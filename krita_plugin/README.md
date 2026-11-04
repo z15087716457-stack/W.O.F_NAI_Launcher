@@ -161,6 +161,15 @@ If Launcher disconnects during a request, the docker clears the preview layer,
 unblocks the controls, and retries the bridge connection automatically. Launcher
 errors are shown in red and clear after a short delay.
 
+While it is not connected, the docker tries again after 5, 10 and 20 seconds,
+then every 30 seconds. It reads `krita-bridge.json` again only when the file's
+modification time changes, or when the last read failed (for example while
+another program had the file open). When Launcher writes a new one (bridge turned on,
+Launcher restarted, session regenerated), the next try uses it and the wait
+starts over at 5 seconds. Once connected it stops retrying until the connection
+drops. Click `Connect` to try at once; clicking does not push the next automatic
+try back.
+
 Click `Diagnostics` after installation to write
 `%APPDATA%/nai-launcher/krita-bridge-diagnostics.json` (macOS:
 `~/.nai-launcher/krita-bridge-diagnostics.json`). The report checks the

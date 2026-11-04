@@ -4,7 +4,7 @@ import ctypes
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional, Tuple
 
 
 @dataclass(frozen=True)
@@ -37,10 +37,15 @@ def _is_windows() -> bool:
 
 
 def load_discovery(path: Optional[Path] = None) -> BridgeDiscovery:
-    source = path or discovery_file_path()
-    with source.open("r", encoding="utf-8") as handle:
-        data = json.load(handle)
+    return discovery_from_data(read_discovery_data(path or discovery_file_path()))
 
+
+def read_discovery_data(path: Path) -> Any:
+    with path.open("r", encoding="utf-8") as handle:
+        return json.load(handle)
+
+
+def discovery_from_data(data: Any) -> BridgeDiscovery:
     port = int(data["port"])
     raw_secret = data.get("secret")
     if raw_secret is None:
@@ -66,6 +71,62 @@ def load_discovery(path: Optional[Path] = None) -> BridgeDiscovery:
         version=data.get("version"),
         started_at=started_at,
     )
+
+
+class DiscoveryFile:
+    """krita-bridge.json, read again only when its modification time changes.
+
+    The Launcher writes a new file (new secret and start time) each time the
+    bridge starts and removes it when the bridge stops, so an unchanged
+    modification time means unchanged content. Whether the Launcher process
+    still runs is checked on every current() call. A file that is there but
+    could not be read (another program holding it open, an I/O error) is
+    read again next time, as such errors pass without the file changing.
+    """
+
+    def __init__(self, path: Optional[Path] = None) -> None:
+        self._path = path
+        self._seen: Optional[Tuple[Path, Optional[int]]] = None
+        self._data: Any = None
+        self._error: Optional[Exception] = None
+        self._read_again = False
+
+    def refresh(self, *, force: bool = False) -> bool:
+        """Read a changed file, or force a fresh read for an explicit Connect.
+
+        True when there is a new version of the file (the Launcher wrote it);
+        False when it is unchanged or was removed.
+        """
+        path = self._path or discovery_file_path()
+        seen = (path, _modified_time_ns(path))
+        new = seen != self._seen
+        if not new and not self._read_again and not (force and seen[1] is not None):
+            return False
+        self._seen = seen
+        self._read_again = False
+        try:
+            self._data, self._error = read_discovery_data(path), None
+        except OSError as error:  # missing, or there but unreadable right now
+            self._data, self._error = None, error
+            self._read_again = seen[1] is not None
+        except ValueError as error:  # Retry on a new version or explicit Connect.
+            self._data, self._error = None, error
+        return new and seen[1] is not None
+
+    def current(self) -> BridgeDiscovery:
+        """The discovery from the last read; raises like load_discovery."""
+        if self._seen is None:
+            self.refresh()
+        if self._error is not None:
+            raise self._error.with_traceback(None)
+        return discovery_from_data(self._data)
+
+
+def _modified_time_ns(path: Path) -> Optional[int]:
+    try:
+        return path.stat().st_mtime_ns
+    except OSError:
+        return None
 
 
 def _pid_is_alive(pid: int) -> bool:

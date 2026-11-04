@@ -1,6 +1,7 @@
 import base64
 import importlib.util
 import json
+import os
 import tempfile
 import unittest
 from pathlib import Path
@@ -203,6 +204,208 @@ class DiscoveryPathTests(unittest.TestCase):
             self._path(False, {"APPDATA": "/tmp/appdata"}),
             Path("/tmp/appdata") / "nai-launcher" / "krita-bridge.json",
         )
+
+
+class DiscoveryFileTests(unittest.TestCase):
+    """krita-bridge.json is read again only when its modification time changes."""
+
+    def setUp(self):
+        temp_dir = tempfile.TemporaryDirectory()
+        self.addCleanup(temp_dir.cleanup)
+        self.path = Path(temp_dir.name) / "krita-bridge.json"
+        self.mtime_ns = 1_800_000_000 * 10**9
+        self.reads = 0
+        real_open = Path.open
+
+        def counting_open(path, mode="r", *args, **kwargs):
+            if "r" in mode and Path(path) == self.path:
+                self.reads += 1
+            return real_open(path, mode, *args, **kwargs)
+
+        patcher = mock.patch.object(Path, "open", counting_open)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        self.file = discovery.DiscoveryFile(self.path)
+
+    def write(self, text=None, **data):
+        self.path.write_text(
+            json.dumps(data) if text is None else text,
+            encoding="utf-8",
+        )
+        # Every write gets a later modification time, as when the Launcher writes it.
+        self.mtime_ns += 10**9
+        os.utime(self.path, ns=(self.mtime_ns, self.mtime_ns))
+
+    def test_an_unchanged_file_is_not_read_again(self):
+        self.write(port=52381, secret="first", version=1)
+
+        self.assertTrue(self.file.refresh())
+        for _ in range(3):
+            self.assertFalse(self.file.refresh())
+
+        self.assertEqual(self.file.current().secret, "first")
+        self.assertEqual(self.reads, 1)
+
+    def test_a_new_modification_time_reads_the_new_file(self):
+        self.write(port=52381, secret="first", version=1)
+        self.file.refresh()
+
+        self.write(port=52382, secret="second", version=1)
+
+        self.assertTrue(self.file.refresh())
+        current = self.file.current()
+        self.assertEqual((current.port, current.secret), (52382, "second"))
+        self.assertEqual(self.reads, 2)
+
+    def test_a_missing_file_is_looked_for_once_until_it_appears(self):
+        self.assertFalse(self.file.refresh())
+        self.assertFalse(self.file.refresh())
+        with self.assertRaisesRegex(OSError, "krita-bridge.json"):
+            self.file.current()
+        self.assertEqual(self.reads, 1)
+
+        self.write(port=52381, secret="first", version=1)
+
+        self.assertTrue(self.file.refresh())
+        self.assertEqual(self.file.current().port, 52381)
+        self.assertEqual(self.reads, 2)
+
+    def test_a_removed_file_is_not_a_new_version(self):
+        self.write(port=52381, secret="first", version=1)
+        self.file.refresh()
+
+        self.path.unlink()
+
+        self.assertFalse(self.file.refresh())
+        with self.assertRaisesRegex(OSError, "No such file"):
+            self.file.current()
+
+    def test_a_read_that_failed_is_tried_again_without_counting_as_new(self):
+        # A passing read error (another program holding the file open on
+        # Windows, an I/O error) is not kept until the file changes.
+        self.write(port=52381, secret="first", version=1)
+        real_read = discovery.read_discovery_data
+        failures = [PermissionError(13, "Permission denied")]
+        calls = []
+
+        def flaky_read(path):
+            calls.append(path)
+            if failures:
+                raise failures.pop()
+            return real_read(path)
+
+        with mock.patch.object(
+            discovery, "read_discovery_data", side_effect=flaky_read
+        ):
+            self.assertTrue(self.file.refresh())
+            with self.assertRaisesRegex(PermissionError, "Permission denied"):
+                self.file.current()
+            self.assertFalse(self.file.refresh())  # the same file, read again
+            self.assertEqual(self.file.current().secret, "first")
+            self.assertFalse(self.file.refresh())  # read now: not again
+        self.assertEqual(len(calls), 2)
+
+    def test_broken_content_is_read_again_only_when_the_file_changes(self):
+        self.write("{not json")
+
+        self.assertTrue(self.file.refresh())
+        for _ in range(3):
+            self.assertFalse(self.file.refresh())
+        with self.assertRaises(ValueError):
+            self.file.current()
+        self.assertEqual(self.reads, 1)
+
+        self.write(port=52381, secret="fixed", version=1)
+        self.assertTrue(self.file.refresh())
+        self.assertEqual(self.file.current().secret, "fixed")
+
+    def test_manual_retry_rechecks_invalid_json_with_the_same_timestamp(self):
+        self.write("{partial")
+        self.file.refresh()
+        with self.assertRaises(ValueError):
+            self.file.current()
+        before = self.path.stat().st_mtime_ns
+        self.write(port=52381, secret="complete", version=1)
+        os.utime(self.path, ns=(before, before))
+        self.assertFalse(self.file.refresh())
+        self.assertFalse(self.file.refresh(force=True))
+        self.assertEqual(self.file.current().secret, "complete")
+        self.assertEqual(self.reads, 2)
+
+    def test_manual_retry_rechecks_json_with_a_missing_secret(self):
+        self.write(port=52381, version=1)
+        self.file.refresh()
+        with self.assertRaises(ValueError):
+            self.file.current()
+        old_mtime = self.path.stat().st_mtime_ns
+        self.write(port=52381, secret="restored", version=1)
+        os.utime(self.path, ns=(old_mtime, old_mtime))
+        self.file.refresh(force=True)
+        self.assertEqual(self.file.current().secret, "restored")
+
+    def test_errors_read_as_they_did_with_load_discovery(self):
+        # The docker shows "未找到 Launcher 桥接：<error>"; that text stays the same.
+        cases = {
+            "missing": None,
+            "broken": "{not json",
+            "no secret": json.dumps({"port": 52381, "version": 1}),
+        }
+        for name, text in cases.items():
+            with self.subTest(name):
+                if text is None:
+                    if self.path.exists():
+                        self.path.unlink()
+                else:
+                    self.write(text)
+                with self.assertRaises(Exception) as before:
+                    discovery.load_discovery(self.path)
+                self.file.refresh()
+                with self.assertRaises(Exception) as now:
+                    self.file.current()
+                self.assertEqual(str(now.exception), str(before.exception))
+
+    def test_the_launcher_process_is_checked_on_every_use_without_reading_again(self):
+        self.write(
+            port=52381,
+            secret="first",
+            version=1,
+            pid=4242,
+            started_at="2026-10-30T08:00:00Z",
+        )
+        with mock.patch.object(
+            discovery, "_process_started_at_matches", return_value=True
+        ):
+            with mock.patch.object(discovery, "_pid_is_alive", return_value=True):
+                self.file.refresh()
+                self.assertEqual(self.file.current().pid, 4242)
+            with mock.patch.object(discovery, "_pid_is_alive", return_value=False):
+                self.assertFalse(self.file.refresh())
+                with self.assertRaisesRegex(ValueError, "stopped Launcher"):
+                    self.file.current()
+        self.assertEqual(self.reads, 1)
+
+    def test_the_default_location_follows_the_platform(self):
+        for windows in (False, True):
+            with self.subTest(windows=windows), tempfile.TemporaryDirectory() as root:
+                home = Path(root)
+                app_data = home / "AppData" / "Roaming"
+                environ = {"APPDATA": str(app_data)} if windows else {}
+                folder = app_data / "nai-launcher" if windows else home / ".nai-launcher"
+                folder.mkdir(parents=True)
+                (folder / "krita-bridge.json").write_text(
+                    json.dumps({"port": 52381, "secret": "here", "version": 1}),
+                    encoding="utf-8",
+                )
+                with mock.patch.object(
+                    discovery, "_is_windows", return_value=windows
+                ), mock.patch.dict(
+                    discovery.os.environ, environ, clear=True
+                ), mock.patch.object(
+                    discovery.Path, "home", return_value=home
+                ):
+                    located = discovery.DiscoveryFile()
+                    self.assertTrue(located.refresh())
+                    self.assertEqual(located.current().secret, "here")
 
 
 class ProtocolTests(unittest.TestCase):

@@ -7,9 +7,12 @@ try:
 except ImportError:
     QWebSocket = None
 
-from .discovery import BridgeDiscovery, load_discovery
+from .discovery import BridgeDiscovery, DiscoveryFile
 from .fallback_websocket import FallbackWebSocketClient
 from .protocol import decode_message, encode_ping, pong_version_error
+
+# While not connected, try again after 5, 10 and 20 s, then every 30 s.
+RETRY_DELAYS_MS = (5000, 10000, 20000, 30000)
 
 
 class BridgeClient(QObject):
@@ -21,16 +24,23 @@ class BridgeClient(QObject):
     _fallback_text_message = pyqtSignal(int, str)
     _fallback_error = pyqtSignal(int, str)
 
-    def __init__(self, parent: Optional[QObject] = None) -> None:
+    def __init__(
+        self,
+        parent: Optional[QObject] = None,
+        discovery_file: Optional[DiscoveryFile] = None,
+    ) -> None:
         super().__init__(parent)
         self._socket: Optional[QWebSocket] = None
         self._fallback_socket: Optional[FallbackWebSocketClient] = None
+        self._discovery_file = discovery_file or DiscoveryFile()
         self._discovery: Optional[BridgeDiscovery] = None
         self._authenticated = False
         self._connection_revision = 0
+        self._auto_reconnect = False
+        self._retry_step = 0
         self._retry_timer = QTimer(self)
-        self._retry_timer.setInterval(5000)
-        self._retry_timer.timeout.connect(self.connect_to_launcher)
+        self._retry_timer.setSingleShot(True)
+        self._retry_timer.timeout.connect(self._retry_now)
         self._fallback_connected.connect(self._on_connected)
         self._fallback_disconnected.connect(self._on_disconnected)
         self._fallback_text_message.connect(self._on_text_message)
@@ -41,22 +51,41 @@ class BridgeClient(QObject):
         return self._authenticated
 
     def start(self) -> None:
-        self.connect_to_launcher()
-        self._retry_timer.start()
+        self._auto_reconnect = True
+        self._retry_step = 0
+        self._try_connect(scheduled=True)
 
     def stop(self) -> None:
+        self._auto_reconnect = False
         self._retry_timer.stop()
         self._reset_socket()
         self.connected_changed.emit(False)
 
     def connect_to_launcher(self) -> None:
+        """The Connect button: try now. The automatic retries keep their
+        schedule unless this try finds a new krita-bridge.json."""
+        self._try_connect(scheduled=False)
+
+    def _retry_now(self) -> None:
+        self._try_connect(scheduled=True)
+
+    def _try_connect(self, scheduled: bool) -> None:
         if self._authenticated:
             return
+        new_file = False
         try:
-            self._discovery = load_discovery()
+            new_file = self._discovery_file.refresh(force=not scheduled)
+            if new_file:
+                # Launcher wrote a new krita-bridge.json: try it now and back
+                # off from 5 s again.
+                self._retry_step = 0
+            discovery = self._discovery_file.current()
         except Exception as error:
+            self._plan_retry(scheduled, new_file)
             self.status_changed.emit(f"未找到 Launcher 桥接：{error}")
             return
+        self._plan_retry(scheduled, new_file)
+        self._discovery = discovery
         self._reset_socket()
         if QWebSocket is None:
             self._connect_with_fallback()
@@ -84,6 +113,22 @@ class BridgeClient(QObject):
             return self._fallback_socket.send_text(text)
         self.status_changed.emit("尚未连接 NAI Launcher")
         return False
+
+    def _plan_retry(self, scheduled: bool, new_file: bool) -> None:
+        # Tries of the timer itself (and start) move the backoff on. A click
+        # leaves the waiting retry where it is, so clicking neither uses up
+        # steps nor pushes the next automatic try back; only a new file
+        # starts the backoff over from 5 s.
+        if scheduled or new_file or not self._retry_timer.isActive():
+            self._schedule_retry()
+
+    def _schedule_retry(self) -> None:
+        if not self._auto_reconnect:
+            return
+        step = min(self._retry_step, len(RETRY_DELAYS_MS) - 1)
+        self._retry_step = step + 1
+        self._retry_timer.setInterval(RETRY_DELAYS_MS[step])
+        self._retry_timer.start()
 
     def _connect_with_fallback(self) -> None:
         if self._discovery is None:
@@ -120,6 +165,9 @@ class BridgeClient(QObject):
         self._authenticated = False
         if was_authenticated:
             self.connected_changed.emit(False)
+            # The retry timer stopped while connected; start it again from 5 s.
+            self._retry_step = 0
+            self._schedule_retry()
         self.status_changed.emit("已断开与 NAI Launcher 的连接")
 
     def _on_text_message(self, revision: int, text: str) -> None:
@@ -140,6 +188,7 @@ class BridgeClient(QObject):
                 return
 
             self._authenticated = True
+            self._retry_timer.stop()
             self.connected_changed.emit(True)
             self.status_changed.emit("已连接 NAI Launcher")
             return
