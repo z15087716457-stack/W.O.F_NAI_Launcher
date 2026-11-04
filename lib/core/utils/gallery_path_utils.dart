@@ -6,6 +6,8 @@ library;
 
 import 'dart:io';
 
+import 'package:path/path.dart' as p;
+
 /// 规范化画廊文件路径
 ///
 /// - Windows 下去掉 `\\?\` / `\\?\UNC\` 前缀
@@ -28,6 +30,14 @@ String galleryFilePathKey(String filePath) {
   final normalized = normalizeGalleryFilePath(filePath);
   return Platform.isWindows ? normalized.toLowerCase() : normalized;
 }
+
+const _galleryImageExtensions = {'.png', '.jpg', '.jpeg', '.webp'};
+
+/// Files eligible for the local gallery index and its folder counts.
+bool isGalleryIndexableImage(String path) =>
+    _galleryImageExtensions.contains(p.extension(path).toLowerCase()) &&
+    !path.contains('.thumb.') &&
+    !(path.contains('.thumbs') && p.split(path).contains('.thumbs'));
 
 /// 两个画廊文件路径是否相等（大小写不敏感、忽略 `\\?\` 前缀）
 bool galleryFilePathsEqual(String left, String right) =>

@@ -32,7 +32,6 @@ class GalleryCategoryRepository {
   static const _categoriesFileName = '.gallery_categories.json';
   static const _suppressedCategoriesFileName =
       '.gallery_category_suppressed_paths.json';
-  static const _supportedExtensions = {'.png', '.jpg', '.jpeg', '.webp'};
 
   /// 获取图片保存根路径
   ///
@@ -781,7 +780,7 @@ class GalleryCategoryRepository {
           folderPath: extraRoot,
           parentId: null,
           sortOrder: updatedCategories.where((c) => c.parentId == null).length,
-        );
+        ).updateImageCount(await _countImagesInFolder(extraRoot));
         existingPaths.add(normalizedRoot);
         updatedCategories.add(rootCategory);
       }
@@ -1041,23 +1040,26 @@ class GalleryCategoryRepository {
     String folderPath, {
     bool recursive = false,
   }) async {
-    int count = 0;
-    try {
-      await for (final entity in Directory(
-        folderPath,
-      ).list(recursive: recursive, followLinks: false)) {
-        if (entity is File &&
-            _supportedExtensions.contains(
-              p.extension(entity.path).toLowerCase(),
-            )) {
-          count++;
+    var count = 0;
+    final pending = [Directory(folderPath)];
+    while (pending.isNotEmpty) {
+      final dir = pending.removeLast();
+      try {
+        await for (final entity in dir.list(followLinks: false)) {
+          if (entity is File && isGalleryIndexableImage(entity.path)) {
+            count++;
+          } else if (recursive &&
+              entity is Directory &&
+              p.basename(entity.path) != '.thumbs') {
+            pending.add(entity);
+          }
         }
+      } on FileSystemException catch (error) {
+        AppLogger.w(
+          'Cannot count images in ${dir.path}: $error',
+          'GalleryCategoryRepository',
+        );
       }
-    } catch (e) {
-      AppLogger.w(
-        'Failed to get total image count',
-        'GalleryCategoryRepository',
-      );
     }
     return count;
   }

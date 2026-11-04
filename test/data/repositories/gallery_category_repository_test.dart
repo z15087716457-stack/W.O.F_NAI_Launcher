@@ -66,6 +66,59 @@ void main() {
   );
 
   test(
+    'new external source counts files in its root and descendants once',
+    () async {
+      final source = await Directory(
+        p.join(hiveTempDir.path, 'source'),
+      ).create();
+      final album = await Directory(p.join(source.path, 'album')).create();
+      await File(p.join(source.path, 'root.PNG')).create();
+      await File(p.join(album.path, 'child.webp')).create();
+      await Hive.box(
+        StorageKeys.settingsBox,
+      ).put(StorageKeys.galleryExtraRoots, [source.path]);
+      final first = await repository.syncWithFileSystem([]);
+      final root = first.singleWhere((c) => c.folderPath == source.path);
+      expect(root.imageCount, 2);
+      expect(first.singleWhere((c) => c.parentId == root.id).imageCount, 1);
+      final refreshed = await repository.syncWithFileSystem(first);
+      expect(refreshed.singleWhere((c) => c.id == root.id).imageCount, 2);
+    },
+  );
+
+  test(
+    'reloading folder counts excludes gallery thumbnails from every level',
+    () async {
+      final album = await Directory(p.join(galleryRoot.path, 'album')).create();
+      final child = await Directory(p.join(album.path, 'child')).create();
+      for (final folder in [album, child]) {
+        await File(p.join(folder.path, 'art.png')).create();
+        final cache = await Directory(p.join(folder.path, '.thumbs')).create();
+        await File(p.join(cache.path, 'encoded.jpg')).create();
+        await File(p.join(folder.path, 'art.thumb.jpg')).create();
+      }
+      final categories = await repository.syncWithFileSystem([]);
+      final category = categories.singleWhere((c) => c.name == 'album');
+      expect(await repository.countImagesInCategory(category), 2);
+      expect(
+        await repository.countImagesInCategory(
+          category,
+          includeDescendants: false,
+        ),
+        1,
+      );
+      expect(category.imageCount, 2);
+      await repository.saveCategories([
+        for (final entry in categories) entry.updateImageCount(53),
+      ]);
+      final stored = (await repository.loadCategories()).singleWhere(
+        (c) => c.id == category.id,
+      );
+      expect(await repository.countImagesInCategory(stored), 2);
+    },
+  );
+
+  test(
     'file events recount only their own folder and aggregate ancestors',
     () async {
       final parent = await Directory(
