@@ -1,3 +1,4 @@
+import '../../../core/services/opus_price_check.dart';
 import 'dart:convert';
 import 'dart:io';
 
@@ -5,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/krita/bridge_draft_guard.dart';
 import '../../../core/services/anlas_calculator.dart';
 import '../../../core/utils/pill_document_editor.dart';
-import '../../../core/utils/max_enhance_utils.dart';
 import '../../../data/models/image/image_params.dart';
 import '../../../data/models/prompt_block/pill_document.dart';
 import '../../../data/models/user/user_subscription.dart';
@@ -208,47 +208,63 @@ Future<String> backupBridgeDraft(
   return file.path;
 }
 
+/// The account a bridge or Agent quote prices on: only the already-loaded
+/// account state; a quote never requests an API.
+UserSubscription? _bridgeSubscription(Ref ref) {
+  final raw = ref.read(authNotifierProvider).subscriptionInfo;
+  final loaded = ref.exists(subscriptionNotifierProvider)
+      ? ref.read(subscriptionNotifierProvider).subscription
+      : null;
+  return loaded ?? (raw == null ? null : UserSubscription.fromJson(raw));
+}
+
+/// 与每次请求记账（AnlasRequestLedger）同一个算法：报价和统计对同一个请求一致。
+int _bridgeEstimate(
+  ImageParams p,
+  UserSubscription? subscription, {
+  required int count,
+  required int batchSize,
+  required int encoding,
+}) => AnlasCalculator.requestCostForParams(
+  p,
+  batchCount: count,
+  batchSize: batchSize,
+  oneTimeCost: encoding,
+  isOpus: subscription?.isOpus == true,
+  opusUsageExhausted: subscription?.isOpusUsageExhausted ?? false,
+);
+
+/// A user-initiated Agent quote checks the same frozen request price as
+/// [readBridgeBilling]. Reading a Krita or external bridge quote stays local.
+OpusPriceCheck bridgeOpusPriceCheck(
+  Ref ref,
+  ImageParams p, {
+  int batchSize = 1,
+}) {
+  int price(UserSubscription? subscription) => _bridgeEstimate(
+    p,
+    subscription,
+    count: 1,
+    batchSize: batchSize,
+    encoding: 0,
+  );
+  return opusPriceCheckForAction(ref.container, price);
+}
+
 Map<String, dynamic> readBridgeBilling(
   Ref ref,
   ImageParams p, {
   int batchCount = 1,
   int batchSize = 1,
 }) {
-  // Read only the already-loaded account state; a quote never requests an API.
-  final auth = ref.read(authNotifierProvider);
-  final raw = auth.subscriptionInfo;
-  final loaded = ref.exists(subscriptionNotifierProvider)
-      ? ref.read(subscriptionNotifierProvider).subscription
-      : null;
-  final subscription =
-      loaded ?? (raw == null ? null : UserSubscription.fromJson(raw));
-  final requestSize =
-      p.upscaledEnhance && MaxEnhanceMath.isEligible(p.model, p.width, p.height)
-      ? MaxEnhanceMath.targetSize(p.width, p.height)
-      : p.effectiveInpaintRequestSize;
-  int estimate(int count, {required int encoding}) =>
-      AnlasCalculator.calculateRequestCost(
-        width: requestSize.width,
-        height: requestSize.height,
-        steps: p.steps,
-        batchCount: count,
-        batchSize: batchSize,
-        smea: p.effectiveSmea,
-        smeaDyn: p.effectiveSmeaDyn,
-        model: p.model,
-        subscriptionTier: subscription?.isOpus == true
-            ? AnlasCalculator.opusTier
-            : 0,
-        strength: switch (p.action) {
-          ImageGenerationAction.generate => 1.0,
-          ImageGenerationAction.img2img => p.strength,
-          ImageGenerationAction.infill => p.inpaintStrength,
-        },
-        extraPerSampleCost: AnlasCalculator.resolvePreciseReferenceExtraCost(p),
-        extraPerRequestCost: AnlasCalculator.resolveVibeReferenceExtraCost(p),
-        oneTimeCost: encoding,
-        opusUsageExhausted: subscription?.isOpusUsageExhausted ?? false,
-      );
+  final subscription = _bridgeSubscription(ref);
+  int estimate(int count, {required int encoding}) => _bridgeEstimate(
+    p,
+    subscription,
+    count: count,
+    batchSize: batchSize,
+    encoding: encoding,
+  );
   final encoding = AnlasCalculator.resolveVibeEncodingCost(p);
   final cost = estimate(batchCount, encoding: encoding);
   return {

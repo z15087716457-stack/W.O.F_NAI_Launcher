@@ -23,6 +23,9 @@ import 'package:nai_launcher/presentation/providers/quality_preset_provider.dart
 import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../helpers/balance_requests.dart';
+import '../../../helpers/novelai_billing.dart';
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -213,15 +216,16 @@ void main() {
 
   test('encodeVibeWithCache 会区分 model 和 informationExtracted', () async {
     final apiService = _FakeEnhancementApiService();
+    final balances = BalanceRequests();
     final container = ProviderContainer(
       overrides: [
         naiImageEnhancementApiServiceProvider.overrideWithValue(apiService),
-        subscriptionNotifierProvider.overrideWith(
-          _TestSubscriptionNotifier.new,
-        ),
+        ...realBalanceOverrides(balances),
       ],
     );
     addTearDown(container.dispose);
+    // The real balance notifier, logged in, read as the screens keep it.
+    expect(container.read(subscriptionNotifierProvider).balance, 5000);
 
     final notifier = container.read(generationParamsNotifierProvider.notifier);
     final imageData = Uint8List.fromList([1, 2, 3, 4]);
@@ -257,6 +261,9 @@ void main() {
     expect(repeatFirst, first);
     expect(apiService.callCount, 3);
     expect(apiService.requestedInformationExtracted, [0.2, 0.5, 0.5]);
+    // Before: the balance was asked 0.5 s after every encoding.
+    await Future<void>.delayed(afterBilledWork);
+    expect(balances.requests, 0);
   });
 
   test('更新信息提取后，可重新编码的 Vibe 会回到待编码状态', () async {
@@ -750,13 +757,10 @@ class _TestSubscriptionNotifier extends SubscriptionNotifier {
       UserSubscription(tier: 1, active: true),
     );
   }
-
-  @override
-  void schedulePostBillingRefresh({Duration delay = Duration.zero}) {}
 }
 
 class _FakeEnhancementApiService extends NAIImageEnhancementApiService {
-  _FakeEnhancementApiService() : super(Dio());
+  _FakeEnhancementApiService() : super(Dio(), ledger: unrecordedLedger());
 
   int callCount = 0;
   final List<double> requestedInformationExtracted = [];

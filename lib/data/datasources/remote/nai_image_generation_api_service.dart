@@ -20,6 +20,7 @@ import '../../../core/utils/nai_api_utils.dart';
 import '../../../core/utils/zip_utils.dart';
 import '../../models/image/image_params.dart';
 import '../../models/image/image_stream_chunk.dart';
+import '../../services/anlas_request_ledger.dart';
 import 'nai_image_enhancement_api_service.dart';
 
 part 'nai_image_generation_api_service.g.dart';
@@ -34,11 +35,17 @@ class NAIImageGenerationApiService {
   final NAIImageEnhancementApiService _enhancementService;
   final NaiApiEndpointService _endpointService;
 
+  /// 每次生图请求按价记一笔（[AnlasRequestLedger]）。必填：少了它统计就悄悄
+  /// 记不上；只有本文件的 provider 构造本服务（测试守着）。请求组装时补编码
+  /// 的 Vibe 由 [_enhancementService] 自己记。
+  final AnlasRequestLedger _ledger;
+
   NAIImageGenerationApiService(
     this._dio,
     this._enhancementService,
-    this._endpointService,
-  );
+    this._endpointService, {
+    required AnlasRequestLedger ledger,
+  }) : _ledger = ledger;
 
   /// Match the website's image/request multipart protocol. Binary image parts
   /// avoid base64's upload overhead without changing pixels or prompt metadata.
@@ -323,7 +330,8 @@ class NAIImageGenerationApiService {
         AppLogger.d('==========================================', 'ImgGen');
       }
 
-      // 5. 发送请求
+      // 5. 发送请求：发出前按这次请求算价，NovelAI 交回图片后记一笔。
+      final charge = _ledger.generation(effectiveParams);
       final response = await _dio.post(
         _endpointService.imageUrl(ApiConstants.generateImageEndpoint),
         data: _requestBody(requestBuildResult),
@@ -337,8 +345,10 @@ class NAIImageGenerationApiService {
 
       // 6. 解压 ZIP 响应
       final zipBytes = response.data as Uint8List;
+      final images = ZipUtils.extractAllImages(zipBytes);
+      if (images.isNotEmpty) charge.delivered();
       final artifacts = await _compositeInpaintImages(
-        ZipUtils.extractAllImages(zipBytes),
+        images,
         params,
         requestBuildResult,
       );
@@ -566,7 +576,9 @@ class NAIImageGenerationApiService {
       );
       AppLogger.d('==========================================', 'ImgGen');
 
-      // 3. 发送流式请求
+      // 3. 发送流式请求：发出前按这次请求算价，这次请求的图全部交回后记一笔。
+      // 中途取消、断流或服务端报错都不记（NovelAI 那时是否已扣费不得而知）。
+      final charge = _ledger.generation(effectiveParams);
       final networkStopwatch = Stopwatch()..start();
       final requestSentStopwatch = Stopwatch();
       if (_enablePipelineTracing) {
@@ -604,6 +616,8 @@ class NAIImageGenerationApiService {
       int messageCount = 0;
       final latestPreviews = <int, Uint8List>{};
       final completedSamples = <int>{};
+      // NovelAI 交回的最终图（合成前）；全部交回即这次请求成功。
+      final deliveredSamples = <int>{};
       final expectedSamples = effectiveParams.nSamples <= 0
           ? 1
           : effectiveParams.nSamples;
@@ -694,6 +708,10 @@ class NAIImageGenerationApiService {
 
               if (imageBytes != null && imageBytes.isNotEmpty) {
                 if (eventType == 'final') {
+                  deliveredSamples.add(sampleIndex);
+                  if (deliveredSamples.length >= expectedSamples) {
+                    charge.delivered();
+                  }
                   final compositeStopwatch = Stopwatch()..start();
                   if (_enablePipelineTracing) {
                     AppLogger.i(
@@ -803,6 +821,7 @@ class NAIImageGenerationApiService {
             final compositeStopwatch = Stopwatch()..start();
             final images = ZipUtils.extractAllImages(bytes);
             if (images.isNotEmpty) {
+              charge.delivered();
               final compositedImage = await _compositeInpaintImage(
                 images.first,
                 params,
@@ -840,15 +859,17 @@ class NAIImageGenerationApiService {
                 });
                 if (msg.containsKey('data')) {
                   final data = msg['data'];
+                  final imageBytes = data is Uint8List
+                      ? data
+                      : data is List<int>
+                      ? Uint8List.fromList(data)
+                      : data is String
+                      ? Uint8List.fromList(base64Decode(data))
+                      : Uint8List(0);
+                  if (imageBytes.isNotEmpty) charge.delivered();
                   final compositeStopwatch = Stopwatch()..start();
                   final compositedImage = await _compositeInpaintImage(
-                    data is Uint8List
-                        ? data
-                        : data is List<int>
-                        ? Uint8List.fromList(data)
-                        : data is String
-                        ? Uint8List.fromList(base64Decode(data))
-                        : Uint8List(0),
+                    imageBytes,
                     params,
                     requestBuildResult,
                   );
@@ -1028,5 +1049,10 @@ NAIImageGenerationApiService naiImageGenerationApiService(Ref ref) {
   final dio = ref.watch(imageGenerationDioClientProvider);
   final enhancementService = ref.watch(naiImageEnhancementApiServiceProvider);
   final endpointService = ref.watch(naiApiEndpointServiceProvider);
-  return NAIImageGenerationApiService(dio, enhancementService, endpointService);
+  return NAIImageGenerationApiService(
+    dio,
+    enhancementService,
+    endpointService,
+    ledger: ref.watch(anlasRequestLedgerProvider),
+  );
 }

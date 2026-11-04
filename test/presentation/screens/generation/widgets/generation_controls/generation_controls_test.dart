@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -9,11 +10,16 @@ import 'package:nai_launcher/data/models/image/image_operation.dart';
 import 'package:nai_launcher/presentation/providers/generation/image_workflow_controller.dart';
 import 'package:nai_launcher/presentation/providers/generation/local_upscale_provider.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
+import 'package:nai_launcher/core/constants/api_constants.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/data/models/user/user_subscription.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/cost_estimate_provider.dart';
+import 'package:nai_launcher/presentation/providers/auth_provider.dart';
+import 'package:nai_launcher/presentation/providers/share_image_settings_provider.dart';
+import 'package:nai_launcher/presentation/widgets/common/anlas_cost_dialog.dart';
+import '../../../../wiring/generation_backend_test.dart' show SwitchingAuth;
 import 'package:nai_launcher/presentation/providers/krita/krita_bridge_notifier.dart';
 import 'package:nai_launcher/presentation/providers/style_explore/explore_run_runner.dart';
 import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
@@ -92,6 +98,148 @@ void main() {
       expect(invoked, 2);
     },
   );
+  for (final approving in [false, true]) {
+    for (final change in [
+      'account',
+      'dimensions',
+      'batch',
+      if (!approving) 'double click',
+    ]) {
+      testWidgets(
+        'direct generation stops if $change changes while waiting for ${approving ? "approval" : "quota"}',
+        (tester) async {
+          final controller = GenerationControlsController(),
+              generation = _CaptureGeneration();
+          final quota = _NearlyUsedQuota(
+            const OpusUsage(isNegative: true),
+            generation,
+          );
+          final container = ProviderContainer(
+            overrides: [
+              localStorageServiceProvider.overrideWithValue(
+                _MemoryLocalStorageService({}),
+              ),
+              generationParamsNotifierProvider.overrideWith(_V5DraftParams.new),
+              imageGenerationNotifierProvider.overrideWith(() => generation),
+              authNotifierProvider.overrideWith(SwitchingAuth.new),
+              kritaBridgeNotifierProvider.overrideWith(
+                (_) => _TestKritaBridgeNotifier(),
+              ),
+              subscriptionNotifierProvider.overrideWith(() => quota),
+              estimatedCostProvider.overrideWithValue(80),
+              isFreeGenerationProvider.overrideWithValue(false),
+            ],
+          );
+          addTearDown(container.dispose);
+          container.read(authNotifierProvider);
+          container.read(subscriptionNotifierProvider);
+          final protection = container.read(
+            shareImageSettingsProvider.notifier,
+          );
+          await protection.setWarnHighAnlasCost(approving);
+          await protection.setHighAnlasCostThreshold(1);
+          await tester.pumpWidget(
+            UncontrolledProviderScope(
+              container: container,
+              child: MaterialApp(
+                locale: const Locale('zh'),
+                supportedLocales: AppLocalizations.supportedLocales,
+                localizationsDelegates: AppLocalizations.localizationsDelegates,
+                home: Scaffold(
+                  body: GenerationControls(
+                    controller: controller,
+                    compact: true,
+                    showBalanceChips: false,
+                    showAutoSaveChip: false,
+                  ),
+                ),
+              ),
+            ),
+          );
+          if (!approving) quota.hold = Completer<void>();
+          final pending = controller.generate();
+          final repeat = change == 'double click'
+              ? controller.generate()
+              : null;
+          await tester.pumpAndSettle();
+          expect(quota.asksBeforeSending, 1);
+          switch (change) {
+            case 'account':
+              (container.read(authNotifierProvider.notifier) as SwitchingAuth)
+                  .changeAccount();
+            case 'dimensions':
+              container
+                  .read(generationParamsNotifierProvider.notifier)
+                  .updateSize(1216, 832, persist: false);
+            case 'batch':
+              container.read(imagesPerRequestProvider.notifier).set(2);
+            case 'double click':
+              break;
+          }
+          if (approving) {
+            expect(find.byType(AnlasCostDialog), findsOneWidget);
+            await tester.tap(find.text('继续生成'));
+          } else {
+            quota.hold!.complete();
+          }
+          await tester.pumpAndSettle();
+          await pending;
+          await repeat;
+          expect(generation.submissions, change == 'double click' ? 1 : 0);
+          await tester.pumpWidget(const SizedBox.shrink());
+        },
+      );
+    }
+  }
+
+  for (final (name, usage, asks) in [
+    ('nearly used up', const OpusUsage(percent: 3), 1),
+    ('with room', const OpusUsage(percent: 50), 0),
+  ]) {
+    testWidgets('an explore candidate free on an Opus quota $name asks '
+        '$asks time(s) for the balance before it is sent', (tester) async {
+      final controller = GenerationControlsController(),
+          generation = _CaptureGeneration(),
+          quota = _NearlyUsedQuota(usage, generation);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            localStorageServiceProvider.overrideWithValue(
+              _MemoryLocalStorageService({}),
+            ),
+            generationParamsNotifierProvider.overrideWith(_V5DraftParams.new),
+            imageGenerationNotifierProvider.overrideWith(() => generation),
+            kritaBridgeNotifierProvider.overrideWith(
+              (ref) => _TestKritaBridgeNotifier(),
+            ),
+            subscriptionNotifierProvider.overrideWith(() => quota),
+            exploreRunRunnerProvider.overrideWith(_TestExploreRunner.new),
+          ],
+          child: MaterialApp(
+            locale: const Locale('zh'),
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            home: Scaffold(
+              body: GenerationControls(
+                controller: controller,
+                compact: true,
+                exploreMode: true,
+                showBalanceChips: false,
+                showAutoSaveChip: false,
+                onBatchEvent: (_) async {},
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await controller.generate();
+      await tester.pump();
+      // Before: sent at once, priced free.
+      expect(quota.asksBeforeSending, asks);
+      expect(generation.submitted!.prompt, 'city lights');
+    });
+  }
   for (final automatic in [false, true]) {
     testWidgets(
       'stop upscale routes cancellation correctly; automatic=$automatic',
@@ -424,6 +572,7 @@ class _RunningGeneration extends ImageGenerationNotifier {
 }
 
 class _CaptureGeneration extends ImageGenerationNotifier {
+  int submissions = 0;
   ImageParams? submitted;
   int? batchSizeOverride;
   GenerationBatchCallback? callback;
@@ -438,6 +587,7 @@ class _CaptureGeneration extends ImageGenerationNotifier {
     int? imagesPerRequestOverride,
     ImageOperation? operation,
   }) async {
+    submissions++;
     submitted = params;
     batchSizeOverride = imagesPerRequestOverride;
     callback = onBatchEvent;
@@ -468,6 +618,51 @@ class _TestKritaBridgeNotifier extends KritaBridgeNotifier {
 class _TestSubscriptionNotifier extends SubscriptionNotifier {
   @override
   SubscriptionState build() => const SubscriptionState.initial();
+}
+
+/// An Opus account with [usage] cached; a balance request brings the quota
+/// run out, as the server has meanwhile decided.
+class _NearlyUsedQuota extends SubscriptionNotifier {
+  _NearlyUsedQuota(this.usage, this.generation);
+  final OpusUsage usage;
+  final _CaptureGeneration generation;
+  int asksBeforeSending = 0;
+  Completer<void>? hold;
+
+  static SubscriptionState _opus(OpusUsage usage) => SubscriptionState.loaded(
+    UserSubscription(
+      tier: 3,
+      active: true,
+      trainingStepsLeft: const TrainingStepsInfo(fixedTrainingStepsLeft: 1000),
+      usage: usage,
+    ),
+  );
+
+  @override
+  SubscriptionState build() {
+    // As the real notifier: kept for the session.
+    ref.keepAlive();
+    return _opus(usage);
+  }
+
+  @override
+  Future<bool> recheckBalance() async {
+    if (generation.submitted == null) asksBeforeSending++;
+    await hold?.future;
+    applyFetchedSubscription(
+      _opus(const OpusUsage(isNegative: true)).subscription!,
+    );
+    return true;
+  }
+}
+
+/// 832 x 1216, 28 steps on V5: one image is free on the Opus quota.
+class _V5DraftParams extends GenerationParamsNotifier {
+  @override
+  ImageParams build() => const ImageParams(
+    prompt: 'city lights',
+    model: ImageModels.animeDiffusionV5Full,
+  );
 }
 
 /// Runner 替身：build 不触发 _recoverInterruptedRuns（真 Hive 未初始化）。

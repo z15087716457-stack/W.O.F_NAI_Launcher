@@ -10542,7 +10542,8 @@ class AppLocalizationsKo extends AppLocalizations {
   String get stats_anlasPeak => '최다';
 
   @override
-  String get stats_anlasNote => '잔액이 줄 때 기록하며 업스케일·Vibe 인코딩 포함, 최근 90일만 보관';
+  String get stats_anlasNote =>
+      '요청마다 앱에 표시된 가격으로 기록하며 업스케일·Vibe 인코딩 포함, 최근 90일만 보관';
 
   @override
   String get stats_aspectTitle => '캔버스 크기';

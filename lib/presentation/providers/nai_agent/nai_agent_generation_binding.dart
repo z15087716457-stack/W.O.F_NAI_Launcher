@@ -17,6 +17,7 @@ import '../generation/image_workflow_controller.dart';
 import '../generation/image_workflow_snapshot.dart';
 import '../prompt_block_library_provider.dart';
 import '../krita/bridge_draft_snapshot.dart';
+import '../subscription_provider.dart';
 import 'nai_agent_generation_approvals.dart';
 import '../style_explore/explore_run_runner.dart';
 import '../generation/local_upscale_provider.dart';
@@ -148,12 +149,14 @@ NaiAgentGenerationTools bindNaiAgentGeneration(
           ? null
           : {'model': local.localModel, 'scale': local.localScale},
       blockedReason: blocked,
+      opusPriceCheck: bridgeOpusPriceCheck(ref, effective, batchSize: size),
     );
   }
 
   return NaiAgentGenerationTools(
     readInput: read,
     isAlive: alive,
+    recheckBalance: () => refreshBalanceBeforeBlocking(ref),
     approve: (quote, token, check) => ref
         .read(naiAgentGenerationApprovalsProvider)
         .request(owner, quote, token, check),

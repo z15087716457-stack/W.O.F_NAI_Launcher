@@ -13,6 +13,7 @@ import 'package:nai_launcher/presentation/providers/generation/generation_params
 import 'package:nai_launcher/presentation/providers/generation/reference_panel_notifier.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../helpers/novelai_billing.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -126,7 +127,7 @@ void main() {
 }
 
 class _FakeEnhancementApiService extends NAIImageEnhancementApiService {
-  _FakeEnhancementApiService() : super(Dio());
+  _FakeEnhancementApiService() : super(Dio(), ledger: unrecordedLedger());
 
   int callCount = 0;
 
@@ -147,7 +148,7 @@ class _FakeVibeLibraryStorageService extends VibeLibraryStorageService {
   final VibeLibraryEntry? actualEntry;
 
   @override
-  Future<List<VibeLibraryEntry>> getRecentEntries({int limit = 20}) async {
+  Future<List<VibeLibraryEntry>> getRecentDisplayEntries({int limit = 20}) async {
     return [];
   }
 

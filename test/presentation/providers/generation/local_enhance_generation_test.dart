@@ -46,8 +46,6 @@ class _Subscription extends SubscriptionNotifier {
   @override
   SubscriptionState build() =>
       const SubscriptionState.loaded(UserSubscription(tier: 3));
-  @override
-  void schedulePostBillingRefresh({Duration delay = Duration.zero}) {}
 }
 
 Uint8List _png(int w, int h) =>

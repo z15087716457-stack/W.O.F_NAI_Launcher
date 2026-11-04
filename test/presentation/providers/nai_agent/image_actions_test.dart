@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:dio/dio.dart';
@@ -17,14 +18,23 @@ import 'package:nai_launcher/core/utils/image_save_utils.dart';
 import 'package:nai_launcher/data/datasources/remote/nai_image_enhancement_api_service.dart';
 import 'package:nai_launcher/data/models/director/director_tool_type.dart';
 import 'package:nai_launcher/data/models/image/image_params.dart';
+import 'package:nai_launcher/data/datasources/remote/nai_user_info_api_service.dart';
 import 'package:nai_launcher/data/services/metadata/unified_metadata_parser.dart';
+import 'package:nai_launcher/presentation/providers/account_manager_provider.dart';
 import 'package:nai_launcher/presentation/providers/auth_provider.dart';
 import 'package:nai_launcher/presentation/providers/director_tools_notifier.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_image_approvals.dart';
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_studio_provider.dart';
-import 'generation_binding_test.dart' show GenerationTestAuth;
+import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
+import 'generation_binding_test.dart'
+    show
+        GenerationTestAccounts,
+        GenerationTestAuth,
+        GenerationTestBalances,
+        generationTestSubscription;
 import '../krita/agent_bridge_draft_test.dart' show MemoryDraftSettings;
+import '../../../helpers/novelai_billing.dart';
 
 Uint8List png(int w, int h) =>
     Uint8List.fromList(img.encodePng(img.Image(width: w, height: h)));
@@ -55,7 +65,7 @@ class _Images extends ImageGenerationNotifier {
 }
 
 class _Api extends NAIImageEnhancementApiService {
-  _Api() : super(Dio());
+  _Api() : super(Dio(), ledger: unrecordedLedger());
   final calls =
       <
         ({
@@ -111,6 +121,7 @@ void main() {
   late ProviderContainer container;
   late NaiAgentStudioTools studio;
   late _Api api;
+  late GenerationTestBalances balances;
   late Uint8List source;
   const owner = NaiAgentConversationOwner('workspace', 'chat');
   Matcher error(String code) =>
@@ -176,8 +187,11 @@ void main() {
       ),
     );
     api = _Api();
+    balances = GenerationTestBalances();
     container = ProviderContainer(
       overrides: [
+        naiUserInfoApiServiceProvider.overrideWithValue(balances),
+        accountManagerNotifierProvider.overrideWith(GenerationTestAccounts.new),
         localStorageServiceProvider.overrideWithValue(MemoryDraftSettings()),
         generationParamsNotifierProvider.overrideWith(_Params.new),
         imageGenerationNotifierProvider.overrideWith(() => _Images(source)),
@@ -384,6 +398,82 @@ void main() {
       },
     );
   }
+  group('a cached balance too low for the tool', () {
+    // The screens keep the balance notifier; it moves only on a click, a
+    // login or an account switch.
+    void cached(int balance) {
+      (container.read(authNotifierProvider.notifier) as GenerationTestAuth)
+          .setAuth(
+            AuthState(
+              status: AuthStatus.authenticated,
+              accountId: 'synthetic-account',
+              displayName: 'Synthetic account',
+              subscriptionInfo: generationTestSubscription(balance),
+            ),
+          );
+      expect(container.read(subscriptionNotifierProvider).balance, balance);
+    }
+
+    test('is asked once before the run; the fresh balance goes on', () async {
+      cached(0);
+      final q = await quote('cloud_upscale');
+      expect(q['estimated_anlas'], 1);
+      expect(balances.requests, 0);
+      balances.balance = 50;
+      final result = await accepted(q);
+      expect(balances.requests, 1);
+      expect(result['artifacts'], hasLength(1));
+      expect(api.calls, hasLength(1));
+    });
+
+    for (final tool in ['cloud_upscale', 'removeBackground']) {
+      test(
+        '$tool approval and backup show the balance already refreshed for this run',
+        () async {
+          cached(0);
+          final q = await quote(tool);
+          expect(q['balance_anlas'], 0);
+          expect(balances.requests, 0);
+          balances.balance = 100;
+          final future = run({'action': 'run', 'quote_id': q['quote_id']});
+          final request = await waiting();
+          final presented = request.quote;
+          container
+              .read(naiAgentImageApprovalsProvider)
+              .decide(request.id, run: true);
+          final result = await future;
+          final backup = jsonDecode(
+            await File(
+              '${workspace.path}/${result['request_backup']}',
+            ).readAsString(),
+          );
+          expect(presented['balance_anlas'], 100);
+          expect(presented['estimated_anlas'], q['estimated_anlas']);
+          expect(backup, presented);
+          expect(balances.requests, 1);
+          expect(api.calls, hasLength(1));
+        },
+      );
+    }
+
+    test('still too low after asking: stopped, asked once', () async {
+      cached(0);
+      final q = await quote('cloud_upscale');
+      await expectLater(
+        run({'action': 'run', 'quote_id': q['quote_id']}),
+        error('insufficient_balance'),
+      );
+      expect(balances.requests, 1);
+      expect(api.calls, isEmpty);
+    });
+
+    test('enough cached: nothing is asked', () async {
+      cached(50);
+      await accepted(await quote('cloud_upscale'));
+      expect(balances.requests, 0);
+    });
+  });
+
   test('owned cancel and late Stop never touch a new native job', () async {
     api.pending = Completer<List<Uint8List>>();
     final token = NaiAgentCancellation(),

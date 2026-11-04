@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'package:nai_launcher/presentation/providers/auth_provider.dart';
 import '../../wiring/generation_backend_test.dart' show SwitchingAuth;
+import '../../../helpers/balance_requests.dart';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,7 +12,6 @@ import 'package:mocktail/mocktail.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/data/datasources/remote/nai_image_enhancement_api_service.dart';
 import 'package:nai_launcher/data/models/image/image_params.dart';
-import 'package:nai_launcher/data/models/user/user_subscription.dart';
 import 'package:nai_launcher/presentation/providers/generation/cloud_upscale_provider.dart';
 import 'package:nai_launcher/presentation/providers/generation/image_workflow_controller.dart';
 import 'package:nai_launcher/presentation/providers/generation/preview_selection_provider.dart';
@@ -44,11 +44,18 @@ class _Save extends ImageSaveSettingsNotifier {
   ImageSaveSettings build() => const ImageSaveSettings(autoSave: false);
 }
 
-class _Subscription extends SubscriptionNotifier {
+/// The token validation brings the balance with every account, so the real
+/// balance notifier takes it on a switch without a request of its own.
+class _ValidatedSwitchingAuth extends SwitchingAuth {
   @override
-  SubscriptionState build() => const SubscriptionState.initial();
+  AuthState build() => _validated('account-a');
   @override
-  void schedulePostBillingRefresh({Duration delay = Duration.zero}) {}
+  void changeAccount([String id = 'account-b']) => state = _validated(id);
+  static AuthState _validated(String id) => AuthState(
+    status: AuthStatus.authenticated,
+    accountId: id,
+    subscriptionInfo: balanceAnswer(5000),
+  );
 }
 
 Uint8List _png(int w, int h) =>
@@ -59,6 +66,43 @@ void main() {
     registerFallbackValue(Uint8List(0));
     registerFallbackValue(CancelToken());
   });
+
+  // The Agent's image tools and the canvas upscale a frozen image this way.
+  for (final outcome in ['finished', 'failed']) {
+    test(
+      'a frozen-image upscale, $outcome, asks nothing for the balance',
+      () async {
+        final api = _Api();
+        when(
+          () => api.upscaleImage(any(), cancelToken: any(named: 'cancelToken')),
+        ).thenAnswer(
+          (_) async => outcome == 'failed'
+              ? throw StateError('synthetic failure')
+              : _png(96, 64),
+        );
+        final balances = BalanceRequests();
+        final container = ProviderContainer(
+          overrides: [
+            ...realBalanceOverrides(balances),
+            localStorageServiceProvider.overrideWithValue(_Storage()),
+            generationParamsNotifierProvider.overrideWith(_Params.new),
+            imageGenerationNotifierProvider.overrideWith(_Generation.new),
+            imageSaveSettingsNotifierProvider.overrideWith(_Save.new),
+            naiImageEnhancementApiServiceProvider.overrideWithValue(api),
+          ],
+        );
+        addTearDown(container.dispose);
+        expect(container.read(subscriptionNotifierProvider).balance, 5000);
+        final result = await container
+            .read(cloudUpscaleTaskProvider.notifier)
+            .processGenerated(_png(48, 32), cancellation: CancelToken());
+        expect(result, outcome == 'failed' ? isNull : isNotNull);
+        // Before: the balance was asked 0.5 s after every one.
+        await Future<void>.delayed(afterBilledWork);
+        expect(balances.requests, 0);
+      },
+    );
+  }
   for (final scenario in [
     'direct',
     'account-restored',
@@ -78,14 +122,14 @@ void main() {
         token = call.namedArguments[#cancelToken] as CancelToken;
         return pending.future;
       });
+      final balances = BalanceRequests();
       final container = ProviderContainer(
         overrides: [
-          authNotifierProvider.overrideWith(SwitchingAuth.new),
+          ...realBalanceOverrides(balances, auth: _ValidatedSwitchingAuth.new),
           localStorageServiceProvider.overrideWithValue(_Storage()),
           generationParamsNotifierProvider.overrideWith(_Params.new),
           imageGenerationNotifierProvider.overrideWith(_Generation.new),
           imageSaveSettingsNotifierProvider.overrideWith(_Save.new),
-          subscriptionNotifierProvider.overrideWith(_Subscription.new),
           naiImageEnhancementApiServiceProvider.overrideWithValue(api),
         ],
       );
@@ -93,6 +137,8 @@ void main() {
       final draft = container.read(generationParamsNotifierProvider);
       final image = GeneratedImage.create(_png(48, 32), width: 48, height: 32);
       container.read(authNotifierProvider);
+      // The real balance notifier, read before the work as the screens do.
+      expect(container.read(subscriptionNotifierProvider).balance, 5000);
       final task = container.read(cloudUpscaleTaskProvider.notifier);
       final work = task.start(image: image);
       final duplicate = task.start(image: image);
@@ -121,6 +167,10 @@ void main() {
       pending.complete(_png(96, 64));
       await Future.wait([work, duplicate]);
       expect(requests, 1);
+      // Before: the balance was asked 0.5 s after every upscale (cancelled
+      // ones too), not after an account change.
+      await Future<void>.delayed(afterBilledWork);
+      expect(balances.requests, 0);
       expect(
         container.read(generationParamsNotifierProvider),
         same(latestDraft),

@@ -93,7 +93,7 @@ class _ExploreRunSession {
 
   final String ownerId;
   final String runId;
-  final void Function(ImageParams)? beforeGenerate;
+  final FutureOr<void> Function(ImageParams)? beforeGenerate;
   int? activeGenerationId;
   ImageGenerationNotifier? generationOwner;
   String? roundId;
@@ -225,7 +225,7 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
 
   Future<bool> start(
     String runId, {
-    void Function(ImageParams)? beforeGenerate,
+    FutureOr<void> Function(ImageParams)? beforeGenerate,
   }) async {
     final session = _claim(runId, beforeGenerate: beforeGenerate);
     if (session == null) return false;
@@ -239,7 +239,7 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
     required String familyId,
     required String parentSetId,
     required int count,
-    void Function(ImageParams)? beforeGenerate,
+    FutureOr<void> Function(ImageParams)? beforeGenerate,
   }) async {
     final session = _claim(runId, beforeGenerate: beforeGenerate);
     if (session == null) return false;
@@ -272,7 +272,7 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
   /// 失败重试：在同一 session 内把 failed 转 pending，再走公共准备和循环路径。
   Future<bool> retryFailed(
     String runId, {
-    void Function(ImageParams)? beforeGenerate,
+    FutureOr<void> Function(ImageParams)? beforeGenerate,
   }) async {
     final session = _claim(runId, beforeGenerate: beforeGenerate);
     if (session == null) return false;
@@ -284,7 +284,7 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
 
   _ExploreRunSession? _claim(
     String runId, {
-    void Function(ImageParams)? beforeGenerate,
+    FutureOr<void> Function(ImageParams)? beforeGenerate,
   }) {
     if (_session != null ||
         state.isRunning ||
@@ -678,7 +678,21 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
         ),
       );
 
-      session.beforeGenerate?.call(tempParams);
+      try {
+        final ready = session.beforeGenerate?.call(tempParams);
+        if (ready is Future) {
+          await ready;
+          // Paused or cancelled while the check waited (it asked for the
+          // balance): this candidate is not sent.
+          if (_cancelRequested || _pauseRequested) break;
+        }
+      } catch (_) {
+        // A stop asked for before the check gave up (still short after the
+        // balance came back, the request failed, the owner closed) decides
+        // how the run ends: cancelled or paused, as asked.
+        if (_cancelRequested || _pauseRequested) break;
+        rethrow;
+      }
       final beforeGeneration = ref
           .read(imageGenerationNotifierProvider)
           .generationRunId;

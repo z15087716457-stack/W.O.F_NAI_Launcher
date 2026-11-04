@@ -23,6 +23,7 @@ import '../generation/image_workflow_controller.dart';
 import '../image_generation_provider.dart';
 import '../krita/bridge_draft_snapshot.dart';
 import '../prompt_block_library_provider.dart';
+import '../subscription_provider.dart';
 import 'nai_agent_generation_approvals.dart';
 import 'nai_agent_generation_binding.dart';
 
@@ -51,6 +52,7 @@ class NaiAgentSourceGenerationBinding {
     generation = NaiAgentGenerationTools(
       readInput: _read,
       isAlive: isAlive,
+      recheckBalance: () => refreshBalanceBeforeBlocking(ref),
       approve: (quote, token, check) => ref
           .read(naiAgentGenerationApprovalsProvider)
           .request(owner, quote, token, check),
@@ -241,6 +243,13 @@ class NaiAgentSourceGenerationBinding {
       blockedReason: blocked,
       sourceOperation: request.operation,
       sourceImageId: request.source.id,
+      opusPriceCheck: bridgeOpusPriceCheck(
+        ref,
+        image,
+        batchSize: request.operation == 'variations'
+            ? OfficialImageVariations.count
+            : 1,
+      ),
     );
   }
 

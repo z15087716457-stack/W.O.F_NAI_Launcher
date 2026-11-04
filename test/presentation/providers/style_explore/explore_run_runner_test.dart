@@ -405,6 +405,152 @@ void main() {
       expect(await runner.start(run.id), isFalse);
     });
 
+    group(
+      'a check before a candidate that waits (it asks for the balance)',
+      () {
+        test('sends the candidate once it passes', () async {
+          final run = await seedRun(targetCount: 2);
+          var sent = 0, checks = 0;
+          final c = container(
+            generateFn: (params) async {
+              sent += 1;
+              return okResult(sent);
+            },
+          );
+          c.read(exploreRunRunnerProvider);
+          await Future<void>.delayed(Duration.zero);
+          final runner = c.read(exploreRunRunnerProvider.notifier);
+          expect(
+            await runner.start(
+              run.id,
+              beforeGenerate: (_) async {
+                checks += 1;
+                await Future<void>.delayed(Duration.zero);
+              },
+            ),
+            isTrue,
+          );
+          expect([checks, sent], [2, 2]);
+          expect((await reload(c, run.id)).generatedCount, 2);
+        });
+
+        for (final stop in ['pause', 'cancel']) {
+          test('a $stop meanwhile sends nothing more', () async {
+            final run = await seedRun(targetCount: 2);
+            var sent = 0;
+            final waiting = Completer<void>(), release = Completer<void>();
+            final c = container(
+              generateFn: (params) async {
+                sent += 1;
+                return okResult(sent);
+              },
+            );
+            c.read(exploreRunRunnerProvider);
+            await Future<void>.delayed(Duration.zero);
+            final runner = c.read(exploreRunRunnerProvider.notifier);
+            final pass = runner.start(
+              run.id,
+              beforeGenerate: (_) {
+                if (!waiting.isCompleted) waiting.complete();
+                return release.future;
+              },
+            );
+            await waiting.future;
+            stop == 'pause' ? runner.pause() : runner.cancel();
+            release.complete();
+            expect(await pass, isTrue);
+            expect(sent, 0);
+            final after = await reload(c, run.id);
+            if (stop == 'pause') {
+              expect(after.status, ExploreRunStatus.paused);
+              expect(after.pendingCandidates, hasLength(2));
+            } else {
+              expect(after.status, ExploreRunStatus.cancelled);
+              expect(after.generatedCount, 0);
+            }
+          });
+
+          // The check gives up once its answer comes back: still short, the
+          // request failed, or the owner closed (an Agent conversation closed
+          // with cancelOwned). The stop asked for meanwhile decides the end.
+          test(
+            'a $stop meanwhile wins over the check failing after it',
+            () async {
+              final run = await seedRun(targetCount: 2);
+              var sent = 0;
+              final waiting = Completer<void>(), release = Completer<void>();
+              final c = container(
+                generateFn: (params) async {
+                  sent += 1;
+                  return okResult(sent);
+                },
+              );
+              c.read(exploreRunRunnerProvider);
+              await Future<void>.delayed(Duration.zero);
+              final runner = c.read(exploreRunRunnerProvider.notifier);
+              final pass = runner.start(
+                run.id,
+                beforeGenerate: (_) {
+                  if (!waiting.isCompleted) waiting.complete();
+                  return release.future;
+                },
+              );
+              await waiting.future;
+              stop == 'pause' ? runner.pause() : runner.cancel();
+              release.completeError(StateError('still short'));
+              expect(await pass, isTrue);
+              expect(sent, 0);
+              final after = await reload(c, run.id);
+              if (stop == 'pause') {
+                expect(after.status, ExploreRunStatus.paused);
+                expect(after.pendingCandidates, hasLength(2));
+              } else {
+                // Before: paused, both candidates left pending.
+                expect(after.status, ExploreRunStatus.cancelled);
+                expect(after.pendingCandidates, isEmpty);
+                expect(
+                  after.candidates.map((c) => c.generation.error),
+                  everyElement('cancelled'),
+                );
+              }
+            },
+          );
+        }
+
+        test('a cancel just before a check that throws at once '
+            'ends the run cancelled', () async {
+          final run = await seedRun(targetCount: 2);
+          var sent = 0;
+          final c = container(
+            generateFn: (params) async {
+              sent += 1;
+              return okResult(sent);
+            },
+          );
+          c.read(exploreRunRunnerProvider);
+          await Future<void>.delayed(Duration.zero);
+          final runner = c.read(exploreRunRunnerProvider.notifier);
+          expect(
+            await runner.start(
+              run.id,
+              // Closing the owner cancels the run, then its check finds it
+              // closed: both while the candidate was being written.
+              beforeGenerate: (_) {
+                runner.cancel();
+                throw StateError('closed');
+              },
+            ),
+            isTrue,
+          );
+          expect(sent, 0);
+          final after = await reload(c, run.id);
+          // Before: paused, both candidates left pending.
+          expect(after.status, ExploreRunStatus.cancelled);
+          expect(after.pendingCandidates, isEmpty);
+        });
+      },
+    );
+
     test('retryFailed resets failed candidates and regenerates them', () async {
       final run = await seedRun(targetCount: 2);
       var call = 0;

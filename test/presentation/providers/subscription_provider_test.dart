@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:nai_launcher/data/datasources/remote/nai_user_info_api_service.dart';
-import 'package:nai_launcher/data/models/user/user_subscription.dart';
 import 'package:nai_launcher/presentation/providers/account_manager_provider.dart';
 import 'package:nai_launcher/presentation/providers/auth_provider.dart';
 import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
@@ -30,11 +29,17 @@ class _MockNAIUserInfoApiService extends Mock
     implements NAIUserInfoApiService {}
 
 class _AuthenticatedAuthNotifier extends AuthNotifier {
+  _AuthenticatedAuthNotifier({this.validatedBalance});
+  final int? validatedBalance;
+
   @override
   AuthState build() {
-    return const AuthState(
+    return AuthState(
       status: AuthStatus.authenticated,
       accountId: 'test-account',
+      subscriptionInfo: validatedBalance == null
+          ? null
+          : _subscriptionJson(balance: validatedBalance!),
     );
   }
 
@@ -42,29 +47,18 @@ class _AuthenticatedAuthNotifier extends AuthNotifier {
     state = const AuthState(status: AuthStatus.unauthenticated);
   }
 
-  void switchAccountForTest() {
-    state = const AuthState(
+  void switchAccountForTest({int? validatedBalance}) {
+    state = AuthState(
       status: AuthStatus.authenticated,
       accountId: 'other-account',
+      subscriptionInfo: validatedBalance == null
+          ? null
+          : _subscriptionJson(balance: validatedBalance),
     );
   }
 
   void updateSessionMetadataForTest() {
     state = state.copyWith(displayName: 'Updated');
-  }
-}
-
-class _TestableSubscriptionNotifier extends SubscriptionNotifier {
-  @override
-  SubscriptionState build() {
-    ref.keepAlive();
-    return const SubscriptionState.loaded(
-      UserSubscription(
-        tier: 3,
-        active: true,
-        trainingStepsLeft: TrainingStepsInfo(fixedTrainingStepsLeft: 100),
-      ),
-    );
   }
 }
 
@@ -90,13 +84,12 @@ void main() {
 
       final container = ProviderContainer(
         overrides: [
-          authNotifierProvider.overrideWith(_AuthenticatedAuthNotifier.new),
+          authNotifierProvider.overrideWith(
+            () => _AuthenticatedAuthNotifier(validatedBalance: 100),
+          ),
           naiUserInfoApiServiceProvider.overrideWithValue(apiService),
           accountManagerNotifierProvider.overrideWith(
             _FakeAccountManagerNotifier.new,
-          ),
-          subscriptionNotifierProvider.overrideWith(
-            _TestableSubscriptionNotifier.new,
           ),
         ],
       );
@@ -127,18 +120,18 @@ void main() {
 
     final container = ProviderContainer(
       overrides: [
-        authNotifierProvider.overrideWith(_AuthenticatedAuthNotifier.new),
+        authNotifierProvider.overrideWith(
+          () => _AuthenticatedAuthNotifier(validatedBalance: 100),
+        ),
         naiUserInfoApiServiceProvider.overrideWithValue(apiService),
         accountManagerNotifierProvider.overrideWith(
           _FakeAccountManagerNotifier.new,
-        ),
-        subscriptionNotifierProvider.overrideWith(
-          _TestableSubscriptionNotifier.new,
         ),
       ],
     );
     addTearDown(container.dispose);
 
+    expect(container.read(subscriptionNotifierProvider).balance, 100);
     final refresh = container
         .read(subscriptionNotifierProvider.notifier)
         .refreshBalance();
@@ -147,11 +140,42 @@ void main() {
         container.read(authNotifierProvider.notifier)
             as _AuthenticatedAuthNotifier;
     auth.signOutForTest();
+    expect(container.read(subscriptionNotifierProvider).balance, isNull);
     response.complete(_subscriptionJson(balance: 70));
 
     expect(await refresh, isFalse);
-    expect(container.read(subscriptionNotifierProvider).balance, 100);
+    expect(container.read(subscriptionNotifierProvider).balance, isNull);
   });
+
+  test(
+    'disposing the real notifier while a refresh is pending discards the late response',
+    () async {
+      final api = _MockNAIUserInfoApiService();
+      final reply = Completer<Map<String, dynamic>>();
+      when(
+        () => api.getUserSubscription(
+          receiveTimeout: any(named: 'receiveTimeout'),
+        ),
+      ).thenAnswer((_) => reply.future);
+      final container = ProviderContainer(
+        overrides: [
+          authNotifierProvider.overrideWith(
+            () => _AuthenticatedAuthNotifier(validatedBalance: 100),
+          ),
+          naiUserInfoApiServiceProvider.overrideWithValue(api),
+          accountManagerNotifierProvider.overrideWith(
+            _FakeAccountManagerNotifier.new,
+          ),
+        ],
+      );
+      final pending = container
+          .read(subscriptionNotifierProvider.notifier)
+          .refreshBalance();
+      container.dispose();
+      reply.complete(_subscriptionJson(balance: 70));
+      expect(await pending, isFalse);
+    },
+  );
 
   test('does not apply an initial fetch from the previous account', () async {
     final apiService = _MockNAIUserInfoApiService();
@@ -169,9 +193,6 @@ void main() {
         accountManagerNotifierProvider.overrideWith(
           _FakeAccountManagerNotifier.new,
         ),
-        subscriptionNotifierProvider.overrideWith(
-          _TestableSubscriptionNotifier.new,
-        ),
       ],
     );
     addTearDown(container.dispose);
@@ -183,7 +204,8 @@ void main() {
     final auth =
         container.read(authNotifierProvider.notifier)
             as _AuthenticatedAuthNotifier;
-    auth.switchAccountForTest();
+    auth.switchAccountForTest(validatedBalance: 100);
+    expect(container.read(subscriptionNotifierProvider).balance, 100);
     response.complete(_subscriptionJson(balance: 70));
     await fetch;
 
@@ -271,46 +293,6 @@ void main() {
       expect(container.read(subscriptionNotifierProvider).balance, 80);
     },
   );
-
-  test('post-billing refresh waits briefly and debounces bursts', () async {
-    final apiService = _MockNAIUserInfoApiService();
-    var requestCount = 0;
-    when(
-      () => apiService.getUserSubscription(
-        receiveTimeout: any(named: 'receiveTimeout'),
-      ),
-    ).thenAnswer((_) async {
-      requestCount += 1;
-      return _subscriptionJson(balance: 70);
-    });
-
-    final container = ProviderContainer(
-      overrides: [
-        authNotifierProvider.overrideWith(_AuthenticatedAuthNotifier.new),
-        naiUserInfoApiServiceProvider.overrideWithValue(apiService),
-        accountManagerNotifierProvider.overrideWith(
-          _FakeAccountManagerNotifier.new,
-        ),
-        subscriptionNotifierProvider.overrideWith(
-          _TestableSubscriptionNotifier.new,
-        ),
-      ],
-    );
-    addTearDown(container.dispose);
-
-    final notifier = container.read(subscriptionNotifierProvider.notifier);
-    notifier.schedulePostBillingRefresh(
-      delay: const Duration(milliseconds: 10),
-    );
-    notifier.schedulePostBillingRefresh(
-      delay: const Duration(milliseconds: 10),
-    );
-
-    await Future<void>.delayed(const Duration(milliseconds: 30));
-
-    expect(requestCount, 1);
-    expect(container.read(subscriptionNotifierProvider).balance, 70);
-  });
 
   test(
     'writes back subscription expiresAt to account manager on successful fetch',

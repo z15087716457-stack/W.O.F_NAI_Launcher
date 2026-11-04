@@ -17,6 +17,7 @@ NaiAgentGenerationInput generationInput({
   int batchSize = 2,
   String? blocked,
   Object? workflow,
+  bool freeOnLowOpusQuota = false,
 }) => NaiAgentGenerationInput(
   raw: raw ?? const ImageParams(prompt: 'synthetic'),
   effective: effective ?? raw ?? const ImageParams(prompt: 'synthetic'),
@@ -34,6 +35,7 @@ NaiAgentGenerationInput generationInput({
   endpoint: endpoint,
   blockedReason: blocked,
   workflowGuard: workflow,
+  freeOnLowOpusQuota: freeOnLowOpusQuota,
 );
 
 void main() {
@@ -48,6 +50,40 @@ void main() {
   final reads = <Map<String, dynamic>>[];
   final startedInputs = <NaiAgentGenerationInput>[];
   void Function()? duringRead;
+  NaiAgentGenerationTools build({Future<void> Function()? recheckBalance}) =>
+      NaiAgentGenerationTools(
+        readInput: (params) {
+          reads.add(params);
+          duringRead?.call();
+          return input;
+        },
+        clock: () => now,
+        isAlive: () => alive,
+        approve: (_, __, ___) async {
+          approvals++;
+          return await approval?.call() ?? true;
+        },
+        backup: (_) async {
+          backups++;
+          await duringBackup?.call();
+          return 'synthetic-backup';
+        },
+        start: (input) {
+          startedInputs.add(input);
+          starts++;
+          return admitted
+              ? NaiAgentGenerationRun(
+                  id: 'own-run',
+                  completion: completion.future,
+                  cancel: () {
+                    cancels++;
+                    return true;
+                  },
+                )
+              : null;
+        },
+        recheckBalance: recheckBalance,
+      );
   setUp(() {
     input = generationInput();
     now = DateTime(2026, 10, 7);
@@ -59,38 +95,7 @@ void main() {
     reads.clear();
     startedInputs.clear();
     duringRead = null;
-    tools = NaiAgentGenerationTools(
-      readInput: (params) {
-        reads.add(params);
-        duringRead?.call();
-        return input;
-      },
-      clock: () => now,
-      isAlive: () => alive,
-      approve: (_, __, ___) async {
-        approvals++;
-        return await approval?.call() ?? true;
-      },
-      backup: (_) async {
-        backups++;
-        await duringBackup?.call();
-        return 'synthetic-backup';
-      },
-      start: (input) {
-        startedInputs.add(input);
-        starts++;
-        return admitted
-            ? NaiAgentGenerationRun(
-                id: 'own-run',
-                completion: completion.future,
-                cancel: () {
-                  cancels++;
-                  return true;
-                },
-              )
-            : null;
-      },
-    );
+    tools = build();
   });
   Matcher error(String code) =>
       isA<NaiAgentToolError>().having((e) => e.code, 'code', code);
@@ -598,6 +603,205 @@ void main() {
         expect([approvals, backups, starts], [0, 2, 2]);
       },
     );
+  });
+
+  group('a cached balance that would block is asked once first', () {
+    // The balance is no longer refreshed by itself: before the Agent stops on
+    // it, ask once (the binding passes refreshBalanceBeforeBlocking).
+    late int rechecks;
+    late NaiAgentGenerationInput Function() answer;
+    late NaiAgentCancellation token;
+    setUp(() {
+      rechecks = 0;
+      token = NaiAgentCancellation();
+      answer = () => input;
+      tools = build(
+        recheckBalance: () async {
+          rechecks++;
+          input = answer();
+        },
+      );
+    });
+    Future<Map> quote() async =>
+        (await tools.prepare(const {}, token))['details']['quote'] as Map;
+
+    for (final reason in ['insufficient_balance', 'balance_unavailable']) {
+      test('prepare: $reason, and the answer is enough', () async {
+        input = generationInput(
+          blocked: reason,
+          balance: reason == 'balance_unavailable' ? null : 5,
+        );
+        answer = () => generationInput(balance: 500);
+        final q = await quote();
+        expect(rechecks, 1);
+        expect(q['can_generate'], true);
+        expect(q['blocked_reason'], null);
+        expect(q['balance_anlas'], 500);
+        expect(reads, hasLength(2));
+      });
+    }
+
+    test('prepare: still short after asking, the quote says so', () async {
+      input = generationInput(blocked: 'insufficient_balance', balance: 5);
+      final q = await quote();
+      expect(rechecks, 1);
+      expect(q['can_generate'], false);
+      expect(q['blocked_reason'], 'insufficient_balance');
+    });
+
+    test('prepare: ready, or stopped by anything else, asks nothing', () async {
+      for (final reason in [
+        null,
+        'account_unavailable',
+        'invalid_price',
+        'busy',
+        'cooldown',
+      ]) {
+        input = generationInput(blocked: reason);
+        await quote();
+      }
+      expect(rechecks, 0);
+    });
+
+    test('prepare: a cancel or close while asking stops there', () async {
+      input = generationInput(blocked: 'insufficient_balance');
+      answer = () {
+        token.cancel();
+        return generationInput();
+      };
+      await expectLater(quote(), throwsA(error('cancelled')));
+      token = NaiAgentCancellation();
+      input = generationInput(blocked: 'insufficient_balance');
+      answer = () {
+        alive = false;
+        return generationInput();
+      };
+      await expectLater(quote(), throwsA(error('closed')));
+      expect(rechecks, 2);
+    });
+
+    test(
+      'run: a quote the cached balance now blocks asks once, then goes on',
+      () async {
+        final id = (await quote())['quote_id'] as String;
+        input = generationInput(blocked: 'insufficient_balance');
+        answer = () => generationInput();
+        completion.complete({'status': 'completed'});
+        final result = await tools.run({'quote_id': id}, token);
+        expect(result['details']['run_id'], 'own-run');
+        expect(rechecks, 1);
+        expect([approvals, backups, starts], [1, 1, 1]);
+      },
+    );
+
+    test('run: still short after asking stops with the reason', () async {
+      final id = (await quote())['quote_id'] as String;
+      input = generationInput(blocked: 'insufficient_balance');
+      await expectLater(
+        tools.run({'quote_id': id}, token),
+        throwsA(error('insufficient_balance')),
+      );
+      expect(rechecks, 1);
+      expect([approvals, backups, starts], [0, 0, 0]);
+    });
+
+    test(
+      'run: a different balance in the answer asks for a new quote',
+      () async {
+        final id = (await quote())['quote_id'] as String;
+        input = generationInput(blocked: 'insufficient_balance');
+        answer = () => generationInput(balance: 900);
+        await expectLater(
+          tools.run({'quote_id': id}, token),
+          throwsA(error('quote_changed')),
+        );
+        expect(rechecks, 1);
+      },
+    );
+
+    test(
+      'run: a quote taken meanwhile is not replayed after the wait',
+      () async {
+        final release = Completer<void>();
+        tools = build(
+          recheckBalance: () async {
+            rechecks++;
+            await release.future;
+          },
+        );
+        final id = (await quote())['quote_id'] as String;
+        input = generationInput(blocked: 'insufficient_balance');
+        final waiting = tools.run({'quote_id': id}, token);
+        await Future<void>.delayed(Duration.zero);
+        // The balance comes back meanwhile (a click); the same quote runs.
+        input = generationInput();
+        completion.complete({'status': 'completed'});
+        await tools.run({'quote_id': id}, token);
+        release.complete();
+        await expectLater(waiting, throwsA(error('quote_missing')));
+        expect(rechecks, 1);
+        expect(starts, 1);
+      },
+    );
+
+    test('the prompt-set card asks once before a blocked click', () async {
+      input = generationInput(blocked: 'insufficient_balance', batchSize: 1);
+      answer = () => generationInput(batchSize: 1);
+      completion.complete({'status': 'completed'});
+      await tools.requestUserGeneration(token);
+      expect(rechecks, 1);
+      expect([approvals, backups, starts], [0, 1, 1]);
+
+      input = generationInput(blocked: 'balance_unavailable', batchSize: 1);
+      answer = () => input;
+      await expectLater(
+        tools.requestUserGeneration(NaiAgentCancellation()),
+        throwsA(error('balance_unavailable')),
+      );
+      expect(rechecks, 2);
+      expect(starts, 1);
+    });
+
+    // The binding sets freeOnLowOpusQuota when the price counts Opus-free
+    // images on a cached quota under 5 % that has not run out.
+    test('prepare: a price free on an Opus quota nearly used up asks once '
+        'and quotes the answer', () async {
+      input = generationInput(estimate: 0, freeOnLowOpusQuota: true);
+      // The server had run the quota out: the image costs Anlas.
+      answer = () => generationInput(estimate: 30);
+      final q = await quote();
+      expect(rechecks, 1);
+      expect(q['estimated_anlas'], 30);
+      expect(q['can_generate'], true);
+      expect(q.keys, isNot(contains('free_on_low_opus_quota')));
+      // Quoted on the answer: the next quote asks nothing.
+      await quote();
+      expect(rechecks, 1);
+    });
+
+    test('the prompt-set card asks once before a free price on an Opus '
+        'quota nearly used up', () async {
+      input = generationInput(
+        estimate: 0,
+        batchSize: 1,
+        freeOnLowOpusQuota: true,
+      );
+      answer = () => generationInput(estimate: 30, batchSize: 1);
+      completion.complete({'status': 'completed'});
+      final result = await tools.requestUserGeneration(token);
+      expect(rechecks, 1);
+      expect(result['details']['estimated_anlas'], 30);
+      expect(starts, 1);
+    });
+
+    test('without the hook nothing is asked, as before', () async {
+      tools = build();
+      input = generationInput(blocked: 'insufficient_balance');
+      final q = (await tools.prepare(const {}, token))['details']['quote'];
+      expect(q['blocked_reason'], 'insufficient_balance');
+      expect(reads, hasLength(1));
+      expect(rechecks, 0);
+    });
   });
 
   test(

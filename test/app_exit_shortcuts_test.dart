@@ -23,18 +23,12 @@ import 'package:nai_launcher/presentation/providers/background_refresh_provider.
 import 'package:nai_launcher/presentation/providers/krita/krita_bridge_notifier.dart';
 import 'package:nai_launcher/presentation/providers/notification_settings_provider.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
-import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
 import 'package:nai_launcher/presentation/router/app_router.dart';
 import 'package:nai_launcher/presentation/widgets/shortcuts/shortcut_aware_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'helpers/app_logger_test_isolation.dart';
 import 'helpers/light_theme_contrast.dart' show InMemoryLocalStorageService;
-
-class _Balance extends AnlasBalanceWatcher {
-  @override
-  void build() {}
-}
 
 class _Completion extends GenerationCompletionWatcher {
   @override
@@ -277,7 +271,6 @@ void main() {
         ),
         appRouterProvider.overrideWithValue(router),
         nativeResourceWindowsProvider.overrideWithValue(false),
-        anlasBalanceWatcherProvider.overrideWith(_Balance.new),
         generationCompletionWatcherProvider.overrideWith(_Completion.new),
         backgroundRefreshNotifierProvider.overrideWith(_Refresh.new),
         kritaBridgeNotifierProvider.overrideWith((_) => KritaBridgeNotifier()),

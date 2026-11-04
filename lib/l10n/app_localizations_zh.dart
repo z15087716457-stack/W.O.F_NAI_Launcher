@@ -10317,7 +10317,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get stats_anlasPeak => '最多';
 
   @override
-  String get stats_anlasNote => '按余额下降记录，含放大、Vibe 编码等；只保留最近 90 天';
+  String get stats_anlasNote => '每次请求按应用显示的价格记录，含放大、Vibe 编码等；只保留最近 90 天';
 
   @override
   String get stats_aspectTitle => '画幅';
@@ -32343,7 +32343,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get stats_anlasPeak => '最多';
 
   @override
-  String get stats_anlasNote => '按餘額下降記錄，含放大、Vibe 編碼等；只保留最近 90 天';
+  String get stats_anlasNote => '每次請求按應用顯示的價格記錄，含放大、Vibe 編碼等；只保留最近 90 天';
 
   @override
   String get stats_aspectTitle => '畫幅';

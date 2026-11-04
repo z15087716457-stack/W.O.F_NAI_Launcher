@@ -8,6 +8,7 @@ import 'package:nai_launcher/core/utils/app_support_directory.dart';
 
 import '../../core/utils/localization_extension.dart';
 import '../../data/models/prompt_block/pill_document.dart';
+import '../../data/models/user/user_subscription.dart';
 import '../providers/auth_provider.dart';
 import '../providers/character_prompt_provider.dart';
 import '../providers/cost_estimate_provider.dart';
@@ -159,6 +160,12 @@ class GenerationBackend {
     };
   }
 
+  /// Check the quota before confirming a price that can change. A fresh
+  /// result is reused, so ordinary clicks remain synchronous up to confirmation.
+  Future<bool>? _recheckOpusFreePrice(
+    int Function(UserSubscription? subscription) price,
+  ) => recheckOpusPriceForAction(ref.container, price);
+
   Future<void> generate({
     required Future<bool> Function(int cost) confirm,
     bool Function()? alive,
@@ -179,10 +186,9 @@ class GenerationBackend {
       final workflow = ref.read(imageWorkflowControllerProvider);
       final auth = ref.read(authNotifierProvider);
       final count = ref.read(imagesPerRequestProvider);
-      final cost = ref.read(estimatedCostProvider);
       final intent = _intentRevision;
       final encodingRevision = _encodingRevision;
-      bool valid() =>
+      bool unchanged() =>
           !_disposed &&
           encodingRevision == _encodingRevision &&
           ref.read(generationEncodingReferencesProvider).isEmpty &&
@@ -195,11 +201,29 @@ class GenerationBackend {
           identical(workflow, ref.read(imageWorkflowControllerProvider)) &&
           auth.accountId == ref.read(authNotifierProvider).accountId &&
           auth.status == ref.read(authNotifierProvider).status &&
-          count == ref.read(imagesPerRequestProvider) &&
-          cost == ref.read(estimatedCostProvider);
+          count == ref.read(imagesPerRequestProvider);
+      int price(UserSubscription? subscription) =>
+          generationRequestCost(request, workflow, subscription, count);
+      final recheck = _recheckOpusFreePrice(price);
+      if (recheck != null) {
+        await recheck;
+        // A change while it asked counts as one during the confirm.
+        if (!unchanged()) return;
+      }
+      final cost = ref.read(estimatedCostProvider);
+      bool valid() => unchanged() && cost == ref.read(estimatedCostProvider);
       if (!await confirm(cost) || !valid()) return;
       await ref.read(generationPlatformProvider).backupDraft(_snapshot());
       if (!valid()) return;
+      final finalCheck = recheckOpusPriceForAction(
+        ref.container,
+        price,
+        checkLow: false,
+      );
+      if (finalCheck != null) {
+        await finalCheck;
+        if (!valid()) return;
+      }
       onStarted?.call();
       await ref
           .read(imageGenerationNotifierProvider.notifier)
@@ -234,14 +258,14 @@ class GenerationBackend {
     final encoding = _encodingRevision;
     final params = ref.read(generationParamsNotifierProvider);
     final version = ref.read(bridgeDraftVersionProvider);
-    int cost() => generationRequestCost(
+    int cost(UserSubscription? subscription) => generationRequestCost(
       request.params,
       request.workflow,
-      ref.read(subscriptionNotifierProvider).subscription,
+      subscription,
       request.count,
     );
-    final quoted = cost();
-    bool valid() =>
+    int billed() => cost(ref.read(subscriptionNotifierProvider).subscription);
+    bool unchanged() =>
         !_disposed &&
         alive?.call() != false &&
         !busy &&
@@ -250,13 +274,30 @@ class GenerationBackend {
         encoding == _encodingRevision &&
         params == ref.read(generationParamsNotifierProvider) &&
         version == ref.read(bridgeDraftVersionProvider) &&
-        identical(notifier.lastRequest, request) &&
-        quoted == cost();
+        identical(notifier.lastRequest, request);
     _launching = true;
     try {
+      final recheck = _recheckOpusFreePrice(cost);
+      if (recheck != null) {
+        await recheck;
+        // A change while it asked counts as one during the confirm.
+        if (!unchanged()) return;
+      }
+      final quoted = billed();
+      bool valid() => unchanged() && quoted == billed();
       if (!await confirm(quoted) || !valid()) return;
       await write(() {});
-      if (valid()) await notifier.retry(request);
+      if (!valid()) return;
+      final finalCheck = recheckOpusPriceForAction(
+        ref.container,
+        cost,
+        checkLow: false,
+      );
+      if (finalCheck != null) {
+        await finalCheck;
+        if (!valid()) return;
+      }
+      await notifier.retry(request);
     } finally {
       _launching = false;
     }

@@ -4,6 +4,8 @@
 
 ## 省电与统计
 
+`stats_anlasNote` 由余额差记账说明改为按请求报价，实际由 `statistics_cards.dart` 的 Anlas 卡绘制。`statistics_golden_test.dart` 的以下 9 张场景使用完整数据：main、main-dark、r30、narrow、narrow-dark、narrow-en、narrow-ja、narrow-ko、min-window。loading、empty-dark、error 不作为确定受影响的完整统计卡场景。
+
 空闲微动从开关变为三档，并改了 `set_cvMotionSub`、`channel_motionSub` 与三个选项标签。还需核对：
 
 - 设置画布页 `test/presentation/ui/settings/goldens/settings-canvas.png`，尤其滚动后微动行及窄窗长文案；默认截图是否包含该行以实际绘制结果为准。

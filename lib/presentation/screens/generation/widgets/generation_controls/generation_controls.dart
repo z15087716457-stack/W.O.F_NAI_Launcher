@@ -2,12 +2,15 @@ import 'dart:async';
 
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:nai_launcher/data/models/user/user_subscription.dart';
 
 import 'package:nai_launcher/core/utils/localization_extension.dart';
 import 'package:nai_launcher/presentation/providers/cost_estimate_provider.dart';
+import 'package:nai_launcher/presentation/providers/auth_provider.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
 import 'package:nai_launcher/presentation/providers/krita/krita_bridge_notifier.dart';
 import 'package:nai_launcher/presentation/providers/style_explore/explore_run_runner.dart';
+import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
 import 'package:nai_launcher/presentation/utils/asset_protection_guard.dart';
 import 'package:nai_launcher/presentation/widgets/common/app_toast.dart';
 import 'package:nai_launcher/presentation/widgets/generation/auto_save_toggle_chip.dart';
@@ -96,6 +99,7 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
   int _copySeed = 0;
   int _lastImageCount = -1;
   bool _wasGenerating = false;
+  bool _checkingPrice = false;
 
   @override
   void didUpdateWidget(GenerationControls oldWidget) {
@@ -281,24 +285,74 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
   }
 
   Future<void> _handleGenerate(BuildContext context, WidgetRef ref) async {
-    if (widget.canGenerate?.call() == false) return;
-    final params = widget.exploreMode
-        ? ref.read(generationParamsNotifierProvider)
-        : ref.read(generationRequestParamsProvider);
+    if (_checkingPrice || widget.canGenerate?.call() == false) return;
+    _checkingPrice = true;
+    try {
+      await _submitGeneration(context, ref);
+    } finally {
+      _checkingPrice = false;
+    }
+  }
+
+  Future<void> _submitGeneration(BuildContext context, WidgetRef ref) async {
+    final explore = widget.exploreMode;
+    final requestProvider = explore
+        ? generationParamsNotifierProvider
+        : generationRequestParamsProvider;
+    final params = ref.read(requestProvider);
     if (params.prompt.isEmpty) {
       AppToast.warning(context, context.l10n.generation_pleaseInputPrompt);
       return;
     }
 
+    final workflowProvider = explore
+        ? draftImageWorkflowProvider
+        : imageWorkflowControllerProvider;
+    final workflow = ref.read(workflowProvider);
+    final count = explore ? 1 : ref.read(imagesPerRequestProvider);
+    AuthState? accountSession() => ref.exists(authNotifierProvider)
+        ? ref.read(authNotifierProvider)
+        : null;
+    final session = accountSession();
+    bool current() =>
+        widget.exploreMode == explore &&
+        identical(accountSession(), session) &&
+        ref.read(requestProvider) == params &&
+        ref.read(workflowProvider) == workflow &&
+        (explore || ref.read(imagesPerRequestProvider) == count);
+    final container = ProviderScope.containerOf(context, listen: false);
+    int price(UserSubscription? subscription) => explore
+        ? styleExploreCandidateCost(params, workflow, subscription)
+        : generationRequestCost(params, workflow, subscription, count);
+    final recheck = recheckOpusPriceForAction(container, price);
+    if (recheck != null) {
+      await recheck;
+      if (!context.mounted || !current()) return;
+    }
+
+    int? shownPrice() => explore
+        ? ref.read(estimatedCostForBatchSizeProvider(1))
+        : ref.read(estimatedCostProvider);
+    final quoted = shownPrice();
     final confirmed = await AssetProtectionGuard.confirmHighAnlasCost(
       context: context,
       ref: ref,
-      cost: widget.exploreMode
-          ? ref.read(estimatedCostForBatchSizeProvider(1))
-          : null,
+      cost: quoted,
     );
-    if (!confirmed || !context.mounted) {
+    if (!confirmed ||
+        !context.mounted ||
+        !current() ||
+        shownPrice() != quoted) {
       return;
+    }
+    final finalCheck = recheckOpusPriceForAction(
+      container,
+      price,
+      checkLow: false,
+    );
+    if (finalCheck != null) {
+      await finalCheck;
+      if (!context.mounted || !current() || shownPrice() != quoted) return;
     }
     if (widget.canGenerate?.call() == false) {
       AppToast.info(context, context.l10n.bridge_conflict);

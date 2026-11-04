@@ -10868,7 +10868,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get stats_anlasNote =>
-      'Recorded when your balance drops, including upscales and Vibe encoding; only the last 90 days are kept';
+      'Recorded per request at the price shown in the app, including upscales and Vibe encoding; only the last 90 days are kept';
 
   @override
   String get stats_aspectTitle => 'Canvas size';

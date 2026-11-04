@@ -9,7 +9,6 @@ import '../../../data/models/image/image_operation.dart';
 import '../image_generation_provider.dart';
 import '../auth_provider.dart';
 import '../image_save_settings_provider.dart';
-import '../subscription_provider.dart';
 import '../../screens/generation/widgets/canvas/canvas_feed_layout.dart';
 import 'image_workflow_controller.dart';
 import 'local_upscale_provider.dart';
@@ -102,11 +101,6 @@ class CloudUpscaleTask extends Notifier<CloudUpscaleState> {
       if (!_disposed) {
         workflow.setToolRunning(false);
         if (state.running) state = const CloudUpscaleState();
-        if (ref.exists(subscriptionNotifierProvider)) {
-          ref
-              .read(subscriptionNotifierProvider.notifier)
-              .schedulePostBillingRefresh();
-        }
       }
     }
   }
@@ -230,13 +224,6 @@ class CloudUpscaleTask extends Notifier<CloudUpscaleState> {
       selectionSub.close();
       focusSub.close();
       _cancellation = null;
-      if (!_disposed &&
-          !accountChanged &&
-          ref.exists(subscriptionNotifierProvider)) {
-        ref
-            .read(subscriptionNotifierProvider.notifier)
-            .schedulePostBillingRefresh();
-      }
       if (!_disposed) {
         controller.setToolRunning(false);
         if (state.running) state = const CloudUpscaleState();

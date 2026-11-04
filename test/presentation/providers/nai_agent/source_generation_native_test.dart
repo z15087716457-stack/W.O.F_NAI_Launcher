@@ -21,15 +21,18 @@ import 'package:image/image.dart' as img;
 import 'package:mocktail/mocktail.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/core/nai_agent/agent_tool.dart';
+import 'package:nai_launcher/data/models/user/user_subscription.dart';
 import 'package:nai_launcher/core/nai_agent/generation_tools.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/core/storage/prompt_block_storage.dart';
 import 'package:nai_launcher/data/datasources/remote/nai_image_generation_api_service.dart';
+import 'package:nai_launcher/data/datasources/remote/nai_user_info_api_service.dart';
 import 'package:nai_launcher/data/models/image/image_params.dart';
 import 'package:nai_launcher/data/models/image/image_stream_chunk.dart';
 import 'package:nai_launcher/data/repositories/character_prompt_repository.dart';
 import 'package:nai_launcher/data/repositories/prompt_block_repository.dart';
 import 'package:nai_launcher/data/services/vibe_library_storage_service.dart';
+import 'package:nai_launcher/presentation/providers/account_manager_provider.dart';
 import 'package:nai_launcher/presentation/providers/auth_provider.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
 import 'package:nai_launcher/presentation/providers/image_save_settings_provider.dart';
@@ -37,10 +40,18 @@ import 'package:nai_launcher/presentation/providers/notification_settings_provid
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_generation_approvals.dart';
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_studio_provider.dart';
+import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
 import '../krita/agent_bridge_draft_test.dart'
     show MemoryDraftSettings, MemoryCharacters;
 import 'generation_binding_test.dart'
-    show GenerationTestAuth, GenerationTestLibrary, GenerationTestVibes;
+    show
+        GenerationTestAccounts,
+        GenerationTestAuth,
+        GenerationTestBalances,
+        GenerationTestLibrary,
+        GenerationTestVibes,
+        generationTestSubscription,
+        generationTestOpus;
 import '../../../helpers/prompt_normalization_fixture.dart';
 
 class _Api extends Mock implements NAIImageGenerationApiService {}
@@ -53,6 +64,7 @@ void main() {
   late Directory root;
   late ProviderContainer container;
   late _Api api;
+  late GenerationTestBalances balances;
   late NaiAgentStudioTools service;
   late NaiAgentModelConnection connection;
   late List<ImageParams> requests;
@@ -73,6 +85,7 @@ void main() {
     final storage = PromptBlockStorage(hivePath: root.path);
     await storage.init();
     api = _Api();
+    balances = GenerationTestBalances();
     requests = [];
     onRequest = null;
     bytes = Uint8List.fromList(img.encodePng(img.Image(width: 32, height: 48)));
@@ -88,6 +101,8 @@ void main() {
     when(() => api.cancelGeneration()).thenReturn(null);
     container = ProviderContainer(
       overrides: [
+        naiUserInfoApiServiceProvider.overrideWithValue(balances),
+        accountManagerNotifierProvider.overrideWith(GenerationTestAccounts.new),
         naiAgentModelResolverProvider.overrideWithValue(
           (_, __) async => connection,
         ),
@@ -180,6 +195,58 @@ void main() {
       (await pending.timeout(const Duration(seconds: 20)))['details'],
     );
   }
+
+  test(
+    'depleted source quote uses the selected image parameters even when the sidebar is paid-only',
+    () async {
+      (container.read(authNotifierProvider.notifier) as GenerationTestAuth)
+          .setAuth(
+            AuthState(
+              status: AuthStatus.authenticated,
+              accountId: 'synthetic-account',
+              subscriptionInfo: generationTestOpus(
+                const OpusUsage(isNegative: true),
+              ),
+            ),
+          );
+      container.read(subscriptionNotifierProvider);
+      container.read(generationParamsNotifierProvider.notifier).updateSteps(40);
+      balances.answer = generationTestOpus(const OpusUsage(percent: 75));
+      final selected = await quote({'operation': 'variations'}, metadata: true);
+      expect(balances.requests, 1);
+      expect(selected['images_per_request'], 3);
+      expect(selected['estimated_anlas'], greaterThan(0));
+      expect(requests, isEmpty);
+      expect(container.read(generationParamsNotifierProvider).steps, 40);
+    },
+  );
+
+  test(
+    'a cached balance too low for the source quote is asked once first',
+    () async {
+      // A paying account; the screens keep the balance notifier, which
+      // moves only on a click, a login or a switch.
+      (container.read(authNotifierProvider.notifier) as GenerationTestAuth)
+          .setAuth(
+            AuthState(
+              status: AuthStatus.authenticated,
+              accountId: 'synthetic-account',
+              displayName: 'Synthetic account',
+              subscriptionInfo: generationTestSubscription(1),
+            ),
+          );
+      expect(container.read(subscriptionNotifierProvider).balance, 1);
+      balances.balance = 5000;
+      final q = await quote({'operation': 'variations'});
+      expect(balances.requests, 1);
+      expect(q['balance_anlas'], 5000);
+      expect(q['can_generate'], true);
+      balances.balance = 1;
+      // Fresh enough: the next quote asks nothing.
+      expect((await quote({'operation': 'variations'}))['can_generate'], true);
+      expect(balances.requests, 1);
+    },
+  );
 
   test(
     'official variants freeze source metadata, use the native three-image seed relation and export originals',

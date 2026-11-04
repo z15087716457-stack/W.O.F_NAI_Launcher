@@ -41,7 +41,6 @@ import 'local_gallery_provider.dart';
 import 'pill_roll_coordinator.dart';
 import 'pill_workspace_provider.dart';
 import 'quality_preset_provider.dart';
-import 'subscription_provider.dart';
 import 'uc_preset_provider.dart';
 
 import 'generation/generation_models.dart';
@@ -137,15 +136,13 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
   GenerationRetryRequest? _lastRequest;
   GenerationRetryRequest? get lastRequest => _lastRequest;
 
-  Future<void> retry(GenerationRetryRequest request) => _withPostBillingRefresh(
-    () => _generate(
-      request.params,
-      imagesPerRequestOverride: request.count,
-      operation: request.operation,
-      variationOriginal: request.original,
-      workflowOverride: request.workflow,
-      preserveSnapshot: true,
-    ),
+  Future<void> retry(GenerationRetryRequest request) => _generate(
+    request.params,
+    imagesPerRequestOverride: request.count,
+    operation: request.operation,
+    variationOriginal: request.original,
+    workflowOverride: request.workflow,
+    preserveSnapshot: true,
   );
   List<GeneratedImage> _pendingLocalEnhanceImages = [];
   final Map<String, _RememberedStreamPreview> _streamPreviewsForSnapshots =
@@ -733,13 +730,11 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     GenerationBatchCallback? onBatchEvent,
     int? imagesPerRequestOverride,
     ImageOperation? operation,
-  }) => _withPostBillingRefresh(
-    () => _generate(
-      params,
-      onBatchEvent: onBatchEvent,
-      imagesPerRequestOverride: imagesPerRequestOverride,
-      operation: operation,
-    ),
+  }) => _generate(
+    params,
+    onBatchEvent: onBatchEvent,
+    imagesPerRequestOverride: imagesPerRequestOverride,
+    operation: operation,
   );
 
   /// Official source-based action. Batch preferences and draft prompt lanes
@@ -747,13 +742,11 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
   Future<void> generateOfficialVariations(
     ImageParams params, {
     required GeneratedImage original,
-  }) => _withPostBillingRefresh(
-    () => _generate(
-      params.copyWith(nSamples: 1),
-      imagesPerRequestOverride: 3,
-      operation: ImageOperation.variations,
-      variationOriginal: original,
-    ),
+  }) => _generate(
+    params.copyWith(nSamples: 1),
+    imagesPerRequestOverride: 3,
+    operation: ImageOperation.variations,
+    variationOriginal: original,
   );
 
   /// Frozen source-image generation does not synchronize or roll the sidebar.
@@ -762,17 +755,13 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     required ImageOperation operation,
     GeneratedImage? original,
     GenerationBatchCallback? onBatchEvent,
-  }) => _withPostBillingRefresh(
-    () => _generate(
-      params.copyWith(nSamples: 1),
-      imagesPerRequestOverride: operation == ImageOperation.variations ? 3 : 1,
-      operation: operation,
-      variationOriginal: operation == ImageOperation.variations
-          ? original
-          : null,
-      onBatchEvent: onBatchEvent,
-      preservePromptSnapshot: true,
-    ),
+  }) => _generate(
+    params.copyWith(nSamples: 1),
+    imagesPerRequestOverride: operation == ImageOperation.variations ? 3 : 1,
+    operation: operation,
+    variationOriginal: operation == ImageOperation.variations ? original : null,
+    onBatchEvent: onBatchEvent,
+    preservePromptSnapshot: true,
   );
 
   /// 探索任务专用生成入口（画风探索阶段 B）：单张、强制 nSamples=1、
@@ -783,23 +772,8 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
   /// 与 [generate] 共享冷却门禁、提示词管线与 vibe 编码；
   /// 但绕开批次分支（批次循环按 imagesPerRequest 共享提示词，
   /// 探索每张候选有独立 roll 快照，不能共用）。
-  Future<ExploreGenerationResult?> generateForExplore(ImageParams params) {
-    return _withPostBillingRefresh(() => _generateForExplore(params));
-  }
-
-  /// 生成结束后的余额刷新包裹：无论成败都调度一次余额刷新——
-  /// 失败/取消的请求服务端也可能已部分计费，刷新让余额尽快回到真实值。
-  Future<T> _withPostBillingRefresh<T>(Future<T> Function() body) {
-    return body().whenComplete(() {
-      // 独立测试/工具环境未启动订阅链路时，不应仅为刷新余额
-      // 而触发认证和平台存储初始化。
-      if (ref.exists(subscriptionNotifierProvider)) {
-        ref
-            .read(subscriptionNotifierProvider.notifier)
-            .schedulePostBillingRefresh();
-      }
-    });
-  }
+  Future<ExploreGenerationResult?> generateForExplore(ImageParams params) =>
+      _generateForExplore(params);
 
   Future<ExploreGenerationResult?> _generateForExplore(
     ImageParams params,
@@ -1078,7 +1052,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
         ),
       );
       // 注意：生成完成音效由 GenerationCompletionWatcher 统一监听
-      // 点数消耗由 AnlasBalanceWatcher 自动监听余额变化记录
+      // 点数消耗由接口服务按每次请求的价记账（AnlasRequestLedger）
       return;
     }
 
@@ -1240,7 +1214,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
               clearStreamPreview: true,
             );
           }
-          // 点数消耗由 AnlasBalanceWatcher 自动监听余额变化记录
+          // 取消的请求不记账：NovelAI 交回结果才记（AnlasRequestLedger）
           return;
         }
         // 并发限制：等待 NAI 释放额度后重试当前批次（取消可随时中断）

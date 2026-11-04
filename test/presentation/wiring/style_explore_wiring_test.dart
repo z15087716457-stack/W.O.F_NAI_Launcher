@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/ui/kit/ui_colors.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,6 +14,7 @@ import 'package:nai_launcher/presentation/ui/blocks/blocks_contract.dart';
 import 'package:nai_launcher/presentation/ui/blocks/blocks_dock.dart';
 import 'package:nai_launcher/presentation/ui/blocks/blocks_instance.dart';
 import 'package:nai_launcher/presentation/wiring/blocks_preferences.dart';
+import 'package:nai_launcher/core/constants/api_constants.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/core/storage/pill_workspace_storage.dart';
 import 'package:nai_launcher/core/storage/style_explore_run_storage.dart';
@@ -153,8 +155,37 @@ class _Characters extends CharacterPromptNotifier {
 }
 
 class _Subscription extends SubscriptionNotifier {
+  /// What the balance notifier holds when it starts.
+  static SubscriptionState cached = const SubscriptionState.initial();
+
+  /// Told of every balance request, which brings an Opus quota run out.
+  static void Function()? onAsk;
+  static OpusUsage answer = const OpusUsage(isNegative: true);
+
+  static SubscriptionState opus(OpusUsage usage) => SubscriptionState.loaded(
+    UserSubscription(
+      tier: 3,
+      active: true,
+      trainingStepsLeft: const TrainingStepsInfo(fixedTrainingStepsLeft: 1000),
+      usage: usage,
+    ),
+  );
+
   @override
-  SubscriptionState build() => const SubscriptionState.initial();
+  SubscriptionState build() {
+    // As the real notifier: kept for the session.
+    ref.keepAlive();
+    return cached;
+  }
+
+  void cache(OpusUsage usage) => state = opus(usage);
+
+  @override
+  Future<bool> recheckBalance() async {
+    onAsk?.call();
+    applyFetchedSubscription(opus(answer).subscription!);
+    return true;
+  }
 }
 
 class _Runner extends ExploreRunRunner {
@@ -232,6 +263,8 @@ class _Controls extends GenerationControlsController {
 
 class _AgentStore extends AgentWorkspaceStore {
   _AgentStore(super.root);
+  @override
+  Future<void> discardDraftChat(String workspaceId, String chatId) async {}
   AgentSettings settings = const AgentSettings();
   @override
   Future<AgentSettings> readSettings() async => settings;
@@ -475,7 +508,7 @@ void main() {
     });
     final preferences = NaiAgentUiPreferences()..replace(agent.settings);
     agent.addListener(() => preferences.replace(agent.settings));
-    agent.ready = Future.value();
+    // Keep the ready future in the real async zone where the controller was initialized.
     agentDirectory = directory;
     agentController = agent;
     addTearDown(route.dispose);
@@ -596,8 +629,12 @@ void main() {
     expect(storage.runs['first'], run);
     expect(controls.calls, 0);
     expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
   });
 
+  final desktop = TargetPlatformVariant.only(
+    Platform.isWindows ? TargetPlatform.windows : TargetPlatform.macOS,
+  );
   for (final language in ['zh', 'zh_TW', 'en', 'ja', 'ko']) {
     for (final dark in [false, true]) {
       testWidgets('explore Agent toolbar $language dark=$dark', (tester) async {
@@ -642,7 +679,8 @@ void main() {
         await captureAgent(tester, 'open-$language-$dark');
         expect(controls.calls, 0);
         expect(tester.takeException(), isNull);
-      });
+        await tester.pumpWidget(const SizedBox.shrink());
+      }, variant: desktop);
     }
   }
 
@@ -1050,6 +1088,115 @@ void main() {
       expect(storage.runs['first']!.families, isEmpty);
     },
   );
+
+  testWidgets(
+    'zero balance colors the explore quote red and the draw button stays available',
+    (tester) async {
+      await mount(
+        tester,
+        overrides: [
+          anlasBalanceProvider.overrideWith((ref) => 0),
+          estimatedCostForBatchSizeProvider(1).overrideWith((ref) => 20),
+        ],
+      );
+      final button = find
+          .byKey(const Key('explore-generate'))
+          .hitTestable()
+          .first;
+      final price = find.descendant(of: button, matching: find.text('20'));
+      final error = tester.element(button).ui.error;
+      expect(
+        find.ancestor(
+          of: price,
+          matching: find.byWidgetPredicate(
+            (w) =>
+                w is Container &&
+                w.decoration is BoxDecoration &&
+                (w.decoration! as BoxDecoration).color == error,
+          ),
+        ),
+        findsOneWidget,
+      );
+      await tester.tap(button);
+      await tester.pumpAndSettle();
+      expect(controls.calls, 1);
+    },
+  );
+
+  group('an Opus-free candidate price on a quota nearly used up', () {
+    // Each candidate is a one-image request, free on the Opus quota; the
+    // cached quota is at 3 %, which the server has meanwhile run out.
+    setUp(() {
+      _Subscription.cached = _Subscription.opus(const OpusUsage(percent: 3));
+    });
+    tearDown(() {
+      _Subscription.cached = const SubscriptionState.initial();
+      _Subscription.onAsk = null;
+      _Subscription.answer = const OpusUsage(isNegative: true);
+    });
+
+    Future<_Subscription> mountOnV5(WidgetTester tester) async {
+      final container = await mount(tester);
+      container
+          .read(generationParamsNotifierProvider.notifier)
+          .updateModel(ImageModels.animeDiffusionV5Full, persist: false);
+      _Subscription.onAsk = () => runner.calls.add('balance');
+      return container.read(subscriptionNotifierProvider.notifier)
+          as _Subscription;
+    }
+
+    testWidgets('retrying failed candidates asks once before it starts', (
+      tester,
+    ) async {
+      await mountOnV5(tester);
+      actions(tester).onRetryFailed();
+      await tester.pumpAndSettle();
+      // Before: retried at once, priced free.
+      expect(runner.calls, ['balance', 'retry:first']);
+    });
+
+    testWidgets(
+      'depleted manual exploration reconciles the candidate price before starting a retry',
+      (tester) async {
+        final quota = await mountOnV5(tester);
+        quota.cache(const OpusUsage(isNegative: true));
+        _Subscription.answer = const OpusUsage(percent: 30);
+        actions(tester).onRetryFailed();
+        await tester.pumpAndSettle();
+        expect(runner.calls, ['balance', 'retry:first']);
+        expect(
+          mountedContainer!
+              .read(subscriptionNotifierProvider)
+              .subscription!
+              .isOpusUsageExhausted,
+          isFalse,
+        );
+      },
+    );
+
+    testWidgets('new children ask once before they start', (tester) async {
+      final quota = await mountOnV5(tester);
+      quota.cache(const OpusUsage(percent: 50));
+      actions(tester).onStartEvolution(
+        const ExploreEvolutionPlan(
+          candidateKeys: [],
+          newLineName: 'Line',
+          customParents: ['artist:x', 'artist:y'],
+          generate: 2,
+        ),
+      );
+      await tester.pumpAndSettle();
+      // Quota left: nothing asked.
+      expect(runner.calls, hasLength(1));
+      expect(runner.calls.single, startsWith('children:'));
+      final family = storage.runs['first']!.families.single;
+      quota.cache(const OpusUsage(percent: 3));
+      actions(tester).onGenerateChildren(family.id, 4);
+      await tester.pumpAndSettle();
+      expect(runner.calls.skip(1), ['balance', startsWith('children:')]);
+      expect(runner.calls.last, endsWith(':4'));
+    });
+  });
 
   testWidgets('stale pause actions do not pause a different generation run', (
     tester,

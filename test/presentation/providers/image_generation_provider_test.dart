@@ -1,4 +1,5 @@
 import '../../helpers/grouped_canvas_batches.dart';
+import '../../helpers/balance_requests.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -20,6 +21,7 @@ import 'package:nai_launcher/data/models/image/image_params.dart';
 import 'package:nai_launcher/data/models/image/image_stream_chunk.dart';
 import 'package:nai_launcher/data/models/user/user_subscription.dart';
 import 'package:nai_launcher/data/models/vibe/vibe_reference.dart';
+import 'package:nai_launcher/data/services/vibe_library_storage_service.dart';
 import 'package:nai_launcher/presentation/providers/generation/image_workflow_controller.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
 import 'package:nai_launcher/presentation/providers/image_save_settings_provider.dart';
@@ -27,6 +29,7 @@ import 'package:nai_launcher/presentation/providers/local_gallery_provider.dart'
 import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
 import 'package:nai_launcher/presentation/providers/notification_settings_provider.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/canvas_feed_layout.dart';
+import '../wiring/generation_reference_imports_test.dart' show ImportStorage;
 
 class MockNAIImageGenerationApiService extends Mock
     implements NAIImageGenerationApiService {}
@@ -70,11 +73,12 @@ class TestSubscriptionNotifier extends SubscriptionNotifier {
     );
   }
 
+  /// A generation asks nothing for the balance any more; only a click (or
+  /// a low balance about to stop the Agent) does.
   @override
-  void schedulePostBillingRefresh({
-    Duration delay = SubscriptionNotifier.postBillingRefreshDelay,
-  }) {
+  Future<bool> refreshBalance() async {
     refreshBalanceCallCount += 1;
+    return true;
   }
 }
 
@@ -510,10 +514,6 @@ void main() {
         expect(capturedParams, isNotNull);
         expect(capturedParams!.prompt, equals('1girl'));
         expect(capturedParams!.negativePrompt, equals('bad hands'));
-        final subscriptionNotifier =
-            container.read(subscriptionNotifierProvider.notifier)
-                as TestSubscriptionNotifier;
-        expect(subscriptionNotifier.refreshBalanceCallCount, 1);
       },
     );
 
@@ -591,12 +591,84 @@ void main() {
         expect(state.status, GenerationStatus.completed);
         expect(state.currentImages, hasLength(6));
         expect(state.displayImages, hasLength(6));
-        final subscriptionNotifier =
-            container.read(subscriptionNotifierProvider.notifier)
-                as TestSubscriptionNotifier;
-        expect(subscriptionNotifier.refreshBalanceCallCount, 1);
       },
     );
+
+    test('billed generations ask nothing for the balance: finished, failed, '
+        'retried, variations, source image', () async {
+      final api = MockNAIImageGenerationApiService();
+      final balances = BalanceRequests();
+      final png = _validImageBytes(width: 512, height: 768);
+      var fail = false;
+      when(() => api.generateImageStream(any())).thenAnswer((invocation) {
+        final request = invocation.positionalArguments.first as ImageParams;
+        return fail
+            ? Stream<ImageStreamChunk>.error(StateError('synthetic failure'))
+            : Stream<ImageStreamChunk>.fromIterable([
+                for (var index = 0; index < request.nSamples; index++)
+                  ImageStreamChunk.complete(png, sampleIndex: index),
+              ]);
+      });
+
+      container.dispose();
+      container = ProviderContainer(
+        overrides: [
+          groupedCanvasBatchesOverride,
+          naiImageGenerationApiServiceProvider.overrideWithValue(api),
+          ...realBalanceOverrides(balances),
+        ],
+      );
+      await container
+          .read(notificationSettingsNotifierProvider.notifier)
+          .setSoundEnabled(false);
+      await container
+          .read(imageSaveSettingsNotifierProvider.notifier)
+          .setAutoSave(false);
+      // The real balance notifier, as the screens keep it.
+      expect(container.read(subscriptionNotifierProvider).balance, 5000);
+
+      final notifier = container.read(imageGenerationNotifierProvider.notifier);
+      GenerationStatus status() =>
+          container.read(imageGenerationNotifierProvider).status;
+      final params = container
+          .read(generationParamsNotifierProvider)
+          .copyWith(prompt: 'balance', width: 512, height: 768);
+      await notifier.generate(params);
+      expect(status(), GenerationStatus.completed);
+      fail = true;
+      await notifier.generate(params);
+      expect(status(), GenerationStatus.error);
+      fail = false;
+      await notifier.retry(notifier.lastRequest!);
+      expect(status(), GenerationStatus.completed);
+
+      final source = params.copyWith(
+        sourceImage: png,
+        action: ImageGenerationAction.img2img,
+        strength: .8,
+        noise: .1,
+      );
+      await notifier.generateOfficialVariations(
+        source,
+        original: GeneratedImage.create(
+          png,
+          width: 512,
+          height: 768,
+          isVariationOriginal: true,
+        ),
+      );
+      expect(status(), GenerationStatus.completed);
+      await notifier.generateSourceImage(
+        source,
+        operation: ImageOperation.imageToImage,
+      );
+      expect(status(), GenerationStatus.completed);
+
+      // Before: each of them asked again 0.5 s after it ended.
+      await Future<void>.delayed(afterBilledWork);
+      expect(balances.requests, 0);
+      expect(container.read(subscriptionNotifierProvider).balance, 5000);
+    });
 
     test(
       'official variations preserve draft and retain the original before three slots',
@@ -1666,6 +1738,7 @@ void main() {
         container = ProviderContainer(
           overrides: [
             groupedCanvasBatchesOverride,
+            vibeLibraryStorageServiceProvider.overrideWithValue(ImportStorage()),
             naiImageGenerationApiServiceProvider.overrideWithValue(api),
             naiImageEnhancementApiServiceProvider.overrideWithValue(
               enhancement,
@@ -1678,6 +1751,9 @@ void main() {
         await container
             .read(notificationSettingsNotifierProvider.notifier)
             .setSoundEnabled(false);
+        await container
+            .read(imageSaveSettingsNotifierProvider.notifier)
+            .setAutoSave(false);
         final paramsNotifier = container.read(
           generationParamsNotifierProvider.notifier,
         );
@@ -1760,6 +1836,7 @@ void main() {
       container = ProviderContainer(
         overrides: [
           groupedCanvasBatchesOverride,
+          vibeLibraryStorageServiceProvider.overrideWithValue(ImportStorage()),
           naiImageGenerationApiServiceProvider.overrideWithValue(
             mockApiService,
           ),
@@ -1775,6 +1852,9 @@ void main() {
       await container
           .read(notificationSettingsNotifierProvider.notifier)
           .setSoundEnabled(false);
+      await container
+          .read(imageSaveSettingsNotifierProvider.notifier)
+          .setAutoSave(false);
 
       final paramsNotifier = container.read(
         generationParamsNotifierProvider.notifier,
@@ -1853,6 +1933,7 @@ void main() {
       container = ProviderContainer(
         overrides: [
           groupedCanvasBatchesOverride,
+          vibeLibraryStorageServiceProvider.overrideWithValue(ImportStorage()),
           naiImageGenerationApiServiceProvider.overrideWithValue(
             mockApiService,
           ),
@@ -1868,6 +1949,9 @@ void main() {
       await container
           .read(notificationSettingsNotifierProvider.notifier)
           .setSoundEnabled(false);
+      await container
+          .read(imageSaveSettingsNotifierProvider.notifier)
+          .setAutoSave(false);
 
       final paramsNotifier = container.read(
         generationParamsNotifierProvider.notifier,

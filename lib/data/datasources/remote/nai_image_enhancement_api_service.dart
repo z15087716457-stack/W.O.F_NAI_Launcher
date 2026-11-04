@@ -12,6 +12,7 @@ import '../../../core/network/nai_api_endpoint_service.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/zip_utils.dart';
 import '../../../core/utils/localization_extension.dart';
+import '../../services/anlas_request_ledger.dart';
 
 part 'nai_image_enhancement_api_service.g.dart';
 
@@ -20,10 +21,17 @@ class NAIImageEnhancementApiService {
   final Dio _dio;
   final NaiApiEndpointService _endpointService;
 
+  /// 每次计费请求（放大、Vibe 编码、导演工具）按价记一笔
+  /// （[AnlasRequestLedger]）。必填：少了它统计就悄悄记不上；只有本文件的
+  /// provider 构造本服务（测试守着）。
+  final AnlasRequestLedger _ledger;
+
   NAIImageEnhancementApiService(
-    this._dio, [
+    this._dio, {
+    required AnlasRequestLedger ledger,
     NaiApiEndpointService? endpointService,
-  ]) : _endpointService = endpointService ?? NaiApiEndpointService();
+  }) : _ledger = ledger,
+       _endpointService = endpointService ?? NaiApiEndpointService();
 
   // ==================== 图像增强类型常量 ====================
   static const String _reqTypeEmotion = 'emotion';
@@ -57,6 +65,11 @@ class NAIImageEnhancementApiService {
         throw ArgumentError(currentL10n.img2img_cloudUpscaleSizeLimit);
       }
 
+      // 发出前按源图尺寸算价，NovelAI 交回放大图后记一笔。
+      final charge = _ledger.upscale(
+        width: decoded.width,
+        height: decoded.height,
+      );
       final response = await _dio.post(
         _endpointService.imageUrl(ApiConstants.upscaleEndpoint),
         data: {
@@ -77,7 +90,10 @@ class NAIImageEnhancementApiService {
       final result = images.isNotEmpty ? images.first : raw;
       // Compatible image services may return PNG directly. Do not register a
       // successful HTTP response containing JSON/HTML as an image.
-      if (img.decodeImage(result) != null) return result;
+      if (img.decodeImage(result) != null) {
+        charge.delivered();
+        return result;
+      }
       throw FormatException(currentL10n.preciseRefLib_invalidImage);
     } on DioException catch (e) {
       AppLogger.w('Upscale image failed: ${e.message}', 'NAIEnhancement');
@@ -92,6 +108,8 @@ class NAIImageEnhancementApiService {
     double informationExtracted = 1.0,
   }) async {
     try {
+      // 每次编码请求都记一笔：生成前编码、编码按钮、请求组装时补编码都走这里。
+      final charge = _ledger.vibeEncoding();
       final response = await _dio.post(
         _endpointService.imageUrl(ApiConstants.encodeVibeEndpoint),
         data: {
@@ -102,7 +120,9 @@ class NAIImageEnhancementApiService {
         options: Options(responseType: ResponseType.bytes),
       );
 
-      return base64Encode(response.data as Uint8List);
+      final encoded = response.data as Uint8List;
+      if (encoded.isNotEmpty) charge.delivered();
+      return base64Encode(encoded);
     } on DioException catch (e) {
       AppLogger.w('Encode vibe failed: ${e.message}', 'NAIEnhancement');
       throw Exception(currentL10n.enhance_vibeEncodeFailed(_mapDioError(e)));
@@ -146,6 +166,12 @@ class NAIImageEnhancementApiService {
         if (prompt != null && prompt.isNotEmpty) 'prompt': prompt,
       };
 
+      // 发出前按源图尺寸算价（与导演工具价签同一算法），交回结果后记一笔。
+      final charge = _ledger.directorTool(
+        width: decoded.width,
+        height: decoded.height,
+        backgroundRemoval: reqType == _reqTypeBgRemoval,
+      );
       final response = await _dio.post(
         _endpointService.imageUrl(ApiConstants.augmentImageEndpoint),
         data: requestData,
@@ -161,6 +187,7 @@ class NAIImageEnhancementApiService {
         throw Exception('No images found in augment response');
       }
 
+      charge.delivered();
       return images;
     } on DioException catch (e) {
       AppLogger.w('Augment image failed: ${e.message}', 'NAIEnhancement');
@@ -203,6 +230,8 @@ class NAIImageEnhancementApiService {
       augmentImage(image, reqType: _reqTypeSketch);
 
   // ==================== 图像标注 API ====================
+  /// 现在没有调用方，应用也没有给它算价，不记账；要用时先补上价再接
+  /// [AnlasRequestLedger]。
   Future<dynamic> annotateImage(
     Uint8List image, {
     required String annotateType,
@@ -284,5 +313,9 @@ class NAIImageEnhancementApiService {
 NAIImageEnhancementApiService naiImageEnhancementApiService(Ref ref) {
   final dio = ref.watch(dioClientProvider);
   final endpointService = ref.watch(naiApiEndpointServiceProvider);
-  return NAIImageEnhancementApiService(dio, endpointService);
+  return NAIImageEnhancementApiService(
+    dio,
+    endpointService: endpointService,
+    ledger: ref.watch(anlasRequestLedgerProvider),
+  );
 }

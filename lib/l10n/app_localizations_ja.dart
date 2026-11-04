@@ -10517,7 +10517,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get stats_anlasNote =>
-      '残高が減ったときに記録（アップスケールや Vibe エンコードを含む）。直近 90 日のみ保持';
+      'リクエストごとにアプリの表示価格で記録（アップスケールや Vibe エンコードを含む）。直近 90 日のみ保持';
 
   @override
   String get stats_aspectTitle => '画面サイズ';

@@ -9,6 +9,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:nai_launcher/core/network/nai_api_endpoint.dart';
 import 'package:nai_launcher/core/network/nai_api_endpoint_service.dart';
 import 'package:nai_launcher/data/datasources/remote/nai_image_enhancement_api_service.dart';
+import '../../../helpers/novelai_billing.dart';
 
 class _MockDio extends Mock implements Dio {}
 
@@ -45,6 +46,7 @@ void main() {
         );
         final result = await NAIImageEnhancementApiService(
           dio,
+          ledger: unrecordedLedger(),
         ).augmentImages(images.first, reqType: 'bg-removal');
         expect(result, hasLength(3));
         for (var i = 0; i < images.length; i++) {
@@ -78,7 +80,10 @@ void main() {
           );
         });
 
-        final service = NAIImageEnhancementApiService(dio);
+        final service = NAIImageEnhancementApiService(
+          dio,
+          ledger: unrecordedLedger(),
+        );
         final result = await service.upscaleImage(sourceImage);
 
         expect(result, isNotEmpty);
@@ -131,7 +136,8 @@ void main() {
           );
           final result = NAIImageEnhancementApiService(
             dio,
-            endpoint,
+            endpointService: endpoint,
+            ledger: unrecordedLedger(),
           ).upscaleImage(source);
           if (rawPng) {
             expect(await result, source);
@@ -155,6 +161,7 @@ void main() {
       await expectLater(
         NAIImageEnhancementApiService(
           dio,
+          ledger: unrecordedLedger(),
         ).upscaleImage(_buildPng(width: 2048, height: 2048)),
         throwsArgumentError,
       );
@@ -192,7 +199,10 @@ void main() {
           );
         });
 
-        final service = NAIImageEnhancementApiService(dio);
+        final service = NAIImageEnhancementApiService(
+          dio,
+          ledger: unrecordedLedger(),
+        );
         final result = await service.removeBackground(sourceImage);
 
         expect(result, isNotEmpty);
@@ -223,7 +233,10 @@ void main() {
         );
       });
 
-      final service = NAIImageEnhancementApiService(dio);
+      final service = NAIImageEnhancementApiService(
+        dio,
+        ledger: unrecordedLedger(),
+      );
       final result = await service.encodeVibe(
         sourceImage,
         model: 'nai-diffusion-4-5-full',

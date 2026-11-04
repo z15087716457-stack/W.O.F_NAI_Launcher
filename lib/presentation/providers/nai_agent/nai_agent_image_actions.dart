@@ -40,10 +40,11 @@ class _ImageQuote {
   final String accountId, endpoint;
   final int cost;
   bool reserved = false;
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson({required int? balance}) => {
     'quote_id': id,
     'expires_at': expires.toIso8601String(),
     ...summary,
+    'balance_anlas': balance,
     ...params,
     'estimated_anlas': cost,
     'authorization': 'explicit_user_button_required',
@@ -113,6 +114,11 @@ class NaiAgentImageActions {
     return loaded ?? (raw == null ? null : UserSubscription.fromJson(raw));
   }
 
+  int? get _cachedBalance {
+    final account = _subscription;
+    return account?.trainingStepsLeft == null ? null : account!.anlasBalance;
+  }
+
   int _cost(String tool, NaiAgentImage source) {
     final size = NaiResolutionAdapter.readImageSize(source.bytes)!;
     return tool == 'cloud_upscale'
@@ -126,6 +132,13 @@ class NaiAgentImageActions {
             isBgRemoval: tool == 'removeBackground',
             isOpus: _subscription?.isOpus == true,
           );
+  }
+
+  /// Whether the cached balance alone would stop [q]: missing, or below its
+  /// price.
+  bool _balanceBlocks(_ImageQuote q) {
+    final balance = _cachedBalance;
+    return balance == null || balance < q.cost;
   }
 
   void _validQuote(_ImageQuote q, NaiAgentCancellation token) {
@@ -243,6 +256,17 @@ class NaiAgentImageActions {
       return naiAgentTextResult({'job_id': activeId, 'cancel_requested': true});
     }
     if (action == 'run') {
+      final waiting = _quotes[params['quote_id']];
+      if (waiting != null &&
+          !waiting.reserved &&
+          owner != null &&
+          _balanceBlocks(waiting)) {
+        // The cached balance moves only on a click, a login or this ask:
+        // before it stops the tool, ask once.
+        await refreshBalanceBeforeBlocking(ref);
+        _check(token);
+      }
+      // Looked up after any wait: a quote another run took meanwhile is gone.
       final q = _quotes[params['quote_id']];
       if (q == null || q.reserved || owner == null) {
         throw const NaiAgentToolError(
@@ -251,13 +275,14 @@ class NaiAgentImageActions {
         );
       }
       _validQuote(q, token);
+      final approval = q.toJson(balance: _cachedBalance);
       q.reserved = true;
       try {
         final accepted = await ref
             .read(naiAgentImageApprovalsProvider)
             .request(
               owner!,
-              q.toJson(),
+              approval,
               q.expires,
               token,
               () => _validQuote(q, token),
@@ -273,7 +298,7 @@ class NaiAgentImageActions {
         _validQuote(q, token);
         final backup = await files.export(
           'image-request.json',
-          Uint8List.fromList(utf8.encode(jsonEncode(q.toJson()))),
+          Uint8List.fromList(utf8.encode(jsonEncode(approval))),
           () => _validQuote(q, token),
           companions: {_sourceName(q.source.bytes): q.source.bytes},
         );
@@ -387,16 +412,13 @@ class NaiAgentImageActions {
       cost,
       {
         'account_name': auth.displayName ?? '',
-        'balance_anlas': _subscription?.trainingStepsLeft == null
-            ? null
-            : _subscription!.anlasBalance,
         'width': size.$1,
         'height': size.$2,
         'source_image_id': source.id,
       },
     );
     _quotes[q.id] = q;
-    return naiAgentTextResult({'quote': q.toJson()});
+    return naiAgentTextResult({'quote': q.toJson(balance: _cachedBalance)});
   }
 
   String _sourceName(Uint8List b) => b[0] == 137

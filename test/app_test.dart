@@ -104,7 +104,6 @@ void main() {
     });
 
     testWidgets('AppBootstrapEffects 监听 provider 变化时不重建子树', (tester) async {
-      final anlasWatcherProvider = StateProvider<int>((ref) => 0);
       final backgroundRefreshProvider = StateProvider<int>((ref) => 0);
       final kritaBridgeProvider = StateProvider<int>((ref) => 0);
       final promptBlockLibraryProvider = StateProvider<int>((ref) => 0);
@@ -114,7 +113,6 @@ void main() {
         ProviderScope(
           child: MaterialApp(
             home: AppBootstrapEffects(
-              anlasWatcher: anlasWatcherProvider,
               backgroundRefresh: backgroundRefreshProvider,
               kritaBridge: kritaBridgeProvider,
               promptBlockLibrary: promptBlockLibraryProvider,
@@ -133,13 +131,10 @@ void main() {
         tester.element(find.byType(AppBootstrapEffects)),
       );
 
-      expect(container.exists(anlasWatcherProvider), isTrue);
       expect(container.exists(backgroundRefreshProvider), isTrue);
       expect(container.exists(kritaBridgeProvider), isTrue);
       expect(buildCount, 1);
 
-      container.read(anlasWatcherProvider.notifier).state = 1;
-      await tester.pump();
       container.read(backgroundRefreshProvider.notifier).state = 1;
       await tester.pump();
       container.read(kritaBridgeProvider.notifier).state = 1;

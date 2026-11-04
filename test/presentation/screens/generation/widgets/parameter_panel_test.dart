@@ -25,6 +25,7 @@ import 'package:nai_launcher/presentation/screens/generation/widgets/vibe_transf
 import 'package:nai_launcher/presentation/widgets/common/editable_double_field.dart';
 import 'package:nai_launcher/presentation/widgets/common/themed_slider.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
+import '../../../../helpers/novelai_billing.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -437,7 +438,7 @@ class _TestVibeLibraryStorageService extends VibeLibraryStorageService {
 }
 
 class _FakeEnhancementApiService extends NAIImageEnhancementApiService {
-  _FakeEnhancementApiService() : super(Dio());
+  _FakeEnhancementApiService() : super(Dio(), ledger: unrecordedLedger());
 }
 
 class _TestKritaBridgeNotifier extends KritaBridgeNotifier {

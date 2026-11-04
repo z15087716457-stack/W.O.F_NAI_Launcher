@@ -5850,7 +5850,7 @@
     }
   },
   "stats_anlasPeak": "Peak",
-  "stats_anlasNote": "Recorded when your balance drops, including upscales and Vibe encoding; only the last 90 days are kept",
+  "stats_anlasNote": "Recorded per request at the price shown in the app, including upscales and Vibe encoding; only the last 90 days are kept",
   "stats_aspectTitle": "Canvas size",
   "stats_aspectHint": "Actual pixel sizes",
   "stats_aspectOrientation": "Orientation",

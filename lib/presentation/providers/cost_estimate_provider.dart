@@ -133,6 +133,22 @@ int generationRequestCost(
   );
 }
 
+/// What one style-explore candidate, a one-image request on the sidebar
+/// draft, costs on [subscription]. The explore prices
+/// ([styleExploreCostForCountProvider], [estimatedCostForBatchSizeProvider]
+/// with 1) count candidates this way on the cached account.
+int styleExploreCandidateCost(
+  ImageParams draft,
+  ImageWorkflowState workflow,
+  UserSubscription? subscription,
+) => generationRequestCost(
+  draft,
+  workflow,
+  subscription,
+  1,
+  batchCountOverride: 1,
+);
+
 final styleExploreCostForCountProvider = Provider.family<int, int>(
   (ref, count) => _calculateEstimatedCost(
     ref,

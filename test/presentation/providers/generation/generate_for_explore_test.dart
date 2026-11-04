@@ -6,6 +6,7 @@ import 'package:nai_launcher/presentation/providers/character_prompt_provider.da
 import 'package:nai_launcher/presentation/providers/pill_roll_coordinator.dart';
 import 'package:nai_launcher/presentation/providers/pill_workspace_provider.dart';
 
+import '../../../helpers/balance_requests.dart';
 import '../../../helpers/prompt_normalization_fixture.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -29,8 +30,6 @@ class MockNAIImageGenerationApiService extends Mock
 class _MockPillRollCoordinator extends Mock implements PillRollCoordinator {}
 
 class TestSubscriptionNotifier extends SubscriptionNotifier {
-  int refreshBalanceCallCount = 0;
-
   @override
   SubscriptionState build() {
     ref.keepAlive();
@@ -41,13 +40,6 @@ class TestSubscriptionNotifier extends SubscriptionNotifier {
         trainingStepsLeft: TrainingStepsInfo(fixedTrainingStepsLeft: 10000),
       ),
     );
-  }
-
-  @override
-  void schedulePostBillingRefresh({
-    Duration delay = SubscriptionNotifier.postBillingRefreshDelay,
-  }) {
-    refreshBalanceCallCount += 1;
   }
 }
 
@@ -76,7 +68,7 @@ void main() {
   group('generateForExplore', () {
     late ProviderContainer container;
     late MockNAIImageGenerationApiService mockApiService;
-    late TestSubscriptionNotifier subscriptionNotifier;
+    late _MockPillRollCoordinator rollCoordinator;
 
     ImageParams? capturedParams;
     final capturedRequests = <ImageParams>[];
@@ -97,7 +89,7 @@ void main() {
       onRoll = null;
       onStream = null;
       mockApiService = MockNAIImageGenerationApiService();
-      final rollCoordinator = _MockPillRollCoordinator();
+      rollCoordinator = _MockPillRollCoordinator();
       when(rollCoordinator.rollAllLanesAndSync).thenAnswer((_) {
         rollCalls++;
         return onRoll?.call() ?? {};
@@ -152,10 +144,33 @@ void main() {
           .read(imageSaveSettingsNotifierProvider.notifier)
           .setAutoSave(false);
       container.read(subscriptionNotifierProvider);
-      subscriptionNotifier =
-          container.read(subscriptionNotifierProvider.notifier)
-              as TestSubscriptionNotifier;
     });
+
+    /// The same container with the real balance notifier, logged in, in
+    /// place of the stand-in: every balance request, whatever asks it, is
+    /// counted in what this returns.
+    Future<BalanceRequests> useRealBalance() async {
+      final balances = BalanceRequests();
+      container.dispose();
+      container = ProviderContainer(
+        overrides: [
+          naiImageGenerationApiServiceProvider.overrideWithValue(
+            mockApiService,
+          ),
+          pillRollCoordinatorProvider.overrideWithValue(rollCoordinator),
+          ...realBalanceOverrides(balances),
+        ],
+      );
+      await container
+          .read(notificationSettingsNotifierProvider.notifier)
+          .setSoundEnabled(false);
+      await container
+          .read(imageSaveSettingsNotifierProvider.notifier)
+          .setAutoSave(false);
+      // Read before the work, as the screens keep it.
+      expect(container.read(subscriptionNotifierProvider).balance, 5000);
+      return balances;
+    }
 
     tearDown(() async {
       container.dispose();
@@ -369,6 +384,7 @@ void main() {
     test(
       'returns materialized seed and image, bypasses batch branch',
       () async {
+        final balances = await useRealBalance();
         // 即使 imagesPerRequest>1，探索入口也必须走单张路径。
         container.read(imagesPerRequestProvider.notifier).set(3);
         final params = container
@@ -395,11 +411,14 @@ void main() {
         final state = container.read(imageGenerationNotifierProvider);
         expect(state.status, GenerationStatus.completed);
         expect(state.currentImages, hasLength(1));
-        expect(subscriptionNotifier.refreshBalanceCallCount, 1);
+        // Before: a balance request 0.5 s after every candidate.
+        await Future<void>.delayed(afterBilledWork);
+        expect(balances.requests, 0);
       },
     );
 
     test('failure returns null and leaves error in state', () async {
+      final balances = await useRealBalance();
       streamError = true;
       final params = container
           .read(generationParamsNotifierProvider)
@@ -413,8 +432,9 @@ void main() {
       final state = container.read(imageGenerationNotifierProvider);
       expect(state.status, GenerationStatus.error);
       expect(state.errorMessage, contains('boom'));
-      // 失败不记账但照常计划余额刷新。
-      expect(subscriptionNotifier.refreshBalanceCallCount, 1);
+      // 失败不记账，也不查余额（以前失败后 0.5 秒也查一次）。
+      await Future<void>.delayed(afterBilledWork);
+      expect(balances.requests, 0);
     });
   });
 }

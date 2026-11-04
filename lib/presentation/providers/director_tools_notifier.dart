@@ -10,7 +10,6 @@ import '../../data/datasources/remote/nai_image_enhancement_api_service.dart';
 import '../../data/models/director/director_tool_type.dart';
 import '../../data/services/director/pixel_snap_service.dart';
 import 'image_generation_provider.dart';
-import 'subscription_provider.dart';
 import 'generation/cloud_upscale_provider.dart';
 import 'generation/local_upscale_provider.dart';
 import 'generation/image_workflow_controller.dart';
@@ -284,14 +283,6 @@ class DirectorToolsNotifier extends Notifier<DirectorToolsState> {
       if (!_disposed) {
         state = state.copyWith(isRunning: false);
         workflow.setToolRunning(false);
-        if (tool != DirectorToolType.pixelSnap &&
-            !token.isCancelled &&
-            canApply?.call() != false &&
-            ref.exists(subscriptionNotifierProvider)) {
-          ref
-              .read(subscriptionNotifierProvider.notifier)
-              .schedulePostBillingRefresh();
-        }
       }
     }
   }

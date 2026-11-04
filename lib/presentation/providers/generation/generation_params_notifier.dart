@@ -25,7 +25,6 @@ import '../../../data/models/vibe/vibe_reference.dart';
 import '../../../data/services/vibe_library_storage_service.dart';
 import '../pill_workspace_provider.dart';
 import '../quality_preset_provider.dart';
-import '../subscription_provider.dart';
 import '../uc_preset_provider.dart';
 
 part 'generation_params_notifier.g.dart';
@@ -632,9 +631,6 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
         model: model,
         informationExtracted: informationExtracted,
       );
-      ref
-          .read(subscriptionNotifierProvider.notifier)
-          .schedulePostBillingRefresh();
 
       // 存入缓存
       _vibeEncodingCache[cacheKey] = encoding;

@@ -5832,7 +5832,7 @@
     }
   },
   "stats_anlasPeak": "最多",
-  "stats_anlasNote": "按餘額下降記錄，含放大、Vibe 編碼等；只保留最近 90 天",
+  "stats_anlasNote": "每次請求按應用顯示的價格記錄，含放大、Vibe 編碼等；只保留最近 90 天",
   "stats_aspectTitle": "畫幅",
   "stats_aspectHint": "按真實尺寸",
   "stats_aspectOrientation": "方向",

@@ -54,11 +54,6 @@ import 'generation_data_wiring_test.dart'
 import 'generation_reference_imports_test.dart' show ImportStorage;
 import '../../helpers/studio_capture_fonts.dart';
 
-class _Subscription extends DataSubscription {
-  @override
-  void schedulePostBillingRefresh({Duration delay = Duration.zero}) {}
-}
-
 class _Api extends Mock implements NAIImageEnhancementApiService {}
 
 Uint8List png(int width, [int height = 128]) => Uint8List.fromList(
@@ -92,7 +87,7 @@ void main() {
         characterPromptRepositoryProvider.overrideWithValue(MemoryCharacters()),
         promptBlockLibraryNotifierProvider.overrideWith(EmptyBlocks.new),
         authNotifierProvider.overrideWith(SwitchingAuth.new),
-        subscriptionNotifierProvider.overrideWith(_Subscription.new),
+        subscriptionNotifierProvider.overrideWith(DataSubscription.new),
         imageGenerationNotifierProvider.overrideWith(DataGeneration.new),
         shortcutConfigNotifierProvider.overrideWith(DataShortcuts.new),
         generationPlatformProvider.overrideWithValue(platform),

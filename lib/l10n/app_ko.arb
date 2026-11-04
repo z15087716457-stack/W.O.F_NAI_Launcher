@@ -5832,7 +5832,7 @@
     }
   },
   "stats_anlasPeak": "최다",
-  "stats_anlasNote": "잔액이 줄 때 기록하며 업스케일·Vibe 인코딩 포함, 최근 90일만 보관",
+  "stats_anlasNote": "요청마다 앱에 표시된 가격으로 기록하며 업스케일·Vibe 인코딩 포함, 최근 90일만 보관",
   "stats_aspectTitle": "캔버스 크기",
   "stats_aspectHint": "실제 크기",
   "stats_aspectOrientation": "방향",

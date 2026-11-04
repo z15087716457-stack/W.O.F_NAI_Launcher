@@ -5832,7 +5832,7 @@
     }
   },
   "stats_anlasPeak": "最多",
-  "stats_anlasNote": "按余额下降记录，含放大、Vibe 编码等；只保留最近 90 天",
+  "stats_anlasNote": "每次请求按应用显示的价格记录，含放大、Vibe 编码等；只保留最近 90 天",
   "stats_aspectTitle": "画幅",
   "stats_aspectHint": "按真实尺寸",
   "stats_aspectOrientation": "方向",

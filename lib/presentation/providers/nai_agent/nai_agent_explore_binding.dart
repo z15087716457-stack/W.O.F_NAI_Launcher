@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:crypto/crypto.dart';
@@ -16,6 +17,7 @@ import '../pill_workspace_provider.dart';
 import '../prompt_block_library_provider.dart';
 import '../style_explore/explore_run_provider.dart';
 import '../style_explore/explore_run_runner.dart';
+import '../subscription_provider.dart';
 import 'nai_agent_generation_binding.dart';
 
 String naiAgentExploreVersion(ExploreRun run) => sha256
@@ -34,6 +36,7 @@ class NaiAgentExploreBinding {
       final base = bindNaiAgentGeneration(ref, workspace, owner!, busy, alive);
       generation = NaiAgentGenerationTools(
         isAlive: alive,
+        recheckBalance: base.recheckBalance,
         readInput: (params) {
           final run = _quotedRun(params);
           final mode = params['mode'] ?? 'basic';
@@ -77,6 +80,7 @@ class NaiAgentExploreBinding {
             blockedReason: input.raw.action != ImageGenerationAction.generate
                 ? 'explore_requires_generate_mode'
                 : input.blockedReason,
+            opusPriceCheck: input.opusPriceCheck,
           );
         },
         approve: base.approve,
@@ -90,7 +94,19 @@ class NaiAgentExploreBinding {
               if (c.generation.status == ExploreCandidateGenerationStatus.done)
                 c.id,
           };
-          void beforeGenerate(ImageParams params) {
+          const insufficient = NaiAgentToolError(
+            'insufficient_balance',
+            'Insufficient balance for next candidate',
+          );
+          NaiAgentToolError? billingStop;
+          Never stopForBilling(NaiAgentToolError reason) {
+            billingStop = reason;
+            throw reason;
+          }
+
+          /// Throws for anything that stops the next candidate except what
+          /// the cached account says; returns the next candidate's input.
+          NaiAgentGenerationInput checkNext() {
             if (!alive()) {
               throw const NaiAgentToolError('closed', 'Explore owner closed');
             }
@@ -125,15 +141,41 @@ class NaiAgentExploreBinding {
                 'Settings, recipe or account changed; stopped before the next request',
               );
             }
-            if ((current.billing['per_request_anlas'] as num) >
-                    (input.billing['per_request_anlas'] as num) ||
-                current.balance == null ||
-                current.balance! < current.estimate) {
-              throw const NaiAgentToolError(
-                'insufficient_balance',
-                'Insufficient balance for next candidate',
+            return current;
+          }
+
+          void validatePrice(NaiAgentGenerationInput current) {
+            final quotedPrice = input.billing['per_request_anlas'] as num;
+            final currentPrice = current.billing['per_request_anlas'] as num;
+            if (currentPrice > quotedPrice) {
+              stopForBilling(
+                NaiAgentToolError(
+                  'quote_changed',
+                  'The next candidate costs more than approved. Prepare a new quote to continue.',
+                  {'quoted_anlas': quotedPrice, 'current_anlas': currentPrice},
+                ),
               );
             }
+            if (current.balance == null ||
+                current.balance! < current.estimate) {
+              stopForBilling(insufficient);
+            }
+          }
+
+          // Roll first. Recheck the actual candidate before validating its
+          // approved price and the available balance.
+          FutureOr<void> beforeGenerate(ImageParams params) {
+            final next = checkNext();
+            if (!bridgeOpusPriceCheck(ref, params).needsRefresh(
+              balanceWouldBlock:
+                  next.balance == null || next.balance! < next.estimate,
+            )) {
+              validatePrice(next);
+              return null;
+            }
+            return refreshBalanceBeforeBlocking(
+              ref,
+            ).then((_) => validatePrice(checkNext()));
           }
 
           final Future<bool> completion = switch (config['mode']) {
@@ -176,6 +218,9 @@ class NaiAgentExploreBinding {
                   <ExploreCandidate>[];
               return {
                 'status': started ? run?.status.name : 'not_started',
+                if (run?.status == ExploreRunStatus.paused &&
+                    billingStop != null)
+                  'stop_reason': billingStop!.toJson(),
                 'explore_id': input.sourceImageId,
                 'done_count': run?.generatedCount,
                 'failed_count': run?.failedCount,

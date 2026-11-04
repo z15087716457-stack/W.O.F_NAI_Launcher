@@ -141,6 +141,19 @@ class _StyleExploreWiringState extends ConsumerState<StyleExploreWiring> {
     activeRunId: _manualRunId,
   );
 
+  /// Quote the actual one-image candidate on the latest eligible Opus quota.
+  Future<void> _recheckCandidatePrice({bool checkLow = true}) async {
+    final draft = ref.read(generationParamsNotifierProvider);
+    final workflow = ref.read(draftImageWorkflowProvider);
+    final recheck = recheckOpusPriceForAction(
+      ProviderScope.containerOf(context, listen: false),
+      (subscription) =>
+          styleExploreCandidateCost(draft, workflow, subscription),
+      checkLow: checkLow,
+    );
+    if (recheck != null) await recheck;
+  }
+
   Future<void> _children(
     String id,
     String lineId,
@@ -160,6 +173,8 @@ class _StyleExploreWiringState extends ConsumerState<StyleExploreWiring> {
       final parentSet = family == null
           ? null
           : original.parentSetById(family.activeParentSetId);
+      await _recheckCandidatePrice();
+      if (!mounted) return;
       final cost = ref.read(styleExploreCostForCountProvider(count));
       final confirmed = await AssetProtectionGuard.confirmHighAnlasCost(
         context: context,
@@ -168,6 +183,9 @@ class _StyleExploreWiringState extends ConsumerState<StyleExploreWiring> {
       );
       if (!confirmed || !mounted) return;
       final latest = await backend.run(id);
+      if (!valid()) throw StateError(l10n.bridge_conflict);
+      await _recheckCandidatePrice(checkLow: false);
+      if (!mounted) return;
       if (!valid() ||
           latest.familyById(lineId) != family ||
           (family != null &&
@@ -204,6 +222,8 @@ class _StyleExploreWiringState extends ConsumerState<StyleExploreWiring> {
           (resume && original.status != ExploreRunStatus.paused)) {
         return;
       }
+      await _recheckCandidatePrice();
+      if (!mounted) return;
       final cost = ref.read(styleExploreCostForCountProvider(targets.length));
       final confirmed = await AssetProtectionGuard.confirmHighAnlasCost(
         context: context,
@@ -212,6 +232,9 @@ class _StyleExploreWiringState extends ConsumerState<StyleExploreWiring> {
       );
       if (!confirmed || !mounted) return;
       final latest = await backend.run(id);
+      if (!valid()) throw StateError(l10n.bridge_conflict);
+      await _recheckCandidatePrice(checkLow: false);
+      if (!mounted) return;
       if (!valid() ||
           latest.status != original.status ||
           !targets.every(

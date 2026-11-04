@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/presentation/ui/kit/ui_keycap.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_contract.dart';
+import 'package:nai_launcher/presentation/ui/kit/ui_colors.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_parts.dart'
     show GenTokenBar;
 import 'package:nai_launcher/presentation/ui/gen/gen_fixture.dart';
@@ -742,6 +743,28 @@ void main() {
   });
 
   group('生成', () {
+    testWidgets(
+      'an insufficient balance makes the price red and leaves Generate enabled',
+      (t) async {
+        await pump(
+          t,
+          GenFixture.view().copyWith(
+            generate: const GenGenerateData(
+              label: 'Generate',
+              cost: 20,
+              insufficient: true,
+            ),
+          ),
+        );
+        final badge = find.byKey(const Key('gen-cost'));
+        final decoration =
+            t.widget<Container>(badge).decoration! as BoxDecoration;
+        expect(decoration.color, t.element(badge).ui.error);
+        await tapKey(t, 'gen-generate');
+        expect(r.called('onGenerate'), isTrue);
+      },
+    );
+
     testWidgets('就绪点生成，生成中点停止', (t) async {
       await pump(t);
       await tapKey(t, 'gen-generate');

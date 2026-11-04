@@ -17,6 +17,7 @@ import 'package:nai_launcher/data/datasources/remote/nai_image_enhancement_api_s
 import 'package:nai_launcher/data/datasources/remote/nai_image_generation_api_service.dart';
 import 'package:nai_launcher/data/models/image/image_params.dart';
 import 'package:nai_launcher/data/models/vibe/vibe_reference.dart';
+import '../../../helpers/novelai_billing.dart';
 
 void main() {
   for (final streamed in [false, true]) {
@@ -32,8 +33,13 @@ void main() {
           final endpoint = NaiApiEndpointService();
           final service = NAIImageGenerationApiService(
             dio,
-            NAIImageEnhancementApiService(dio, endpoint),
+            NAIImageEnhancementApiService(
+              dio,
+              endpointService: endpoint,
+              ledger: unrecordedLedger(),
+            ),
             endpoint,
+            ledger: unrecordedLedger(),
           );
           final source = _solidPng(
             width: 256,
@@ -181,8 +187,13 @@ void main() {
       final endpoint = NaiApiEndpointService();
       final service = NAIImageGenerationApiService(
         dio,
-        NAIImageEnhancementApiService(dio, endpoint),
+        NAIImageEnhancementApiService(
+          dio,
+          endpointService: endpoint,
+          ledger: unrecordedLedger(),
+        ),
         endpoint,
+        ledger: unrecordedLedger(),
       );
       final result = service
           .generateImageStream(const ImageParams(prompt: 'test'))
@@ -212,8 +223,13 @@ void main() {
         final endpoint = NaiApiEndpointService();
         final service = NAIImageGenerationApiService(
           dio,
-          NAIImageEnhancementApiService(dio, endpoint),
+          NAIImageEnhancementApiService(
+            dio,
+            endpointService: endpoint,
+            ledger: unrecordedLedger(),
+          ),
           endpoint,
+          ledger: unrecordedLedger(),
         );
         final source = _solidPng(width: 256, height: 256, r: 10, g: 20, b: 30);
         final params = ImageParams(
@@ -279,8 +295,13 @@ void main() {
         final endpoint = NaiApiEndpointService();
         final service = NAIImageGenerationApiService(
           dio,
-          NAIImageEnhancementApiService(dio, endpoint),
+          NAIImageEnhancementApiService(
+            dio,
+            endpointService: endpoint,
+            ledger: unrecordedLedger(),
+          ),
           endpoint,
+          ledger: unrecordedLedger(),
         );
         final source = _solidPng(width: 256, height: 256, r: 10, g: 20, b: 30);
         final mask = _rectMaskPng(
@@ -356,8 +377,13 @@ void main() {
     final endpointService = NaiApiEndpointService();
     final service = NAIImageGenerationApiService(
       dio,
-      NAIImageEnhancementApiService(dio, endpointService),
+      NAIImageEnhancementApiService(
+        dio,
+        endpointService: endpointService,
+        ledger: unrecordedLedger(),
+      ),
       endpointService,
+      ledger: unrecordedLedger(),
     );
 
     final first = service.generateImage(
@@ -405,8 +431,13 @@ void main() {
       final endpointService = NaiApiEndpointService();
       final service = NAIImageGenerationApiService(
         dio,
-        NAIImageEnhancementApiService(dio, endpointService),
+        NAIImageEnhancementApiService(
+          dio,
+          endpointService: endpointService,
+          ledger: unrecordedLedger(),
+        ),
         endpointService,
+        ledger: unrecordedLedger(),
       );
 
       final first = service
@@ -460,8 +491,13 @@ void main() {
       final endpointService = NaiApiEndpointService();
       final service = NAIImageGenerationApiService(
         dio,
-        NAIImageEnhancementApiService(dio, endpointService),
+        NAIImageEnhancementApiService(
+          dio,
+          endpointService: endpointService,
+          ledger: unrecordedLedger(),
+        ),
         endpointService,
+        ledger: unrecordedLedger(),
       );
       final source = _solidPng(width: 256, height: 256, r: 10, g: 20, b: 30);
       final mask = _rectMaskPng(
@@ -516,8 +552,13 @@ void main() {
     final endpointService = NaiApiEndpointService();
     final service = NAIImageGenerationApiService(
       dio,
-      NAIImageEnhancementApiService(dio, endpointService),
+      NAIImageEnhancementApiService(
+        dio,
+        endpointService: endpointService,
+        ledger: unrecordedLedger(),
+      ),
       endpointService,
+      ledger: unrecordedLedger(),
     );
 
     final stream = service.generateImageStream(
@@ -545,8 +586,13 @@ void main() {
     final endpointService = NaiApiEndpointService();
     final service = NAIImageGenerationApiService(
       dio,
-      NAIImageEnhancementApiService(dio, endpointService),
+      NAIImageEnhancementApiService(
+        dio,
+        endpointService: endpointService,
+        ledger: unrecordedLedger(),
+      ),
       endpointService,
+      ledger: unrecordedLedger(),
     );
 
     final chunksFuture = service
@@ -583,8 +629,13 @@ void main() {
     final endpointService = NaiApiEndpointService();
     final service = NAIImageGenerationApiService(
       dio,
-      NAIImageEnhancementApiService(dio, endpointService),
+      NAIImageEnhancementApiService(
+        dio,
+        endpointService: endpointService,
+        ledger: unrecordedLedger(),
+      ),
       endpointService,
+      ledger: unrecordedLedger(),
     );
 
     final chunksFuture = service
@@ -617,8 +668,13 @@ void main() {
     final endpointService = NaiApiEndpointService();
     final service = NAIImageGenerationApiService(
       dio,
-      NAIImageEnhancementApiService(dio, endpointService),
+      NAIImageEnhancementApiService(
+        dio,
+        endpointService: endpointService,
+        ledger: unrecordedLedger(),
+      ),
       endpointService,
+      ledger: unrecordedLedger(),
     );
 
     final chunksFuture = service
@@ -651,8 +707,13 @@ void main() {
       final endpointService = NaiApiEndpointService();
       final service = NAIImageGenerationApiService(
         dio,
-        NAIImageEnhancementApiService(dio, endpointService),
+        NAIImageEnhancementApiService(
+          dio,
+          endpointService: endpointService,
+          ledger: unrecordedLedger(),
+        ),
         endpointService,
+        ledger: unrecordedLedger(),
       );
       final source = _solidPng(width: 256, height: 256, r: 10, g: 20, b: 30);
       final mask = _rectMaskPng(
@@ -728,8 +789,13 @@ void main() {
       final endpointService = NaiApiEndpointService();
       final service = NAIImageGenerationApiService(
         dio,
-        NAIImageEnhancementApiService(dio, endpointService),
+        NAIImageEnhancementApiService(
+          dio,
+          endpointService: endpointService,
+          ledger: unrecordedLedger(),
+        ),
         endpointService,
+        ledger: unrecordedLedger(),
       );
 
       final source = _solidPng(width: 256, height: 256, r: 10, g: 20, b: 30);
@@ -806,8 +872,13 @@ void main() {
     final endpointService = NaiApiEndpointService();
     final service = NAIImageGenerationApiService(
       dio,
-      NAIImageEnhancementApiService(dio, endpointService),
+      NAIImageEnhancementApiService(
+        dio,
+        endpointService: endpointService,
+        ledger: unrecordedLedger(),
+      ),
       endpointService,
+      ledger: unrecordedLedger(),
     );
 
     final source = _solidPng(width: 256, height: 256, r: 10, g: 20, b: 30);
@@ -887,8 +958,13 @@ void main() {
       );
     final service = NAIImageGenerationApiService(
       dio,
-      NAIImageEnhancementApiService(dio, endpointService),
+      NAIImageEnhancementApiService(
+        dio,
+        endpointService: endpointService,
+        ledger: unrecordedLedger(),
+      ),
       endpointService,
+      ledger: unrecordedLedger(),
     );
 
     final generation = service

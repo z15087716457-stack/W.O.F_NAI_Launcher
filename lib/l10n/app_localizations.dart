@@ -18773,7 +18773,7 @@ abstract class AppLocalizations {
   /// No description provided for @stats_anlasNote.
   ///
   /// In en, this message translates to:
-  /// **'Recorded when your balance drops, including upscales and Vibe encoding; only the last 90 days are kept'**
+  /// **'Recorded per request at the price shown in the app, including upscales and Vibe encoding; only the last 90 days are kept'**
   String get stats_anlasNote;
 
   /// No description provided for @stats_aspectTitle.

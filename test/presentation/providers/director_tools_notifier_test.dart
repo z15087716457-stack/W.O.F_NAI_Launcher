@@ -11,7 +11,10 @@ import 'package:nai_launcher/data/models/image/image_operation.dart';
 import 'package:nai_launcher/data/models/image/image_params.dart';
 import 'package:nai_launcher/presentation/providers/director_tools_notifier.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
+import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/history_batch.dart';
+
+import '../../helpers/balance_requests.dart';
 
 class _Api extends Mock implements NAIImageEnhancementApiService {}
 
@@ -263,4 +266,58 @@ void main() {
       verifyZeroInteractions(api);
     },
   );
+  // The director page runs a tool with runTool; the Agent's image tools and
+  // the canvas run one on a frozen image with processGenerated.
+  for (final entry in ['runTool', 'processGenerated']) {
+    for (final outcome in ['finished', 'failed']) {
+      test('a director tool ($entry), $outcome, asks nothing for the '
+          'balance', () async {
+        final balances = BalanceRequests();
+        final billed = ProviderContainer(
+          overrides: [
+            naiImageEnhancementApiServiceProvider.overrideWithValue(api),
+            imageGenerationNotifierProvider.overrideWith(_Generation.new),
+            generationParamsNotifierProvider.overrideWith(_Params.new),
+            ...realBalanceOverrides(balances),
+          ],
+        );
+        addTearDown(billed.dispose);
+        // The real balance notifier, logged in, read as the screens keep it.
+        expect(billed.read(subscriptionNotifierProvider).balance, 5000);
+        when(
+          () => api.augmentImages(
+            any(),
+            reqType: 'bg-removal',
+            prompt: null,
+            defry: 0,
+            cancelToken: any(named: 'cancelToken'),
+          ),
+        ).thenAnswer(
+          (_) async => outcome == 'failed'
+              ? throw StateError('offline fixture error')
+              : [_png(16)],
+        );
+        final controller = billed.read(directorToolsNotifierProvider.notifier);
+        if (entry == 'runTool') {
+          controller.addSource(_png(24));
+          controller.selectTool(DirectorToolType.removeBackground);
+          await controller.runTool();
+          expect(
+            billed.read(directorToolsNotifierProvider).runs,
+            hasLength(outcome == 'failed' ? 0 : 1),
+          );
+        } else {
+          final bytes = await controller.processGenerated(
+            _png(24),
+            tool: DirectorToolType.removeBackground,
+          );
+          expect(bytes, outcome == 'failed' ? isNull : hasLength(1));
+        }
+        // Before: the balance was asked 0.5 s after every billed tool run,
+        // a failed one too.
+        await Future<void>.delayed(afterBilledWork);
+        expect(balances.requests, 0);
+      });
+    }
+  }
 }

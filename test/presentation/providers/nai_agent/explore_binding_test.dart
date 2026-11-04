@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 import 'package:image/image.dart' as img;
+import 'package:nai_launcher/core/constants/api_constants.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/core/nai_agent/agent_tool.dart';
 import 'package:nai_launcher/core/nai_agent/generation_tools.dart';
@@ -14,11 +15,14 @@ import 'package:nai_launcher/core/storage/prompt_block_storage.dart';
 import 'package:nai_launcher/core/storage/style_explore_run_storage.dart';
 import 'package:nai_launcher/data/models/image/image_params.dart';
 import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
+import 'package:nai_launcher/data/datasources/remote/nai_user_info_api_service.dart';
 import 'package:nai_launcher/data/models/style_explore/explore_run.dart';
+import 'package:nai_launcher/data/models/user/user_subscription.dart';
 import 'package:nai_launcher/data/repositories/character_prompt_repository.dart';
 import 'package:nai_launcher/data/repositories/prompt_block_repository.dart';
 import 'package:nai_launcher/data/services/explore_run_image_store.dart';
 import 'package:nai_launcher/data/services/vibe_library_storage_service.dart';
+import 'package:nai_launcher/presentation/providers/account_manager_provider.dart';
 import 'package:nai_launcher/presentation/providers/auth_provider.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
 import 'package:nai_launcher/presentation/providers/krita/bridge_draft_snapshot.dart';
@@ -28,14 +32,19 @@ import 'package:nai_launcher/presentation/providers/prompt_block_library_provide
 import 'package:nai_launcher/presentation/providers/pill_workspace_provider.dart';
 import 'package:nai_launcher/presentation/providers/style_explore/explore_run_provider.dart';
 import 'package:nai_launcher/presentation/providers/style_explore/explore_run_runner.dart';
+import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
 import '../krita/agent_bridge_draft_test.dart'
     show MemoryDraftSettings, MemoryCharacters;
 import 'generation_binding_test.dart'
     show
+        GenerationTestAccounts,
         GenerationTestAuth,
+        GenerationTestBalances,
         ControlledAgentGeneration,
         GenerationTestVibes,
-        GenerationTestLibrary;
+        GenerationTestLibrary,
+        generationTestOpus,
+        generationTestSubscription;
 
 final _draft = Provider(
   (ref) =>
@@ -51,6 +60,7 @@ void main() {
   late Uint8List pixels;
   late List<ImageParams> generated;
   late ExploreGenerateFn generate;
+  late GenerationTestBalances balances;
   setUp(() async {
     root = await Directory.systemTemp.createTemp('agent-exploration-');
     workspace = await Directory('${root.path}/workspace').create();
@@ -63,6 +73,7 @@ void main() {
     await runs.init();
     pixels = Uint8List.fromList(img.encodePng(img.Image(width: 6, height: 4)));
     generated = [];
+    balances = GenerationTestBalances();
     generate = (params) async => ExploreGenerationResult(
       imageBytes: pixels,
       seed: 42,
@@ -72,6 +83,8 @@ void main() {
     );
     container = ProviderContainer(
       overrides: [
+        naiUserInfoApiServiceProvider.overrideWithValue(balances),
+        accountManagerNotifierProvider.overrideWith(GenerationTestAccounts.new),
         localStorageServiceProvider.overrideWithValue(MemoryDraftSettings()),
         characterPromptRepositoryProvider.overrideWithValue(MemoryCharacters()),
         promptBlockRepositoryProvider.overrideWithValue(
@@ -329,6 +342,159 @@ void main() {
       expect(q['quote_id'], isNot(owned['quote_id']));
     },
   );
+  group('the balance before each candidate', () {
+    // A paying account: every candidate costs Anlas. The screens keep the
+    // balance notifier; it moves only on a click, a login or a switch.
+    setUp(() {
+      (container.read(authNotifierProvider.notifier) as GenerationTestAuth)
+          .setAuth(
+            AuthState(
+              status: AuthStatus.authenticated,
+              accountId: 'synthetic-account',
+              displayName: 'Synthetic account',
+              subscriptionInfo: generationTestSubscription(100000),
+            ),
+          );
+      expect(container.read(subscriptionNotifierProvider).balance, 100000);
+    });
+
+    /// The first candidate's generation; the user clicks the balance
+    /// meanwhile and gets [clicked]; the next request answers [then].
+    void clickDuringFirst(int clicked, int then) {
+      final plain = generate;
+      generate = (params) async {
+        if (generated.length == 1) {
+          balances.balance = clicked;
+          await container
+              .read(subscriptionNotifierProvider.notifier)
+              .refreshBalance();
+          expect(container.read(subscriptionNotifierProvider).balance, clicked);
+          balances.balance = then;
+        }
+        return plain(params);
+      };
+    }
+
+    test('a low cached one is asked once, and the fresh one goes on', () async {
+      final id = await create(2);
+      final q = await quote(id);
+      expect(q['per_request_anlas'], greaterThan(1));
+      clickDuringFirst(1, 100000);
+      final result = await runApproved(id, q);
+      expect(result['done_count'], 2);
+      expect(generated, hasLength(2));
+      // The click, then one ask before the second candidate.
+      expect(balances.requests, 2);
+    });
+
+    test('still too low after asking: the exploration stops there', () async {
+      final id = await create(2);
+      final q = await quote(id);
+      clickDuringFirst(1, 1);
+      final result = await runApproved(id, q);
+      expect(result['done_count'], 1);
+      expect(generated, hasLength(1));
+      expect(balances.requests, 2);
+      expect(result['stop_reason']?['code'], 'insufficient_balance');
+    });
+
+    test('enough cached: no candidate asks', () async {
+      final id = await create(3);
+      final result = await runApproved(id, await quote(id));
+      expect(result['done_count'], 3);
+      expect(balances.requests, 0);
+    });
+  });
+
+  group('an Opus-free candidate on a quota nearly used up', () {
+    // Each candidate, a one-image V5 request, is free on the Opus quota; the
+    // cached quota is at 3 %, and moves only on a click, a login, a switch or
+    // these asks.
+    setUp(() {
+      container
+          .read(generationParamsNotifierProvider.notifier)
+          .updateModel(ImageModels.animeDiffusionV5Full, persist: false);
+      (container.read(authNotifierProvider.notifier) as GenerationTestAuth)
+          .setAuth(
+            AuthState(
+              status: AuthStatus.authenticated,
+              accountId: 'synthetic-account',
+              displayName: 'Synthetic account',
+              subscriptionInfo: generationTestOpus(const OpusUsage(percent: 3)),
+            ),
+          );
+      // The screens keep the balance notifier, which the quote reads.
+      expect(
+        container
+            .read(subscriptionNotifierProvider)
+            .subscription
+            ?.opusUsagePercent,
+        3,
+      );
+      // The server still has 2 % left when asked.
+      balances.answer = generationTestOpus(const OpusUsage(percent: 2));
+    });
+
+    test(
+      'a depleted quote can recover and send the approved candidates at zero cost',
+      () async {
+        (container.read(authNotifierProvider.notifier) as GenerationTestAuth)
+            .setAuth(
+              AuthState(
+                status: AuthStatus.authenticated,
+                accountId: 'recovered-account',
+                subscriptionInfo: generationTestOpus(
+                  const OpusUsage(isNegative: true),
+                ),
+              ),
+            );
+        container.read(subscriptionNotifierProvider);
+        balances.answer = generationTestOpus(const OpusUsage(percent: 50));
+        final id = await create(2);
+        final estimate = await quote(id);
+        expect(estimate['per_request_anlas'], 0);
+        expect(balances.requests, 1);
+        final result = await runApproved(id, estimate);
+        expect(result['done_count'], 2);
+        expect(balances.requests, 1);
+      },
+    );
+
+    test('the quote and each candidate ask once while it lasts', () async {
+      final id = await create(2);
+      final q = await quote(id);
+      expect(q['per_request_anlas'], 0);
+      expect(balances.requests, 1);
+      final result = await runApproved(id, q);
+      expect(result['done_count'], 2);
+      // Before: none at all, the quote and both candidates priced free.
+      expect(balances.requests, 3);
+    });
+
+    test('run out after the first: the exploration stops before the next '
+        'one is billed', () async {
+      final id = await create(3);
+      final q = await quote(id);
+      final plain = generate;
+      generate = (params) {
+        // The first candidate takes the last of the quota.
+        balances.answer = generationTestOpus(const OpusUsage(isNegative: true));
+        return plain(params);
+      };
+      final result = await runApproved(id, q);
+      // Before: all three sent, the last two billed against a free quote.
+      expect(result['done_count'], 1);
+      expect(generated, hasLength(1));
+      expect(result['status'], 'paused');
+      final reason = result['stop_reason'];
+      expect(reason?['code'], 'quote_changed');
+      expect(reason?['quoted_anlas'], 0);
+      expect(reason?['current_anlas'], greaterThan(0));
+      expect(container.read(subscriptionNotifierProvider).balance, 100000);
+      expect(balances.requests, 3);
+    });
+  });
+
   test('stale ownership cannot pause or cancel a later manual run', () async {
     final id = await create(1);
     await runApproved(id, await quote(id));

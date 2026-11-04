@@ -52,8 +52,6 @@ class _Save extends ImageSaveSettingsNotifier {
 class _Subscription extends SubscriptionNotifier {
   @override
   SubscriptionState build() => const SubscriptionState.initial();
-  @override
-  void schedulePostBillingRefresh({Duration delay = Duration.zero}) {}
 }
 
 class _Models extends ComfyUISeedvr2Models {

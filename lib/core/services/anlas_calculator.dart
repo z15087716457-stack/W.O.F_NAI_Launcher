@@ -5,6 +5,7 @@ import 'effective_vibe_references.dart';
 import '../../data/models/image/image_params.dart';
 import '../constants/api_constants.dart';
 import '../constants/model_spec.dart';
+import '../utils/max_enhance_utils.dart';
 
 /// Anlas 消耗计算器
 ///
@@ -105,6 +106,46 @@ class AnlasCalculator {
       extraPerSampleCost: resolvePreciseReferenceExtraCost(params),
       extraPerRequestCost: resolveVibeReferenceExtraCost(params),
       oneTimeCost: resolveVibeEncodingCost(params),
+    );
+  }
+
+  /// 按请求本身的参数计价：[batchCount] 次请求、每次 [batchSize] 张，另加一次性的
+  /// [oneTimeCost]（Vibe 编码）。Max 增强按服务端放大后的目标尺寸算，重绘按聚焦
+  /// 区域算，强度随动作取。Agent／Krita 桥接报价和按次记账
+  /// （`AnlasRequestLedger`）都用它；生图页按工作流算的价对它发出的同一个请求
+  /// 结果相同。
+  static int requestCostForParams(
+    ImageParams params, {
+    int batchCount = 1,
+    int batchSize = 1,
+    int oneTimeCost = 0,
+    bool isOpus = false,
+    bool opusUsageExhausted = false,
+  }) {
+    final requestSize =
+        params.upscaledEnhance &&
+            MaxEnhanceMath.isEligible(params.model, params.width, params.height)
+        ? MaxEnhanceMath.targetSize(params.width, params.height)
+        : params.effectiveInpaintRequestSize;
+    return calculateRequestCost(
+      width: requestSize.width,
+      height: requestSize.height,
+      steps: params.steps,
+      batchCount: batchCount,
+      batchSize: batchSize,
+      smea: params.effectiveSmea,
+      smeaDyn: params.effectiveSmeaDyn,
+      model: params.model,
+      subscriptionTier: isOpus ? opusTier : 0,
+      strength: switch (params.action) {
+        ImageGenerationAction.generate => 1.0,
+        ImageGenerationAction.img2img => params.strength,
+        ImageGenerationAction.infill => params.inpaintStrength,
+      },
+      extraPerSampleCost: resolvePreciseReferenceExtraCost(params),
+      extraPerRequestCost: resolveVibeReferenceExtraCost(params),
+      oneTimeCost: oneTimeCost,
+      opusUsageExhausted: opusUsageExhausted,
     );
   }
 

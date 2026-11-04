@@ -5832,7 +5832,7 @@
     }
   },
   "stats_anlasPeak": "最多",
-  "stats_anlasNote": "残高が減ったときに記録（アップスケールや Vibe エンコードを含む）。直近 90 日のみ保持",
+  "stats_anlasNote": "リクエストごとにアプリの表示価格で記録（アップスケールや Vibe エンコードを含む）。直近 90 日のみ保持",
   "stats_aspectTitle": "画面サイズ",
   "stats_aspectHint": "実際のサイズ",
   "stats_aspectOrientation": "向き",
