@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:io';
 
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -45,15 +44,16 @@ class CanvasUpscaleButton extends ConsumerWidget {
     final models = isCloud
         ? null
         : ref.watch(localUpscaleModelsProvider).valueOrNull;
+    final platform = ref.watch(localUpscalePlatformProvider);
     final supported = isCloud
         ? cost >= 0
-        : Platform.isWindows &&
-              (models?.any(
-                    (model) =>
-                        model.installed &&
-                        model.id == workflow.upscale.localModel,
-                  ) ??
-                  false);
+        : models?.any(
+                (model) =>
+                    model.installed &&
+                    model.id == workflow.upscale.localModel &&
+                    platform.supports(model.method),
+              ) ??
+              false;
     final locked =
         generating || ref.watch(advancedUpscaleInstallProvider).running;
     final enabled =

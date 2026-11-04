@@ -594,6 +594,34 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets(
+    'macOS: Cmd+[ / Cmd+] go back and forward like Finder and Safari',
+    (tester) async {
+      await _pump(tester, initialTag: '1girl');
+      tester
+          .widget<WikiLinkedBody>(find.byType(WikiLinkedBody))
+          .onTagTap(tags[1]);
+      await tester.pumpAndSettle();
+      tester
+          .widget<WikiLinkedBody>(find.byType(WikiLinkedBody))
+          .onTagTap(tags[2]);
+      await tester.pumpAndSettle();
+      Future<void> cmd(LogicalKeyboardKey key) async {
+        await tester.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
+        await tester.sendKeyEvent(key);
+        await tester.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+        await tester.pumpAndSettle();
+      }
+
+      await cmd(LogicalKeyboardKey.bracketLeft);
+      expect(find.byKey(const Key('wiki-body-solo')), findsOneWidget);
+      await cmd(LogicalKeyboardKey.bracketRight);
+      expect(find.byKey(const Key('wiki-body-1boy')), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.macOS),
+  );
+
   testWidgets('arrow selection is not remembered and modifiers are ignored', (
     tester,
   ) async {

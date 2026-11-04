@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/utils/platform_shortcut_text.dart';
 import 'ui_colors.dart';
 import 'ui_text.dart';
 
@@ -14,7 +15,7 @@ enum UiKeycapStyle {
   tip,
 }
 
-/// 一组键帽，例如 `['Ctrl', '1']`，间距 3。
+/// 一组键帽，例如 `['Ctrl', '1']`，间距 3。macOS 上按 Mac 写法排（⇧⌘T，见 [platformKeyLabels]）。
 class UiKeycaps extends StatelessWidget {
   const UiKeycaps(
     this.keys, {
@@ -31,10 +32,13 @@ class UiKeycaps extends StatelessWidget {
   Widget build(BuildContext context) => Row(
     mainAxisSize: MainAxisSize.min,
     spacing: gap,
-    children: [for (final k in keys) UiKeycap(k, style: style)],
+    children: [
+      for (final k in platformKeyLabels(keys)) UiKeycap(k, style: style),
+    ],
   );
 }
 
+/// 一个键帽。键名里的 Ctrl 指主修饰键，macOS 上显示成 ⌘（见 [platformKeyLabel]）。
 class UiKeycap extends StatelessWidget {
   const UiKeycap(this.label, {super.key, this.style = UiKeycapStyle.normal});
 
@@ -71,7 +75,7 @@ class UiKeycap extends StatelessWidget {
         widthFactor: 1,
         heightFactor: 1,
         child: Text(
-          label,
+          platformKeyLabel(label),
           style: UiText.mono(
             compact ? 10 : 10.5,
             weight: FontWeight.w500,

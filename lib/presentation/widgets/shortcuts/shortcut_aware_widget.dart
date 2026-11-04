@@ -2,8 +2,12 @@ import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/shortcuts/default_shortcuts.dart';
+import '../../../core/shortcuts/shortcut_manager.dart';
 import '../../../core/shortcuts/shortcut_config.dart';
+import '../../../core/utils/desktop_platform.dart';
 import '../../providers/shortcuts_provider.dart';
+import '../common/text_editing_shortcuts.dart';
+import 'page_focus.dart';
 
 /// 快捷键感知包装器
 /// 自动处理快捷键的注册和注销
@@ -39,395 +43,89 @@ class ShortcutAwareWidget extends ConsumerStatefulWidget {
 }
 
 class _ShortcutAwareWidgetState extends ConsumerState<ShortcutAwareWidget> {
-  late FocusNode _focusNode;
-
-  @override
-  void initState() {
-    super.initState();
-    _focusNode = widget.focusNode ?? FocusNode();
-  }
-
-  @override
-  void dispose() {
-    if (widget.focusNode == null) {
-      _focusNode.dispose();
-    }
-    super.dispose();
-  }
+  // Keep the subtree (and its focus/navigator) alive while the saved bindings
+  // load or a user edits a shortcut. Flutter's Shortcuts refreshes its map.
+  late final ShortcutConfig _defaults = ShortcutConfig.createDefault();
 
   @override
   Widget build(BuildContext context) {
-    // 从 Provider 读取用户配置
-    final config = ref.watch(shortcutConfigNotifierProvider);
-
-    return config.when(
-      data: (config) => _buildWithConfig(context, config),
-      loading: () => _buildWithDefaultShortcuts(),
-      error: (_, __) => _buildWithDefaultShortcuts(),
-    );
-  }
-
-  /// 使用用户配置构建
-  Widget _buildWithConfig(BuildContext context, ShortcutConfig config) {
-    // 如果禁用快捷键，使用 FocusScope 包裹子组件以确保焦点管理一致
-    if (!config.enableShortcuts) {
-      return FocusScope(autofocus: widget.autofocus, child: widget.child);
-    }
-
-    // 构建快捷键映射（使用 Shortcuts widget 的 Map 格式）
-    final shortcutsMap = <LogicalKeySet, Intent>{};
-
-    for (final entry in widget.shortcuts.entries) {
-      final shortcutId = entry.key;
-
-      // 从用户配置获取快捷键
-      final binding = config.bindings[shortcutId];
-      if (binding == null || !binding.enabled) continue;
-
-      // 检查上下文
-      if (binding.context != ShortcutContext.global &&
-          binding.context != widget.contextType) {
-        continue;
-      }
-
-      final shortcut = binding.effectiveShortcut;
-      if (shortcut == null || shortcut.isEmpty) continue;
-
-      final parsed = ShortcutParser.parse(shortcut);
-      if (parsed == null) continue;
-
-      // 创建 LogicalKeySet
-      final keys = <LogicalKeyboardKey>{};
-      if (parsed.modifiers.contains(ShortcutModifier.control)) {
-        keys.add(LogicalKeyboardKey.control);
-      }
-      if (parsed.modifiers.contains(ShortcutModifier.alt)) {
-        keys.add(LogicalKeyboardKey.alt);
-      }
-      if (parsed.modifiers.contains(ShortcutModifier.shift)) {
-        keys.add(LogicalKeyboardKey.shift);
-      }
-      if (parsed.modifiers.contains(ShortcutModifier.meta)) {
-        keys.add(LogicalKeyboardKey.meta);
-      }
-
-      final mainKey = _getLogicalKey(parsed.key);
-      if (mainKey == null) continue;
-      keys.add(mainKey);
-
-      if (keys.isEmpty) continue;
-
-      // 创建唯一的 Intent
-      final intent = _ShortcutIntent(shortcutId, entry.value);
-      shortcutsMap[LogicalKeySet.fromSet(keys)] = intent;
-    }
-
-    // 如果没有快捷键，直接返回子组件
-    if (shortcutsMap.isEmpty) {
-      return widget.child;
-    }
-
-    // 构建 Actions Map - 只需要注册一次 _ShortcutIntent 的处理
-    final actionsMap = <Type, Action<Intent>>{
-      _ShortcutIntent: CallbackAction<_ShortcutIntent>(
-        onInvoke: (intent) {
-          // Nested Actions share this intent type. Dispatch to the callback
-          // that created the binding, rather than swallowing ancestor actions.
-          intent.callback();
-          return null;
-        },
-      ),
-    };
-
-    // 使用 Shortcuts + Actions + Focus 确保快捷键在整个子树中都能工作
-    // 即使子组件（如 TextField）获得焦点，快捷键也能正常触发
-    // 收集所有生效的快捷键字符串作为 key 的一部分
-    final activeShortcuts = <String>[];
-    for (final entry in widget.shortcuts.entries) {
-      final binding = config.bindings[entry.key];
-      if (binding != null && binding.enabled) {
-        final shortcut = binding.effectiveShortcut;
-        if (shortcut != null && shortcut.isNotEmpty) {
-          activeShortcuts.add('${entry.key}:$shortcut');
+    final config =
+        ref.watch(shortcutConfigNotifierProvider).valueOrNull ?? _defaults;
+    final bindings = <ShortcutActivator, Intent>{};
+    if (config.enableShortcuts) {
+      for (final entry in widget.shortcuts.entries) {
+        final binding = config.bindings[entry.key];
+        if (binding == null ||
+            !binding.enabled ||
+            (binding.context != ShortcutContext.global &&
+                binding.context != widget.contextType)) {
+          continue;
+        }
+        for (final key in AppShortcutManager.activatorsFor(
+          binding.effectiveShortcut,
+        )) {
+          bindings[key] = _ShortcutIntent(
+            entry.value,
+            yieldsToTextField: _yieldsToTextField(key),
+          );
         }
       }
     }
-    activeShortcuts.sort(); // 确保顺序一致
-    final configKey = activeShortcuts.join('|');
-
-    // 关键修复：使用 Shortcuts.manager 并创建新的 ShortcutManager 实例
-    // 因为 Flutter 的 Shortcuts widget 内部会缓存 shortcuts，即使 key 变化也可能不更新
-    // 通过显式创建新的 ShortcutManager，确保快捷键映射总是被正确更新
-    final shortcutManager = ShortcutManager(shortcuts: shortcutsMap);
-
-    return Shortcuts.manager(
-      key: ValueKey('shortcuts_${config.enableShortcuts}_$configKey'),
-      manager: shortcutManager,
+    return Shortcuts(
+      shortcuts: bindings,
       child: Actions(
-        key: ValueKey('actions_${config.enableShortcuts}_$configKey'),
-        actions: actionsMap,
-        child: Focus(
+        actions: {_ShortcutIntent: _ShortcutAction()},
+        child: ShortcutFocusAnchor(
           autofocus: widget.autofocus,
-          skipTraversal: true, // 不参与焦点遍历，只作为快捷键的锚点
+          focusNode: widget.focusNode,
           child: widget.child,
         ),
       ),
     );
   }
+}
 
-  /// 使用默认快捷键构建（加载中或出错时）
-  Widget _buildWithDefaultShortcuts() {
-    final shortcutsMap = <LogicalKeySet, Intent>{};
-
-    for (final entry in widget.shortcuts.entries) {
-      final shortcutId = entry.key;
-
-      // 获取默认快捷键
-      final defaultShortcut = DefaultShortcuts.all[shortcutId];
-      if (defaultShortcut == null) continue;
-
-      final parsed = ShortcutParser.parse(defaultShortcut);
-      if (parsed == null) continue;
-
-      // 检查上下文
-      final shortcutContext = DefaultShortcuts.getContext(shortcutId);
-      if (shortcutContext != ShortcutContext.global &&
-          shortcutContext != widget.contextType) {
-        continue;
-      }
-
-      // 创建 LogicalKeySet
-      final keys = <LogicalKeyboardKey>{};
-      if (parsed.modifiers.contains(ShortcutModifier.control)) {
-        keys.add(LogicalKeyboardKey.control);
-      }
-      if (parsed.modifiers.contains(ShortcutModifier.alt)) {
-        keys.add(LogicalKeyboardKey.alt);
-      }
-      if (parsed.modifiers.contains(ShortcutModifier.shift)) {
-        keys.add(LogicalKeyboardKey.shift);
-      }
-      if (parsed.modifiers.contains(ShortcutModifier.meta)) {
-        keys.add(LogicalKeyboardKey.meta);
-      }
-
-      final mainKey = _getLogicalKey(parsed.key);
-      if (mainKey == null) continue;
-      keys.add(mainKey);
-
-      if (keys.isEmpty) continue;
-
-      // 创建唯一的 Intent
-      final intent = _ShortcutIntent(shortcutId, entry.value);
-      shortcutsMap[LogicalKeySet.fromSet(keys)] = intent;
-    }
-
-    // 如果没有快捷键，直接返回子组件
-    if (shortcutsMap.isEmpty) {
-      return widget.child;
-    }
-
-    // 构建 Actions Map - 只需要注册一次 _ShortcutIntent 的处理
-    final actionsMap = <Type, Action<Intent>>{
-      _ShortcutIntent: CallbackAction<_ShortcutIntent>(
-        onInvoke: (intent) {
-          intent.callback();
-          return null;
-        },
-      ),
-    };
-
-    // 使用 Shortcuts + Actions + Focus 确保快捷键在整个子树中都能工作
-    // 使用 ValueKey 基于默认快捷键哈希值
-    final defaultHash = Object.hash('default', shortcutsMap.hashCode);
-
-    // 关键修复：使用 Shortcuts.manager 并创建新的 ShortcutManager 实例
-    final shortcutManager = ShortcutManager(shortcuts: shortcutsMap);
-
-    return Shortcuts.manager(
-      key: ValueKey('shortcuts_default_$defaultHash'),
-      manager: shortcutManager,
-      child: Actions(
-        key: ValueKey('actions_default_$defaultHash'),
-        actions: actionsMap,
-        child: Focus(
-          autofocus: widget.autofocus,
-          skipTraversal: true,
-          child: widget.child,
-        ),
-      ),
-    );
+/// Leave standard text shortcuts and unmodified printable input to the editor.
+bool _yieldsToTextField(ShortcutActivator key) {
+  if (!usesMacOSConventions || key is! SingleActivator) return false;
+  if (!key.alt && !key.control && key.meta) {
+    if (key.shift) return key.trigger == LogicalKeyboardKey.keyZ;
+    return const [
+      LogicalKeyboardKey.keyA,
+      LogicalKeyboardKey.keyC,
+      LogicalKeyboardKey.keyX,
+      LogicalKeyboardKey.keyV,
+      LogicalKeyboardKey.keyZ,
+      LogicalKeyboardKey.keyY,
+    ].contains(key.trigger);
   }
-
-  LogicalKeyboardKey? _getLogicalKey(ShortcutKey key) {
-    switch (key) {
-      case ShortcutKey.keyA:
-        return LogicalKeyboardKey.keyA;
-      case ShortcutKey.keyB:
-        return LogicalKeyboardKey.keyB;
-      case ShortcutKey.keyC:
-        return LogicalKeyboardKey.keyC;
-      case ShortcutKey.keyD:
-        return LogicalKeyboardKey.keyD;
-      case ShortcutKey.keyE:
-        return LogicalKeyboardKey.keyE;
-      case ShortcutKey.keyF:
-        return LogicalKeyboardKey.keyF;
-      case ShortcutKey.keyG:
-        return LogicalKeyboardKey.keyG;
-      case ShortcutKey.keyH:
-        return LogicalKeyboardKey.keyH;
-      case ShortcutKey.keyI:
-        return LogicalKeyboardKey.keyI;
-      case ShortcutKey.keyJ:
-        return LogicalKeyboardKey.keyJ;
-      case ShortcutKey.keyK:
-        return LogicalKeyboardKey.keyK;
-      case ShortcutKey.keyL:
-        return LogicalKeyboardKey.keyL;
-      case ShortcutKey.keyM:
-        return LogicalKeyboardKey.keyM;
-      case ShortcutKey.keyN:
-        return LogicalKeyboardKey.keyN;
-      case ShortcutKey.keyO:
-        return LogicalKeyboardKey.keyO;
-      case ShortcutKey.keyP:
-        return LogicalKeyboardKey.keyP;
-      case ShortcutKey.keyQ:
-        return LogicalKeyboardKey.keyQ;
-      case ShortcutKey.keyR:
-        return LogicalKeyboardKey.keyR;
-      case ShortcutKey.keyS:
-        return LogicalKeyboardKey.keyS;
-      case ShortcutKey.keyT:
-        return LogicalKeyboardKey.keyT;
-      case ShortcutKey.keyU:
-        return LogicalKeyboardKey.keyU;
-      case ShortcutKey.keyV:
-        return LogicalKeyboardKey.keyV;
-      case ShortcutKey.keyW:
-        return LogicalKeyboardKey.keyW;
-      case ShortcutKey.keyX:
-        return LogicalKeyboardKey.keyX;
-      case ShortcutKey.keyY:
-        return LogicalKeyboardKey.keyY;
-      case ShortcutKey.keyZ:
-        return LogicalKeyboardKey.keyZ;
-      case ShortcutKey.digit0:
-        return LogicalKeyboardKey.digit0;
-      case ShortcutKey.digit1:
-        return LogicalKeyboardKey.digit1;
-      case ShortcutKey.digit2:
-        return LogicalKeyboardKey.digit2;
-      case ShortcutKey.digit3:
-        return LogicalKeyboardKey.digit3;
-      case ShortcutKey.digit4:
-        return LogicalKeyboardKey.digit4;
-      case ShortcutKey.digit5:
-        return LogicalKeyboardKey.digit5;
-      case ShortcutKey.digit6:
-        return LogicalKeyboardKey.digit6;
-      case ShortcutKey.digit7:
-        return LogicalKeyboardKey.digit7;
-      case ShortcutKey.digit8:
-        return LogicalKeyboardKey.digit8;
-      case ShortcutKey.digit9:
-        return LogicalKeyboardKey.digit9;
-      case ShortcutKey.f1:
-        return LogicalKeyboardKey.f1;
-      case ShortcutKey.f2:
-        return LogicalKeyboardKey.f2;
-      case ShortcutKey.f3:
-        return LogicalKeyboardKey.f3;
-      case ShortcutKey.f4:
-        return LogicalKeyboardKey.f4;
-      case ShortcutKey.f5:
-        return LogicalKeyboardKey.f5;
-      case ShortcutKey.f6:
-        return LogicalKeyboardKey.f6;
-      case ShortcutKey.f7:
-        return LogicalKeyboardKey.f7;
-      case ShortcutKey.f8:
-        return LogicalKeyboardKey.f8;
-      case ShortcutKey.f9:
-        return LogicalKeyboardKey.f9;
-      case ShortcutKey.f10:
-        return LogicalKeyboardKey.f10;
-      case ShortcutKey.f11:
-        return LogicalKeyboardKey.f11;
-      case ShortcutKey.f12:
-        return LogicalKeyboardKey.f12;
-      case ShortcutKey.enter:
-        return LogicalKeyboardKey.enter;
-      case ShortcutKey.escape:
-        return LogicalKeyboardKey.escape;
-      case ShortcutKey.space:
-        return LogicalKeyboardKey.space;
-      case ShortcutKey.tab:
-        return LogicalKeyboardKey.tab;
-      case ShortcutKey.backspace:
-        return LogicalKeyboardKey.backspace;
-      case ShortcutKey.delete:
-        return LogicalKeyboardKey.delete;
-      case ShortcutKey.insert:
-        return LogicalKeyboardKey.insert;
-      case ShortcutKey.home:
-        return LogicalKeyboardKey.home;
-      case ShortcutKey.end:
-        return LogicalKeyboardKey.end;
-      case ShortcutKey.pageup:
-        return LogicalKeyboardKey.pageUp;
-      case ShortcutKey.pagedown:
-        return LogicalKeyboardKey.pageDown;
-      case ShortcutKey.arrowup:
-        return LogicalKeyboardKey.arrowUp;
-      case ShortcutKey.arrowdown:
-        return LogicalKeyboardKey.arrowDown;
-      case ShortcutKey.arrowleft:
-        return LogicalKeyboardKey.arrowLeft;
-      case ShortcutKey.arrowright:
-        return LogicalKeyboardKey.arrowRight;
-      case ShortcutKey.comma:
-        return LogicalKeyboardKey.comma;
-      case ShortcutKey.period:
-        return LogicalKeyboardKey.period;
-      case ShortcutKey.slash:
-        return LogicalKeyboardKey.slash;
-      case ShortcutKey.semicolon:
-        return LogicalKeyboardKey.semicolon;
-      case ShortcutKey.quote:
-        return LogicalKeyboardKey.quoteSingle;
-      case ShortcutKey.bracketleft:
-        return LogicalKeyboardKey.bracketLeft;
-      case ShortcutKey.bracketright:
-        return LogicalKeyboardKey.bracketRight;
-      case ShortcutKey.backslash:
-        return LogicalKeyboardKey.backslash;
-      case ShortcutKey.minus:
-        return LogicalKeyboardKey.minus;
-      case ShortcutKey.equal:
-        return LogicalKeyboardKey.equal;
-      case ShortcutKey.backquote:
-        return LogicalKeyboardKey.backquote;
-    }
-  }
+  if (key.alt || key.control || key.meta) return false;
+  return key.trigger.keyLabel.runes.length == 1 ||
+      key.trigger == LogicalKeyboardKey.space;
 }
 
 /// 内部 Intent 类，用于标识快捷键动作
 class _ShortcutIntent extends Intent {
-  final String shortcutId;
   final VoidCallback callback;
 
-  const _ShortcutIntent(this.shortcutId, this.callback);
+  /// 焦点在可编辑文本里时让给输入框（见 [_yieldsToTextField]）
+  final bool yieldsToTextField;
+
+  const _ShortcutIntent(this.callback, {this.yieldsToTextField = false});
+}
+
+/// 执行快捷键的回调。让给输入框的快捷键，焦点落在可编辑文本里时不启用：
+/// 按键接着往上传，由输入框自己处理（⌘A 全选）。
+class _ShortcutAction extends Action<_ShortcutIntent> {
+  @override
+  bool isEnabled(_ShortcutIntent intent) =>
+      !intent.yieldsToTextField || !hasEditableTextFocus;
 
   @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is _ShortcutIntent && other.shortcutId == shortcutId;
+  Object? invoke(_ShortcutIntent intent) {
+    intent.callback();
+    return null;
   }
-
-  @override
-  int get hashCode => shortcutId.hashCode;
 }
 
 /// 全局快捷键包装器

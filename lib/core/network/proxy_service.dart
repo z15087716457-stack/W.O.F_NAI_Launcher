@@ -5,6 +5,7 @@ import 'package:dio/io.dart';
 
 import '../utils/app_logger.dart';
 import 'windows_proxy_helper.dart';
+import 'macos_proxy_address.dart';
 import '../utils/localization_extension.dart';
 
 /// 代理测试结果
@@ -42,6 +43,8 @@ class ProxyService {
     try {
       if (Platform.isWindows) {
         return _getWindowsProxy();
+      } else if (Platform.isMacOS) {
+        return _getMacOSProxy();
       }
       return null;
     } catch (e, stackTrace) {
@@ -61,6 +64,22 @@ class ProxyService {
       return proxyString.substring(6);
     }
     return proxyString;
+  }
+
+  /// macOS: 通过 scutil 命令读取代理
+  static String? _getMacOSProxy() {
+    try {
+      final result = Process.runSync('scutil', ['--proxy']);
+      if (result.exitCode != 0) {
+        AppLogger.w('scutil --proxy failed: ${result.stderr}', 'PROXY');
+        return null;
+      }
+
+      return macOSProxyAddress(result.stdout as String);
+    } catch (e) {
+      AppLogger.w('Failed to read macOS proxy: $e', 'PROXY');
+      return null;
+    }
   }
 
   /// 创建测试用的 Dio 实例

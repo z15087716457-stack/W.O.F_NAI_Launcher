@@ -1,3 +1,4 @@
+import 'dart:io' show Platform;
 import 'dart:typed_data';
 
 enum LocalUpscaleError {
@@ -38,6 +39,28 @@ enum LocalUpscalePhase {
 }
 
 enum LocalUpscaleMethod { standard, seedvr2, rtx }
+
+/// Where local upscaling can run. Real-ESRGAN NCNN/Vulkan runs on Windows and
+/// macOS (MoltenVK on Metal); SeedVR2 (CUDA) and RTX Video (Direct3D 11 with
+/// the NVIDIA SDK) need Windows.
+enum LocalUpscalePlatform {
+  windows,
+  macOS,
+  unsupported;
+
+  /// The operating system this process runs on.
+  static LocalUpscalePlatform get host => Platform.isWindows
+      ? windows
+      : Platform.isMacOS
+      ? macOS
+      : unsupported;
+
+  bool supports(LocalUpscaleMethod method) => switch (this) {
+    windows => true,
+    macOS => method == LocalUpscaleMethod.standard,
+    unsupported => false,
+  };
+}
 
 class LocalUpscaleProgress {
   const LocalUpscaleProgress(this.phase, [this.fraction]);

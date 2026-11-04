@@ -19,6 +19,7 @@ import '../../../core/shortcuts/default_shortcuts.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/file_explorer_utils.dart';
 import '../../../core/utils/gallery_path_utils.dart';
+import '../../../core/utils/keyboard_modifier_utils.dart';
 import '../../../core/utils/zip_utils.dart';
 import '../../../data/models/gallery/gallery_category.dart';
 import '../../../data/models/gallery/local_image_record.dart';
@@ -104,7 +105,7 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
   static const double _sidebarWidth = 240;
   static const double _minContentWidth = 560;
 
-  final FocusNode _shortcutsFocusNode = FocusNode();
+  final FocusNode _shortcutsFocusNode = FocusNode(skipTraversal: true);
   final FocusNode _searchFocusNode = FocusNode(debugLabel: 'gallery-search');
   final GalleryTimelineController _timelineController =
       GalleryTimelineController();
@@ -285,13 +286,14 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
       ),
     );
 
-    return PageShortcuts(
-      contextType: ShortcutContext.gallery,
-      shortcuts: _shortcuts,
-      child: KeyboardListener(
-        focusNode: _shortcutsFocusNode,
-        autofocus: true,
-        onKeyEvent: (event) => _handleKeyEvent(event, bulkOpState),
+    // 撤销的按键监听放在页面快捷键外面、不抢焦点：页面焦点停在 PageShortcuts 自带的节点上，
+    // 按键从那里往上传，监听器放在它里面时收不到撤销键
+    return KeyboardListener(
+      focusNode: _shortcutsFocusNode,
+      onKeyEvent: (event) => _handleKeyEvent(event, bulkOpState),
+      child: PageShortcuts(
+        contextType: ShortcutContext.gallery,
+        shortcuts: _shortcuts,
         child: Scaffold(
           backgroundColor: theme.colorScheme.surface,
           body: LayoutBuilder(
@@ -989,10 +991,11 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
   }
 
   void _handleKeyEvent(KeyEvent event, BulkOperationState bulkOpState) {
+    // 在输入框里打字时，撤销 / 重做归输入框，不能顺带撤掉上一次批量移动、删除
     if (event is! KeyDownEvent || hasEditableTextFocus) return;
 
-    final isCtrlPressed = HardwareKeyboard.instance.isControlPressed;
-    if (!isCtrlPressed) return;
+    // 主修饰键：macOS 上是 ⌘（⌘Z / ⇧⌘Z），其他平台是 Ctrl
+    if (!isPrimaryShortcutModifierPressed()) return;
 
     if (event.logicalKey == LogicalKeyboardKey.keyZ) {
       if (HardwareKeyboard.instance.isShiftPressed) {
@@ -1068,7 +1071,7 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
         return;
       }
 
-      await Process.start('explorer', [rootPath]);
+      await FileExplorerUtils.openDirectory(rootPath);
     } catch (e) {
       if (mounted) {
         AppToast.error(

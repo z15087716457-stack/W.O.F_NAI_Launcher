@@ -167,6 +167,44 @@ class DiscoveryTests(unittest.TestCase):
             self.assertEqual(result.started_at, "2026-05-07T10:30:00.000Z")
 
 
+class DiscoveryPathTests(unittest.TestCase):
+    """The plugin must look where the Launcher writes krita-bridge.json."""
+
+    home = Path("/Users/alice")
+
+    def _path(self, windows: bool, environ: dict) -> Path:
+        with mock.patch.object(
+            discovery, "_is_windows", return_value=windows
+        ), mock.patch.dict(discovery.os.environ, environ, clear=True), mock.patch.object(
+            discovery.Path, "home", return_value=self.home
+        ):
+            return discovery.discovery_file_path()
+
+    def test_macos_reads_the_dot_nai_launcher_folder_in_home(self):
+        self.assertEqual(
+            self._path(False, {}),
+            self.home / ".nai-launcher" / "krita-bridge.json",
+        )
+
+    def test_windows_reads_appdata(self):
+        self.assertEqual(
+            self._path(True, {"APPDATA": "C:/Users/alice/AppData/Roaming"}),
+            Path("C:/Users/alice/AppData/Roaming") / "nai-launcher" / "krita-bridge.json",
+        )
+
+    def test_windows_without_appdata_keeps_the_roaming_fallback(self):
+        self.assertEqual(
+            self._path(True, {}),
+            self.home / "AppData" / "Roaming" / "nai-launcher" / "krita-bridge.json",
+        )
+
+    def test_appdata_wins_on_every_platform_like_the_launcher(self):
+        self.assertEqual(
+            self._path(False, {"APPDATA": "/tmp/appdata"}),
+            Path("/tmp/appdata") / "nai-launcher" / "krita-bridge.json",
+        )
+
+
 class ProtocolTests(unittest.TestCase):
     def test_encode_get_params_and_cancel_use_request_ids(self):
         params = json.loads(protocol.encode_get_params("params-1"))

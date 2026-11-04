@@ -82,6 +82,162 @@ void main() {
           ))['details']
           as Map<String, dynamic>;
 
+  for (final action in ['install', 'update']) {
+    test(
+      'cancelled POSIX package $action stops its child and grandchild only',
+      () async {
+        final scripts = await Directory(
+          p.join(root.path, 'sdk scripts'),
+        ).create();
+        // Copy the shipped launchers and substitute only the SDK work behind them.
+        for (final file in Directory(
+          'tool/nai_agent',
+        ).listSync().whereType<File>()) {
+          if (p.extension(file.path) == '.mjs') {
+            await file.copy(p.join(scripts.path, p.basename(file.path)));
+          }
+        }
+        final pids = File(p.join(root.path, 'owned-pids'));
+        await File(p.join(scripts.path, 'manage-resources.mjs')).writeAsString(
+          '''
+import { spawn } from 'node:child_process';
+import { appendFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+const script = fileURLToPath(import.meta.url);
+let [depth, record] = process.argv.slice(2);
+if (!record) {
+  let input = '';
+  for await (const data of process.stdin) input += data;
+  record = JSON.parse(input).record;
+  depth = 2;
+}
+appendFileSync(record, process.pid + '\\n');
+if (depth > 0) spawn(process.execPath, [script, depth - 1, record], { stdio: 'ignore' });
+if (depth < 2) process.on('SIGTERM', () => {});
+setInterval(() => {}, 1000);
+''',
+        );
+        final runtime = container.read(naiAgentRuntimePathsProvider);
+        final isolated = ProviderContainer(
+          overrides: [
+            naiAgentRuntimePathsProvider.overrideWithValue(
+              NaiAgentRuntimePaths(
+                node: runtime.node,
+                host: p.join(scripts.path, 'host.mjs'),
+              ),
+            ),
+          ],
+        );
+        addTearDown(isolated.dispose);
+        final token = NaiAgentCancellation();
+        final sibling = await Process.start('/bin/sleep', ['60']);
+        addTearDown(() async {
+          token.cancel();
+          if (pids.existsSync()) {
+            for (final pid in pids.readAsLinesSync().map(int.parse)) {
+              Process.killPid(pid, ProcessSignal.sigkill);
+            }
+          }
+          sibling.kill(ProcessSignal.sigkill);
+          await sibling.exitCode;
+        });
+        final stopped = expectLater(
+          isolated.read(naiAgentManagementProvider).runSdk({
+            'resource': 'packages',
+            'action': action,
+            'record': pids.path,
+          }, cancellation: token),
+          throwsA(
+            isA<NaiAgentToolError>().having((e) => e.code, 'code', 'cancelled'),
+          ),
+        );
+        final ready = Stopwatch()..start();
+        while ((!pids.existsSync() || pids.readAsLinesSync().length != 3) &&
+            ready.elapsed < const Duration(seconds: 5)) {
+          await Future<void>.delayed(const Duration(milliseconds: 20));
+        }
+        final family = pids.readAsLinesSync().map(int.parse).toList();
+        expect(family, hasLength(3));
+        token.cancel();
+        await stopped.timeout(const Duration(seconds: 5));
+        Future<bool> alive(int pid) async {
+          final state = await Process.run('/bin/kill', ['-0', '$pid']);
+          return state.exitCode == 0;
+        }
+
+        final deadline = Stopwatch()..start();
+        var surviving = family;
+        while (surviving.isNotEmpty &&
+            deadline.elapsed < const Duration(seconds: 2)) {
+          surviving = [
+            for (final pid in surviving)
+              if (await alive(pid)) pid,
+          ];
+          if (surviving.isNotEmpty) {
+            await Future<void>.delayed(const Duration(milliseconds: 20));
+          }
+        }
+        expect(
+          surviving,
+          isEmpty,
+          reason: 'npm/git descendants must exit with their request',
+        );
+        expect(await alive(sibling.pid), isTrue);
+      },
+      skip: Platform.isWindows,
+    );
+  }
+
+  test(
+    'the bundled macOS Node reports its minimum before either Agent entry starts',
+    () async {
+      final installed = container.read(naiAgentRuntimePathsProvider);
+      for (final version in [
+        'Version 12.7.6 (Build 21H1320)',
+        'Version 13.4.1 (Build 22F82)',
+      ]) {
+        final paths = NaiAgentRuntimePaths(
+          node: installed.node,
+          host: installed.host,
+          bundledMacOSVersion: version,
+        );
+        final unsupported = throwsA(
+          isA<NaiAgentToolError>().having(
+            (e) => e.message,
+            'minimum',
+            contains('13.5'),
+          ),
+        );
+        await expectLater(paths.check(), unsupported);
+        final isolated = ProviderContainer(
+          overrides: [naiAgentRuntimePathsProvider.overrideWithValue(paths)],
+        );
+        addTearDown(isolated.dispose);
+        await expectLater(
+          isolated.read(naiAgentManagementProvider).runSdk({
+            'resource': 'packages',
+            'action': 'resolve',
+            'entries': [],
+          }),
+          unsupported,
+        );
+      }
+      for (final version in [
+        null,
+        'Version 13.5 (Build 22G74)',
+        'Version 14.0 (Build 23A344)',
+      ]) {
+        final paths = NaiAgentRuntimePaths(
+          node: installed.node,
+          host: installed.host,
+          bundledMacOSVersion: version,
+        );
+        await paths.check();
+        expect(paths.node, installed.node);
+      }
+    },
+  );
+
   test(
     'MCP self-management shares encrypted persistence and preserves unrelated credentials',
     () async {

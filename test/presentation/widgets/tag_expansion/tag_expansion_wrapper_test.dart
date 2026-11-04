@@ -1,5 +1,6 @@
 import 'dart:ui' show PointerDeviceKind;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show kSecondaryMouseButton;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -386,6 +387,46 @@ void main() {
     expect(find.text('Related tags · blue hair'), findsOneWidget);
     expect(controller.text, 'blue hair, ');
   });
+
+  testWidgets(
+    'macOS opens related tags with Cmd+click, not Control+click',
+    (tester) async {
+      final controller = TextEditingController(text: 'blue hair, ');
+      final focusNode = FocusNode();
+      addTearDown(controller.dispose);
+      addTearDown(focusNode.dispose);
+      await _pumpEditor(
+        tester,
+        controller,
+        focusNode,
+        _Source(const []),
+        related: _Source([_tag('long_hair')]),
+      );
+      final popup = find.byKey(const Key('tag-expansion-popup'));
+      final mac = defaultTargetPlatform == TargetPlatform.macOS;
+
+      Future<void> clickWith(LogicalKeyboardKey modifier) async {
+        await tester.sendKeyDownEvent(modifier);
+        await tester.tap(find.byKey(const Key('prompt-editor')));
+        await tester.pump();
+        await tester.pump();
+        await tester.sendKeyUpEvent(modifier);
+      }
+
+      // Control+click is a right click on macOS; Windows keeps Ctrl+click.
+      await clickWith(LogicalKeyboardKey.controlLeft);
+      expect(popup, mac ? findsNothing : findsOneWidget);
+      if (!mac) return;
+
+      await tester.pump(const Duration(milliseconds: 400));
+      await clickWith(LogicalKeyboardKey.metaLeft);
+      expect(popup, findsOneWidget);
+    },
+    variant: const TargetPlatformVariant({
+      TargetPlatform.macOS,
+      TargetPlatform.windows,
+    }),
+  );
 
   testWidgets('Tab completes search text; Enter inserts into prompt', (
     tester,

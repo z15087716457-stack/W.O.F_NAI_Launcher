@@ -35,6 +35,10 @@ class HiveStartupBoxOpener {
     try {
       await _openBox<E>(name, openBoxOverride: openBoxOverride);
       return HiveStartupBoxOpenResult(name: name, recovered: false);
+    } on FileSystemException {
+      // A busy lock, missing permission or disk failure says nothing about
+      // the box contents. Keep its files (including the lock inode) intact.
+      rethrow;
     } catch (error, stackTrace) {
       AppLogger.e(
         'Failed to open Hive box "$name"; attempting file recovery',

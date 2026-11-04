@@ -109,6 +109,7 @@ void main() {
         return response;
       });
     return AdvancedUpscaleComponentManager(
+      platform: LocalUpscalePlatform.windows,
       rootDirectory: () async =>
           Directory(p.join(temporary.path, 'components')),
       loadAsset: (name) async => Uint8List.fromList(
@@ -263,6 +264,7 @@ void main() {
         return ResponseBody.fromBytes(bytes, 200);
       });
     return AdvancedUpscaleComponentManager(
+      platform: LocalUpscalePlatform.windows,
       rootDirectory: () async => Directory(p.join(temporary.path, 'seed')),
       loadAsset: (name) async =>
           name == 'advanced_manifest.json' ? manifest : worker,
@@ -378,6 +380,66 @@ void main() {
   );
 
   test(
+    'macOS lists SeedVR2 and RTX as not installed and never installs, releases or runs the Windows host',
+    () async {
+      final requests = <Uri>[];
+      final assets = <String>[];
+      final manager = AdvancedUpscaleComponentManager(
+        platform: LocalUpscalePlatform.macOS,
+        rootDirectory: () async => Directory(p.join(temporary.path, 'mac')),
+        loadAsset: (name) {
+          assets.add(name);
+          return File('assets/local_upscale/$name').readAsBytes();
+        },
+        dio: Dio()
+          ..httpClientAdapter = _Adapter((options) async {
+            requests.add(options.uri);
+            throw StateError('unexpected network');
+          }),
+        startProcess: (_, __, ___) async =>
+            throw StateError('unexpected process'),
+      );
+      addTearDown(manager.dispose);
+      final models = await manager.models();
+      expect(models.map((m) => m.id), advancedUpscaleCatalog.map((m) => m.id));
+      expect(models.every((m) => !m.installed), isTrue);
+      for (final model in advancedUpscaleCatalog) {
+        await expectLater(
+          manager.install(model.id, cancellation: LocalUpscaleCancellation()),
+          throwsA(error(LocalUpscaleError.unsupportedPlatform)),
+        );
+        await expectLater(
+          manager.command(
+            model.id,
+            p.join(temporary.path, 'input.png'),
+            p.join(temporary.path, 'output.png'),
+            64,
+            64,
+            LocalUpscaleCancellation(),
+          ),
+          throwsA(error(LocalUpscaleError.unsupportedPlatform)),
+        );
+      }
+      await expectLater(
+        manager.worker(),
+        throwsA(error(LocalUpscaleError.unsupportedPlatform)),
+      );
+      expect(requests, isEmpty);
+      expect(assets.toSet(), {'advanced_manifest.json'});
+      expect(
+        await Directory(p.join(manager.directory.path, 'tools')).exists(),
+        isFalse,
+      );
+      expect(
+        await Directory(p.join(manager.directory.path, 'installs')).exists(),
+        isFalse,
+      );
+      manager.claimInference();
+      manager.releaseInference();
+    },
+  );
+
+  test(
     'pinned model sizes are available offline without installing weights',
     () async {
       final manager = AdvancedUpscaleComponentManager(
@@ -425,7 +487,7 @@ void main() {
           await LocalUpscaleService(
             base,
             advanced: manager,
-            supportedPlatform: true,
+            platform: LocalUpscalePlatform.windows,
           ).upscale(
             Uint8List.fromList(img.encodePng(img.Image(width: 32, height: 24))),
             modelId: 'seedvr2-3b',
@@ -1220,7 +1282,7 @@ void main() {
       final service = LocalUpscaleService(
         base,
         advanced: manager,
-        supportedPlatform: true,
+        platform: LocalUpscalePlatform.windows,
       );
       await expectLater(
         service.upscale(

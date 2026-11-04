@@ -9,6 +9,7 @@ import '../../core/crypto/nai_crypto_service.dart';
 import '../../core/network/nai_api_endpoint.dart';
 import '../../core/network/nai_api_endpoint_service.dart';
 import '../../core/storage/secure_storage_service.dart';
+import '../../core/storage/mac_credential_store.dart';
 import '../../core/utils/app_logger.dart';
 import '../../data/datasources/remote/nai_auth_api_service.dart';
 import '../../data/datasources/remote/nai_user_info_api_service.dart';
@@ -25,6 +26,8 @@ enum AuthStatus { initial, loading, authenticated, unauthenticated, error }
 /// 认证错误码
 enum AuthErrorCode {
   networkTimeout,
+  credentialStorageUnavailable,
+  credentialStorageCorrupt,
   networkError,
   authFailed,
   tokenInvalid,
@@ -78,6 +81,14 @@ class AuthState {
 
   /// 从异常解析错误码
   static (AuthErrorCode, int?) parseError(Object e) {
+    if (e is LocalCredentialStoreException) {
+      return (
+        e.corrupt
+            ? AuthErrorCode.credentialStorageCorrupt
+            : AuthErrorCode.credentialStorageUnavailable,
+        null,
+      );
+    }
     if (e is DioException) {
       final statusCode = e.response?.statusCode;
 
@@ -189,47 +200,19 @@ class AuthNotifier extends _$AuthNotifier {
     NaiApiEndpointConfig endpoint = NaiApiEndpointConfig.official,
     bool allowAnyTokenFormat = false,
   }) {
-    final cancel = _loginCancel!;
     return ref
         .read(naiAuthApiServiceProvider)
         .validateToken(
           token,
           endpoint: endpoint,
           allowAnyTokenFormat: allowAnyTokenFormat,
-          cancelToken: cancel,
-        )
-        .timeout(
-          const Duration(seconds: 5),
-          onTimeout: () {
-            cancel.cancel('login validation timeout');
-            throw DioException(
-              type: DioExceptionType.connectionTimeout,
-              requestOptions: RequestOptions(
-                path: endpoint.userUrl('/user/subscription'),
-              ),
-            );
-          },
+          cancelToken: _loginCancel,
         );
   }
 
-  Future<Map<String, dynamic>> _loginWithKey(String key) {
-    final cancel = _loginCancel!;
-    return ref
-        .read(naiAuthApiServiceProvider)
-        .loginWithKey(key, cancelToken: cancel)
-        .timeout(
-          const Duration(seconds: 5),
-          onTimeout: () {
-            cancel.cancel('login timeout');
-            throw DioException(
-              type: DioExceptionType.connectionTimeout,
-              requestOptions: RequestOptions(
-                path: NaiApiEndpointConfig.official.userUrl('/user/login'),
-              ),
-            );
-          },
-        );
-  }
+  Future<Map<String, dynamic>> _loginWithKey(String key) => ref
+      .read(naiAuthApiServiceProvider)
+      .loginWithKey(key, cancelToken: _loginCancel);
 
   bool _invalidCredential(Object error) =>
       error is DioException &&
@@ -259,6 +242,42 @@ class AuthNotifier extends _$AuthNotifier {
   /// 检查已存储的认证状态
   Future<void> _checkExistingAuth() async {
     final request = _beginSession();
+    try {
+      await _restoreExistingAuth(request);
+    } on LocalCredentialStoreException catch (error) {
+      if (_ownsSession(request)) reportCredentialError(error);
+    }
+  }
+
+  void reportCredentialError(LocalCredentialStoreException error) {
+    state = AuthState(
+      status: AuthStatus.error,
+      errorCode: AuthState.parseError(error).$1,
+    );
+  }
+
+  Future<void> resetCorruptLocalCredentials() async {
+    if (state.errorCode != AuthErrorCode.credentialStorageCorrupt) return;
+    final request = _beginSession();
+    state = const AuthState(status: AuthStatus.loading);
+    try {
+      final reset = await ref
+          .read(secureStorageServiceProvider)
+          .resetCorruptMacCredentials();
+      if (!_ownsSession(request)) return;
+      if (!reset) {
+        await _checkExistingAuth();
+        return;
+      }
+      _loginBase = null;
+      ref.read(naiApiEndpointServiceProvider).resetToOfficial();
+      state = const AuthState(status: AuthStatus.unauthenticated);
+    } on LocalCredentialStoreException catch (error) {
+      if (_ownsSession(request)) reportCredentialError(error);
+    }
+  }
+
+  Future<void> _restoreExistingAuth(int request) async {
     // 0. 检查自动登录设置（默认启用，确保重启后自动恢复登录）
     final prefs = await SharedPreferences.getInstance();
     if (!_ownsSession(request)) return;
@@ -350,6 +369,8 @@ class AuthNotifier extends _$AuthNotifier {
           subscriptionInfo: subscriptionInfo,
         );
         return;
+      } on LocalCredentialStoreException {
+        rethrow;
       } catch (e) {
         if (!_ownsSession(request)) return;
         final (code, status) = AuthState.parseError(e);
@@ -446,6 +467,8 @@ class AuthNotifier extends _$AuthNotifier {
           );
 
           return;
+        } on LocalCredentialStoreException {
+          rethrow;
         } catch (e) {
           if (!_ownsSession(request)) return;
           AppLogger.w('Auto-login failed: exception=${e.runtimeType}');
@@ -576,6 +599,24 @@ class AuthNotifier extends _$AuthNotifier {
     expiry: const Duration(days: 365 * 10),
   );
 
+  /// One validation and one save operation. Failed credential storage leaves
+  /// the login page active and never installs the entered token.
+  Future<bool> signInWithEnteredToken(
+    String token, {
+    required String nickname,
+    String? existingAccountId,
+    NaiApiEndpointConfig endpoint = NaiApiEndpointConfig.official,
+  }) => _loginWithAccessToken(
+    token.trim(),
+    endpoint: endpoint,
+    accountId: existingAccountId,
+    persistentToken: endpoint.isOfficial,
+    displayName: nickname,
+    fallbackEmail: endpoint.isOfficial ? 'Token User' : endpoint.mainBaseUrl,
+    expiry: const Duration(days: 365 * 10),
+    rememberEnteredToken: true,
+  );
+
   /// 切换账号（使用已保存的 Token）
   ///
   /// [accountId] 账号ID
@@ -632,6 +673,7 @@ class AuthNotifier extends _$AuthNotifier {
     String? displayName,
     NaiApiEndpointConfig endpoint = NaiApiEndpointConfig.official,
     bool persistentToken = false,
+    bool rememberEnteredToken = false,
     String fallbackEmail = '',
     Duration expiry = const Duration(days: 30),
   }) async {
@@ -650,15 +692,47 @@ class AuthNotifier extends _$AuthNotifier {
         allowAnyTokenFormat: endpoint.isThirdParty,
       );
       if (!_ownsSession(request)) return false;
-      await _enableAutoLoginForSavedSession();
+      final storage = ref.read(secureStorageServiceProvider);
+      final expires = DateTime.now().add(expiry),
+          owner = displayName ?? fallbackEmail;
+      if (rememberEnteredToken) {
+        final manager = ref.read(accountManagerNotifierProvider.notifier);
+        final account = await storage.saveAuthAndAccount(
+          accessToken: token,
+          expiry: expires,
+          email: owner,
+          saveAccount: () async {
+            final selected = accountId;
+            if (selected != null) {
+              final existing = ref
+                  .read(accountManagerNotifierProvider)
+                  .accounts
+                  .firstWhere((account) => account.id == selected);
+              await manager.updateAccountToken(selected, token);
+              return existing;
+            }
+            return manager.addAccount(
+              identifier: endpoint.isOfficial
+                  ? 'token_${DateTime.now().millisecondsSinceEpoch}'
+                  : endpoint.mainBaseUrl,
+              token: token,
+              nickname: displayName ?? '',
+              setAsDefault: true,
+              apiEndpoint: endpoint,
+            );
+          },
+        );
+        accountId = account.id;
+        displayName = account.displayName;
+      } else {
+        await storage.saveAuth(
+          accessToken: token,
+          expiry: expires,
+          email: owner,
+        );
+      }
       if (!_ownsSession(request)) return false;
-      await ref
-          .read(secureStorageServiceProvider)
-          .saveAuth(
-            accessToken: token,
-            expiry: DateTime.now().add(expiry),
-            email: displayName ?? fallbackEmail,
-          );
+      await _enableAutoLoginForSavedSession();
       if (!_ownsSession(request)) return false;
       endpointService.setCurrent(endpoint);
       state = AuthState(
@@ -899,7 +973,12 @@ class AuthNotifier extends _$AuthNotifier {
     );
 
     final storage = ref.read(secureStorageServiceProvider);
-    await storage.clearAuth();
+    try {
+      await storage.clearAuth();
+    } on LocalCredentialStoreException catch (error) {
+      if (_ownsSession(request)) reportCredentialError(error);
+      return;
+    }
     if (!_ownsSession(request)) return;
     ref.read(naiApiEndpointServiceProvider).resetToOfficial();
     ref.read(guestSessionNotifierProvider.notifier).clear();

@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+
+import '../../../core/nai_agent/node_runtime_environment.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 import 'nai_agent_workspace_provider.dart';
@@ -17,9 +19,12 @@ final naiAgentCommandsProvider = FutureProvider.autoDispose
       if (!await File(paths.node).exists() || !await File(script).exists()) {
         return [];
       }
-      final process = await Process.start(paths.node, [
-        script,
-      ], workingDirectory: p.dirname(script));
+      final process = await Process.start(
+        paths.node,
+        [script],
+        workingDirectory: p.dirname(script),
+        environment: nodeRuntimeEnvironment(paths.node),
+      );
       ref.onDispose(() => process.kill());
       unawaited(process.stderr.drain<void>());
       process.stdin.writeln(

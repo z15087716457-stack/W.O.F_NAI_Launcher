@@ -479,6 +479,12 @@ void main() {
         },
       );
 
+      // macOS 在访达中选中（open -R），其他平台走资源管理器
+      if (Platform.isMacOS) {
+        expect(executable, 'open');
+        expect(arguments, ['-R', file.absolute.path]);
+        return;
+      }
       final absolutePath = FileExplorerUtils.normalizeWindowsExplorerPath(
         file.absolute.path,
       );
@@ -507,11 +513,45 @@ void main() {
             arguments = List.of(args);
           },
         );
-        expect(executable, 'explorer.exe');
-      expect(arguments, [
-        FileExplorerUtils.normalizeWindowsExplorerPath(directory.absolute.path),
-      ]);
+        if (Platform.isMacOS) {
+          expect(executable, 'open');
+          expect(arguments, [directory.absolute.path]);
+        } else {
+          expect(executable, 'explorer.exe');
+          expect(arguments, [
+            FileExplorerUtils.normalizeWindowsExplorerPath(
+              directory.absolute.path,
+            ),
+          ]);
+        }
       },
+    );
+    test(
+      'Finder opens and selects the exact existing names when a trailing space distinguishes siblings',
+      () async {
+        final root = await Directory.systemTemp.createTemp(
+          'finder_exact_name_',
+        );
+        addTearDown(() => root.delete(recursive: true));
+        final folder = await Directory('${root.path}/图库 +%, ').create();
+        await Directory(folder.path.trimRight()).create();
+        final file = await File(
+          '${folder.path}/作品 +%, ',
+        ).writeAsString('selected');
+        await File(file.path.trimRight()).writeAsString('other');
+        final calls = <(String, List<String>)>[];
+        Future<void> record(String exe, List<String> args) async =>
+            calls.add((exe, args));
+        await FileExplorerUtils.openDirectory(
+          folder.path,
+          startProcess: record,
+        );
+        await FileExplorerUtils.revealFile(file.path, startProcess: record);
+        expect(calls.map((call) => call.$1), ['open', 'open']);
+        expect(calls[0].$2, [folder.absolute.path]);
+        expect(calls[1].$2, ['-R', file.absolute.path]);
+      },
+      skip: !Platform.isMacOS,
     );
   });
 

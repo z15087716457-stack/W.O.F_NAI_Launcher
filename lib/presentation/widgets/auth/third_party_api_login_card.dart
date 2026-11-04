@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/nai_api_endpoint.dart';
 import '../../../core/utils/localization_extension.dart';
-import '../../providers/account_manager_provider.dart';
 import '../../providers/auth_provider.dart';
 import 'entry_controls.dart';
 
@@ -195,38 +194,20 @@ class _ThirdPartyApiLoginCardState
     final nickname = _nicknameController.text.trim();
 
     final authNotifier = ref.read(authNotifierProvider.notifier);
-    final accountNotifier = ref.read(accountManagerNotifierProvider.notifier);
-
-    final success = await authNotifier.loginWithThirdPartyToken(
+    final success = await authNotifier.signInWithEnteredToken(
       token,
-      apiEndpoint: endpoint,
-      displayName: nickname,
-    );
-
-    if (!success) return;
-
-    final account = await accountNotifier.addAccount(
-      identifier: endpoint.mainBaseUrl,
-      token: token,
       nickname: nickname,
-      setAsDefault: true,
-      apiEndpoint: endpoint,
+      endpoint: endpoint,
     );
-
-    await authNotifier.loginWithThirdPartyToken(
-      token,
-      apiEndpoint: endpoint,
-      accountId: account.id,
-      displayName: account.displayName,
-    );
-
-    if (mounted) {
-      widget.onLoginSuccess?.call();
-    }
+    if (success && mounted) widget.onLoginSuccess?.call();
   }
 
   String _getErrorMessage(AuthErrorCode? errorCode) {
     return switch (errorCode) {
+      AuthErrorCode.credentialStorageCorrupt =>
+        context.l10n.auth_credentialStorageCorrupt,
+      AuthErrorCode.credentialStorageUnavailable =>
+        context.l10n.auth_credentialStorageUnavailable,
       AuthErrorCode.networkTimeout => context.l10n.auth_error_networkTimeout,
       AuthErrorCode.networkError => context.l10n.auth_error_networkError,
       AuthErrorCode.authFailed => context.l10n.auth_error_authFailed,

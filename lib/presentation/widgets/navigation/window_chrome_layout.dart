@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter/services.dart';
 import 'package:window_manager/window_manager.dart';
+import '../../../core/utils/desktop_platform.dart';
 
 /// Set only by the desktop window shell. Standalone pages and other platforms
 /// keep their normal layout; retained routes share the same caption geometry.
@@ -24,7 +25,9 @@ class WindowChromeScope extends InheritedWidget {
   final double captionHeight;
 
   static const height = 36.0;
-  static const controlsWidth = 138.0;
+
+  /// macOS 不画 Windows 的三个窗口按钮，不留这块宽度（见 IntegratedTitleBarShell.reservedRight）
+  static double get controlsWidth => usesMacOSConventions ? 0 : 138.0;
   static const dragWidth = 64.0;
   static bool activeOf(BuildContext context) =>
       context

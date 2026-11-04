@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import '../../../core/nai_agent/node_runtime_environment.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 
@@ -75,9 +77,12 @@ Future<NaiAgentSkillInventory> listNaiAgentSkills({
   required String script,
   required Map<String, dynamic> config,
 }) async {
-  final process = await Process.start(node, [
-    script,
-  ], workingDirectory: p.dirname(script));
+  final process = await Process.start(
+    node,
+    [script],
+    workingDirectory: p.dirname(script),
+    environment: nodeRuntimeEnvironment(node),
+  );
   final stderr = process.stderr.transform(utf8.decoder).join();
   process.stdin.writeln(jsonEncode(config));
   await process.stdin.close();

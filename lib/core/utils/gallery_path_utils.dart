@@ -6,13 +6,26 @@ library;
 
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
+import 'package:path/path.dart' as p;
+
+/// 测试用：按哪个平台的路径规则判断（true = Windows，false = macOS 等 POSIX 平台）。
+///
+/// 为 null 时跟随运行的机器。路径规则看的是宿主系统，`debugDefaultTargetPlatformOverride`
+/// 改不了它，测试要在任何机器上验证两套规则就用这个开关。
+@visibleForTesting
+bool? debugGalleryPathWindowsRulesOverride;
+
+bool get _windowsRules =>
+    debugGalleryPathWindowsRulesOverride ?? Platform.isWindows;
+
 /// 规范化画廊文件路径
 ///
 /// - Windows 下去掉 `\\?\` / `\\?\UNC\` 前缀
 /// - 统一为反斜杠分隔
 String normalizeGalleryFilePath(String filePath) {
   final trimmed = filePath.trim();
-  if (!Platform.isWindows) return trimmed;
+  if (!_windowsRules) return trimmed;
 
   var normalized = trimmed.replaceAll('/', r'\');
   if (normalized.startsWith(r'\\?\UNC\')) {
@@ -26,7 +39,7 @@ String normalizeGalleryFilePath(String filePath) {
 /// 画廊文件路径键（Windows 小写化，用于比较/去重/前缀匹配）
 String galleryFilePathKey(String filePath) {
   final normalized = normalizeGalleryFilePath(filePath);
-  return Platform.isWindows ? normalized.toLowerCase() : normalized;
+  return _windowsRules ? normalized.toLowerCase() : normalized;
 }
 
 /// 两个画廊文件路径是否相等（大小写不敏感、忽略 `\\?\` 前缀）
@@ -46,12 +59,19 @@ bool galleryPathIsWithin(String rootPath, String childPath) {
   }
   final childKey = galleryFilePathKey(childPath);
   if (childKey == rootKey) return true;
-  return childKey.startsWith('$rootKey${Platform.pathSeparator}');
+  final separator = _windowsRules ? r'\' : '/';
+  return childKey.startsWith('$rootKey$separator');
 }
 
-/// [path] 是否为绝对路径（Windows 盘符或 UNC 前缀）
+/// [path] 是否为绝对路径
+///
+/// 盘符（`C:\`）和 UNC 前缀（`\\server`）在哪个平台都算；macOS 等 POSIX 平台上以 `/`
+/// 开头的也算（外部图库源在 `/Users/…`、`/Volumes/…` 下）。
 bool isAbsoluteGalleryPath(String path) {
   final normalized = normalizeGalleryFilePath(path);
-  return RegExp(r'^[a-zA-Z]:[\\/]').hasMatch(normalized) ||
-      normalized.startsWith(r'\\');
+  if (RegExp(r'^[a-zA-Z]:[\\/]').hasMatch(normalized) ||
+      normalized.startsWith(r'\\')) {
+    return true;
+  }
+  return !_windowsRules && p.posix.isAbsolute(normalized);
 }

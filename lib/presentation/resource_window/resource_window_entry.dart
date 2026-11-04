@@ -11,6 +11,7 @@ import '../../core/utils/localization_extension.dart';
 import '../../l10n/app_localizations.dart';
 import '../providers/font_provider.dart';
 import '../themes/app_theme.dart';
+import '../widgets/common/studio_scroll_behavior.dart';
 import '../ui/kit/ui_resource_kind.dart';
 import '../ui/resource_window/resource_window_page.dart';
 import 'resource_window_controller.dart';
@@ -120,6 +121,7 @@ class _ResourceWindowAppState extends State<ResourceWindowApp> {
 
   @override
   Widget build(BuildContext context) => MaterialApp(
+    scrollBehavior: const StudioScrollBehavior(),
     debugShowCheckedModeBanner: false,
     locale: widget.locale,
     localizationsDelegates: AppLocalizations.localizationsDelegates,

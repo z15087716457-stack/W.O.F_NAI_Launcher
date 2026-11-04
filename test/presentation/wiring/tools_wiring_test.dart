@@ -11,6 +11,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
+import 'package:nai_launcher/core/utils/localization_extension.dart';
 import 'package:nai_launcher/data/datasources/remote/nai_image_enhancement_api_service.dart';
 import 'package:nai_launcher/data/models/director/director_tool_type.dart';
 import 'package:nai_launcher/data/models/upscale/local_upscale_models.dart';
@@ -75,7 +76,9 @@ void main() {
   late MemoryGenerationPlatform platform;
   late _Api api;
   late Future<bool> Function(int) approval;
+  var upscalePlatform = LocalUpscalePlatform.windows;
   setUp(() async {
+    upscalePlatform = LocalUpscalePlatform.windows;
     SharedPreferences.setMockInitialValues({});
     directory = await Directory.systemTemp.createTemp('tools-wiring-');
     Hive.init(directory.path);
@@ -104,7 +107,7 @@ void main() {
             advancedUpscaleCatalog.first.withInstalled(true),
           ],
         ),
-        toolsWindowsProvider.overrideWithValue(true),
+        localUpscalePlatformProvider.overrideWith((ref) => upscalePlatform),
       ],
     );
     await container.read(promptBlockLibraryNotifierProvider.future);
@@ -305,6 +308,48 @@ void main() {
       // Cancel the route's periodic tip timer inside the widget-test zone.
       container.invalidate(tipEpochProvider);
       await tester.pump();
+    },
+  );
+
+  test(
+    'local upscale in the tools sheets runs Real-ESRGAN on macOS and marks SeedVR2 as Windows-only',
+    () {
+      final image = GeneratedImage(
+        id: 'source',
+        bytes: png(64, 64),
+        width: 64,
+        height: 64,
+      );
+      final upscale = Provider((ref) => toolsUpscaleView(ref, image));
+      final enhance = Provider((ref) => toolsEnhanceView(ref, image).local!);
+      final workflow = container.read(imageWorkflowControllerProvider.notifier);
+      workflow.updateUpscaleBackend(UpscaleBackend.local);
+      for (final platform in [
+        LocalUpscalePlatform.windows,
+        LocalUpscalePlatform.macOS,
+      ]) {
+        upscalePlatform = platform;
+        container.invalidate(localUpscalePlatformProvider);
+        workflow.updateLocalUpscaleModel('anime');
+        expect(container.read(upscale).blocked, isNull, reason: '$platform');
+        expect(
+          container.read(upscale).backends.firstWhere((b) => b.id == 'local'),
+          isA<ToolsUpscaleBackend>().having((b) => b.enabled, 'enabled', true),
+        );
+        expect(container.read(enhance).ready, isTrue, reason: '$platform');
+        // The fixture reports SeedVR2 3B as installed on both systems.
+        workflow.updateLocalUpscaleModel('seedvr2-3b');
+        expect(
+          container.read(upscale).blocked,
+          platform == LocalUpscalePlatform.macOS
+              ? currentL10n.localUpscale_unsupportedPlatform
+              : isNull,
+        );
+        expect(
+          container.read(enhance).ready,
+          platform == LocalUpscalePlatform.windows,
+        );
+      }
     },
   );
 

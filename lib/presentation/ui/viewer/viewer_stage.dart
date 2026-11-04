@@ -5,6 +5,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/utils/localization_extension.dart';
+import '../../utils/platform_labels.dart';
 import '../../widgets/navigation/window_chrome_layout.dart';
 import '../kit/ui_controls.dart';
 import '../kit/ui_glyph.dart';
@@ -655,7 +656,7 @@ class _Missing extends StatelessWidget {
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 560),
             child: Text(
-              [?item.path, l10n.imageViewer_missingHint].join('\n'),
+              [?item.path, imageMissingHintLabel(l10n)].join('\n'),
               textAlign: TextAlign.center,
               style: UiText.sans(
                 12,
@@ -857,7 +858,7 @@ class _ZoomHint extends StatelessWidget {
     final keys = ViewerPageScope.of(context).data.keys;
     String key(ViewerCommand c, String fallback) {
       final a = keys[c]?.firstOrNull ?? ViewerKeys.defaults[c]?.firstOrNull;
-      return a == null ? fallback : viewerKeyLabels(a).join(' ');
+      return a == null ? fallback : viewerKeyText(a);
     }
 
     return ViewerGlass(
@@ -956,7 +957,7 @@ class _UndoToast extends StatelessWidget {
                       color: ViewerInk.toastInk,
                     ),
                   ),
-                  _LightKey(viewerKeyLabels(keys).join(' ')),
+                  _LightKey(viewerKeyText(keys)),
                 ],
               ),
             ),

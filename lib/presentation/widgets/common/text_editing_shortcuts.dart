@@ -1,6 +1,9 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import '../../../core/utils/keyboard_modifier_utils.dart';
+import '../../../core/utils/primary_activator.dart';
+
 /// A page shortcut must yield to both a TextField's focus node and any focus
 /// nested inside EditableText (for example an inline source field).
 bool get hasEditableTextFocus {
@@ -21,6 +24,9 @@ class PromptUndoBoundary extends InheritedWidget {
 /// Application-wide Ctrl+Y plus a deliberately narrow blurred-prompt fallback.
 /// Focused text always uses its own Actions. Other page/route undo handlers run
 /// first; canvas/editor areas opt out through [PromptUndoBoundary].
+///
+/// macOS 上主修饰键是 ⌘：⌘Y 重做（系统自带的 ⇧⌘Z 照旧），失焦时的撤销 / 重做也认 ⌘Z、⇧⌘Z、⌘Y；
+/// Control+Y、Control+Z 留给输入框和系统。
 class TextEditingShortcuts extends StatefulWidget {
   const TextEditingShortcuts({super.key, required this.child});
   final Widget child;
@@ -56,7 +62,8 @@ class TextEditingShortcutsState extends State<TextEditingShortcuts> {
 
   KeyEventResult _onKey(FocusNode node, KeyEvent event) {
     if (event is! KeyDownEvent ||
-        !HardwareKeyboard.instance.isControlPressed ||
+        // 主修饰键：macOS 上是 ⌘（不带 Control），其他平台是 Ctrl
+        !isPrimaryShortcutModifierPressed() ||
         HardwareKeyboard.instance.isAltPressed ||
         hasEditableTextFocus) {
       return KeyEventResult.ignored;
@@ -91,7 +98,7 @@ class TextEditingShortcutsState extends State<TextEditingShortcuts> {
     onKeyEvent: _onKey,
     child: Shortcuts(
       shortcuts: const {
-        SingleActivator(LogicalKeyboardKey.keyY, control: true): RedoTextIntent(
+        PrimaryActivator(LogicalKeyboardKey.keyY): RedoTextIntent(
           SelectionChangedCause.keyboard,
         ),
       },

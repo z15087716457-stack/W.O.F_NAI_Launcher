@@ -1,7 +1,9 @@
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/utils/desktop_platform.dart';
 import '../../../core/utils/localization_extension.dart';
+import '../../../core/utils/platform_shortcut_text.dart';
 import '../../../l10n/app_localizations.dart';
 import 'viewer_contract.dart';
 
@@ -70,7 +72,7 @@ String viewerCellName(double? x, double? y) {
 int viewerTagCount(String s) =>
     s.split(',').where((t) => t.trim().isNotEmpty).length;
 
-/// 快捷键显示成键帽：`Ctrl R`、`←`、`?`。
+/// 快捷键显示成键帽：`Ctrl R`、`←`、`?`；macOS 上用 Mac 符号：`⌘ R`、`⌘ ⌫`。
 List<String> viewerKeyLabels(SingleActivator a) {
   final k = a.trigger;
   final name = switch (k.keyLabel) {
@@ -85,6 +87,16 @@ List<String> viewerKeyLabels(SingleActivator a) {
     final s => s,
   };
   if (a.shift && name == '/') return const ['?'];
+  // macOS：⌃⌥⇧⌘ 按 Mac 菜单的顺序，特殊键用键盘符号（配置里的主修饰键在 Mac 上是 ⌘，见 ShortcutParser）
+  if (usesMacOSConventions) {
+    return [
+      if (a.control) '⌃',
+      if (a.alt) '⌥',
+      if (a.shift) '⇧',
+      if (a.meta) '⌘',
+      platformKeyLabel(name),
+    ];
+  }
   return [
     if (a.control) 'Ctrl',
     if (a.alt) 'Alt',
@@ -93,3 +105,7 @@ List<String> viewerKeyLabels(SingleActivator a) {
     name,
   ];
 }
+
+/// 快捷键写成一行：`Ctrl R`；macOS 上照 Mac 菜单连写：`⌘R`。
+String viewerKeyText(SingleActivator a) =>
+    viewerKeyLabels(a).join(usesMacOSConventions ? '' : ' ');

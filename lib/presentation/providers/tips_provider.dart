@@ -3,6 +3,8 @@ import 'dart:math';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/utils/desktop_platform.dart';
+import '../../core/utils/platform_shortcut_text.dart';
 import '../../l10n/app_localizations.dart';
 
 part 'tip_catalog.dart';
@@ -80,7 +82,8 @@ class Tip {
   /// 只在深夜出现。
   final bool night;
 
-  String text(AppLocalizations l10n) => _text(l10n);
+  // 正文里的 Ctrl、Alt、F1 在 macOS 上写成 ⌘、⌥、⌘/（见 platformShortcutText）
+  String text(AppLocalizations l10n) => platformShortcutText(_text(l10n));
 
   String label(AppLocalizations l10n) => tipKindLabel(l10n, kind);
 

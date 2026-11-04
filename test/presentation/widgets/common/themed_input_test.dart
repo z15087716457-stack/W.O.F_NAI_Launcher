@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/presentation/widgets/common/themed_input.dart';
 
@@ -55,4 +57,31 @@ void main() {
       expect(controller.text, 'g');
     });
   });
+
+  testWidgets(
+    'Ctrl+Y 重做只在 Windows 上加；macOS 用系统的 ⇧⌘Z，Control+Y 留给文本框',
+    (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(home: Scaffold(body: ThemedInput())),
+      );
+      final redo = tester
+          .widgetList<Shortcuts>(
+            find.descendant(
+              of: find.byType(ThemedInput),
+              matching: find.byType(Shortcuts),
+            ),
+          )
+          .expand((s) => s.shortcuts.keys)
+          .whereType<SingleActivator>()
+          .where((a) => a.trigger == LogicalKeyboardKey.keyY && a.control);
+      expect(
+        redo,
+        defaultTargetPlatform == TargetPlatform.macOS ? isEmpty : hasLength(1),
+      );
+    },
+    variant: const TargetPlatformVariant({
+      TargetPlatform.macOS,
+      TargetPlatform.windows,
+    }),
+  );
 }

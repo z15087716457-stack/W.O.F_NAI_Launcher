@@ -175,6 +175,7 @@ SettingsUpscaleData settingsUpscaleData(
   AdvancedUpscaleInstallState advanced,
   UpscaleWorkflowSettings workflow, {
   SettingsGpuInfo? gpu,
+  LocalUpscalePlatform platform = LocalUpscalePlatform.windows,
 }) {
   SettingsUpscaleModel map(LocalUpscaleModel model) {
     final id =
@@ -231,5 +232,7 @@ SettingsUpscaleData settingsUpscaleData(
         ? map(models.firstWhere((m) => m.method == LocalUpscaleMethod.rtx))
         : null,
     seedOffloadMaxBlocks: Seedvr2Options.maxBlocks(settingsSeedModel(workflow)),
+    seedAvailable: platform.supports(LocalUpscaleMethod.seedvr2),
+    rtxAvailable: platform.supports(LocalUpscaleMethod.rtx),
   );
 }

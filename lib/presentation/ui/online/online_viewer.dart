@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../core/utils/keyboard_modifier_utils.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../kit/ui_controls.dart';
 import '../kit/ui_glyph.dart';
@@ -121,7 +122,9 @@ class _OnlineViewerState extends State<OnlineViewer> {
     final a = scope.actions;
     final k = e.logicalKey;
     final shift = HardwareKeyboard.instance.isShiftPressed;
-    final ctrl = HardwareKeyboard.instance.isControlPressed;
+    // 主修饰键：macOS 上是 ⌘（不带 Control）；带 Control 的组合（⌃⌘F 全屏……）留给系统菜单
+    final ctrl = isPrimaryShortcutModifierPressed();
+    if (isMacChordModifierPressed() && !ctrl) return KeyEventResult.ignored;
     if (k == LogicalKeyboardKey.escape) {
       widget.onClose();
     } else if (k == LogicalKeyboardKey.arrowLeft ||

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/utils/localization_extension.dart';
+import '../../utils/platform_labels.dart';
 import '../../widgets/common/studio_icons.dart';
 import '../../widgets/common/translation_icon.dart';
 import '../../widgets/navigation/window_chrome_layout.dart';
@@ -123,7 +124,10 @@ class _Header extends StatelessWidget {
                   key: const Key('viewer-info-folder'),
                   glyph: UiGlyphs.folder,
                   glyphSize: 16,
-                  tooltip: l10n.imageViewer_showInFolder,
+                  tooltip: showInFileManagerLabel(
+                    l10n,
+                    l10n.imageViewer_showInFolder,
+                  ),
                   onTap: () => scope.actions.onAction(
                     item.key,
                     ViewerAction.showInFolder,
@@ -168,7 +172,7 @@ class _Header extends StatelessWidget {
 
 String _keyText(ViewerViewData data, ViewerCommand c) {
   final a = data.keys[c]?.firstOrNull ?? ViewerKeys.defaults[c]?.firstOrNull;
-  return a == null ? '' : viewerKeyLabels(a).join(' ');
+  return a == null ? '' : viewerKeyText(a);
 }
 
 class _Body extends StatefulWidget {
@@ -1083,7 +1087,7 @@ class _Footer extends StatelessWidget {
             )
           else
             const Spacer(),
-          if (meta) _BrandKey(viewerKeyLabels(reuseKeys).join(' ')),
+          if (meta) _BrandKey(viewerKeyText(reuseKeys)),
         ],
       );
     }

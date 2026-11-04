@@ -5,14 +5,20 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'system_font_service.g.dart';
 
 /// 系统字体服务 - 通过 MethodChannel 获取系统字体列表
+///
+/// 原生一侧：Windows 在 `windows/runner/flutter_window.cpp`（GDI 枚举字族），
+/// macOS 在 `macos/Runner/MainFlutterWindow.swift`（NSFontManager），都返回字族名列表。
 class SystemFontService {
-  static const _channel = MethodChannel('com.nailauncher/system_fonts');
+  static const channel = MethodChannel('com.nailauncher/system_fonts');
+  static const getSystemFontsMethod = 'getSystemFonts';
 
   /// 获取系统字体列表
   Future<List<String>> getSystemFonts() async {
     try {
-      final List<dynamic> fonts = await _channel.invokeMethod('getSystemFonts');
-      return fonts.cast<String>();
+      final fonts = await channel.invokeMethod<List<Object?>>(
+        getSystemFontsMethod,
+      );
+      return [...?fonts?.whereType<String>()];
     } catch (e) {
       // 如果获取失败，返回空列表
       return [];

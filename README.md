@@ -15,6 +15,7 @@
 <p align="center">
   <a href="https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/latest"><img src="https://img.shields.io/github/v/release/z15087716457-stack/W.O.F_NAI_Launcher?label=%E4%B8%8B%E8%BD%BD&color=2f80ed" alt="下载"></a>
   <img src="https://img.shields.io/badge/Windows-10%20%2F%2011%20x64-0078D4?logo=windows11&logoColor=white" alt="Windows">
+  <img src="https://img.shields.io/badge/macOS-13.5%2B%20%C2%B7%20Apple%20%E8%8A%AF%E7%89%87%20%2F%20Intel-000000?logo=apple&logoColor=white" alt="macOS">
   <img src="https://img.shields.io/badge/%E7%95%8C%E9%9D%A2-%E7%AE%80%E4%B8%AD%20%2F%20%E7%B9%81%E4%B8%AD%20%2F%20EN%20%2F%20%E6%97%A5%E6%9C%AC%E8%AA%9E%20%2F%20%ED%95%9C%EA%B5%AD%EC%96%B4-555" alt="五种界面语言">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT"></a>
 </p>
@@ -23,24 +24,43 @@
   <img src="docs/images/readme/zh/hero.webp" alt="W.O.F NAI Studio 生图页" width="100%">
 </p>
 
-W.O.F NAI Studio 是一个 Windows 桌面上的 NovelAI 第三方客户端。它不只是把官网搬到桌面：常用的提示词可以存成**积木**反复使用，画师组合可以交给**画风遗传**一代代筛选，看不懂的标签有**翻译、标签百科和本地语义检索**帮忙，生成、整理、修图的杂活还可以交给内置的 **NAI Agent**。
+W.O.F NAI Studio 是一个 Windows 和 macOS 桌面上的 NovelAI 第三方客户端。它不只是把官网搬到桌面：常用的提示词可以存成**积木**反复使用，画师组合可以交给**画风遗传**一代代筛选，看不懂的标签有**翻译、标签百科和本地语义检索**帮忙，生成、整理、修图的杂活还可以交给内置的 **NAI Agent**。
 
 > 这是非官方项目，与 NovelAI 无关。请使用你自己的 NovelAI 账号，并遵守 NovelAI 的服务条款。
 
 ## 下载
 
-到 [Releases](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/latest) 下载最新版本，二选一：
+在 [Releases](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/latest) 选择对应系统的文件。Mac 包随包含此适配的版本发布。首个 Mac 版本发布前，可在通过 PR 校验的 Actions 页面下载 `macos-validation`。
 
 | 文件 | 适合谁 |
 | --- | --- |
-| `WOF_NAI_Studio_Windows_<版本>_Setup.exe` | **大多数人选这个。** 装到当前用户目录，不需要管理员权限，有开始菜单和桌面快捷方式。 |
+| `WOF_NAI_Studio_Windows_<版本>_Setup.exe` | **大多数 Windows 用户选这个。** 装到当前用户目录，不需要管理员权限，有开始菜单和桌面快捷方式。 |
 | `WOF_NAI_Studio_Windows_<版本>_Portable.zip` | 想放在自己指定的文件夹、U 盘或多台电脑之间带着走。解压后运行 `nai_launcher.exe`。 |
+| `WOF_NAI_Studio_macOS_<版本>_Portable.zip` | **Mac 用这个。** 完整包需要 macOS 13.5 及以上，包含 Apple 芯片与 Intel 两种架构。用访达解压后，把 `W.O.F NAI Studio` 拖进“应用程序”。 |
 
-两个版本都支持应用内更新。你的设置、图库数据库和 Agent 数据都放在程序旁边的 `user-data/` 和 `agent-data/` 里，升级和卸载都不会删除它们。
+Windows 的两个版本都支持应用内更新。你的设置、图库数据库和 Agent 数据都放在程序旁边的 `user-data/` 和 `agent-data/` 里，升级和卸载都不会删除它们。
 
 > **2.2.3 及更早 Portable 首次升级**：请完全退出应用，解压新版覆盖原程序目录，保留 `user-data/` 与 `agent-data/`。2.2.4 及之后可正常使用应用内更新；Setup 不受此旧脚本问题影响。
 
 > 安装包暂未做代码签名，第一次运行时 Windows 可能提示“已保护你的电脑”。点“更多信息 → 仍要运行”即可。每个版本都附有 SHA-256 校验值。
+
+### macOS
+
+- **构建与签名**：GitHub Actions 在 `macos-15` 上生成 Apple 芯片 / Intel 通用包，使用 ad-hoc 临时签名，不需要 Apple Developer 证书或密钥。PR 的 Actions 产物可用于验证，正式 tag 的产物随 Release 发布；Intel 尚待实机验证。
+- **Agent 工具**：随包提供 Node 和 npm/npx，从访达启动也能用于 Agent 包管理和本地命令 MCP。安装 Git 来源的扩展需要系统可用的 Git；这些安装仍由现有权限流程确认。
+- **第一次打开**：Mac 版没有经过 Apple 公证，第一次打开会被系统拦下。在访达里按住 Control 点按应用（或右键点按），选“打开”，再点“打开”。macOS 15 起这一步改了：先双击打开一次，再到“系统设置 → 隐私与安全性”最下面点“仍要打开”。如果提示“已损坏，无法打开”，在“终端”里运行下面这行，然后照常打开：
+
+  ```bash
+  xattr -dr com.apple.quarantine "/Applications/W.O.F NAI Studio.app"
+  ```
+
+- **更新**：应用内下载并校验新版本后，会在访达中选中它。按 `⌘Q` 退出旧版本，把新版本拖进“应用程序”替换即可。
+- **数据位置**：设置、数据库和 Agent 数据在 `~/Library/Application Support/com.wof.naiStudio/`，替换应用不会删除它们。
+- **从 1.x 升级**：第一次打开时，会把旧版（Aaalice NAI Launcher）的设置、历史记录、各类库和收藏复制过来，旧版自己的数据保持原样；旧版还开着时，会先请你退出它。登录信息不复制，需要重新登录。图片、Vibe 等放在“文稿”里的文件本来就是两版共用的。之后还可以在“设置 → 备份与重置 → 旧版数据”里再同步一次或撤销上次同步，撤销后还能换回同步后的数据；每次换之前都会备份当前数据，备份保留最近 2 份。
+- **快捷键**：快捷键里的 `Ctrl` 在 Mac 上换成 `⌘`，快捷键列表用 `⌘/` 打开。
+- **本地放大**：Real-ESRGAN 可以用，引擎和模型与 Windows 版相同，用 Mac 的显卡（Metal）运行。NVIDIA RTX Video 和 SeedVR2 需要 NVIDIA 显卡，目前只有 Windows 版。
+- **本地语义检索（RAG）**：需要 Apple 芯片的 Mac。运行设备选“自动”时，内存 18 GB 及以上的 Mac 用 GPU，16 GB 及以下用 CPU。Intel 芯片的 Mac 用不了：PyTorch 已不再提供 Intel Mac 的版本。
+- **资源小窗**：Mac 上资源小窗开在主窗口里面，可以同时开几个、拖动、缩放，把资源拖回创作区；还不是独立的系统窗口，不能拖到主窗口外，也没有窗口置顶和小窗里看大图。
 
 ## 2.2 新增与增强
 
@@ -169,13 +189,13 @@ W.O.F NAI Studio 是一个 Windows 桌面上的 NovelAI 第三方客户端。它
 
 - **NovelAI 全模型**：V1 到 V4.5、V5（Full / Curated）、多角色框和角色定位、透明背景、Anlas 实时估算和高消耗提醒；
 - **统计**：创作日历、模型与产量、Anlas 消耗，点图表直接跳到当天的图；
-- **本机桥接**：外部脚本或 AI 工具可以通过随附的 `studio-bridge.exe` 读写参数，生图前同样要报价确认；也支持 Krita 插件联动；
-- **快捷键**：按 `F1` 查看全部快捷键，都能自定义；
+- **本机桥接**：外部脚本或 AI 工具可以通过随附的 `studio-bridge`（Windows 上是 `studio-bridge.exe`）读写参数，生图前同样要报价确认；也支持 Krita 插件联动；
+- **快捷键**：按 `F1`（Mac 上是 `⌘/`）查看全部快捷键，都能自定义；
 - **五种界面语言、浅色和深色主题**。
 
 ## 隐私与网络
 
-- 账号 Token 和各家 API 密钥保存在 Windows 系统安全存储里，只在本机使用。
+- 账号 Token 和各家 API 密钥保存在本机。Windows 使用系统安全存储。macOS 使用当前用户专用的加密凭据文件；从旧的钥匙串版升级时需要重新输入密钥。
 - 只有这些情况会联网：调用 NovelAI 接口；使用你自己配置的翻译或 Agent 模型服务；浏览在线画廊；检查更新；以及你主动点击下载的可选组件（语义检索模型、放大模型等）。
 - 语义检索、本地放大、图库整理都在本机完成。
 - 自动翻译默认关闭；Danbooru 在线关联标签只发送相关的标签，不发送完整提示词。
@@ -201,7 +221,7 @@ W.O.F NAI Studio 是一个 Windows 桌面上的 NovelAI 第三方客户端。它
 <details>
 <summary><b>从源码构建</b></summary>
 
-需要 Windows 10/11 x64、Flutter 3.47.7（见 `tool/flutter-sdk.json`）、Visual Studio 2022 的“使用 C++ 的桌面开发”、Git LFS 和 NuGet CLI。
+两个平台都需要 Flutter 3.47.7（见 `tool/flutter-sdk.json`）和 Git LFS：
 
 ```bash
 git clone https://github.com/z15087716457-stack/W.O.F_NAI_Launcher.git
@@ -210,10 +230,26 @@ git lfs install && git lfs pull
 flutter pub get
 dart run tool/generate.dart
 flutter gen-l10n
+```
+
+**Windows**：需要 Windows 10/11 x64、Visual Studio 2022 的“使用 C++ 的桌面开发”和 NuGet CLI。
+
+```bash
 flutter build windows --release --no-tree-shake-icons
 ```
 
-打包安装版与便携版用 `scripts/package_windows_release.ps1`。开发约定见 [DEVELOPMENT.md](DEVELOPMENT.md)，版本记录见 [CHANGELOG.md](CHANGELOG.md)。
+打包安装版与便携版用 `scripts/package_windows_release.ps1`。
+
+**macOS**：应用主体的部署目标为 macOS 12，随包 Node 需要 macOS 13.5 及以上。构建需要完整的 Xcode（只装命令行工具不够）、CocoaPods 和 rustup（拖放和剪贴板用的 `super_native_extensions` 要编译 Rust）。发布构建要在 Apple 芯片的 Mac 上做，并装好 Rosetta（`softwareupdate --install-rosetta`）：`studio-bridge` 的 Intel 版用 x64 的 Dart SDK 编译。
+
+```bash
+scripts/build_macos.sh --release
+scripts/package_macos_release.sh
+```
+
+`build_macos.sh` 构建通用应用包，并放进 NAI Agent 的 Node 运行时、Pi、`studio-bridge` 和本地放大用的 Real-ESRGAN；`package_macos_release.sh` 检查后打成 `dist/WOF_NAI_Studio_macOS_<版本>_Portable.zip`。默认 ad-hoc 签名，有 Apple 开发者证书时用环境变量 `CODESIGN_IDENTITY` 指定。改了 `tool/branding/wof_icon.svg` 后，用 `tool/branding/generate_macos_icons.sh` 重新生成 Mac 图标（需要 `rsvg-convert`，即 Homebrew 的 librsvg）。
+
+开发约定见 [DEVELOPMENT.md](DEVELOPMENT.md)，版本记录见 [CHANGELOG.md](CHANGELOG.md)。
 
 </details>
 

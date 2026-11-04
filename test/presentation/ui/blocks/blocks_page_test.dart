@@ -248,6 +248,37 @@ void main() {
       expect(find.byKey(const Key('block-edit')), findsOneWidget);
     });
 
+    testWidgets('macOS：⌘⌫ 删除确认、菜单写 ⌘⌫；⌃⌘F（系统全屏）不聚焦搜索', (t) async {
+      await lib(t);
+      await key(t, LogicalKeyboardKey.arrowRight);
+      await t.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await t.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
+      expect(await t.sendKeyEvent(LogicalKeyboardKey.keyF), false);
+      await t.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+      await t.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      expect(
+        FocusManager.instance.primaryFocus?.context
+            ?.findAncestorWidgetOfExactType<EditableText>(),
+        isNull,
+      );
+      await key(t, LogicalKeyboardKey.backspace);
+      expect(find.byKey(const Key('blocks-delete')), findsNothing);
+      await t.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
+      await t.sendKeyEvent(LogicalKeyboardKey.backspace);
+      await t.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+      await t.pumpAndSettle();
+      expect(find.byKey(const Key('blocks-delete')), findsOneWidget);
+      await tapKey(t, 'blocks-delete-cancel');
+      // 右键菜单里「复制一份」「删除」的快捷键字写 Mac 写法
+      await t.tapAt(
+        t.getCenter(find.byKey(const Key('blocks-card-cy'))),
+        buttons: 2,
+      );
+      await t.pumpAndSettle();
+      expect(find.text('⌘D'), findsOneWidget);
+      expect(find.text('⌘⌫'), findsOneWidget);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
+
     testWidgets('Ctrl+N 新建、/ 聚焦搜索', (t) async {
       await lib(t);
       await key(t, LogicalKeyboardKey.slash);
@@ -422,6 +453,15 @@ void main() {
       expect(rec.calls, ['select:pk']);
       expect(find.byKey(const Key('blocks-selection-bar')), findsOneWidget);
     });
+
+    testWidgets('macOS：⌘ 单击进多选', (t) async {
+      await lib(t, data: view(v: BlocksView.list));
+      await t.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
+      await tapKey(t, 'blocks-row-pf');
+      await t.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+      expect(rec.calls, isEmpty);
+      expect(find.byKey(const Key('blocks-selection-bar')), findsOneWidget);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
   });
 
   group('编辑块', () {
@@ -474,6 +514,21 @@ void main() {
       await tapKey(t, 'block-edit-delete-yes');
       expect(rec.calls.last, 'delete:y99');
     });
+
+    testWidgets('macOS：⌘↩ 保存，Control+↩ 不保存', (t) async {
+      await open(t);
+      await t.tap(find.byKey(const Key('block-edit-title')));
+      await t.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await t.sendKeyEvent(LogicalKeyboardKey.enter);
+      await t.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await t.pumpAndSettle();
+      expect(rec.calls, isEmpty);
+      await t.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
+      await t.sendKeyEvent(LogicalKeyboardKey.enter);
+      await t.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+      await t.pumpAndSettle();
+      expect(rec.calls, ['save:y99']);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
 
     testWidgets('纯文本页原样保存；换图 / 清除预览图；参数从当前读取', (t) async {
       await open(t);

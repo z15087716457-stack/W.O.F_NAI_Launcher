@@ -5,6 +5,158 @@
   "brand_entryTagline": "A place for your imagination.",
   "brand_switchToLight": "Switch to light mode",
   "brand_switchToDark": "Switch to dark mode",
+  "legacyImport_copyingTitle": "Copying your data from {app}",
+  "@legacyImport_copyingTitle": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "legacyImport_copyingBody": "Settings, history, libraries and favorites are copied once, the first time this version starts. You will need to sign in again. {app} keeps its own data unchanged.",
+  "@legacyImport_copyingBody": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "legacyImport_runningTitle": "Quit {app} to bring your data over",
+  "@legacyImport_runningTitle": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "legacyImport_runningBody": "The first time it starts, this version copies the previous version's settings, history, libraries and favorites. Quit it completely, including its menu bar icon, and copying starts by itself.",
+  "legacyImport_waiting": "Waiting for {app} to quit…",
+  "@legacyImport_waiting": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "legacyImport_failedTitle": "Can't copy your data from {app}",
+  "@legacyImport_failedTitle": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "legacyImport_failedBody": "Nothing was changed: {app} keeps its data, and no partial copy was left behind. Make sure the disk has enough free space, then try again.",
+  "@legacyImport_failedBody": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "legacyImport_startWithout": "Start Without Copying",
+  "legacySync_title": "Syncing your data from {app}",
+  "@legacySync_title": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "legacySync_body": "The settings, history, libraries and favorites here are being replaced with the current ones from {app}. This version's data was backed up first.",
+  "@legacySync_body": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "legacySync_runningBody": "Syncing reads the previous version's settings, history, libraries and favorites. Quit it completely, including its menu bar icon, and syncing starts by itself.",
+  "legacySync_failedTitle": "Can't sync your data from {app}",
+  "@legacySync_failedTitle": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "legacySync_failedBody": "Your previous data is back in place and nothing half-synced was left. Make sure there's enough free disk space, then try again.",
+  "legacySync_startWithout": "Start Without Syncing",
+  "legacyUndo_title": "Undoing the last sync",
+  "legacyUndo_body": "Switching back to the data from before the sync. The data from after it is kept as a backup.",
+  "legacyUndo_failedTitle": "Can't undo the last sync",
+  "legacyUndo_failedBody": "Your data is unchanged and nothing half-switched was left. Make sure there's enough free disk space, then try again.",
+  "legacyUndo_startWithout": "Start Without Undoing",
+  "legacyRedo_title": "Switching back to the synced data",
+  "legacyRedo_body": "Changes made here after the sync come back. The data from before the sync is kept as a backup.",
+  "legacyRedo_failedTitle": "Can't switch back to the synced data",
+  "legacyRedo_startWithout": "Start Without Switching Back",
+  "set_bkLegacy": "Previous version",
+  "set_bkLegacySub": "From the previous version, {app}. Its data is only read, never changed. The latest 2 backups are kept.",
+  "@set_bkLegacySub": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "set_bkLegacySync": "Sync from previous version",
+  "set_bkLegacySyncCopied": "Copied on first launch ({time}). Sync backs up this profile and takes matching libraries from the previous version. Libraries found only here are kept.",
+  "@set_bkLegacySyncCopied": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "set_bkLegacySyncSynced": "Last synced {time}. Sync backs up this profile and takes matching libraries from the previous version. Libraries found only here are kept.",
+  "@set_bkLegacySyncSynced": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "set_bkLegacySyncNever": "Not copied on first launch. Sync backs up this profile and takes matching libraries from the previous version. Libraries found only here are kept.",
+  "set_bkLegacySyncBtn": "Sync…",
+  "set_bkLegacyUndo": "Undo last sync",
+  "set_bkLegacyUndoSub": "Go back to the data from before the {time} sync",
+  "@set_bkLegacyUndoSub": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "set_bkLegacyRedo": "Switch back to synced data",
+  "set_bkLegacyRedoSub": "Go back to the data from before the {time} undo",
+  "@set_bkLegacyRedoSub": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "set_bkLegacyUndoAgainSub": "Go back to the data from before the {time} switch",
+  "@set_bkLegacyUndoAgainSub": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "set_bkLegacyNoSync": "No sync yet",
+  "set_bkLegacyUndoBtn": "Restore…",
+  "set_bkLegacySyncTitle": "Replace this version's data with the previous version's?",
+  "set_bkLegacySyncBody": "Copies settings, history, libraries and favorites from {app}. A library at the same location is replaced as a whole. Libraries found only in this version are kept with their companion files.\n\n· This version's data is backed up first; use Undo Last Sync to switch back\n· Agent sessions and preference backups in folders found only here are kept\n· Images and Vibe files are not affected\n· Restarts the app; quit {app} first if it is open",
+  "@set_bkLegacySyncBody": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "set_bkLegacySyncRunning": "⚠ {app} is running. Quit it first, or the restart waits on a screen until you do.",
+  "@set_bkLegacySyncRunning": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "set_bkLegacySyncConfirm": "Sync and Restart",
+  "set_bkLegacyUndoTitle": "Undo the last sync?",
+  "set_bkLegacyUndoBody": "Switches back to the data from before the {time} sync. Changes made here since then are kept as a backup. Restarts the app.",
+  "@set_bkLegacyUndoBody": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "set_bkLegacyUndoConfirm": "Undo and Restart",
+  "set_bkLegacyRedoTitle": "Switch back to the synced data?",
+  "set_bkLegacyRedoBody": "Switches back to the data from before the {time} undo, including changes made here after the sync. The current data is kept as a backup. Restarts the app.",
+  "@set_bkLegacyRedoBody": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "set_bkLegacyRedoConfirm": "Switch Back and Restart",
+  "set_bkLegacyUndoAgainBody": "Switches back to the data from before the sync, as it was before the {time} switch. The current data is kept as a backup. Restarts the app.",
+  "@set_bkLegacyUndoAgainBody": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "set_bkLegacyBusy": "A task is still running. Try again when it finishes.",
+  "set_bkLegacySyncFailed": "Can't start the sync. Make sure there's enough free disk space, then try again.",
+  "set_bkLegacyUndoFailed": "Can't undo the sync. Make sure there's enough free disk space, then try again.",
+  "set_bkLegacyRedoFailed": "Can't switch back to the synced data. Make sure there's enough free disk space, then try again.",
   "app_subtitle": "NovelAI Third-party Client",
   "common_cancel": "Cancel",
   "common_confirm": "Confirm",
@@ -147,6 +299,11 @@
   "auth_error_credentialsLoginUnavailable": "Email/password login is currently unavailable",
   "auth_error_credentialsLoginUnavailable_hint": "NovelAI now requires a web safety check for email/password login. Please use a Persistent API Token instead.",
   "auth_error_serverError": "Server error",
+  "auth_credentialStorageCorrupt": "The local credential file is damaged.",
+  "auth_resetLocalCredentials": "Reset local credentials",
+  "auth_credentialResetExplanation": "This removes all saved sign-in tokens and service keys from this app on this Mac. You will need to enter them again. Your images and settings are kept.",
+  "auth_credentialStorageUnavailable": "Could not access the local credential file.",
+  "auth_credentialStorageUnavailableHint": "Sign-in was canceled. Check this macOS user’s file permissions and try again.",
   "auth_error_unknown": "Unknown error",
   "auth_autoLogin": "Auto login",
   "auth_forgotPassword": "Forgot password?",
@@ -1812,6 +1969,7 @@
   "shortcut_action_jump_to_date": "Jump to Date",
   "shortcut_action_open_folder": "Open Folder",
   "shortcut_action_minimize_to_tray": "Minimize to Tray",
+  "shortcut_action_hide_to_menu_bar": "Hide to Menu Bar",
   "shortcut_action_quit_app": "Quit Application",
   "shortcut_action_show_shortcut_help": "Show Shortcut Help",
   "shortcut_action_toggle_theme": "Toggle Theme",
@@ -2637,7 +2795,15 @@
       "version": {}
     }
   },
+  "updateDownloadedFinderHint": "v{version} has been downloaded and verified. Choose “Show in Finder”, quit this app with ⌘Q, then drag the new version into the Applications folder to replace the old one.",
+  "@updateDownloadedFinderHint": {
+    "placeholders": {
+      "version": {}
+    }
+  },
   "updateInstallAndRestart": "Install and Restart",
+  "update_runningFromStaging": "You opened the app from the update folder. Choose Show in Finder, quit with ⌘Q, then drag the app into Applications and open it there.",
+  "updateShowInFinder": "Show in Finder",
   "updateInstallNow": "Install Now",
   "updateInstallLater": "Install Later",
   "updateDownload": "Download Update",
@@ -2645,6 +2811,8 @@
   "updateDownloadFailed": "Failed to download the update",
   "updateInstallFailed": "Failed to install the update",
   "updateInstallingHint": "The installer has started. The app will close and finish updating automatically.",
+  "updatePreparingApp": "Preparing the new version...",
+  "updatePreparingAppHint": "Unpacking the update. The new version will be selected in Finder.",
   "remindMeLater": "Remind Me in 4 Hours",
   "updateNoticeAvailable": "Version v{version} is available",
   "@updateNoticeAvailable": {
@@ -2654,6 +2822,7 @@
   },
   "updateNoticeAvailableSubtitle": "Download and finish the update automatically in the app",
   "updateNoticeManualSubtitle": "This platform must be updated manually from the Release page",
+  "updateNoticeFinderSubtitle": "Download and verify in the app, then replace the old version in Finder",
   "updateNoticeReady": "Version v{version} is ready",
   "@updateNoticeReady": {
     "placeholders": {
@@ -2661,6 +2830,7 @@
     }
   },
   "updateNoticeReadySubtitle": "The package is verified and ready to install on restart",
+  "updateNoticeReadyFinderSubtitle": "The package is verified; replace the old version in Finder to finish",
   "updateNoticeFailed": "The previous update did not finish",
   "updateViewDetails": "View Update",
   "updateSettingsAvailable": "v{version} is available; select to view details",
@@ -2843,6 +3013,7 @@
   "common_clickToRetry": "Click to retry",
   "common_opening": "Opening...",
   "common_swap": "Swap",
+  "common_showInFinder": "Show in Finder",
   "addToLibrary_displayNameHint": "Enter a name to identify this entry",
   "addToLibrary_tagHint": "Enter a tag and press Enter to add it",
   "drop_saveVibeBundle": "Save Vibe Bundle",
@@ -3237,6 +3408,10 @@
   "tips_studio_trick_6": "Middle-click a translation block to flip between the original and the translation. However good the AI is, peek at the original now and then to make sure \"cat ears\" didn't become something strange.",
   "@tips_studio_trick_6": {
     "description": "promptTranslation_guideMiddleText."
+  },
+  "tips_studio_trick_6_mac": "⌘-click a translation block to flip between the original and the translation. However good the AI is, peek at the original now and then to make sure \"cat ears\" didn't become something strange.",
+  "@tips_studio_trick_6_mac": {
+    "description": "macOS variant of tips_studio_trick_6: Cmd+click toggles a translation block."
   },
   "tips_studio_trick_7": "Limit generation frequency in Settings forces a cooldown between runs, and a little random jitter keeps the rhythm from feeling mechanical. Good for slow late-night sessions — and for anyone whose finger won't leave the button.",
   "@tips_studio_trick_7": {
@@ -4761,6 +4936,7 @@
   "promptTranslation_tutorial": "How it works",
   "promptTranslation_guideBack": "Back to actions",
   "promptTranslation_guideMiddleTitle": "Middle-click a block",
+  "promptTranslation_guideCommandClickTitle": "⌘ + click a block",
   "promptTranslation_guideMiddleText": "Switch original and translation",
   "promptTranslation_guideSourceTitle": "Left-click the original",
   "promptTranslation_guideSourceText": "Place the cursor and edit directly",
@@ -4897,6 +5073,13 @@
   "update_errorPackageRemoved": "The update package was cleaned up; download it again",
   "update_errorPackageCorrupted": "The update package is corrupted; download it again",
   "update_errorLaunchFailed": "Failed to start the updater",
+  "update_errorExtractFailed": "Failed to unpack the update package",
+  "update_errorRevealFailed": "Failed to show the new version in Finder; it is at {path}",
+  "@update_errorRevealFailed": {
+    "placeholders": {
+      "path": {}
+    }
+  },
   "update_errorCheckFailed": "Failed to check for updates",
   "update_errorRateLimited": "GitHub request limit reached. Please try again later.",
   "update_retryAt": "Try again after {time} (local time).",
@@ -5301,7 +5484,7 @@
   "localUpscale_resizing": "Finishing image…",
   "localUpscale_complete": "Upscale complete",
   "localUpscale_cancelling": "Cancelling…",
-  "localUpscale_unsupportedPlatform": "Local upscaling currently supports Windows.",
+  "localUpscale_unsupportedPlatform": "This upscaling method is currently available on Windows only.",
   "localUpscale_engineMissing": "Local engine unavailable. Reinstall the complete Studio package.",
   "localUpscale_integrity": "File verification failed. Reinstall the affected model or Studio package.",
   "localUpscale_modelMissing": "Model unavailable. Choose an installed model or check the model folder path length.",
@@ -7380,6 +7563,7 @@
   },
   "imageViewer_missingTitle": "Can't find this image",
   "imageViewer_missingHint": "It may have been moved, renamed or deleted in Explorer",
+  "imageViewer_missingHintFinder": "It may have been moved, renamed or deleted in Finder",
   "imageViewer_openFolder": "Open folder",
   "imageViewer_nextImage": "Next image",
   "imageViewer_hintPan": "Drag to pan",
@@ -8833,6 +9017,7 @@
   "naiAgent_inputChanged": "Input changed while preparing. Send the current draft.",
   "naiAgent_imageLimit": "Invalid image format or image exceeds upload limits.",
   "naiAgent_composerNotEmpty": "Save or send the current input before restoring this message.",
+  "naiAgent_bundledNodeRequiresMacOS135": "The bundled Agent requires macOS 13.5 or later. You can still generate images on this Mac.",
   "naiAgent_runtimeMissing": "Agent runtime is missing. Install the complete update package.",
   "naiAgent_usage": "Model usage",
   "naiAgent_globalScope": "Global default",
@@ -9534,6 +9719,7 @@
   "set_apDark": "Dark",
   "set_apSystem": "System",
   "set_apSystemSub": "Follows the Windows setting",
+  "set_apSystemSubMac": "Follows the macOS setting",
   "set_apText": "Text",
   "set_apFont": "Interface font",
   "set_apFontSub": "Numbers and code always use Geist Mono",
@@ -9749,6 +9935,12 @@
   "@set_stFree": {
     "placeholders": {
       "disk": {},
+      "size": {}
+    }
+  },
+  "set_stFreeMac": "{size} free",
+  "@set_stFreeMac": {
+    "placeholders": {
       "size": {}
     }
   },
@@ -10192,6 +10384,10 @@
   "set_rgInstallHint": "Downloads Python and inference packages, not model weights. Pick CUDA for NVIDIA GPUs (several GB); otherwise CPU, which is smaller.",
   "set_rgInstallCuda": "CUDA · NVIDIA",
   "set_rgInstallCpu": "CPU",
+  "set_rgInstallHintMac": "Downloads Python and inference packages (about 200 MB), not model weights. Needs a Mac with Apple silicon. Auto runs on the GPU on Macs with 18 GB of memory or more, and on the CPU with 16 GB or less.",
+  "set_rgPythonSubMac": "Uses the standalone runtime by default; you can pick an existing python3.",
+  "set_rgNeedsAppleSilicon": "Needs a Mac with Apple silicon. PyTorch no longer makes builds for Intel Macs, so the runtime can't be installed on this Mac.",
+  "set_rgEnvUnsupported": "Not supported",
   "set_rgPhaseExisting": "Checking existing runtime",
   "set_rgPhaseDownload": "Downloading installer",
   "set_rgPhaseCreate": "Preparing Python",
@@ -11283,6 +11479,7 @@
   "ag_psNoCharacters": "The current model doesn't support character prompts",
   "ag_psMissing": "This card's data is no longer available",
   "startup_dataTitle": "Could not prepare application data",
+  "startup_profileInUse": "Another copy of the app is using this data folder. Quit that copy, then retry.",
   "startup_dataHelp": "Application data is not ready. Keep existing files; files with different contents are not merged or overwritten. Back up and check your data folders, free disk space and permissions, then retry.",
   "startup_dataCurrent": "Current data folder",
   "startup_dataLegacy": "Previous data folder",

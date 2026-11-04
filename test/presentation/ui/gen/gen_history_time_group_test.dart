@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -59,40 +60,52 @@ void main() {
       'onOpenViewer(done-0)',
     ]);
   });
-  testWidgets('打开详情模式仍优先 Ctrl、Shift 和多选按钮', (tester) async {
-    final recorder = GenRecorder();
-    await pumpGen(
-      tester,
-      actions: recorder.actions,
-      data: data([
-        for (final id in ['first', 'second', 'third'])
-          batch(id, DateTime(2026, 10, 12, 10, 46)),
-      ], openDetailOnClick: true),
-    );
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
-    await tapKey(tester, 'gen-batch-tile-first');
-    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
-    await tapKey(tester, 'gen-batch-tile-third');
-    await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
-    await tapKey(tester, 'gen-history-save-selected');
-    expect(
-      recorder.last('onSaveImages'),
-      'onSaveImages([first-0, second-0, third-0])',
-    );
-    expect(recorder.called('onOpenViewer'), isFalse);
-    expect(recorder.called('onFocusBatch'), isFalse);
-    await tapKey(tester, 'gen-history-select');
-    await tapKey(tester, 'gen-history-select');
-    await tapKey(tester, 'gen-batch-tile-second');
-    await tapKey(tester, 'gen-history-save-selected');
-    expect(recorder.last('onSaveImages'), 'onSaveImages([second-0])');
-    expect(recorder.called('onOpenViewer'), isFalse);
-    await tapKey(tester, 'gen-history-select');
-    await tapKey(tester, 'gen-batch-tile-second');
-    expect(recorder.last('onOpenViewer'), 'onOpenViewer(second-0)');
-    expect(tester.takeException(), isNull);
-  });
+  testWidgets(
+    '打开详情模式仍优先 Ctrl/Cmd、Shift 和多选按钮',
+    (tester) async {
+      final recorder = GenRecorder();
+      await pumpGen(
+        tester,
+        actions: recorder.actions,
+        data: data([
+          for (final id in ['first', 'second', 'third'])
+            batch(id, DateTime(2026, 10, 12, 10, 46)),
+        ], openDetailOnClick: true),
+      );
+      final modifier = defaultTargetPlatform == TargetPlatform.macOS
+          ? LogicalKeyboardKey.metaLeft
+          : LogicalKeyboardKey.controlLeft;
+      await tester.sendKeyDownEvent(modifier);
+      await tapKey(tester, 'gen-batch-tile-first');
+      await tester.sendKeyUpEvent(modifier);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      await tapKey(tester, 'gen-batch-tile-third');
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+      await tapKey(tester, 'gen-history-save-selected');
+      expect(
+        recorder.last('onSaveImages'),
+        'onSaveImages([first-0, second-0, third-0])',
+      );
+      expect(recorder.called('onOpenViewer'), isFalse);
+      expect(recorder.called('onFocusBatch'), isFalse);
+      expect(recorder.called('onFocusTile'), isFalse);
+      await tapKey(tester, 'gen-history-select');
+      await tapKey(tester, 'gen-history-select');
+      await tapKey(tester, 'gen-batch-tile-second');
+      await tapKey(tester, 'gen-history-save-selected');
+      expect(recorder.last('onSaveImages'), 'onSaveImages([second-0])');
+      expect(recorder.called('onOpenViewer'), isFalse);
+      expect(recorder.called('onFocusTile'), isFalse);
+      await tapKey(tester, 'gen-history-select');
+      await tapKey(tester, 'gen-batch-tile-second');
+      expect(recorder.last('onOpenViewer'), 'onOpenViewer(second-0)');
+      expect(tester.takeException(), isNull);
+    },
+    variant: const TargetPlatformVariant({
+      TargetPlatform.macOS,
+      TargetPlatform.windows,
+    }),
+  );
   for (final dark in [false, true]) {
     testWidgets('同一分钟不同请求共享时间标题，保留两个缩略图 $dark', (tester) async {
       await pumpGen(

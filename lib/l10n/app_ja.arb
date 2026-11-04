@@ -5,6 +5,158 @@
   "brand_entryTagline": "想像が、かたちになる場所。",
   "brand_switchToLight": "ライトモードに切り替え",
   "brand_switchToDark": "ダークモードに切り替え",
+  "legacyImport_copyingTitle": "{app} からデータをコピーしています",
+  "@legacyImport_copyingTitle": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "legacyImport_copyingBody": "設定、履歴、各種ライブラリとお気に入りは、初回起動時に一度だけコピーされます。アカウントにはもう一度ログインしてください。{app} のデータはそのまま残ります。",
+  "@legacyImport_copyingBody": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "legacyImport_runningTitle": "{app} を終了してください",
+  "@legacyImport_runningTitle": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "legacyImport_runningBody": "初回起動時に、旧版の設定、履歴、各種ライブラリとお気に入りをコピーします。メニューバーのアイコンも含めて旧版を完全に終了すると、自動的にコピーが始まります。",
+  "legacyImport_waiting": "{app} の終了を待っています…",
+  "@legacyImport_waiting": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "legacyImport_failedTitle": "{app} からデータをコピーできません",
+  "@legacyImport_failedTitle": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "legacyImport_failedBody": "データは何も変更されていません。{app} のデータはそのまま残り、途中までのコピーも残っていません。ディスクの空き容量を確認してから、もう一度お試しください。",
+  "@legacyImport_failedBody": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "legacyImport_startWithout": "コピーせずに起動",
+  "legacySync_title": "{app} からデータを同期しています",
+  "@legacySync_title": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "legacySync_body": "ここにある設定、履歴、各種ライブラリとお気に入りを、{app} の現在のデータに置き換えています。このバージョンのデータは先にバックアップしました。",
+  "@legacySync_body": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "legacySync_runningBody": "同期では旧版の設定、履歴、各種ライブラリとお気に入りを読み込みます。メニューバーのアイコンも含めて旧版を完全に終了すると、自動的に同期が始まります。",
+  "legacySync_failedTitle": "{app} からデータを同期できません",
+  "@legacySync_failedTitle": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "legacySync_failedBody": "同期前のデータに戻しました。途中までの同期も残っていません。ディスクの空き容量を確認してから、もう一度お試しください。",
+  "legacySync_startWithout": "同期せずに起動",
+  "legacyUndo_title": "前回の同期を取り消しています",
+  "legacyUndo_body": "同期前のデータに戻しています。同期後のデータはバックアップとして残します。",
+  "legacyUndo_failedTitle": "前回の同期を取り消せません",
+  "legacyUndo_failedBody": "データは変更されておらず、途中までの切り替えも残っていません。ディスクの空き容量を確認してから、もう一度お試しください。",
+  "legacyUndo_startWithout": "取り消さずに起動",
+  "legacyRedo_title": "同期後のデータに戻しています",
+  "legacyRedo_body": "同期後にここで行った変更も戻ります。同期前のデータはバックアップとして残します。",
+  "legacyRedo_failedTitle": "同期後のデータに戻せません",
+  "legacyRedo_startWithout": "戻さずに起動",
+  "set_bkLegacy": "旧版のデータ",
+  "set_bkLegacySub": "旧版 {app} のデータです。読み込むだけで変更はしません。バックアップは直近 2 件を保持します。",
+  "@set_bkLegacySub": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "set_bkLegacySync": "旧版から同期",
+  "set_bkLegacySyncCopied": "初回起動時にコピーしました（{time}）。同期前に現在のデータをバックアップします。同じ場所の同名ライブラリは旧版のものに置き換え、この版にだけあるライブラリは保持します。",
+  "@set_bkLegacySyncCopied": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "set_bkLegacySyncSynced": "前回の同期は {time} です。同期前に現在のデータをバックアップします。同じ場所の同名ライブラリは旧版のものに置き換え、この版にだけあるライブラリは保持します。",
+  "@set_bkLegacySyncSynced": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "set_bkLegacySyncNever": "初回起動時にはコピーしていません。同期前に現在のデータをバックアップします。同じ場所の同名ライブラリは旧版のものに置き換え、この版にだけあるライブラリは保持します。",
+  "set_bkLegacySyncBtn": "同期…",
+  "set_bkLegacyUndo": "前回の同期を取り消す",
+  "set_bkLegacyUndoSub": "{time} の同期前のデータに戻します",
+  "@set_bkLegacyUndoSub": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "set_bkLegacyRedo": "同期後のデータに戻す",
+  "set_bkLegacyRedoSub": "{time} の取り消し前のデータに戻します",
+  "@set_bkLegacyRedoSub": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "set_bkLegacyUndoAgainSub": "{time} の切り替え前のデータに戻します",
+  "@set_bkLegacyUndoAgainSub": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "set_bkLegacyNoSync": "まだ同期していません",
+  "set_bkLegacyUndoBtn": "復元…",
+  "set_bkLegacySyncTitle": "旧版のデータで置き換えますか？",
+  "set_bkLegacySyncBody": "{app} の設定、履歴、ライブラリ、お気に入りをコピーします。同じ場所にある同名のライブラリは旧版のファイル一式に置き換えます。この版にだけあるライブラリは関連ファイルごと保持します。\n\n· 現在のデータは先にすべてバックアップし、「前回の同期を取り消す」で元に戻せます\n· この版にだけあるフォルダの Agent セッションや設定のバックアップは保持されます\n· 画像と Vibe ファイルには影響しません\n· アプリを再起動します。旧版が起動中なら先に終了してください",
+  "@set_bkLegacySyncBody": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "set_bkLegacySyncRunning": "⚠ {app} が起動中です。先に終了してください。終了しないと、再起動後に終了を待つ画面で止まります。",
+  "@set_bkLegacySyncRunning": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "set_bkLegacySyncConfirm": "同期して再起動",
+  "set_bkLegacyUndoTitle": "前回の同期を取り消しますか？",
+  "set_bkLegacyUndoBody": "{time} の同期前のデータに戻します。同期後にここで行った変更はバックアップとして残します。アプリを再起動します。",
+  "@set_bkLegacyUndoBody": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "set_bkLegacyUndoConfirm": "取り消して再起動",
+  "set_bkLegacyRedoTitle": "同期後のデータに戻しますか？",
+  "set_bkLegacyRedoBody": "{time} の取り消し前のデータに戻します。同期後にここで行った変更も戻ります。現在のデータはバックアップとして残します。アプリを再起動します。",
+  "@set_bkLegacyRedoBody": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "set_bkLegacyRedoConfirm": "戻して再起動",
+  "set_bkLegacyUndoAgainBody": "{time} の切り替え前のデータ、つまり同期前のデータに戻します。現在のデータはバックアップとして残します。アプリを再起動します。",
+  "@set_bkLegacyUndoAgainBody": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "set_bkLegacyBusy": "実行中のタスクがあります。終わってからもう一度お試しください。",
+  "set_bkLegacySyncFailed": "同期を開始できません。ディスクの空き容量を確認してから、もう一度お試しください。",
+  "set_bkLegacyUndoFailed": "同期を取り消せません。ディスクの空き容量を確認してから、もう一度お試しください。",
+  "set_bkLegacyRedoFailed": "同期後のデータに戻せません。ディスクの空き容量を確認してから、もう一度お試しください。",
   "app_subtitle": "NovelAI サードパーティ クライアント",
   "common_cancel": "キャンセル",
   "common_confirm": "確認",
@@ -146,6 +298,11 @@
   "auth_error_credentialsLoginUnavailable": "メールアドレス/パスワードでのログインは現在利用できません",
   "auth_error_credentialsLoginUnavailable_hint": "NovelAI ではメールアドレス/パスワードログインに Web の安全確認が必要になりました。代わりに Persistent API Token を使用してください。",
   "auth_error_serverError": "サーバーエラー",
+  "auth_credentialStorageCorrupt": "この Mac の認証情報ファイルが破損しています。",
+  "auth_resetLocalCredentials": "ローカル認証情報をリセット",
+  "auth_credentialResetExplanation": "この Mac 上でアプリに保存したすべてのログイントークンとサービスキーを削除します。再度入力が必要になります。画像と設定は保持されます。",
+  "auth_credentialStorageUnavailable": "ローカルの認証情報ファイルにアクセスできません。",
+  "auth_credentialStorageUnavailableHint": "ログインを取り消しました。現在の macOS ユーザのファイル権限を確認して、もう一度お試しください。",
   "auth_error_unknown": "不明なエラー",
   "auth_autoLogin": "自動ログイン",
   "auth_forgotPassword": "パスワードをお忘れですか?",
@@ -1806,6 +1963,7 @@
   "shortcut_action_jump_to_date": "日付に移動",
   "shortcut_action_open_folder": "フォルダーを開く",
   "shortcut_action_minimize_to_tray": "トレイに最小化",
+  "shortcut_action_hide_to_menu_bar": "メニューバーに隠す",
   "shortcut_action_quit_app": "アプリケーションを終了します",
   "shortcut_action_show_shortcut_help": "ショートカット ヘルプを表示",
   "shortcut_action_toggle_theme": "テーマの切り替え",
@@ -2626,6 +2784,7 @@
   },
   "updateNoticeAvailableSubtitle": "アプリ内でダウンロードして自動的に更新できます",
   "updateNoticeManualSubtitle": "このプラットフォームでは Release ページから手動で更新してください",
+  "updateNoticeFinderSubtitle": "アプリ内でダウンロードと検証を行い、Finder で古いバージョンと置き換えます",
   "updateNoticeReady": "バージョン v{version} の準備ができました",
   "@updateNoticeReady": {
     "placeholders": {
@@ -2633,6 +2792,7 @@
     }
   },
   "updateNoticeReadySubtitle": "パッケージは検証済みです。再起動してインストールできます",
+  "updateNoticeReadyFinderSubtitle": "パッケージは検証済みです。Finder で古いバージョンと置き換えてください",
   "updateNoticeFailed": "前回の更新は完了しませんでした",
   "updateViewDetails": "更新を表示",
   "updateSettingsAvailable": "v{version} が利用可能です。選択して詳細を表示",
@@ -2670,12 +2830,22 @@
       "version": {}
     }
   },
+  "updateDownloadedFinderHint": "v{version} をダウンロードし、検証が完了しました。「Finder に表示」を押したあと、⌘Q でこのアプリを終了し、新しいバージョンを「アプリケーション」フォルダにドラッグして古いバージョンと置き換えてください。",
+  "@updateDownloadedFinderHint": {
+    "placeholders": {
+      "version": {}
+    }
+  },
   "updateInstallAndRestart": "インストールして再起動",
+  "update_runningFromStaging": "アップデートフォルダ内のアプリを実行しています。「Finder に表示」を選び、⌘Q で終了してから「アプリケーション」にドラッグし、そこから開いてください。",
+  "updateShowInFinder": "Finder に表示",
   "updateInstallLater": "後でインストール",
   "updateDownloadCancelled": "ダウンロードをキャンセルしました。後で再開できます",
   "updateDownloadFailed": "更新のダウンロードに失敗しました",
   "updateInstalling": "インストーラーを起動しています...",
   "updateInstallingHint": "インストーラーが起動しました。アプリは終了し、自動的に更新が完了します。",
+  "updatePreparingApp": "新しいバージョンを準備しています...",
+  "updatePreparingAppHint": "更新パッケージを展開しています。完了すると Finder で新しいバージョンが選択されます。",
   "cannotOpenUrl": "リンクを開けません",
   "model3d_editorTitle": "3Dモデルレイヤー",
   "model3d_modeTransform": "変換",
@@ -2843,6 +3013,7 @@
   "common_clickToRetry": "クリックして再試行",
   "common_opening": "開いています...",
   "common_swap": "入れ替え",
+  "common_showInFinder": "Finder で表示",
   "addToLibrary_displayNameHint": "この項目を識別する名前を入力",
   "addToLibrary_tagHint": "タグを入力して Enter キーで追加",
   "drop_saveVibeBundle": "Vibe Bundleを保存",
@@ -3237,6 +3408,10 @@
   "tips_studio_trick_6": "翻訳ブロックを中クリックすると、原文と訳文を切り替えられます。AI の翻訳がどれだけ優秀でも、たまには原文をのぞいて cat ears が変なものになっていないか確かめましょう。",
   "@tips_studio_trick_6": {
     "description": "promptTranslation_guideMiddleText."
+  },
+  "tips_studio_trick_6_mac": "翻訳ブロックを ⌘ を押しながらクリックすると、原文と訳文を切り替えられます。AI の翻訳がどれだけ優秀でも、たまには原文をのぞいて cat ears が変なものになっていないか確かめましょう。",
+  "@tips_studio_trick_6_mac": {
+    "description": "macOS variant of tips_studio_trick_6: Cmd+click toggles a translation block."
   },
   "tips_studio_trick_7": "設定の「画像生成の頻度を制限」を使うと、生成と生成のあいだに強制クールダウンを入れられます。少しランダムな揺らぎも足せば、リズムが機械っぽくなりません。のんびり回す夜にも、手が止まらない自分にも。",
   "@tips_studio_trick_7": {
@@ -4761,6 +4936,7 @@
   "promptTranslation_tutorial": "使い方",
   "promptTranslation_guideBack": "操作に戻る",
   "promptTranslation_guideMiddleTitle": "ブロックを中クリック",
+  "promptTranslation_guideCommandClickTitle": "⌘ + ブロックをクリック",
   "promptTranslation_guideMiddleText": "原文と訳文を切り替え",
   "promptTranslation_guideSourceTitle": "原文を左クリック",
   "promptTranslation_guideSourceText": "カーソルを置いて直接編集",
@@ -4897,6 +5073,13 @@
   "update_errorPackageRemoved": "更新パッケージが削除されました。もう一度ダウンロードしてください",
   "update_errorPackageCorrupted": "更新パッケージが破損しています。もう一度ダウンロードしてください",
   "update_errorLaunchFailed": "更新プログラムの起動に失敗しました",
+  "update_errorExtractFailed": "更新パッケージの展開に失敗しました",
+  "update_errorRevealFailed": "新しいバージョンを Finder に表示できませんでした。場所：{path}",
+  "@update_errorRevealFailed": {
+    "placeholders": {
+      "path": {}
+    }
+  },
   "update_errorCheckFailed": "更新の確認に失敗しました",
   "update_errorRateLimited": "GitHub のリクエスト上限に達しました。しばらくしてから再試行してください。",
   "update_retryAt": "{time}（現地時刻）以降に再試行してください。",
@@ -5265,7 +5448,7 @@
   "localUpscale_resizing": "画像を仕上げ中…",
   "localUpscale_complete": "超解像完了",
   "localUpscale_cancelling": "キャンセル中…",
-  "localUpscale_unsupportedPlatform": "ローカル超解像は現在 Windows に対応しています。",
+  "localUpscale_unsupportedPlatform": "この拡大方式は現在 Windows のみ対応しています。",
   "localUpscale_engineMissing": "ローカルエンジンを利用できません。Studio の完全なパッケージを再インストールしてください。",
   "localUpscale_integrity": "ファイル検証に失敗しました。モデルまたは Studio を再インストールしてください。",
   "localUpscale_modelMissing": "モデルを利用できません。インストール済みのモデルを選ぶか、フォルダーのパス長を確認してください。",
@@ -7362,6 +7545,7 @@
   },
   "imageViewer_missingTitle": "この画像が見つかりません",
   "imageViewer_missingHint": "エクスプローラーで移動・名前変更・削除された可能性があります",
+  "imageViewer_missingHintFinder": "Finder で移動・名前変更・削除された可能性があります",
   "imageViewer_openFolder": "フォルダーを開く",
   "imageViewer_nextImage": "次の画像",
   "imageViewer_hintPan": "ドラッグで移動",
@@ -8813,6 +8997,7 @@
   "naiAgent_inputChanged": "準備中に入力が変わりました。現在の下書きを送信してください。",
   "naiAgent_imageLimit": "画像形式が無効、またはアップロード上限を超えています。",
   "naiAgent_composerNotEmpty": "現在の入力を保存または送信してから戻してください。",
+  "naiAgent_bundledNodeRequiresMacOS135": "内蔵エージェントには macOS 13.5 以降が必要です。この Mac では引き続き画像を生成できます。",
   "naiAgent_runtimeMissing": "Agent 実行環境がありません。完全な更新パッケージを使用してください。",
   "naiAgent_usage": "モデル使用量",
   "naiAgent_globalScope": "全体の既定値",
@@ -9514,6 +9699,7 @@
   "set_apDark": "ダーク",
   "set_apSystem": "システム",
   "set_apSystemSub": "Windows の設定に合わせる",
+  "set_apSystemSubMac": "macOS の設定に合わせる",
   "set_apText": "文字",
   "set_apFont": "UI フォント",
   "set_apFontSub": "数字とコードは Geist Mono を使います",
@@ -9729,6 +9915,12 @@
   "@set_stFree": {
     "placeholders": {
       "disk": {},
+      "size": {}
+    }
+  },
+  "set_stFreeMac": "空き {size}",
+  "@set_stFreeMac": {
+    "placeholders": {
       "size": {}
     }
   },
@@ -10162,6 +10354,10 @@
   "set_rgInstallHint": "Python と推論依存をダウンロードします（モデルの重みは含みません）。NVIDIA なら CUDA（数 GB）、それ以外は小さい CPU 版。",
   "set_rgInstallCuda": "CUDA · NVIDIA",
   "set_rgInstallCpu": "CPU",
+  "set_rgInstallHintMac": "Python と推論依存をダウンロードします（約 200 MB、モデルの重みは含みません）。Apple シリコンの Mac が必要です。「自動」は、メモリ 18 GB 以上の Mac では GPU、16 GB 以下では CPU を使います。",
+  "set_rgPythonSubMac": "既定は自動インストールの独立環境。既存の python3 も選べます。",
+  "set_rgNeedsAppleSilicon": "Apple シリコンの Mac が必要です。PyTorch は Intel Mac 向けの版を提供していないため、この Mac には実行環境をインストールできません。",
+  "set_rgEnvUnsupported": "非対応",
   "set_rgPhaseExisting": "既存の環境を確認中",
   "set_rgPhaseDownload": "インストーラーをダウンロード中",
   "set_rgPhaseCreate": "Python を準備中",
@@ -11253,6 +11449,7 @@
   "ag_psNoCharacters": "現在のモデルはキャラクタープロンプトに対応していません",
   "ag_psMissing": "このカードのデータは見つかりません",
   "startup_dataTitle": "アプリのデータを準備できませんでした",
+  "startup_profileInUse": "別のアプリのコピーがこのデータフォルダを使用中です。そのアプリを終了してから、もう一度お試しください。",
   "startup_dataHelp": "アプリのデータを準備できていません。既存のファイルを保持してください。内容の異なるファイルは統合も上書きもしません。データフォルダーをバックアップして確認し、ディスクの空き容量とアクセス権を確認してから再試行してください。",
   "startup_dataCurrent": "現在のデータフォルダー",
   "startup_dataLegacy": "以前のデータフォルダー",

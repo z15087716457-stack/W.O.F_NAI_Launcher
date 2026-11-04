@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'proxy_bypass.dart';
 import '../utils/app_logger.dart';
 
 /// 系统代理 HTTP 覆盖类
@@ -11,10 +12,20 @@ class SystemProxyHttpOverrides extends HttpOverrides {
   /// 代理配置字符串
   final String _proxyString;
 
+  /// 不走代理的地址（本机一律直连，见 [ProxyBypassList]）
+  final ProxyBypassList _bypass;
+
   /// 构造函数
   ///
   /// [proxyString] 格式为 "PROXY host:port" 或 "DIRECT"
-  SystemProxyHttpOverrides(this._proxyString);
+  SystemProxyHttpOverrides(
+    this._proxyString, {
+    ProxyBypassList bypass = ProxyBypassList.loopbackOnly,
+  }) : _bypass = bypass;
+
+  /// 这个地址走代理还是直连
+  String proxyFor(Uri uri) =>
+      _bypass.matches(uri.host) ? 'DIRECT' : _proxyString;
 
   @override
   HttpClient createHttpClient(SecurityContext? context) {
@@ -24,11 +35,12 @@ class SystemProxyHttpOverrides extends HttpOverrides {
     // 设置代理配置
     // findProxy 回调接收请求 URI，返回代理字符串
     client.findProxy = (uri) {
+      final proxy = proxyFor(uri); // 本机和「不走代理」名单里的直连
       AppLogger.d(
-        'Proxy request for: ${uri.host}:${uri.port} -> $_proxyString',
+        'Proxy request for: ${uri.host}:${uri.port} -> $proxy',
         'PROXY',
       );
-      return _proxyString;
+      return proxy;
     };
 
     // 可选：处理代理服务器的证书验证问题

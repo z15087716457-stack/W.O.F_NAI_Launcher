@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 
 import '../../../../core/autocomplete/completion_models.dart';
 import '../../../../core/autocomplete/prompt_token_parser.dart';
+import '../../../../core/utils/desktop_platform.dart';
 import '../../../../core/utils/draft_history.dart';
 import '../../../../core/utils/prompt_translation_edit.dart';
 import '../../../../core/utils/prompt_translation_language.dart';
@@ -846,10 +847,11 @@ class _TranslationPillEditPopoverState
     final focus = chinese ? _zhFocus : _sourceFocus;
     final history = chinese ? _zhHistory : _sourceHistory;
     Widget field = Shortcuts(
-      shortcuts: const {
-        SingleActivator(LogicalKeyboardKey.keyY, control: true): RedoTextIntent(
-          SelectionChangedCause.keyboard,
-        ),
+      // Ctrl+Y 重做是 Windows 的习惯；macOS 上重做是系统自带的 ⇧⌘Z，Control+Y 留给文本框（yank）
+      shortcuts: {
+        if (!usesMacOSConventions)
+          const SingleActivator(LogicalKeyboardKey.keyY, control: true):
+              const RedoTextIntent(SelectionChangedCause.keyboard),
       },
       child: Actions(
         actions: {

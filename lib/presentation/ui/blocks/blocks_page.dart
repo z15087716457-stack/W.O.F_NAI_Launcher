@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../core/utils/keyboard_modifier_utils.dart';
 import '../../../core/utils/localization_extension.dart';
+import '../../../core/utils/platform_shortcut_text.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_dialog.dart';
 import '../kit/ui_glyph.dart';
@@ -207,12 +209,14 @@ class BlocksLibraryPageState extends State<BlocksLibraryPage> {
       return KeyEventResult.ignored;
     }
     final k = e.logicalKey;
-    final hw = HardwareKeyboard.instance;
-    final ctrl = hw.isControlPressed || hw.isMetaPressed;
+    // Ctrl 或 ⌘；macOS 上只认 ⌘（⌃⌘F 是系统全屏）
+    final ctrl = isControlOrCommandPressed();
     if (ctrl && k == LogicalKeyboardKey.keyF) {
       searchFocus.requestFocus();
       return KeyEventResult.handled;
     }
+    // macOS 上带 Control 的组合（⌃⌘F 全屏……）不当裸键，留给系统菜单
+    if (isMacChordModifierPressed() && !ctrl) return KeyEventResult.ignored;
     if (_typing() || _dialog != _Dialog.none) return KeyEventResult.ignored;
     if (k == LogicalKeyboardKey.slash && !ctrl) {
       searchFocus.requestFocus();
@@ -257,7 +261,7 @@ class BlocksLibraryPageState extends State<BlocksLibraryPage> {
       _actions.onSetFavorite(t, !all);
     } else if (ctrl && k == LogicalKeyboardKey.keyD && !_picking) {
       _actions.onDuplicate(t.first);
-    } else if (k == LogicalKeyboardKey.delete) {
+    } else if (isListDeleteKey(e)) {
       confirmDelete(t);
     } else {
       return KeyEventResult.ignored;
@@ -569,7 +573,7 @@ List<UiMenuItem> blocksCardMenu(BuildContext context, BlockData b) {
     UiMenuItem(
       glyph: UiGlyphs.trash,
       label: l10n.blocks_delete,
-      trailing: 'Del',
+      trailing: listDeleteKeyLabel(),
       danger: true,
       divider: true,
       onTap: () => ctrl.confirmDelete([b.id]),

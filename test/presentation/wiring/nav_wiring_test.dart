@@ -1,5 +1,4 @@
-import 'dart:typed_data';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -190,6 +189,22 @@ void main() {
       expect(navShortcutKeycaps(null), isEmpty);
     },
   );
+
+  test('macOS：导航键帽用 Mac 符号（⌘1、⌘,）', () {
+    debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+    try {
+      final config = ShortcutConfig.createDefault().setCustomShortcut(
+        ShortcutIds.navigateToStyleExplore,
+        'shift+alt+ctrl+a',
+      );
+      final caps = navShortcutKeycaps(config);
+      expect(caps[NavPage.generation], ['⌘', '1']);
+      expect(caps[NavPage.settings], ['⌘', ',']);
+      expect(caps[NavPage.styleExplore], ['⌥', '⇧', '⌘', 'A']);
+    } finally {
+      debugDefaultTargetPlatformOverride = null;
+    }
+  });
 
   test(
     'account mapping follows authenticated identity and subscription expiry semantics',

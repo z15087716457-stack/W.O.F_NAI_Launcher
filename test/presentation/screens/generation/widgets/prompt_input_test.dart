@@ -1239,6 +1239,118 @@ void main() {
     }
   });
 
+  testWidgets('macOS：⌘F 搜索、⌥⌘F 替换、⌘↩ 全部替换；⌘H（系统隐藏）和 ⌃⌘F 不占', (tester) async {
+    const prompt = 'alpha, beta, Alpha';
+    debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+    try {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            kritaBridgeNotifierProvider.overrideWith(
+              (ref) => KritaBridgeNotifier(),
+            ),
+            promptBlockLibraryNotifierProvider.overrideWith(
+              _EmptyPromptBlockLibraryNotifier.new,
+            ),
+            localStorageServiceProvider.overrideWith((ref) {
+              return _TestLocalStorageService();
+            }),
+            characterPromptNotifierProvider.overrideWith(
+              _TestCharacterPromptNotifier.new,
+            ),
+            promptTokenUsageProvider(
+              PromptTokenCountTarget.positive,
+            ).overrideWith(
+              (ref) async => const PromptTokenUsage(usedTokens: 0, limit: 512),
+            ),
+            promptTokenUsageProvider(
+              PromptTokenCountTarget.negative,
+            ).overrideWith(
+              (ref) async => const PromptTokenUsage(usedTokens: 0, limit: 512),
+            ),
+          ],
+          child: const MaterialApp(
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            home: Scaffold(
+              body: SizedBox(
+                width: 960,
+                height: 420,
+                child: PromptInputWidget(),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+
+      final promptField = find
+          .descendant(
+            of: find.byKey(const ValueKey('generation_prompt_positive_input')),
+            matching: find.byType(TextField),
+          )
+          .first;
+      await tester.tap(promptField);
+      await tester.enterText(promptField, prompt);
+      await tester.pump();
+
+      Future<void> chord(
+        List<LogicalKeyboardKey> modifiers,
+        LogicalKeyboardKey key,
+      ) async {
+        for (final m in modifiers) {
+          await tester.sendKeyDownEvent(m);
+        }
+        await tester.sendKeyEvent(key);
+        for (final m in modifiers.reversed) {
+          await tester.sendKeyUpEvent(m);
+        }
+        await tester.pump();
+      }
+
+      const cmd = LogicalKeyboardKey.metaLeft;
+      final searchField = find.byKey(
+        const ValueKey('prompt_input_search_field'),
+      );
+      final replaceField = find.byKey(
+        const ValueKey('prompt_input_replace_field'),
+      );
+
+      await chord([cmd], LogicalKeyboardKey.keyH);
+      await chord([
+        LogicalKeyboardKey.controlLeft,
+        cmd,
+      ], LogicalKeyboardKey.keyF);
+      await chord([LogicalKeyboardKey.controlLeft], LogicalKeyboardKey.keyF);
+      expect(searchField, findsNothing);
+
+      await chord([cmd], LogicalKeyboardKey.keyF);
+      expect(searchField, findsOneWidget);
+      expect(replaceField, findsNothing);
+
+      await chord([LogicalKeyboardKey.altLeft, cmd], LogicalKeyboardKey.keyF);
+      expect(replaceField, findsOneWidget);
+
+      await tester.enterText(searchField, 'alpha');
+      await tester.pump();
+      await tester.enterText(replaceField, 'omega');
+      await tester.pump();
+      await chord([cmd], LogicalKeyboardKey.enter);
+      final promptController = tester
+          .widgetList<EditableText>(find.byType(EditableText))
+          .singleWhere((editable) => editable.controller.text.contains('beta'))
+          .controller;
+      expect(promptController.text, 'omega, beta, omega');
+
+      await tester.pump(const Duration(seconds: 4));
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump();
+    } finally {
+      debugDefaultTargetPlatformOverride = null;
+    }
+  });
+
   testWidgets('shared prompt input reads the disabled wheel setting', (
     tester,
   ) async {

@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/services/desktop_app_shutdown_service.dart';
+import '../../../core/utils/desktop_platform.dart';
 
 import '../../../data/models/image/image_operation.dart';
 import '../../../data/models/upscale/local_upscale_models.dart';
@@ -15,6 +16,16 @@ import '../rag_provider.dart';
 import 'image_workflow_controller.dart';
 import 'preview_selection_provider.dart';
 import '../../screens/generation/widgets/canvas/canvas_feed_layout.dart';
+
+/// Which local upscaling the interface offers. Like [usesMacOSConventions] it
+/// follows the target platform, so widget tests keep the Windows behaviour
+/// unless they switch to macOS with `debugDefaultTargetPlatformOverride`; the
+/// services check the real host themselves.
+final localUpscalePlatformProvider = Provider<LocalUpscalePlatform>(
+  (ref) => usesMacOSConventions
+      ? LocalUpscalePlatform.macOS
+      : LocalUpscalePlatform.windows,
+);
 
 final localUpscaleModelManagerProvider = Provider((ref) {
   final manager = LocalUpscaleModelManager();

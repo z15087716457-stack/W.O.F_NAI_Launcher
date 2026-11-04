@@ -96,4 +96,25 @@ void main() {
       expect(recoveries, 0);
     },
   );
+
+  test(
+    'recovery opens the folder in Explorer or Finder, or its parent while missing',
+    () async {
+      final root = await Directory.systemTemp.createTemp('startup_open_');
+      addTearDown(() => root.delete(recursive: true));
+      final missing = '${root.path}${Platform.pathSeparator}user-data';
+      final launched = <List<String>>[];
+      Future<Object?> run(String executable, List<String> arguments) async {
+        launched.add([executable, ...arguments]);
+        return null;
+      }
+
+      await openStartupDataDirectory(missing, run: run, macOS: true);
+      await openStartupDataDirectory(root.path, run: run, macOS: false);
+      expect(launched, [
+        ['open', root.path],
+        ['explorer.exe', root.path],
+      ]);
+    },
+  );
 }

@@ -15,6 +15,7 @@
 <p align="center">
   <a href="https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/latest"><img src="https://img.shields.io/github/v/release/z15087716457-stack/W.O.F_NAI_Launcher?label=%E4%B8%8B%E8%BC%89&color=2f80ed" alt="下載"></a>
   <img src="https://img.shields.io/badge/Windows-10%20%2F%2011%20x64-0078D4?logo=windows11&logoColor=white" alt="Windows">
+  <img src="https://img.shields.io/badge/macOS-13.5%2B%20%C2%B7%20Apple%20%E6%99%B6%E7%89%87%20%2F%20Intel-000000?logo=apple&logoColor=white" alt="macOS">
   <img src="https://img.shields.io/badge/%E4%BB%8B%E9%9D%A2%E8%AA%9E%E8%A8%80-%E7%AE%80%E4%B8%AD%20%2F%20%E7%B9%81%E4%B8%AD%20%2F%20EN%20%2F%20%E6%97%A5%E6%9C%AC%E8%AA%9E%20%2F%20%ED%95%9C%EA%B5%AD%EC%96%B4-555" alt="五種介面語言">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT"></a>
 </p>
@@ -23,22 +24,39 @@
   <img src="docs/images/readme/zh/hero.webp" alt="W.O.F NAI Studio 生圖頁" width="100%">
 </p>
 
-W.O.F NAI Studio 是 Windows 桌面上的 NovelAI 第三方用戶端。它不只是把官網搬到桌面：常用的提示詞可以存成**積木**重複使用，畫師組合可以交給**畫風遺傳**逐代篩選，看不懂的標籤有**翻譯、標籤百科和本機語義檢索**幫忙，生成、整理、修圖的雜事也可以交給內建的 **NAI Agent**。
+W.O.F NAI Studio 是 Windows 和 macOS 桌面上的 NovelAI 第三方用戶端。它不只是把官網搬到桌面：常用的提示詞可以存成**積木**重複使用，畫師組合可以交給**畫風遺傳**逐代篩選，看不懂的標籤有**翻譯、標籤百科和本機語義檢索**幫忙，生成、整理、修圖的雜事也可以交給內建的 **NAI Agent**。
 
 > 這是非官方專案，與 NovelAI 無關。請使用你自己的 NovelAI 帳號，並遵守 NovelAI 的服務條款。
 
 ## 下載
 
-到 [Releases](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/latest) 下載最新版本，二選一：
+在 [Releases](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/latest) 選擇適用於你系統的檔案。Mac 套件會隨包含 macOS 支援的版本發行。在首次發行前，可到通過 PR 驗證的 Actions 執行頁面下載 `macos-validation`。
 
 | 檔案 | 適合誰 |
 | --- | --- |
-| `WOF_NAI_Studio_Windows_<版本>_Setup.exe` | **大多數人選這個。** 安裝到目前使用者的目錄，不需要系統管理員權限，附開始功能表和桌面捷徑。 |
+| `WOF_NAI_Studio_Windows_<版本>_Setup.exe` | **大多數 Windows 使用者選這個。** 安裝到目前使用者的目錄，不需要系統管理員權限，附開始功能表和桌面捷徑。 |
 | `WOF_NAI_Studio_Windows_<版本>_Portable.zip` | 想放在自己指定的資料夾、隨身碟，或帶到不同電腦上使用。解壓縮後執行 `nai_launcher.exe`。 |
+| `WOF_NAI_Studio_macOS_<版本>_Portable.zip` | **Mac 用這個。** 完整套件需要 macOS 13.5 以上，包含 Apple 晶片和 Intel 兩種架構。Intel Mac 仍待實機驗證。在 Finder 解壓縮後，把 `W.O.F NAI Studio` 拖進「應用程式」檔案夾。 |
 
-兩個版本都支援應用程式內更新。你的設定、圖庫資料庫和 Agent 資料都放在程式旁的 `user-data/` 和 `agent-data/`，升級和解除安裝都不會刪除。
+Windows 的兩個版本都支援應用程式內更新。你的設定、圖庫資料庫和 Agent 資料都放在程式旁的 `user-data/` 和 `agent-data/`，升級和解除安裝都不會刪除。
 
 > 安裝檔尚未進行程式碼簽章，第一次執行時 Windows 可能顯示「Windows 已保護您的電腦」。點選「其他資訊 → 仍要執行」即可。每個版本都附有 SHA-256 校驗值。
+
+### macOS
+
+- **第一次打開**：Mac 版沒有經過 Apple 公證，第一次打開會被系統擋下。在 Finder 按住 Control 鍵並按一下 App（或按右鍵），選「打開」，再按「打開」。macOS 15 起改成：先打開一次，再到「系統設定 → 隱私權與安全性」最下方按「強制打開」。如果顯示「已損毀，無法打開」，在「終端機」執行下面這行，然後照常打開：
+
+  ```bash
+  xattr -dr com.apple.quarantine "/Applications/W.O.F NAI Studio.app"
+  ```
+
+- **更新**：應用程式內下載並校驗新版本後，會在 Finder 中選取它。按 `⌘Q` 結束舊版本，把新版本拖進「應用程式」取代即可。
+- **資料位置**：設定、資料庫和 Agent 資料在 `~/Library/Application Support/com.wof.naiStudio/`，取代 App 不會刪除它們。
+- **從 1.x 升級**：第一次開啟時，會把舊版（Aaalice NAI Launcher）的設定、歷史記錄、各類庫和收藏複製過來，舊版自己的資料保持原樣；舊版還開著時，會先請你結束它。登入資訊不會複製，需要重新登入。圖片、Vibe 等放在「文件」裡的檔案本來就是兩版共用的。之後還可以在「設定 → 備份與重設 → 舊版資料」裡再同步一次或復原上次同步，復原後還能換回同步後的資料；每次切換前都會備份目前的資料，備份保留最近 2 份。
+- **快速鍵**：快速鍵裡的 `Ctrl` 在 Mac 上換成 `⌘`，快速鍵列表用 `⌘/` 打開。
+- **本機放大**：Real-ESRGAN 可以使用，引擎和模型與 Windows 版相同，用 Mac 的顯示卡（Metal）執行。NVIDIA RTX Video 和 SeedVR2 需要 NVIDIA 顯示卡，目前只有 Windows 版。
+- **本機語義檢索（RAG）**：需要 Apple 晶片的 Mac。執行裝置選「自動」時，記憶體 18 GB 以上的 Mac 使用 GPU，16 GB 以下使用 CPU。Intel 晶片的 Mac 無法使用：PyTorch 已不再提供 Intel Mac 的版本。
+- **資源小窗**：Mac 上資源小窗會開在主視窗裡，可以同時開好幾個、拖曳、縮放，把資源拖回創作區；目前還不是獨立的系統視窗，不能拖到主視窗外，也沒有視窗置頂和小窗內看大圖。
 
 ## 三步上手
 
@@ -153,13 +171,13 @@ W.O.F NAI Studio 是 Windows 桌面上的 NovelAI 第三方用戶端。它不只
 
 - **NovelAI 全模型**：V1 到 V4.5、V5（Full / Curated）、多角色輸入框和角色定位、透明背景、Anlas 即時估算和高消耗提醒；
 - **統計**：創作日曆、模型與產量、Anlas 消耗，點選圖表直接跳到當天的圖片；
-- **本機橋接**：外部指令碼或 AI 工具可以透過隨附的 `studio-bridge.exe` 讀寫參數，生圖前同樣要報價確認；也支援 Krita 外掛連動；
-- **快速鍵**：按 `F1` 查看全部快速鍵，都能自訂；
+- **本機橋接**：外部指令碼或 AI 工具可以透過隨附的 `studio-bridge`（Windows 上是 `studio-bridge.exe`）讀寫參數，生圖前同樣要報價確認；也支援 Krita 外掛連動；
+- **快速鍵**：按 `F1`（Mac 上是 `⌘/`）查看全部快速鍵，都能自訂；
 - **五種介面語言、淺色和深色主題**。
 
 ## 隱私與網路
 
-- 帳號 Token 和各家的 API 金鑰儲存在 Windows 系統安全儲存區，只在本機使用。
+- 帳號 Token 與各服務的 API 金鑰儲存在本機。Windows 使用系統的安全儲存區。macOS 使用目前使用者專用的加密憑證檔案，從使用鑰匙圈的版本升級時需重新輸入憑證。
 - 只有下列情況會連網：呼叫 NovelAI API；使用你自己設定的翻譯或 Agent 模型服務；瀏覽線上畫廊；檢查更新；以及你主動點選下載的選用元件（語義檢索模型、放大模型等）。
 - 語義檢索、本機放大、圖庫整理都在本機完成。
 - 自動翻譯預設關閉；Danbooru 線上關聯標籤只傳送相關標籤，不傳送完整提示詞。
@@ -185,7 +203,7 @@ W.O.F NAI Studio 是 Windows 桌面上的 NovelAI 第三方用戶端。它不只
 <details>
 <summary><b>從原始碼建置</b></summary>
 
-需要 Windows 10/11 x64、Flutter 3.47.7（見 `tool/flutter-sdk.json`）、Visual Studio 2022 的「使用 C++ 的桌面開發」、Git LFS 和 NuGet CLI。
+兩個平台都需要 Flutter 3.47.7（見 `tool/flutter-sdk.json`）和 Git LFS：
 
 ```bash
 git clone https://github.com/z15087716457-stack/W.O.F_NAI_Launcher.git
@@ -194,10 +212,26 @@ git lfs install && git lfs pull
 flutter pub get
 dart run tool/generate.dart
 flutter gen-l10n
+```
+
+**Windows**：需要 Windows 10/11 x64、Visual Studio 2022 的「使用 C++ 的桌面開發」和 NuGet CLI。
+
+```bash
 flutter build windows --release --no-tree-shake-icons
 ```
 
-使用 `scripts/package_windows_release.ps1` 製作安裝版與可攜版。開發約定請見 [DEVELOPMENT.md](DEVELOPMENT.md)，版本紀錄請見 [CHANGELOG.md](CHANGELOG.md)。
+使用 `scripts/package_windows_release.ps1` 製作安裝版與可攜版。
+
+**macOS**：App 本身的部署目標為 macOS 12，隨附的 Node 需要 macOS 13.5 以上。建置需要完整的 Xcode（只裝指令列工具不夠）、CocoaPods 和 rustup（拖放和剪貼簿用的 `super_native_extensions` 要編譯 Rust）。發行版要在 Apple 晶片的 Mac 上建置，並裝好 Rosetta（`softwareupdate --install-rosetta`）：`studio-bridge` 的 Intel 版用 x64 的 Dart SDK 編譯。
+
+```bash
+scripts/build_macos.sh --release
+scripts/package_macos_release.sh
+```
+
+`build_macos.sh` 建置通用 App，並放進 NAI Agent 的 Node 執行環境、Pi、`studio-bridge` 和本機放大用的 Real-ESRGAN；`package_macos_release.sh` 檢查後打包成 `dist/WOF_NAI_Studio_macOS_<版本>_Portable.zip`。預設為 ad-hoc 簽章，有 Apple 開發者憑證時用環境變數 `CODESIGN_IDENTITY` 指定。修改 `tool/branding/wof_icon.svg` 後，用 `tool/branding/generate_macos_icons.sh` 重新產生 Mac 圖示（需要 `rsvg-convert`，即 Homebrew 的 librsvg）。
+
+開發約定請見 [DEVELOPMENT.md](DEVELOPMENT.md)，版本紀錄請見 [CHANGELOG.md](CHANGELOG.md)。
 
 </details>
 

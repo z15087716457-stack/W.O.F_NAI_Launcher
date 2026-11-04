@@ -9,6 +9,8 @@ import 'package:window_manager/window_manager.dart';
 import '../../../core/services/titlebar_region_service.dart';
 import '../../../core/services/window_material_service.dart';
 import 'window_chrome_layout.dart';
+import '../../../core/utils/desktop_platform.dart';
+import '../common/macos_app_integration.dart';
 
 /// Borderless window shell: page surfaces reach the top, with a fixed caption
 /// cluster. Existing headers reserve its footprint through WindowChromeScope.
@@ -19,6 +21,8 @@ class IntegratedTitleBarShell extends StatefulWidget {
     this.immersive = false,
     this.onToggleTheme,
     this.entryLanguageButton,
+    this.nativeAgentExpanded = false,
+    this.onToggleNativeAgent,
     this.accessory,
     this.accessoryWidth = 0,
     this.captionHeight = barHeight,
@@ -39,13 +43,17 @@ class IntegratedTitleBarShell extends StatefulWidget {
 
   /// Optional entry-only picker, beside the appearance control.
   final Widget? entryLanguageButton;
+  final bool nativeAgentExpanded;
+  final VoidCallback? onToggleNativeAgent;
 
   /// 栏高（逻辑像素），与原生命中区换算共用。
   static const double barHeight = 36;
 
   /// 单个窗口按钮宽 ×3 = 右侧保留宽（逻辑像素）。
   static const double buttonWidth = 46;
-  static const double reservedRight = buttonWidth * 3;
+
+  /// macOS 不画 Windows 的三个窗口按钮（用系统的红黄绿按钮），不留这块宽度
+  static double get reservedRight => usesMacOSConventions ? 0 : buttonWidth * 3;
 
   /// 沉浸模式的明暗切换按钮宽，及其与窗口按钮之间的分隔（1px + 两侧 4px）。
   static const double themeButtonWidth = 40;
@@ -60,7 +68,7 @@ class IntegratedTitleBarShell extends StatefulWidget {
 class _IntegratedTitleBarShellState extends State<IntegratedTitleBarShell> {
   @override
   Widget build(BuildContext context) {
-    if (!TitleBarRegionService.isSupported) return widget.child;
+    if (!TitleBarRegionService.chromeSupported) return widget.child;
     final configuration = _WindowChromeConfiguration(
       shell: widget,
       child: WindowChromeScope(
@@ -74,7 +82,13 @@ class _IntegratedTitleBarShellState extends State<IntegratedTitleBarShell> {
             : WindowChromePage(child: widget.child),
       ),
     );
-    return configuration;
+    return usesMacOSConventions
+        ? MacOSNativeTitleBar(
+            agentExpanded: widget.nativeAgentExpanded,
+            onToggleAgent: widget.onToggleNativeAgent,
+            child: configuration,
+          )
+        : configuration;
   }
 }
 
@@ -353,7 +367,8 @@ class _TitleBarState extends State<_TitleBar> with WindowListener {
             ),
             const SizedBox(width: IntegratedTitleBarShell.themeSeparatorWidth),
           ],
-          ...captionButtons,
+          // macOS 的最小化、缩放、关闭用系统标题栏的红黄绿按钮
+          if (!usesMacOSConventions) ...captionButtons,
         ],
       ),
     );

@@ -8,6 +8,7 @@ import '../widgets/common/text_editing_shortcuts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/utils/desktop_platform.dart';
 import '../../core/utils/localization_extension.dart';
 import '../../core/shortcuts/default_shortcuts.dart';
 import '../widgets/prompt/blocks/prompt_block_palette.dart';
@@ -63,6 +64,13 @@ class _GenerationRouteState extends ConsumerState<GenerationRoute> {
       () => context.mounted && ModalRoute.of(context)?.isCurrent != false,
     );
     GenViewData getData() => ref.read(generationViewDataProvider(context.l10n));
+    final canPreview =
+        !usesMacOSConventions ||
+        ref.watch(
+          generationViewDataProvider(
+            context.l10n,
+          ).select((data) => data.canvas.info?.tileId != null),
+        );
     final settings = ref.read(generationSettingsProvider);
     GenController? controller() => wiring.currentState?.controller;
     void focused(Future<void> Function(String) action) {
@@ -131,8 +139,9 @@ class _GenerationRouteState extends ConsumerState<GenerationRoute> {
                         focused((id) => operations.saveImages([id])),
                     ShortcutIds.copyImage: () => focused(operations.copyImage),
                     ShortcutIds.upscaleImage: () => focused(operations.upscale),
-                    ShortcutIds.fullscreenPreview: () =>
-                        focused(operations.viewer),
+                    if (canPreview)
+                      ShortcutIds.fullscreenPreview: () =>
+                          focused(operations.viewer),
                     ShortcutIds.reuseParams: () => focused(operations.reuse),
                     ShortcutIds.openParamsPanel: () =>
                         controller()?.setDrawer(true),

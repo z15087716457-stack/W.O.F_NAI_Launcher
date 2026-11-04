@@ -110,6 +110,23 @@ void main() {
     },
   );
 
+  testWidgets('macOS：⌘S 保存指令，Control+S 不保存', (t) async {
+    final rec = await agent(t);
+    await edit(t, 'agent-global', 'mac global');
+    int saves() =>
+        rec.calls.where((x) => x.startsWith('saveInstructions:')).length;
+    await t.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await t.sendKeyEvent(LogicalKeyboardKey.keyS);
+    await t.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await t.pumpAndSettle();
+    expect(saves(), 0);
+    await t.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
+    await t.sendKeyEvent(LogicalKeyboardKey.keyS);
+    await t.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+    await t.pumpAndSettle();
+    expect(saves(), 1);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
+
   for (final throws in [false, true]) {
     testWidgets(
       'failed write (${throws ? 'exception' : 'false'}) retains retryable draft',

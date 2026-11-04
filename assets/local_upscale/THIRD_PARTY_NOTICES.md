@@ -31,9 +31,14 @@ Studio launches an unmodified, short-lived Real-ESRGAN NCNN/Vulkan executable.
 Engine release: v0.2.0 (2022-04-24), source revision 37026f4.
 https://github.com/xinntao/Real-ESRGAN-ncnn-vulkan/releases/tag/v0.2.0
 
-The engine and default Real-ESRGAN x4plus Anime model are MIT licensed by
-Xintao Wang. The original engine license, including realsr-ncnn-vulkan's
-MIT notice (nihui), is reproduced in windows/LICENSE.
+The engine is MIT licensed by Xintao Wang. The original engine license,
+including realsr-ncnn-vulkan's MIT notice (nihui), is reproduced in
+windows/LICENSE; the macOS app carries the same text next to its engine.
+https://github.com/xinntao/Real-ESRGAN-ncnn-vulkan
+
+The bundled default Real-ESRGAN x4plus Anime model and the optional models
+are Real-ESRGAN weights in NCNN format. Real-ESRGAN is BSD 3-Clause licensed
+by Xintao Wang; the full license is reproduced in REAL-ESRGAN-LICENSE.txt.
 https://github.com/xinntao/Real-ESRGAN
 
 Optional models are taken from the upstream v0.2.5.0 model archive
@@ -54,6 +59,21 @@ The engine's release dependency vcomp140.dll is Microsoft's Visual C++ OpenMP
 redistributable runtime. It remains unmodified and retains Microsoft's ownership
 and license terms. No debug runtime (vcomp140d.dll) is distributed.
 https://learn.microsoft.com/en-us/cpp/windows/redistributing-visual-cpp-files
+
+On macOS, Studio launches the unmodified universal (arm64 and x86_64) build
+from the same v0.2.0 release, realesrgan-ncnn-vulkan-v0.2.0-macos.zip. The
+macOS build script pins the archive and executable SHA-256 hashes and places
+the engine and the release's LICENSE in Contents/Resources/tools/local-upscale
+of the app bundle. The engine statically links MoltenVK 1.1.1 (Khronos Group,
+Apache-2.0), which includes SPIRV-Cross (Apache-2.0) and cereal (BSD
+3-Clause), and LLVM OpenMP 11.0.0 (Apache-2.0 with LLVM Exceptions); their
+license texts are next to the engine as MOLTENVK-LICENSE.txt,
+CEREAL-LICENSE.txt and LLVM-OPENMP-LICENSE.txt. Vulkan runs on Metal through
+MoltenVK. Instead of Windows Imaging Component, the macOS engine reads and
+writes images with stb_image and stb_image_write (Sean Barrett, public domain
+or MIT). The Windows engine, worker and vcomp140.dll are not included in the
+macOS app.
+https://github.com/KhronosGroup/MoltenVK/releases/tag/v1.1.1
 
 The exact-size finishing step uses Studio's existing Dart port of Pica's
 Lanczos3 pipeline. Its MIT attribution is recorded in the project root

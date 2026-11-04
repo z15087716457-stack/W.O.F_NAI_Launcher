@@ -6,7 +6,12 @@ import '../../providers/auth_provider.dart';
 import '../../screens/settings/widgets/settings_dialog.dart';
 
 class AccountCredentialsDialog extends ConsumerStatefulWidget {
-  const AccountCredentialsDialog({super.key, required this.account});
+  const AccountCredentialsDialog({
+    super.key,
+    required this.account,
+    this.onSubmit,
+  });
+  final Future<bool> Function(String token)? onSubmit;
   final SavedAccount account;
   @override
   ConsumerState<AccountCredentialsDialog> createState() =>
@@ -31,9 +36,21 @@ class _AccountCredentialsDialogState
       error = null;
     });
     try {
-      await ref
-          .read(authNotifierProvider.notifier)
-          .replaceSavedAccountCredential(widget.account.id, controller.text);
+      if (widget.onSubmit case final signIn?) {
+        if (!await signIn(controller.text.trim())) {
+          if (mounted) {
+            setState(
+              () =>
+                  error = context.l10n.settings_credentialsWereNotUpdatedCheck,
+            );
+          }
+          return;
+        }
+      } else {
+        await ref
+            .read(authNotifierProvider.notifier)
+            .replaceSavedAccountCredential(widget.account.id, controller.text);
+      }
       if (mounted) Navigator.pop(context, true);
     } catch (_) {
       if (mounted) {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../core/utils/keyboard_modifier_utils.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_dialog.dart';
 import '../kit/ui_menu.dart';
@@ -271,12 +272,15 @@ class _RefsLibraryPageState extends State<RefsLibraryPage>
     }
     final k = e.logicalKey;
     final hw = HardwareKeyboard.instance;
-    final ctrl = hw.isControlPressed || hw.isMetaPressed;
+    // Ctrl 或 ⌘；macOS 上只认 ⌘（⌃⌘F 是系统全屏）
+    final ctrl = isControlOrCommandPressed();
     final shift = hw.isShiftPressed;
     if (ctrl && k == LogicalKeyboardKey.keyF) {
       _searchFocus.requestFocus();
       return KeyEventResult.handled;
     }
+    // macOS 上带 Control 的组合（⌃⌘F 全屏……）不当裸键，留给系统菜单
+    if (isMacChordModifierPressed() && !ctrl) return KeyEventResult.ignored;
     if (_typing() || _dialog != _Dialog.none || _data.importDraft != null) {
       return KeyEventResult.ignored;
     }
@@ -327,7 +331,7 @@ class _RefsLibraryPageState extends State<RefsLibraryPage>
         (t) => items.firstWhere((x) => x.key == t).favorite,
       );
       _actions.onSetFavorite(targets, !all);
-    } else if (k == LogicalKeyboardKey.delete) {
+    } else if (isListDeleteKey(e)) {
       confirmDelete(targets);
     } else {
       return KeyEventResult.ignored;

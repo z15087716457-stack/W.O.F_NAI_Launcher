@@ -15,6 +15,7 @@ import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 
 import '../../../core/enums/precise_ref_type.dart';
 import '../../../core/utils/app_logger.dart';
+import '../../../core/utils/primary_activator.dart';
 import '../../../data/models/gallery/nai_image_metadata.dart';
 import '../../../data/models/metadata/metadata_import_options.dart';
 import '../../../data/services/image_metadata_service.dart';
@@ -176,12 +177,7 @@ class _GlobalDropHandlerState extends ConsumerState<GlobalDropHandler> {
   @override
   Widget build(BuildContext context) {
     return Shortcuts(
-      shortcuts: const <ShortcutActivator, Intent>{
-        SingleActivator(LogicalKeyboardKey.keyV, control: true):
-            _PasteImageIntent(),
-        SingleActivator(LogicalKeyboardKey.keyV, meta: true):
-            _PasteImageIntent(),
-      },
+      shortcuts: pasteShortcuts(const _PasteImageIntent()),
       child: Actions(
         actions: <Type, Action<Intent>>{
           _PasteImageIntent: CallbackAction<_PasteImageIntent>(

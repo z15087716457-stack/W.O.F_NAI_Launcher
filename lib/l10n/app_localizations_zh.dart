@@ -24,6 +24,205 @@ class AppLocalizationsZh extends AppLocalizations {
   String get brand_switchToDark => '切换到深色';
 
   @override
+  String legacyImport_copyingTitle(Object app) {
+    return '正在从 $app 复制数据';
+  }
+
+  @override
+  String legacyImport_copyingBody(Object app) {
+    return '设置、历史记录、各类库和收藏只在首次启动时复制一次，账号需要重新登录。$app 自己的数据保持原样。';
+  }
+
+  @override
+  String legacyImport_runningTitle(Object app) {
+    return '请先退出 $app';
+  }
+
+  @override
+  String get legacyImport_runningBody =>
+      '首次启动时要复制旧版的设置、历史记录、各类库和收藏。请完全退出旧版（包括菜单栏里的图标），退出后会自动开始复制。';
+
+  @override
+  String legacyImport_waiting(Object app) {
+    return '正在等待 $app 退出…';
+  }
+
+  @override
+  String legacyImport_failedTitle(Object app) {
+    return '无法从 $app 复制数据';
+  }
+
+  @override
+  String legacyImport_failedBody(Object app) {
+    return '没有改动任何数据：$app 的数据保持原样，也没有留下复制了一半的文件。请确认磁盘空间足够，然后重试。';
+  }
+
+  @override
+  String get legacyImport_startWithout => '跳过复制并启动';
+
+  @override
+  String legacySync_title(Object app) {
+    return '正在从 $app 同步数据';
+  }
+
+  @override
+  String legacySync_body(Object app) {
+    return '正在用 $app 现在的设置、历史记录、各类库和收藏替换这里的同类数据，当前数据已先备份。';
+  }
+
+  @override
+  String get legacySync_runningBody =>
+      '同步要读取旧版的设置、历史记录、各类库和收藏。请完全退出旧版（包括菜单栏里的图标），退出后会自动开始同步。';
+
+  @override
+  String legacySync_failedTitle(Object app) {
+    return '无法从 $app 同步数据';
+  }
+
+  @override
+  String get legacySync_failedBody => '已换回同步前的数据，没有留下同步了一半的文件。请确认磁盘空间足够，然后重试。';
+
+  @override
+  String get legacySync_startWithout => '取消同步并启动';
+
+  @override
+  String get legacyUndo_title => '正在撤销上次同步';
+
+  @override
+  String get legacyUndo_body => '正在换回同步前的数据，同步之后的数据另存为一份备份。';
+
+  @override
+  String get legacyUndo_failedTitle => '无法撤销上次同步';
+
+  @override
+  String get legacyUndo_failedBody => '数据保持原样，没有留下换了一半的文件。请确认磁盘空间足够，然后重试。';
+
+  @override
+  String get legacyUndo_startWithout => '取消撤销并启动';
+
+  @override
+  String get legacyRedo_title => '正在换回同步后的数据';
+
+  @override
+  String get legacyRedo_body => '同步后在这里做的改动都会回来，同步前的数据另存为一份备份。';
+
+  @override
+  String get legacyRedo_failedTitle => '无法换回同步后的数据';
+
+  @override
+  String get legacyRedo_startWithout => '取消换回并启动';
+
+  @override
+  String get set_bkLegacy => '旧版数据';
+
+  @override
+  String set_bkLegacySub(Object app) {
+    return '来自旧版 $app。只读取它的数据，不会改动；备份保留最近 2 份。';
+  }
+
+  @override
+  String get set_bkLegacySync => '从旧版同步';
+
+  @override
+  String set_bkLegacySyncCopied(Object time) {
+    return '首次启动时已复制（$time）。同步前会备份当前数据。同位置的同名库整套采用旧版，只有新版有的库会保留。';
+  }
+
+  @override
+  String set_bkLegacySyncSynced(Object time) {
+    return '上次同步于 $time。同步前会备份当前数据。同位置的同名库整套采用旧版，只有新版有的库会保留。';
+  }
+
+  @override
+  String get set_bkLegacySyncNever =>
+      '首次启动时没有复制。同步前会备份当前数据。同位置的同名库整套采用旧版，只有新版有的库会保留。';
+
+  @override
+  String get set_bkLegacySyncBtn => '同步…';
+
+  @override
+  String get set_bkLegacyUndo => '撤销上次同步';
+
+  @override
+  String set_bkLegacyUndoSub(Object time) {
+    return '回到 $time 同步前的数据';
+  }
+
+  @override
+  String get set_bkLegacyRedo => '换回同步后的数据';
+
+  @override
+  String set_bkLegacyRedoSub(Object time) {
+    return '回到 $time 撤销前的数据';
+  }
+
+  @override
+  String set_bkLegacyUndoAgainSub(Object time) {
+    return '回到 $time 换回前的数据';
+  }
+
+  @override
+  String get set_bkLegacyNoSync => '还没有同步过';
+
+  @override
+  String get set_bkLegacyUndoBtn => '恢复…';
+
+  @override
+  String get set_bkLegacySyncTitle => '用旧版数据替换当前数据？';
+
+  @override
+  String set_bkLegacySyncBody(Object app) {
+    return '从 $app 复制设置、历史记录、各类库和收藏。同位置的同名库会采用旧版的整套文件。只有新版有的库会连同配套文件保留。\n\n· 当前数据先完整备份，可以用“撤销上次同步”换回来\n· 新版独有文件夹中的 Agent 会话、偏好备份等会保留\n· 图片和 Vibe 文件不受影响\n· 需要重启；旧版还开着的话，请先退出它';
+  }
+
+  @override
+  String set_bkLegacySyncRunning(Object app) {
+    return '⚠ $app 正在运行。请先退出它，否则重启后会停在等待页面，等你退出后再继续。';
+  }
+
+  @override
+  String get set_bkLegacySyncConfirm => '同步并重启';
+
+  @override
+  String get set_bkLegacyUndoTitle => '撤销上次同步？';
+
+  @override
+  String set_bkLegacyUndoBody(Object time) {
+    return '会换回 $time 同步前的数据。同步之后在这里做的改动另存为一份备份。需要重启。';
+  }
+
+  @override
+  String get set_bkLegacyUndoConfirm => '撤销并重启';
+
+  @override
+  String get set_bkLegacyRedoTitle => '换回同步后的数据？';
+
+  @override
+  String set_bkLegacyRedoBody(Object time) {
+    return '会换回 $time 撤销前的数据，同步后在这里做的改动也会回来。当前数据另存为一份备份。需要重启。';
+  }
+
+  @override
+  String get set_bkLegacyRedoConfirm => '换回并重启';
+
+  @override
+  String set_bkLegacyUndoAgainBody(Object time) {
+    return '会回到 $time 换回前的数据，也就是同步前的那份。当前数据另存为一份备份。需要重启。';
+  }
+
+  @override
+  String get set_bkLegacyBusy => '还有任务在进行，请等它结束后再试。';
+
+  @override
+  String get set_bkLegacySyncFailed => '无法开始同步。请确认磁盘空间足够，然后重试。';
+
+  @override
+  String get set_bkLegacyUndoFailed => '无法撤销同步。请确认磁盘空间足够，然后重试。';
+
+  @override
+  String get set_bkLegacyRedoFailed => '无法换回同步后的数据。请确认磁盘空间足够，然后重试。';
+
+  @override
   String get app_subtitle => 'NovelAI 第三方客户端';
 
   @override
@@ -364,6 +563,23 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get auth_error_serverError => '服务器错误';
+
+  @override
+  String get auth_credentialStorageCorrupt => '本机凭据文件已损坏。';
+
+  @override
+  String get auth_resetLocalCredentials => '重置本机凭据';
+
+  @override
+  String get auth_credentialResetExplanation =>
+      '重置会移除本应用在这台 Mac 上保存的所有登录令牌和服务密钥。之后需要重新输入，图片和设置会保留。';
+
+  @override
+  String get auth_credentialStorageUnavailable => '无法读写本机凭据文件。';
+
+  @override
+  String get auth_credentialStorageUnavailableHint =>
+      '本次登录已取消。请检查当前 macOS 用户的文件权限后重试。';
 
   @override
   String get auth_error_unknown => '未知错误';
@@ -3582,6 +3798,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get shortcut_action_minimize_to_tray => '最小化到托盘';
 
   @override
+  String get shortcut_action_hide_to_menu_bar => '隐藏到菜单栏';
+
+  @override
   String get shortcut_action_quit_app => '退出应用';
 
   @override
@@ -5004,7 +5223,19 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String updateDownloadedFinderHint(Object version) {
+    return '新版本 v$version 已下载并通过校验。点“在访达中显示”后，按 ⌘Q 退出本应用，再把新版本拖进“应用程序”文件夹，替换旧版本。';
+  }
+
+  @override
   String get updateInstallAndRestart => '安装并重启';
+
+  @override
+  String get update_runningFromStaging =>
+      '你打开的是更新文件夹中的应用。请先在访达中显示它，按 ⌘Q 退出，再将应用拖入「应用程序」并从那里打开。';
+
+  @override
+  String get updateShowInFinder => '在访达中显示';
 
   @override
   String get updateInstallNow => '立即安装';
@@ -5028,6 +5259,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get updateInstallingHint => '安装程序已启动，应用即将关闭并自动完成更新。';
 
   @override
+  String get updatePreparingApp => '正在准备新版本...';
+
+  @override
+  String get updatePreparingAppHint => '正在解压更新包，完成后会在访达中选中新版本。';
+
+  @override
   String get remindMeLater => '4 小时后提醒';
 
   @override
@@ -5042,12 +5279,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get updateNoticeManualSubtitle => '当前平台需要前往 Release 页面手动更新';
 
   @override
+  String get updateNoticeFinderSubtitle => '可在应用内下载并校验，再到访达中替换旧版本';
+
+  @override
   String updateNoticeReady(Object version) {
     return '新版本 v$version 已准备好';
   }
 
   @override
   String get updateNoticeReadySubtitle => '更新包已校验，重启即可安装';
+
+  @override
+  String get updateNoticeReadyFinderSubtitle => '更新包已校验，在访达中替换旧版本即可';
 
   @override
   String get updateNoticeFailed => '上次更新没有完成';
@@ -5264,6 +5507,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get common_swap => '交换';
+
+  @override
+  String get common_showInFinder => '在访达中显示';
 
   @override
   String get addToLibrary_displayNameHint => '输入便于识别此条目的名称';
@@ -5775,6 +6021,10 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get tips_studio_trick_6 =>
       '在翻译块上按一下鼠标中键，原文和译文来回切换。AI 翻得再好，偶尔也值得偷看一眼原文，确认它没把 cat ears 翻成什么奇怪的东西。';
+
+  @override
+  String get tips_studio_trick_6_mac =>
+      '在翻译块上按住 ⌘ 点一下，原文和译文来回切换。AI 翻得再好，偶尔也值得偷看一眼原文，确认它没把 cat ears 翻成什么奇怪的东西。';
 
   @override
   String get tips_studio_trick_7 =>
@@ -8493,6 +8743,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get promptTranslation_guideMiddleTitle => '中键点块';
 
   @override
+  String get promptTranslation_guideCommandClickTitle => '⌘ + 点击块';
+
+  @override
   String get promptTranslation_guideMiddleText => '切换原文与译文';
 
   @override
@@ -8731,6 +8984,14 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get update_errorLaunchFailed => '启动更新程序失败';
+
+  @override
+  String get update_errorExtractFailed => '解压更新包失败';
+
+  @override
+  String update_errorRevealFailed(Object path) {
+    return '无法在访达中显示新版本，它在：$path';
+  }
 
   @override
   String get update_errorCheckFailed => '检查更新失败';
@@ -9448,7 +9709,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get localUpscale_cancelling => '正在取消…';
 
   @override
-  String get localUpscale_unsupportedPlatform => '本地超分目前支持 Windows。';
+  String get localUpscale_unsupportedPlatform => '这种放大方式目前只支持 Windows。';
 
   @override
   String get localUpscale_engineMissing => '本地引擎不可用，请重新安装完整 Studio 运行包。';
@@ -13048,6 +13309,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get imageViewer_missingHint => '可能已经在资源管理器里被移动、改名或删除';
 
   @override
+  String get imageViewer_missingHintFinder => '可能已经在访达里被移动、改名或删除';
+
+  @override
   String get imageViewer_openFolder => '打开所在文件夹';
 
   @override
@@ -15917,6 +16181,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get naiAgent_composerNotEmpty => '请先保存或发送当前输入，再恢复这条消息。';
 
   @override
+  String get naiAgent_bundledNodeRequiresMacOS135 =>
+      '内置 Agent 需要 macOS 13.5 或更高版本。你仍可在这台 Mac 上使用生图功能。';
+
+  @override
   String get naiAgent_runtimeMissing => 'Agent 运行组件尚未安装，请使用完整更新包。';
 
   @override
@@ -17137,6 +17405,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_apSystemSub => '按 Windows 设置自动切换';
 
   @override
+  String get set_apSystemSubMac => '按 macOS 设置自动切换';
+
+  @override
   String get set_apText => '文字';
 
   @override
@@ -17573,6 +17844,11 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String set_stFree(Object disk, Object size) {
     return '$disk 盘剩余 $size';
+  }
+
+  @override
+  String set_stFreeMac(Object size) {
+    return '剩余 $size';
   }
 
   @override
@@ -18492,6 +18768,20 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get set_rgInstallCpu => 'CPU';
+
+  @override
+  String get set_rgInstallHintMac =>
+      '下载 Python 与推理依赖（约 200 MB），不下载模型权重。需要 Apple 芯片的 Mac。“自动”在内存 18 GB 及以上的 Mac 上用 GPU，16 GB 及以下用 CPU。';
+
+  @override
+  String get set_rgPythonSubMac => '默认用自动安装的独立环境；也可以选一个已有的 python3。';
+
+  @override
+  String get set_rgNeedsAppleSilicon =>
+      '需要 Apple 芯片的 Mac。PyTorch 已不再提供 Intel 芯片 Mac 的版本，这台 Mac 装不了运行环境。';
+
+  @override
+  String get set_rgEnvUnsupported => '不支持';
 
   @override
   String get set_rgPhaseExisting => '正在检测已有环境';
@@ -21091,6 +21381,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get startup_dataTitle => '无法准备应用数据';
 
   @override
+  String get startup_profileInUse => '另一份应用正在使用此数据目录。请先退出那份应用，再点重试。';
+
+  @override
   String get startup_dataHelp =>
       '应用数据尚未准备完成，请保留现有文件。内容不同的文件不会合并或覆盖。请先备份并核对数据目录，检查磁盘空间和访问权限，再重试。';
 
@@ -21746,6 +22039,205 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get brand_switchToDark => '切換到深色';
 
   @override
+  String legacyImport_copyingTitle(Object app) {
+    return '正在從 $app 複製資料';
+  }
+
+  @override
+  String legacyImport_copyingBody(Object app) {
+    return '設定、歷史記錄、各類庫和收藏只在首次啟動時複製一次，帳號需要重新登入。$app 自己的資料保持原樣。';
+  }
+
+  @override
+  String legacyImport_runningTitle(Object app) {
+    return '請先退出 $app';
+  }
+
+  @override
+  String get legacyImport_runningBody =>
+      '首次啟動時要複製舊版的設定、歷史記錄、各類庫和收藏。請完全退出舊版（包括選單列裡的圖示），退出後會自動開始複製。';
+
+  @override
+  String legacyImport_waiting(Object app) {
+    return '正在等待 $app 退出…';
+  }
+
+  @override
+  String legacyImport_failedTitle(Object app) {
+    return '無法從 $app 複製資料';
+  }
+
+  @override
+  String legacyImport_failedBody(Object app) {
+    return '沒有改動任何資料：$app 的資料保持原樣，也沒有留下複製了一半的檔案。請確認磁碟空間足夠，然後重試。';
+  }
+
+  @override
+  String get legacyImport_startWithout => '跳過複製並啟動';
+
+  @override
+  String legacySync_title(Object app) {
+    return '正在從 $app 同步資料';
+  }
+
+  @override
+  String legacySync_body(Object app) {
+    return '正在用 $app 現在的設定、歷史記錄、各類庫和收藏替換這裡的同類資料，當前資料已先備份。';
+  }
+
+  @override
+  String get legacySync_runningBody =>
+      '同步要讀取舊版的設定、歷史記錄、各類庫和收藏。請完全退出舊版（包括選單列裡的圖示），退出後會自動開始同步。';
+
+  @override
+  String legacySync_failedTitle(Object app) {
+    return '無法從 $app 同步資料';
+  }
+
+  @override
+  String get legacySync_failedBody => '已換回同步前的資料，沒有留下同步了一半的檔案。請確認磁碟空間足夠，然後重試。';
+
+  @override
+  String get legacySync_startWithout => '取消同步並啟動';
+
+  @override
+  String get legacyUndo_title => '正在復原上次同步';
+
+  @override
+  String get legacyUndo_body => '正在換回同步前的資料，同步之後的資料另存為一份備份。';
+
+  @override
+  String get legacyUndo_failedTitle => '無法復原上次同步';
+
+  @override
+  String get legacyUndo_failedBody => '資料保持原樣，沒有留下換了一半的檔案。請確認磁碟空間足夠，然後重試。';
+
+  @override
+  String get legacyUndo_startWithout => '取消復原並啟動';
+
+  @override
+  String get legacyRedo_title => '正在換回同步後的資料';
+
+  @override
+  String get legacyRedo_body => '同步後在這裡做的改動都會回來，同步前的資料另存為一份備份。';
+
+  @override
+  String get legacyRedo_failedTitle => '無法換回同步後的資料';
+
+  @override
+  String get legacyRedo_startWithout => '取消換回並啟動';
+
+  @override
+  String get set_bkLegacy => '舊版資料';
+
+  @override
+  String set_bkLegacySub(Object app) {
+    return '來自舊版 $app。只讀取它的資料，不會改動；備份保留最近 2 份。';
+  }
+
+  @override
+  String get set_bkLegacySync => '從舊版同步';
+
+  @override
+  String set_bkLegacySyncCopied(Object time) {
+    return '首次啟動時已複製（$time）。同步前會備份當前資料。同位置的同名庫整套採用舊版，只有新版有的庫會保留。';
+  }
+
+  @override
+  String set_bkLegacySyncSynced(Object time) {
+    return '上次同步於 $time。同步前會備份當前資料。同位置的同名庫整套採用舊版，只有新版有的庫會保留。';
+  }
+
+  @override
+  String get set_bkLegacySyncNever =>
+      '首次啟動時沒有複製。同步前會備份當前資料。同位置的同名庫整套採用舊版，只有新版有的庫會保留。';
+
+  @override
+  String get set_bkLegacySyncBtn => '同步…';
+
+  @override
+  String get set_bkLegacyUndo => '復原上次同步';
+
+  @override
+  String set_bkLegacyUndoSub(Object time) {
+    return '回到 $time 同步前的資料';
+  }
+
+  @override
+  String get set_bkLegacyRedo => '換回同步後的資料';
+
+  @override
+  String set_bkLegacyRedoSub(Object time) {
+    return '回到 $time 復原前的資料';
+  }
+
+  @override
+  String set_bkLegacyUndoAgainSub(Object time) {
+    return '回到 $time 換回前的資料';
+  }
+
+  @override
+  String get set_bkLegacyNoSync => '還沒有同步過';
+
+  @override
+  String get set_bkLegacyUndoBtn => '恢復…';
+
+  @override
+  String get set_bkLegacySyncTitle => '用舊版資料替換當前資料？';
+
+  @override
+  String set_bkLegacySyncBody(Object app) {
+    return '從 $app 複製設定、歷史記錄、各類庫和收藏。同位置的同名庫會採用舊版的整套檔案。只有新版有的庫會連同配套檔案保留。\n\n· 當前資料先完整備份，可以用“復原上次同步”換回來\n· 新版獨有資料夾中的 Agent 會話、偏好備份等會保留\n· 圖片和 Vibe 檔案不受影響\n· 需要重啟；舊版還開著的話，請先退出它';
+  }
+
+  @override
+  String set_bkLegacySyncRunning(Object app) {
+    return '⚠ $app 正在執行。請先退出它，否則重啟後會停在等待頁面，等你退出後再繼續。';
+  }
+
+  @override
+  String get set_bkLegacySyncConfirm => '同步並重啟';
+
+  @override
+  String get set_bkLegacyUndoTitle => '復原上次同步？';
+
+  @override
+  String set_bkLegacyUndoBody(Object time) {
+    return '會換回 $time 同步前的資料。同步之後在這裡做的改動另存為一份備份。需要重啟。';
+  }
+
+  @override
+  String get set_bkLegacyUndoConfirm => '復原並重啟';
+
+  @override
+  String get set_bkLegacyRedoTitle => '換回同步後的資料？';
+
+  @override
+  String set_bkLegacyRedoBody(Object time) {
+    return '會換回 $time 復原前的資料，同步後在這裡做的改動也會回來。當前資料另存為一份備份。需要重啟。';
+  }
+
+  @override
+  String get set_bkLegacyRedoConfirm => '換回並重啟';
+
+  @override
+  String set_bkLegacyUndoAgainBody(Object time) {
+    return '會回到 $time 換回前的資料，也就是同步前的那份。當前資料另存為一份備份。需要重啟。';
+  }
+
+  @override
+  String get set_bkLegacyBusy => '還有任務在進行，請等它結束後再試。';
+
+  @override
+  String get set_bkLegacySyncFailed => '無法開始同步。請確認磁碟空間足夠，然後重試。';
+
+  @override
+  String get set_bkLegacyUndoFailed => '無法復原同步。請確認磁碟空間足夠，然後重試。';
+
+  @override
+  String get set_bkLegacyRedoFailed => '無法換回同步後的資料。請確認磁碟空間足夠，然後重試。';
+
+  @override
   String get app_subtitle => 'NovelAI 第三方客戶端';
 
   @override
@@ -22086,6 +22578,23 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get auth_error_serverError => '伺服器錯誤';
+
+  @override
+  String get auth_credentialStorageCorrupt => '本機憑據檔案已損壞。';
+
+  @override
+  String get auth_resetLocalCredentials => '重設本機憑據';
+
+  @override
+  String get auth_credentialResetExplanation =>
+      '重設會移除本應用在這臺 Mac 上儲存的所有登入令牌和服務金鑰。之後需要重新輸入，圖片和設定會保留。';
+
+  @override
+  String get auth_credentialStorageUnavailable => '無法讀寫本機憑據檔案。';
+
+  @override
+  String get auth_credentialStorageUnavailableHint =>
+      '本次登入已取消。請檢查當前 macOS 使用者的檔案權限後重試。';
 
   @override
   String get auth_error_unknown => '未知錯誤';
@@ -25304,6 +25813,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get shortcut_action_minimize_to_tray => '最小化到系統匣';
 
   @override
+  String get shortcut_action_hide_to_menu_bar => '隱藏到選單列';
+
+  @override
   String get shortcut_action_quit_app => '退出應用';
 
   @override
@@ -26726,7 +27238,19 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
+  String updateDownloadedFinderHint(Object version) {
+    return '新版本 v$version 已下載並通過校驗。點“在 Finder 中顯示”後，按 ⌘Q 退出本應用，再把新版本拖進“應用程式”資料夾，替換舊版本。';
+  }
+
+  @override
   String get updateInstallAndRestart => '安裝並重啟';
+
+  @override
+  String get update_runningFromStaging =>
+      '你開啟的是更新資料夾中的應用。請先在 Finder 中顯示它，按 ⌘Q 退出，再將應用拖入「應用程式」並從那裡開啟。';
+
+  @override
+  String get updateShowInFinder => '在 Finder 中顯示';
 
   @override
   String get updateInstallNow => '立即安裝';
@@ -26750,6 +27274,12 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get updateInstallingHint => '安裝程式已啟動，應用即將關閉並自動完成更新。';
 
   @override
+  String get updatePreparingApp => '正在準備新版本...';
+
+  @override
+  String get updatePreparingAppHint => '正在解壓更新包，完成後會在 Finder 中選中新版本。';
+
+  @override
   String get remindMeLater => '4 小時後提醒';
 
   @override
@@ -26764,12 +27294,18 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get updateNoticeManualSubtitle => '當前平臺需要前往 Release 頁面手動更新';
 
   @override
+  String get updateNoticeFinderSubtitle => '可在應用內下載並校驗，再到 Finder 中替換舊版本';
+
+  @override
   String updateNoticeReady(Object version) {
     return '新版本 v$version 已準備好';
   }
 
   @override
   String get updateNoticeReadySubtitle => '更新包已校驗，重啟即可安裝';
+
+  @override
+  String get updateNoticeReadyFinderSubtitle => '更新包已校驗，在 Finder 中替換舊版本即可';
 
   @override
   String get updateNoticeFailed => '上次更新沒有完成';
@@ -26986,6 +27522,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get common_swap => '交換';
+
+  @override
+  String get common_showInFinder => '在 Finder 中顯示';
 
   @override
   String get addToLibrary_displayNameHint => '輸入便於識別此條目的名稱';
@@ -27497,6 +28036,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   @override
   String get tips_studio_trick_6 =>
       '在翻譯塊上按一下滑鼠中鍵，原文和譯文來回切換。AI 翻得再好，偶爾也值得偷看一眼原文，確認它沒把 cat ears 翻成什麼奇怪的東西。';
+
+  @override
+  String get tips_studio_trick_6_mac =>
+      '在翻譯塊上按住 ⌘ 點一下，原文和譯文來回切換。AI 翻得再好，偶爾也值得偷看一眼原文，確認它沒把 cat ears 翻成什麼奇怪的東西。';
 
   @override
   String get tips_studio_trick_7 =>
@@ -30215,6 +30758,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get promptTranslation_guideMiddleTitle => '中鍵點塊';
 
   @override
+  String get promptTranslation_guideCommandClickTitle => '⌘ + 點選塊';
+
+  @override
   String get promptTranslation_guideMiddleText => '切換原文與譯文';
 
   @override
@@ -30453,6 +30999,14 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get update_errorLaunchFailed => '啟動更新程式失敗';
+
+  @override
+  String get update_errorExtractFailed => '解壓更新包失敗';
+
+  @override
+  String update_errorRevealFailed(Object path) {
+    return '無法在 Finder 中顯示新版本，它在：$path';
+  }
 
   @override
   String get update_errorCheckFailed => '檢查更新失敗';
@@ -31170,7 +31724,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get localUpscale_cancelling => '正在取消…';
 
   @override
-  String get localUpscale_unsupportedPlatform => '本地超分目前支援 Windows。';
+  String get localUpscale_unsupportedPlatform => '這種放大方式目前只支援 Windows。';
 
   @override
   String get localUpscale_engineMissing => '本地引擎不可用，請重新安裝完整 Studio 執行包。';
@@ -34770,6 +35324,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get imageViewer_missingHint => '可能已經在資源管理器裡被移動、改名或刪除';
 
   @override
+  String get imageViewer_missingHintFinder => '可能已經在 Finder 裡被移動、改名或刪除';
+
+  @override
   String get imageViewer_openFolder => '開啟所在資料夾';
 
   @override
@@ -37639,6 +38196,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get naiAgent_composerNotEmpty => '請先儲存或傳送當前輸入，再恢復這條訊息。';
 
   @override
+  String get naiAgent_bundledNodeRequiresMacOS135 =>
+      '內建 Agent 需要 macOS 13.5 或更高版本。你仍可在這臺 Mac 上使用生圖功能。';
+
+  @override
   String get naiAgent_runtimeMissing => 'Agent 執行元件尚未安裝，請使用完整更新包。';
 
   @override
@@ -38859,6 +39420,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get set_apSystemSub => '按 Windows 設定自動切換';
 
   @override
+  String get set_apSystemSubMac => '按 macOS 設定自動切換';
+
+  @override
   String get set_apText => '文字';
 
   @override
@@ -39295,6 +39859,11 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   @override
   String set_stFree(Object disk, Object size) {
     return '$disk 盤剩餘 $size';
+  }
+
+  @override
+  String set_stFreeMac(Object size) {
+    return '剩餘 $size';
   }
 
   @override
@@ -40214,6 +40783,20 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get set_rgInstallCpu => 'CPU';
+
+  @override
+  String get set_rgInstallHintMac =>
+      '下載 Python 與推理依賴（約 200 MB），不下載模型權重。需要 Apple 晶片的 Mac。“自動”在記憶體 18 GB 及以上的 Mac 上用 GPU，16 GB 及以下用 CPU。';
+
+  @override
+  String get set_rgPythonSubMac => '預設用自動安裝的獨立環境；也可以選一個已有的 python3。';
+
+  @override
+  String get set_rgNeedsAppleSilicon =>
+      '需要 Apple 晶片的 Mac。PyTorch 已不再提供 Intel 晶片 Mac 的版本，這臺 Mac 裝不了執行環境。';
+
+  @override
+  String get set_rgEnvUnsupported => '不支援';
 
   @override
   String get set_rgPhaseExisting => '正在檢測已有環境';
@@ -42811,6 +43394,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get startup_dataTitle => '無法準備應用資料';
+
+  @override
+  String get startup_profileInUse => '另一份應用正在使用此資料目錄。請先退出那份應用，再點重試。';
 
   @override
   String get startup_dataHelp =>

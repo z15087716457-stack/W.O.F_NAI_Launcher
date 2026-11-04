@@ -12,6 +12,7 @@ import '../../../../core/constants/api_constants.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../core/utils/comfyui_prompt_parser/pipe_parser.dart';
 import '../../../../core/utils/nai_prompt_formatter.dart';
+import '../../../../core/utils/platform_shortcut_text.dart';
 import '../../../../core/utils/sd_to_nai_converter.dart';
 import '../../../../data/models/character/character_prompt.dart';
 import '../../../../data/models/prompt/prompt_preset_mode.dart';
@@ -933,7 +934,9 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
           enabledProvider: completion_settings.autocompleteSettingsProvider
               .select((s) => s.relatedTagsEnabled),
           title: menuContext.l10n.prompt_cooccurrenceRecommendation,
-          subtitle: menuContext.l10n.prompt_cooccurrenceRecommendationSubtitle,
+          subtitle: platformShortcutText(
+            menuContext.l10n.prompt_cooccurrenceRecommendationSubtitle,
+          ),
           theme: theme,
           onTap: () {
             final provider = completion_settings.autocompleteSettingsProvider;

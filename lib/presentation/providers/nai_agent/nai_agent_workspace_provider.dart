@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
+import '../../../core/utils/app_bundle_paths.dart';
+import '../../../core/nai_agent/agent_tool.dart';
 import '../../../data/services/nai_agent/agent_workspace_store.dart';
 import 'nai_agent_session_provider.dart';
 import 'nai_agent_workspace_controller.dart';
@@ -14,8 +16,34 @@ import '../../../core/utils/localization_extension.dart';
 import '../../prompt_assistant/providers/prompt_assistant_config_provider.dart';
 
 class NaiAgentRuntimePaths {
-  const NaiAgentRuntimePaths({required this.node, required this.host});
-  final String node, host;
+  const NaiAgentRuntimePaths({
+    required String node,
+    required this.host,
+    this.bundledMacOSVersion,
+  }) : _node = node;
+  final String _node, host;
+
+  /// Only the packaged macOS Node has a known minimum. Overrides can supply
+  /// a different executable with different system requirements.
+  final String? bundledMacOSVersion;
+  String get node {
+    final version = bundledMacOSVersion;
+    if (version != null) {
+      final match = RegExp(r'\b(\d+)(?:\.(\d+))?').firstMatch(version);
+      if (match != null) {
+        final major = int.parse(match[1]!);
+        final minor = int.tryParse(match[2] ?? '') ?? 0;
+        if (major < 13 || major == 13 && minor < 5) {
+          throw NaiAgentToolError(
+            'unsupported_macos',
+            currentL10n.naiAgent_bundledNodeRequiresMacOS135,
+          );
+        }
+      }
+    }
+    return _node;
+  }
+
   Future<void> check() async {
     if (!await File(node).exists() || !await File(host).exists()) {
       throw const FileSystemException('NAI Agent runtime is not installed');
@@ -25,21 +53,26 @@ class NaiAgentRuntimePaths {
 
 /// Installer preserves this adjacent directory. It is outside Flutter data/.
 final naiAgentWorkspaceStoreProvider = Provider<AgentWorkspaceStore>(
+  // macOS 不往应用包里写，放「应用支持」目录（见 AppBundlePaths）；内置技能随运行时在
+  // 包里，不在数据目录旁边，所以显式指给它
   (ref) => AgentWorkspaceStore(
-    Directory(p.join(p.dirname(Platform.resolvedExecutable), 'agent-data')),
+    Directory(AppBundlePaths.agentDataDirectory),
+    builtinSkillsDirectory: Directory(
+      p.join(AppBundlePaths.toolsDirectory, 'nai-agent', 'skills'),
+    ),
   ),
 );
 
 /// Production uses the bundled runtime only; tests explicitly override paths.
 final naiAgentRuntimePathsProvider = Provider<NaiAgentRuntimePaths>((ref) {
-  final root = p.join(
-    p.dirname(Platform.resolvedExecutable),
-    'tools',
-    'nai-agent',
-  );
+  // Windows 在 exe 旁边的 tools，macOS 在 Contents/Resources/tools（见 AppBundlePaths）
+  final root = p.join(AppBundlePaths.toolsDirectory, 'nai-agent');
   return NaiAgentRuntimePaths(
     node: p.join(root, Platform.isWindows ? 'node.exe' : 'node'),
     host: p.join(root, 'host.mjs'),
+    bundledMacOSVersion: Platform.isMacOS
+        ? Platform.operatingSystemVersion
+        : null,
   );
 });
 

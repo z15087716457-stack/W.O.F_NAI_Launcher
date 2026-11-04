@@ -122,4 +122,62 @@ void main() {
     expect(find.text('新版本 v2.0.0 已准备好'), findsOneWidget);
     expect(find.text('立即安装'), findsOneWidget);
   });
+
+  group('macOS app archive', () {
+    const macAsset = ReleaseAssetInfo(
+      type: ReleaseAssetType.macosPortable,
+      platform: 'macos',
+      fileName: 'WOF_NAI_Studio_macOS_2.0.0_Portable.zip',
+      downloadUrl: 'https://example.com/macos.zip',
+      sha256: 'abc',
+      size: 100,
+    );
+    const macInfo = VersionInfo(
+      version: '2.0.0',
+      currentVersion: '1.0.0',
+      assets: [macAsset],
+      primaryAsset: macAsset,
+      isNewer: true,
+    );
+    final l10n = lookupAppLocalizations(const Locale('zh'));
+
+    testWidgets('says the update finishes in Finder', (tester) async {
+      await tester.pumpWidget(
+        app(
+          const UpdateState(
+            status: UpdateStatus.available,
+            versionInfo: macInfo,
+            notificationVisible: true,
+          ),
+        ),
+      );
+
+      expect(find.text(l10n.updateNoticeFinderSubtitle), findsOneWidget);
+      expect(find.text(l10n.updateNoticeAvailableSubtitle), findsNothing);
+    });
+
+    testWidgets('a verified package is replaced in Finder, not on restart', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        app(
+          UpdateState(
+            status: UpdateStatus.downloaded,
+            versionInfo: macInfo,
+            downloadedUpdate: DownloadedUpdate(
+              file: File('macos.zip'),
+              asset: macAsset,
+              version: '2.0.0',
+            ),
+            notificationVisible: true,
+          ),
+        ),
+      );
+
+      expect(find.text(l10n.updateNoticeReady('2.0.0')), findsOneWidget);
+      expect(find.text(l10n.updateNoticeReadyFinderSubtitle), findsOneWidget);
+      expect(find.text(l10n.updateViewDetails), findsOneWidget);
+      expect(find.text(l10n.updateInstallNow), findsNothing);
+    });
+  });
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/utils/platform_shortcut_text.dart';
 import '../kit/ui_controls.dart';
 import '../kit/ui_glyph.dart';
 import '../kit/ui_text.dart';
@@ -60,7 +61,7 @@ class ViewerKeycap extends StatelessWidget {
       child: Center(
         widthFactor: 1,
         child: Text(
-          label,
+          platformKeyLabel(label),
           style: UiText.mono(
             10.5,
             weight: FontWeight.w500,
@@ -82,7 +83,7 @@ class ViewerKeycaps extends StatelessWidget {
   Widget build(BuildContext context) => Row(
     mainAxisSize: MainAxisSize.min,
     spacing: gap,
-    children: [for (final k in keys) ViewerKeycap(k)],
+    children: [for (final k in platformKeyLabels(keys)) ViewerKeycap(k)],
   );
 }
 

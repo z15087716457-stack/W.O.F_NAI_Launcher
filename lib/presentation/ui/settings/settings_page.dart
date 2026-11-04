@@ -1,10 +1,14 @@
+import '../../widgets/navigation/workspace_navigation.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../widgets/common/text_editing_shortcuts.dart';
 
+import '../../../core/utils/keyboard_modifier_utils.dart';
+import '../../../core/utils/desktop_platform.dart';
 import '../../../core/utils/localization_extension.dart';
+import '../../../core/utils/platform_shortcut_text.dart';
 import '../../widgets/navigation/window_chrome_layout.dart';
 import '../agent/agent_glyphs.dart';
 import '../kit/ui_colors.dart';
@@ -65,6 +69,18 @@ class _Confirm {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+  SettingsDeparture? _departure;
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final next = WorkspaceNavigation.maybeOf(context)?.settingsDeparture;
+    if (!identical(next, _departure)) {
+      _departure?.detach(_guard);
+      _departure = next;
+      _departure?.attach(_guard);
+    }
+  }
+
   late var _query = widget.initialQuery;
   late String? _highlight = widget.initialAnchor;
   Timer? _highlightTimer;
@@ -102,6 +118,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   void dispose() {
+    _departure?.detach(_guard);
     _toastTimer?.cancel();
     _highlightTimer?.cancel();
     _searchFocus.dispose();
@@ -118,6 +135,7 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   void _guard(VoidCallback go) {
+    if (_confirm != null) return;
     if (!_dirty) return go();
     final l = context.l10n;
     _ask(
@@ -180,7 +198,8 @@ class _SettingsPageState extends State<SettingsPage> {
 
   KeyEventResult _onKey(FocusNode _, KeyEvent e) {
     if (e is! KeyDownEvent) return KeyEventResult.ignored;
-    final ctrl = HardwareKeyboard.instance.isControlPressed;
+    // 主修饰键：macOS 上是 ⌘（不带 Control，⌃⌘F 是系统的全屏键）
+    final ctrl = isPrimaryShortcutModifierPressed();
     if (ctrl &&
         (e.logicalKey == LogicalKeyboardKey.keyZ ||
             e.logicalKey == LogicalKeyboardKey.keyY) &&
@@ -200,8 +219,29 @@ class _SettingsPageState extends State<SettingsPage> {
       setState(() => _toast = null);
       return KeyEventResult.handled;
     }
-    if (e.logicalKey == LogicalKeyboardKey.escape && _query.isNotEmpty) {
-      setState(() => _query = '');
+    if (e.logicalKey == LogicalKeyboardKey.escape &&
+        !HardwareKeyboard.instance.isMetaPressed &&
+        !HardwareKeyboard.instance.isControlPressed &&
+        !HardwareKeyboard.instance.isAltPressed &&
+        !HardwareKeyboard.instance.isShiftPressed) {
+      final editor = FocusManager.instance.primaryFocus?.context
+          ?.findAncestorStateOfType<EditableTextState>();
+      final composing = editor?.widget.controller.value.composing;
+      if (composing != null && composing.isValid && !composing.isCollapsed) {
+        return KeyEventResult.skipRemainingHandlers;
+      }
+      if (_confirm != null) {
+        setState(() => _confirm = null);
+      } else if (_query.isNotEmpty) {
+        setState(() => _query = '');
+      } else if (hasEditableTextFocus && !_searchFocus.hasFocus && !_dirty) {
+        // SettingsInput submits on blur. Keep its page mounted for that commit.
+        _rootFocus.requestFocus();
+      } else if (usesMacOSConventions) {
+        final navigation = WorkspaceNavigation.maybeOf(context);
+        if (navigation == null) return KeyEventResult.ignored;
+        navigation.closeSettings();
+      }
       return KeyEventResult.handled;
     }
     return KeyEventResult.ignored;
@@ -897,7 +937,7 @@ class _ToastDock extends StatelessWidget {
           if (change.undoable) ...[
             SettingsDockButton(label: l.set_undo, onTap: onUndo),
             Text(
-              'Ctrl+Z',
+              platformShortcutLabel('Ctrl+Z'),
               style: UiText.mono(
                 10.5,
                 weight: FontWeight.w500,

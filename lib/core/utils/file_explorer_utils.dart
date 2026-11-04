@@ -70,15 +70,22 @@ class FileExplorerUtils {
     String directoryPath, {
     FileExplorerProcessLauncher? startProcess,
   }) async {
-    final dir = Directory(directoryPath.trim());
-    if (dir.path.isEmpty) {
+    final trimmed = directoryPath.trim();
+    if (trimmed.isEmpty) {
       throw ArgumentError.value(directoryPath, 'directoryPath', 'is empty');
     }
+    // Finder can distinguish two existing names by a trailing space.
+    final dir = Directory(Platform.isMacOS ? directoryPath : trimmed);
     if (!await dir.exists()) {
       throw FileSystemException('Directory does not exist', dir.path);
     }
 
     final launcher = startProcess ?? _startProcess;
+    // macOS：用 open 打开文件夹
+    if (Platform.isMacOS) {
+      await launcher('open', [dir.absolute.path]);
+      return;
+    }
     final absolutePath = normalizeWindowsExplorerPath(dir.absolute.path);
     await launcher('explorer.exe', [absolutePath]);
   }
@@ -87,15 +94,21 @@ class FileExplorerUtils {
     String filePath, {
     FileExplorerProcessLauncher? startProcess,
   }) async {
-    final file = File(filePath.trim());
-    if (file.path.isEmpty) {
+    final trimmed = filePath.trim();
+    if (trimmed.isEmpty) {
       throw ArgumentError.value(filePath, 'filePath', 'is empty');
     }
+    final file = File(Platform.isMacOS ? filePath : trimmed);
     if (!await file.exists()) {
       throw FileSystemException('File does not exist', file.path);
     }
 
     final launcher = startProcess ?? _startProcess;
+    // macOS：用 open -R 在访达中选中文件
+    if (Platform.isMacOS) {
+      await launcher('open', ['-R', file.absolute.path]);
+      return;
+    }
     final absolutePath = normalizeWindowsExplorerPath(file.absolute.path);
     if (startProcess == null && _tryRevealFileWithShellApi(absolutePath)) {
       return;

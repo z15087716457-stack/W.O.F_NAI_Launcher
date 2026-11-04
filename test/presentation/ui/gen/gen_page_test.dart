@@ -1,9 +1,11 @@
 import 'dart:convert';
 
 import 'package:flutter/gestures.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nai_launcher/presentation/ui/kit/ui_keycap.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_contract.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_parts.dart'
     show GenTokenBar;
@@ -874,6 +876,34 @@ void main() {
       expect(find.byKey(const Key('gen-history-empty')), findsOneWidget);
     });
 
+    testWidgets(
+      '空画布的生成快捷键：macOS 写 ⌘⏎，Windows 写 Ctrl Enter',
+      (t) async {
+        await pump(t, GenFixture.empty());
+        final keys = [
+          for (final w in t.widgetList<Text>(
+            find.descendant(
+              of: find.byKey(const Key('gen-canvas-empty')),
+              matching: find.descendant(
+                of: find.byType(UiKeycaps),
+                matching: find.byType(Text),
+              ),
+            ),
+          ))
+            w.data,
+        ];
+        expect(
+          keys,
+          defaultTargetPlatform == TargetPlatform.macOS
+              ? ['⌘', '⏎']
+              : ['Ctrl', 'Enter'],
+        );
+      },
+      variant: const TargetPlatformVariant({
+        TargetPlatform.macOS,
+        TargetPlatform.windows,
+      }),
+    );
     for (final longImage in [false, true]) {
       testWidgets('错误卡显示 HTTP 代码和原因 longImage=$longImage', (t) async {
         final raw = longImage
@@ -994,6 +1024,17 @@ void main() {
       await tapKey(t, 'gen-history-send-img2img');
       expect(r.last('onSendTo'), 'onSendTo(i5, GenSendTarget.img2img)');
     });
+
+    testWidgets('macOS：右键菜单写在访达中显示', (t) async {
+      await pump(t);
+      await t.tap(
+        find.byKey(const Key('gen-batch-tile-b4')),
+        buttons: kSecondaryButton,
+      );
+      await t.pumpAndSettle();
+      expect(find.text('在访达中显示'), findsOneWidget);
+      expect(find.text('在资源管理器中显示'), findsNothing);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
 
     testWidgets('清空历史要确认；自动保存开关', (t) async {
       await pump(t);

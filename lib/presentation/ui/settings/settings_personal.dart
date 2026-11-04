@@ -3,7 +3,11 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../core/shortcuts/shortcut_config.dart';
+import '../../../core/shortcuts/shortcut_manager.dart';
+import '../../../core/utils/desktop_platform.dart';
 import '../../../core/utils/localization_extension.dart';
+import '../../../core/utils/platform_shortcut_text.dart';
 import '../channel/channel_contract.dart';
 import '../channel/channel_format.dart';
 import '../channel/channel_geometry.dart';
@@ -14,6 +18,7 @@ import '../kit/ui_glyph.dart';
 import '../kit/ui_lib_controls.dart';
 import '../kit/ui_new_badge.dart';
 import '../kit/ui_text.dart';
+import '../../utils/platform_labels.dart';
 import 'settings_contract.dart';
 import 'settings_controls.dart';
 import 'settings_format.dart';
@@ -537,7 +542,7 @@ class SettingsAppearancePage extends StatelessWidget {
                         description: switch (k) {
                           'light' => 'Geist Light',
                           'dark' => 'Geist Dark',
-                          _ => l.set_apSystemSub,
+                          _ => followSystemAppearanceLabel(l),
                         },
                         onTap: () =>
                             s.actions.onChanged(SettingKey.themeMode, k),
@@ -1230,7 +1235,8 @@ class _SettingsShortcutsPageState extends State<SettingsShortcutsPage> {
     bool match(SettingsShortcut x) {
       if (q.isNotEmpty &&
           !x.label.toLowerCase().contains(q) &&
-          !x.keys.join('+').toLowerCase().contains(q)) {
+          !x.keys.join('+').toLowerCase().contains(q) &&
+          !platformKeysText(x.keys).toLowerCase().contains(q)) {
         return false;
       }
       if (_key != null) {
@@ -1285,7 +1291,7 @@ class _SettingsShortcutsPageState extends State<SettingsShortcutsPage> {
                   key: const Key('shortcut-search'),
                   width: 280,
                   value: _query,
-                  hint: l.set_scSearch,
+                  hint: platformShortcutText(l.set_scSearch),
                   leading: UiGlyph(UiGlyphs.search, size: 14, color: c.faint),
                   onChanged: (v) => setState(() => _query = v),
                 ),
@@ -1364,7 +1370,7 @@ class _SettingsShortcutsPageState extends State<SettingsShortcutsPage> {
                           const SettingsDot(SettingsTone.error),
                           Expanded(
                             child: Text(
-                              l.set_scConflictLine(b.keys.join('+')),
+                              l.set_scConflictLine(platformKeysText(b.keys)),
                               style: UiText.sans(12, color: c.ink),
                             ),
                           ),
@@ -1387,7 +1393,10 @@ class _SettingsShortcutsPageState extends State<SettingsShortcutsPage> {
                       ),
                       SettingsBtn(
                         key: Key('shortcut-fix-${b.id}'),
-                        label: l.set_scFix(b.label, b.defaultKeys.join('+')),
+                        label: l.set_scFix(
+                          b.label,
+                          platformKeysText(b.defaultKeys),
+                        ),
                         small: true,
                         onTap: () => s.actions.onShortcutReset(b.id),
                       ),
@@ -1439,7 +1448,8 @@ class _SettingsShortcutsPageState extends State<SettingsShortcutsPage> {
         SettingsHint(
           child: SettingsKeyText(
             text: SettingsFormat.keyed((k) => l.set_scHelpTip(k)),
-            keys: const ['F1'],
+            // macOS 上快捷键帮助默认是 ⌘/（F 键要按 fn，见 DefaultShortcuts.macOverrides）
+            keys: usesMacOSConventions ? const ['Ctrl', '/'] : const ['F1'],
             style: UiText.sans(12, color: c.muted, height: 1.6),
           ),
         ),
@@ -1574,6 +1584,21 @@ class _SettingsShortcutsPageState extends State<SettingsShortcutsPage> {
     ],
   ];
 
+  // Mac 键盘最下一排：fn ⌃ ⌥ ⌘ 空格 ⌘ ⌥。键名照配置里的写法：Ctrl 是主修饰键 ⌘，Meta 是 Control（⌃）
+  static const _macBottomRow = <(String, double)>[
+    ('Fn', 1.2),
+    ('Meta', 1.2),
+    ('Alt', 1.2),
+    ('Ctrl', 1.5),
+    ('Space', 7.2),
+    ('Ctrl', 1.5),
+    ('Alt', 1.2),
+  ];
+
+  static List<List<(String, double)>> get _layout => usesMacOSConventions
+      ? [..._rows.take(_rows.length - 1), _macBottomRow]
+      : _rows;
+
   Widget _keyboard(BuildContext context, SettingsShortcutsData data) {
     final l = context.l10n;
     final c = context.ui;
@@ -1600,7 +1625,7 @@ class _SettingsShortcutsPageState extends State<SettingsShortcutsPage> {
                 key: const Key('shortcut-layer'),
                 values: _mods,
                 selected: _layer,
-                labelOf: (m) => m.isEmpty ? l.set_scNoMod : m,
+                labelOf: (m) => m.isEmpty ? l.set_scNoMod : platformKeyLabel(m),
                 onChanged: (m) => setState(() {
                   _layer = m;
                   _key = null;
@@ -1610,7 +1635,7 @@ class _SettingsShortcutsPageState extends State<SettingsShortcutsPage> {
                 child: Text(
                   _layer.isEmpty
                       ? l.set_scLayerNone(ctxLabel)
-                      : l.set_scLayer(ctxLabel, _layer),
+                      : l.set_scLayer(ctxLabel, platformKeyLabel(_layer)),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: UiText.sans(12, color: c.faint),
@@ -1642,7 +1667,7 @@ class _SettingsShortcutsPageState extends State<SettingsShortcutsPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: 5,
                 children: [
-                  for (final row in _rows)
+                  for (final row in _layout)
                     Row(
                       spacing: 5,
                       children: [
@@ -1717,7 +1742,7 @@ class _SettingsShortcutsPageState extends State<SettingsShortcutsPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                k,
+                platformKeyLabel(k),
                 maxLines: 1,
                 style: UiText.mono(
                   10.5,
@@ -1880,7 +1905,7 @@ class _ShortcutTable extends StatelessWidget {
                       ),
                 Text(
                   x.changed && x.defaultKeys.isNotEmpty
-                      ? l.set_scDefaultIs(x.defaultKeys.join('+'))
+                      ? l.set_scDefaultIs(platformKeysText(x.defaultKeys))
                       : '',
                   style: UiText.sans(11, color: c.faint),
                 ),
@@ -1911,7 +1936,7 @@ class _ShortcutTable extends StatelessWidget {
   }
 }
 
-/// 录制框：按下组合键即回调；Esc 取消，Backspace 清除。
+/// 录制框：按下组合键即回调（按配置里的写法拆开，见 [ShortcutParser.serialize]）；Esc 取消，Backspace 清除。
 class _Recorder extends StatefulWidget {
   const _Recorder({
     required this.onKeys,
@@ -1954,33 +1979,29 @@ class _RecorderState extends State<_Recorder> {
     LogicalKeyboardKey.metaRight,
   };
 
-  static String _label(LogicalKeyboardKey k) => switch (k) {
-    LogicalKeyboardKey.arrowUp => '↑',
-    LogicalKeyboardKey.arrowDown => '↓',
-    LogicalKeyboardKey.arrowLeft => '←',
-    LogicalKeyboardKey.arrowRight => '→',
-    LogicalKeyboardKey.space => 'Space',
-    LogicalKeyboardKey.escape => 'Esc',
-    _ => k.keyLabel.length == 1 ? k.keyLabel.toUpperCase() : k.keyLabel,
-  };
-
   KeyEventResult _onKey(FocusNode _, KeyEvent e) {
     if (e is! KeyDownEvent) return KeyEventResult.handled;
     final k = e.logicalKey;
     if (_modifiers.contains(k)) return KeyEventResult.handled;
     final hw = HardwareKeyboard.instance;
-    final hasMod = hw.isControlPressed || hw.isShiftPressed || hw.isAltPressed;
-    if (!hasMod && k == LogicalKeyboardKey.escape) {
+    final modifiers = {
+      if (hw.isControlPressed) ShortcutModifier.control,
+      if (hw.isAltPressed) ShortcutModifier.alt,
+      if (hw.isShiftPressed) ShortcutModifier.shift,
+      if (hw.isMetaPressed) ShortcutModifier.meta,
+    };
+    if (modifiers.isEmpty && k == LogicalKeyboardKey.escape) {
       widget.onCancel();
-    } else if (!hasMod && k == LogicalKeyboardKey.backspace) {
+    } else if (modifiers.isEmpty && k == LogicalKeyboardKey.backspace) {
       widget.onClear();
-    } else {
-      widget.onKeys([
-        if (hw.isControlPressed) 'Ctrl',
-        if (hw.isShiftPressed) 'Shift',
-        if (hw.isAltPressed) 'Alt',
-        _label(k),
-      ]);
+    } else if (AppShortcutManager.shortcutKeyOf(k) case final key?) {
+      // 按配置里的写法存（逗号是 comma、↑ 是 arrowup）；macOS 上按下的 ⌘ 存成主修饰键 ctrl、
+      // Control 存成 meta（见 ShortcutParser）。快捷键里用不了的键不录，接着等
+      widget.onKeys(
+        ShortcutParser.serialize(
+          ParsedShortcut(modifiers: modifiers, key: key, raw: ''),
+        ).split('+'),
+      );
     }
     return KeyEventResult.handled;
   }

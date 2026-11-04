@@ -29,6 +29,7 @@ import 'canvas_tile_toolbar.dart';
 import 'canvas_image_background.dart';
 import 'generated_image_card.dart';
 import 'generation_canvas_controller.dart';
+import '../../../../../core/utils/keyboard_modifier_utils.dart';
 import '../../../../../core/utils/localization_extension.dart';
 
 /// 生成画布（G11 V3）：对标 NAI5 官网无限画布，逐字对码模块 22099。
@@ -1116,8 +1117,10 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     final idx = focus == null
         ? -1
         : groups.indexWhere((g) => g.key == focus.group);
+    // macOS 上按着 ⌘ / Control 的 Q、F 是 ⌘Q 退出、⌃⌘F 全屏这类系统键，不当跳组、飞回
+    final chord = isMacChordModifierPressed();
 
-    if (key == LogicalKeyboardKey.keyQ) {
+    if (key == LogicalKeyboardKey.keyQ && !chord) {
       // q 跳组：Shift+q 前 / 裸 q 后
       final next = shift
           ? (idx <= 0 ? groups.length - 1 : idx - 1)
@@ -1130,7 +1133,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
       _flyToGroup(layout, g);
       return KeyEventResult.handled;
     }
-    if (key == LogicalKeyboardKey.keyF) {
+    if (key == LogicalKeyboardKey.keyF && !chord) {
       // f 飞回焦点组（无焦点则飞最近组）
       if (focus != null) {
         final g = groups.where((x) => x.key == focus.group).firstOrNull;

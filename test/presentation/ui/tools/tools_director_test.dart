@@ -1,4 +1,5 @@
 // 导演工具的交互。
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -87,6 +88,50 @@ void main() {
     ]);
   });
 
+  testWidgets(
+    'paste inserts clipboard text into the director prompt',
+    (t) async {
+      final r = ToolsRecorder();
+      await pumpToolsDirector(t, data: ToolsFixture.emotion(), r: r);
+      final prompt = find.byKey(const Key('tools-dt-prompt-field'));
+      await t.ensureVisible(prompt);
+      await t.enterText(prompt, 'draft');
+      final editor = t.widget<TextField>(prompt);
+      editor.controller!.selection = const TextSelection(
+        baseOffset: 0,
+        extentOffset: 5,
+      );
+      t.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (call) async {
+          if (call.method == 'Clipboard.getData') {
+            return {'text': 'pasted text'};
+          }
+          return null;
+        },
+      );
+      addTearDown(
+        () => t.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        ),
+      );
+      final primary = defaultTargetPlatform == TargetPlatform.macOS
+          ? LogicalKeyboardKey.metaLeft
+          : LogicalKeyboardKey.controlLeft;
+      await t.sendKeyDownEvent(primary);
+      await t.sendKeyEvent(LogicalKeyboardKey.keyV);
+      await t.sendKeyUpEvent(primary);
+      await t.pump();
+      expect(editor.controller!.text, 'pasted text');
+      expect(r.calls, isNot(contains('onPaste')));
+    },
+    variant: const TargetPlatformVariant({
+      TargetPlatform.macOS,
+      TargetPlatform.windows,
+    }),
+  );
+
   testWidgets('快捷键：Ctrl+Enter 运行、Ctrl+V 粘贴、Esc 回生图', (t) async {
     final r = ToolsRecorder();
     await pumpToolsDirector(t, data: ToolsFixture.director(), r: r);
@@ -97,6 +142,20 @@ void main() {
     await t.sendKeyEvent(LogicalKeyboardKey.escape);
     expect(r.calls, ['onRun', 'onPaste', 'onBack']);
   });
+
+  testWidgets('快捷键 macOS：⌘↩ 运行、⌘V 粘贴（在这里接住，不传到全局导入），Control 不触发', (t) async {
+    final r = ToolsRecorder();
+    await pumpToolsDirector(t, data: ToolsFixture.director(), r: r);
+    await t.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
+    await t.sendKeyEvent(LogicalKeyboardKey.enter);
+    expect(await t.sendKeyEvent(LogicalKeyboardKey.keyV), true);
+    await t.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+    await t.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await t.sendKeyEvent(LogicalKeyboardKey.enter);
+    await t.sendKeyEvent(LogicalKeyboardKey.keyV);
+    await t.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    expect(r.calls, ['onRun', 'onPaste']);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
 
   testWidgets('表情修复运行前：16 个表情 + 更多 8 个、强度、补充提示词；结果操作不可点', (t) async {
     final r = ToolsRecorder();

@@ -233,3 +233,10 @@ dist/checksums.txt
 # Executable-adjacent private application data and migration backups.
 user-data/
 .studio-data-*
+
+# ===========================================================================
+# macOS 构建产物
+# ===========================================================================
+**/macos/Flutter/ephemeral/
+**/macos/Flutter/GeneratedPluginRegistrant.swift
+**/macos/Pods/

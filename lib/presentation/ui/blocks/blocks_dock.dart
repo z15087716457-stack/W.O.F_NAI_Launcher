@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/utils/localization_extension.dart';
 import '../../widgets/common/studio_icons.dart';
+import '../../widgets/common/studio_scroll_behavior.dart';
 import '../kit/ui_block_pill.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_controls.dart';
@@ -690,27 +690,6 @@ class _ChipsState extends State<_Chips> {
     return false;
   }
 
-  void _wheel(PointerSignalEvent event) {
-    if (event is! PointerScrollEvent || !_scroll.hasClients) return;
-    final position = _scroll.position;
-    if (!position.hasContentDimensions || position.maxScrollExtent <= 0) return;
-    final delta = event.scrollDelta.dx != 0
-        ? event.scrollDelta.dx
-        : event.scrollDelta.dy;
-    if (delta == 0) return;
-    GestureBinding.instance.pointerSignalResolver.register(event, (resolved) {
-      if (!mounted || !_scroll.hasClients) return;
-      final current = _scroll.position;
-      _scroll.jumpTo(
-        (current.pixels + delta).clamp(
-          current.minScrollExtent,
-          current.maxScrollExtent,
-        ),
-      );
-      (resolved as PointerScrollEvent).respond(allowPlatformDefault: false);
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final data = widget.data;
@@ -775,7 +754,8 @@ class _ChipsState extends State<_Chips> {
             child: NotificationListener<ScrollMetricsNotification>(
               onNotification: _metrics,
               child: Listener(
-                onPointerSignal: _wheel,
+                onPointerSignal: (event) =>
+                    scrollStripWithWheel(_scroll, event),
                 child: ShaderMask(
                   key: const Key('dock-chips-fade'),
                   shaderCallback: (r) => LinearGradient(

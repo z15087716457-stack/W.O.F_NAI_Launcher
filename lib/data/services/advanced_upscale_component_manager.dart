@@ -23,6 +23,10 @@ class AdvancedUpscaleCommand {
 
 /// Optional components. Listing and resolving never download a missing file.
 /// Every installer process belongs to the bundled Windows job host.
+///
+/// SeedVR2 runs on CUDA and RTX Video on Direct3D 11, so installing and running
+/// them needs Windows; elsewhere they are listed as not installed and the
+/// Windows host is never released from the asset bundle.
 class AdvancedUpscaleComponentManager {
   AdvancedUpscaleComponentManager({
     Future<Directory> Function()? rootDirectory,
@@ -31,8 +35,10 @@ class AdvancedUpscaleComponentManager {
     this.startProcess,
     this.proxyAddress,
     this.manifestDigest = manifestSha256,
+    LocalUpscalePlatform? platform,
   }) : _rootDirectory = rootDirectory ?? _defaultDirectory,
        _loadAsset = loadAsset ?? _bundleBytes,
+       _platform = platform ?? LocalUpscalePlatform.host,
        _dio =
            dio ??
            Dio(
@@ -47,6 +53,7 @@ class AdvancedUpscaleComponentManager {
   final String manifestDigest;
   final Future<Directory> Function() _rootDirectory;
   final Future<Uint8List> Function(String) _loadAsset;
+  final LocalUpscalePlatform _platform;
   final Dio _dio;
   final OwnedUpscaleStarter? startProcess;
   final String? Function()? proxyAddress;
@@ -131,6 +138,14 @@ class AdvancedUpscaleComponentManager {
     _ => throw const LocalUpscaleException(LocalUpscaleError.invalidModel),
   };
   File _pointer(String id) => File(p.join(directory.path, '${_key(id)}.json'));
+  void _checkPlatform(String id) {
+    if (!_platform.supports(
+      _key(id) == 'rtx' ? LocalUpscaleMethod.rtx : LocalUpscaleMethod.seedvr2,
+    )) {
+      throw const LocalUpscaleException(LocalUpscaleError.unsupportedPlatform);
+    }
+  }
+
   List<Map<String, dynamic>> _seedModels(
     String id, {
     bool requireModel = true,
@@ -333,6 +348,9 @@ class AdvancedUpscaleComponentManager {
   }
 
   Future<String> worker() async {
+    if (_platform != LocalUpscalePlatform.windows) {
+      throw const LocalUpscaleException(LocalUpscaleError.unsupportedPlatform);
+    }
     await initialize();
     final spec = _manifest['worker'] as Map<String, dynamic>;
     final target = File(
@@ -497,11 +515,7 @@ class AdvancedUpscaleComponentManager {
       cancellation.check();
       final existing = await _receipt(id);
       if (existing != null) return;
-      if (!Platform.isWindows) {
-        throw const LocalUpscaleException(
-          LocalUpscaleError.unsupportedPlatform,
-        );
-      }
+      _checkPlatform(id);
       final host = await worker();
       if (key == 'seedvr2') {
         final shared = await _receipt(id, requireModel: false);
@@ -900,6 +914,7 @@ class AdvancedUpscaleComponentManager {
     LocalUpscaleCancellation cancellation, {
     Seedvr2Options seedvr2Options = const Seedvr2Options(),
   }) async {
+    _checkPlatform(id);
     await initialize();
     final receipt = await _receipt(id);
     if (receipt == null) {

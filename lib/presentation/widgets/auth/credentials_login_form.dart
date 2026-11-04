@@ -158,6 +158,10 @@ class _CredentialsLoginFormState extends ConsumerState<CredentialsLoginForm> {
 
   String _getErrorMessage(AuthErrorCode? errorCode) {
     switch (errorCode) {
+      case AuthErrorCode.credentialStorageCorrupt:
+        return context.l10n.auth_credentialStorageCorrupt;
+      case AuthErrorCode.credentialStorageUnavailable:
+        return context.l10n.auth_credentialStorageUnavailable;
       case AuthErrorCode.networkTimeout:
         return context.l10n.auth_error_networkTimeout;
       case AuthErrorCode.networkError:
@@ -179,6 +183,10 @@ class _CredentialsLoginFormState extends ConsumerState<CredentialsLoginForm> {
   /// 获取错误恢复建议
   String? _getErrorRecoveryHint(AuthErrorCode? errorCode, int? httpStatusCode) {
     switch (errorCode) {
+      case AuthErrorCode.credentialStorageCorrupt:
+        return context.l10n.auth_credentialResetExplanation;
+      case AuthErrorCode.credentialStorageUnavailable:
+        return context.l10n.auth_credentialStorageUnavailableHint;
       case AuthErrorCode.networkTimeout:
         return context.l10n.api_error_timeout_hint;
       case AuthErrorCode.networkError:

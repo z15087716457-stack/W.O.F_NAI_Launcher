@@ -24,6 +24,210 @@ class AppLocalizationsJa extends AppLocalizations {
   String get brand_switchToDark => 'ダークモードに切り替え';
 
   @override
+  String legacyImport_copyingTitle(Object app) {
+    return '$app からデータをコピーしています';
+  }
+
+  @override
+  String legacyImport_copyingBody(Object app) {
+    return '設定、履歴、各種ライブラリとお気に入りは、初回起動時に一度だけコピーされます。アカウントにはもう一度ログインしてください。$app のデータはそのまま残ります。';
+  }
+
+  @override
+  String legacyImport_runningTitle(Object app) {
+    return '$app を終了してください';
+  }
+
+  @override
+  String get legacyImport_runningBody =>
+      '初回起動時に、旧版の設定、履歴、各種ライブラリとお気に入りをコピーします。メニューバーのアイコンも含めて旧版を完全に終了すると、自動的にコピーが始まります。';
+
+  @override
+  String legacyImport_waiting(Object app) {
+    return '$app の終了を待っています…';
+  }
+
+  @override
+  String legacyImport_failedTitle(Object app) {
+    return '$app からデータをコピーできません';
+  }
+
+  @override
+  String legacyImport_failedBody(Object app) {
+    return 'データは何も変更されていません。$app のデータはそのまま残り、途中までのコピーも残っていません。ディスクの空き容量を確認してから、もう一度お試しください。';
+  }
+
+  @override
+  String get legacyImport_startWithout => 'コピーせずに起動';
+
+  @override
+  String legacySync_title(Object app) {
+    return '$app からデータを同期しています';
+  }
+
+  @override
+  String legacySync_body(Object app) {
+    return 'ここにある設定、履歴、各種ライブラリとお気に入りを、$app の現在のデータに置き換えています。このバージョンのデータは先にバックアップしました。';
+  }
+
+  @override
+  String get legacySync_runningBody =>
+      '同期では旧版の設定、履歴、各種ライブラリとお気に入りを読み込みます。メニューバーのアイコンも含めて旧版を完全に終了すると、自動的に同期が始まります。';
+
+  @override
+  String legacySync_failedTitle(Object app) {
+    return '$app からデータを同期できません';
+  }
+
+  @override
+  String get legacySync_failedBody =>
+      '同期前のデータに戻しました。途中までの同期も残っていません。ディスクの空き容量を確認してから、もう一度お試しください。';
+
+  @override
+  String get legacySync_startWithout => '同期せずに起動';
+
+  @override
+  String get legacyUndo_title => '前回の同期を取り消しています';
+
+  @override
+  String get legacyUndo_body => '同期前のデータに戻しています。同期後のデータはバックアップとして残します。';
+
+  @override
+  String get legacyUndo_failedTitle => '前回の同期を取り消せません';
+
+  @override
+  String get legacyUndo_failedBody =>
+      'データは変更されておらず、途中までの切り替えも残っていません。ディスクの空き容量を確認してから、もう一度お試しください。';
+
+  @override
+  String get legacyUndo_startWithout => '取り消さずに起動';
+
+  @override
+  String get legacyRedo_title => '同期後のデータに戻しています';
+
+  @override
+  String get legacyRedo_body => '同期後にここで行った変更も戻ります。同期前のデータはバックアップとして残します。';
+
+  @override
+  String get legacyRedo_failedTitle => '同期後のデータに戻せません';
+
+  @override
+  String get legacyRedo_startWithout => '戻さずに起動';
+
+  @override
+  String get set_bkLegacy => '旧版のデータ';
+
+  @override
+  String set_bkLegacySub(Object app) {
+    return '旧版 $app のデータです。読み込むだけで変更はしません。バックアップは直近 2 件を保持します。';
+  }
+
+  @override
+  String get set_bkLegacySync => '旧版から同期';
+
+  @override
+  String set_bkLegacySyncCopied(Object time) {
+    return '初回起動時にコピーしました（$time）。同期前に現在のデータをバックアップします。同じ場所の同名ライブラリは旧版のものに置き換え、この版にだけあるライブラリは保持します。';
+  }
+
+  @override
+  String set_bkLegacySyncSynced(Object time) {
+    return '前回の同期は $time です。同期前に現在のデータをバックアップします。同じ場所の同名ライブラリは旧版のものに置き換え、この版にだけあるライブラリは保持します。';
+  }
+
+  @override
+  String get set_bkLegacySyncNever =>
+      '初回起動時にはコピーしていません。同期前に現在のデータをバックアップします。同じ場所の同名ライブラリは旧版のものに置き換え、この版にだけあるライブラリは保持します。';
+
+  @override
+  String get set_bkLegacySyncBtn => '同期…';
+
+  @override
+  String get set_bkLegacyUndo => '前回の同期を取り消す';
+
+  @override
+  String set_bkLegacyUndoSub(Object time) {
+    return '$time の同期前のデータに戻します';
+  }
+
+  @override
+  String get set_bkLegacyRedo => '同期後のデータに戻す';
+
+  @override
+  String set_bkLegacyRedoSub(Object time) {
+    return '$time の取り消し前のデータに戻します';
+  }
+
+  @override
+  String set_bkLegacyUndoAgainSub(Object time) {
+    return '$time の切り替え前のデータに戻します';
+  }
+
+  @override
+  String get set_bkLegacyNoSync => 'まだ同期していません';
+
+  @override
+  String get set_bkLegacyUndoBtn => '復元…';
+
+  @override
+  String get set_bkLegacySyncTitle => '旧版のデータで置き換えますか？';
+
+  @override
+  String set_bkLegacySyncBody(Object app) {
+    return '$app の設定、履歴、ライブラリ、お気に入りをコピーします。同じ場所にある同名のライブラリは旧版のファイル一式に置き換えます。この版にだけあるライブラリは関連ファイルごと保持します。\n\n· 現在のデータは先にすべてバックアップし、「前回の同期を取り消す」で元に戻せます\n· この版にだけあるフォルダの Agent セッションや設定のバックアップは保持されます\n· 画像と Vibe ファイルには影響しません\n· アプリを再起動します。旧版が起動中なら先に終了してください';
+  }
+
+  @override
+  String set_bkLegacySyncRunning(Object app) {
+    return '⚠ $app が起動中です。先に終了してください。終了しないと、再起動後に終了を待つ画面で止まります。';
+  }
+
+  @override
+  String get set_bkLegacySyncConfirm => '同期して再起動';
+
+  @override
+  String get set_bkLegacyUndoTitle => '前回の同期を取り消しますか？';
+
+  @override
+  String set_bkLegacyUndoBody(Object time) {
+    return '$time の同期前のデータに戻します。同期後にここで行った変更はバックアップとして残します。アプリを再起動します。';
+  }
+
+  @override
+  String get set_bkLegacyUndoConfirm => '取り消して再起動';
+
+  @override
+  String get set_bkLegacyRedoTitle => '同期後のデータに戻しますか？';
+
+  @override
+  String set_bkLegacyRedoBody(Object time) {
+    return '$time の取り消し前のデータに戻します。同期後にここで行った変更も戻ります。現在のデータはバックアップとして残します。アプリを再起動します。';
+  }
+
+  @override
+  String get set_bkLegacyRedoConfirm => '戻して再起動';
+
+  @override
+  String set_bkLegacyUndoAgainBody(Object time) {
+    return '$time の切り替え前のデータ、つまり同期前のデータに戻します。現在のデータはバックアップとして残します。アプリを再起動します。';
+  }
+
+  @override
+  String get set_bkLegacyBusy => '実行中のタスクがあります。終わってからもう一度お試しください。';
+
+  @override
+  String get set_bkLegacySyncFailed =>
+      '同期を開始できません。ディスクの空き容量を確認してから、もう一度お試しください。';
+
+  @override
+  String get set_bkLegacyUndoFailed =>
+      '同期を取り消せません。ディスクの空き容量を確認してから、もう一度お試しください。';
+
+  @override
+  String get set_bkLegacyRedoFailed =>
+      '同期後のデータに戻せません。ディスクの空き容量を確認してから、もう一度お試しください。';
+
+  @override
   String get app_subtitle => 'NovelAI サードパーティ クライアント';
 
   @override
@@ -369,6 +573,23 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get auth_error_serverError => 'サーバーエラー';
+
+  @override
+  String get auth_credentialStorageCorrupt => 'この Mac の認証情報ファイルが破損しています。';
+
+  @override
+  String get auth_resetLocalCredentials => 'ローカル認証情報をリセット';
+
+  @override
+  String get auth_credentialResetExplanation =>
+      'この Mac 上でアプリに保存したすべてのログイントークンとサービスキーを削除します。再度入力が必要になります。画像と設定は保持されます。';
+
+  @override
+  String get auth_credentialStorageUnavailable => 'ローカルの認証情報ファイルにアクセスできません。';
+
+  @override
+  String get auth_credentialStorageUnavailableHint =>
+      'ログインを取り消しました。現在の macOS ユーザのファイル権限を確認して、もう一度お試しください。';
 
   @override
   String get auth_error_unknown => '不明なエラー';
@@ -3639,6 +3860,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get shortcut_action_minimize_to_tray => 'トレイに最小化';
 
   @override
+  String get shortcut_action_hide_to_menu_bar => 'メニューバーに隠す';
+
+  @override
   String get shortcut_action_quit_app => 'アプリケーションを終了します';
 
   @override
@@ -5087,7 +5311,19 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String updateDownloadedFinderHint(Object version) {
+    return 'v$version をダウンロードし、検証が完了しました。「Finder に表示」を押したあと、⌘Q でこのアプリを終了し、新しいバージョンを「アプリケーション」フォルダにドラッグして古いバージョンと置き換えてください。';
+  }
+
+  @override
   String get updateInstallAndRestart => 'インストールして再起動';
+
+  @override
+  String get update_runningFromStaging =>
+      'アップデートフォルダ内のアプリを実行しています。「Finder に表示」を選び、⌘Q で終了してから「アプリケーション」にドラッグし、そこから開いてください。';
+
+  @override
+  String get updateShowInFinder => 'Finder に表示';
 
   @override
   String get updateInstallNow => '今すぐインストール';
@@ -5111,6 +5347,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get updateInstallingHint => 'インストーラーが起動しました。アプリは終了し、自動的に更新が完了します。';
 
   @override
+  String get updatePreparingApp => '新しいバージョンを準備しています...';
+
+  @override
+  String get updatePreparingAppHint =>
+      '更新パッケージを展開しています。完了すると Finder で新しいバージョンが選択されます。';
+
+  @override
   String get remindMeLater => '4時間後に通知';
 
   @override
@@ -5126,12 +5369,20 @@ class AppLocalizationsJa extends AppLocalizations {
       'このプラットフォームでは Release ページから手動で更新してください';
 
   @override
+  String get updateNoticeFinderSubtitle =>
+      'アプリ内でダウンロードと検証を行い、Finder で古いバージョンと置き換えます';
+
+  @override
   String updateNoticeReady(Object version) {
     return 'バージョン v$version の準備ができました';
   }
 
   @override
   String get updateNoticeReadySubtitle => 'パッケージは検証済みです。再起動してインストールできます';
+
+  @override
+  String get updateNoticeReadyFinderSubtitle =>
+      'パッケージは検証済みです。Finder で古いバージョンと置き換えてください';
 
   @override
   String get updateNoticeFailed => '前回の更新は完了しませんでした';
@@ -5350,6 +5601,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get common_swap => '入れ替え';
+
+  @override
+  String get common_showInFinder => 'Finder で表示';
 
   @override
   String get addToLibrary_displayNameHint => 'この項目を識別する名前を入力';
@@ -5868,6 +6122,10 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get tips_studio_trick_6 =>
       '翻訳ブロックを中クリックすると、原文と訳文を切り替えられます。AI の翻訳がどれだけ優秀でも、たまには原文をのぞいて cat ears が変なものになっていないか確かめましょう。';
+
+  @override
+  String get tips_studio_trick_6_mac =>
+      '翻訳ブロックを ⌘ を押しながらクリックすると、原文と訳文を切り替えられます。AI の翻訳がどれだけ優秀でも、たまには原文をのぞいて cat ears が変なものになっていないか確かめましょう。';
 
   @override
   String get tips_studio_trick_7 =>
@@ -8659,6 +8917,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get promptTranslation_guideMiddleTitle => 'ブロックを中クリック';
 
   @override
+  String get promptTranslation_guideCommandClickTitle => '⌘ + ブロックをクリック';
+
+  @override
   String get promptTranslation_guideMiddleText => '原文と訳文を切り替え';
 
   @override
@@ -8905,6 +9166,14 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get update_errorLaunchFailed => '更新プログラムの起動に失敗しました';
+
+  @override
+  String get update_errorExtractFailed => '更新パッケージの展開に失敗しました';
+
+  @override
+  String update_errorRevealFailed(Object path) {
+    return '新しいバージョンを Finder に表示できませんでした。場所：$path';
+  }
 
   @override
   String get update_errorCheckFailed => '更新の確認に失敗しました';
@@ -9627,7 +9896,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get localUpscale_cancelling => 'キャンセル中…';
 
   @override
-  String get localUpscale_unsupportedPlatform => 'ローカル超解像は現在 Windows に対応しています。';
+  String get localUpscale_unsupportedPlatform => 'この拡大方式は現在 Windows のみ対応しています。';
 
   @override
   String get localUpscale_engineMissing =>
@@ -13249,6 +13518,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get imageViewer_missingHint => 'エクスプローラーで移動・名前変更・削除された可能性があります';
 
   @override
+  String get imageViewer_missingHintFinder => 'Finder で移動・名前変更・削除された可能性があります';
+
+  @override
   String get imageViewer_openFolder => 'フォルダーを開く';
 
   @override
@@ -16126,6 +16398,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get naiAgent_composerNotEmpty => '現在の入力を保存または送信してから戻してください。';
 
   @override
+  String get naiAgent_bundledNodeRequiresMacOS135 =>
+      '内蔵エージェントには macOS 13.5 以降が必要です。この Mac では引き続き画像を生成できます。';
+
+  @override
   String get naiAgent_runtimeMissing => 'Agent 実行環境がありません。完全な更新パッケージを使用してください。';
 
   @override
@@ -17356,6 +17632,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get set_apSystemSub => 'Windows の設定に合わせる';
 
   @override
+  String get set_apSystemSubMac => 'macOS の設定に合わせる';
+
+  @override
   String get set_apText => '文字';
 
   @override
@@ -17791,6 +18070,11 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String set_stFree(Object disk, Object size) {
     return '$disk 空き $size';
+  }
+
+  @override
+  String set_stFreeMac(Object size) {
+    return '空き $size';
   }
 
   @override
@@ -18714,6 +18998,20 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get set_rgInstallCpu => 'CPU';
+
+  @override
+  String get set_rgInstallHintMac =>
+      'Python と推論依存をダウンロードします（約 200 MB、モデルの重みは含みません）。Apple シリコンの Mac が必要です。「自動」は、メモリ 18 GB 以上の Mac では GPU、16 GB 以下では CPU を使います。';
+
+  @override
+  String get set_rgPythonSubMac => '既定は自動インストールの独立環境。既存の python3 も選べます。';
+
+  @override
+  String get set_rgNeedsAppleSilicon =>
+      'Apple シリコンの Mac が必要です。PyTorch は Intel Mac 向けの版を提供していないため、この Mac には実行環境をインストールできません。';
+
+  @override
+  String get set_rgEnvUnsupported => '非対応';
 
   @override
   String get set_rgPhaseExisting => '既存の環境を確認中';
@@ -21329,6 +21627,10 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get startup_dataTitle => 'アプリのデータを準備できませんでした';
+
+  @override
+  String get startup_profileInUse =>
+      '別のアプリのコピーがこのデータフォルダを使用中です。そのアプリを終了してから、もう一度お試しください。';
 
   @override
   String get startup_dataHelp =>

@@ -4,6 +4,7 @@ import 'dart:ui' show lerpDouble;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../core/utils/keyboard_modifier_utils.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_keycap.dart';
@@ -78,9 +79,8 @@ class _NavShellState extends State<NavShell>
     super.dispose();
   }
 
-  bool _isCtrl(LogicalKeyboardKey k) =>
-      k == LogicalKeyboardKey.controlLeft ||
-      k == LogicalKeyboardKey.controlRight;
+  // 主修饰键：macOS 上是 ⌘（导航是 ⌘1、⌘2……），其他平台是 Ctrl
+  bool _isCtrl(LogicalKeyboardKey k) => isPrimaryModifierKey(k);
 
   bool _onKey(KeyEvent e) {
     final k = e.logicalKey;

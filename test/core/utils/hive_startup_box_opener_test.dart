@@ -21,6 +21,47 @@ void main() {
     }
   });
 
+  for (final code in [13, 35]) {
+    test(
+      'OS open failure $code leaves the box and its lock in place',
+      () async {
+        final box = File(p.join(hiveDir.path, 'settings.hive'));
+        final lock = File(p.join(hiveDir.path, 'settings.lock'));
+        await box.writeAsBytes([11, 22, 33]);
+        await lock.writeAsBytes([44]);
+        final error = FileSystemException(
+          'Cannot lock file',
+          lock.path,
+          OSError('test', code),
+        );
+        var attempts = 0;
+        await expectLater(
+          HiveStartupBoxOpener.openBox(
+            'settings',
+            hivePath: hiveDir.path,
+            openBoxOverride: () async {
+              attempts++;
+              throw error;
+            },
+          ),
+          throwsA(same(error)),
+        );
+        expect(attempts, 1);
+        expect(await box.readAsBytes(), [11, 22, 33]);
+        expect(await lock.readAsBytes(), [44]);
+        expect(
+          await Directory(
+            p.join(
+              hiveDir.path,
+              HiveStartupBoxOpener.recoveryBackupDirectoryName,
+            ),
+          ).exists(),
+          false,
+        );
+      },
+    );
+  }
+
   test(
     'recovers a failed startup box by backing it up and opening a new box',
     () async {

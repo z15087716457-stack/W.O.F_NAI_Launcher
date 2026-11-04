@@ -35,7 +35,11 @@ class UpdateCheckDialog extends ConsumerWidget {
 
     final canClose = state.status != UpdateStatus.installing;
     final ready = state.hasDownloadedUpdate;
-    final busy = ready && ref.watch(updateTaskBusyProvider);
+    // macOS 在访达中替换，不关应用，生成任务进行中也可以先准备好新版本。
+    final busy =
+        ready &&
+        !state.requiresManualReplace &&
+        ref.watch(updateTaskBusyProvider);
     return PopScope(
       canPop: canClose,
       child: AlertDialog(
@@ -83,7 +87,10 @@ class UpdateCheckDialog extends ConsumerWidget {
       UpdateStatus.available => context.l10n.updateAvailable,
       UpdateStatus.downloading => context.l10n.updateDownloading,
       UpdateStatus.downloaded => context.l10n.updateDownloaded,
-      UpdateStatus.installing => context.l10n.updateInstalling,
+      UpdateStatus.installing =>
+        state.requiresManualReplace
+            ? context.l10n.updatePreparingApp
+            : context.l10n.updateInstalling,
       UpdateStatus.upToDate => context.l10n.updateUpToDate,
       UpdateStatus.error =>
         state.downloadedUpdate != null
@@ -106,7 +113,7 @@ class UpdateCheckDialog extends ConsumerWidget {
       ),
       UpdateStatus.downloading => _buildDownloadContent(context, state),
       UpdateStatus.downloaded => _buildDownloadedContent(context, state),
-      UpdateStatus.installing => _buildInstallingContent(context),
+      UpdateStatus.installing => _buildInstallingContent(context, state),
       UpdateStatus.upToDate => _buildUpToDateContent(context),
       UpdateStatus.error => _buildErrorContent(context, state.errorMessage),
       UpdateStatus.idle || UpdateStatus.skipped => SizedBox(
@@ -255,7 +262,15 @@ class UpdateCheckDialog extends ConsumerWidget {
           ),
           const SizedBox(height: 14),
           Text(
-            context.l10n.updateDownloadedHint(state.versionInfo?.version ?? ''),
+            state.runningFromStaging
+                ? context.l10n.update_runningFromStaging
+                : state.requiresManualReplace
+                ? context.l10n.updateDownloadedFinderHint(
+                    state.versionInfo?.version ?? '',
+                  )
+                : context.l10n.updateDownloadedHint(
+                    state.versionInfo?.version ?? '',
+                  ),
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -266,8 +281,8 @@ class UpdateCheckDialog extends ConsumerWidget {
     );
   }
 
-  /// 构建安装器启动内容
-  Widget _buildInstallingContent(BuildContext context) {
+  /// 构建安装器启动内容（macOS 是解压新版本）
+  Widget _buildInstallingContent(BuildContext context, UpdateState state) {
     return SizedBox(
       height: 120,
       child: Center(
@@ -276,7 +291,11 @@ class UpdateCheckDialog extends ConsumerWidget {
           children: [
             const CircularProgressIndicator(),
             const SizedBox(height: 16),
-            Text(context.l10n.updateInstallingHint),
+            Text(
+              state.requiresManualReplace
+                  ? context.l10n.updatePreparingAppHint
+                  : context.l10n.updateInstallingHint,
+            ),
           ],
         ),
       ),
@@ -546,12 +565,18 @@ class UpdateCheckDialog extends ConsumerWidget {
           },
           child: Text(context.l10n.updateInstallLater),
         ),
-        FilledButton(
-          onPressed: ref.watch(updateTaskBusyProvider)
-              ? null
-              : () => _install(ref),
-          child: Text(context.l10n.updateInstallAndRestart),
-        ),
+        if (state.requiresManualReplace)
+          FilledButton(
+            onPressed: () => _install(ref, state),
+            child: Text(context.l10n.updateShowInFinder),
+          )
+        else
+          FilledButton(
+            onPressed: ref.watch(updateTaskBusyProvider)
+                ? null
+                : () => _install(ref, state),
+            child: Text(context.l10n.updateInstallAndRestart),
+          ),
       ],
       UpdateStatus.installing => const [],
       UpdateStatus.upToDate => [
@@ -589,14 +614,16 @@ class UpdateCheckDialog extends ConsumerWidget {
           ),
         FilledButton(
           onPressed:
-              state.hasDownloadedUpdate && ref.watch(updateTaskBusyProvider)
+              state.hasDownloadedUpdate &&
+                  !state.requiresManualReplace &&
+                  ref.watch(updateTaskBusyProvider)
               ? null
               : () {
                   final notifier = ref.read(updateStateProvider.notifier);
                   // 已有版本信息说明是下载/安装阶段出错，直接重试下载；
                   // 否则重新走检查更新流程。
                   if (state.downloadedUpdate != null) {
-                    _install(ref);
+                    _install(ref, state);
                   } else if (state.versionInfo != null &&
                       state.versionInfo!.supportsInAppInstall) {
                     notifier.downloadUpdate();
@@ -616,9 +643,12 @@ class UpdateCheckDialog extends ConsumerWidget {
     };
   }
 
-  Future<void> _install(WidgetRef ref) async {
+  Future<void> _install(WidgetRef ref, UpdateState state) async {
     // Recheck at the click boundary; a task may have started since the render.
-    if (ref.read(updateTaskBusyProvider)) return;
+    // macOS only reveals the new app in Finder and keeps running.
+    if (!state.requiresManualReplace && ref.read(updateTaskBusyProvider)) {
+      return;
+    }
     await ref.read(updateStateProvider.notifier).installDownloadedUpdate();
   }
 

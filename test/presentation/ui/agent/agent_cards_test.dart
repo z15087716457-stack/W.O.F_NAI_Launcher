@@ -533,6 +533,30 @@ void main() {
     await t.pump(const Duration(seconds: 2));
   });
 
+  testWidgets('macOS：编辑历史消息后 ⌘↩ 发送，Control+↩ 不发', (t) async {
+    final rec = await pumpAgent(t, data: _view([const AgentTextBlock('答')]));
+    final g = await t.createGesture(kind: PointerDeviceKind.mouse);
+    await g.addPointer(
+      location: t.getCenter(find.byKey(const Key('agent-user-e1'))),
+    );
+    await t.pump();
+    await t.tap(find.byKey(const Key('agent-edit-e1')));
+    await t.pump();
+    await t.enterText(find.byKey(const Key('agent-edit-text-e1')), '改过');
+    await t.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await t.sendKeyEvent(LogicalKeyboardKey.enter);
+    await t.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await t.pump();
+    expect(rec.names, isNot(contains('resendFrom')));
+    await t.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
+    await t.sendKeyEvent(LogicalKeyboardKey.enter);
+    await t.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+    await t.pump();
+    expect(rec.names, contains('resendFrom'));
+    await g.removePointer();
+    await t.pump(const Duration(seconds: 2));
+  }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
+
   testWidgets('运行中不给编辑', (t) async {
     await pumpAgent(t, data: _view([const AgentTextBlock('答')], live: true));
     final g = await t.createGesture(kind: PointerDeviceKind.mouse);

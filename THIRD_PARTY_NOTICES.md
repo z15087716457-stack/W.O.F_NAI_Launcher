@@ -11,12 +11,17 @@ name tables remain unchanged. These two files retain the same OFL license.
 
 ## Native Local Upscaling
 
-The bundled unmodified Real-ESRGAN NCNN/Vulkan v0.2.0 engine and default
-Real-ESRGAN x4plus Anime model use the MIT license. Full engine, NCNN,
-libwebp and glslang notices, official sources and runtime dependencies
-are included under `assets/local_upscale/`. The compiled manifest pins
-the engine and model archive versions, SHA-256 hashes and file sizes.
-See `assets/local_upscale/THIRD_PARTY_NOTICES.md` and `windows/LICENSE`.
+The bundled unmodified Real-ESRGAN NCNN/Vulkan v0.2.0 engine uses the MIT
+license; the default Real-ESRGAN x4plus Anime model and the optional models
+are Real-ESRGAN weights under the BSD 3-Clause license. Full engine,
+Real-ESRGAN, NCNN, libwebp and glslang notices, official sources and runtime
+dependencies are included under `assets/local_upscale/`. The compiled
+manifest pins the engine and model archive versions, SHA-256 hashes and file
+sizes. See `assets/local_upscale/THIRD_PARTY_NOTICES.md` and `windows/LICENSE`.
+The macOS app ships the official universal build of the same engine release
+in `Contents/Resources/tools/local-upscale/`, with its license and those of
+MoltenVK (including SPIRV-Cross and cereal) and LLVM OpenMP, which it links
+statically; the texts come from `tool/local_upscale/macos/`.
 
 ## Danbooru/e621 Tag Data
 

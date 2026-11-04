@@ -146,6 +146,27 @@ void main() {
       expect(find.text('67%'), findsOneWidget);
     });
 
+    testWidgets('macOS：⌘↩ 用作底图；按着 ⌘ / Control 的字母不切工具', (t) async {
+      final r = ToolsRecorder();
+      await pumpToolsEditor(t, data: edit(), r: r);
+      await t.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
+      await t.sendKeyEvent(LogicalKeyboardKey.enter);
+      await t.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+      await t.pumpAndSettle();
+      expect(r.calls, ['onApply']);
+      await t.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await t.sendKeyEvent(LogicalKeyboardKey.keyE);
+      await t.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
+      await t.sendKeyEvent(LogicalKeyboardKey.keyL);
+      await t.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+      await t.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await t.pumpAndSettle();
+      expect(r.calls.where((c) => c.startsWith('onTool')), isEmpty);
+      await t.sendKeyEvent(LogicalKeyboardKey.keyE);
+      await t.pumpAndSettle();
+      expect(r.calls.last, 'onTool(eraser)');
+    }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
+
     testWidgets('窄窗：右栏收成抽屉，顶栏开关', (t) async {
       await pumpToolsEditor(t, data: edit(), width: 1000);
       expect(find.byKey(const Key('tools-editor-side')), findsNothing);

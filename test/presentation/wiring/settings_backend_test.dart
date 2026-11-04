@@ -242,9 +242,55 @@ void main() {
       expect(SettingsGpuProbe.parse('N/A,N/A,N/A', ''), isNull);
       expect(
         await SettingsGpuProbe(
+          macOS: false,
           run: (_) => Future.error(StateError('no driver')),
         ).inspect(),
         isNull,
+      );
+    },
+  );
+
+  test(
+    'macOS names the Apple chip, never asks nvidia-smi and falls back otherwise',
+    () async {
+      var nvidia = 0;
+      SettingsGpuProbe mac(SettingsChipName chip) => SettingsGpuProbe(
+        macOS: true,
+        chipName: chip,
+        run: (_) async {
+          nvidia++;
+          return '';
+        },
+      );
+      final info = (await mac(() async => 'Apple M2 Max\n').inspect())!;
+      expect(
+        (info.name, info.vramMb, info.cuda, info.int8, info.rtxVideo),
+        ('Apple M2 Max', 0, '', false, false),
+      );
+      // Intel Macs report their CPU there, which does not name a GPU.
+      expect(
+        await mac(
+          () async => 'Intel(R) Core(TM) i9-9880H CPU @ 2.30GHz',
+        ).inspect(),
+        isNull,
+      );
+      expect(
+        await mac(
+          () => Future.error(const FormatException('sysctl')),
+        ).inspect(),
+        isNull,
+      );
+      expect(nvidia, 0);
+      final windows = await SettingsGpuProbe(
+        macOS: false,
+        chipName: () => throw StateError('chip name on Windows'),
+        run: (args) async => args.isEmpty
+            ? 'CUDA Version: 12.6'
+            : 'NVIDIA GeForce RTX 4070, 12282, 8.9',
+      ).inspect();
+      expect(
+        (windows!.name, windows.vramMb, windows.cuda),
+        ('NVIDIA GeForce RTX 4070', 12282, '12.6'),
       );
     },
   );

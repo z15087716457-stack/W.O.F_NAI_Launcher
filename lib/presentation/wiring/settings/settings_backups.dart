@@ -31,6 +31,7 @@ import '../../providers/theme_provider.dart';
 import '../../ui/settings/settings_contract.dart';
 import 'settings_dialogs.dart';
 import 'settings_edits.dart';
+import 'settings_legacy_data.dart';
 import 'settings_values.dart';
 
 final settingsBackupDirectoryProvider = Provider<Future<Directory> Function()>(
@@ -80,6 +81,7 @@ final settingsBackupDataProvider = FutureProvider((ref) async {
               defaults.bindings[binding.id]?.effectiveShortcut,
         )
         .length,
+    legacy: await ref.watch(settingsLegacyDataProvider.future),
   );
 });
 
@@ -113,6 +115,7 @@ class SettingsBackupActions {
     ref.invalidate(promptWeightScrollModifierSettingsProvider);
     ref.invalidate(cooccurrenceSettingsProvider);
     ref.invalidate(autocomplete.autocompleteSettingsProvider);
+    ref.invalidate(settingsLegacyDataProvider);
     ref.invalidate(settingsBackupDataProvider);
     ref.read(settingsRefreshProvider.notifier).state++;
   }

@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:math' as math;
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -46,6 +45,7 @@ class LocalUpscalePanel extends ConsumerWidget {
     final controller = ref.read(imageWorkflowControllerProvider.notifier);
     final task = ref.watch(localUpscaleTaskProvider);
     final installing = ref.watch(advancedUpscaleInstallProvider).running;
+    final platform = ref.watch(localUpscalePlatformProvider);
     final cloud =
         !localOnly && workflow.upscale.backend == UpscaleBackend.novelai;
     final busy =
@@ -125,7 +125,7 @@ class LocalUpscalePanel extends ConsumerWidget {
         hasSource &&
         !busy &&
         !generating &&
-        (cloud ? cloudSupported : Platform.isWindows && localSupported);
+        (cloud ? cloudSupported : platform.supports(method) && localSupported);
     final progress = task.progress;
     final status = task.cancelling
         ? l.localUpscale_cancelling
@@ -347,7 +347,7 @@ class LocalUpscalePanel extends ConsumerWidget {
                   : l.localUpscale_seedvr2Help,
             LocalUpscaleMethod.rtx => l.localUpscale_rtxHelp,
           }, style: captionStyle),
-          if (!Platform.isWindows)
+          if (!platform.supports(method))
             Text(
               l.localUpscale_unsupportedPlatform,
               style: TextStyle(color: theme.colorScheme.error),

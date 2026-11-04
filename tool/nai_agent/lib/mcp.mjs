@@ -15,12 +15,15 @@ const { createDefaultTransport, McpOAuthCredentialStore, McpServerConnection, si
 const { FileAuthStorageBackend } = await import(new URL('core/auth-storage.js', sdkRoot));
 
 // On-demand handshake/OAuth for the form and agent_manage; no Agent session.
-export async function inspectStudioMcp({ name, config, cwd, agentDir, action = 'test', emit = () => {} }) {
+export async function inspectStudioMcp({ name, config, cwd, agentDir, action = 'test', emit = () => {}, signal }) {
+  signal?.throwIfAborted();
   const { entries: [entry] } = validateStudioMcp({ mcpServers: { [name]: config } });
   const credentials = new McpOAuthCredentialStore(new FileAuthStorageBackend(join(agentDir, 'mcp-auth.json')), agentDir);
   const redact = mcpRedactor({}, { mcpServers: { [name]: config } });
   const connection = new McpServerConnection({ entry, cwd, createTransport: createDefaultTransport,
     credentials, onTools() {} });
+  const cancel = () => { void connection.close().catch(() => {}); };
+  signal?.addEventListener('abort', cancel, { once: true });
   try {
     if (action === 'logout') {
       if (connection.oauthUrl) credentials.remove(name, connection.oauthUrl);
@@ -29,9 +32,11 @@ export async function inspectStudioMcp({ name, config, cwd, agentDir, action = '
     // The official connection owns discovery, auth challenges and timeouts.
     try { await connection.getClient(); }
     catch (error) { if (connection.state !== 'needs-auth') throw error; }
+    signal?.throwIfAborted();
     if (action === 'login' && connection.state === 'needs-auth') {
       if (!connection.oauthUrl) throw new Error('This server does not support OAuth');
       await signInMcpServer({ serverUrl: connection.oauthUrl,
+        signal,
         store: credentials.forServer(name, connection.oauthUrl),
         settings: connection.oauthSettings(), challenge: connection.challenge,
         prompt: {
@@ -46,7 +51,10 @@ export async function inspectStudioMcp({ name, config, cwd, agentDir, action = '
       toolNames: connection.tools.map(t => t.name), error: connection.error };
   } catch (error) {
     return redact({ name, state: 'failed', tools: 0, error: error.message });
-  } finally { await connection.close(); }
+  } finally {
+    signal?.removeEventListener('abort', cancel);
+    await connection.close();
+  }
 }
 
 export function validateStudioMcp(raw = {}) {

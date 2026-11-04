@@ -11,6 +11,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../data/models/version/release_asset_info.dart';
 import '../../data/models/version/version_info.dart';
 import '../utils/app_logger.dart';
+import '../utils/app_bundle_paths.dart';
+import '../utils/studio_sandbox.dart';
 import 'app_installation_service.dart';
 import 'desktop_app_shutdown_service.dart';
 import 'windows_update_script.dart';
@@ -39,6 +41,8 @@ class UpdateDownloadCancelledException implements Exception {
 
 typedef AppShutdownHandler = Future<void> Function(int code);
 typedef UpdateSha256Calculator = Future<String> Function(File file);
+typedef UpdateProcessRunner =
+    Future<ProcessResult> Function(String executable, List<String> arguments);
 typedef UpdateScriptLauncher = Future<void> Function(String scriptPath);
 
 /// 一次下载的实时进度快照。
@@ -69,6 +73,9 @@ class DownloadedUpdate {
   });
 
   bool get isPortableZip => asset.type == ReleaseAssetType.windowsPortable;
+
+  /// macOS 应用包的压缩包，最后一步在访达中由用户替换。
+  bool get requiresManualReplace => asset.requiresManualReplace;
 }
 
 /// 从磁盘恢复的待安装更新。
@@ -97,18 +104,21 @@ class UpdateExecutionResult {
   });
 }
 
-/// Windows 应用内更新服务。
+/// 应用内更新服务。
 ///
 /// 下载使用 `.part` 文件和 HTTP Range 真正续传；完整包必须同时通过
-/// 长度与 SHA256 校验。安装由独立脚本在应用优雅退出后执行，并留下
-/// 可在下次启动读取的结果与日志。
+/// 长度与 SHA256 校验。Windows 的安装由独立脚本在应用优雅退出后执行，并留下
+/// 可在下次启动读取的结果与日志；macOS 解压后在访达中选中新版本，由用户替换
+/// （见 [revealUpdateInFinder]）。
 class UpdateInstallerService {
   final Dio _dio;
   final AppInstallationService _installationService;
   final AppShutdownHandler _shutdownHandler;
   final UpdateSha256Calculator _sha256Calculator;
+  final UpdateProcessRunner _runProcess;
   final UpdateScriptLauncher _scriptLauncher;
   final Directory? _updateDirectoryOverride;
+  final String? _runningMacBundle;
 
   static const Duration _speedSampleWindow = Duration(milliseconds: 500);
   static const Duration _connectTimeout = Duration(seconds: 15);
@@ -118,20 +128,27 @@ class UpdateInstallerService {
   static const String _pendingMetadataName = 'pending_update.json';
   static const String _resultMetadataName = 'update_result.json';
 
+  /// macOS 新版本解压到更新目录下的 `macos-<版本>/`。
+  static const String _macAppDirectoryPrefix = 'macos-';
+
   UpdateInstallerService({
     required Dio dio,
     required AppInstallationService installationService,
     AppShutdownHandler shutdownHandler =
         DesktopAppShutdownService.shutdownAndExit,
     UpdateSha256Calculator? sha256Calculator,
+    UpdateProcessRunner? runProcess,
     UpdateScriptLauncher scriptLauncher = WindowsUpdateScript.launch,
     Directory? updateDirectory,
+    String? runningMacBundle,
   }) : _dio = dio,
        _installationService = installationService,
        _shutdownHandler = shutdownHandler,
        _sha256Calculator = sha256Calculator ?? calculateSha256,
+       _runProcess = runProcess ?? Process.run,
        _scriptLauncher = scriptLauncher,
-       _updateDirectoryOverride = updateDirectory;
+       _updateDirectoryOverride = updateDirectory,
+       _runningMacBundle = runningMacBundle ?? AppBundlePaths.macOSBundle;
 
   bool get supportsInAppInstall => _installationService.supportsInAppInstall;
 
@@ -510,6 +527,141 @@ class UpdateInstallerService {
     await _shutdownHandler(0);
   }
 
+  /// macOS：解压已校验的更新包，在访达中选中新版本，返回新应用包的路径。
+  ///
+  /// 用户退出本应用后，把它拖进「应用程序」替换旧版本。这里不在退出后自动覆盖：
+  /// 没有开发者证书的包只有 ad-hoc 签名，静默替换既要「应用程序」的写权限，
+  /// 也绕过了用户对未公证应用的确认。
+  Future<String> revealUpdateInFinder(DownloadedUpdate update) async {
+    if (!update.requiresManualReplace) {
+      throw UpdateInstallException(
+        currentL10n.update_errorNoInstallablePackage,
+      );
+    }
+    if (!await update.file.exists()) {
+      throw UpdateInstallException(currentL10n.update_errorPackageRemoved);
+    }
+    if (!await _isPackageValid(update.file, update.asset)) {
+      throw UpdateInstallException(currentL10n.update_errorPackageCorrupted);
+    }
+
+    final updateDir = await _ensureUpdateDir();
+    final active = await _activeMacStagingName(updateDir);
+    await _deleteMacAppDirectories(updateDir, preserve: active);
+    final target = Directory(
+      p.join(
+        updateDir.path,
+        '$_macAppDirectoryPrefix${_safeVersion(update.version)}',
+      ),
+    );
+    if (p.basename(target.path) == active) {
+      return _revealMacBundle(_runningMacBundle!);
+    }
+    if (await FileSystemEntity.type(target.path, followLinks: false) ==
+        FileSystemEntityType.link) {
+      throw UpdateInstallException(currentL10n.update_errorPackageCorrupted);
+    }
+    await target.create(recursive: true);
+
+    // ditto 保留应用包里的符号链接、权限和签名，和打包时的 ditto -c -k 对应。
+    final extracted = await _runTool('/usr/bin/ditto', [
+      '-x',
+      '-k',
+      update.file.path,
+      target.path,
+    ]);
+    if (extracted.exitCode != 0) {
+      await _deleteDirectoryQuietly(target);
+      throw UpdateInstallException(
+        currentL10n.update_errorExtractFailed,
+        originalError: extracted.stderr,
+      );
+    }
+
+    final apps = await target
+        .list(followLinks: false)
+        .where((entity) => entity is Directory && entity.path.endsWith('.app'))
+        .toList();
+    if (apps.length != 1) {
+      await _deleteDirectoryQuietly(target);
+      throw UpdateInstallException(currentL10n.update_errorPackageCorrupted);
+    }
+    return _revealMacBundle(apps.single.path);
+  }
+
+  Future<String> _revealMacBundle(String app) async {
+    final revealed = await _runTool('/usr/bin/open', ['-R', app]);
+    if (revealed.exitCode != 0) {
+      throw UpdateInstallException(
+        currentL10n.update_errorRevealFailed(app),
+        originalError: revealed.stderr,
+      );
+    }
+    AppLogger.i('Revealed update in Finder: $app', 'UpdateInstaller');
+    return app;
+  }
+
+  /// 新版本已经装好：删掉这次的更新包、解压出来的应用和待安装记录。
+  Future<bool> clearPendingUpdate(DownloadedUpdate update) async {
+    final updateDir = await _ensureUpdateDir();
+    if (await _activeMacStagingName(updateDir) != null) return false;
+    await _deleteQuietly(update.file);
+    await _deleteQuietly(File('${update.file.path}.part'));
+    await _deleteMacAppDirectories(updateDir);
+    await _deleteQuietly(await _pendingMetadataFile());
+    return true;
+  }
+
+  Future<String?> _activeMacStagingName(Directory updateDir) async {
+    final bundle = _runningMacBundle;
+    if (bundle == null) return null;
+    // TMPDIR and the executable can use /var and /private/var respectively.
+    final root = await updateDir.resolveSymbolicLinks();
+    final app = await Directory(bundle).resolveSymbolicLinks();
+    if (!p.isWithin(root, app)) return null;
+    final name = p.split(p.relative(app, from: root)).first;
+    return name.startsWith(_macAppDirectoryPrefix) ? name : null;
+  }
+
+  /// 系统工具起不来（例如不在 macOS 上）也按失败的退出码处理。
+  Future<ProcessResult> _runTool(
+    String executable,
+    List<String> arguments,
+  ) async {
+    try {
+      return await _runProcess(executable, arguments);
+    } catch (error) {
+      return ProcessResult(0, -1, '', '$error');
+    }
+  }
+
+  Future<void> _deleteMacAppDirectories(
+    Directory updateDir, {
+    String? preserve,
+  }) async {
+    await for (final entity in updateDir.list(followLinks: false)) {
+      if (entity is Directory &&
+          p.basename(entity.path) != preserve &&
+          p.basename(entity.path).startsWith(_macAppDirectoryPrefix)) {
+        await _deleteDirectoryQuietly(entity);
+      }
+    }
+  }
+
+  Future<void> _deleteDirectoryQuietly(Directory directory) async {
+    try {
+      if (await directory.exists()) await directory.delete(recursive: true);
+    } catch (error) {
+      AppLogger.d(
+        'Unable to remove update directory ${directory.path}: $error',
+        'UpdateInstaller',
+      );
+    }
+  }
+
+  static String _safeVersion(String version) =>
+      version.replaceAll(RegExp(r'[^0-9A-Za-z._-]'), '_');
+
   Future<File> _writeUpdateScript(DownloadedUpdate update) async {
     final updateDir = await _ensureUpdateDir();
     final scriptFile = File(
@@ -610,7 +762,7 @@ class UpdateInstallerService {
   Future<Directory> _ensureUpdateDir() async {
     final updateDir =
         _updateDirectoryOverride ??
-        Directory(p.join(Directory.systemTemp.path, _updateDirectoryName));
+        Directory(p.join(studioTemporaryRoot().path, _updateDirectoryName));
     await updateDir.create(recursive: true);
     return updateDir;
   }

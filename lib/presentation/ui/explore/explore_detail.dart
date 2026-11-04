@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/utils/localization_extension.dart';
+import '../../../core/utils/platform_shortcut_text.dart';
 import '../../widgets/navigation/window_chrome_layout.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_controls.dart';
@@ -393,7 +394,7 @@ class _DetailInfoState extends State<_DetailInfo> {
               children: [
                 UiGlyph(UiGlyphs.trash, size: 14, color: c.error),
                 Text(l.explore_deleteThis),
-                const UiKeycap('Del'),
+                UiKeycap(listDeleteKeyLabel()),
               ],
             ),
           ),

@@ -60,36 +60,12 @@ Map<ViewerCommand, List<SingleActivator>> generationViewerKeys(
   for (final entry in ids.entries) {
     final binding = config.bindings[entry.value];
     if (binding == null) continue;
-    final parsed = AppShortcutManager.parseActivator(binding.effectiveShortcut);
-    if (parsed is! LogicalKeySet ||
-        binding.context != ShortcutContext.viewer &&
-            binding.context != ShortcutContext.generation &&
-            binding.context != ShortcutContext.global) {
-      result[entry.key] = [];
-      continue;
-    }
-    final keys = parsed.keys;
-    final trigger = keys
-        .where(
-          (key) => !{
-            LogicalKeyboardKey.control,
-            LogicalKeyboardKey.shift,
-            LogicalKeyboardKey.alt,
-            LogicalKeyboardKey.meta,
-          }.contains(key),
-        )
-        .firstOrNull;
-    result[entry.key] = trigger == null
-        ? []
-        : [
-            SingleActivator(
-              trigger,
-              control: keys.contains(LogicalKeyboardKey.control),
-              shift: keys.contains(LogicalKeyboardKey.shift),
-              alt: keys.contains(LogicalKeyboardKey.alt),
-              meta: keys.contains(LogicalKeyboardKey.meta),
-            ),
-          ];
+    result[entry.key] = [
+      if (binding.context == ShortcutContext.viewer ||
+          binding.context == ShortcutContext.generation ||
+          binding.context == ShortcutContext.global)
+        ?AppShortcutManager.parseSingleActivator(binding.effectiveShortcut),
+    ];
   }
   return result;
 }

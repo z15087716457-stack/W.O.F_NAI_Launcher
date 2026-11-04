@@ -1,0 +1,157 @@
+name: macOS build
+
+on:
+  workflow_call:
+    inputs:
+      checkout-ref:
+        type: string
+        default: ""
+      version:
+        type: string
+        default: ""
+      artifact-name:
+        type: string
+        default: macos-validation
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Test and package macOS universal
+    # macos-15 is Apple silicon; studio-bridge also needs the x64 Dart SDK
+    # under Rosetta. macos-15-intel cannot build its arm64 slice.
+    runs-on: macos-15
+    timeout-minutes: 60
+    env:
+      CODESIGN_IDENTITY: "-"
+      EXTRA_DART_DEFINES: "--no-pub"
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.checkout-ref }}
+          lfs: true
+          persist-credentials: false
+
+      - name: Select Xcode
+        env:
+          REQUESTED_DEVELOPER_DIR: ${{ vars.MACOS_XCODE_DEVELOPER_DIR }}
+        run: |
+          developer_dir="${REQUESTED_DEVELOPER_DIR:-$(xcode-select -p)}"
+          test -x "$developer_dir/usr/bin/xcodebuild"
+          echo "DEVELOPER_DIR=$developer_dir" >> "$GITHUB_ENV"
+
+      - name: Read registered Flutter version
+        id: sdk
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          from pathlib import Path
+          print('version=' + json.loads(Path('tool/flutter-sdk.json').read_text())['flutterVersion'])
+          PY
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ steps.sdk.outputs.version }}
+          channel: stable
+          architecture: arm64
+          cache: true
+
+      - name: Setup Node for offline Agent tests
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24.18.0"
+          cache: npm
+          cache-dependency-path: tool/nai_agent/package-lock.json
+
+      - name: Cache verified runtime downloads
+        uses: actions/cache@v4
+        with:
+          path: build/macos-runtime-cache
+          key: macos-runtime-${{ runner.arch }}-${{ hashFiles('scripts/build_macos.sh', 'tool/flutter-sdk.json') }}
+
+      - name: Prepare universal build tools
+        run: |
+          test "$(uname -m)" = arm64
+          test -d "$DEVELOPER_DIR"
+          xcodebuild -version
+          pod --version
+          rustup target add aarch64-apple-darwin x86_64-apple-darwin
+          # This runs only on GitHub's disposable VM, never on a contributor's Mac.
+          sudo softwareupdate --install-rosetta --agree-to-license
+          arch -x86_64 /usr/bin/true
+          flutter --version
+          mkdir -p build-logs
+
+      - name: Resolve dependencies
+        run: |
+          flutter pub get
+          npm ci --prefix tool/nai_agent --no-audit --no-fund
+
+      - name: Validate bundled databases
+        run: dart run tool/tag_catalog/verify_bundled_databases.dart
+
+      - name: Generate code and localizations
+        run: |
+          dart run tool/generate.dart
+          flutter test --no-pub test/l10n/zh_tw_resources_test.dart
+          flutter gen-l10n
+          git diff --exit-code
+
+      - name: Analyze
+        run: |
+          paths=(lib test)
+          if [ -d integration_test ]; then paths+=(integration_test); fi
+          dart analyze "${paths[@]}"
+
+      - name: Test macOS behavior and packaging
+        run: |
+          bash scripts/test_macos.sh
+          python3 -B scripts/test_macos_node_tools.py
+
+      - name: Test Agent with synthetic services
+        run: npm test --prefix tool/nai_agent
+
+      - name: Build macOS release with ad-hoc signing
+        run: |
+          set -o pipefail
+          scripts/build_macos.sh --release 2>&1 | tee build-logs/macos-build.log
+
+      - name: Run native tests in the Runner app host
+        run: bash scripts/test_macos_native.sh
+
+      - name: Package and verify universal artifact
+        env:
+          BUNDLE_VERSION: ${{ inputs.version }}
+        run: |
+          set -o pipefail
+          args=()
+          if [ -n "$BUNDLE_VERSION" ]; then args+=(--version "$BUNDLE_VERSION"); fi
+          scripts/package_macos_release.sh "${args[@]}" 2>&1 | tee build-logs/macos-package.log
+          version="$(sed -n 's/^version:[[:space:]]*//p' pubspec.yaml | tr -d '[:space:]')"
+          zip="dist/WOF_NAI_Studio_macOS_${version%%+*}_Portable.zip"
+          test -f "$zip"
+          test -f "$zip.sha256"
+
+      - name: Upload macOS package
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.artifact-name }}
+          path: |
+            dist/WOF_NAI_Studio_macOS_*_Portable.zip
+            dist/WOF_NAI_Studio_macOS_*_Portable.zip.sha256
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 14
+
+      - name: Upload build diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.artifact-name }}-logs
+          path: build-logs/*.log
+          if-no-files-found: ignore
+          retention-days: 7

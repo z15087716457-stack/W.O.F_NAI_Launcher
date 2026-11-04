@@ -1,5 +1,5 @@
 name: nai_launcher
-description: W.O.F NAI Studio - NovelAI Windows 桌面客户端（Aaalice_NAI_Launcher 分支）
+description: W.O.F NAI Studio - NovelAI Windows 与 macOS 桌面客户端（Aaalice_NAI_Launcher 分支）
 publish_to: "none"
 version: 2.2.6+83
 
@@ -33,6 +33,8 @@ dependencies:
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   shared_preferences: ^2.2.3
+  # macOS 首次启动读旧版（另一个 bundle id）的偏好设置，要用它的 suiteName 选项
+  shared_preferences_foundation: any
 
   # SQLite数据库（画廊索引）
   sqflite_common_ffi: ^2.3.4
@@ -103,6 +105,7 @@ dependencies:
   video_player: ^2.8.0
   video_player_media_kit: ^1.0.5
   media_kit_libs_windows_video: any
+  media_kit_libs_macos_video: any
 
   cached_network_image: ^3.4.1
   url_launcher: ^6.3.1

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../core/utils/keyboard_modifier_utils.dart';
 import '../../../core/utils/localization_extension.dart';
+import '../../utils/platform_labels.dart';
 import '../../widgets/navigation/window_chrome_layout.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_controls.dart';
@@ -66,7 +68,7 @@ class _GenHistoryPanelState extends State<GenHistoryPanel> {
     final h = scope.data.history;
     if (scope.controller.selection.tap(
       b.images.map((image) => image.id).toList(),
-      modify: keys.isControlPressed || keys.isMetaPressed,
+      modify: isControlOrCommandPressed(keyboard: keys),
       range: keys.isShiftPressed,
       pendingBatch: b.pending > 0 ? b.id : null,
     )) {
@@ -163,7 +165,7 @@ class _GenHistoryPanelState extends State<GenHistoryPanel> {
           onTap: () => a.onSendTo(cover.id, GenSendTarget.precise),
         ),
         UiMenuItem(
-          label: l.gen_reveal,
+          label: showInFileManagerLabel(l, l.gen_reveal),
           glyph: GenGlyphs.reveal,
           divider: true,
           onTap: () => a.onReveal(cover.id),
@@ -187,6 +189,7 @@ class _GenHistoryPanelState extends State<GenHistoryPanel> {
     final c = context.ui;
     final scope = GenScope.of(context, GenAspect.history);
     final h = scope.data.history;
+    final reserveCaption = scope.reservesHistoryCaption(context);
     final l = context.l10n;
     final selection = GenScope.of(
       context,
@@ -200,7 +203,7 @@ class _GenHistoryPanelState extends State<GenHistoryPanel> {
       border: Border(left: BorderSide(color: c.line)),
       child: WindowPaneInset(
         key: const Key('gen-history-window-inset'),
-        enabled: scope.slots.historyCaptionInset,
+        enabled: reserveCaption,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -211,10 +214,8 @@ class _GenHistoryPanelState extends State<GenHistoryPanel> {
               decoration: BoxDecoration(
                 border: Border(bottom: BorderSide(color: c.line)),
               ),
-              // Agent docked: this pane no longer reserves the captions, so the
-              // blank header space moves the window instead.
               child: WindowHeaderDragSurface(
-                enabled: !scope.slots.historyCaptionInset,
+                enabled: !reserveCaption,
                 child: Row(
                   spacing: 8,
                   children: [

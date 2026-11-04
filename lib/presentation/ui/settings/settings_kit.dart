@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../../core/utils/localization_extension.dart';
+import '../../../core/utils/platform_shortcut_text.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_controls.dart';
 import '../kit/ui_glyph.dart';
@@ -232,6 +233,7 @@ class SettingsDot extends StatelessWidget {
 }
 
 /// 键帽（原型 `.kbd`）：高 20、圆角 5、1px 描边 + 2px 底边、Geist Mono 11。
+/// 键名里的 Ctrl 指主修饰键，macOS 上显示成 ⌘（见 [platformKeyLabel]）。
 class SettingsKey extends StatelessWidget {
   const SettingsKey(this.label, {super.key});
   final String label;
@@ -261,7 +263,7 @@ class SettingsKey extends StatelessWidget {
         widthFactor: 1,
         heightFactor: 1,
         child: Text(
-          label,
+          platformKeyLabel(label),
           style: UiText.mono(
             11,
             weight: FontWeight.w500,
@@ -274,7 +276,7 @@ class SettingsKey extends StatelessWidget {
   }
 }
 
-/// 一组键帽，间距 3。
+/// 一组键帽，间距 3。macOS 上按 Mac 写法排（⇧⌘T，见 [platformKeyLabels]）。
 class SettingsKeys extends StatelessWidget {
   const SettingsKeys(this.keys, {super.key});
   final List<String> keys;
@@ -283,7 +285,7 @@ class SettingsKeys extends StatelessWidget {
   Widget build(BuildContext context) => Row(
     mainAxisSize: MainAxisSize.min,
     spacing: 3,
-    children: [for (final k in keys) SettingsKey(k)],
+    children: [for (final k in platformKeyLabels(keys)) SettingsKey(k)],
   );
 }
 
@@ -1121,6 +1123,7 @@ class _SettingsSelectState extends State<SettingsSelect> {
   Widget build(BuildContext context) {
     final c = context.ui;
     return UiPopover(
+      focusOnOpen: true,
       anchor: _anchor,
       onDismiss: () => setState(() => _anchor = null),
       builder: (context) => UiMenu(
@@ -1224,6 +1227,7 @@ class _SettingsPopupMenuState extends State<SettingsPopupMenu> {
 
   @override
   Widget build(BuildContext context) => UiPopover(
+    focusOnOpen: true,
     anchor: _anchor,
     onDismiss: widget.onClose,
     builder: (context) => UiMenu(

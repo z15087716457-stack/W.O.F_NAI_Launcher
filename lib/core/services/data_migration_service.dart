@@ -48,7 +48,11 @@ class DataMigrationService {
       // 1. Hive 数据迁移
       onProgress?.call('迁移 Hive 数据', 0.05);
       final hivePath = await HiveStorageHelper.instance.getPath();
-      await HiveStorageHelper.instance.migrateFromOldLocation(hivePath);
+      // main() already migrated before opening settings. Never copy over a
+      // live box when the later warmup also asks for data migration.
+      if (!Hive.isBoxOpen(StorageKeys.settingsBox)) {
+        await HiveStorageHelper.instance.migrateFromOldLocation(hivePath);
+      }
       onProgress?.call('Hive 数据迁移完成', 0.35);
       AppLogger.i('Hive 存储路径: $hivePath', 'DataMigration');
       result.hiveMigrated = true;

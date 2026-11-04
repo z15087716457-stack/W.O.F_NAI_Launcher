@@ -13,6 +13,18 @@ String? studioSandboxRoot([Map<String, String>? environment]) {
   return p.normalize(value);
 }
 
+/// False when NAI_STUDIO_SANDBOX is set but unusable. The Windows runner checks
+/// this natively (studio_sandbox.h) and exits before Dart starts; other
+/// platforms ask here and exit too, before any data is touched.
+bool studioSandboxEnvironmentValid([Map<String, String>? environment]) {
+  try {
+    studioSandboxRoot(environment);
+    return true;
+  } on ArgumentError {
+    return false;
+  }
+}
+
 /// Synchronous fallback root for early logging and legacy path helpers. In
 /// sandbox mode even error paths must not share the production temp namespace.
 Directory studioTemporaryRoot() {

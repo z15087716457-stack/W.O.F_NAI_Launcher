@@ -8,6 +8,7 @@ import 'package:nai_launcher/core/services/app_installation_service.dart';
 import 'package:nai_launcher/core/services/update_installer_service.dart';
 import 'package:nai_launcher/data/models/version/release_asset_info.dart';
 import 'package:nai_launcher/data/models/version/version_info.dart';
+import 'package:path/path.dart' as p;
 
 class _SupportedInstallationService extends AppInstallationService {
   @override
@@ -278,6 +279,217 @@ void main() {
       expect(result.version, '2.0.0');
       expect(result.message, 'access denied');
       expect(await service.consumeExecutionResult(), isNull);
+    });
+
+    group('macOS app archive', () {
+      const appName = 'W.O.F NAI Studio.app';
+      late Directory updateDir;
+      late File package;
+      late ReleaseAssetInfo asset;
+      late List<List<String>> calls;
+
+      setUp(() async {
+        updateDir = Directory(p.join(tempDir.path, 'updates'))..createSync();
+        package = File(
+          p.join(updateDir.path, 'WOF_NAI_Studio_macOS_2.1.0_Portable.zip'),
+        );
+        await package.writeAsString('app archive bytes');
+        asset = ReleaseAssetInfo(
+          type: ReleaseAssetType.macosPortable,
+          platform: 'macos',
+          fileName: p.basename(package.path),
+          downloadUrl: 'https://example.com/macos.zip',
+          sha256: await UpdateInstallerService.calculateSha256(package),
+          size: await package.length(),
+        );
+        calls = [];
+      });
+
+      DownloadedUpdate update({String version = '2.1.0'}) =>
+          DownloadedUpdate(file: package, asset: asset, version: version);
+
+      /// 记下命令行；ditto 解压时照真实包的样子放一个应用包。
+      UpdateProcessRunner runner({
+        int dittoExit = 0,
+        int openExit = 0,
+        bool withApp = true,
+      }) => (executable, arguments) async {
+        calls.add([executable, ...arguments]);
+        if (executable == '/usr/bin/ditto') {
+          if (withApp) {
+            Directory(
+              p.join(arguments.last, appName, 'Contents', 'MacOS'),
+            ).createSync(recursive: true);
+          }
+          return ProcessResult(1, dittoExit, '', 'ditto failed');
+        }
+        return ProcessResult(2, openExit, '', 'open failed');
+      };
+
+      UpdateInstallerService service(
+        UpdateProcessRunner runProcess, {
+        String? bundle,
+      }) => UpdateInstallerService(
+        dio: Dio(),
+        installationService: _SupportedInstallationService(),
+        updateDirectory: updateDir,
+        runningMacBundle: bundle,
+        runProcess: runProcess,
+      );
+
+      test(
+        'unpacks the verified archive and selects the app in Finder',
+        () async {
+          final stale = Directory(p.join(updateDir.path, 'macos-2.0.9'))
+            ..createSync();
+
+          final app = await service(
+            runner(),
+          ).revealUpdateInFinder(update(version: '2.1.0+43'));
+
+          final target = p.join(updateDir.path, 'macos-2.1.0_43');
+          expect(app, p.join(target, appName));
+          expect(calls, [
+            ['/usr/bin/ditto', '-x', '-k', package.path, target],
+            ['/usr/bin/open', '-R', app],
+          ]);
+          expect(stale.existsSync(), isFalse);
+          expect(update().requiresManualReplace, isTrue);
+        },
+      );
+
+      test('a failed unpack leaves no half-extracted app behind', () async {
+        await expectLater(
+          service(runner(dittoExit: 1)).revealUpdateInFinder(update()),
+          throwsA(isA<UpdateInstallException>()),
+        );
+
+        expect(
+          Directory(p.join(updateDir.path, 'macos-2.1.0')).existsSync(),
+          isFalse,
+        );
+        expect(calls.single.first, '/usr/bin/ditto');
+      });
+
+      test('an archive without an app bundle is rejected', () async {
+        await expectLater(
+          service(runner(withApp: false)).revealUpdateInFinder(update()),
+          throwsA(isA<UpdateInstallException>()),
+        );
+
+        expect(calls.map((call) => call.first), ['/usr/bin/ditto']);
+      });
+
+      test('reports where the app is when Finder cannot show it', () async {
+        await expectLater(
+          service(runner(openExit: 1)).revealUpdateInFinder(update()),
+          throwsA(
+            isA<UpdateInstallException>().having(
+              (error) => error.message,
+              'message',
+              contains(p.join(updateDir.path, 'macos-2.1.0', appName)),
+            ),
+          ),
+        );
+      });
+
+      test('a changed archive is not unpacked', () async {
+        await package.writeAsString('tampered bytes!!!');
+
+        await expectLater(
+          service(runner()).revealUpdateInFinder(update()),
+          throwsA(isA<UpdateInstallException>()),
+        );
+        expect(calls, isEmpty);
+      });
+
+      test('Windows packages never go through Finder', () async {
+        final windows = DownloadedUpdate(
+          file: package,
+          asset: asset.copyWith(type: ReleaseAssetType.windowsPortable),
+          version: '2.1.0',
+        );
+
+        await expectLater(
+          service(runner()).revealUpdateInFinder(windows),
+          throwsA(isA<UpdateInstallException>()),
+        );
+        expect(calls, isEmpty);
+        expect(windows.requiresManualReplace, isFalse);
+      });
+
+      test(
+        'a launch inside the extracted update preserves the archive, executable and pending record',
+        () async {
+          final app = await service(runner()).revealUpdateInFinder(update());
+          final marker = await File(
+            p.join(app, 'Contents', 'MacOS', 'runner'),
+          ).writeAsString('running');
+          final pending = await File(
+            p.join(updateDir.path, 'pending_update.json'),
+          ).writeAsString('pending');
+          final alias = await Link(
+            p.join(tempDir.path, 'update-alias'),
+          ).create(updateDir.path);
+          final bundle = p.join(
+            alias.path,
+            p.relative(app, from: updateDir.path),
+          );
+          final installer = service(runner(), bundle: bundle);
+          expect(await installer.clearPendingUpdate(update()), false);
+          expect(await package.readAsString(), 'app archive bytes');
+          expect(await pending.readAsString(), 'pending');
+          calls.clear();
+          await installer.revealUpdateInFinder(update());
+          expect(calls, [
+            ['/usr/bin/open', '-R', bundle],
+          ]);
+          await installer.revealUpdateInFinder(update(version: '2.2.0'));
+          expect(await marker.readAsString(), 'running');
+        },
+        skip: Platform.isWindows,
+      );
+
+      test(
+        'clearing a replaced update removes the archive, app and record',
+        () async {
+          final installer = service(runner());
+          final payload = await package.readAsBytes();
+          final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+          server.listen((request) async {
+            request.response.headers.contentLength = payload.length;
+            request.response.add(payload);
+            await request.response.close();
+          });
+          try {
+            await package.delete();
+            final downloaded = await installer.downloadUpdate(
+              VersionInfo(
+                version: '2.1.0',
+                currentVersion: '2.0.0',
+                primaryAsset: asset.copyWith(
+                  downloadUrl: 'http://127.0.0.1:${server.port}/macos.zip',
+                ),
+                isNewer: true,
+              ),
+            );
+            final app = await installer.revealUpdateInFinder(downloaded);
+            expect(await installer.restorePendingUpdate(), isNotNull);
+
+            await installer.clearPendingUpdate(downloaded);
+
+            expect(await installer.restorePendingUpdate(), isNull);
+            expect(downloaded.file.existsSync(), isFalse);
+            expect(Directory(app).existsSync(), isFalse);
+            expect(
+              File(p.join(updateDir.path, 'pending_update.json')).existsSync(),
+              isFalse,
+            );
+          } finally {
+            await server.close(force: true);
+          }
+        },
+      );
     });
 
     test('DownloadedUpdate identifies portable zip packages', () {

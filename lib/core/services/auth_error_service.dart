@@ -33,6 +33,10 @@ class AuthErrorService {
     int? httpStatusCode,
   ) {
     switch (errorCode) {
+      case AuthErrorCode.credentialStorageCorrupt:
+        return l10n.auth_credentialStorageCorrupt;
+      case AuthErrorCode.credentialStorageUnavailable:
+        return l10n.auth_credentialStorageUnavailable;
       case AuthErrorCode.networkTimeout:
         AppLogger.d('Network timeout error', 'AuthErrorService');
         return l10n.api_error_timeout;
@@ -74,6 +78,10 @@ class AuthErrorService {
     int? httpStatusCode,
   ) {
     switch (errorCode) {
+      case AuthErrorCode.credentialStorageCorrupt:
+        return l10n.auth_credentialResetExplanation;
+      case AuthErrorCode.credentialStorageUnavailable:
+        return l10n.auth_credentialStorageUnavailableHint;
       case AuthErrorCode.networkTimeout:
         AppLogger.d('Providing timeout recovery hint', 'AuthErrorService');
         return l10n.api_error_timeout_hint;

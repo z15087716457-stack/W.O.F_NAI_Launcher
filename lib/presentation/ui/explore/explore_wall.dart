@@ -1,9 +1,11 @@
 import 'dart:math' as math;
 
+import 'package:flutter/gestures.dart' show GestureBinding;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/utils/localization_extension.dart';
+import '../../../core/utils/platform_shortcut_text.dart';
 import '../../widgets/common/studio_icons.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_controls.dart';
@@ -289,7 +291,7 @@ List<UiMenuItem> exploreCandidateMenu(
       glyph: UiGlyphs.trash,
       danger: true,
       divider: true,
-      trailing: 'Del',
+      trailing: listDeleteKeyLabel(),
       onTap: () => ctrl.delete(keys),
     ),
   ];
@@ -305,9 +307,9 @@ class ExploreCard extends StatefulWidget {
   State<ExploreCard> createState() => _ExploreCardState();
 }
 
-class _ExploreCardState extends State<ExploreCard> {
+class _ExploreCardState extends State<ExploreCard>
+    with ExploreQuickOpen<ExploreCard> {
   var _hover = false;
-  DateTime? _lastTap;
 
   void _tap() {
     final scope = ExploreScope.of(context);
@@ -318,17 +320,7 @@ class _ExploreCardState extends State<ExploreCard> {
     if ((hw.isControlPressed || hw.isMetaPressed || ctrl.selecting) && x.done) {
       return ctrl.toggleSelect(x.key);
     }
-    final now = DateTime.now();
-    final again =
-        _lastTap != null &&
-        now.difference(_lastTap!) < const Duration(milliseconds: 300);
-    _lastTap = now;
-    if (again && ctrl.focusKey == x.key) {
-      _lastTap = null;
-      ctrl.openDetail(x.key);
-    } else {
-      ctrl.focus(x.key);
-    }
+    quickTap(ctrl, x.key);
   }
 
   @override
@@ -1001,18 +993,19 @@ class ExploreSelectionBar extends StatelessWidget {
 
 /// 子代 / 小图卡：给进化页签复用的点击逻辑（单击看检查器，0.3 秒内再点开大图）。
 mixin ExploreQuickOpen<T extends StatefulWidget> on State<T> {
-  DateTime? _quickTap;
+  late final Stopwatch _betweenTaps = GestureBinding.instance.samplingClock
+      .stopwatch();
 
   void quickTap(ExploreController ctrl, String key) {
-    final now = DateTime.now();
-    final again =
-        _quickTap != null &&
-        now.difference(_quickTap!) < const Duration(milliseconds: 300);
-    _quickTap = now;
-    if (again && ctrl.focusKey == key) {
-      _quickTap = null;
+    if (ctrl.focusKey == key &&
+        _betweenTaps.isRunning &&
+        _betweenTaps.elapsed < const Duration(milliseconds: 300)) {
+      _betweenTaps.stop();
       ctrl.openDetail(key);
     } else {
+      _betweenTaps
+        ..reset()
+        ..start();
       ctrl.focus(key);
     }
   }

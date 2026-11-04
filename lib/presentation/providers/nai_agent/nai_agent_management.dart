@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+
+import '../../../core/nai_agent/node_runtime_environment.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 import 'package:url_launcher/url_launcher.dart';
@@ -170,9 +172,19 @@ class NaiAgentManagement {
   }) async {
     cancellation?.check();
     final paths = ref.read(naiAgentRuntimePathsProvider);
-    final process = await Process.start(paths.node, [
-      p.join(p.dirname(paths.host), 'manage-resources.mjs'),
-    ], workingDirectory: p.dirname(paths.host));
+    final packageOperation =
+        !Platform.isWindows &&
+        input['resource'] == 'packages' &&
+        const {'install', 'uninstall', 'update'}.contains(input['action']);
+    final helper = packageOperation
+        ? 'package-process-group.mjs'
+        : 'manage-resources.mjs';
+    final process = await Process.start(
+      paths.node,
+      [p.join(p.dirname(paths.host), helper)],
+      workingDirectory: p.dirname(paths.host),
+      environment: nodeRuntimeEnvironment(paths.node),
+    );
     var finished = false;
     Future<void> stop() async {
       if (Platform.isWindows) {

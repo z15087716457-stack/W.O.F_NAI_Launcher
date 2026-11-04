@@ -204,6 +204,38 @@ void main() {
     });
   });
 
+  testWidgets('macOS：按住 ⌘ 出编号，说明条键帽写 ⌘；按住 Control 不出', (tester) async {
+    await pumpNav(tester, data: NavFixture.view(ctrlHintSeen: false));
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.pump(const Duration(milliseconds: 600));
+    expect(find.text('1'), findsNothing);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
+    await tester.pump(const Duration(milliseconds: 600));
+    expect(find.text('1'), findsOneWidget);
+    expect(
+      find.descendant(of: _k('main-nav-ctrl-hint'), matching: find.text('⌘')),
+      findsOneWidget,
+    );
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+    await tester.pump();
+    expect(find.text('1'), findsNothing);
+
+    // 自定义菜单里的开关写「按住 ⌘」
+    await tester.tapAt(const Offset(24, 300), buttons: kSecondaryButton);
+    await tester.pumpAndSettle();
+    await tester.tap(_k('main-nav-customize-menu'));
+    await tester.pumpAndSettle();
+    expect(
+      find.descendant(
+        of: _k('main-nav-customize-ctrl'),
+        matching: find.text('按住 ⌘ 显示页面编号'),
+      ),
+      findsOneWidget,
+    );
+  }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
+
   group('展开', () {
     testWidgets('展开是浮层：页面不动；Esc、点外面、选了页面都收起', (tester) async {
       final rec = RecordingNavActions();

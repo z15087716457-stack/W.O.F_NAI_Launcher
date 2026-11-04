@@ -85,7 +85,6 @@ class _SizeRow extends StatelessWidget {
         final tight = box.maxWidth < 350;
         final compact = box.maxWidth < 330;
         return Row(
-          spacing: compact ? 4 : 8,
           children: [
             Builder(
               builder: (ctx) => UiPressable(
@@ -137,6 +136,7 @@ class _SizeRow extends StatelessWidget {
                 ),
               ),
             ),
+            SizedBox(width: compact ? 4 : 8),
             GenTrack<GenOrientation>(
               key: const Key('gen-orientation'),
               values: const [
@@ -159,6 +159,8 @@ class _SizeRow extends StatelessWidget {
                 color: on ? c.ink : c.muted,
               ),
             ),
+            // The spacer is the gap before the dimensions. Fixed spacing on
+            // both sides of it would overflow otherwise fitting controls.
             const Spacer(),
             Row(
               spacing: 4,

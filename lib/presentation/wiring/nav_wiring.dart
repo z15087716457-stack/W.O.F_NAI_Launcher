@@ -1,3 +1,4 @@
+import '../widgets/navigation/workspace_navigation.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -53,7 +54,7 @@ Map<NavPage, List<String>> navShortcutKeycaps(ShortcutConfig? config) {
       if (config.getEffectiveShortcut(entry.key) case final String shortcut)
         if (ShortcutParser.parse(shortcut) case final ParsedShortcut parsed)
           navPageForBranch(entry.value): List<String>.unmodifiable(
-            parsed.displayLabel.split('+'),
+            parsed.keyLabels,
           ),
   });
 }
@@ -334,8 +335,13 @@ class _NavWiringState extends ConsumerState<NavWiring> {
       actions: NavActions(
         onOpenPage: (page) {
           final branch = navBranchForPage(page);
-          activityController.setCurrentBranch(branch);
-          widget.navigationShell.goBranch(branch.index);
+          final navigation = WorkspaceNavigation.maybeOf(context);
+          if (navigation != null) {
+            navigation.select(branch);
+          } else {
+            activityController.setCurrentBranch(branch);
+            widget.navigationShell.goBranch(branch.index);
+          }
         },
         onPinnedChanged: (value) =>
             unawaited(layoutController.setMainNavRailExpanded(value)),

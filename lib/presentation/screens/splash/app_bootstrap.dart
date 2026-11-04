@@ -164,10 +164,9 @@ class _MainAppWrapperState extends ConsumerState<_MainAppWrapper> {
       if (!mounted) return;
       final notifier = ref.read(updateStateProvider.notifier);
       await notifier.initialize();
+      if (!mounted) return;
       final updateState = ref.read(updateStateProvider);
-      if (!mounted ||
-          updateState.hasDownloadedUpdate ||
-          updateState.hasNewVersion) {
+      if (updateState.hasDownloadedUpdate || updateState.hasNewVersion) {
         return;
       }
 

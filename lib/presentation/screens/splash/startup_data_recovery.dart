@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/constants/brand.dart';
 import '../../../core/services/adjacent_app_data_migration.dart';
+import '../../../core/services/mac_legacy_data_import.dart';
 import '../../../core/utils/app_language.dart';
 import '../../../core/utils/fatal_diagnostics.dart';
 import '../../../l10n/app_localizations.dart';
@@ -107,7 +108,11 @@ class _StartupDataRecoveryAppState extends State<StartupDataRecoveryApp> {
                           style: Theme.of(context).textTheme.headlineSmall,
                         ),
                         const SizedBox(height: 12),
-                        Text(l10n.startup_dataHelp),
+                        Text(
+                          failure is MacProfileInUse
+                              ? l10n.startup_profileInUse
+                              : l10n.startup_dataHelp,
+                        ),
                         if (paths != null) ...[
                           const SizedBox(height: 24),
                           Text(l10n.startup_dataCurrent),

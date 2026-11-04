@@ -36,6 +36,7 @@ import 'settings_connections.dart';
 import 'settings_data.dart';
 import 'settings_edits.dart';
 import 'settings_inventory.dart';
+import 'settings_legacy_data.dart';
 import 'settings_caches.dart';
 import 'settings_dictionary_update.dart';
 import 'settings_models.dart';
@@ -128,13 +129,34 @@ class _SettingsWiringState extends ConsumerState<SettingsWiring> {
     );
   }
 
+  /// Sync and undo restart the app; their failures name what to do.
+  void _runLegacy(Future<void> Function() action, {required String failed}) {
+    unawaited(
+      action().catchError((Object error) {
+        if (!mounted) return;
+        AppToast.error(
+          context,
+          error is SettingsLegacyBusy ? context.l10n.set_bkLegacyBusy : failed,
+        );
+        ref.invalidate(settingsLegacyDataProvider);
+        ref.invalidate(settingsBackupDataProvider);
+      }),
+    );
+  }
+
   Future<void> _pick(SettingKey key, SettingsValueLabel label) async {
     final before = ref.read(settingsValuesProvider)[key];
+    // A Mac interpreter (python3) has no extension to filter on.
+    final anyFile =
+        key == SettingKey.ragPythonPath &&
+        ref.read(ragPlatformProvider).isMacOS;
     final path =
         key == SettingKey.ragPythonPath || key == SettingKey.completionSoundFile
         ? (await FilePicker.platform.pickFiles(
-            type: FileType.custom,
-            allowedExtensions: key == SettingKey.ragPythonPath
+            type: anyFile ? FileType.any : FileType.custom,
+            allowedExtensions: anyFile
+                ? null
+                : key == SettingKey.ragPythonPath
                 ? ['exe']
                 : ['mp3', 'wav', 'ogg', 'flac'],
           ))?.files.single.path
@@ -209,6 +231,10 @@ class _SettingsWiringState extends ConsumerState<SettingsWiring> {
     final connections = SettingsConnectionActions(context, ref);
     final backup = SettingsBackupActions(context, ref);
     final system = SettingsSystemActions(context, ref);
+    final legacy = SettingsLegacyActions(
+      locate: ref.read(macLegacyDataLocatorProvider),
+      restart: system.restart,
+    );
     return SettingsActions(
       onOpenPage: (page) => setState(() {
         _page = page;
@@ -488,6 +514,16 @@ class _SettingsWiringState extends ConsumerState<SettingsWiring> {
       onUndoImport: () => _run(backup.undoImport),
       onResetScopes: (scopes) => _run(() => backup.reset(scopes)),
       onRestoreBackup: (id) => _run(() => backup.restore(id)),
+      onLegacySync: () =>
+          _runLegacy(legacy.sync, failed: context.l10n.set_bkLegacySyncFailed),
+      onLegacyUndo: (id) => _runLegacy(
+        () => legacy.undo(id),
+        failed: context.l10n.set_bkLegacyUndoFailed,
+      ),
+      onLegacyRedo: (id) => _runLegacy(
+        () => legacy.redo(id),
+        failed: context.l10n.set_bkLegacyRedoFailed,
+      ),
       onCheckUpdate: () => _run(system.checkUpdate),
       onInstallUpdate: () => _run(system.installUpdate),
       onOpenChangelog: () => _run(system.changelog),

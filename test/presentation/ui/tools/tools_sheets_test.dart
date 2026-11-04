@@ -101,6 +101,19 @@ void main() {
       expect(r.calls, ['onRun', 'onClose']);
     });
 
+    testWidgets('macOS：⌘↩ 运行，Control+↩ 不触发', (t) async {
+      final r = ToolsRecorder();
+      await pumpToolsGen(t, r: r, sheet: GenToolSheet.enhance);
+      await t.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await t.sendKeyEvent(LogicalKeyboardKey.enter);
+      await t.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      expect(r.calls, isEmpty);
+      await t.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
+      await t.sendKeyEvent(LogicalKeyboardKey.enter);
+      await t.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+      expect(r.calls, ['onRun']);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
+
     testWidgets('自定义：幅度分段变灰不可点，出强度 / 噪声滑杆', (t) async {
       final r = ToolsRecorder();
       await pumpToolsGen(t, r: r, sheet: GenToolSheet.enhance, custom: true);

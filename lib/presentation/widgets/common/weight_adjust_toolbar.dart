@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:nai_launcher/core/utils/keyboard_modifier_utils.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
 import 'package:nai_launcher/core/utils/nai_weight_syntax.dart';
 
@@ -27,8 +28,8 @@ enum PromptWeightScrollModifier {
     return switch (this) {
       PromptWeightScrollModifier.none => true,
       PromptWeightScrollModifier.alt => HardwareKeyboard.instance.isAltPressed,
-      PromptWeightScrollModifier.ctrl =>
-        HardwareKeyboard.instance.isControlPressed,
+      // 主修饰键：macOS 上是 ⌘（Mac 上 Control+滚轮是辅助功能的缩放手势），其他平台是 Ctrl
+      PromptWeightScrollModifier.ctrl => isPrimarySelectionModifierPressed(),
       PromptWeightScrollModifier.shift =>
         HardwareKeyboard.instance.isShiftPressed,
     };
@@ -421,7 +422,14 @@ class WeightAdjustScrollPhysics extends ScrollPhysics {
 }
 
 bool supportsPromptWeightScrollPhysics(TargetPlatform platform) {
-  return platform == TargetPlatform.windows;
+  return switch (platform) {
+    TargetPlatform.windows ||
+    TargetPlatform.macOS ||
+    TargetPlatform.linux => true,
+    TargetPlatform.android ||
+    TargetPlatform.iOS ||
+    TargetPlatform.fuchsia => false,
+  };
 }
 
 /// 权重调整工具条

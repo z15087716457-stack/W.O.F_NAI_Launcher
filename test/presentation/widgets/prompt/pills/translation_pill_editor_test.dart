@@ -407,6 +407,35 @@ void main() {
   );
 
   testWidgets(
+    'macOS: Cmd+Z undo, Shift+Cmd+Z redo; Control+Y stays with the text field',
+    (tester) async {
+      await openEditor(
+        tester,
+        locale: const Locale('en'),
+        converter: (_, __) async =>
+            const PromptTranslationEditResult('blue eyes, smile'),
+      );
+      await tester.tap(find.byKey(downKey));
+      await settleConversion(tester);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyZ);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+      await tester.pump();
+      expect(fieldText(tester, zhKey), '蓝眼睛，微笑');
+      await _control(tester, LogicalKeyboardKey.keyY);
+      expect(fieldText(tester, zhKey), '蓝眼睛，微笑');
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyZ);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+      await tester.pump();
+      expect(fieldText(tester, zhKey), 'blue eyes, smile');
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.macOS),
+  );
+
+  testWidgets(
     'narrow English layout and enlarged text keep statuses above fields',
     (tester) async {
       tester.view.physicalSize = const Size(300, 360);

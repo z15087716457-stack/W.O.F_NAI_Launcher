@@ -2,12 +2,15 @@ import 'package:flutter/gestures.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../../core/utils/keyboard_modifier_utils.dart';
 import 'editor_state.dart';
 
 /// 键盘状态管理
 class KeyboardState {
   bool isSpacePressed = false;
   bool isShiftPressed = false;
+
+  /// 主修饰键：macOS 上是 ⌘（⌘Z 撤销、⌘= 放大），其他平台是 Ctrl
   bool isCtrlPressed = false;
   bool isAltPressed = false;
 
@@ -15,7 +18,7 @@ class KeyboardState {
   void syncFromHardware() {
     final keyboard = HardwareKeyboard.instance;
     isShiftPressed = keyboard.isShiftPressed;
-    isCtrlPressed = keyboard.isControlPressed;
+    isCtrlPressed = isPrimarySelectionModifierPressed(keyboard: keyboard);
     isAltPressed = keyboard.isAltPressed;
   }
 
@@ -35,10 +38,9 @@ class KeyboardState {
       if (isUp) isShiftPressed = HardwareKeyboard.instance.isShiftPressed;
     }
 
-    if (event.logicalKey == LogicalKeyboardKey.controlLeft ||
-        event.logicalKey == LogicalKeyboardKey.controlRight) {
+    if (isPrimaryModifierKey(event.logicalKey)) {
       if (isDown) isCtrlPressed = true;
-      if (isUp) isCtrlPressed = HardwareKeyboard.instance.isControlPressed;
+      if (isUp) isCtrlPressed = isPrimarySelectionModifierPressed();
     }
 
     if (event.logicalKey == LogicalKeyboardKey.altLeft ||
@@ -138,9 +140,8 @@ class InputHandler {
       return KeyEventResult.handled;
     }
 
-    // Ctrl 键
-    if (event.logicalKey == LogicalKeyboardKey.controlLeft ||
-        event.logicalKey == LogicalKeyboardKey.controlRight) {
+    // Ctrl 键（macOS 上是 ⌘）
+    if (isPrimaryModifierKey(event.logicalKey)) {
       return KeyEventResult.handled;
     }
 
@@ -193,7 +194,11 @@ class InputHandler {
         state.editSelection.copyToLayer(cut: keyboard.isShiftPressed);
         return KeyEventResult.handled;
       }
-      if (isDown && !keyboard.isCtrlPressed && !keyboard.isAltPressed) {
+      // macOS 上按着 Control 的 [ ] ⌫ 也是组合键，不当单键用
+      if (isDown &&
+          !keyboard.isCtrlPressed &&
+          !keyboard.isAltPressed &&
+          !isMacChordModifierPressed()) {
         if (event.logicalKey == LogicalKeyboardKey.bracketLeft) {
           final n = state.brushSize;
           state.setBrushSize(
@@ -238,7 +243,7 @@ class InputHandler {
       return KeyEventResult.ignored;
     }
     // Krita 风格视图快捷键（无修饰键）
-    if (isDown && !keyboard.isCtrlPressed) {
+    if (isDown && !keyboard.isCtrlPressed && !isMacChordModifierPressed()) {
       switch (event.logicalKey) {
         case LogicalKeyboardKey.digit1:
           state.canvasController.resetTo100(canvasSize: state.canvasSize);
@@ -307,7 +312,12 @@ class InputHandler {
   bool handleHardwareKey(KeyEvent event) {
     if (event is! KeyDownEvent) return false;
     if (!focusNode.hasFocus) return false;
-    if (HardwareKeyboard.instance.isControlPressed) return false;
+    // 这里比系统菜单和 Shortcuts 都先拿到按键：macOS 上按着 ⌘ / Control 的字母是 ⌘W、⌘C、⌘S 这类组合，
+    // 不当工具快捷键
+    if (HardwareKeyboard.instance.isControlPressed ||
+        isMacChordModifierPressed()) {
+      return false;
+    }
 
     if (HardwareKeyboard.instance.isAltPressed) return false;
     // 处理工具快捷键

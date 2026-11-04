@@ -7,12 +7,14 @@ on:
     paths:
       - ".github/workflows/pull-request-validation.yml"
       - ".github/workflows/release.yml"
+      - ".github/workflows/macos-build.yml"
       - "analysis_options.yaml"
       - "assets/**"
       - "fonts/**"
       - "installer/windows/**"
       - "l10n.yaml"
       - "lib/**"
+      - "macos/**"
       - "pubspec.lock"
       - "pubspec.yaml"
       - "scripts/**"
@@ -133,3 +135,9 @@ jobs:
               throw "Missing packaged artifact: $path"
             }
           }
+
+  macos-validation:
+    name: Test and package macOS
+    uses: ./.github/workflows/macos-build.yml
+    with:
+      artifact-name: macos-validation

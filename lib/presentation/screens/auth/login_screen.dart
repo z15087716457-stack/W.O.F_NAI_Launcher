@@ -1,3 +1,6 @@
+import 'package:flutter/foundation.dart'
+    show defaultTargetPlatform, TargetPlatform;
+import '../../../core/storage/mac_credential_store.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,6 +16,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/guest_session_provider.dart';
 import '../../themes/studio_typography.dart';
 import '../../widgets/auth/account_avatar.dart';
+import '../../widgets/settings/account_credentials_dialog.dart';
 import '../../widgets/auth/entry_controls.dart';
 import '../../widgets/auth/login_form_container.dart';
 import '../../widgets/auth/network_troubleshooting_dialog.dart';
@@ -77,6 +81,26 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           child: Center(
             child: EntryBusyDots(color: EntryPalette.of(context).faint),
           ),
+        ),
+      );
+    } else if (authState.errorCode == AuthErrorCode.credentialStorageCorrupt) {
+      kind = 'credential_recovery';
+      final l10n = context.l10n;
+      card = EntryCard(
+        key: const ValueKey('entry_card_credential_recovery'),
+        child: Column(
+          children: [
+            EntryAlert(
+              title: l10n.auth_credentialStorageCorrupt,
+              hint: l10n.auth_credentialResetExplanation,
+              actionLabel: l10n.auth_resetLocalCredentials,
+              onAction: _confirmCredentialReset,
+            ),
+            EntrySkipButton(
+              onPressed: () =>
+                  ref.read(guestSessionNotifierProvider.notifier).enterGuest(),
+            ),
+          ],
         ),
       );
     } else if (accounts.isEmpty) {
@@ -386,7 +410,48 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
   }
 
+  Future<void> _confirmCredentialReset() async {
+    final l10n = context.l10n;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialog) => AlertDialog(
+        title: Text(l10n.auth_resetLocalCredentials),
+        content: Text(l10n.auth_credentialResetExplanation),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialog, false),
+            child: Text(l10n.common_cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialog, true),
+            child: Text(l10n.auth_resetLocalCredentials),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && mounted) {
+      await ref
+          .read(authNotifierProvider.notifier)
+          .resetCorruptLocalCredentials();
+    }
+  }
+
   Future<void> _handleQuickLogin(SavedAccount account) async {
+    final initial = ref.read(authNotifierProvider);
+    try {
+      await _submitQuickLogin(account);
+    } on LocalCredentialStoreException catch (error) {
+      if (!mounted || !identical(ref.read(authNotifierProvider), initial)) {
+        return;
+      }
+      ref.read(authNotifierProvider.notifier).reportCredentialError(error);
+      if (!error.corrupt) {
+        AppToast.info(context, context.l10n.auth_credentialStorageUnavailable);
+      }
+    }
+  }
+
+  Future<void> _submitQuickLogin(SavedAccount account) async {
     final authNotifier = ref.read(authNotifierProvider.notifier);
     final accountNotifier = ref.read(accountManagerNotifierProvider.notifier);
     final auth = ref.read(authNotifierProvider);
@@ -396,7 +461,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final token = await accountNotifier.getAccountToken(account.id);
     if (!mounted) return;
     if (token == null) {
-      AppToast.info(context, context.l10n.auth_tokenNotFound);
+      if (defaultTargetPlatform == TargetPlatform.macOS &&
+          account.accountType == AccountType.token) {
+        await showDialog<bool>(
+          context: context,
+          builder: (_) => AccountCredentialsDialog(
+            account: account,
+            onSubmit: (entered) => authNotifier.signInWithEnteredToken(
+              entered,
+              nickname: account.displayName,
+              existingAccountId: account.id,
+              endpoint: accountNotifier.getAccountApiEndpoint(account.id),
+            ),
+          ),
+        );
+      } else {
+        AppToast.info(context, context.l10n.auth_tokenNotFound);
+      }
       return;
     }
     // 取 Token 期间可能已经登录或正在登录

@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../core/utils/localization_extension.dart';
+import '../../../core/utils/platform_shortcut_text.dart';
 import '../../widgets/common/studio_icons.dart';
 import '../kit/ui_glyph.dart';
 import 'settings_contract.dart';
@@ -240,9 +241,10 @@ abstract final class SettingsFormat {
       (SettingKey.historyClick, 'linkedPreview') => l.set_cvLinked,
       (SettingKey.outputViewer, 'canvas') => l.set_cvCanvas,
       (SettingKey.outputViewer, 'simple') => l.set_cvSimple,
-      (SettingKey.wheelModifier, 'alt') => 'Alt',
-      (SettingKey.wheelModifier, 'ctrl') => 'Ctrl',
-      (SettingKey.wheelModifier, 'shift') => 'Shift',
+      // macOS 上写成 ⌥ ⌘ ⇧（Ctrl 这一项在 Mac 上是 ⌘，见 PromptWeightScrollModifier）
+      (SettingKey.wheelModifier, 'alt') => platformKeyLabel('Alt'),
+      (SettingKey.wheelModifier, 'ctrl') => platformKeyLabel('Ctrl'),
+      (SettingKey.wheelModifier, 'shift') => platformKeyLabel('Shift'),
       (SettingKey.wheelModifier, 'none') => l.set_gnNoKey,
       (SettingKey.galleryQuality, 'high') => l.set_stHigh,
       (SettingKey.galleryQuality, 'standard') => l.set_stStandard,

@@ -359,7 +359,7 @@ void main() {
   }
 
   test(
-    'startup five second timeout cancels request and one-click retry succeeds',
+    'a valid slow startup response can complete after five seconds',
     () async {
       container.dispose();
       SharedPreferences.setMockInitialValues({'auto_login': true});
@@ -379,26 +379,15 @@ void main() {
       auth = container.read(authNotifierProvider.notifier);
       await api.automaticStarted.future;
       final cancel = api.cancels.last!;
-      final timedOut = Completer<void>();
-      container.listen(authNotifierProvider, (_, next) {
-        if (next.errorCode == AuthErrorCode.networkTimeout &&
-            !timedOut.isCompleted) {
-          timedOut.complete();
-        }
-      });
-      await timedOut.future.timeout(const Duration(seconds: 7));
-      expect(cancel.isCancelled, true);
-      expect(await storage.getAccessToken(), tokenA);
-      api.holdAutomatic = false;
-      expect(
-        await auth.switchAccount('A', tokenA, accountType: AccountType.token),
-        true,
-      );
+      await Future<void>.delayed(const Duration(milliseconds: 5100));
+      expect(cancel.isCancelled, false);
       api.automaticResponse.complete({'tier': 1});
       await Future<void>.delayed(Duration.zero);
+      expect(container.read(authNotifierProvider).isAuthenticated, true);
       expect(container.read(authNotifierProvider).subscriptionInfo, {
-        'tier': 2,
+        'tier': 1,
       });
+      expect(await storage.getAccessToken(), tokenA);
     },
   );
 

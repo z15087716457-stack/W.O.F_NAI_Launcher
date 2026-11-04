@@ -102,7 +102,7 @@ class _Sep extends StatelessWidget {
 
 String _keyOf(ViewerViewData d, ViewerCommand c) {
   final a = d.keys[c]?.firstOrNull ?? ViewerKeys.defaults[c]?.firstOrNull;
-  return a == null ? '' : viewerKeyLabels(a).join(' ');
+  return a == null ? '' : viewerKeyText(a);
 }
 
 /// 收藏集：收藏（F）· 各收藏集勾选 · 新建收藏集。勾选不关菜单，可以连着点。

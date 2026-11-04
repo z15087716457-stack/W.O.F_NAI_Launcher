@@ -5,6 +5,158 @@
   "brand_entryTagline": "상상이 현실이 되는 곳.",
   "brand_switchToLight": "라이트 모드로 전환",
   "brand_switchToDark": "다크 모드로 전환",
+  "legacyImport_copyingTitle": "{app}에서 데이터를 복사하는 중",
+  "@legacyImport_copyingTitle": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "legacyImport_copyingBody": "설정, 기록, 각종 라이브러리와 즐겨찾기는 처음 시작할 때 한 번만 복사됩니다. 계정에는 다시 로그인해야 합니다. {app}의 데이터는 그대로 남습니다.",
+  "@legacyImport_copyingBody": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "legacyImport_runningTitle": "{app}을(를) 종료해 주세요",
+  "@legacyImport_runningTitle": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "legacyImport_runningBody": "처음 시작할 때 이전 버전의 설정, 기록, 각종 라이브러리와 즐겨찾기를 복사합니다. 메뉴 막대 아이콘까지 이전 버전을 완전히 종료하면 복사가 자동으로 시작됩니다.",
+  "legacyImport_waiting": "{app}이(가) 종료되기를 기다리는 중…",
+  "@legacyImport_waiting": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "legacyImport_failedTitle": "{app}에서 데이터를 복사할 수 없습니다",
+  "@legacyImport_failedTitle": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "legacyImport_failedBody": "데이터는 변경되지 않았습니다. {app}의 데이터는 그대로이며 복사하다 만 파일도 남지 않았습니다. 디스크 여유 공간을 확인한 뒤 다시 시도해 주세요.",
+  "@legacyImport_failedBody": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "legacyImport_startWithout": "복사하지 않고 시작",
+  "legacySync_title": "{app}에서 데이터를 동기화하는 중",
+  "@legacySync_title": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "legacySync_body": "이곳의 설정, 기록, 각종 라이브러리와 즐겨찾기를 {app}의 현재 데이터로 바꾸는 중입니다. 이 버전의 데이터는 먼저 백업했습니다.",
+  "@legacySync_body": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "legacySync_runningBody": "동기화하려면 이전 버전의 설정, 기록, 각종 라이브러리와 즐겨찾기를 읽어야 합니다. 메뉴 막대 아이콘까지 이전 버전을 완전히 종료하면 동기화가 자동으로 시작됩니다.",
+  "legacySync_failedTitle": "{app}에서 데이터를 동기화할 수 없습니다",
+  "@legacySync_failedTitle": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "legacySync_failedBody": "동기화 전의 데이터로 되돌렸고, 동기화하다 만 파일도 남지 않았습니다. 디스크 여유 공간을 확인한 뒤 다시 시도해 주세요.",
+  "legacySync_startWithout": "동기화하지 않고 시작",
+  "legacyUndo_title": "마지막 동기화를 되돌리는 중",
+  "legacyUndo_body": "동기화 전의 데이터로 되돌리는 중입니다. 동기화 후의 데이터는 백업으로 남겨 둡니다.",
+  "legacyUndo_failedTitle": "마지막 동기화를 되돌릴 수 없습니다",
+  "legacyUndo_failedBody": "데이터는 그대로이며 바꾸다 만 파일도 남지 않았습니다. 디스크 여유 공간을 확인한 뒤 다시 시도해 주세요.",
+  "legacyUndo_startWithout": "되돌리지 않고 시작",
+  "legacyRedo_title": "동기화 후 데이터로 돌아가는 중",
+  "legacyRedo_body": "동기화 후 이곳에서 바꾼 내용도 돌아옵니다. 동기화 전의 데이터는 백업으로 남겨 둡니다.",
+  "legacyRedo_failedTitle": "동기화 후 데이터로 돌아갈 수 없습니다",
+  "legacyRedo_startWithout": "돌아가지 않고 시작",
+  "set_bkLegacy": "이전 버전 데이터",
+  "set_bkLegacySub": "이전 버전 {app}의 데이터입니다. 읽기만 하고 바꾸지 않습니다. 백업은 최근 2개를 보관합니다.",
+  "@set_bkLegacySub": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "set_bkLegacySync": "이전 버전에서 동기화",
+  "set_bkLegacySyncCopied": "처음 시작할 때 복사했습니다({time}). 동기화 전에 현재 데이터를 백업합니다. 같은 위치의 같은 이름 라이브러리는 이전 버전 것으로 교체하고 이 버전에만 있는 라이브러리는 유지합니다.",
+  "@set_bkLegacySyncCopied": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "set_bkLegacySyncSynced": "마지막 동기화는 {time}입니다. 동기화 전에 현재 데이터를 백업합니다. 같은 위치의 같은 이름 라이브러리는 이전 버전 것으로 교체하고 이 버전에만 있는 라이브러리는 유지합니다.",
+  "@set_bkLegacySyncSynced": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "set_bkLegacySyncNever": "처음 시작할 때 복사하지 않았습니다. 동기화 전에 현재 데이터를 백업합니다. 같은 위치의 같은 이름 라이브러리는 이전 버전 것으로 교체하고 이 버전에만 있는 라이브러리는 유지합니다.",
+  "set_bkLegacySyncBtn": "동기화…",
+  "set_bkLegacyUndo": "마지막 동기화 되돌리기",
+  "set_bkLegacyUndoSub": "{time} 동기화 전의 데이터로 돌아갑니다",
+  "@set_bkLegacyUndoSub": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "set_bkLegacyRedo": "동기화 후 데이터로 돌아가기",
+  "set_bkLegacyRedoSub": "{time} 되돌리기 전의 데이터로 돌아갑니다",
+  "@set_bkLegacyRedoSub": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "set_bkLegacyUndoAgainSub": "{time} 전환 전의 데이터로 돌아갑니다",
+  "@set_bkLegacyUndoAgainSub": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "set_bkLegacyNoSync": "아직 동기화하지 않았습니다",
+  "set_bkLegacyUndoBtn": "복원…",
+  "set_bkLegacySyncTitle": "이전 버전 데이터로 바꿀까요?",
+  "set_bkLegacySyncBody": "{app}에서 설정, 기록, 라이브러리 및 즐겨찾기를 복사합니다. 같은 위치의 같은 이름 라이브러리는 이전 버전의 파일 전체로 교체합니다. 이 버전에만 있는 라이브러리는 관련 파일과 함께 유지합니다.\n\n· 현재 데이터는 먼저 모두 백업하며, “마지막 동기화 되돌리기”로 원래대로 돌릴 수 있습니다\n· 이 버전에만 있는 폴더의 Agent 세션과 설정 백업 등은 유지됩니다\n· 이미지와 Vibe 파일은 영향을 받지 않습니다\n· 앱을 다시 시작합니다. 이전 버전이 실행 중이면 먼저 종료해 주세요",
+  "@set_bkLegacySyncBody": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "set_bkLegacySyncRunning": "⚠ {app}이(가) 실행 중입니다. 먼저 종료해 주세요. 종료하지 않으면 다시 시작한 뒤 종료를 기다리는 화면에서 멈춥니다.",
+  "@set_bkLegacySyncRunning": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "set_bkLegacySyncConfirm": "동기화하고 다시 시작",
+  "set_bkLegacyUndoTitle": "마지막 동기화를 되돌릴까요?",
+  "set_bkLegacyUndoBody": "{time} 동기화 전의 데이터로 되돌립니다. 동기화 후 이곳에서 바꾼 내용은 백업으로 남겨 둡니다. 앱을 다시 시작합니다.",
+  "@set_bkLegacyUndoBody": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "set_bkLegacyUndoConfirm": "되돌리고 다시 시작",
+  "set_bkLegacyRedoTitle": "동기화 후 데이터로 돌아갈까요?",
+  "set_bkLegacyRedoBody": "{time} 되돌리기 전의 데이터로 돌아갑니다. 동기화 후 이곳에서 바꾼 내용도 돌아옵니다. 현재 데이터는 백업으로 남겨 둡니다. 앱을 다시 시작합니다.",
+  "@set_bkLegacyRedoBody": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "set_bkLegacyRedoConfirm": "돌아가고 다시 시작",
+  "set_bkLegacyUndoAgainBody": "{time} 전환 전의 데이터, 즉 동기화 전의 데이터로 돌아갑니다. 현재 데이터는 백업으로 남겨 둡니다. 앱을 다시 시작합니다.",
+  "@set_bkLegacyUndoAgainBody": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "set_bkLegacyBusy": "아직 진행 중인 작업이 있습니다. 끝난 뒤 다시 시도해 주세요.",
+  "set_bkLegacySyncFailed": "동기화를 시작할 수 없습니다. 디스크 여유 공간을 확인한 뒤 다시 시도해 주세요.",
+  "set_bkLegacyUndoFailed": "동기화를 되돌릴 수 없습니다. 디스크 여유 공간을 확인한 뒤 다시 시도해 주세요.",
+  "set_bkLegacyRedoFailed": "동기화 후 데이터로 돌아갈 수 없습니다. 디스크 여유 공간을 확인한 뒤 다시 시도해 주세요.",
   "app_subtitle": "NovelAI 서드파티 클라이언트",
   "common_cancel": "취소",
   "common_confirm": "확인",
@@ -146,6 +298,11 @@
   "auth_error_credentialsLoginUnavailable": "이메일/비밀번호 로그인은 현재 사용할 수 없습니다",
   "auth_error_credentialsLoginUnavailable_hint": "NovelAI의 이메일/비밀번호 로그인에는 웹 보안 확인이 필요합니다. Persistent API Token을 사용하세요.",
   "auth_error_serverError": "서버 오류",
+  "auth_credentialStorageCorrupt": "로컬 인증 정보 파일이 손상되었습니다.",
+  "auth_resetLocalCredentials": "로컬 인증 정보 재설정",
+  "auth_credentialResetExplanation": "이 Mac에서 앱에 저장한 모든 로그인 토큰과 서비스 키를 삭제합니다. 재설정 후 다시 입력해야 합니다. 이미지와 설정은 유지됩니다.",
+  "auth_credentialStorageUnavailable": "로컬 인증 정보 파일에 접근할 수 없습니다.",
+  "auth_credentialStorageUnavailableHint": "로그인이 취소되었습니다. 현재 macOS 사용자의 파일 권한을 확인한 후 다시 시도하세요.",
   "auth_error_unknown": "알 수 없는 오류",
   "auth_autoLogin": "자동 로그인",
   "auth_forgotPassword": "비밀번호를 잊으셨나요?",
@@ -1806,6 +1963,7 @@
   "shortcut_action_jump_to_date": "날짜로 이동",
   "shortcut_action_open_folder": "폴더 열기",
   "shortcut_action_minimize_to_tray": "트레이로 최소화",
+  "shortcut_action_hide_to_menu_bar": "메뉴 막대로 숨기기",
   "shortcut_action_quit_app": "앱 종료",
   "shortcut_action_show_shortcut_help": "단축키 도움말 표시",
   "shortcut_action_toggle_theme": "테마 전환",
@@ -2626,6 +2784,7 @@
   },
   "updateNoticeAvailableSubtitle": "앱에서 다운로드하고 업데이트를 자동으로 마칩니다",
   "updateNoticeManualSubtitle": "이 플랫폼은 Release 페이지에서 직접 업데이트해야 합니다",
+  "updateNoticeFinderSubtitle": "앱에서 다운로드하고 확인한 뒤 Finder에서 이전 버전을 바꿉니다",
   "updateNoticeReady": "v{version} 버전이 준비되었습니다",
   "@updateNoticeReady": {
     "placeholders": {
@@ -2633,6 +2792,7 @@
     }
   },
   "updateNoticeReadySubtitle": "패키지를 확인했으며 다시 시작하면 설치할 수 있습니다",
+  "updateNoticeReadyFinderSubtitle": "패키지를 확인했습니다. Finder에서 이전 버전을 바꾸면 끝납니다",
   "updateNoticeFailed": "이전 업데이트가 끝나지 않았습니다",
   "updateViewDetails": "업데이트 보기",
   "updateSettingsAvailable": "v{version}을(를) 사용할 수 있습니다. 선택하면 자세히 볼 수 있습니다",
@@ -2670,12 +2830,22 @@
       "version": {}
     }
   },
+  "updateDownloadedFinderHint": "v{version}을(를) 다운로드하고 확인했습니다. \"Finder에서 보기\"를 누른 뒤 ⌘Q로 이 앱을 종료하고, 새 버전을 \"응용 프로그램\" 폴더로 드래그해 이전 버전을 바꾸세요.",
+  "@updateDownloadedFinderHint": {
+    "placeholders": {
+      "version": {}
+    }
+  },
   "updateInstallAndRestart": "설치 후 다시 시작",
+  "update_runningFromStaging": "업데이트 폴더에서 앱을 열었습니다. Finder에서 표시를 선택하고 ⌘Q로 종료한 다음, 앱을 응용 프로그램 폴더로 옮겨 그곳에서 여세요.",
+  "updateShowInFinder": "Finder에서 보기",
   "updateInstallLater": "나중에 설치",
   "updateDownloadCancelled": "다운로드를 취소했습니다. 나중에 이어서 받을 수 있습니다",
   "updateDownloadFailed": "업데이트를 다운로드하지 못했습니다",
   "updateInstalling": "설치 프로그램 시작 중...",
   "updateInstallingHint": "설치 프로그램이 시작되었습니다. 앱이 닫히고 업데이트가 자동으로 완료됩니다.",
+  "updatePreparingApp": "새 버전 준비 중...",
+  "updatePreparingAppHint": "업데이트 패키지의 압축을 푸는 중입니다. 완료되면 Finder에서 새 버전이 선택됩니다.",
   "cannotOpenUrl": "링크를 열 수 없습니다",
   "model3d_editorTitle": "3D 모델 레이어",
   "model3d_modeTransform": "변형",
@@ -2843,6 +3013,7 @@
   "common_clickToRetry": "클릭하여 다시 시도",
   "common_opening": "여는 중...",
   "common_swap": "바꾸기",
+  "common_showInFinder": "Finder에서 보기",
   "addToLibrary_displayNameHint": "이 항목을 알아보기 쉬운 이름을 입력하세요",
   "addToLibrary_tagHint": "태그를 입력하고 Enter를 눌러 추가하세요",
   "drop_saveVibeBundle": "Vibe 번들 저장",
@@ -3237,6 +3408,10 @@
   "tips_studio_trick_6": "번역 블록을 가운데 버튼으로 누르면 원문과 번역문이 번갈아 바뀌어요. AI 번역이 아무리 좋아도 가끔은 원문을 슬쩍 보고 cat ears가 이상한 말로 바뀌지 않았는지 확인해 보세요.",
   "@tips_studio_trick_6": {
     "description": "promptTranslation_guideMiddleText."
+  },
+  "tips_studio_trick_6_mac": "번역 블록을 ⌘를 누른 채 클릭하면 원문과 번역문이 번갈아 바뀌어요. AI 번역이 아무리 좋아도 가끔은 원문을 슬쩍 보고 cat ears가 이상한 말로 바뀌지 않았는지 확인해 보세요.",
+  "@tips_studio_trick_6_mac": {
+    "description": "macOS variant of tips_studio_trick_6: Cmd+click toggles a translation block."
   },
   "tips_studio_trick_7": "설정의 생성 빈도 제한을 켜면 생성 사이에 강제로 쉬는 시간을 둘 수 있어요. 간격 무작위 변동까지 더하면 리듬이 덜 기계적이에요. 느긋하게 돌리는 밤에도, 손이 멈추지 않는 나에게도 좋아요.",
   "@tips_studio_trick_7": {
@@ -4761,6 +4936,7 @@
   "promptTranslation_tutorial": "사용 방법",
   "promptTranslation_guideBack": "작업으로 돌아가기",
   "promptTranslation_guideMiddleTitle": "블록 가운데 버튼 클릭",
+  "promptTranslation_guideCommandClickTitle": "⌘ + 블록 클릭",
   "promptTranslation_guideMiddleText": "원문과 번역문 전환",
   "promptTranslation_guideSourceTitle": "원문 왼쪽 클릭",
   "promptTranslation_guideSourceText": "커서를 놓고 바로 편집",
@@ -4897,6 +5073,13 @@
   "update_errorPackageRemoved": "업데이트 패키지가 정리되었습니다. 다시 다운로드하세요",
   "update_errorPackageCorrupted": "업데이트 패키지가 손상되었습니다. 다시 다운로드하세요",
   "update_errorLaunchFailed": "업데이트 프로그램을 시작하지 못했습니다",
+  "update_errorExtractFailed": "업데이트 패키지의 압축을 풀지 못했습니다",
+  "update_errorRevealFailed": "Finder에서 새 버전을 표시하지 못했습니다. 위치: {path}",
+  "@update_errorRevealFailed": {
+    "placeholders": {
+      "path": {}
+    }
+  },
   "update_errorCheckFailed": "업데이트를 확인하지 못했습니다",
   "update_errorRateLimited": "GitHub 요청 한도에 도달했습니다. 잠시 후 다시 시도하세요.",
   "update_retryAt": "{time}(현지 시간) 이후에 다시 시도하세요.",
@@ -5265,7 +5448,7 @@
   "localUpscale_resizing": "이미지 마무리 중…",
   "localUpscale_complete": "업스케일 완료",
   "localUpscale_cancelling": "취소 중…",
-  "localUpscale_unsupportedPlatform": "로컬 업스케일은 현재 Windows를 지원합니다.",
+  "localUpscale_unsupportedPlatform": "이 업스케일 방식은 현재 Windows에서만 지원됩니다.",
   "localUpscale_engineMissing": "로컬 엔진을 사용할 수 없습니다. 전체 Studio 패키지를 다시 설치하세요.",
   "localUpscale_integrity": "파일 검증에 실패했습니다. 모델 또는 Studio를 다시 설치하세요.",
   "localUpscale_modelMissing": "모델을 사용할 수 없습니다. 설치된 모델을 선택하거나 모델 경로 길이를 확인하세요.",
@@ -7362,6 +7545,7 @@
   },
   "imageViewer_missingTitle": "이미지를 찾을 수 없음",
   "imageViewer_missingHint": "탐색기에서 이동, 이름 변경 또는 삭제되었을 수 있습니다",
+  "imageViewer_missingHintFinder": "Finder에서 이동, 이름 변경 또는 삭제되었을 수 있습니다",
   "imageViewer_openFolder": "폴더 열기",
   "imageViewer_nextImage": "다음 이미지",
   "imageViewer_hintPan": "드래그해 이동",
@@ -8813,6 +8997,7 @@
   "naiAgent_inputChanged": "준비 중 입력이 변경되었습니다. 현재 초안을 보내세요.",
   "naiAgent_imageLimit": "잘못된 이미지 형식이거나 업로드 한도를 초과했습니다.",
   "naiAgent_composerNotEmpty": "현재 입력을 저장하거나 보낸 후 이 메시지를 복원하세요.",
+  "naiAgent_bundledNodeRequiresMacOS135": "내장 에이전트에는 macOS 13.5 이상이 필요합니다. 이 Mac에서 이미지 생성은 계속 사용할 수 있습니다.",
   "naiAgent_runtimeMissing": "Agent 런타임이 없습니다. 전체 업데이트 패키지를 사용하세요.",
   "naiAgent_usage": "모델 사용량",
   "naiAgent_globalScope": "전역 기본값",
@@ -9514,6 +9699,7 @@
   "set_apDark": "다크",
   "set_apSystem": "시스템",
   "set_apSystemSub": "Windows 설정을 따름",
+  "set_apSystemSubMac": "macOS 설정을 따름",
   "set_apText": "글꼴",
   "set_apFont": "인터페이스 글꼴",
   "set_apFontSub": "숫자와 코드는 Geist Mono를 사용합니다",
@@ -9729,6 +9915,12 @@
   "@set_stFree": {
     "placeholders": {
       "disk": {},
+      "size": {}
+    }
+  },
+  "set_stFreeMac": "여유 {size}",
+  "@set_stFreeMac": {
+    "placeholders": {
       "size": {}
     }
   },
@@ -10162,6 +10354,10 @@
   "set_rgInstallHint": "Python과 추론 패키지를 받습니다(모델 가중치 제외). NVIDIA는 CUDA(수 GB), 그 외는 더 작은 CPU.",
   "set_rgInstallCuda": "CUDA · NVIDIA",
   "set_rgInstallCpu": "CPU",
+  "set_rgInstallHintMac": "Python과 추론 패키지를 받습니다(약 200 MB, 모델 가중치 제외). Apple 실리콘 Mac이 필요합니다. 자동은 메모리 18 GB 이상인 Mac에서는 GPU를, 16 GB 이하에서는 CPU를 사용합니다.",
+  "set_rgPythonSubMac": "기본은 자동 설치한 독립 환경이며 기존 python3도 고를 수 있습니다.",
+  "set_rgNeedsAppleSilicon": "Apple 실리콘 Mac이 필요합니다. PyTorch가 Intel Mac용 빌드를 더 이상 제공하지 않아 이 Mac에는 런타임을 설치할 수 없습니다.",
+  "set_rgEnvUnsupported": "지원 안 함",
   "set_rgPhaseExisting": "기존 환경 확인 중",
   "set_rgPhaseDownload": "설치 도구 다운로드 중",
   "set_rgPhaseCreate": "Python 준비 중",
@@ -11253,6 +11449,7 @@
   "ag_psNoCharacters": "현재 모델은 캐릭터 프롬프트를 지원하지 않습니다",
   "ag_psMissing": "이 카드의 데이터를 찾을 수 없습니다",
   "startup_dataTitle": "앱 데이터를 준비하지 못했습니다",
+  "startup_profileInUse": "다른 앱 인스턴스에서 이 데이터 폴더를 사용 중입니다. 해당 앱을 종료한 다음 다시 시도하세요.",
   "startup_dataHelp": "앱 데이터가 아직 준비되지 않았습니다. 기존 파일을 보존하세요. 내용이 다른 파일은 병합하거나 덮어쓰지 않습니다. 데이터 폴더를 백업하고 확인한 뒤 디스크 여유 공간과 접근 권한을 점검하고 다시 시도하세요.",
   "startup_dataCurrent": "현재 데이터 폴더",
   "startup_dataLegacy": "이전 데이터 폴더",

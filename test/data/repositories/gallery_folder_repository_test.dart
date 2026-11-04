@@ -5,6 +5,14 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/data/repositories/gallery_folder_repository.dart';
 import 'package:path/path.dart' as p;
+import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
+
+class _GalleryDocuments extends PathProviderPlatform {
+  _GalleryDocuments(this.directory);
+  final Directory directory;
+  @override
+  Future<String?> getApplicationDocumentsPath() async => directory.path;
+}
 
 void main() {
   late Directory hiveTempDir;
@@ -37,6 +45,30 @@ void main() {
       await galleryRoot.delete(recursive: true);
     }
   });
+
+  test(
+    'an empty gallery uses the configured save folder or the Documents default, independently of extra roots',
+    () async {
+      final previous = PathProviderPlatform.instance;
+      PathProviderPlatform.instance = _GalleryDocuments(hiveTempDir);
+      addTearDown(() => PathProviderPlatform.instance = previous);
+      final box = Hive.box(StorageKeys.settingsBox);
+      final extra = await Directory(p.join(hiveTempDir.path, 'extra')).create();
+      await box.put(StorageKeys.galleryExtraRoots, [extra.path]);
+      expect(await galleryRoot.list().isEmpty, true);
+      expect(await repository.getRootPath(), galleryRoot.path);
+      await box.delete(StorageKeys.imageSavePath);
+      expect(
+        await repository.getRootPath(),
+        p.join(hiveTempDir.path, 'NAI_Launcher', 'images'),
+      );
+      await box.put(StorageKeys.imageSavePath, galleryRoot.path);
+      expect(await repository.getRootPath(), galleryRoot.path);
+    },
+    skip:
+        !Platform.isMacOS ||
+        Platform.environment.containsKey('NAI_STUDIO_SANDBOX'),
+  );
 
   test('moveImageToFolder 成功移动图片且不被外部源拦截', () async {
     final extraRoot = await Directory.systemTemp.createTemp(

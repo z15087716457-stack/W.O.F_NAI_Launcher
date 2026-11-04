@@ -2,6 +2,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/presentation/ui/model_providers/model_providers_contract.dart';
 import 'package:nai_launcher/presentation/ui/model_providers/model_providers_controller.dart';
@@ -95,6 +96,23 @@ void main() {
     expect(rec.lastKey, isNull);
     expect(find.byKey(const Key('mp-dock')), findsNothing);
   });
+
+  testWidgets('macOS：⌘S 保存，Control+S 不保存', (t) async {
+    final rec = await pumpProviders(t);
+    // 焦点在页面里（输入框）时才收得到快捷键，同 Windows 的 Ctrl+S
+    await t.enterText(_field('mp-key'), 'sk-new');
+    await t.pumpAndSettle();
+    await t.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await t.sendKeyEvent(LogicalKeyboardKey.keyS);
+    await t.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await t.pumpAndSettle();
+    expect(rec.has('save:ds'), isFalse);
+    await t.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
+    await t.sendKeyEvent(LogicalKeyboardKey.keyS);
+    await t.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+    await t.pumpAndSettle();
+    expect(rec.has('save:ds'), isTrue);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
 
   testWidgets('保存中继续编辑：新的修改留在草稿里', (t) async {
     final rec = await pumpProviders(t);

@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/cache/thumbnail_cache_service.dart';
+import '../../../../core/utils/keyboard_modifier_utils.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/models/gallery/local_image_record.dart';
 import '../../../../data/services/gallery/gallery_filter_service.dart';
@@ -19,6 +20,7 @@ import '../../../providers/canvas_settings_provider.dart';
 import '../../../providers/local_gallery_focus_provider.dart';
 import '../../../providers/local_gallery_provider.dart';
 import '../../../providers/selection_mode_provider.dart';
+import '../../../utils/selection_modifiers.dart';
 import '../draggable_image_card.dart';
 import '../gallery_state_views.dart';
 import '../local_image_card.dart';
@@ -112,6 +114,7 @@ class _GalleryTimelineViewState extends ConsumerState<GalleryTimelineView> {
   @override
   void initState() {
     super.initState();
+    PointerDownModifiers.ensureInstalled(); // 见 _handleTap
     widget.controller?._state = this;
     _scroll.addListener(_onScroll);
   }
@@ -208,9 +211,9 @@ class _GalleryTimelineViewState extends ConsumerState<GalleryTimelineView> {
       localGallerySelectionNotifierProvider.notifier,
     );
     final focusNotifier = ref.read(localGalleryFocusNotifierProvider.notifier);
-    final keyboard = HardwareKeyboard.instance;
-    final isCtrl = keyboard.isControlPressed || keyboard.isMetaPressed;
-    final isShift = keyboard.isShiftPressed;
+    // 读按下那一刻的修饰键：点得快时 Ctrl / ⌘、Shift 会比鼠标键先松开（macOS 上多选只认 ⌘）
+    final isCtrl = PointerDownModifiers.selection;
+    final isShift = PointerDownModifiers.shift;
     _focusNode.requestFocus();
 
     if (isShift) {
@@ -307,7 +310,8 @@ class _GalleryTimelineViewState extends ConsumerState<GalleryTimelineView> {
       widget.onOpenViewer(current);
       return KeyEventResult.handled;
     }
-    if (key == LogicalKeyboardKey.delete) {
+    // 删除：Delete，macOS 上还有 ⌘⌫
+    if (isListDeleteKey(event)) {
       if (widget.onDeleteRequested == null) return KeyEventResult.ignored;
       widget.onDeleteRequested!();
       return KeyEventResult.handled;
@@ -508,9 +512,8 @@ class _GalleryTimelineViewState extends ConsumerState<GalleryTimelineView> {
             children: [
               Positioned.fill(
                 child: ScrollConfiguration(
-                  behavior: ScrollConfiguration.of(
-                    context,
-                  ).copyWith(scrollbars: false),
+                  behavior: ScrollConfiguration.of(context)
+                      .copyWith(scrollbars: false),
                   child: SingleChildScrollView(
                     key: const Key('gallery-timeline-scroll'),
                     controller: _scroll,

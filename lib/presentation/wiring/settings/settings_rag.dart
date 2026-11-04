@@ -5,7 +5,9 @@ import 'package:path/path.dart' as p;
 
 import '../../../core/rag/rag_client.dart';
 import '../../../core/rag/rag_maintenance.dart';
+import '../../../core/rag/rag_platform.dart';
 import '../../../core/rag/rag_settings.dart';
+import '../../../core/rag/rag_runtime.dart';
 import '../../../core/rag/rag_runtime_probe.dart';
 import '../../providers/rag_model_download_provider.dart';
 import '../../providers/rag_provider.dart';
@@ -39,7 +41,9 @@ SettingsRagData settingsRagData(
   ({bool embedding, bool reranker})? weights, {
   int indexBytes = 0,
   SettingsRagSourceKind? preparing,
+  RagPlatform? platform,
 }) {
+  final host = platform ?? RagPlatform.host;
   final environment = runtime.valueOrNull;
   final ready =
       environment?.ready == true ||
@@ -62,6 +66,10 @@ SettingsRagData settingsRagData(
     RagSource.gallery => settings.galleryEnabled,
   };
   return SettingsRagData(
+    platform: host.isMacOS
+        ? SettingsRagPlatform.macOS
+        : SettingsRagPlatform.windows,
+    runtimeSupported: RagRuntimeInstaller.uvFor(host) != null,
     indexBusy: status.anyBusy,
     initializing:
         settings.enabled &&

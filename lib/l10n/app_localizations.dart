@@ -133,6 +133,318 @@ abstract class AppLocalizations {
   /// **'Switch to dark mode'**
   String get brand_switchToDark;
 
+  /// No description provided for @legacyImport_copyingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Copying your data from {app}'**
+  String legacyImport_copyingTitle(Object app);
+
+  /// No description provided for @legacyImport_copyingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings, history, libraries and favorites are copied once, the first time this version starts. You will need to sign in again. {app} keeps its own data unchanged.'**
+  String legacyImport_copyingBody(Object app);
+
+  /// No description provided for @legacyImport_runningTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quit {app} to bring your data over'**
+  String legacyImport_runningTitle(Object app);
+
+  /// No description provided for @legacyImport_runningBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The first time it starts, this version copies the previous version\'s settings, history, libraries and favorites. Quit it completely, including its menu bar icon, and copying starts by itself.'**
+  String get legacyImport_runningBody;
+
+  /// No description provided for @legacyImport_waiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for {app} to quit…'**
+  String legacyImport_waiting(Object app);
+
+  /// No description provided for @legacyImport_failedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t copy your data from {app}'**
+  String legacyImport_failedTitle(Object app);
+
+  /// No description provided for @legacyImport_failedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing was changed: {app} keeps its data, and no partial copy was left behind. Make sure the disk has enough free space, then try again.'**
+  String legacyImport_failedBody(Object app);
+
+  /// No description provided for @legacyImport_startWithout.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Without Copying'**
+  String get legacyImport_startWithout;
+
+  /// No description provided for @legacySync_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing your data from {app}'**
+  String legacySync_title(Object app);
+
+  /// No description provided for @legacySync_body.
+  ///
+  /// In en, this message translates to:
+  /// **'The settings, history, libraries and favorites here are being replaced with the current ones from {app}. This version\'s data was backed up first.'**
+  String legacySync_body(Object app);
+
+  /// No description provided for @legacySync_runningBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing reads the previous version\'s settings, history, libraries and favorites. Quit it completely, including its menu bar icon, and syncing starts by itself.'**
+  String get legacySync_runningBody;
+
+  /// No description provided for @legacySync_failedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t sync your data from {app}'**
+  String legacySync_failedTitle(Object app);
+
+  /// No description provided for @legacySync_failedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your previous data is back in place and nothing half-synced was left. Make sure there\'s enough free disk space, then try again.'**
+  String get legacySync_failedBody;
+
+  /// No description provided for @legacySync_startWithout.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Without Syncing'**
+  String get legacySync_startWithout;
+
+  /// No description provided for @legacyUndo_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Undoing the last sync'**
+  String get legacyUndo_title;
+
+  /// No description provided for @legacyUndo_body.
+  ///
+  /// In en, this message translates to:
+  /// **'Switching back to the data from before the sync. The data from after it is kept as a backup.'**
+  String get legacyUndo_body;
+
+  /// No description provided for @legacyUndo_failedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t undo the last sync'**
+  String get legacyUndo_failedTitle;
+
+  /// No description provided for @legacyUndo_failedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data is unchanged and nothing half-switched was left. Make sure there\'s enough free disk space, then try again.'**
+  String get legacyUndo_failedBody;
+
+  /// No description provided for @legacyUndo_startWithout.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Without Undoing'**
+  String get legacyUndo_startWithout;
+
+  /// No description provided for @legacyRedo_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Switching back to the synced data'**
+  String get legacyRedo_title;
+
+  /// No description provided for @legacyRedo_body.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes made here after the sync come back. The data from before the sync is kept as a backup.'**
+  String get legacyRedo_body;
+
+  /// No description provided for @legacyRedo_failedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t switch back to the synced data'**
+  String get legacyRedo_failedTitle;
+
+  /// No description provided for @legacyRedo_startWithout.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Without Switching Back'**
+  String get legacyRedo_startWithout;
+
+  /// No description provided for @set_bkLegacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous version'**
+  String get set_bkLegacy;
+
+  /// No description provided for @set_bkLegacySub.
+  ///
+  /// In en, this message translates to:
+  /// **'From the previous version, {app}. Its data is only read, never changed. The latest 2 backups are kept.'**
+  String set_bkLegacySub(Object app);
+
+  /// No description provided for @set_bkLegacySync.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync from previous version'**
+  String get set_bkLegacySync;
+
+  /// No description provided for @set_bkLegacySyncCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied on first launch ({time}). Sync backs up this profile and takes matching libraries from the previous version. Libraries found only here are kept.'**
+  String set_bkLegacySyncCopied(Object time);
+
+  /// No description provided for @set_bkLegacySyncSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Last synced {time}. Sync backs up this profile and takes matching libraries from the previous version. Libraries found only here are kept.'**
+  String set_bkLegacySyncSynced(Object time);
+
+  /// No description provided for @set_bkLegacySyncNever.
+  ///
+  /// In en, this message translates to:
+  /// **'Not copied on first launch. Sync backs up this profile and takes matching libraries from the previous version. Libraries found only here are kept.'**
+  String get set_bkLegacySyncNever;
+
+  /// No description provided for @set_bkLegacySyncBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync…'**
+  String get set_bkLegacySyncBtn;
+
+  /// No description provided for @set_bkLegacyUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo last sync'**
+  String get set_bkLegacyUndo;
+
+  /// No description provided for @set_bkLegacyUndoSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Go back to the data from before the {time} sync'**
+  String set_bkLegacyUndoSub(Object time);
+
+  /// No description provided for @set_bkLegacyRedo.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch back to synced data'**
+  String get set_bkLegacyRedo;
+
+  /// No description provided for @set_bkLegacyRedoSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Go back to the data from before the {time} undo'**
+  String set_bkLegacyRedoSub(Object time);
+
+  /// No description provided for @set_bkLegacyUndoAgainSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Go back to the data from before the {time} switch'**
+  String set_bkLegacyUndoAgainSub(Object time);
+
+  /// No description provided for @set_bkLegacyNoSync.
+  ///
+  /// In en, this message translates to:
+  /// **'No sync yet'**
+  String get set_bkLegacyNoSync;
+
+  /// No description provided for @set_bkLegacyUndoBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore…'**
+  String get set_bkLegacyUndoBtn;
+
+  /// No description provided for @set_bkLegacySyncTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace this version\'s data with the previous version\'s?'**
+  String get set_bkLegacySyncTitle;
+
+  /// No description provided for @set_bkLegacySyncBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Copies settings, history, libraries and favorites from {app}. A library at the same location is replaced as a whole. Libraries found only in this version are kept with their companion files.\n\n· This version\'s data is backed up first; use Undo Last Sync to switch back\n· Agent sessions and preference backups in folders found only here are kept\n· Images and Vibe files are not affected\n· Restarts the app; quit {app} first if it is open'**
+  String set_bkLegacySyncBody(Object app);
+
+  /// No description provided for @set_bkLegacySyncRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'⚠ {app} is running. Quit it first, or the restart waits on a screen until you do.'**
+  String set_bkLegacySyncRunning(Object app);
+
+  /// No description provided for @set_bkLegacySyncConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync and Restart'**
+  String get set_bkLegacySyncConfirm;
+
+  /// No description provided for @set_bkLegacyUndoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo the last sync?'**
+  String get set_bkLegacyUndoTitle;
+
+  /// No description provided for @set_bkLegacyUndoBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Switches back to the data from before the {time} sync. Changes made here since then are kept as a backup. Restarts the app.'**
+  String set_bkLegacyUndoBody(Object time);
+
+  /// No description provided for @set_bkLegacyUndoConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo and Restart'**
+  String get set_bkLegacyUndoConfirm;
+
+  /// No description provided for @set_bkLegacyRedoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch back to the synced data?'**
+  String get set_bkLegacyRedoTitle;
+
+  /// No description provided for @set_bkLegacyRedoBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Switches back to the data from before the {time} undo, including changes made here after the sync. The current data is kept as a backup. Restarts the app.'**
+  String set_bkLegacyRedoBody(Object time);
+
+  /// No description provided for @set_bkLegacyRedoConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch Back and Restart'**
+  String get set_bkLegacyRedoConfirm;
+
+  /// No description provided for @set_bkLegacyUndoAgainBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Switches back to the data from before the sync, as it was before the {time} switch. The current data is kept as a backup. Restarts the app.'**
+  String set_bkLegacyUndoAgainBody(Object time);
+
+  /// No description provided for @set_bkLegacyBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'A task is still running. Try again when it finishes.'**
+  String get set_bkLegacyBusy;
+
+  /// No description provided for @set_bkLegacySyncFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t start the sync. Make sure there\'s enough free disk space, then try again.'**
+  String get set_bkLegacySyncFailed;
+
+  /// No description provided for @set_bkLegacyUndoFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t undo the sync. Make sure there\'s enough free disk space, then try again.'**
+  String get set_bkLegacyUndoFailed;
+
+  /// No description provided for @set_bkLegacyRedoFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t switch back to the synced data. Make sure there\'s enough free disk space, then try again.'**
+  String get set_bkLegacyRedoFailed;
+
   /// No description provided for @app_subtitle.
   ///
   /// In en, this message translates to:
@@ -786,6 +1098,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Server error'**
   String get auth_error_serverError;
+
+  /// No description provided for @auth_credentialStorageCorrupt.
+  ///
+  /// In en, this message translates to:
+  /// **'The local credential file is damaged.'**
+  String get auth_credentialStorageCorrupt;
+
+  /// No description provided for @auth_resetLocalCredentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset local credentials'**
+  String get auth_resetLocalCredentials;
+
+  /// No description provided for @auth_credentialResetExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'This removes all saved sign-in tokens and service keys from this app on this Mac. You will need to enter them again. Your images and settings are kept.'**
+  String get auth_credentialResetExplanation;
+
+  /// No description provided for @auth_credentialStorageUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not access the local credential file.'**
+  String get auth_credentialStorageUnavailable;
+
+  /// No description provided for @auth_credentialStorageUnavailableHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in was canceled. Check this macOS user’s file permissions and try again.'**
+  String get auth_credentialStorageUnavailableHint;
 
   /// No description provided for @auth_error_unknown.
   ///
@@ -6701,6 +7043,12 @@ abstract class AppLocalizations {
   /// **'Minimize to Tray'**
   String get shortcut_action_minimize_to_tray;
 
+  /// No description provided for @shortcut_action_hide_to_menu_bar.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide to Menu Bar'**
+  String get shortcut_action_hide_to_menu_bar;
+
   /// No description provided for @shortcut_action_quit_app.
   ///
   /// In en, this message translates to:
@@ -9227,11 +9575,29 @@ abstract class AppLocalizations {
   /// **'v{version} has been downloaded and verified. Installing will close the app and restart it automatically.'**
   String updateDownloadedHint(Object version);
 
+  /// No description provided for @updateDownloadedFinderHint.
+  ///
+  /// In en, this message translates to:
+  /// **'v{version} has been downloaded and verified. Choose “Show in Finder”, quit this app with ⌘Q, then drag the new version into the Applications folder to replace the old one.'**
+  String updateDownloadedFinderHint(Object version);
+
   /// No description provided for @updateInstallAndRestart.
   ///
   /// In en, this message translates to:
   /// **'Install and Restart'**
   String get updateInstallAndRestart;
+
+  /// No description provided for @update_runningFromStaging.
+  ///
+  /// In en, this message translates to:
+  /// **'You opened the app from the update folder. Choose Show in Finder, quit with ⌘Q, then drag the app into Applications and open it there.'**
+  String get update_runningFromStaging;
+
+  /// No description provided for @updateShowInFinder.
+  ///
+  /// In en, this message translates to:
+  /// **'Show in Finder'**
+  String get updateShowInFinder;
 
   /// No description provided for @updateInstallNow.
   ///
@@ -9275,6 +9641,18 @@ abstract class AppLocalizations {
   /// **'The installer has started. The app will close and finish updating automatically.'**
   String get updateInstallingHint;
 
+  /// No description provided for @updatePreparingApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing the new version...'**
+  String get updatePreparingApp;
+
+  /// No description provided for @updatePreparingAppHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpacking the update. The new version will be selected in Finder.'**
+  String get updatePreparingAppHint;
+
   /// No description provided for @remindMeLater.
   ///
   /// In en, this message translates to:
@@ -9299,6 +9677,12 @@ abstract class AppLocalizations {
   /// **'This platform must be updated manually from the Release page'**
   String get updateNoticeManualSubtitle;
 
+  /// No description provided for @updateNoticeFinderSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Download and verify in the app, then replace the old version in Finder'**
+  String get updateNoticeFinderSubtitle;
+
   /// No description provided for @updateNoticeReady.
   ///
   /// In en, this message translates to:
@@ -9310,6 +9694,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The package is verified and ready to install on restart'**
   String get updateNoticeReadySubtitle;
+
+  /// No description provided for @updateNoticeReadyFinderSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The package is verified; replace the old version in Finder to finish'**
+  String get updateNoticeReadyFinderSubtitle;
 
   /// No description provided for @updateNoticeFailed.
   ///
@@ -9670,6 +10060,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Swap'**
   String get common_swap;
+
+  /// No description provided for @common_showInFinder.
+  ///
+  /// In en, this message translates to:
+  /// **'Show in Finder'**
+  String get common_showInFinder;
 
   /// No description provided for @addToLibrary_displayNameHint.
   ///
@@ -10539,6 +10935,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Middle-click a translation block to flip between the original and the translation. However good the AI is, peek at the original now and then to make sure \"cat ears\" didn\'t become something strange.'**
   String get tips_studio_trick_6;
+
+  /// macOS variant of tips_studio_trick_6: Cmd+click toggles a translation block.
+  ///
+  /// In en, this message translates to:
+  /// **'⌘-click a translation block to flip between the original and the translation. However good the AI is, peek at the original now and then to make sure \"cat ears\" didn\'t become something strange.'**
+  String get tips_studio_trick_6_mac;
 
   /// settings_limitGenerationIntervalTitle / settings_setGenerationIntervalJitterTitle.
   ///
@@ -15572,6 +15974,12 @@ abstract class AppLocalizations {
   /// **'Middle-click a block'**
   String get promptTranslation_guideMiddleTitle;
 
+  /// No description provided for @promptTranslation_guideCommandClickTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'⌘ + click a block'**
+  String get promptTranslation_guideCommandClickTitle;
+
   /// No description provided for @promptTranslation_guideMiddleText.
   ///
   /// In en, this message translates to:
@@ -16003,6 +16411,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to start the updater'**
   String get update_errorLaunchFailed;
+
+  /// No description provided for @update_errorExtractFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to unpack the update package'**
+  String get update_errorExtractFailed;
+
+  /// No description provided for @update_errorRevealFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to show the new version in Finder; it is at {path}'**
+  String update_errorRevealFailed(Object path);
 
   /// No description provided for @update_errorCheckFailed.
   ///
@@ -17279,7 +17699,7 @@ abstract class AppLocalizations {
   /// No description provided for @localUpscale_unsupportedPlatform.
   ///
   /// In en, this message translates to:
-  /// **'Local upscaling currently supports Windows.'**
+  /// **'This upscaling method is currently available on Windows only.'**
   String get localUpscale_unsupportedPlatform;
 
   /// No description provided for @localUpscale_engineMissing.
@@ -23701,6 +24121,12 @@ abstract class AppLocalizations {
   /// **'It may have been moved, renamed or deleted in Explorer'**
   String get imageViewer_missingHint;
 
+  /// No description provided for @imageViewer_missingHintFinder.
+  ///
+  /// In en, this message translates to:
+  /// **'It may have been moved, renamed or deleted in Finder'**
+  String get imageViewer_missingHintFinder;
+
   /// No description provided for @imageViewer_openFolder.
   ///
   /// In en, this message translates to:
@@ -28985,6 +29411,12 @@ abstract class AppLocalizations {
   /// **'Save or send the current input before restoring this message.'**
   String get naiAgent_composerNotEmpty;
 
+  /// No description provided for @naiAgent_bundledNodeRequiresMacOS135.
+  ///
+  /// In en, this message translates to:
+  /// **'The bundled Agent requires macOS 13.5 or later. You can still generate images on this Mac.'**
+  String get naiAgent_bundledNodeRequiresMacOS135;
+
   /// No description provided for @naiAgent_runtimeMissing.
   ///
   /// In en, this message translates to:
@@ -31138,6 +31570,12 @@ abstract class AppLocalizations {
   /// **'Follows the Windows setting'**
   String get set_apSystemSub;
 
+  /// No description provided for @set_apSystemSubMac.
+  ///
+  /// In en, this message translates to:
+  /// **'Follows the macOS setting'**
+  String get set_apSystemSubMac;
+
   /// No description provided for @set_apText.
   ///
   /// In en, this message translates to:
@@ -31947,6 +32385,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{size} free on {disk}'**
   String set_stFree(Object disk, Object size);
+
+  /// No description provided for @set_stFreeMac.
+  ///
+  /// In en, this message translates to:
+  /// **'{size} free'**
+  String set_stFreeMac(Object size);
 
   /// No description provided for @set_stRecount.
   ///
@@ -33645,6 +34089,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'CPU'**
   String get set_rgInstallCpu;
+
+  /// No description provided for @set_rgInstallHintMac.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloads Python and inference packages (about 200 MB), not model weights. Needs a Mac with Apple silicon. Auto runs on the GPU on Macs with 18 GB of memory or more, and on the CPU with 16 GB or less.'**
+  String get set_rgInstallHintMac;
+
+  /// No description provided for @set_rgPythonSubMac.
+  ///
+  /// In en, this message translates to:
+  /// **'Uses the standalone runtime by default; you can pick an existing python3.'**
+  String get set_rgPythonSubMac;
+
+  /// No description provided for @set_rgNeedsAppleSilicon.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs a Mac with Apple silicon. PyTorch no longer makes builds for Intel Macs, so the runtime can\'t be installed on this Mac.'**
+  String get set_rgNeedsAppleSilicon;
+
+  /// No description provided for @set_rgEnvUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Not supported'**
+  String get set_rgEnvUnsupported;
 
   /// No description provided for @set_rgPhaseExisting.
   ///
@@ -38361,6 +38829,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not prepare application data'**
   String get startup_dataTitle;
+
+  /// No description provided for @startup_profileInUse.
+  ///
+  /// In en, this message translates to:
+  /// **'Another copy of the app is using this data folder. Quit that copy, then retry.'**
+  String get startup_profileInUse;
 
   /// No description provided for @startup_dataHelp.
   ///

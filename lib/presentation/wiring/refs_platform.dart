@@ -126,7 +126,8 @@ class RefsPlatform {
     final directory = await FileSystemEntity.isDirectory(path)
         ? path
         : p.dirname(path);
-    await Process.start('explorer.exe', [
+    // macOS 用 open 打开文件夹
+    await Process.start(Platform.isMacOS ? 'open' : 'explorer.exe', [
       directory,
     ], mode: ProcessStartMode.detached);
   }

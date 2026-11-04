@@ -24,6 +24,214 @@ class AppLocalizationsEn extends AppLocalizations {
   String get brand_switchToDark => 'Switch to dark mode';
 
   @override
+  String legacyImport_copyingTitle(Object app) {
+    return 'Copying your data from $app';
+  }
+
+  @override
+  String legacyImport_copyingBody(Object app) {
+    return 'Settings, history, libraries and favorites are copied once, the first time this version starts. You will need to sign in again. $app keeps its own data unchanged.';
+  }
+
+  @override
+  String legacyImport_runningTitle(Object app) {
+    return 'Quit $app to bring your data over';
+  }
+
+  @override
+  String get legacyImport_runningBody =>
+      'The first time it starts, this version copies the previous version\'s settings, history, libraries and favorites. Quit it completely, including its menu bar icon, and copying starts by itself.';
+
+  @override
+  String legacyImport_waiting(Object app) {
+    return 'Waiting for $app to quit…';
+  }
+
+  @override
+  String legacyImport_failedTitle(Object app) {
+    return 'Can\'t copy your data from $app';
+  }
+
+  @override
+  String legacyImport_failedBody(Object app) {
+    return 'Nothing was changed: $app keeps its data, and no partial copy was left behind. Make sure the disk has enough free space, then try again.';
+  }
+
+  @override
+  String get legacyImport_startWithout => 'Start Without Copying';
+
+  @override
+  String legacySync_title(Object app) {
+    return 'Syncing your data from $app';
+  }
+
+  @override
+  String legacySync_body(Object app) {
+    return 'The settings, history, libraries and favorites here are being replaced with the current ones from $app. This version\'s data was backed up first.';
+  }
+
+  @override
+  String get legacySync_runningBody =>
+      'Syncing reads the previous version\'s settings, history, libraries and favorites. Quit it completely, including its menu bar icon, and syncing starts by itself.';
+
+  @override
+  String legacySync_failedTitle(Object app) {
+    return 'Can\'t sync your data from $app';
+  }
+
+  @override
+  String get legacySync_failedBody =>
+      'Your previous data is back in place and nothing half-synced was left. Make sure there\'s enough free disk space, then try again.';
+
+  @override
+  String get legacySync_startWithout => 'Start Without Syncing';
+
+  @override
+  String get legacyUndo_title => 'Undoing the last sync';
+
+  @override
+  String get legacyUndo_body =>
+      'Switching back to the data from before the sync. The data from after it is kept as a backup.';
+
+  @override
+  String get legacyUndo_failedTitle => 'Can\'t undo the last sync';
+
+  @override
+  String get legacyUndo_failedBody =>
+      'Your data is unchanged and nothing half-switched was left. Make sure there\'s enough free disk space, then try again.';
+
+  @override
+  String get legacyUndo_startWithout => 'Start Without Undoing';
+
+  @override
+  String get legacyRedo_title => 'Switching back to the synced data';
+
+  @override
+  String get legacyRedo_body =>
+      'Changes made here after the sync come back. The data from before the sync is kept as a backup.';
+
+  @override
+  String get legacyRedo_failedTitle => 'Can\'t switch back to the synced data';
+
+  @override
+  String get legacyRedo_startWithout => 'Start Without Switching Back';
+
+  @override
+  String get set_bkLegacy => 'Previous version';
+
+  @override
+  String set_bkLegacySub(Object app) {
+    return 'From the previous version, $app. Its data is only read, never changed. The latest 2 backups are kept.';
+  }
+
+  @override
+  String get set_bkLegacySync => 'Sync from previous version';
+
+  @override
+  String set_bkLegacySyncCopied(Object time) {
+    return 'Copied on first launch ($time). Sync backs up this profile and takes matching libraries from the previous version. Libraries found only here are kept.';
+  }
+
+  @override
+  String set_bkLegacySyncSynced(Object time) {
+    return 'Last synced $time. Sync backs up this profile and takes matching libraries from the previous version. Libraries found only here are kept.';
+  }
+
+  @override
+  String get set_bkLegacySyncNever =>
+      'Not copied on first launch. Sync backs up this profile and takes matching libraries from the previous version. Libraries found only here are kept.';
+
+  @override
+  String get set_bkLegacySyncBtn => 'Sync…';
+
+  @override
+  String get set_bkLegacyUndo => 'Undo last sync';
+
+  @override
+  String set_bkLegacyUndoSub(Object time) {
+    return 'Go back to the data from before the $time sync';
+  }
+
+  @override
+  String get set_bkLegacyRedo => 'Switch back to synced data';
+
+  @override
+  String set_bkLegacyRedoSub(Object time) {
+    return 'Go back to the data from before the $time undo';
+  }
+
+  @override
+  String set_bkLegacyUndoAgainSub(Object time) {
+    return 'Go back to the data from before the $time switch';
+  }
+
+  @override
+  String get set_bkLegacyNoSync => 'No sync yet';
+
+  @override
+  String get set_bkLegacyUndoBtn => 'Restore…';
+
+  @override
+  String get set_bkLegacySyncTitle =>
+      'Replace this version\'s data with the previous version\'s?';
+
+  @override
+  String set_bkLegacySyncBody(Object app) {
+    return 'Copies settings, history, libraries and favorites from $app. A library at the same location is replaced as a whole. Libraries found only in this version are kept with their companion files.\n\n· This version\'s data is backed up first; use Undo Last Sync to switch back\n· Agent sessions and preference backups in folders found only here are kept\n· Images and Vibe files are not affected\n· Restarts the app; quit $app first if it is open';
+  }
+
+  @override
+  String set_bkLegacySyncRunning(Object app) {
+    return '⚠ $app is running. Quit it first, or the restart waits on a screen until you do.';
+  }
+
+  @override
+  String get set_bkLegacySyncConfirm => 'Sync and Restart';
+
+  @override
+  String get set_bkLegacyUndoTitle => 'Undo the last sync?';
+
+  @override
+  String set_bkLegacyUndoBody(Object time) {
+    return 'Switches back to the data from before the $time sync. Changes made here since then are kept as a backup. Restarts the app.';
+  }
+
+  @override
+  String get set_bkLegacyUndoConfirm => 'Undo and Restart';
+
+  @override
+  String get set_bkLegacyRedoTitle => 'Switch back to the synced data?';
+
+  @override
+  String set_bkLegacyRedoBody(Object time) {
+    return 'Switches back to the data from before the $time undo, including changes made here after the sync. The current data is kept as a backup. Restarts the app.';
+  }
+
+  @override
+  String get set_bkLegacyRedoConfirm => 'Switch Back and Restart';
+
+  @override
+  String set_bkLegacyUndoAgainBody(Object time) {
+    return 'Switches back to the data from before the sync, as it was before the $time switch. The current data is kept as a backup. Restarts the app.';
+  }
+
+  @override
+  String get set_bkLegacyBusy =>
+      'A task is still running. Try again when it finishes.';
+
+  @override
+  String get set_bkLegacySyncFailed =>
+      'Can\'t start the sync. Make sure there\'s enough free disk space, then try again.';
+
+  @override
+  String get set_bkLegacyUndoFailed =>
+      'Can\'t undo the sync. Make sure there\'s enough free disk space, then try again.';
+
+  @override
+  String get set_bkLegacyRedoFailed =>
+      'Can\'t switch back to the synced data. Make sure there\'s enough free disk space, then try again.';
+
+  @override
   String get app_subtitle => 'NovelAI Third-party Client';
 
   @override
@@ -377,6 +585,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get auth_error_serverError => 'Server error';
+
+  @override
+  String get auth_credentialStorageCorrupt =>
+      'The local credential file is damaged.';
+
+  @override
+  String get auth_resetLocalCredentials => 'Reset local credentials';
+
+  @override
+  String get auth_credentialResetExplanation =>
+      'This removes all saved sign-in tokens and service keys from this app on this Mac. You will need to enter them again. Your images and settings are kept.';
+
+  @override
+  String get auth_credentialStorageUnavailable =>
+      'Could not access the local credential file.';
+
+  @override
+  String get auth_credentialStorageUnavailableHint =>
+      'Sign-in was canceled. Check this macOS user’s file permissions and try again.';
 
   @override
   String get auth_error_unknown => 'Unknown error';
@@ -3732,6 +3959,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shortcut_action_minimize_to_tray => 'Minimize to Tray';
 
   @override
+  String get shortcut_action_hide_to_menu_bar => 'Hide to Menu Bar';
+
+  @override
   String get shortcut_action_quit_app => 'Quit Application';
 
   @override
@@ -5205,7 +5435,19 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String updateDownloadedFinderHint(Object version) {
+    return 'v$version has been downloaded and verified. Choose “Show in Finder”, quit this app with ⌘Q, then drag the new version into the Applications folder to replace the old one.';
+  }
+
+  @override
   String get updateInstallAndRestart => 'Install and Restart';
+
+  @override
+  String get update_runningFromStaging =>
+      'You opened the app from the update folder. Choose Show in Finder, quit with ⌘Q, then drag the app into Applications and open it there.';
+
+  @override
+  String get updateShowInFinder => 'Show in Finder';
 
   @override
   String get updateInstallNow => 'Install Now';
@@ -5231,6 +5473,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'The installer has started. The app will close and finish updating automatically.';
 
   @override
+  String get updatePreparingApp => 'Preparing the new version...';
+
+  @override
+  String get updatePreparingAppHint =>
+      'Unpacking the update. The new version will be selected in Finder.';
+
+  @override
   String get remindMeLater => 'Remind Me in 4 Hours';
 
   @override
@@ -5247,6 +5496,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'This platform must be updated manually from the Release page';
 
   @override
+  String get updateNoticeFinderSubtitle =>
+      'Download and verify in the app, then replace the old version in Finder';
+
+  @override
   String updateNoticeReady(Object version) {
     return 'Version v$version is ready';
   }
@@ -5254,6 +5507,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get updateNoticeReadySubtitle =>
       'The package is verified and ready to install on restart';
+
+  @override
+  String get updateNoticeReadyFinderSubtitle =>
+      'The package is verified; replace the old version in Finder to finish';
 
   @override
   String get updateNoticeFailed => 'The previous update did not finish';
@@ -5481,6 +5738,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get common_swap => 'Swap';
+
+  @override
+  String get common_showInFinder => 'Show in Finder';
 
   @override
   String get addToLibrary_displayNameHint =>
@@ -6011,6 +6271,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get tips_studio_trick_6 =>
       'Middle-click a translation block to flip between the original and the translation. However good the AI is, peek at the original now and then to make sure \"cat ears\" didn\'t become something strange.';
+
+  @override
+  String get tips_studio_trick_6_mac =>
+      '⌘-click a translation block to flip between the original and the translation. However good the AI is, peek at the original now and then to make sure \"cat ears\" didn\'t become something strange.';
 
   @override
   String get tips_studio_trick_7 =>
@@ -8936,6 +9200,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get promptTranslation_guideMiddleTitle => 'Middle-click a block';
 
   @override
+  String get promptTranslation_guideCommandClickTitle => '⌘ + click a block';
+
+  @override
   String get promptTranslation_guideMiddleText =>
       'Switch original and translation';
 
@@ -9212,6 +9479,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get update_errorLaunchFailed => 'Failed to start the updater';
+
+  @override
+  String get update_errorExtractFailed => 'Failed to unpack the update package';
+
+  @override
+  String update_errorRevealFailed(Object path) {
+    return 'Failed to show the new version in Finder; it is at $path';
+  }
 
   @override
   String get update_errorCheckFailed => 'Failed to check for updates';
@@ -9955,7 +10230,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get localUpscale_unsupportedPlatform =>
-      'Local upscaling currently supports Windows.';
+      'This upscaling method is currently available on Windows only.';
 
   @override
   String get localUpscale_engineMissing =>
@@ -13648,6 +13923,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'It may have been moved, renamed or deleted in Explorer';
 
   @override
+  String get imageViewer_missingHintFinder =>
+      'It may have been moved, renamed or deleted in Finder';
+
+  @override
   String get imageViewer_openFolder => 'Open folder';
 
   @override
@@ -16606,6 +16885,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Save or send the current input before restoring this message.';
 
   @override
+  String get naiAgent_bundledNodeRequiresMacOS135 =>
+      'The bundled Agent requires macOS 13.5 or later. You can still generate images on this Mac.';
+
+  @override
   String get naiAgent_runtimeMissing =>
       'Agent runtime is missing. Install the complete update package.';
 
@@ -17866,6 +18149,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get set_apSystemSub => 'Follows the Windows setting';
 
   @override
+  String get set_apSystemSubMac => 'Follows the macOS setting';
+
+  @override
   String get set_apText => 'Text';
 
   @override
@@ -18319,6 +18605,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String set_stFree(Object disk, Object size) {
     return '$size free on $disk';
+  }
+
+  @override
+  String set_stFreeMac(Object size) {
+    return '$size free';
   }
 
   @override
@@ -19291,6 +19582,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get set_rgInstallCpu => 'CPU';
+
+  @override
+  String get set_rgInstallHintMac =>
+      'Downloads Python and inference packages (about 200 MB), not model weights. Needs a Mac with Apple silicon. Auto runs on the GPU on Macs with 18 GB of memory or more, and on the CPU with 16 GB or less.';
+
+  @override
+  String get set_rgPythonSubMac =>
+      'Uses the standalone runtime by default; you can pick an existing python3.';
+
+  @override
+  String get set_rgNeedsAppleSilicon =>
+      'Needs a Mac with Apple silicon. PyTorch no longer makes builds for Intel Macs, so the runtime can\'t be installed on this Mac.';
+
+  @override
+  String get set_rgEnvUnsupported => 'Not supported';
 
   @override
   String get set_rgPhaseExisting => 'Checking existing runtime';
@@ -22083,6 +22389,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get startup_dataTitle => 'Could not prepare application data';
+
+  @override
+  String get startup_profileInUse =>
+      'Another copy of the app is using this data folder. Quit that copy, then retry.';
 
   @override
   String get startup_dataHelp =>

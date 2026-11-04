@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'dart:ui' as ui;
@@ -473,6 +474,23 @@ void main() {
     }
   }
 
+  testWidgets(
+    'shortcut hints follow the platform: Ctrl F / Ctrl+Z / Ctrl+Y, macOS ⌘F / ⌘Z / ⇧⌘Z',
+    (tester) async {
+      await _pumpToolbar(tester);
+      final mac = defaultTargetPlatform == TargetPlatform.macOS;
+      expect(find.text(mac ? '⌘F' : 'Ctrl F'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('gallery-toolbar-more')));
+      await tester.pumpAndSettle();
+      expect(find.text(mac ? '⌘Z' : 'Ctrl+Z'), findsOneWidget);
+      expect(find.text(mac ? '⇧⌘Z' : 'Ctrl+Y'), findsOneWidget);
+    },
+    variant: const TargetPlatformVariant({
+      TargetPlatform.macOS,
+      TargetPlatform.windows,
+    }),
+  );
+
   testWidgets('breadcrumb shows the folder path and the result count', (
     tester,
   ) async {
@@ -671,6 +689,54 @@ void main() {
     await tester.pumpAndSettle();
     expect(windowCalls, isNot(contains('startDragging')));
   });
+
+  testWidgets(
+    'search field: Cmd+A selects all on macOS, Control+A goes to line start',
+    (tester) async {
+      await _pumpToolbar(tester);
+      final field = find.byKey(const Key('gallery-search-field'));
+      await tester.enterText(field, 'blue hair');
+      await tester.pump();
+      final controller = tester.widget<TextField>(field).controller!;
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyA);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+      await tester.pump();
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 9),
+      );
+
+      // On macOS Control+A is the text field's "move to line start".
+      controller.selection = const TextSelection.collapsed(offset: 9);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyA);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.pump();
+      expect(controller.selection, const TextSelection.collapsed(offset: 0));
+      await tester.pump(const Duration(milliseconds: 400));
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.macOS),
+  );
+
+  testWidgets('search field: Ctrl+A selects all on Windows', (tester) async {
+    await _pumpToolbar(tester);
+    final field = find.byKey(const Key('gallery-search-field'));
+    await tester.enterText(field, 'blue hair');
+    await tester.pump();
+    final controller = tester.widget<TextField>(field).controller!;
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyA);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.pump();
+    expect(
+      controller.selection,
+      const TextSelection(baseOffset: 0, extentOffset: 9),
+    );
+    await tester.pump(const Duration(milliseconds: 400));
+  }, variant: TargetPlatformVariant.only(TargetPlatform.windows));
 
   testWidgets('Ctrl+click selects a local tag as a gallery filter chip', (
     tester,

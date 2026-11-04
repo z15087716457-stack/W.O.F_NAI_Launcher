@@ -41,6 +41,17 @@ class _Auth extends AuthNotifier {
   AuthState build() => initial;
 }
 
+class _RecoveryAuth extends _Auth {
+  _RecoveryAuth(AuthErrorCode code)
+    : super(AuthState(status: AuthStatus.error, errorCode: code));
+  var resets = 0;
+  @override
+  Future<void> resetCorruptLocalCredentials() async {
+    resets++;
+    state = const AuthState(status: AuthStatus.unauthenticated);
+  }
+}
+
 class _Accounts extends AccountManagerNotifier {
   _Accounts(this.accounts);
   final List<SavedAccount> accounts;
@@ -85,6 +96,7 @@ Future<GlobalKey> pumpEntry(
   bool splash = false,
   List<SavedAccount> accounts = const [],
   AuthState auth = const AuthState(status: AuthStatus.unauthenticated),
+  AuthNotifier? authNotifier,
   Locale locale = const Locale('zh'),
   double textScale = 1,
   WarmupState warmup = const WarmupState(
@@ -104,7 +116,7 @@ Future<GlobalKey> pumpEntry(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
-        authNotifierProvider.overrideWith(() => _Auth(auth)),
+        authNotifierProvider.overrideWith(() => authNotifier ?? _Auth(auth)),
         accountManagerNotifierProvider.overrideWith(() => _Accounts(accounts)),
         updateStateProvider.overrideWith(_Updates.new),
         localStorageServiceProvider.overrideWithValue(storage),
@@ -212,6 +224,23 @@ void main() {
     await AppVersion.initialize();
   });
   setUp(() => SharedPreferences.setMockInitialValues({}));
+
+  testWidgets(
+    'login label and Return hint have separate space on the first-run button',
+    (tester) async {
+      await pumpEntry(tester, locale: const Locale('en'));
+      final face = find.byKey(const Key('auth_start_login'));
+      final hint = find.descendant(of: face, matching: find.text('↵'));
+      final label = find.descendant(
+        of: face,
+        matching: find.byWidgetPredicate(
+          (widget) => widget is Text && widget.data != '↵',
+        ),
+      );
+      expect(tester.getRect(label).right, lessThan(tester.getRect(hint).left));
+      expect(tester.getCenter(label).dx, closeTo(tester.getCenter(face).dx, 1));
+    },
+  );
 
   for (final brightness in Brightness.values) {
     testWidgets(
@@ -643,6 +672,38 @@ void main() {
     expect(tester.takeException(), isNull);
     // 停掉一直在走的字符场
     await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets(
+    'a damaged vault requires explicit confirmation before resetting',
+    (tester) async {
+      final auth = _RecoveryAuth(AuthErrorCode.credentialStorageCorrupt);
+      await pumpEntry(tester, authNotifier: auth, locale: const Locale('en'));
+      final reset = find.text('Reset local credentials');
+      await tester.tap(reset);
+      await tester.pumpAndSettle();
+      expect(auth.resets, 0);
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+      expect(auth.resets, 0);
+      await tester.tap(reset);
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.widgetWithText(TextButton, 'Reset local credentials'),
+      );
+      await tester.pumpAndSettle();
+      expect(auth.resets, 1);
+      expect(find.byKey(const Key('auth_start_login')), findsOneWidget);
+    },
+  );
+
+  testWidgets('an inaccessible credential file offers no reset', (
+    tester,
+  ) async {
+    final auth = _RecoveryAuth(AuthErrorCode.credentialStorageUnavailable);
+    await pumpEntry(tester, authNotifier: auth, locale: const Locale('en'));
+    expect(find.text('Reset local credentials'), findsNothing);
+    expect(auth.resets, 0);
   });
 
   testWidgets('quick login failure is shown inside the card', (tester) async {

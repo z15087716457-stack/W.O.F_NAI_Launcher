@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../core/utils/keyboard_modifier_utils.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_popover.dart';
 import 'online_contract.dart';
@@ -233,11 +234,14 @@ class _OnlineGalleryPageState extends State<OnlineGalleryPage>
       return KeyEventResult.ignored;
     }
     final k = e.logicalKey;
-    final ctrl = HardwareKeyboard.instance.isControlPressed;
+    // 主修饰键：macOS 上是 ⌘（不带 Control）
+    final ctrl = isPrimaryShortcutModifierPressed();
     if (ctrl && k == LogicalKeyboardKey.keyF) {
       _searchFocus.requestFocus();
       return KeyEventResult.handled;
     }
+    // macOS 上带 Control 的组合（⌃⌘F 全屏……）不归这里，留给系统菜单
+    if (isMacChordModifierPressed() && !ctrl) return KeyEventResult.ignored;
     if (_typing() || _viewerKey != null) return KeyEventResult.ignored;
     final items = _data.list.items;
     final sel = _data.selectedKey;

@@ -6,11 +6,74 @@ import 'package:crypto/crypto.dart';
 import 'package:ffi/ffi.dart';
 
 /// Keep model migration bounded without loading a whole model into memory.
+/// Large files use the system hash (Windows CNG, macOS CommonCrypto), which
+/// is about ten times faster than the Dart implementation.
 Future<String> fileSha256(File file) async {
-  if (!Platform.isWindows || await file.length() < 1024 * 1024) {
-    return (await sha256.bind(file.openRead()).first).toString();
+  if (await file.length() >= 1024 * 1024) {
+    if (Platform.isWindows) return _WindowsSha256.instance.hash(file);
+    if (Platform.isMacOS) return _MacSha256.instance.hash(file);
   }
-  return _WindowsSha256.instance.hash(file);
+  return (await sha256.bind(file.openRead()).first).toString();
+}
+
+/// CommonCrypto, part of libSystem on every macOS version.
+class _MacSha256 {
+  _MacSha256._();
+
+  static final instance = _MacSha256._();
+  static final _library = DynamicLibrary.process();
+  static final _init = _library
+      .lookupFunction<
+        Int32 Function(Pointer<Uint8>),
+        int Function(Pointer<Uint8>)
+      >('CC_SHA256_Init');
+  static final _update = _library
+      .lookupFunction<
+        Int32 Function(Pointer<Uint8>, Pointer<Uint8>, Uint32),
+        int Function(Pointer<Uint8>, Pointer<Uint8>, int)
+      >('CC_SHA256_Update');
+  static final _final = _library
+      .lookupFunction<
+        Int32 Function(Pointer<Uint8>, Pointer<Uint8>),
+        int Function(Pointer<Uint8>, Pointer<Uint8>)
+      >('CC_SHA256_Final');
+
+  /// CC_SHA256_CTX is 104 bytes; the margin costs nothing.
+  static const _contextSize = 128;
+
+  Future<String> hash(File file) async {
+    final context = calloc<Uint8>(_contextSize);
+    final output = calloc<Uint8>(32);
+    final bufferSize = math.min(await file.length(), 4 * 1024 * 1024);
+    final buffer = calloc<Uint8>(bufferSize);
+    RandomAccessFile? input;
+    try {
+      _check(_init(context));
+      input = await file.open();
+      final bytes = buffer.asTypedList(bufferSize);
+      while (true) {
+        final count = await input.readInto(bytes);
+        if (count == 0) break;
+        _check(_update(context, buffer, count));
+      }
+      _check(_final(output, context));
+      return output
+          .asTypedList(32)
+          .map((value) => value.toRadixString(16).padLeft(2, '0'))
+          .join();
+    } finally {
+      await input?.close();
+      calloc.free(context);
+      calloc.free(output);
+      calloc.free(buffer);
+    }
+  }
+
+  static void _check(int status) {
+    if (status != 1) {
+      throw FileSystemException('macOS SHA-256 failed: $status');
+    }
+  }
 }
 
 class _WindowsSha256 {

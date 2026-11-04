@@ -24,6 +24,212 @@ class AppLocalizationsKo extends AppLocalizations {
   String get brand_switchToDark => '다크 모드로 전환';
 
   @override
+  String legacyImport_copyingTitle(Object app) {
+    return '$app에서 데이터를 복사하는 중';
+  }
+
+  @override
+  String legacyImport_copyingBody(Object app) {
+    return '설정, 기록, 각종 라이브러리와 즐겨찾기는 처음 시작할 때 한 번만 복사됩니다. 계정에는 다시 로그인해야 합니다. $app의 데이터는 그대로 남습니다.';
+  }
+
+  @override
+  String legacyImport_runningTitle(Object app) {
+    return '$app을(를) 종료해 주세요';
+  }
+
+  @override
+  String get legacyImport_runningBody =>
+      '처음 시작할 때 이전 버전의 설정, 기록, 각종 라이브러리와 즐겨찾기를 복사합니다. 메뉴 막대 아이콘까지 이전 버전을 완전히 종료하면 복사가 자동으로 시작됩니다.';
+
+  @override
+  String legacyImport_waiting(Object app) {
+    return '$app이(가) 종료되기를 기다리는 중…';
+  }
+
+  @override
+  String legacyImport_failedTitle(Object app) {
+    return '$app에서 데이터를 복사할 수 없습니다';
+  }
+
+  @override
+  String legacyImport_failedBody(Object app) {
+    return '데이터는 변경되지 않았습니다. $app의 데이터는 그대로이며 복사하다 만 파일도 남지 않았습니다. 디스크 여유 공간을 확인한 뒤 다시 시도해 주세요.';
+  }
+
+  @override
+  String get legacyImport_startWithout => '복사하지 않고 시작';
+
+  @override
+  String legacySync_title(Object app) {
+    return '$app에서 데이터를 동기화하는 중';
+  }
+
+  @override
+  String legacySync_body(Object app) {
+    return '이곳의 설정, 기록, 각종 라이브러리와 즐겨찾기를 $app의 현재 데이터로 바꾸는 중입니다. 이 버전의 데이터는 먼저 백업했습니다.';
+  }
+
+  @override
+  String get legacySync_runningBody =>
+      '동기화하려면 이전 버전의 설정, 기록, 각종 라이브러리와 즐겨찾기를 읽어야 합니다. 메뉴 막대 아이콘까지 이전 버전을 완전히 종료하면 동기화가 자동으로 시작됩니다.';
+
+  @override
+  String legacySync_failedTitle(Object app) {
+    return '$app에서 데이터를 동기화할 수 없습니다';
+  }
+
+  @override
+  String get legacySync_failedBody =>
+      '동기화 전의 데이터로 되돌렸고, 동기화하다 만 파일도 남지 않았습니다. 디스크 여유 공간을 확인한 뒤 다시 시도해 주세요.';
+
+  @override
+  String get legacySync_startWithout => '동기화하지 않고 시작';
+
+  @override
+  String get legacyUndo_title => '마지막 동기화를 되돌리는 중';
+
+  @override
+  String get legacyUndo_body =>
+      '동기화 전의 데이터로 되돌리는 중입니다. 동기화 후의 데이터는 백업으로 남겨 둡니다.';
+
+  @override
+  String get legacyUndo_failedTitle => '마지막 동기화를 되돌릴 수 없습니다';
+
+  @override
+  String get legacyUndo_failedBody =>
+      '데이터는 그대로이며 바꾸다 만 파일도 남지 않았습니다. 디스크 여유 공간을 확인한 뒤 다시 시도해 주세요.';
+
+  @override
+  String get legacyUndo_startWithout => '되돌리지 않고 시작';
+
+  @override
+  String get legacyRedo_title => '동기화 후 데이터로 돌아가는 중';
+
+  @override
+  String get legacyRedo_body =>
+      '동기화 후 이곳에서 바꾼 내용도 돌아옵니다. 동기화 전의 데이터는 백업으로 남겨 둡니다.';
+
+  @override
+  String get legacyRedo_failedTitle => '동기화 후 데이터로 돌아갈 수 없습니다';
+
+  @override
+  String get legacyRedo_startWithout => '돌아가지 않고 시작';
+
+  @override
+  String get set_bkLegacy => '이전 버전 데이터';
+
+  @override
+  String set_bkLegacySub(Object app) {
+    return '이전 버전 $app의 데이터입니다. 읽기만 하고 바꾸지 않습니다. 백업은 최근 2개를 보관합니다.';
+  }
+
+  @override
+  String get set_bkLegacySync => '이전 버전에서 동기화';
+
+  @override
+  String set_bkLegacySyncCopied(Object time) {
+    return '처음 시작할 때 복사했습니다($time). 동기화 전에 현재 데이터를 백업합니다. 같은 위치의 같은 이름 라이브러리는 이전 버전 것으로 교체하고 이 버전에만 있는 라이브러리는 유지합니다.';
+  }
+
+  @override
+  String set_bkLegacySyncSynced(Object time) {
+    return '마지막 동기화는 $time입니다. 동기화 전에 현재 데이터를 백업합니다. 같은 위치의 같은 이름 라이브러리는 이전 버전 것으로 교체하고 이 버전에만 있는 라이브러리는 유지합니다.';
+  }
+
+  @override
+  String get set_bkLegacySyncNever =>
+      '처음 시작할 때 복사하지 않았습니다. 동기화 전에 현재 데이터를 백업합니다. 같은 위치의 같은 이름 라이브러리는 이전 버전 것으로 교체하고 이 버전에만 있는 라이브러리는 유지합니다.';
+
+  @override
+  String get set_bkLegacySyncBtn => '동기화…';
+
+  @override
+  String get set_bkLegacyUndo => '마지막 동기화 되돌리기';
+
+  @override
+  String set_bkLegacyUndoSub(Object time) {
+    return '$time 동기화 전의 데이터로 돌아갑니다';
+  }
+
+  @override
+  String get set_bkLegacyRedo => '동기화 후 데이터로 돌아가기';
+
+  @override
+  String set_bkLegacyRedoSub(Object time) {
+    return '$time 되돌리기 전의 데이터로 돌아갑니다';
+  }
+
+  @override
+  String set_bkLegacyUndoAgainSub(Object time) {
+    return '$time 전환 전의 데이터로 돌아갑니다';
+  }
+
+  @override
+  String get set_bkLegacyNoSync => '아직 동기화하지 않았습니다';
+
+  @override
+  String get set_bkLegacyUndoBtn => '복원…';
+
+  @override
+  String get set_bkLegacySyncTitle => '이전 버전 데이터로 바꿀까요?';
+
+  @override
+  String set_bkLegacySyncBody(Object app) {
+    return '$app에서 설정, 기록, 라이브러리 및 즐겨찾기를 복사합니다. 같은 위치의 같은 이름 라이브러리는 이전 버전의 파일 전체로 교체합니다. 이 버전에만 있는 라이브러리는 관련 파일과 함께 유지합니다.\n\n· 현재 데이터는 먼저 모두 백업하며, “마지막 동기화 되돌리기”로 원래대로 돌릴 수 있습니다\n· 이 버전에만 있는 폴더의 Agent 세션과 설정 백업 등은 유지됩니다\n· 이미지와 Vibe 파일은 영향을 받지 않습니다\n· 앱을 다시 시작합니다. 이전 버전이 실행 중이면 먼저 종료해 주세요';
+  }
+
+  @override
+  String set_bkLegacySyncRunning(Object app) {
+    return '⚠ $app이(가) 실행 중입니다. 먼저 종료해 주세요. 종료하지 않으면 다시 시작한 뒤 종료를 기다리는 화면에서 멈춥니다.';
+  }
+
+  @override
+  String get set_bkLegacySyncConfirm => '동기화하고 다시 시작';
+
+  @override
+  String get set_bkLegacyUndoTitle => '마지막 동기화를 되돌릴까요?';
+
+  @override
+  String set_bkLegacyUndoBody(Object time) {
+    return '$time 동기화 전의 데이터로 되돌립니다. 동기화 후 이곳에서 바꾼 내용은 백업으로 남겨 둡니다. 앱을 다시 시작합니다.';
+  }
+
+  @override
+  String get set_bkLegacyUndoConfirm => '되돌리고 다시 시작';
+
+  @override
+  String get set_bkLegacyRedoTitle => '동기화 후 데이터로 돌아갈까요?';
+
+  @override
+  String set_bkLegacyRedoBody(Object time) {
+    return '$time 되돌리기 전의 데이터로 돌아갑니다. 동기화 후 이곳에서 바꾼 내용도 돌아옵니다. 현재 데이터는 백업으로 남겨 둡니다. 앱을 다시 시작합니다.';
+  }
+
+  @override
+  String get set_bkLegacyRedoConfirm => '돌아가고 다시 시작';
+
+  @override
+  String set_bkLegacyUndoAgainBody(Object time) {
+    return '$time 전환 전의 데이터, 즉 동기화 전의 데이터로 돌아갑니다. 현재 데이터는 백업으로 남겨 둡니다. 앱을 다시 시작합니다.';
+  }
+
+  @override
+  String get set_bkLegacyBusy => '아직 진행 중인 작업이 있습니다. 끝난 뒤 다시 시도해 주세요.';
+
+  @override
+  String get set_bkLegacySyncFailed =>
+      '동기화를 시작할 수 없습니다. 디스크 여유 공간을 확인한 뒤 다시 시도해 주세요.';
+
+  @override
+  String get set_bkLegacyUndoFailed =>
+      '동기화를 되돌릴 수 없습니다. 디스크 여유 공간을 확인한 뒤 다시 시도해 주세요.';
+
+  @override
+  String get set_bkLegacyRedoFailed =>
+      '동기화 후 데이터로 돌아갈 수 없습니다. 디스크 여유 공간을 확인한 뒤 다시 시도해 주세요.';
+
+  @override
   String get app_subtitle => 'NovelAI 서드파티 클라이언트';
 
   @override
@@ -369,6 +575,23 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get auth_error_serverError => '서버 오류';
+
+  @override
+  String get auth_credentialStorageCorrupt => '로컬 인증 정보 파일이 손상되었습니다.';
+
+  @override
+  String get auth_resetLocalCredentials => '로컬 인증 정보 재설정';
+
+  @override
+  String get auth_credentialResetExplanation =>
+      '이 Mac에서 앱에 저장한 모든 로그인 토큰과 서비스 키를 삭제합니다. 재설정 후 다시 입력해야 합니다. 이미지와 설정은 유지됩니다.';
+
+  @override
+  String get auth_credentialStorageUnavailable => '로컬 인증 정보 파일에 접근할 수 없습니다.';
+
+  @override
+  String get auth_credentialStorageUnavailableHint =>
+      '로그인이 취소되었습니다. 현재 macOS 사용자의 파일 권한을 확인한 후 다시 시도하세요.';
 
   @override
   String get auth_error_unknown => '알 수 없는 오류';
@@ -3637,6 +3860,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get shortcut_action_minimize_to_tray => '트레이로 최소화';
 
   @override
+  String get shortcut_action_hide_to_menu_bar => '메뉴 막대로 숨기기';
+
+  @override
   String get shortcut_action_quit_app => '앱 종료';
 
   @override
@@ -5084,7 +5310,19 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
+  String updateDownloadedFinderHint(Object version) {
+    return 'v$version을(를) 다운로드하고 확인했습니다. \"Finder에서 보기\"를 누른 뒤 ⌘Q로 이 앱을 종료하고, 새 버전을 \"응용 프로그램\" 폴더로 드래그해 이전 버전을 바꾸세요.';
+  }
+
+  @override
   String get updateInstallAndRestart => '설치 후 다시 시작';
+
+  @override
+  String get update_runningFromStaging =>
+      '업데이트 폴더에서 앱을 열었습니다. Finder에서 표시를 선택하고 ⌘Q로 종료한 다음, 앱을 응용 프로그램 폴더로 옮겨 그곳에서 여세요.';
+
+  @override
+  String get updateShowInFinder => 'Finder에서 보기';
 
   @override
   String get updateInstallNow => '지금 설치';
@@ -5109,6 +5347,13 @@ class AppLocalizationsKo extends AppLocalizations {
       '설치 프로그램이 시작되었습니다. 앱이 닫히고 업데이트가 자동으로 완료됩니다.';
 
   @override
+  String get updatePreparingApp => '새 버전 준비 중...';
+
+  @override
+  String get updatePreparingAppHint =>
+      '업데이트 패키지의 압축을 푸는 중입니다. 완료되면 Finder에서 새 버전이 선택됩니다.';
+
+  @override
   String get remindMeLater => '4시간 후에 알림';
 
   @override
@@ -5123,12 +5368,20 @@ class AppLocalizationsKo extends AppLocalizations {
   String get updateNoticeManualSubtitle => '이 플랫폼은 Release 페이지에서 직접 업데이트해야 합니다';
 
   @override
+  String get updateNoticeFinderSubtitle =>
+      '앱에서 다운로드하고 확인한 뒤 Finder에서 이전 버전을 바꿉니다';
+
+  @override
   String updateNoticeReady(Object version) {
     return 'v$version 버전이 준비되었습니다';
   }
 
   @override
   String get updateNoticeReadySubtitle => '패키지를 확인했으며 다시 시작하면 설치할 수 있습니다';
+
+  @override
+  String get updateNoticeReadyFinderSubtitle =>
+      '패키지를 확인했습니다. Finder에서 이전 버전을 바꾸면 끝납니다';
 
   @override
   String get updateNoticeFailed => '이전 업데이트가 끝나지 않았습니다';
@@ -5347,6 +5600,9 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get common_swap => '바꾸기';
+
+  @override
+  String get common_showInFinder => 'Finder에서 보기';
 
   @override
   String get addToLibrary_displayNameHint => '이 항목을 알아보기 쉬운 이름을 입력하세요';
@@ -5866,6 +6122,10 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get tips_studio_trick_6 =>
       '번역 블록을 가운데 버튼으로 누르면 원문과 번역문이 번갈아 바뀌어요. AI 번역이 아무리 좋아도 가끔은 원문을 슬쩍 보고 cat ears가 이상한 말로 바뀌지 않았는지 확인해 보세요.';
+
+  @override
+  String get tips_studio_trick_6_mac =>
+      '번역 블록을 ⌘를 누른 채 클릭하면 원문과 번역문이 번갈아 바뀌어요. AI 번역이 아무리 좋아도 가끔은 원문을 슬쩍 보고 cat ears가 이상한 말로 바뀌지 않았는지 확인해 보세요.';
 
   @override
   String get tips_studio_trick_7 =>
@@ -8680,6 +8940,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get promptTranslation_guideMiddleTitle => '블록 가운데 버튼 클릭';
 
   @override
+  String get promptTranslation_guideCommandClickTitle => '⌘ + 블록 클릭';
+
+  @override
   String get promptTranslation_guideMiddleText => '원문과 번역문 전환';
 
   @override
@@ -8927,6 +9190,14 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get update_errorLaunchFailed => '업데이트 프로그램을 시작하지 못했습니다';
+
+  @override
+  String get update_errorExtractFailed => '업데이트 패키지의 압축을 풀지 못했습니다';
+
+  @override
+  String update_errorRevealFailed(Object path) {
+    return 'Finder에서 새 버전을 표시하지 못했습니다. 위치: $path';
+  }
 
   @override
   String get update_errorCheckFailed => '업데이트를 확인하지 못했습니다';
@@ -9649,7 +9920,8 @@ class AppLocalizationsKo extends AppLocalizations {
   String get localUpscale_cancelling => '취소 중…';
 
   @override
-  String get localUpscale_unsupportedPlatform => '로컬 업스케일은 현재 Windows를 지원합니다.';
+  String get localUpscale_unsupportedPlatform =>
+      '이 업스케일 방식은 현재 Windows에서만 지원됩니다.';
 
   @override
   String get localUpscale_engineMissing =>
@@ -13279,6 +13551,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get imageViewer_missingHint => '탐색기에서 이동, 이름 변경 또는 삭제되었을 수 있습니다';
 
   @override
+  String get imageViewer_missingHintFinder =>
+      'Finder에서 이동, 이름 변경 또는 삭제되었을 수 있습니다';
+
+  @override
   String get imageViewer_openFolder => '폴더 열기';
 
   @override
@@ -16163,6 +16439,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get naiAgent_composerNotEmpty => '현재 입력을 저장하거나 보낸 후 이 메시지를 복원하세요.';
 
   @override
+  String get naiAgent_bundledNodeRequiresMacOS135 =>
+      '내장 에이전트에는 macOS 13.5 이상이 필요합니다. 이 Mac에서 이미지 생성은 계속 사용할 수 있습니다.';
+
+  @override
   String get naiAgent_runtimeMissing => 'Agent 런타임이 없습니다. 전체 업데이트 패키지를 사용하세요.';
 
   @override
@@ -17404,6 +17684,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get set_apSystemSub => 'Windows 설정을 따름';
 
   @override
+  String get set_apSystemSubMac => 'macOS 설정을 따름';
+
+  @override
   String get set_apText => '글꼴';
 
   @override
@@ -17840,6 +18123,11 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String set_stFree(Object disk, Object size) {
     return '$disk 여유 $size';
+  }
+
+  @override
+  String set_stFreeMac(Object size) {
+    return '여유 $size';
   }
 
   @override
@@ -18774,6 +19062,20 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get set_rgInstallCpu => 'CPU';
+
+  @override
+  String get set_rgInstallHintMac =>
+      'Python과 추론 패키지를 받습니다(약 200 MB, 모델 가중치 제외). Apple 실리콘 Mac이 필요합니다. 자동은 메모리 18 GB 이상인 Mac에서는 GPU를, 16 GB 이하에서는 CPU를 사용합니다.';
+
+  @override
+  String get set_rgPythonSubMac => '기본은 자동 설치한 독립 환경이며 기존 python3도 고를 수 있습니다.';
+
+  @override
+  String get set_rgNeedsAppleSilicon =>
+      'Apple 실리콘 Mac이 필요합니다. PyTorch가 Intel Mac용 빌드를 더 이상 제공하지 않아 이 Mac에는 런타임을 설치할 수 없습니다.';
+
+  @override
+  String get set_rgEnvUnsupported => '지원 안 함';
 
   @override
   String get set_rgPhaseExisting => '기존 환경 확인 중';
@@ -21399,6 +21701,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get startup_dataTitle => '앱 데이터를 준비하지 못했습니다';
+
+  @override
+  String get startup_profileInUse =>
+      '다른 앱 인스턴스에서 이 데이터 폴더를 사용 중입니다. 해당 앱을 종료한 다음 다시 시도하세요.';
 
   @override
   String get startup_dataHelp =>

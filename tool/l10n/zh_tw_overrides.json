@@ -1,3 +1,6 @@
 {
-  "viewer_fullscreen": "全螢幕（F11）"
+  "viewer_fullscreen": "全螢幕（F11）",
+  "common_showInFinder": "在 Finder 中顯示",
+  "imageViewer_missingHintFinder": "可能已經在 Finder 裡被移動、改名或刪除",
+  "shortcut_action_hide_to_menu_bar": "隱藏到選單列"
 }

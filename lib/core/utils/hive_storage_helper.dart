@@ -59,6 +59,7 @@ class HiveStorageHelper {
 
   /// 从文件系统读取自定义路径（在 Hive 初始化前使用）
   Future<String?> _getCustomPathFromFile() async {
+    if (!Platform.isWindows) return null;
     try {
       // 检查旧位置的 settings.hive 文件
       final appDir = await getApplicationDocumentsDirectory();
@@ -164,8 +165,10 @@ class HiveStorageHelper {
   /// 新位置：启动器目录/user-data/hive/（当前版本）
   ///
   /// 由 [DataMigrationService] 在预热阶段调用
-  Future<void> migrateFromOldLocation(String newPath) async {
-    if (studioSandboxRoot() != null) return;
+  Future<void> migrateFromOldLocation(String newPath, {bool? isWindows}) async {
+    if (!(isWindows ?? Platform.isWindows) || studioSandboxRoot() != null) {
+      return;
+    }
     try {
       final appDir = await getApplicationDocumentsDirectory();
       final appSupportDir = await getLegacyApplicationSupportDirectory();

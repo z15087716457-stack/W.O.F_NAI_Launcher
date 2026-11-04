@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/utils/localization_extension.dart';
+import '../../../core/utils/platform_shortcut_text.dart';
 import '../../widgets/common/studio_icons.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_controls.dart';
@@ -774,7 +775,7 @@ class NavCustomizePanel extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    l.navShell_ctrlNumbers,
+                    platformShortcutText(l.navShell_ctrlNumbers),
                     style: UiText.sans(13, color: c.ink),
                   ),
                 ),

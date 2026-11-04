@@ -12,6 +12,16 @@ import 'package:nai_launcher/data/services/nai_agent/agent_workspace_store.dart'
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_workspace_controller.dart';
 
 void main() {
+  late String nodeExecutable;
+  setUpAll(() async {
+    final result = await Process.run('node', ['-p', 'process.execPath']);
+    expect(
+      result.exitCode,
+      0,
+      reason: 'This suite starts the real local Pi host',
+    );
+    nodeExecutable = result.stdout.toString().trim();
+  });
   late Directory root;
   late HttpServer server;
   late StreamSubscription<HttpRequest> serving;
@@ -96,7 +106,7 @@ void main() {
       readModelRevision: readModelRevision,
       startClient: (workspace, chat, settings, prompt, resume) =>
           PiHostClient.start(
-            nodeExecutable: 'E:/node/node.exe',
+            nodeExecutable: nodeExecutable,
             hostScript: File('tool/nai_agent/host.mjs').absolute.path,
             workspaceId: workspace.id,
             workspaceDirectory: workspace.directory,
@@ -171,7 +181,7 @@ createInterface({input:process.stdin}).on('line', line=>{
       );
       final c = controller(
         mcpConfig: {
-          'command': 'E:/node/node.exe',
+          'command': nodeExecutable,
           'args': [script.path],
         },
       );

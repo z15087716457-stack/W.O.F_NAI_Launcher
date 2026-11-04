@@ -1,5 +1,6 @@
 import '../../l10n/app_localizations.dart';
 import '../../core/shortcuts/default_shortcuts.dart';
+import 'platform_labels.dart';
 
 String settingsShortcutLabel(AppLocalizations l10n, String key) {
   switch (key) {
@@ -107,7 +108,7 @@ String settingsShortcutLabel(AppLocalizations l10n, String key) {
     case 'shortcut_action_show_shortcut_help':
       return l10n.shortcut_action_show_shortcut_help;
     case 'shortcut_action_minimize_to_tray':
-      return l10n.shortcut_action_minimize_to_tray;
+      return minimizeToTrayLabel(l10n);
     case 'shortcut_action_quit_app':
       return l10n.shortcut_action_quit_app;
     case 'shortcut_action_open_resource_window':

@@ -478,6 +478,73 @@ void main() {
     await _unmount(tester);
   });
 
+  testWidgets('macOS：⌘Q、⌃⌘F 留给系统菜单，画布不当跳组、飞回；裸 Q、F 照旧', (tester) async {
+    final container = _container(
+      ImageGenerationState(history: [_image(1), _image(2)]),
+    );
+    addTearDown(container.dispose);
+    await _mount(tester, container);
+    await tester.tapAt(const Offset(20, 200));
+    Future<bool> chord(
+      List<LogicalKeyboardKey> modifiers,
+      LogicalKeyboardKey key,
+    ) async {
+      for (final m in modifiers) {
+        await tester.sendKeyDownEvent(m);
+      }
+      final handled = await tester.sendKeyEvent(key);
+      for (final m in modifiers.reversed) {
+        await tester.sendKeyUpEvent(m);
+      }
+      await tester.pump();
+      return handled;
+    }
+
+    String? group() =>
+        container.read(generationCanvasGroupSelectionProvider)?.group;
+    final before = group();
+    expect(
+      await chord([LogicalKeyboardKey.metaLeft], LogicalKeyboardKey.keyQ),
+      false,
+    );
+    expect(group(), before);
+    expect(await chord(const [], LogicalKeyboardKey.keyQ), true);
+    expect(group(), isNot(before));
+    final camera =
+        container.read(generationCanvasCameraProvider.notifier) as _Camera;
+    final flights = camera.targets.length;
+    expect(
+      await chord([
+        LogicalKeyboardKey.controlLeft,
+        LogicalKeyboardKey.metaLeft,
+      ], LogicalKeyboardKey.keyF),
+      false,
+    );
+    expect(camera.targets, hasLength(flights));
+    expect(await chord(const [], LogicalKeyboardKey.keyF), true);
+    expect(camera.targets, hasLength(flights + 1));
+    await _unmount(tester);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
+
+  testWidgets('Windows：Ctrl+Q 照旧跳组', (tester) async {
+    final container = _container(
+      ImageGenerationState(history: [_image(1), _image(2)]),
+    );
+    addTearDown(container.dispose);
+    await _mount(tester, container);
+    await tester.tapAt(const Offset(20, 200));
+    final before = container.read(generationCanvasGroupSelectionProvider);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    expect(await tester.sendKeyEvent(LogicalKeyboardKey.keyQ), true);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.pump();
+    expect(
+      container.read(generationCanvasGroupSelectionProvider)?.group,
+      isNot(before?.group),
+    );
+    await _unmount(tester);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.windows));
+
   testWidgets('Ctrl+0 overview survives stream updates and camera idle', (
     tester,
   ) async {

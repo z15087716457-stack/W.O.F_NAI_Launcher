@@ -9,6 +9,36 @@ void main() {
         r'Software\Microsoft\Windows\CurrentVersion\Uninstall\Aaalice NAI Launcher',
       ]);
     });
+
+    test('macOS uses the app archive and finishes updates in Finder', () {
+      final service = AppInstallationService(operatingSystem: 'macos');
+
+      expect(service.getInstallationType(), AppInstallationType.macosPortable);
+      expect(service.getReleaseAssetPreference(), 'macos');
+      expect(service.supportsInAppInstall, isTrue);
+    });
+
+    test('Windows outside a registered install directory is portable', () {
+      // 测试进程不在任何安装目录里；注册表读不到（非 Windows）时同样按便携版。
+      final service = AppInstallationService(operatingSystem: 'windows');
+
+      expect(
+        service.getInstallationType(),
+        AppInstallationType.windowsPortable,
+      );
+      expect(service.getReleaseAssetPreference(), 'windows-portable');
+      expect(service.supportsInAppInstall, isTrue);
+    });
+
+    test('other platforms have no release package', () {
+      final service = AppInstallationService(operatingSystem: 'linux');
+
+      expect(service.getInstallationType(), AppInstallationType.unsupported);
+      expect(service.getReleaseAssetPreference(), 'unknown');
+      expect(service.supportsInAppInstall, isFalse);
+      expect(service.readWindowsInstallLocation(), isNull);
+    });
+
     test('detects executable inside install directory', () {
       expect(
         AppInstallationService.isExecutableInsideInstallDir(

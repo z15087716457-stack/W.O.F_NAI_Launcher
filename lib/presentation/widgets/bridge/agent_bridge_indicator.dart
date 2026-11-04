@@ -14,6 +14,7 @@ import '../../providers/settings_navigation_provider.dart';
 import '../../router/app_router.dart';
 import '../common/app_toast.dart';
 import 'bridge_link_icon.dart';
+import '../../../core/utils/app_bundle_paths.dart';
 
 class BridgeClientBundle {
   const BridgeClientBundle(this.path, {required this.available});
@@ -24,8 +25,9 @@ class BridgeClientBundle {
 final bridgeClientBundleProvider = FutureProvider<BridgeClientBundle>((
   ref,
 ) async {
+  // Windows 在 exe 旁边的 tools，macOS 在 Contents/Resources/tools（见 AppBundlePaths）
   final path =
-      '${File(Platform.resolvedExecutable).parent.path}/tools/studio-bridge.exe';
+      '${AppBundlePaths.toolsDirectory}/studio-bridge${Platform.isWindows ? '.exe' : ''}';
   return BridgeClientBundle(path, available: await File(path).exists());
 });
 

@@ -2,12 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart'
-    show
-        GestureBinding,
-        PointerScrollEvent,
-        PointerSignalEvent,
-        kBackMouseButton,
-        kForwardMouseButton;
+    show kBackMouseButton, kForwardMouseButton;
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -19,7 +14,10 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/autocomplete/autocomplete_providers.dart';
 import '../../../core/autocomplete/completion_models.dart';
 import '../../../core/tag_expansion/tag_expansion_providers.dart';
+import '../../../core/utils/desktop_platform.dart';
+import '../../../core/utils/keyboard_modifier_utils.dart';
 import '../../../core/utils/localization_extension.dart';
+import '../../../core/utils/platform_shortcut_text.dart';
 import '../../../core/utils/tag_normalizer.dart';
 import '../../../core/wiki/tag_wiki_repository.dart';
 import '../../../core/wiki/auto_tag_translation_controller.dart';
@@ -35,6 +33,7 @@ import '../../wiring/blocks_edit_wiring.dart';
 import '../../widgets/common/app_toast.dart';
 import '../../widgets/common/prototype_typography_scope.dart';
 import '../../widgets/common/studio_icons.dart';
+import '../../widgets/common/studio_scroll_behavior.dart';
 import '../../widgets/navigation/window_chrome_layout.dart';
 import '../../widgets/autocomplete/tag_category_visuals.dart';
 import 'wiki_sidebar.dart';
@@ -780,26 +779,6 @@ class _TagWikiScreenState extends ConsumerState<_TagWikiContents> {
     }
   }
 
-  void _onTypeFilterPointerSignal(PointerSignalEvent event) {
-    if (event is! PointerScrollEvent || !_typeFilterScroll.hasClients) return;
-    final position = _typeFilterScroll.position;
-    if (position.maxScrollExtent <= position.minScrollExtent) return;
-    final delta = event.scrollDelta.dx != 0
-        ? event.scrollDelta.dx
-        : event.scrollDelta.dy;
-    if (delta == 0) return;
-    GestureBinding.instance.pointerSignalResolver.register(event, (_) {
-      if (!mounted || !_typeFilterScroll.hasClients) return;
-      final position = _typeFilterScroll.position;
-      _typeFilterScroll.jumpTo(
-        (position.pixels + delta).clamp(
-          position.minScrollExtent,
-          position.maxScrollExtent,
-        ),
-      );
-    });
-  }
-
   bool get _focusInEditable {
     final focus = FocusManager.instance.primaryFocus;
     final element = focus?.context;
@@ -838,6 +817,17 @@ class _TagWikiScreenState extends ConsumerState<_TagWikiContents> {
     if (alt && key == LogicalKeyboardKey.arrowRight) {
       _goForward();
       return KeyEventResult.handled;
+    }
+    // macOS 上的后退 / 前进习惯键 ⌘[ / ⌘]（同访达、Safari），触控板没有鼠标侧键
+    if (usesMacOSConventions && isPrimaryShortcutModifierPressed()) {
+      if (key == LogicalKeyboardKey.bracketLeft) {
+        _goBack();
+        return KeyEventResult.handled;
+      }
+      if (key == LogicalKeyboardKey.bracketRight) {
+        _goForward();
+        return KeyEventResult.handled;
+      }
     }
     final keyboard = HardwareKeyboard.instance;
     if (alt || keyboard.isControlPressed || keyboard.isMetaPressed) {
@@ -1384,7 +1374,8 @@ class _TagWikiScreenState extends ConsumerState<_TagWikiContents> {
             },
             child: Listener(
               key: const ValueKey('wiki-type-scroll-area'),
-              onPointerSignal: _onTypeFilterPointerSignal,
+              onPointerSignal: (event) =>
+                  scrollStripWithWheel(_typeFilterScroll, event),
               child: ListenableBuilder(
                 listenable: _typeFilterScroll,
                 builder: (context, child) => ShaderMask(
@@ -3217,7 +3208,7 @@ class _TagWikiScreenState extends ConsumerState<_TagWikiContents> {
                 _readingLanguage(refreshDialog: () => update(() {})),
                 const SizedBox(height: 13),
                 Text(
-                  context.l10n.wiki_shortcutsHint,
+                  platformShortcutText(context.l10n.wiki_shortcutsHint),
                   style: TextStyle(
                     fontSize: 11,
                     color: Theme.of(context).colorScheme.onSurfaceVariant,

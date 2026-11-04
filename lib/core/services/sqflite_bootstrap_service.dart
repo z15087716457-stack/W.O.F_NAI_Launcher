@@ -25,7 +25,8 @@ class SqfliteBootstrapService {
   }
 
   Future<void> _doInitialize() async {
-    if (!Platform.isWindows) {
+    // Windows 和 macOS 都走 FFI 的 sqflite
+    if (!(Platform.isWindows || Platform.isMacOS)) {
       _initialized = true;
       return;
     }

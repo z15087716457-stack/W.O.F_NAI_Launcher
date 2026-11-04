@@ -351,6 +351,7 @@ class ThemeComposer {
       pageTransitionsTheme: PageTransitionsTheme(
         builders: {
           TargetPlatform.windows: _ModularPageTransitionBuilder(motion),
+          TargetPlatform.macOS: _ModularPageTransitionBuilder(motion),
         },
       ),
     );

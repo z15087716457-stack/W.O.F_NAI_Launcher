@@ -1,7 +1,7 @@
-import 'package:flutter/gestures.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 
 import '../../../../data/models/prompt_block/prompt_block.dart';
+import '../../common/studio_scroll_behavior.dart';
 import 'prompt_block_colors.dart';
 
 /// 标签颜色只点在图标、边框与淡底上，文字保持当前主题对比度。
@@ -133,22 +133,8 @@ class _PromptBlockTagStripState extends State<PromptBlockTagStrip> {
         Flexible(
           child: Listener(
             key: const Key('block-tag-scroll-area'),
-            onPointerSignal: (event) {
-              if (event is! PointerScrollEvent ||
-                  !_scrollController.hasClients) {
-                return;
-              }
-              final delta = event.scrollDelta.dy != 0
-                  ? event.scrollDelta.dy
-                  : event.scrollDelta.dx;
-              final position = _scrollController.position;
-              _scrollController.jumpTo(
-                (position.pixels + delta).clamp(
-                  position.minScrollExtent,
-                  position.maxScrollExtent,
-                ),
-              );
-            },
+            onPointerSignal: (event) =>
+                scrollStripWithWheel(_scrollController, event),
             child: ShaderMask(
               blendMode: BlendMode.dstIn,
               shaderCallback: (bounds) => LinearGradient(

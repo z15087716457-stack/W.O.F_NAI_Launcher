@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/utils/localization_extension.dart';
+import '../../../core/utils/platform_shortcut_text.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_controls.dart';
 import '../kit/ui_glyph.dart';
+import '../../utils/platform_labels.dart';
 import '../../widgets/common/studio_icons.dart';
 import '../kit/ui_keycap.dart';
 import '../kit/ui_lib_controls.dart';
@@ -559,7 +561,7 @@ List<UiMenuItem> refsEntryMenu(BuildContext context, RefsEntry e) {
       ),
       UiMenuItem(
         glyph: UiGlyphs.folder,
-        label: l10n.refs_showInFolder,
+        label: showInFileManagerLabel(l10n, l10n.refs_showInFolder),
         onTap: () => a.onOpenFolder(e.key),
       ),
     ] else
@@ -571,7 +573,7 @@ List<UiMenuItem> refsEntryMenu(BuildContext context, RefsEntry e) {
     UiMenuItem(
       glyph: UiGlyphs.trash,
       label: l10n.refs_delete,
-      trailing: 'Del',
+      trailing: listDeleteKeyLabel(),
       danger: true,
       divider: true,
       onTap: () => ctrl.confirmDelete([e.key]),

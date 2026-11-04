@@ -13,7 +13,11 @@ import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'core/shortcuts/default_shortcuts.dart';
+import 'core/utils/desktop_platform.dart';
 import 'presentation/providers/auth_provider.dart';
+import 'presentation/providers/nai_agent/nai_agent_window_controller.dart';
+import 'presentation/providers/nai_agent/nai_agent_workspace_provider.dart';
+import 'presentation/widgets/common/app_toast.dart';
 import 'presentation/providers/guest_session_provider.dart';
 import 'presentation/providers/new_badge_provider.dart';
 import 'presentation/router/app_router.dart';
@@ -32,6 +36,8 @@ import 'presentation/providers/subscription_provider.dart'
 import 'presentation/widgets/shortcuts/shortcut_aware_widget.dart';
 import 'presentation/widgets/shortcuts/shortcut_help_dialog.dart';
 import 'presentation/wiring/nai_agent_generation_host.dart';
+import 'presentation/widgets/common/macos_app_integration.dart';
+import 'presentation/widgets/common/studio_scroll_behavior.dart';
 import 'presentation/wiring/clipboard_history_paste.dart';
 import 'presentation/wiring/floating_resource_window.dart';
 import 'presentation/wiring/floating_resource_windows_host.dart';
@@ -137,38 +143,6 @@ class NAILauncherApp extends ConsumerWidget {
 
     // 定义全局快捷键映射
     final globalShortcuts = <String, VoidCallback>{
-      // 页面导航快捷键
-      ShortcutIds.navigateToGeneration: () {
-        router.go(AppRoutes.generation);
-      },
-      ShortcutIds.navigateToLocalGallery: () {
-        router.go(AppRoutes.localGallery);
-      },
-      ShortcutIds.navigateToOnlineGallery: () {
-        router.go(AppRoutes.onlineGallery);
-      },
-      ShortcutIds.navigateToTagLibrary: () {
-        router.go(AppRoutes.promptBlockLibrary);
-      },
-      ShortcutIds.navigateToStatistics: () {
-        router.go(AppRoutes.statistics);
-      },
-      ShortcutIds.navigateToSettings: () {
-        router.go(AppRoutes.settings);
-      },
-      ShortcutIds.navigateToVibeLibrary: () {
-        router.go(AppRoutes.vibeLibrary);
-      },
-      ShortcutIds.navigateToStyleExplore: () {
-        router.go(AppRoutes.styleExplore);
-      },
-      ShortcutIds.navigateToPreciseRefLibrary: () {
-        router.go(AppRoutes.preciseRefLibrary);
-      },
-      ShortcutIds.navigateToTagWiki: () {
-        router.go(AppRoutes.tagWiki);
-      },
-
       ShortcutIds.openResourceWindow: () {
         unawaited(
           ref
@@ -186,6 +160,8 @@ class NAILauncherApp extends ConsumerWidget {
         windowManager.hide();
       },
       ShortcutIds.quitApp: () {
+        // windowManager.close() 在这里等于藏到托盘，「退出应用」并不会退出；
+        // 走托盘「退出」同一套关闭流程
         unawaited(DesktopAppShutdownService.shutdownAndExit(0));
       },
       ShortcutIds.toggleTheme: () {
@@ -212,6 +188,7 @@ class NAILauncherApp extends ConsumerWidget {
 
           // 路由
           routerConfig: router,
+          scrollBehavior: const StudioScrollBehavior(),
 
           // 工作区保持 100% 字号；设置页面在自身范围内独立缩放。
           builder: (context, child) {
@@ -219,26 +196,30 @@ class NAILauncherApp extends ConsumerWidget {
             // 让 Navigator 的菜单、提示与对话框位于按钮上方。
             // child 作为普通子组件直传，保证 element 在 MaterialApp
             // rebuild 时原地更新、不拆树重建。
-            return WorkspaceTextScaleHost(
-              child: NaiAgentIntegrationScope(
-                child: WorkspaceTypographyScope(
-                  child: _RouteAwareTitleBar(
-                    router: router,
-                    // 首个路由解析前按认证状态先行判断，未登录时不先闪 Logo 标题栏；
-                    // 认证尚未建立（例如测试里）时不在这里触发它
-                    initialImmersive: () =>
-                        ref.exists(authNotifierProvider) &&
-                        !ref.read(authNotifierProvider).isAuthenticated &&
-                        !ref.read(guestSessionNotifierProvider),
-                    onToggleTheme: () =>
-                        ref.read(themeNotifierProvider.notifier).nextTheme(),
-                    child: NumpadEditingShortcuts(
-                      child: TextEditingShortcuts(
-                        child: NewBadgeScope(
-                          child: FloatingResourceWindowsHost(
-                            builder: floatingResourceWindowBuilder,
-                            child: ResourceWindowBridge(
-                              child: child ?? const SizedBox.shrink(),
+            // macOS：菜单「设置…」和系统退出请求（⌘Q、程序坞、注销关机）
+            return MacOSAppIntegration(
+              onOpenSettings: () => router.go(AppRoutes.settings),
+              child: WorkspaceTextScaleHost(
+                child: NaiAgentIntegrationScope(
+                  child: WorkspaceTypographyScope(
+                    child: _RouteAwareTitleBar(
+                      router: router,
+                      // 首个路由解析前按认证状态先行判断，未登录时不先闪 Logo 标题栏；
+                      // 认证尚未建立（例如测试里）时不在这里触发它
+                      initialImmersive: () =>
+                          ref.exists(authNotifierProvider) &&
+                          !ref.read(authNotifierProvider).isAuthenticated &&
+                          !ref.read(guestSessionNotifierProvider),
+                      onToggleTheme: () =>
+                          ref.read(themeNotifierProvider.notifier).nextTheme(),
+                      child: NumpadEditingShortcuts(
+                        child: TextEditingShortcuts(
+                          child: NewBadgeScope(
+                            child: FloatingResourceWindowsHost(
+                              builder: floatingResourceWindowBuilder,
+                              child: ResourceWindowBridge(
+                                child: child ?? const SizedBox.shrink(),
+                              ),
                             ),
                           ),
                         ),
@@ -259,7 +240,7 @@ class NAILauncherApp extends ConsumerWidget {
 ///
 /// 路由在首次构建期间就会通知变化，此时本组件正处于构建阶段之外的
 /// 祖先位置，不能立即 setState，留到这一帧结束后再刷新。
-class _RouteAwareTitleBar extends StatefulWidget {
+class _RouteAwareTitleBar extends ConsumerStatefulWidget {
   const _RouteAwareTitleBar({
     required this.router,
     required this.initialImmersive,
@@ -273,12 +254,12 @@ class _RouteAwareTitleBar extends StatefulWidget {
   final Widget child;
 
   @override
-  State<_RouteAwareTitleBar> createState() => _RouteAwareTitleBarState();
+  ConsumerState<_RouteAwareTitleBar> createState() =>
+      _RouteAwareTitleBarState();
 }
 
-class _RouteAwareTitleBarState extends State<_RouteAwareTitleBar> {
-  late bool _immersive = _resolve();
-  late double _captionHeight = _resolveCaptionHeight();
+class _RouteAwareTitleBarState extends ConsumerState<_RouteAwareTitleBar> {
+  late String _path = _currentPath();
   bool _refreshQueued = false;
 
   @override
@@ -293,8 +274,7 @@ class _RouteAwareTitleBarState extends State<_RouteAwareTitleBar> {
     if (oldWidget.router != widget.router) {
       oldWidget.router.routerDelegate.removeListener(_onRouteChanged);
       widget.router.routerDelegate.addListener(_onRouteChanged);
-      _immersive = _resolve();
-      _captionHeight = _resolveCaptionHeight();
+      _path = _currentPath();
     }
   }
 
@@ -304,15 +284,28 @@ class _RouteAwareTitleBarState extends State<_RouteAwareTitleBar> {
     super.dispose();
   }
 
-  bool _resolve() {
+  String _currentPath() {
     final config = widget.router.routerDelegate.currentConfiguration;
-    if (config.isEmpty) return widget.initialImmersive();
-    return config.uri.path == AppRoutes.login;
+    return config.isEmpty ? '' : config.uri.path;
   }
 
-  double _resolveCaptionHeight() => windowCaptionHeightForRoute(
-    widget.router.routerDelegate.currentConfiguration.uri.path,
-  );
+  bool _supportsAgent(String path) =>
+      path == AppRoutes.home ||
+      path == AppRoutes.generation ||
+      path == AppRoutes.styleExplore;
+
+  Future<void> _toggleNativeAgent() async {
+    if (!_supportsAgent(_currentPath())) return;
+    try {
+      await ref.read(naiAgentWindowControllerProvider).toggle();
+    } catch (_) {
+      if (!mounted) return;
+      AppToast.errorOnOverlay(
+        widget.router.routerDelegate.navigatorKey.currentState?.overlay,
+        AppLocalizations.of(context)!.naiAgent_error,
+      );
+    }
+  }
 
   void _onRouteChanged() {
     final building =
@@ -331,24 +324,27 @@ class _RouteAwareTitleBarState extends State<_RouteAwareTitleBar> {
 
   void _refresh() {
     if (!mounted) return;
-    final next = _resolve();
-    final height = _resolveCaptionHeight();
-    if (next != _immersive || height != _captionHeight) {
-      setState(() {
-        _immersive = next;
-        _captionHeight = height;
-      });
-    }
+    final next = _currentPath();
+    if (next != _path) setState(() => _path = next);
   }
 
   @override
   Widget build(BuildContext context) {
+    final immersive = _path.isEmpty
+        ? widget.initialImmersive()
+        : _path == AppRoutes.login;
+    final agent = usesMacOSConventions && _supportsAgent(_path);
     return IntegratedTitleBarShell(
       deferToRoute: true,
-      immersive: _immersive,
-      captionHeight: _captionHeight,
+      immersive: immersive,
+      captionHeight: windowCaptionHeightForRoute(_path),
       onToggleTheme: widget.onToggleTheme,
-      entryLanguageButton: _immersive ? const EntryLanguageButton() : null,
+      entryLanguageButton: immersive ? const EntryLanguageButton() : null,
+      onToggleNativeAgent: agent ? () => unawaited(_toggleNativeAgent()) : null,
+      nativeAgentExpanded:
+          agent &&
+          (ref.watch(naiAgentWindowControllerProvider).presentationExpanded ??
+              ref.watch(naiAgentUiPreferencesProvider).settings.panelExpanded),
       child: widget.child,
     );
   }

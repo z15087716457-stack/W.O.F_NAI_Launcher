@@ -21,10 +21,19 @@ class BridgeDiscovery:
 
 
 def discovery_file_path() -> Path:
+    # Same lookup order as the Launcher (lib/core/krita/krita_bridge_server.dart):
+    # %APPDATA%/nai-launcher when APPDATA is set, otherwise ~/.nai-launcher on
+    # macOS and Linux.
     app_data = os.environ.get("APPDATA")
     if app_data:
         return Path(app_data) / "nai-launcher" / "krita-bridge.json"
-    return Path.home() / "AppData" / "Roaming" / "nai-launcher" / "krita-bridge.json"
+    if _is_windows():
+        return Path.home() / "AppData" / "Roaming" / "nai-launcher" / "krita-bridge.json"
+    return Path.home() / ".nai-launcher" / "krita-bridge.json"
+
+
+def _is_windows() -> bool:
+    return os.name == "nt"
 
 
 def load_discovery(path: Optional[Path] = None) -> BridgeDiscovery:

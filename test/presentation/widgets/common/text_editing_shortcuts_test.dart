@@ -10,6 +10,55 @@ Future<void> _key(WidgetTester t, LogicalKeyboardKey key) async {
   await t.pump();
 }
 
+/// 按住 [modifiers] 按一下 [key]。
+Future<void> _press(
+  WidgetTester t,
+  List<LogicalKeyboardKey> modifiers,
+  LogicalKeyboardKey key,
+) async {
+  for (final m in modifiers) {
+    await t.sendKeyDownEvent(m);
+  }
+  await t.sendKeyEvent(key);
+  for (final m in modifiers.reversed) {
+    await t.sendKeyUpEvent(m);
+  }
+  await t.pump();
+}
+
+/// 输入框里先后输入「a」「ab」，留下两步撤销记录。
+Future<TextEditingController> _editor(
+  WidgetTester t, {
+  FocusNode? elsewhere,
+}) async {
+  final controller = TextEditingController();
+  addTearDown(controller.dispose);
+  await t.pumpWidget(
+    MaterialApp(
+      builder: (_, child) => TextEditingShortcuts(child: child!),
+      home: Scaffold(
+        body: Column(
+          children: [
+            TextField(controller: controller),
+            Focus(
+              focusNode: elsewhere,
+              child: const SizedBox(width: 10, height: 10),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+  await t.tap(find.byType(TextField));
+  await t.pump();
+  // 撤销记录会合并很短时间里的改动，两次输入之间等一会儿
+  await t.enterText(find.byType(TextField), 'a');
+  await t.pump(const Duration(seconds: 1));
+  await t.enterText(find.byType(TextField), 'ab');
+  await t.pump(const Duration(seconds: 1));
+  return controller;
+}
+
 void main() {
   testWidgets(
     'fallback only uses the latest live owner on the current route; text and boundaries win',
@@ -197,5 +246,103 @@ void main() {
     await t.pump();
     await _key(t, LogicalKeyboardKey.keyZ);
     expect(count, 0);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.windows));
+
+  testWidgets(
+    'macOS: Cmd+Z undoes, Cmd+Y and Shift+Cmd+Z redo in a text field; '
+    'Control+Y stays with the field',
+    (t) async {
+      final controller = await _editor(t);
+      await _press(t, [LogicalKeyboardKey.metaLeft], LogicalKeyboardKey.keyZ);
+      expect(controller.text, 'a');
+      await _press(t, [
+        LogicalKeyboardKey.controlLeft,
+      ], LogicalKeyboardKey.keyY);
+      expect(controller.text, 'a');
+      await _press(t, [LogicalKeyboardKey.metaLeft], LogicalKeyboardKey.keyY);
+      expect(controller.text, 'ab');
+      await _press(t, [LogicalKeyboardKey.metaLeft], LogicalKeyboardKey.keyZ);
+      expect(controller.text, 'a');
+      await _press(t, [
+        LogicalKeyboardKey.metaLeft,
+        LogicalKeyboardKey.shiftLeft,
+      ], LogicalKeyboardKey.keyZ);
+      expect(controller.text, 'ab');
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.macOS),
+  );
+
+  testWidgets('macOS: the blurred prompt fallback answers Cmd, not Control', (
+    t,
+  ) async {
+    final router = GlobalKey<TextEditingShortcutsState>();
+    final owner = GlobalKey();
+    final blank = FocusNode();
+    addTearDown(blank.dispose);
+    var undo = 0;
+    var redo = 0;
+    await t.pumpWidget(
+      MaterialApp(
+        builder: (_, child) => TextEditingShortcuts(key: router, child: child!),
+        home: Scaffold(
+          body: Column(
+            children: [
+              SizedBox(key: owner),
+              Focus(focusNode: blank, child: const Text('blank')),
+            ],
+          ),
+        ),
+      ),
+    );
+    router.currentState!.rememberPrompt(
+      owner.currentContext!,
+      undo: () => undo++,
+      redo: () => redo++,
+    );
+    blank.requestFocus();
+    await t.pump();
+    await _press(t, [LogicalKeyboardKey.controlLeft], LogicalKeyboardKey.keyZ);
+    await _press(t, [LogicalKeyboardKey.controlLeft], LogicalKeyboardKey.keyY);
+    expect((undo, redo), (0, 0));
+    await _press(t, [LogicalKeyboardKey.metaLeft], LogicalKeyboardKey.keyZ);
+    expect(undo, 1);
+    await _press(t, [
+      LogicalKeyboardKey.metaLeft,
+      LogicalKeyboardKey.shiftLeft,
+    ], LogicalKeyboardKey.keyZ);
+    await _press(t, [LogicalKeyboardKey.metaLeft], LogicalKeyboardKey.keyY);
+    expect(redo, 2);
+    // ⌃⌘ 加字母是系统的组合键（⌃⌘F 全屏这类），不算撤销
+    await _press(t, [
+      LogicalKeyboardKey.controlLeft,
+      LogicalKeyboardKey.metaLeft,
+    ], LogicalKeyboardKey.keyZ);
+    expect((undo, redo), (1, 2));
+  }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
+
+  testWidgets(
+    'macOS: Cmd+Y outside text passes on when no prompt is remembered '
+    '(the gallery keeps its own Cmd+Y)',
+    (t) async {
+      final elsewhere = FocusNode();
+      addTearDown(elsewhere.dispose);
+      await _editor(t, elsewhere: elsewhere);
+      elsewhere.requestFocus();
+      await t.pump();
+      await t.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
+      expect(await t.sendKeyEvent(LogicalKeyboardKey.keyY), isFalse);
+      await t.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.macOS),
+  );
+
+  testWidgets('Windows: Ctrl+Y redoes, Win+Y does not', (t) async {
+    final controller = await _editor(t);
+    await _press(t, [LogicalKeyboardKey.controlLeft], LogicalKeyboardKey.keyZ);
+    expect(controller.text, 'a');
+    await _press(t, [LogicalKeyboardKey.metaLeft], LogicalKeyboardKey.keyY);
+    expect(controller.text, 'a');
+    await _press(t, [LogicalKeyboardKey.controlLeft], LogicalKeyboardKey.keyY);
+    expect(controller.text, 'ab');
   }, variant: TargetPlatformVariant.only(TargetPlatform.windows));
 }

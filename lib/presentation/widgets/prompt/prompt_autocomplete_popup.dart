@@ -419,15 +419,9 @@ class _List extends StatelessWidget {
     onPointerSignal: (event) {
       if (event is PointerScrollEvent) {
         GestureBinding.instance.pointerSignalResolver.register(event, (e) {
-          final s = e as PointerScrollEvent;
-          if (!controller.hasClients) return;
-          final pos = controller.position;
-          controller.jumpTo(
-            (pos.pixels + s.scrollDelta.dy).clamp(
-              pos.minScrollExtent,
-              pos.maxScrollExtent,
-            ),
-          );
+          // The inner Scrollable already claims movement it can perform. This
+          // fallback only keeps a wheel tick at its edge out of the editor.
+          (e as PointerScrollEvent).respond(allowPlatformDefault: false);
         });
       }
     },
@@ -436,7 +430,9 @@ class _List extends StatelessWidget {
       child: ListView.builder(
         controller: controller,
         padding: EdgeInsets.zero,
-        physics: const ClampingScrollPhysics(),
+        physics: Theme.of(context).platform == TargetPlatform.macOS
+            ? null
+            : const ClampingScrollPhysics(),
         itemExtent: PromptAutocompletePopup.rowHeight,
         itemCount: count,
         itemBuilder: (context, i) => row(i),

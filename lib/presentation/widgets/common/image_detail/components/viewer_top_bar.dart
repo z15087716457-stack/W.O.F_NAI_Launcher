@@ -1,6 +1,7 @@
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import '../../../../themes/studio_typography.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
+import '../../../../../core/utils/platform_shortcut_text.dart';
 import '../../../navigation/window_chrome_layout.dart';
 import 'viewer_icon.dart';
 import 'viewer_stage.dart';
@@ -229,7 +230,7 @@ class ViewerTopBar extends StatelessWidget {
                 ],
                 if (showFullscreen) ...[
                   _button(
-                    context.l10n.viewer_fullscreen,
+                    platformShortcutText(context.l10n.viewer_fullscreen),
                     'full',
                     onFullscreen,
                     key: const Key('viewer-fullscreen'),

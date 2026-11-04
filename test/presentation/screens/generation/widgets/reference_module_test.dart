@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:image/image.dart' as img;
 // ignore: depend_on_referenced_packages
 import 'package:irondash_message_channel/irondash_message_channel.dart';
 // ignore: implementation_imports, depend_on_referenced_packages
@@ -121,7 +122,8 @@ void prepareGenerationDropTestPlatform() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final drag = MockMessageChannelContext()
     ..registerMockMethodCallHandler('DropManager', (_) async => null)
-    ..registerMockMethodCallHandler('DragManager', (_) async => null);
+    ..registerMockMethodCallHandler('DragManager', (_) async => null)
+    ..registerMockMethodCallHandler('MenuManager', (_) async => null);
   setContextOverride(drag);
   TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
       .setMockMethodCallHandler(
@@ -168,9 +170,7 @@ void main() {
     (tester) async {
       await tester.binding.setSurfaceSize(const Size(800, 1200));
       addTearDown(() => tester.binding.setSurfaceSize(null));
-      final bytes = File(
-        '../../mockups/generation/assets/g07.jpg',
-      ).readAsBytesSync();
+      final bytes = img.encodePng(img.Image(width: 16, height: 12));
       final container = referenceContainer(
         ImageParams(model: 'nai-diffusion-4-5-full', sourceImage: bytes),
       );

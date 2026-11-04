@@ -16,6 +16,7 @@ import '../../providers/local_gallery_focus_provider.dart';
 import '../../providers/local_gallery_provider.dart';
 import '../../themes/studio_typography.dart';
 import '../../utils/local_gallery_metadata_resolver.dart';
+import '../../utils/platform_labels.dart';
 import '../common/app_toast.dart';
 import '../common/studio_icons.dart';
 import '../common/image_detail/components/detail_prompt_section.dart';
@@ -202,7 +203,10 @@ class _GalleryInspectorPanelState extends ConsumerState<GalleryInspectorPanel> {
                 ),
               _HeaderButton(
                 icon: StudioIcons.galleryReveal,
-                tooltip: l10n.localGallery_showInFolder,
+                tooltip: showInFileManagerLabel(
+                  l10n,
+                  l10n.localGallery_showInFolder,
+                ),
                 onPressed: () => widget.onAction(
                   record,
                   LocalImageContextAction.showInFolder,

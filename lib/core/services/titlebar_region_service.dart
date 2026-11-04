@@ -3,6 +3,7 @@ import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import '../utils/desktop_platform.dart';
 
 /// FEAT-23 内置一体标题栏：命中区上报服务。
 ///
@@ -15,8 +16,9 @@ import 'package:flutter/services.dart';
 class TitleBarRegionService {
   TitleBarRegionService._();
 
-  static const MethodChannel _channel =
-      MethodChannel('com.nailauncher/titlebar');
+  static const MethodChannel _channel = MethodChannel(
+    'com.nailauncher/titlebar',
+  );
 
   /// 活跃标题栏实例计数。
   ///
@@ -29,6 +31,12 @@ class TitleBarRegionService {
 
   /// 平台通道是否可用（Windows 桌面端才有对应原生实现）。
   static bool get isSupported => !kIsWeb && Platform.isWindows;
+
+  /// 自绘标题栏这一排（Agent 开关、登录页的明暗和语言）要不要画。
+  /// macOS 用系统标题栏和红黄绿按钮，这一排照画、只是不画 Windows 的三个窗口按钮；
+  /// 原生命中区（[setRegion]）仍只有 Windows 有。
+  static bool get chromeSupported =>
+      !kIsWeb && (Platform.isWindows || usesMacOSConventions);
 
   /// 标题栏实例挂载时调用：计数 +1。
   static void retain() {

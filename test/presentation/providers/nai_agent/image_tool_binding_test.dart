@@ -603,6 +603,7 @@ void main() {
     'official Pi and production Studio factory use real native preprocessing/output with no vision',
     () async {
       final manager = LocalUpscaleModelManager(
+        platform: LocalUpscalePlatform.windows,
         rootDirectory: () async => Directory(p.join(workspace.path, 'native')),
         loadAsset: (name) =>
             File(p.join('assets', 'local_upscale', name)).readAsBytes(),
@@ -610,7 +611,7 @@ void main() {
       var workers = 0;
       final native = LocalUpscaleService(
         manager,
-        supportedPlatform: true,
+        platform: LocalUpscalePlatform.windows,
         startProcess: (exe, args) async {
           workers++;
           expect(p.isWithin(workspace.path, exe), true);

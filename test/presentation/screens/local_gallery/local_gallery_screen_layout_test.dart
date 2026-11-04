@@ -7,6 +7,8 @@ import 'package:nai_launcher/presentation/services/image_clipboard_service.dart'
 import 'dart:io';
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
+import 'package:hive/hive.dart';
 import 'package:flutter/gestures.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:nai_launcher/data/services/gallery/gallery_filter_service.dart';
@@ -82,7 +84,9 @@ void main() {
   setContextOverride(
     MockMessageChannelContext()
       ..registerMockMethodCallHandler('DropManager', (_) async => null)
-      ..registerMockMethodCallHandler('DragManager', (_) async => null),
+      ..registerMockMethodCallHandler('DragManager', (_) async => null)
+      // macOS 上拖放组件还会初始化原生菜单
+      ..registerMockMethodCallHandler('MenuManager', (_) async => null),
   );
   TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
       .setMockMethodCallHandler(
@@ -117,6 +121,60 @@ void main() {
       StorageKeys.hasSeenLocalGalleryTip: true,
     });
   });
+
+  testWidgets(
+    'with no images, the More menu and Command+O both open the configured gallery',
+    (tester) async {
+      final fixture = (await tester.runAsync(() async {
+        final root = await Directory.systemTemp.createTemp(
+          'wof-empty-gallery-',
+        );
+        Hive.init(root.path);
+        final box = await Hive.openBox(StorageKeys.settingsBox);
+        // Both entry points can be exercised without starting the real Finder.
+        await box.put(StorageKeys.imageSavePath, '${root.path}/removed-folder');
+        return root;
+      }))!;
+      addTearDown(() async {
+        await Hive.close();
+        await fixture.delete(recursive: true);
+      });
+      final container = await _pumpScreen(
+        tester,
+        records: [],
+        dimensions: {},
+        locale: const Locale('en'),
+        dark: false,
+        size: const Size(1400, 800),
+      );
+      final strings = AppLocalizations.of(
+        tester.element(find.byKey(const Key('gallery-toolbar-more'))),
+      )!;
+      final missing = find.text(strings.localGallery_folderNotFound);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyO);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await _settle(tester, rounds: 3);
+      expect(missing, findsNothing);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyO);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+      await _settle(tester, rounds: 4);
+      expect(missing, findsOneWidget);
+      await tester.tap(find.byKey(const Key('toast-dismiss')));
+      await tester.pumpAndSettle();
+      expect(missing, findsNothing);
+      await tester.tap(find.byKey(const Key('gallery-toolbar-more')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(strings.shortcut_action_open_folder));
+      await _settle(tester, rounds: 5);
+      expect(missing, findsOneWidget);
+      await tester.pumpWidget(const SizedBox.shrink());
+      container.dispose();
+      await tester.pump(const Duration(minutes: 1));
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.macOS),
+  );
 
   testWidgets(
     'sidebar navigation restores all and favorites through recent browsing',
@@ -266,6 +324,35 @@ void main() {
       await tester.pump(const Duration(seconds: 1));
     },
   );
+
+  testWidgets('gallery Tab traversal skips the bulk undo listener', (t) async {
+    final container = await _pumpScreen(
+      t,
+      records: records,
+      dimensions: dimensions,
+      locale: const Locale('en'),
+      dark: false,
+      size: const Size(1600, 1000),
+    );
+    final undo = t
+        .widget<KeyboardListener>(find.byType(KeyboardListener).first)
+        .focusNode;
+    // Start one Tab stop before the listener's place in traversal order.
+    // The user should land on a gallery control, within reach of PageShortcuts.
+    undo.requestFocus();
+    await t.pump();
+    await t.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+    await t.sendKeyEvent(LogicalKeyboardKey.tab);
+    await t.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+    await t.pump();
+    await t.sendKeyEvent(LogicalKeyboardKey.tab);
+    await t.pump();
+    expect(undo.hasPrimaryFocus, isFalse);
+    expect(undo.nearestScope!.traversalDescendants, isNot(contains(undo)));
+    await t.pumpWidget(const SizedBox.shrink());
+    container.dispose();
+    await t.pump(const Duration(minutes: 1));
+  });
 
   testWidgets(
     'R2 gallery bulk undo/redo never runs while search text is focused',
@@ -645,6 +732,133 @@ void main() {
       await tester.pump(const Duration(minutes: 1));
     });
   }
+
+  testWidgets(
+    'typing in the search box keeps undo / redo in the field: bulk operations are not undone',
+    (tester) async {
+      final bulk = _RecordingBulkOperations();
+      final container = await _pumpScreen(
+        tester,
+        records: records,
+        dimensions: dimensions,
+        locale: const Locale('zh'),
+        dark: false,
+        size: const Size(1600, 1000),
+        extraOverrides: [
+          bulkOperationNotifierProvider.overrideWith(() => bulk),
+        ],
+      );
+      // 主修饰键：macOS 上是 ⌘，其他平台是 Ctrl
+      final primary = defaultTargetPlatform == TargetPlatform.macOS
+          ? LogicalKeyboardKey.metaLeft
+          : LogicalKeyboardKey.controlLeft;
+      Future<void> press(
+        List<LogicalKeyboardKey> modifiers,
+        LogicalKeyboardKey key,
+      ) async {
+        for (final m in modifiers) {
+          await tester.sendKeyDownEvent(m);
+        }
+        await tester.sendKeyEvent(key);
+        for (final m in modifiers.reversed) {
+          await tester.sendKeyUpEvent(m);
+        }
+        await _settle(tester, rounds: 4);
+      }
+
+      final search = find.byWidgetPredicate(
+        (w) => w is TextField && w.focusNode?.debugLabel == 'gallery-search',
+      );
+      await tester.tap(search);
+      await _settle(tester, rounds: 4);
+      await tester.enterText(search, 'cat');
+      await _settle(tester, rounds: 4);
+      expect(FocusManager.instance.primaryFocus?.debugLabel, 'gallery-search');
+
+      // 打字时的撤销 / 重做只管输入框里的字，不能顺带撤掉上一次批量移动、删除
+      await press([primary], LogicalKeyboardKey.keyZ);
+      await press([
+        primary,
+        LogicalKeyboardKey.shiftLeft,
+      ], LogicalKeyboardKey.keyZ);
+      await press([primary], LogicalKeyboardKey.keyY);
+      expect(bulk.calls, isEmpty);
+
+      // 离开输入框后，图库的撤销照旧
+      FocusManager.instance.primaryFocus!.unfocus();
+      await _settle(tester, rounds: 4);
+      await press([primary], LogicalKeyboardKey.keyZ);
+      expect(bulk.calls, ['undo']);
+
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+      container.dispose();
+      await tester.pump(const Duration(minutes: 1));
+    },
+    variant: const TargetPlatformVariant({
+      TargetPlatform.macOS,
+      TargetPlatform.windows,
+    }),
+  );
+
+  testWidgets(
+    'primary+Z undoes, primary+Shift+Z and primary+Y redo bulk operations from the page focus',
+    (tester) async {
+      final bulk = _RecordingBulkOperations();
+      final container = await _pumpScreen(
+        tester,
+        records: records,
+        dimensions: dimensions,
+        locale: const Locale('zh'),
+        dark: false,
+        size: const Size(1600, 1000),
+        extraOverrides: [
+          bulkOperationNotifierProvider.overrideWith(() => bulk),
+        ],
+      );
+      // 主修饰键：macOS 上是 ⌘，其他平台是 Ctrl
+      final mac = defaultTargetPlatform == TargetPlatform.macOS;
+      final primary = mac
+          ? LogicalKeyboardKey.metaLeft
+          : LogicalKeyboardKey.controlLeft;
+      Future<void> press(
+        List<LogicalKeyboardKey> modifiers,
+        LogicalKeyboardKey key,
+      ) async {
+        for (final m in modifiers) {
+          await tester.sendKeyDownEvent(m);
+        }
+        await tester.sendKeyEvent(key);
+        for (final m in modifiers.reversed) {
+          await tester.sendKeyUpEvent(m);
+        }
+        await _settle(tester, rounds: 4);
+      }
+
+      await press([primary], LogicalKeyboardKey.keyZ);
+      expect(bulk.calls, ['undo']);
+      await press([
+        primary,
+        LogicalKeyboardKey.shiftLeft,
+      ], LogicalKeyboardKey.keyZ);
+      expect(bulk.calls, ['undo', 'redo']);
+      // 两种重做键都认：⌘Y / Ctrl+Y
+      await press([primary], LogicalKeyboardKey.keyY);
+      expect(bulk.calls, ['undo', 'redo', 'redo']);
+      if (mac) {
+        await press([LogicalKeyboardKey.controlLeft], LogicalKeyboardKey.keyZ);
+        expect(bulk.calls, ['undo', 'redo', 'redo']);
+      }
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+      container.dispose();
+      await tester.pump(const Duration(minutes: 1));
+    },
+    variant: const TargetPlatformVariant({
+      TargetPlatform.macOS,
+      TargetPlatform.windows,
+    }),
+  );
 
   testWidgets(
     'card arrow opens the shared import dialog and cancellation preserves gallery state',

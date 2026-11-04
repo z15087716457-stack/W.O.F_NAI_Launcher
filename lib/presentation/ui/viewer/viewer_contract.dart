@@ -1,6 +1,8 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import '../../../core/utils/primary_activator.dart';
+
 /// 大图查看器（本地画廊大图 · 生图页打开的生成结果）：界面只认这份契约。
 ///
 /// 口径约定：
@@ -307,20 +309,13 @@ abstract final class ViewerKeys {
     ],
     ViewerCommand.zoomFit: [SingleActivator(LogicalKeyboardKey.digit0)],
     ViewerCommand.zoomActual: [SingleActivator(LogicalKeyboardKey.digit1)],
-    ViewerCommand.reuse: [
-      SingleActivator(LogicalKeyboardKey.keyR, control: true),
-    ],
-    ViewerCommand.copyPrompt: [
-      SingleActivator(LogicalKeyboardKey.keyC, control: true),
-    ],
+    // 主修饰键：macOS 上是 ⌘
+    ViewerCommand.reuse: [PrimaryActivator(LogicalKeyboardKey.keyR)],
+    ViewerCommand.copyPrompt: [PrimaryActivator(LogicalKeyboardKey.keyC)],
     ViewerCommand.favorite: [SingleActivator(LogicalKeyboardKey.keyF)],
     ViewerCommand.delete: [SingleActivator(LogicalKeyboardKey.delete)],
-    ViewerCommand.undo: [
-      SingleActivator(LogicalKeyboardKey.keyZ, control: true),
-    ],
-    ViewerCommand.save: [
-      SingleActivator(LogicalKeyboardKey.keyS, control: true),
-    ],
+    ViewerCommand.undo: [PrimaryActivator(LogicalKeyboardKey.keyZ)],
+    ViewerCommand.save: [PrimaryActivator(LogicalKeyboardKey.keyS)],
     ViewerCommand.help: [
       SingleActivator(LogicalKeyboardKey.slash, shift: true),
     ],

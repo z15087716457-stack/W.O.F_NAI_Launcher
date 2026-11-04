@@ -15,6 +15,7 @@ class DesktopAppShutdownService {
   DesktopAppShutdownService._();
 
   static Future<void>? _shutdownFuture;
+  static Future<void>? _exitFuture;
   static final _cleanups = <Future<void> Function(), String>{};
 
   static bool get isShuttingDown => _shutdownFuture != null;
@@ -36,15 +37,21 @@ class DesktopAppShutdownService {
   }
 
   static Future<void> shutdownAndExit(int code) {
-    return _shutdownFuture ??= _performShutdown(code);
+    return _exitFuture ??= _finishAndExit(code);
   }
 
-  static Future<void> _performShutdown(int code) async {
+  /// AppKit owns termination during a system request. Return after cleanup
+  /// so the native delegate can reply to the original logout/quit request.
+  static Future<void> prepareForTermination() =>
+      _shutdownFuture ??= _performShutdown();
+
+  static Future<void> _performShutdown() async {
     final elapsed = Stopwatch()..start();
     AppLogger.i('Application shutdown started', 'AppShutdown');
-    if (Platform.isWindows) {
+    if (Platform.isMacOS || Platform.isWindows) {
       await _cleanup('Window hide', windowManager.hide);
     }
+    if (Platform.isMacOS) await _cleanup('Tray', trayManager.destroy);
     await prepareBackgroundShutdown();
     await _cleanup('Database', () => DatabaseManager.instance.dispose());
     await _cleanup('Hive', Hive.close);
@@ -56,6 +63,17 @@ class DesktopAppShutdownService {
       'AppShutdown',
     );
     await AppLogger.flush();
+  }
+
+  static Future<void> _finishAndExit(int code) async {
+    await prepareForTermination();
+    // AppKit may finish quitting as soon as the last window is destroyed.
+    if (Platform.isMacOS) {
+      await _cleanup('Window', () async {
+        await windowManager.setPreventClose(false);
+        await windowManager.destroy();
+      });
+    }
     exit(code);
   }
 

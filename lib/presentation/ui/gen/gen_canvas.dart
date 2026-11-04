@@ -5,6 +5,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../core/utils/keyboard_modifier_utils.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../core/utils/inpaint_mask_utils.dart';
 import '../../widgets/navigation/window_chrome_layout.dart';
@@ -434,7 +435,7 @@ class _GenCanvasTileState extends State<GenCanvasTile> {
     if ((t.state == GenTileState.done || interaction?.failedPreview != null) &&
         scope.controller.selection.tap(
           [t.id],
-          modify: keys.isControlPressed || keys.isMetaPressed,
+          modify: isControlOrCommandPressed(keyboard: keys),
           range: keys.isShiftPressed,
         )) {
       _last = null;

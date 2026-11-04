@@ -1,6 +1,6 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
+import '../../widgets/common/studio_scroll_behavior.dart';
 import '../kit/ui_controls.dart';
 import '../kit/ui_text.dart';
 import 'viewer_contract.dart';
@@ -120,17 +120,8 @@ class _ViewerFilmstripState extends State<ViewerFilmstrip> {
               child: LayoutBuilder(
                 builder: (context, box) => Listener(
                   // 竖滚轮也横着滚。
-                  onPointerSignal: (e) {
-                    if (e is PointerScrollEvent && _scroll.hasClients) {
-                      final p = _scroll.position;
-                      final d = e.scrollDelta.dy != 0
-                          ? e.scrollDelta.dy
-                          : e.scrollDelta.dx;
-                      _scroll.jumpTo(
-                        (p.pixels + d).clamp(0, p.maxScrollExtent),
-                      );
-                    }
-                  },
+                  onPointerSignal: (event) =>
+                      scrollStripWithWheel(_scroll, event),
                   child: SingleChildScrollView(
                     controller: _scroll,
                     scrollDirection: Axis.horizontal,

@@ -35,6 +35,7 @@ class UpdateState {
   final int totalBytes;
   final int downloadBytesPerSecond;
   final DownloadedUpdate? downloadedUpdate;
+  final bool runningFromStaging;
 
   /// 是否显示全局更新提示；状态本身保留，以便设置页仍能重新打开。
   final bool notificationVisible;
@@ -49,6 +50,7 @@ class UpdateState {
     this.totalBytes = 0,
     this.downloadBytesPerSecond = 0,
     this.downloadedUpdate,
+    this.runningFromStaging = false,
     this.notificationVisible = false,
   });
 
@@ -75,6 +77,7 @@ class UpdateState {
       downloadBytesPerSecond:
           downloadBytesPerSecond ?? this.downloadBytesPerSecond,
       downloadedUpdate: downloadedUpdate ?? this.downloadedUpdate,
+      runningFromStaging: runningFromStaging,
       notificationVisible: notificationVisible ?? this.notificationVisible,
     );
   }
@@ -88,6 +91,12 @@ class UpdateState {
 
   bool get hasDownloadedUpdate => downloadedUpdate != null;
 
+  /// macOS 包：在访达中替换旧版本，不重启应用，也不用等任务结束。
+  bool get requiresManualReplace =>
+      (downloadedUpdate?.asset ?? versionInfo?.primaryAsset)
+          ?.requiresManualReplace ==
+      true;
+
   // 兼容现有 UI 字段名。
   int get downloadedBytes => receivedBytes;
   int get downloadSpeedBytesPerSecond => downloadBytesPerSecond;
@@ -99,7 +108,7 @@ class UpdateState {
 class UpdateStateNotifier extends _$UpdateStateNotifier {
   CancelToken? _downloadCancelToken;
   Timer? _reminderTimer;
-  bool _initialized = false;
+  Future<void>? _initialization;
   bool _disposed = false;
   int _checkRevision = 0;
   Future<void>? _checkFuture;
@@ -129,10 +138,13 @@ class UpdateStateNotifier extends _$UpdateStateNotifier {
   }
 
   /// 恢复待安装包和上一次独立更新脚本的结果。
-  Future<void> initialize() async {
-    if (_initialized) return;
-    _initialized = true;
+  Future<void> initialize() => _initialization ??= _restoreStartupUpdate()
+      .onError<Object>((error, stack) {
+        _initialization = null;
+        Error.throwWithStackTrace(error, stack);
+      });
 
+  Future<void> _restoreStartupUpdate() async {
     final installer = ref.read(updateInstallerServiceProvider);
     final result = await installer.consumeExecutionResult();
     final restored = await installer.restorePendingUpdate();
@@ -175,6 +187,22 @@ class UpdateStateNotifier extends _$UpdateStateNotifier {
         }
       }
       return;
+    }
+
+    if (restored != null && restored.update.requiresManualReplace) {
+      // macOS 由用户在访达中替换：已经在运行这个版本或更新的版本，清掉这次的
+      // 更新包和解压出来的应用。
+      if (!await installer.clearPendingUpdate(restored.update)) {
+        state = UpdateState(
+          status: UpdateStatus.downloaded,
+          versionInfo: restored.versionInfo,
+          downloadedUpdate: restored.update,
+          downloadProgress: 1,
+          runningFromStaging: true,
+          notificationVisible: true,
+        );
+        return;
+      }
     }
 
     if (result != null && !result.success) {
@@ -367,7 +395,41 @@ class UpdateStateNotifier extends _$UpdateStateNotifier {
     _downloadCancelToken?.cancel('cancelled by user');
   }
 
-  Future<void> installDownloadedUpdate() => installAndRestart();
+  /// Windows 退出后安装并重启；macOS 在访达中选中新版本，替换由用户完成。
+  Future<void> installDownloadedUpdate() {
+    if (state.downloadedUpdate?.requiresManualReplace == true) {
+      return revealDownloadedUpdate();
+    }
+    return installAndRestart();
+  }
+
+  /// 解压已校验的 macOS 包并在访达中选中新版本。应用继续运行，
+  /// 状态回到“已下载”，用户可以再点一次。
+  Future<void> revealDownloadedUpdate() async {
+    final downloaded = state.downloadedUpdate;
+    if (downloaded == null) return;
+
+    state = state.copyWith(
+      status: UpdateStatus.installing,
+      errorMessage: null,
+      notificationVisible: true,
+    );
+    try {
+      await ref
+          .read(updateInstallerServiceProvider)
+          .revealUpdateInFinder(downloaded);
+      state = state.copyWith(
+        status: UpdateStatus.downloaded,
+        notificationVisible: true,
+      );
+    } catch (error) {
+      state = state.copyWith(
+        status: UpdateStatus.error,
+        errorMessage: _formatError(error),
+        notificationVisible: true,
+      );
+    }
+  }
 
   Future<void> installAndRestart() async {
     final downloaded = state.downloadedUpdate;

@@ -4,6 +4,7 @@ import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../core/utils/localization_extension.dart';
+import '../../../../core/utils/platform_shortcut_text.dart';
 import '../core/editor_state.dart';
 import '../core/history_manager.dart';
 import '../core/edit_image_actions.dart';
@@ -226,7 +227,7 @@ class CloneStampTool extends EditorTool {
               ),
               const SizedBox(height: 8),
               Text(
-                context.l10n.editor_sourcePoint,
+                platformShortcutText(context.l10n.editor_sourcePoint),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),

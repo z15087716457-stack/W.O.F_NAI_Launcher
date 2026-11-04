@@ -101,6 +101,13 @@ class GenScope extends InheritedModel<GenAspect> {
   static GenScope read(BuildContext context) =>
       context.getInheritedWidgetOfExactType<GenScope>()!;
 
+  // macOS normally draws its window controls in the native title bar. Only
+  // move history below the top edge when this pane has actual chrome above it.
+  bool reservesHistoryCaption(BuildContext context) =>
+      slots.historyCaptionInset &&
+      WindowChromeScope.activeOf(context) &&
+      WindowChromeScope.reservedWidthOf(context) > 0;
+
   Object? _value(GenAspect aspect) => switch (aspect) {
     GenAspect.layout => (data.layout, data.history.total),
     GenAspect.structure => data.characters != null,
@@ -762,16 +769,14 @@ class _Strip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
+    final scope = GenScope.of(context, GenAspect.layout);
     final top =
-        side == _StripSide.right &&
-            GenScope.of(context, GenAspect.layout).slots.historyCaptionInset &&
-            WindowChromeScope.activeOf(context)
+        side == _StripSide.right && scope.reservesHistoryCaption(context)
         ? WindowChromeScope.heightOf(context)
         : 0.0;
     return GenPanelSurface(
       width: GenerationPage.strip,
-      enabled:
-          GenScope.of(context, GenAspect.layout).slots.panelBackdrop != null,
+      enabled: scope.slots.panelBackdrop != null,
       border: side == _StripSide.left
           ? Border(right: BorderSide(color: c.line))
           : Border(left: BorderSide(color: c.line)),

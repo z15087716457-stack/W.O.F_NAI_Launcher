@@ -3,10 +3,12 @@ import 'dart:io';
 
 import 'package:path/path.dart' as p;
 
-import '../utils/file_sha256.dart';
+import 'verified_directory_copy.dart';
 
-typedef CompatibilityDirectoryCreator =
-    Future<void> Function(Directory legacy, Directory destination);
+typedef CompatibilityDirectoryCreator = Future<void> Function(
+  Directory legacy,
+  Directory destination,
+);
 
 class AdjacentAppDataException extends FileSystemException {
   AdjacentAppDataException(
@@ -139,17 +141,27 @@ class AdjacentAppDataMigration {
     // removed. The two copies do not share file hardlinks.
     final backup = await destination.parent.createTemp('.studio-data-backup-');
     onPhase?.call('Reading and hashing original data');
-    final snapshot = await _snapshot(legacy);
+    final snapshot = await snapshotDirectory(legacy);
     onPhase?.call('Creating and verifying independent backup');
-    await _copyVerified(legacy, backup, snapshot);
+    await copySnapshot(
+      legacy,
+      backup,
+      snapshot,
+      createLink: createWindowsCompatibilityDirectory,
+    );
     final staging = await destination.parent.createTemp(
       '.studio-data-staging-',
     );
     onPhase?.call('Creating and verifying adjacent application data');
-    await _copyVerified(backup, staging, snapshot);
+    await copySnapshot(
+      backup,
+      staging,
+      snapshot,
+      createLink: createWindowsCompatibilityDirectory,
+    );
     await beforeCommit?.call();
     onPhase?.call('Checking original data has not changed');
-    await _verifySnapshot(legacy, snapshot);
+    await verifySnapshot(legacy, snapshot);
 
     // Rename on the source volume first: locked files stop the operation while
     // the original is intact. Only publish a fully verified destination.
@@ -170,7 +182,7 @@ class AdjacentAppDataMigration {
       await staging.rename(destination.path);
       published = true;
       for (final entry in snapshot.entries) {
-        if (entry.value.bytes != -2) continue;
+        if (!entry.value.isLink) continue;
         final link = Link(p.join(destination.path, entry.key));
         await link.delete();
         await createWindowsCompatibilityDirectory(
@@ -217,7 +229,7 @@ class AdjacentAppDataMigration {
         'Retired data directory boundary changed',
       );
     }
-    await _verifySnapshot(retired, snapshot, originalRoot: legacy);
+    await verifySnapshot(retired, snapshot, originalRoot: legacy);
     onPhase?.call('Removing verified original copy from system drive');
     await retired.delete(recursive: true);
     return destination;
@@ -236,8 +248,8 @@ class AdjacentAppDataMigration {
         return null;
       }
     }
-    final snapshot = await _snapshot(legacy);
-    final missing = <String, _DataFile>{};
+    final snapshot = await snapshotDirectory(legacy);
+    final missing = <String, DataSnapshotEntry>{};
     for (final entry in snapshot.entries) {
       if (await FileSystemEntity.type(
             p.join(destination.path, entry.key),
@@ -250,13 +262,23 @@ class AdjacentAppDataMigration {
     if (missing.isEmpty) return null;
     final backup = await destination.parent.createTemp('.studio-data-backup-');
     onPhase?.call('Backing up legacy plugin data');
-    await _copyVerified(legacy, backup, snapshot);
+    await copySnapshot(
+      legacy,
+      backup,
+      snapshot,
+      createLink: createWindowsCompatibilityDirectory,
+    );
     final staging = await destination.parent.createTemp(
       '.studio-data-staging-',
     );
-    await _copyVerified(backup, staging, missing);
+    await copySnapshot(
+      backup,
+      staging,
+      missing,
+      createLink: createWindowsCompatibilityDirectory,
+    );
     await beforeCommit?.call();
-    await _verifySnapshot(legacy, snapshot);
+    await verifySnapshot(legacy, snapshot);
     for (final name in missing.keys) {
       final file = File(p.join(destination.path, name));
       final staged = File(p.join(staging.path, name));
@@ -288,117 +310,6 @@ class AdjacentAppDataMigration {
     );
   }
 
-  Future<Map<String, _DataFile>> _snapshot(
-    Directory root, {
-    Directory? originalRoot,
-  }) async {
-    final result = <String, _DataFile>{};
-    final physicalRoot = await root.resolveSymbolicLinks();
-    final physicalOriginal = await originalRoot?.resolveSymbolicLinks();
-    await for (final entry in root.list(recursive: true, followLinks: false)) {
-      final type = await FileSystemEntity.type(entry.path, followLinks: false);
-      if (type == FileSystemEntityType.link) {
-        final resolved = await Directory(entry.path).resolveSymbolicLinks();
-        final String linkRoot;
-        if (p.isWithin(physicalRoot, resolved)) {
-          linkRoot = physicalRoot;
-        } else if (physicalOriginal != null &&
-            p.isWithin(physicalOriginal, resolved)) {
-          linkRoot = physicalOriginal;
-        } else {
-          throw FileSystemException(
-            'Application data contains an external link',
-            entry.path,
-          );
-        }
-        if (await FileSystemEntity.type(entry.path) !=
-            FileSystemEntityType.directory) {
-          throw FileSystemException(
-            'Application data contains a file link',
-            entry.path,
-          );
-        }
-        result[p.relative(entry.path, from: root.path)] = _DataFile(
-          -2,
-          DateTime.fromMillisecondsSinceEpoch(0),
-          p.relative(resolved, from: linkRoot),
-        );
-        continue;
-      }
-      if (type == FileSystemEntityType.directory) {
-        result[p.relative(entry.path, from: root.path)] = _DataFile(
-          -1,
-          DateTime.fromMillisecondsSinceEpoch(0),
-          '',
-        );
-        continue;
-      }
-      if (type != FileSystemEntityType.file) {
-        throw FileSystemException(
-          'Unsupported application data entry',
-          entry.path,
-        );
-      }
-      final file = File(entry.path);
-      final stat = await file.stat();
-      result[p.relative(file.path, from: root.path)] = _DataFile(
-        stat.size,
-        stat.modified,
-        await fileSha256(file),
-      );
-    }
-    return result;
-  }
-
-  Future<void> _copyVerified(
-    Directory source,
-    Directory target,
-    Map<String, _DataFile> snapshot,
-  ) async {
-    final links = <MapEntry<String, _DataFile>>[];
-    for (final entry in snapshot.entries) {
-      if (entry.value.bytes == -2) {
-        links.add(entry);
-        continue;
-      }
-      if (entry.value.bytes == -1) {
-        await Directory(p.join(target.path, entry.key)).create(recursive: true);
-        continue;
-      }
-      final file = File(p.join(target.path, entry.key));
-      await file.parent.create(recursive: true);
-      await File(p.join(source.path, entry.key)).copy(file.path);
-      await file.setLastModified(entry.value.modified);
-      if (await file.length() != entry.value.bytes ||
-          await fileSha256(file) != entry.value.digest) {
-        throw FileSystemException(
-          'Application data copy verification failed',
-          file.path,
-        );
-      }
-    }
-    for (final link in links) {
-      await createWindowsCompatibilityDirectory(
-        Directory(p.join(target.path, link.key)),
-        Directory(p.join(target.path, link.value.digest)),
-      );
-    }
-  }
-
-  Future<void> _verifySnapshot(
-    Directory root,
-    Map<String, _DataFile> expected, {
-    Directory? originalRoot,
-  }) async {
-    final current = await _snapshot(root, originalRoot: originalRoot);
-    if (current.length != expected.length ||
-        expected.entries.any((entry) => current[entry.key] != entry.value)) {
-      throw const FileSystemException(
-        'Application data changed during migration; originals preserved',
-      );
-    }
-  }
-
   static Future<void> createWindowsCompatibilityDirectory(
     Directory legacy,
     Directory destination,
@@ -422,21 +333,4 @@ class AdjacentAppDataMigration {
       );
     }
   }
-}
-
-class _DataFile {
-  const _DataFile(this.bytes, this.modified, this.digest);
-  final int bytes;
-  final DateTime modified;
-  final String digest;
-
-  @override
-  bool operator ==(Object other) =>
-      other is _DataFile &&
-      bytes == other.bytes &&
-      modified == other.modified &&
-      digest == other.digest;
-
-  @override
-  int get hashCode => Object.hash(bytes, modified, digest);
 }

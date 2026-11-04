@@ -24,7 +24,45 @@ void main() {
 
       expect(windowsAsset.type, ReleaseAssetType.windowsPortable);
       expect(windowsAsset.supportsInAppInstall, isTrue);
+      expect(windowsAsset.requiresManualReplace, isFalse);
       expect(windowsAsset.platform, 'windows');
+    });
+
+    test('detects the macOS app archive', () {
+      final asset = ReleaseAssetInfo.fromGitHubAsset({
+        'name': 'WOF_NAI_Studio_macOS_2.1.0_Portable.zip',
+        'browser_download_url': 'https://example.com/macos.zip',
+        'size': 456,
+      });
+
+      expect(asset.type, ReleaseAssetType.macosPortable);
+      expect(asset.platform, 'macos');
+      expect(asset.typeId, 'macos-portable');
+      expect(asset.supportsInAppInstall, isTrue);
+      expect(asset.requiresManualReplace, isTrue);
+    });
+
+    test('does not treat the checksum sidecar as the macOS archive', () {
+      final asset = ReleaseAssetInfo.fromGitHubAsset({
+        'name': 'WOF_NAI_Studio_macOS_2.1.0_Portable.zip.sha256',
+        'browser_download_url': 'https://example.com/macos.zip.sha256',
+      });
+
+      expect(asset.type, ReleaseAssetType.unknown);
+    });
+
+    test('reads the macOS type from the release manifest', () {
+      final asset = ReleaseAssetInfo.fromManifestAsset({
+        'type': 'macos-portable',
+        'fileName': 'WOF_NAI_Studio_macOS_2.1.0_Portable.zip',
+        'downloadUrl': 'https://example.com/macos.zip',
+        'sha256': 'abc123',
+      });
+
+      expect(ReleaseAssetInfo.parseType('macos-portable'), asset.type);
+      expect(asset.type, ReleaseAssetType.macosPortable);
+      expect(asset.platform, 'macos');
+      expect(asset.sha256, 'abc123');
     });
 
     test('retains the SHA256 digest supplied by GitHub', () {

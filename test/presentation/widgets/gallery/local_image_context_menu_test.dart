@@ -109,6 +109,22 @@ void main() {
     },
   );
 
+  testWidgets('macOS calls the reveal item Show in Finder', (tester) async {
+    LocalImageContextAction? selected;
+    await tester.pumpWidget(
+      _MenuHarness(
+        isKritaConnected: false,
+        onSelected: (value) => selected = value,
+      ),
+    );
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+    expect(find.text('Show in Folder'), findsNothing);
+    await tester.tap(find.text('Show in Finder'));
+    await tester.pumpAndSettle();
+    expect(selected, LocalImageContextAction.showInFolder);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
+
   testWidgets('no metadata still permits details and file actions', (
     tester,
   ) async {

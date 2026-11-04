@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
+import '../../../core/utils/desktop_platform.dart';
 import '../../../core/utils/localization_extension.dart';
 
 enum ToastType { success, error, warning, info, progress }
@@ -73,7 +73,7 @@ class AppToast {
     ToastType type,
   ) => _manager(overlay)?.add(message, type);
   static void _show(BuildContext context, String message, ToastType type) {
-    if (Platform.isWindows) {
+    if (isSupportedDesktop) {
       _onOverlay(Overlay.maybeOf(context, rootOverlay: true), message, type);
       return;
     }

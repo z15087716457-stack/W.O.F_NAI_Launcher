@@ -360,4 +360,23 @@ void main() {
       expect(result.roots.map((r) => r.images), [2, 1, 2]);
     },
   );
+
+  test(
+    'macOS: a library reached through a differently cased path keeps one key per file',
+    () async {
+      final library = Directory(p.join(temp.path, 'Gallery'));
+      await File(p.join(library.path, 'A.png')).create(recursive: true);
+      final cased = p.join(temp.path, 'gallery');
+      if (!Directory(cased).existsSync()) {
+        markTestSkipped('this volume is case-sensitive');
+        return;
+      }
+      final exact = settingsMeasureDirectory(library.path, gallery: true);
+      final other = settingsMeasureDirectory(cased, gallery: true);
+      // realpath 给的是磁盘上的写法，两条路径走到同一个文件得到同一个键，不用转小写
+      expect(other.files.keys, exact.files.keys);
+      expect(exact.files.keys.single, endsWith(p.join('Gallery', 'A.png')));
+    },
+    skip: !Platform.isMacOS,
+  );
 }

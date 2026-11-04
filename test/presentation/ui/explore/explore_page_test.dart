@@ -40,10 +40,6 @@ void main() {
     await t.pumpAndSettle();
   }
 
-  // 双击判定用真实时钟（同块库），这里真等 0.35 秒。
-  Future<void> wait300(WidgetTester t) =>
-      t.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 350)));
-
   Finder text(String s) => find.text(s, findRichText: true);
 
   group('候选墙', () {
@@ -62,7 +58,7 @@ void main() {
     testWidgets('单击看检查器，0.3 秒内再点开大图；Esc 关大图', (t) async {
       await pump(t);
       await t.tap(find.byKey(const Key('explore-card-c29')));
-      await t.pumpAndSettle();
+      await t.pump();
       expect(
         find.descendant(
           of: find.byKey(const Key('explore-inspector')),
@@ -70,6 +66,7 @@ void main() {
         ),
         findsOneWidget,
       );
+      await t.pump(const Duration(milliseconds: 299));
       await t.tap(find.byKey(const Key('explore-card-c29')));
       await t.pumpAndSettle();
       expect(find.byKey(const Key('explore-detail')), findsOneWidget);
@@ -80,8 +77,7 @@ void main() {
     testWidgets('两次单击隔得久不算双击', (t) async {
       await pump(t);
       await t.tap(find.byKey(const Key('explore-card-c29')));
-      await t.pumpAndSettle();
-      await wait300(t);
+      await t.pump(const Duration(milliseconds: 300));
       await t.tap(find.byKey(const Key('explore-card-c29')));
       await t.pumpAndSettle();
       expect(find.byKey(const Key('explore-detail')), findsNothing);
@@ -104,6 +100,27 @@ void main() {
       await key(t, LogicalKeyboardKey.keyE);
       expect(find.byKey(const Key('explore-evolution-dialog')), findsOneWidget);
     });
+
+    testWidgets('Windows Ctrl+Delete leaves the selected candidate alone', (
+      t,
+    ) async {
+      await pump(t);
+      await key(t, LogicalKeyboardKey.arrowRight);
+      await ctrlKey(t, LogicalKeyboardKey.delete);
+      expect(rec.calls, isNot(contains('delete:c28')));
+      await key(t, LogicalKeyboardKey.delete);
+      expect(rec.calls.last, 'delete:c28');
+    }, variant: TargetPlatformVariant.only(TargetPlatform.windows));
+
+    testWidgets('macOS：⌘⌫ 删除', (t) async {
+      await pump(t);
+      await key(t, LogicalKeyboardKey.arrowRight);
+      await t.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
+      await t.sendKeyEvent(LogicalKeyboardKey.backspace);
+      await t.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+      await t.pumpAndSettle();
+      expect(rec.calls.last, 'delete:c28');
+    }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
 
     testWidgets('数字键归组，0 移出，再按一次同组移出', (t) async {
       await pump(t);

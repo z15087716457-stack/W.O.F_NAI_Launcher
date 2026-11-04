@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -248,6 +246,9 @@ class _AdvancedUpscaleComponentsState
   }) {
     final l = context.l10n;
     final theme = Theme.of(context);
+    final supported = ref
+        .watch(localUpscalePlatformProvider)
+        .supports(model.method);
     return Row(
       children: [
         if (model.installed) ...[
@@ -268,7 +269,9 @@ class _AdvancedUpscaleComponentsState
         ] else
           Expanded(
             child: Text(
-              l.localUpscale_notInstalledShort,
+              supported
+                  ? l.localUpscale_notInstalledShort
+                  : l.localUpscale_unsupportedPlatform,
               style: theme.textTheme.labelMedium,
             ),
           ),
@@ -287,7 +290,7 @@ class _AdvancedUpscaleComponentsState
         else
           TextButton(
             key: ValueKey('upscale-management-install-${model.id}'),
-            onPressed: blocked || !Platform.isWindows
+            onPressed: blocked || !supported
                 ? null
                 : () => ref
                       .read(advancedUpscaleInstallProvider.notifier)

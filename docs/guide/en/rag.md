@@ -23,7 +23,7 @@ Each source is enabled and indexed separately. NAI Agent’s semantic search too
 
 Open “Settings → Semantic search” and complete these steps in order:
 
-1. **Runtime**: Click “Install.” For an NVIDIA GPU, choose **CUDA** (a download of several GB); for other GPUs, choose **CPU** (a smaller download). This installs only Python and inference dependencies, not models.
+1. **Runtime**: Click “Install.” For an NVIDIA GPU, choose **CUDA** (a download of several GB); for other GPUs, choose **CPU** (a smaller download). This installs only Python and inference dependencies, not models. On a Mac there is no choice to make: click “Install” (about 200 MB).
 2. **Models**: Two models are needed. Click “Download” to get them automatically, or select folders you have already downloaded:
    - EmbeddingGemma 2 (about 1.5 GB), for understanding text and images.
    - Qwen3-Reranker-0.6B (about 1.2 GB), for reranking text results.
@@ -34,13 +34,14 @@ You can pause indexing at any time; completed parts are usable immediately. New 
 
 ## Settings
 
-- **Device**: Auto, CUDA or CPU.
+- **Device**: Auto, CUDA or CPU (on a Mac, Auto or CPU).
 - **Suggestion context**: Use content before the cursor or around the insertion point (up to about 120 tokens, keeping tags whole).
-- **Python interpreter**: Uses the automatically installed standalone environment by default; you can also specify an existing `python.exe`.
+- **Python interpreter**: Uses the automatically installed standalone environment by default; you can also specify an existing `python.exe` (`python3` on a Mac).
 
 ## FAQ
 
 - **Initial indexing is slow**: The tag database has hundreds of thousands of entries, and a gallery may have tens of thousands of images. The first run takes time; you can pause and resume.
 - **Progress does not move during preparation**: Loading models and existing indexes takes time. Please wait.
 - **Can I use it without an NVIDIA GPU?** Yes, with CPU, though it will be slower.
+- **Does it work on a Mac?** On Apple silicon, yes. With the device set to Auto it runs on the GPU on Macs with 18 GB of memory or more, and on the CPU with 16 GB or less (the GPU is faster but needs about 1.5 times the memory). Both give the same results, and you can pick CPU yourself. Intel Macs aren't supported, because PyTorch no longer makes builds for them.
 - **Will it send my images anywhere?** No. Network access is needed only to download models and the runtime.

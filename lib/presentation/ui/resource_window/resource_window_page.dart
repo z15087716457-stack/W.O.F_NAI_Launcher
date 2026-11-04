@@ -7,6 +7,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 import '../../../core/utils/justified_layout.dart';
 import '../../../core/utils/localization_extension.dart';
+import '../../../core/utils/primary_activator.dart';
 import '../../widgets/common/themed_confirm_dialog.dart';
 import '../kit/ui_block_pill.dart';
 import '../kit/ui_colors.dart';
@@ -187,10 +188,7 @@ class _ResourceWindowPageState extends State<ResourceWindowPage> {
     return CallbackShortcuts(
       bindings: widget.viewer == null
           ? {
-              const SingleActivator(
-                LogicalKeyboardKey.keyF,
-                control: true,
-              ): () =>
+              const PrimaryActivator(LogicalKeyboardKey.keyF): () =>
                   _search.requestFocus(),
               const SingleActivator(LogicalKeyboardKey.arrowRight): () =>
                   _move(1),
@@ -440,9 +438,8 @@ class _TopBarState extends State<_TopBar> {
     ].whereType<Rect>().toList();
     if (_reported != null &&
         _reported!.length == blocked.length &&
-        Iterable.generate(
-          blocked.length,
-        ).every((i) => _reported![i] == blocked[i])) {
+        Iterable.generate(blocked.length)
+            .every((i) => _reported![i] == blocked[i])) {
       return;
     }
     _reported = blocked;

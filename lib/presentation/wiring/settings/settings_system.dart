@@ -15,6 +15,7 @@ import '../../providers/update_provider.dart';
 import '../../ui/settings/settings_contract.dart';
 import '../../widgets/common/update_check_dialog.dart';
 import 'settings_edits.dart';
+import '../../../core/utils/app_bundle_paths.dart';
 
 final settingsUpdateCheckedAtProvider = FutureProvider<DateTime?>((ref) async {
   ref.watch(updateStateProvider);
@@ -79,6 +80,17 @@ String settingsDiagnostics({
 typedef SettingsRestart = Future<void> Function();
 final settingsRestartProvider = Provider<SettingsRestart>(
   (ref) => () async {
+    // macOS：等这个进程退出后用 open 重新打开应用包
+    final bundle = AppBundlePaths.macOSBundle;
+    if (bundle != null) {
+      final quoted = bundle.replaceAll("'", "'\\''");
+      await Process.start('/bin/sh', [
+        '-c',
+        "while kill -0 $pid 2>/dev/null; do sleep 0.2; done; open '$quoted'",
+      ], mode: ProcessStartMode.detached);
+      await DesktopAppShutdownService.shutdownAndExit(0);
+      return;
+    }
     if (!Platform.isWindows) {
       throw UnsupportedError('Desktop restart requires Windows');
     }

@@ -6,18 +6,33 @@ import 'package:win32_registry/win32_registry.dart';
 
 part 'app_installation_service.g.dart';
 
-enum AppInstallationType { windowsInstaller, windowsPortable, unsupported }
+enum AppInstallationType {
+  windowsInstaller,
+  windowsPortable,
+  macosPortable,
+  unsupported,
+}
 
 /// 判断当前应用是安装版还是便携版。
 class AppInstallationService {
+  /// [operatingSystem] 取值同 `Platform.operatingSystem`，测试里用它切平台。
+  AppInstallationService({String? operatingSystem})
+    : _operatingSystem = operatingSystem ?? Platform.operatingSystem;
+
   /// New installations take priority; 1.x installations remain updatable.
   static const uninstallRegistryPaths = [
     r'Software\Microsoft\Windows\CurrentVersion\Uninstall\W.O.F NAI Studio',
     r'Software\Microsoft\Windows\CurrentVersion\Uninstall\Aaalice NAI Launcher',
   ];
 
+  final String _operatingSystem;
+
   AppInstallationType getInstallationType() {
-    if (!Platform.isWindows) {
+    // macOS 只有一种包：应用包的压缩包，用户自己放到「应用程序」或别处。
+    if (_operatingSystem == 'macos') {
+      return AppInstallationType.macosPortable;
+    }
+    if (_operatingSystem != 'windows') {
       return AppInstallationType.unsupported;
     }
     return _isInstalledWindowsApp()
@@ -29,16 +44,19 @@ class AppInstallationService {
     return switch (getInstallationType()) {
       AppInstallationType.windowsInstaller => 'windows-installer',
       AppInstallationType.windowsPortable => 'windows-portable',
+      AppInstallationType.macosPortable => 'macos',
       AppInstallationType.unsupported => 'unknown',
     };
   }
 
   /// Windows 安装版与便携版都支持应用内自动更新：
   /// 安装版运行 NSIS 静默安装，便携版由辅助脚本解压覆盖并重启。
+  /// macOS 在应用内下载、校验并解压，最后在访达中由用户替换旧版本。
   bool get supportsInAppInstall {
     final type = getInstallationType();
     return type == AppInstallationType.windowsInstaller ||
-        type == AppInstallationType.windowsPortable;
+        type == AppInstallationType.windowsPortable ||
+        type == AppInstallationType.macosPortable;
   }
 
   bool _isInstalledWindowsApp() {
@@ -56,7 +74,7 @@ class AppInstallationService {
   }
 
   String? readWindowsInstallLocation() {
-    if (!Platform.isWindows) return null;
+    if (_operatingSystem != 'windows') return null;
     for (final path in uninstallRegistryPaths) {
       final location = _readInstallLocation(path);
       if (location != null && location.isNotEmpty) return location;

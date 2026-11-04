@@ -7,6 +7,8 @@ import '../../../core/enums/quality_tag_preset.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/utils/localization_extension.dart';
+import '../../../core/utils/platform_shortcut_text.dart';
+import '../../../core/utils/primary_activator.dart';
 import '../kit/ui_new_badge.dart';
 import '../kit/ui_block_pill.dart';
 import '../kit/ui_colors.dart';
@@ -132,7 +134,9 @@ class _BlockIconGridState extends State<BlockIconGrid> {
         behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
         child: SingleChildScrollView(
           controller: _scroll,
-          physics: const ClampingScrollPhysics(),
+          physics: Theme.of(context).platform == TargetPlatform.macOS
+              ? null
+              : const ClampingScrollPhysics(),
           child: Wrap(
             spacing: BlockIconGrid.gap,
             runSpacing: BlockIconGrid.gap,
@@ -232,9 +236,8 @@ class _BlockEditDialogState extends State<BlockEditDialog> {
 
     return CallbackShortcuts(
       bindings: {
-        const SingleActivator(LogicalKeyboardKey.enter, control: true): _save,
-        const SingleActivator(LogicalKeyboardKey.numpadEnter, control: true):
-            _save,
+        const PrimaryActivator(LogicalKeyboardKey.enter): _save,
+        const PrimaryActivator(LogicalKeyboardKey.numpadEnter): _save,
       },
       child: UiPopover(
         anchor: _pop,
@@ -344,7 +347,7 @@ class _BlockEditDialogState extends State<BlockEditDialog> {
                       const Spacer(),
                       UiGlyph(UiGlyphs.keyboard, size: 13, color: c.faint),
                       Text(
-                        l10n.blocks_saveShortcut,
+                        platformShortcutText(l10n.blocks_saveShortcut),
                         style: UiText.sans(12, color: c.faint),
                       ),
                       const SizedBox(width: 4),

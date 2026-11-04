@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../core/utils/keyboard_modifier_utils.dart';
 import '../../widgets/common/drag_preview_divider.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_dialog.dart';
@@ -605,8 +606,13 @@ class _StyleExplorePageState extends State<StyleExplorePage>
       return KeyEventResult.ignored;
     }
     final k = e.logicalKey;
-    final hw = HardwareKeyboard.instance;
-    final ctrl = hw.isControlPressed || hw.isMetaPressed;
+    // Ctrl 或 ⌘；macOS 上只认 ⌘（⌃⌘F 是系统全屏）
+    final ctrl = isControlOrCommandPressed();
+    // 删除：Delete，macOS 上还有 ⌘⌫
+    final deleteKey =
+        isListDeleteKey(e) && (!ctrl || k == LogicalKeyboardKey.backspace);
+    // macOS 上带 Control 的组合（⌃⌘F 全屏……）不当裸键，留给系统菜单
+    if (isMacChordModifierPressed() && !ctrl) return KeyEventResult.ignored;
     final detail = _detailKey != null;
     if (!detail && k == LogicalKeyboardKey.escape) {
       if (_drawer) {
@@ -651,7 +657,7 @@ class _StyleExplorePageState extends State<StyleExplorePage>
       }
     }
     final t = targets;
-    if (t.isEmpty || ctrl && k != LogicalKeyboardKey.keyC) {
+    if (t.isEmpty || ctrl && k != LogicalKeyboardKey.keyC && !deleteKey) {
       return KeyEventResult.ignored;
     }
     if (ctrl && k == LogicalKeyboardKey.keyC) {
@@ -661,7 +667,7 @@ class _StyleExplorePageState extends State<StyleExplorePage>
       _actions.onSetFavorite(t, !all);
     } else if (k == LogicalKeyboardKey.keyE) {
       startEvolution(t);
-    } else if (k == LogicalKeyboardKey.delete && !detail) {
+    } else if (deleteKey && !detail) {
       delete(t);
     } else if (_digit(k) case final d?) {
       if (d == 0) {

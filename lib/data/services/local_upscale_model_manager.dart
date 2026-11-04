@@ -7,19 +7,30 @@ import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart' as p;
+import 'package:nai_launcher/core/utils/app_bundle_paths.dart';
 import 'package:nai_launcher/core/utils/app_support_directory.dart';
 import 'package:uuid/uuid.dart';
 
 import '../models/upscale/local_upscale_models.dart';
 
 /// Private versioned files, independent of ComfyUI paths, ports and settings.
+///
+/// Windows releases the hash-pinned engine from the asset bundle. On macOS the
+/// engine ships signed inside the app bundle (`Contents/Resources/tools`, put
+/// there by `scripts/build_macos.sh`) and is never copied out; models work the
+/// same way on both.
 class LocalUpscaleModelManager {
   LocalUpscaleModelManager({
     Future<Directory> Function()? rootDirectory,
     Future<Uint8List> Function(String)? loadAsset,
     Dio? dio,
+    LocalUpscalePlatform? platform,
+    String Function()? toolsDirectory,
   }) : _rootDirectory = rootDirectory ?? _defaultDirectory,
        _loadAsset = loadAsset ?? _bundleBytes,
+       _platform = platform ?? LocalUpscalePlatform.host,
+       _toolsDirectory =
+           toolsDirectory ?? (() => AppBundlePaths.toolsDirectory),
        _dio =
            dio ??
            Dio(
@@ -33,6 +44,8 @@ class LocalUpscaleModelManager {
       'bceed7d6dc52eac1ea510bdb35e5617742f6d8029f5cf04e820f7c48a014135b';
   final Future<Directory> Function() _rootDirectory;
   final Future<Uint8List> Function(String) _loadAsset;
+  final LocalUpscalePlatform _platform;
+  final String Function() _toolsDirectory;
   final Dio _dio;
   Future<void>? _initializing;
   late Directory directory;
@@ -95,14 +108,23 @@ class LocalUpscaleModelManager {
     _manifest = jsonDecode(utf8.decode(manifest)) as Map<String, dynamic>;
     directory = await _rootDirectory();
     await directory.create(recursive: true);
-    for (final item
-        in (_manifest['engine_files'] as List).cast<Map<String, dynamic>>()) {
-      final relative = item['path'] as String;
-      await _installBundled(
-        relative,
-        File(p.join(directory.path, relative)),
-        item['sha256'] as String,
-      );
+    if (_platform == LocalUpscalePlatform.windows) {
+      for (final item
+          in (_manifest['engine_files'] as List).cast<Map<String, dynamic>>()) {
+        final relative = item['path'] as String;
+        await _installBundled(
+          relative,
+          File(p.join(directory.path, relative)),
+          item['sha256'] as String,
+        );
+      }
+    } else {
+      // Earlier macOS builds released the Windows engine here; it never runs.
+      try {
+        await _removeOwned(Directory(p.join(directory.path, 'windows')));
+      } catch (_) {
+        // Leftover cleanup must not block upscaling.
+      }
     }
     for (final item in _filesFor(localUpscaleCatalog.first)) {
       final relative = item['name'] as String;
@@ -223,18 +245,45 @@ class LocalUpscaleModelManager {
     return models;
   }
 
+  /// The Real-ESRGAN executable for this platform. The Windows copy is checked
+  /// against the manifest on every run; the macOS one is covered by the app
+  /// bundle's code signature.
+  Future<String> _engine() async {
+    switch (_platform) {
+      case LocalUpscalePlatform.windows:
+        for (final item
+            in (_manifest['engine_files'] as List)
+                .cast<Map<String, dynamic>>()) {
+          final file = File(p.join(directory.path, item['path'] as String));
+          if (!await file.exists()) {
+            throw const LocalUpscaleException(LocalUpscaleError.engineMissing);
+          }
+          if (await _hash(file) != item['sha256']) {
+            throw const LocalUpscaleException(LocalUpscaleError.integrity);
+          }
+        }
+        return p.join(directory.path, 'windows', 'realesrgan-ncnn-vulkan.exe');
+      case LocalUpscalePlatform.macOS:
+        final engine = p.join(
+          _toolsDirectory(),
+          'local-upscale',
+          'realesrgan-ncnn-vulkan',
+        );
+        if (await FileSystemEntity.type(engine, followLinks: false) !=
+            FileSystemEntityType.file) {
+          throw const LocalUpscaleException(LocalUpscaleError.engineMissing);
+        }
+        return engine;
+      case LocalUpscalePlatform.unsupported:
+        throw const LocalUpscaleException(
+          LocalUpscaleError.unsupportedPlatform,
+        );
+    }
+  }
+
   Future<(String, String, LocalUpscaleModel)> resolve(String id) async {
     await initialize();
-    for (final item
-        in (_manifest['engine_files'] as List).cast<Map<String, dynamic>>()) {
-      final file = File(p.join(directory.path, item['path'] as String));
-      if (!await file.exists()) {
-        throw const LocalUpscaleException(LocalUpscaleError.engineMissing);
-      }
-      if (await _hash(file) != item['sha256']) {
-        throw const LocalUpscaleException(LocalUpscaleError.integrity);
-      }
-    }
+    final engine = await _engine();
     final available = await models();
     final matches = available.where(
       (model) => model.id == id && model.installed,
@@ -268,11 +317,7 @@ class LocalUpscaleModelManager {
         }
       }
     }
-    return (
-      p.join(directory.path, 'windows', 'realesrgan-ncnn-vulkan.exe'),
-      folder.path,
-      model,
-    );
+    return (engine, folder.path, model);
   }
 
   void _claimMutation() {

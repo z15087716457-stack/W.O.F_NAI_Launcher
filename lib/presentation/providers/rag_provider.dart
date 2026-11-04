@@ -9,6 +9,7 @@ import '../../core/database/asset_database_manager.dart';
 import '../../core/tag_expansion/tag_semantics_store.dart';
 import '../../core/rag/rag_client.dart';
 import '../../core/rag/rag_maintenance.dart';
+import '../../core/rag/rag_platform.dart';
 import '../../core/rag/rag_settings.dart';
 import '../../core/rag/rag_runtime.dart';
 import '../../core/rag/rag_runtime_probe.dart';
@@ -192,9 +193,19 @@ final ragTagSemanticsPathsProvider =
           ),
     );
 
+/// The host machine; tests override it to take the Windows or macOS path.
+final ragPlatformProvider = Provider<RagPlatform>((ref) => RagPlatform.host);
+
+/// A Mac's memory decides what "auto" means there (RagSettings.deviceOn);
+/// tests override it. Null when unknown, which counts as the CPU.
+final ragPhysicalMemoryProvider = Provider<int?>(
+  (ref) =>
+      ref.watch(ragPlatformProvider).isMacOS ? readMacPhysicalMemory() : null,
+);
+
 final ragRuntimeProbeFactoryProvider = Provider<RagRuntimeProbe Function()>(
   (ref) =>
-      () => RagRuntimeProbe(),
+      () => RagRuntimeProbe(platform: ref.read(ragPlatformProvider)),
 );
 // Compatibility belongs to the selected interpreter, not the settings page's
 // lifetime. Explicit recheck/install/path changes still invalidate this probe.
@@ -357,8 +368,9 @@ class RagController extends Notifier<RagStatus> {
     );
     try {
       final root = await ref.read(ragDirectoryProvider)();
+      final platform = ref.read(ragPlatformProvider);
       final python = settings.python.isEmpty
-          ? p.join(root.path, 'runtime', 'Scripts', 'python.exe')
+          ? platform.managedPython(root.path)
           : settings.python;
       if (!await File(python).exists()) {
         throw const RagException('runtime_missing');
@@ -398,7 +410,12 @@ class RagController extends Notifier<RagStatus> {
           {
             'embedding': settings.embedding,
             'reranker': settings.reranker,
-            'device': settings.device.name,
+            'device': settings
+                .deviceOn(
+                  platform,
+                  memoryBytes: ref.read(ragPhysicalMemoryProvider),
+                )
+                .name,
             'directory': p.join(root.path, 'indices'),
             'catalog': paths.catalog,
             'runtime': paths.runtime,
@@ -1117,7 +1134,10 @@ class RagController extends Notifier<RagStatus> {
       if (_disposed || _runtimeInstallCancelled) return;
       final root = await ref.read(ragDirectoryProvider)();
       if (_disposed || _runtimeInstallCancelled) return;
-      installer = _installer = RagRuntimeInstaller(root);
+      installer = _installer = RagRuntimeInstaller(
+        root,
+        platform: ref.read(ragPlatformProvider),
+      );
       final python = await installer.install(
         cuda: cuda,
         preferredPython: selectedPython,

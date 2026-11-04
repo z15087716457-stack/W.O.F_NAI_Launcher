@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'default_shortcuts.dart';
 
@@ -24,6 +25,7 @@ class ShortcutBinding with _$ShortcutBinding {
   /// 获取当前有效的快捷键（优先使用自定义，否则使用默认）
   String? get effectiveShortcut {
     if (!enabled) return null;
+    // 空串表示没设键（2.0 用它标「默认键让给了用户自定义的」；Mac 版有几项默认不设键也是空串）
     return customShortcut ?? defaultShortcut;
   }
 
@@ -277,6 +279,19 @@ class ParsedShortcut {
     return parts.join('+');
   }
 
+  /// Mac 写法，一个键一段：⌃⌥⇧⌘ 按 Mac 菜单的顺序在前，特殊键用键盘符号（见 [ShortcutKey.macLabel]）。
+  List<String> get macKeyLabels => [
+    if (modifiers.contains(ShortcutModifier.control)) '⌃',
+    if (modifiers.contains(ShortcutModifier.alt)) '⌥',
+    if (modifiers.contains(ShortcutModifier.shift)) '⇧',
+    if (modifiers.contains(ShortcutModifier.meta)) '⌘',
+    key.macLabel,
+  ];
+
+  /// 键帽用，一个键一段：macOS 上是 [macKeyLabels]，其他平台按 [displayLabel] 拆开。
+  List<String> get keyLabels =>
+      ShortcutParser.primaryIsCommand ? macKeyLabels : displayLabel.split('+');
+
   /// 转换为ShortcutActivator字符串格式
   String toActivatorString() {
     final parts = <String>[
@@ -387,6 +402,22 @@ enum ShortcutKey {
 
   const ShortcutKey(this.logicalKey, this.displayName);
 
+  /// macOS 上的写法：特殊键用 Mac 菜单里的键盘符号，其余同 [displayName]。
+  String get macLabel => _macSymbols[this] ?? displayName;
+
+  // Mac 菜单里的 ↩ ↖ ↘ 都有 emoji 写法，应用字体里没有时 Flutter 会回退成彩色 emoji
+  // （加 U+FE0E 也不管用），所以 Return 用没有 emoji 写法的 ISO 9995-7 符号 ⏎。
+  // Home / End 的 ⇱ ⇲ 应用自带的字体里都没有，照旧写字
+  static const _macSymbols = {
+    ShortcutKey.enter: '⏎',
+    ShortcutKey.escape: '⎋',
+    ShortcutKey.tab: '⇥',
+    ShortcutKey.backspace: '⌫',
+    ShortcutKey.delete: '⌦',
+    ShortcutKey.pageup: '⇞',
+    ShortcutKey.pagedown: '⇟',
+  };
+
   /// 从字符串解析
   static ShortcutKey? fromString(String value) {
     final normalized = value.toLowerCase().trim();
@@ -425,9 +456,14 @@ class ShortcutParser {
           modifiers.add(ShortcutModifier.shift);
           continue;
         case 'meta':
+          modifiers.add(ShortcutModifier.meta);
+          continue;
+        // 手写的 cmd 指 ⌘ 键：macOS 上就是主修饰键（和 ctrl 同义），其他平台照旧当 meta
         case 'cmd':
         case 'command':
-          modifiers.add(ShortcutModifier.meta);
+          modifiers.add(
+            primaryIsCommand ? ShortcutModifier.control : ShortcutModifier.meta,
+          );
           continue;
       }
 
@@ -442,7 +478,30 @@ class ShortcutParser {
 
     if (key == null) return null;
 
-    return ParsedShortcut(modifiers: modifiers, key: key, raw: shortcut);
+    return ParsedShortcut(
+      modifiers: _platformPrimary(modifiers),
+      key: key,
+      raw: shortcut,
+    );
+  }
+
+  // macOS 按规范用 ⌘ 当主修饰键。配置里的 ctrl 表示「主修饰键」：Windows / Linux 上是 Ctrl，macOS 上是 ⌘；
+  // macOS 键盘上真正的 Control 键记成 meta。存储格式跨平台不变，只在解析和序列化这一处对调（对调两次等于没调）。
+  static bool get primaryIsCommand =>
+      defaultTargetPlatform == TargetPlatform.macOS;
+
+  static Set<ShortcutModifier> _platformPrimary(
+    Set<ShortcutModifier> modifiers,
+  ) {
+    if (!primaryIsCommand) return modifiers;
+    return {
+      for (final m in modifiers)
+        switch (m) {
+          ShortcutModifier.control => ShortcutModifier.meta,
+          ShortcutModifier.meta => ShortcutModifier.control,
+          _ => m,
+        },
+    };
   }
 
   /// 尝试解析别名
@@ -462,11 +521,12 @@ class ShortcutParser {
 
   /// 将ParsedShortcut转换回字符串
   static String serialize(ParsedShortcut shortcut) {
+    final modifiers = _platformPrimary(shortcut.modifiers);
     final parts = <String>[
-      if (shortcut.modifiers.contains(ShortcutModifier.control)) 'ctrl',
-      if (shortcut.modifiers.contains(ShortcutModifier.alt)) 'alt',
-      if (shortcut.modifiers.contains(ShortcutModifier.shift)) 'shift',
-      if (shortcut.modifiers.contains(ShortcutModifier.meta)) 'meta',
+      if (modifiers.contains(ShortcutModifier.control)) 'ctrl',
+      if (modifiers.contains(ShortcutModifier.alt)) 'alt',
+      if (modifiers.contains(ShortcutModifier.shift)) 'shift',
+      if (modifiers.contains(ShortcutModifier.meta)) 'meta',
       shortcut.key.logicalKey,
     ];
 

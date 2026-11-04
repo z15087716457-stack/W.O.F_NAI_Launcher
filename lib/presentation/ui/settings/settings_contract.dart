@@ -576,6 +576,7 @@ class SettingsViewData {
     SettingsUpscaleData? upscale,
     SettingsDictionaryData? dictionaries,
     SettingsStorageData? storage,
+    SettingsBackupData? backup,
     SettingsBridgesData? bridges,
   }) => SettingsViewData(
     page: page ?? this.page,
@@ -601,7 +602,7 @@ class SettingsViewData {
     bridges: bridges ?? this.bridges,
     network: network,
     privacy: privacy ?? this.privacy,
-    backup: backup,
+    backup: backup ?? this.backup,
     about: about,
   );
 }
@@ -1603,9 +1604,14 @@ class SettingsRagStep {
   final SettingsTone tone;
 }
 
+/// 运行环境所在的系统：Windows 可选 CUDA；Mac 没有 CUDA，Apple 芯片自动用 GPU（MPS）。
+enum SettingsRagPlatform { windows, macOS }
+
 @immutable
 class SettingsRagData {
   const SettingsRagData({
+    this.platform = SettingsRagPlatform.windows,
+    this.runtimeSupported = true,
     this.runtime = const SettingsRagStep(value: ''),
     this.embedder = const SettingsRagStep(value: ''),
     this.reranker = const SettingsRagStep(value: ''),
@@ -1630,12 +1636,20 @@ class SettingsRagData {
     this.error,
   });
 
+  final SettingsRagPlatform platform;
+
+  /// 这台机器能装运行环境。Intel 芯片的 Mac 不能（PyTorch 没有 Intel Mac 的包）：
+  /// 显示“不支持”和原因，安装按钮置灰。
+  final bool runtimeSupported;
   final SettingsRagStep runtime;
   final SettingsRagStep embedder;
   final SettingsRagStep reranker;
   final SettingsRagStep device;
   final List<SettingsRagSource> sources;
   final int indexBytes;
+
+  /// 能装 CUDA 版运行环境、能选 CUDA 设备（只有 Windows）。
+  bool get cudaSupported => platform == SettingsRagPlatform.windows;
 
   /// 正在检测运行环境。
   final bool checking;
@@ -1751,10 +1765,14 @@ class SettingsUpscaleData {
     this.seed = const [],
     this.rtx,
     this.seedOffloadMaxBlocks = 32,
+    this.seedAvailable = true,
+    this.rtxAvailable = true,
   });
 
-  /// 显卡检测（新增）；null = 没检测到独显。
+  /// 显卡检测（新增）；null = 没检测到独显。Apple 芯片的 Mac 上是芯片名（如 Apple M2 Max）。
   final String? gpuName;
+
+  /// 独立显存；0 = 没有单独的显存（Apple 芯片），卡片只显示名字。
   final int vramGb;
   final Set<SettingsGpuCap> caps;
   final String cudaVersion;
@@ -1765,6 +1783,11 @@ class SettingsUpscaleData {
   /// Upper bound of the currently edited SeedVR2 model: 3B = 32, 7B = 36.
   /// Wiring supplies Seedvr2Options.maxBlocks for the selected model.
   final int seedOffloadMaxBlocks;
+
+  /// Whether SeedVR2 / RTX Video can be installed on this platform (Windows
+  /// only). When false the install buttons are disabled and the section says so.
+  final bool seedAvailable;
+  final bool rtxAvailable;
 }
 
 // ── 桥接与集成
@@ -1900,6 +1923,7 @@ class SettingsBackupData {
     this.lastImportAt,
     this.backups = const [],
     this.shortcutsCustomized = 0,
+    this.legacy,
   });
 
   /// 有值时“撤销上次导入”可用。
@@ -1908,6 +1932,65 @@ class SettingsBackupData {
   /// 自动备份（新增：保留最近 5 份）。
   final List<SettingsBackup> backups;
   final int shortcutsCustomized;
+
+  /// “旧版数据”一节；只在 macOS、不是沙箱、检测到旧版数据时有值。
+  final SettingsLegacyData? legacy;
+}
+
+/// 旧版（1.x）数据：从旧版同步，以及在同步前、同步后两份数据之间来回换。
+/// 都在下次启动、数据打开前进行。
+@immutable
+class SettingsLegacyData {
+  const SettingsLegacyData({
+    required this.appName,
+    this.copiedAt,
+    this.syncedAt,
+    this.switchBack,
+    this.running = false,
+  });
+
+  /// 程序坞里旧版的名字。
+  final String appName;
+
+  /// 现在的数据来自首次启动时的复制。
+  final DateTime? copiedAt;
+
+  /// 现在的数据来自这次同步。
+  final DateTime? syncedAt;
+
+  /// 第二行换回的那份备份；null 时还没有同步过，这一行不可用。
+  final SettingsLegacySwitch? switchBack;
+
+  /// 旧版正在运行（同步前要先退出）。
+  final bool running;
+}
+
+/// 第二行此刻做什么：最近一份备份是另一份数据，换回它。
+enum SettingsLegacySwitchKind {
+  /// 刚同步过：撤销上次同步，换回同步前的数据。
+  undo,
+
+  /// 撤销过：换回同步后的数据。
+  redo,
+
+  /// 撤销后又换回过：再撤销一次，换回同步前的数据。
+  undoAgain,
+}
+
+/// 第二行要换回的备份。
+@immutable
+class SettingsLegacySwitch {
+  const SettingsLegacySwitch({
+    required this.kind,
+    required this.backup,
+    required this.at,
+  });
+
+  final SettingsLegacySwitchKind kind;
+  final String backup;
+
+  /// 这份备份留下的时间：同步、撤销或换回的那一刻，换回后的数据就是那时的样子。
+  final DateTime at;
 }
 
 // ── 关于
@@ -2085,6 +2168,9 @@ class SettingsActions {
     this.onUndoImport = _none,
     this.onResetScopes = _noScopes,
     this.onRestoreBackup = _noId,
+    this.onLegacySync = _none,
+    this.onLegacyUndo = _noId,
+    this.onLegacyRedo = _noId,
     // 关于
     this.onCheckUpdate = _none,
     this.onInstallUpdate = _none,
@@ -2312,6 +2398,11 @@ class SettingsActions {
   /// 界面已确认过；接线方先自动备份再重置。
   final ValueChanged<Set<SettingsResetScope>> onResetScopes;
   final ValueChanged<String> onRestoreBackup;
+
+  /// 界面已确认过；接线方记下请求并重启，下次启动时同步、撤销或换回。
+  final VoidCallback onLegacySync;
+  final ValueChanged<String> onLegacyUndo;
+  final ValueChanged<String> onLegacyRedo;
 
   final VoidCallback onCheckUpdate;
   final VoidCallback onInstallUpdate;

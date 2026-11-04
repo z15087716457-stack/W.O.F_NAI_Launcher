@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -78,6 +79,67 @@ void main() {
       'MaterialIcons',
     )..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();
   });
+  testWidgets(
+    'capsule runs the local Real-ESRGAN scheme on macOS but not SeedVR2',
+    (tester) async {
+      final mac = defaultTargetPlatform == TargetPlatform.macOS;
+      final task = _Task();
+      final container = ProviderContainer(
+        overrides: [
+          localStorageServiceProvider.overrideWithValue(_Storage()),
+          generationParamsNotifierProvider.overrideWith(_Params.new),
+          imageGenerationNotifierProvider.overrideWith(_Generation.new),
+          localUpscaleTaskProvider.overrideWith(() => task),
+          cloudUpscaleTaskProvider.overrideWith(_CloudTask.new),
+          // A SeedVR2 receipt is faked as installed to isolate the platform.
+          localUpscaleModelsProvider.overrideWith(
+            (ref) async => [
+              localUpscaleCatalog.first.withInstalled(true),
+              advancedUpscaleCatalog.first.withInstalled(true),
+            ],
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+      final image = GeneratedImage.create(
+        Uint8List.fromList(img.encodePng(img.Image(width: 64, height: 64))),
+        width: 64,
+        height: 64,
+      );
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            theme: AppTheme.getTheme(AppStyle.geist, Brightness.light),
+            locale: const Locale('zh'),
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            home: Scaffold(
+              body: Center(child: CanvasUpscaleButton(image: image)),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final execute = find.byKey(const Key('canvas-upscale-execute'));
+      await tester.tap(execute);
+      await tester.pumpAndSettle();
+      expect(task.calls, 1);
+      container
+          .read(imageWorkflowControllerProvider.notifier)
+          .updateLocalUpscaleModel(advancedUpscaleCatalog.first.id);
+      await tester.pumpAndSettle();
+      expect(tester.widget<InkWell>(execute).onTap, mac ? isNull : isNotNull);
+      await tester.tap(execute);
+      await tester.pumpAndSettle();
+      expect(task.calls, mac ? 1 : 2);
+      expect(tester.takeException(), isNull);
+    },
+    variant: const TargetPlatformVariant({
+      TargetPlatform.windows,
+      TargetPlatform.macOS,
+    }),
+  );
   for (final locale in const [
     Locale('zh'),
     Locale('zh', 'TW'),

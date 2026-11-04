@@ -7,6 +7,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as p;
 import 'package:nai_launcher/core/utils/pica_lanczos_resizer.dart';
 import 'package:nai_launcher/data/models/upscale/local_upscale_models.dart';
+import 'package:nai_launcher/data/services/advanced_upscale_component_manager.dart';
 import 'package:nai_launcher/data/services/local_upscale_model_manager.dart';
 import 'package:nai_launcher/data/services/local_upscale_service.dart';
 
@@ -45,6 +46,7 @@ void main() {
   setUp(() async {
     temporary = await Directory.systemTemp.createTemp('studio-upscale-test-');
     manager = LocalUpscaleModelManager(
+      platform: LocalUpscalePlatform.windows,
       rootDirectory: () async => Directory(p.join(temporary.path, 'runtime')),
       loadAsset: (name) =>
           File(p.join('assets', 'local_upscale', name)).readAsBytes(),
@@ -54,10 +56,36 @@ void main() {
     await temporary.delete(recursive: true);
   });
 
+  // Opt-in audits run the real engine: on Windows the copy released from the
+  // asset bundle; on macOS the one scripts/build_macos.sh put into an app
+  // bundle, given as LOCAL_UPSCALE_MAC_TOOLS=<App>.app/Contents/Resources/tools.
+  final macTools = Platform.environment['LOCAL_UPSCALE_MAC_TOOLS'];
+  Object nativeAudit(String needs) => !Platform.isWindows && !Platform.isMacOS
+      ? 'Requires Windows or macOS and Vulkan; kept as an opt-in native audit'
+      : Platform.environment['RUN_LOCAL_UPSCALE_AUDIT'] != '1'
+      ? 'Opt in with RUN_LOCAL_UPSCALE_AUDIT=1; $needs'
+      : Platform.isMacOS && macTools == null
+      ? 'Set LOCAL_UPSCALE_MAC_TOOLS to the tools folder of an app bundle built by scripts/build_macos.sh'
+      : false;
+  LocalUpscaleModelManager native() {
+    if (!Platform.isMacOS) return manager;
+    final mac = LocalUpscaleModelManager(
+      platform: LocalUpscalePlatform.macOS,
+      toolsDirectory: () => macTools!,
+      rootDirectory: () async =>
+          Directory(p.join(temporary.path, 'native-runtime')),
+      loadAsset: (name) =>
+          File(p.join('assets', 'local_upscale', name)).readAsBytes(),
+    );
+    addTearDown(mac.dispose);
+    return mac;
+  }
+
   test(
     'real Flutter bundle extracts the pinned offline engine and default model',
     () async {
       final bundled = LocalUpscaleModelManager(
+        platform: LocalUpscalePlatform.windows,
         rootDirectory: () async =>
             Directory(p.join(temporary.path, 'bundle-runtime')),
       );
@@ -179,19 +207,282 @@ void main() {
     expect((await manager.models()).where((m) => m.custom), isEmpty);
   });
 
+  test('only Real-ESRGAN runs on macOS; SeedVR2 and RTX need Windows', () {
+    for (final method in LocalUpscaleMethod.values) {
+      expect(LocalUpscalePlatform.windows.supports(method), isTrue);
+      expect(
+        LocalUpscalePlatform.macOS.supports(method),
+        method == LocalUpscaleMethod.standard,
+      );
+      expect(LocalUpscalePlatform.unsupported.supports(method), isFalse);
+    }
+  });
+
+  test(
+    'Windows releases its own engine and never reads the app bundle',
+    () async {
+      final windows = LocalUpscaleModelManager(
+        platform: LocalUpscalePlatform.windows,
+        toolsDirectory: () => throw StateError('app bundle tools on Windows'),
+        rootDirectory: () async => Directory(p.join(temporary.path, 'windows')),
+        loadAsset: (name) =>
+            File(p.join('assets', 'local_upscale', name)).readAsBytes(),
+      );
+      addTearDown(windows.dispose);
+      final (engine, _, _) = await windows.resolve('anime');
+      expect(
+        engine,
+        p.join(windows.directory.path, 'windows', 'realesrgan-ncnn-vulkan.exe'),
+      );
+      expect(await File(engine).length(), 6161408);
+    },
+  );
+
+  group('macOS', () {
+    late Directory tools;
+    late File engine;
+    late List<String> assets;
+    late LocalUpscaleModelManager mac;
+    setUp(() async {
+      tools = Directory(
+        p.join(temporary.path, 'Studio.app', 'Contents', 'Resources', 'tools'),
+      );
+      engine = File(
+        p.join(tools.path, 'local-upscale', 'realesrgan-ncnn-vulkan'),
+      );
+      await engine.create(recursive: true);
+      await engine.writeAsBytes([0xcf, 0xfa, 0xed, 0xfe]);
+      assets = [];
+      mac = LocalUpscaleModelManager(
+        platform: LocalUpscalePlatform.macOS,
+        toolsDirectory: () => tools.path,
+        rootDirectory: () async => Directory(p.join(temporary.path, 'mac')),
+        loadAsset: (name) {
+          assets.add(name);
+          return File(p.join('assets', 'local_upscale', name)).readAsBytes();
+        },
+      );
+    });
+    tearDown(() => mac.dispose());
+
+    Process finished() {
+      final process = _Process();
+      when(() => process.stdout).thenAnswer((_) => const Stream.empty());
+      when(() => process.stderr).thenAnswer(
+        (_) => Stream.value(Uint8List.fromList('100.00%\n'.codeUnits)),
+      );
+      when(() => process.exitCode).thenAnswer((_) async => 0);
+      return process;
+    }
+
+    test(
+      'runs the bundled engine with the Windows arguments and models, never the Windows files',
+      () async {
+        // Earlier macOS builds released the Windows engine; it is cleaned up.
+        final leftover = File(
+          p.join(
+            temporary.path,
+            'mac',
+            'windows',
+            'realesrgan-ncnn-vulkan.exe',
+          ),
+        );
+        await leftover.create(recursive: true);
+        final (executable, modelPath, model) = await mac.resolve('anime');
+        expect(executable, engine.path);
+        expect(
+          await File(p.join(modelPath, '${model.engineName}.bin')).length(),
+          8943500,
+        );
+        expect(await leftover.parent.exists(), isFalse);
+
+        final runs = <(String, List<String>)>[];
+        final service = LocalUpscaleService(
+          mac,
+          platform: LocalUpscalePlatform.macOS,
+          startProcess: (exe, args) async {
+            runs.add((exe, args));
+            final input = img.decodePng(
+              await File(args[args.indexOf('-i') + 1]).readAsBytes(),
+            )!;
+            final scale = int.parse(args[args.indexOf('-s') + 1]);
+            await File(args[args.indexOf('-o') + 1]).writeAsBytes(
+              img.encodePng(
+                img.copyResize(
+                  input,
+                  width: input.width * scale,
+                  height: input.height * scale,
+                ),
+              ),
+            );
+            return finished();
+          },
+        );
+        final progress = <LocalUpscaleProgress>[];
+        final result = await service.upscale(
+          _source(alpha: true),
+          modelId: 'anime',
+          scale: 1.5,
+          cancellation: LocalUpscaleCancellation(),
+          onProgress: progress.add,
+        );
+        expect((result.width, result.height), (72, 48));
+        expect(img.decodePng(result.bytes)!.getPixel(0, 0).a, 0);
+        final (exe, args) = runs.single;
+        expect(exe, engine.path);
+        String value(String flag) => args[args.indexOf(flag) + 1];
+        expect(value('-m'), modelPath);
+        expect(value('-n'), 'realesrgan-x4plus-anime');
+        expect([value('-s'), value('-t'), value('-j')], ['4', '128', '1:1:1']);
+        expect(
+          progress.any(
+            (item) =>
+                item.phase == LocalUpscalePhase.inference && item.fraction == 1,
+          ),
+          isTrue,
+        );
+        expect(assets.where((name) => name.startsWith('windows/')), isEmpty);
+        expect(service.isRunning, isFalse);
+      },
+    );
+
+    test(
+      'model paths are measured in UTF-8 bytes for the 256-byte engine buffer',
+      () async {
+        // 80 CJK characters: 80 UTF-16 units on Windows, 240 bytes on macOS.
+        Future<Directory> deep() async =>
+            Directory(p.join(temporary.path, '模' * 40, '型' * 40));
+        final starts = <LocalUpscalePlatform>[];
+        for (final platform in [
+          LocalUpscalePlatform.windows,
+          LocalUpscalePlatform.macOS,
+        ]) {
+          final models = LocalUpscaleModelManager(
+            platform: platform,
+            toolsDirectory: () => tools.path,
+            rootDirectory: () async =>
+                Directory(p.join((await deep()).path, platform.name)),
+            loadAsset: (name) =>
+                File(p.join('assets', 'local_upscale', name)).readAsBytes(),
+          );
+          addTearDown(models.dispose);
+          final service = LocalUpscaleService(
+            models,
+            platform: platform,
+            startProcess: (_, __) async {
+              starts.add(platform);
+              throw const ProcessException('engine', []);
+            },
+          );
+          await expectLater(
+            service.upscale(
+              _source(),
+              modelId: 'anime',
+              scale: 2,
+              cancellation: LocalUpscaleCancellation(),
+            ),
+            throwsA(
+              _error(
+                platform == LocalUpscalePlatform.macOS
+                    ? LocalUpscaleError.modelMissing
+                    : LocalUpscaleError.engineMissing,
+              ),
+            ),
+          );
+        }
+        expect(starts, [LocalUpscalePlatform.windows]);
+      },
+    );
+
+    test('a missing or linked engine is reported and never started', () async {
+      var starts = 0;
+      final service = LocalUpscaleService(
+        mac,
+        platform: LocalUpscalePlatform.macOS,
+        startProcess: (_, __) async {
+          starts++;
+          throw StateError('unexpected process');
+        },
+      );
+      await engine.delete();
+      await expectLater(
+        service.upscale(
+          _source(),
+          modelId: 'anime',
+          scale: 2,
+          cancellation: LocalUpscaleCancellation(),
+        ),
+        throwsA(_error(LocalUpscaleError.engineMissing)),
+      );
+      final elsewhere = File(p.join(temporary.path, 'elsewhere'));
+      await elsewhere.writeAsBytes([1]);
+      await Link(engine.path).create(elsewhere.path);
+      await expectLater(
+        mac.resolve('anime'),
+        throwsA(_error(LocalUpscaleError.engineMissing)),
+      );
+      expect(starts, 0);
+      expect(service.isRunning, isFalse);
+      mac.claimInference('anime');
+      mac.releaseInference();
+    });
+
+    test(
+      'SeedVR2 and RTX are refused before any lock, asset or process',
+      () async {
+        var starts = 0;
+        final advanced = AdvancedUpscaleComponentManager(
+          platform: LocalUpscalePlatform.macOS,
+          rootDirectory: () async =>
+              Directory(p.join(temporary.path, 'advanced')),
+          loadAsset: (name) async => throw StateError('asset $name'),
+          startProcess: (_, __, ___) async => throw StateError('process'),
+        );
+        addTearDown(advanced.dispose);
+        final service = LocalUpscaleService(
+          mac,
+          platform: LocalUpscalePlatform.macOS,
+          advanced: advanced,
+          startProcess: (_, __) async {
+            starts++;
+            throw StateError('unexpected process');
+          },
+        );
+        for (final model in advancedUpscaleCatalog) {
+          await expectLater(
+            service.upscale(
+              _source(),
+              modelId: model.id,
+              scale: 2,
+              cancellation: LocalUpscaleCancellation(),
+            ),
+            throwsA(_error(LocalUpscaleError.unsupportedPlatform)),
+          );
+        }
+        expect(starts, 0);
+        expect(assets, isEmpty);
+        mac.claimInference('anime');
+        mac.releaseInference();
+        advanced.claimInference();
+        advanced.releaseInference();
+      },
+    );
+  });
+
   test(
     'official optional models install from the verified archive and run natively',
     () async {
       // The release archive is downloaded once for this audit, never in a unit run.
-      await manager.initialize();
+      final models = native();
+      await models.initialize();
       await File(
         '.dart_tool/local-upscale-20261005/official-models.zip',
-      ).copy(p.join(manager.directory.path, 'official-models.zip'));
+      ).copy(p.join(models.directory.path, 'official-models.zip'));
       for (final id in ['anime-fast', 'general']) {
-        await manager.download(id);
-        final resolved = await manager.resolve(id);
+        await models.download(id);
+        final resolved = await models.resolve(id);
         expect(resolved.$3.installed, isTrue);
-        final result = await LocalUpscaleService(manager).upscale(
+        final result = await LocalUpscaleService(models).upscale(
           _source(),
           modelId: id,
           scale: 2.75,
@@ -199,14 +490,10 @@ void main() {
         );
         expect((result.width, result.height), (132, 88));
         expect(img.decodePng(result.bytes), isNotNull);
-        await manager.delete(id);
+        await models.delete(id);
       }
     },
-    skip: !Platform.isWindows
-        ? 'Requires Windows and Vulkan; kept as an opt-in native audit'
-        : Platform.environment['RUN_LOCAL_UPSCALE_AUDIT'] != '1'
-        ? 'Opt in with RUN_LOCAL_UPSCALE_AUDIT=1; requires Vulkan and the cached official model archive'
-        : false,
+    skip: nativeAudit('requires Vulkan and the cached official model archive'),
   );
 
   test(
@@ -232,7 +519,7 @@ void main() {
         });
         final service = LocalUpscaleService(
           manager,
-          supportedPlatform: true,
+          platform: LocalUpscalePlatform.windows,
           timeout: const Duration(milliseconds: 60),
           startProcess: (_, args) async {
             expect(args, containsAll(['-m', '-s', '4', '-t', '128']));
@@ -274,7 +561,7 @@ void main() {
       var starts = 0;
       final service = LocalUpscaleService(
         manager,
-        supportedPlatform: true,
+        platform: LocalUpscalePlatform.windows,
         startProcess: (_, __) async {
           starts++;
           throw StateError('unexpected process');
@@ -311,7 +598,7 @@ void main() {
         final gate = Completer<void>();
         final service = LocalUpscaleService(
           manager,
-          supportedPlatform: true,
+          platform: LocalUpscalePlatform.windows,
           beforeInference: () async {
             order.add('suspend');
             await gate.future;
@@ -357,7 +644,8 @@ void main() {
   test(
     'real bundled native worker produces exact fractional targets, keeps alpha, and exits',
     () async {
-      final service = LocalUpscaleService(manager);
+      final models = native();
+      final service = LocalUpscaleService(models);
       final progress = <LocalUpscaleProgress>[];
       for (final alpha in [false, true]) {
         final source = _source(alpha: alpha);
@@ -389,7 +677,7 @@ void main() {
         expect(service.isRunning, isFalse);
         expect(
           await Directory(
-            p.join(manager.directory.path, 'jobs'),
+            p.join(models.directory.path, 'jobs'),
           ).list().toList(),
           isEmpty,
         );
@@ -402,11 +690,7 @@ void main() {
       );
       expect(progress.last.fraction, 1);
     },
-    skip: !Platform.isWindows
-        ? 'Requires Windows and Vulkan; kept as an opt-in native audit'
-        : Platform.environment['RUN_LOCAL_UPSCALE_AUDIT'] != '1'
-        ? 'Opt in with RUN_LOCAL_UPSCALE_AUDIT=1; requires a working Vulkan GPU'
-        : false,
+    skip: nativeAudit('requires a working Vulkan GPU'),
   );
 
   test(
@@ -414,8 +698,9 @@ void main() {
     () async {
       final cancellation = LocalUpscaleCancellation();
       Process? child;
+      final models = native();
       final service = LocalUpscaleService(
-        manager,
+        models,
         startProcess: (exe, args) async {
           child = await Process.start(exe, args);
           cancellation.cancel();
@@ -435,14 +720,10 @@ void main() {
       expect(await child!.exitCode, isNonZero);
       expect(service.isRunning, isFalse);
       expect(
-        await Directory(p.join(manager.directory.path, 'jobs')).list().toList(),
+        await Directory(p.join(models.directory.path, 'jobs')).list().toList(),
         isEmpty,
       );
     },
-    skip: !Platform.isWindows
-        ? 'Requires Windows and Vulkan; kept as an opt-in native audit'
-        : Platform.environment['RUN_LOCAL_UPSCALE_AUDIT'] != '1'
-        ? 'Opt in with RUN_LOCAL_UPSCALE_AUDIT=1; requires a working Vulkan GPU'
-        : false,
+    skip: nativeAudit('requires a working Vulkan GPU'),
   );
 }

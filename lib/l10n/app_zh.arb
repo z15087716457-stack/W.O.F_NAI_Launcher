@@ -5,6 +5,158 @@
   "brand_entryTagline": "给想象，一个发生的地方。",
   "brand_switchToLight": "切换到浅色",
   "brand_switchToDark": "切换到深色",
+  "legacyImport_copyingTitle": "正在从 {app} 复制数据",
+  "@legacyImport_copyingTitle": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "legacyImport_copyingBody": "设置、历史记录、各类库和收藏只在首次启动时复制一次，账号需要重新登录。{app} 自己的数据保持原样。",
+  "@legacyImport_copyingBody": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "legacyImport_runningTitle": "请先退出 {app}",
+  "@legacyImport_runningTitle": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "legacyImport_runningBody": "首次启动时要复制旧版的设置、历史记录、各类库和收藏。请完全退出旧版（包括菜单栏里的图标），退出后会自动开始复制。",
+  "legacyImport_waiting": "正在等待 {app} 退出…",
+  "@legacyImport_waiting": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "legacyImport_failedTitle": "无法从 {app} 复制数据",
+  "@legacyImport_failedTitle": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "legacyImport_failedBody": "没有改动任何数据：{app} 的数据保持原样，也没有留下复制了一半的文件。请确认磁盘空间足够，然后重试。",
+  "@legacyImport_failedBody": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "legacyImport_startWithout": "跳过复制并启动",
+  "legacySync_title": "正在从 {app} 同步数据",
+  "@legacySync_title": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "legacySync_body": "正在用 {app} 现在的设置、历史记录、各类库和收藏替换这里的同类数据，当前数据已先备份。",
+  "@legacySync_body": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "legacySync_runningBody": "同步要读取旧版的设置、历史记录、各类库和收藏。请完全退出旧版（包括菜单栏里的图标），退出后会自动开始同步。",
+  "legacySync_failedTitle": "无法从 {app} 同步数据",
+  "@legacySync_failedTitle": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "legacySync_failedBody": "已换回同步前的数据，没有留下同步了一半的文件。请确认磁盘空间足够，然后重试。",
+  "legacySync_startWithout": "取消同步并启动",
+  "legacyUndo_title": "正在撤销上次同步",
+  "legacyUndo_body": "正在换回同步前的数据，同步之后的数据另存为一份备份。",
+  "legacyUndo_failedTitle": "无法撤销上次同步",
+  "legacyUndo_failedBody": "数据保持原样，没有留下换了一半的文件。请确认磁盘空间足够，然后重试。",
+  "legacyUndo_startWithout": "取消撤销并启动",
+  "legacyRedo_title": "正在换回同步后的数据",
+  "legacyRedo_body": "同步后在这里做的改动都会回来，同步前的数据另存为一份备份。",
+  "legacyRedo_failedTitle": "无法换回同步后的数据",
+  "legacyRedo_startWithout": "取消换回并启动",
+  "set_bkLegacy": "旧版数据",
+  "set_bkLegacySub": "来自旧版 {app}。只读取它的数据，不会改动；备份保留最近 2 份。",
+  "@set_bkLegacySub": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "set_bkLegacySync": "从旧版同步",
+  "set_bkLegacySyncCopied": "首次启动时已复制（{time}）。同步前会备份当前数据。同位置的同名库整套采用旧版，只有新版有的库会保留。",
+  "@set_bkLegacySyncCopied": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "set_bkLegacySyncSynced": "上次同步于 {time}。同步前会备份当前数据。同位置的同名库整套采用旧版，只有新版有的库会保留。",
+  "@set_bkLegacySyncSynced": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "set_bkLegacySyncNever": "首次启动时没有复制。同步前会备份当前数据。同位置的同名库整套采用旧版，只有新版有的库会保留。",
+  "set_bkLegacySyncBtn": "同步…",
+  "set_bkLegacyUndo": "撤销上次同步",
+  "set_bkLegacyUndoSub": "回到 {time} 同步前的数据",
+  "@set_bkLegacyUndoSub": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "set_bkLegacyRedo": "换回同步后的数据",
+  "set_bkLegacyRedoSub": "回到 {time} 撤销前的数据",
+  "@set_bkLegacyRedoSub": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "set_bkLegacyUndoAgainSub": "回到 {time} 换回前的数据",
+  "@set_bkLegacyUndoAgainSub": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "set_bkLegacyNoSync": "还没有同步过",
+  "set_bkLegacyUndoBtn": "恢复…",
+  "set_bkLegacySyncTitle": "用旧版数据替换当前数据？",
+  "set_bkLegacySyncBody": "从 {app} 复制设置、历史记录、各类库和收藏。同位置的同名库会采用旧版的整套文件。只有新版有的库会连同配套文件保留。\n\n· 当前数据先完整备份，可以用“撤销上次同步”换回来\n· 新版独有文件夹中的 Agent 会话、偏好备份等会保留\n· 图片和 Vibe 文件不受影响\n· 需要重启；旧版还开着的话，请先退出它",
+  "@set_bkLegacySyncBody": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "set_bkLegacySyncRunning": "⚠ {app} 正在运行。请先退出它，否则重启后会停在等待页面，等你退出后再继续。",
+  "@set_bkLegacySyncRunning": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "set_bkLegacySyncConfirm": "同步并重启",
+  "set_bkLegacyUndoTitle": "撤销上次同步？",
+  "set_bkLegacyUndoBody": "会换回 {time} 同步前的数据。同步之后在这里做的改动另存为一份备份。需要重启。",
+  "@set_bkLegacyUndoBody": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "set_bkLegacyUndoConfirm": "撤销并重启",
+  "set_bkLegacyRedoTitle": "换回同步后的数据？",
+  "set_bkLegacyRedoBody": "会换回 {time} 撤销前的数据，同步后在这里做的改动也会回来。当前数据另存为一份备份。需要重启。",
+  "@set_bkLegacyRedoBody": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "set_bkLegacyRedoConfirm": "换回并重启",
+  "set_bkLegacyUndoAgainBody": "会回到 {time} 换回前的数据，也就是同步前的那份。当前数据另存为一份备份。需要重启。",
+  "@set_bkLegacyUndoAgainBody": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "set_bkLegacyBusy": "还有任务在进行，请等它结束后再试。",
+  "set_bkLegacySyncFailed": "无法开始同步。请确认磁盘空间足够，然后重试。",
+  "set_bkLegacyUndoFailed": "无法撤销同步。请确认磁盘空间足够，然后重试。",
+  "set_bkLegacyRedoFailed": "无法换回同步后的数据。请确认磁盘空间足够，然后重试。",
   "app_subtitle": "NovelAI 第三方客户端",
   "common_cancel": "取消",
   "common_confirm": "确定",
@@ -147,6 +299,11 @@
   "auth_error_credentialsLoginUnavailable": "账号密码登录当前不可用",
   "auth_error_credentialsLoginUnavailable_hint": "NovelAI 官网账号密码登录需要网页安全验证，客户端无法完成，请改用 Persistent API Token。",
   "auth_error_serverError": "服务器错误",
+  "auth_credentialStorageCorrupt": "本机凭据文件已损坏。",
+  "auth_resetLocalCredentials": "重置本机凭据",
+  "auth_credentialResetExplanation": "重置会移除本应用在这台 Mac 上保存的所有登录令牌和服务密钥。之后需要重新输入，图片和设置会保留。",
+  "auth_credentialStorageUnavailable": "无法读写本机凭据文件。",
+  "auth_credentialStorageUnavailableHint": "本次登录已取消。请检查当前 macOS 用户的文件权限后重试。",
   "auth_error_unknown": "未知错误",
   "auth_autoLogin": "自动登录",
   "auth_forgotPassword": "忘记密码？",
@@ -1808,6 +1965,7 @@
   "shortcut_action_jump_to_date": "跳转到日期",
   "shortcut_action_open_folder": "打开文件夹",
   "shortcut_action_minimize_to_tray": "最小化到托盘",
+  "shortcut_action_hide_to_menu_bar": "隐藏到菜单栏",
   "shortcut_action_quit_app": "退出应用",
   "shortcut_action_show_shortcut_help": "显示快捷键帮助",
   "shortcut_action_toggle_theme": "切换主题",
@@ -2552,7 +2710,15 @@
       "version": {}
     }
   },
+  "updateDownloadedFinderHint": "新版本 v{version} 已下载并通过校验。点“在访达中显示”后，按 ⌘Q 退出本应用，再把新版本拖进“应用程序”文件夹，替换旧版本。",
+  "@updateDownloadedFinderHint": {
+    "placeholders": {
+      "version": {}
+    }
+  },
   "updateInstallAndRestart": "安装并重启",
+  "update_runningFromStaging": "你打开的是更新文件夹中的应用。请先在访达中显示它，按 ⌘Q 退出，再将应用拖入「应用程序」并从那里打开。",
+  "updateShowInFinder": "在访达中显示",
   "updateInstallNow": "立即安装",
   "updateInstallLater": "稍后安装",
   "updateDownload": "下载更新",
@@ -2560,6 +2726,8 @@
   "updateDownloadFailed": "下载更新失败",
   "updateInstallFailed": "安装更新失败",
   "updateInstallingHint": "安装程序已启动，应用即将关闭并自动完成更新。",
+  "updatePreparingApp": "正在准备新版本...",
+  "updatePreparingAppHint": "正在解压更新包，完成后会在访达中选中新版本。",
   "remindMeLater": "4 小时后提醒",
   "updateNoticeAvailable": "新版本 v{version} 可用",
   "@updateNoticeAvailable": {
@@ -2569,6 +2737,7 @@
   },
   "updateNoticeAvailableSubtitle": "可在应用内下载并自动完成更新",
   "updateNoticeManualSubtitle": "当前平台需要前往 Release 页面手动更新",
+  "updateNoticeFinderSubtitle": "可在应用内下载并校验，再到访达中替换旧版本",
   "updateNoticeReady": "新版本 v{version} 已准备好",
   "@updateNoticeReady": {
     "placeholders": {
@@ -2576,6 +2745,7 @@
     }
   },
   "updateNoticeReadySubtitle": "更新包已校验，重启即可安装",
+  "updateNoticeReadyFinderSubtitle": "更新包已校验，在访达中替换旧版本即可",
   "updateNoticeFailed": "上次更新没有完成",
   "updateViewDetails": "查看更新",
   "updateSettingsAvailable": "发现 v{version}，点击查看更新内容",
@@ -2843,6 +3013,7 @@
   "common_clickToRetry": "点击重试",
   "common_opening": "正在打开...",
   "common_swap": "交换",
+  "common_showInFinder": "在访达中显示",
   "addToLibrary_displayNameHint": "输入便于识别此条目的名称",
   "addToLibrary_tagHint": "输入标签并按 Enter 添加",
   "drop_saveVibeBundle": "保存 Vibe Bundle",
@@ -3237,6 +3408,10 @@
   "tips_studio_trick_6": "在翻译块上按一下鼠标中键，原文和译文来回切换。AI 翻得再好，偶尔也值得偷看一眼原文，确认它没把 cat ears 翻成什么奇怪的东西。",
   "@tips_studio_trick_6": {
     "description": "promptTranslation_guideMiddleText."
+  },
+  "tips_studio_trick_6_mac": "在翻译块上按住 ⌘ 点一下，原文和译文来回切换。AI 翻得再好，偶尔也值得偷看一眼原文，确认它没把 cat ears 翻成什么奇怪的东西。",
+  "@tips_studio_trick_6_mac": {
+    "description": "macOS variant of tips_studio_trick_6: Cmd+click toggles a translation block."
   },
   "tips_studio_trick_7": "设置里的「限制生图频率」可以让两次生图之间强制冷却，再加一点随机抖动，节奏就没那么机械。适合挂着慢慢抽的夜晚，也适合管不住手的自己。",
   "@tips_studio_trick_7": {
@@ -4761,6 +4936,7 @@
   "promptTranslation_tutorial": "操作教程",
   "promptTranslation_guideBack": "返回操作",
   "promptTranslation_guideMiddleTitle": "中键点块",
+  "promptTranslation_guideCommandClickTitle": "⌘ + 点击块",
   "promptTranslation_guideMiddleText": "切换原文与译文",
   "promptTranslation_guideSourceTitle": "左键点原文",
   "promptTranslation_guideSourceText": "定位光标，直接修改",
@@ -4897,6 +5073,13 @@
   "update_errorPackageRemoved": "更新包已被清理，请重新下载",
   "update_errorPackageCorrupted": "更新包已损坏，请重新下载",
   "update_errorLaunchFailed": "启动更新程序失败",
+  "update_errorExtractFailed": "解压更新包失败",
+  "update_errorRevealFailed": "无法在访达中显示新版本，它在：{path}",
+  "@update_errorRevealFailed": {
+    "placeholders": {
+      "path": {}
+    }
+  },
   "update_errorCheckFailed": "检查更新失败",
   "update_errorRateLimited": "GitHub 请求已达上限，请稍后重试。",
   "update_retryAt": "请在 {time}（本地时间）后重试。",
@@ -5265,7 +5448,7 @@
   "localUpscale_resizing": "正在完成图片处理…",
   "localUpscale_complete": "超分完成",
   "localUpscale_cancelling": "正在取消…",
-  "localUpscale_unsupportedPlatform": "本地超分目前支持 Windows。",
+  "localUpscale_unsupportedPlatform": "这种放大方式目前只支持 Windows。",
   "localUpscale_engineMissing": "本地引擎不可用，请重新安装完整 Studio 运行包。",
   "localUpscale_integrity": "文件校验失败，请重新安装对应模型或 Studio 运行包。",
   "localUpscale_modelMissing": "模型不可用，请选择已安装的模型，或检查模型目录路径是否过长。",
@@ -7362,6 +7545,7 @@
   },
   "imageViewer_missingTitle": "找不到这张图",
   "imageViewer_missingHint": "可能已经在资源管理器里被移动、改名或删除",
+  "imageViewer_missingHintFinder": "可能已经在访达里被移动、改名或删除",
   "imageViewer_openFolder": "打开所在文件夹",
   "imageViewer_nextImage": "下一张",
   "imageViewer_hintPan": "拖动平移",
@@ -8813,6 +8997,7 @@
   "naiAgent_inputChanged": "准备期间输入已改变，请发送当前草稿。",
   "naiAgent_imageLimit": "图片格式无效、文件过大或超出上传限制。",
   "naiAgent_composerNotEmpty": "请先保存或发送当前输入，再恢复这条消息。",
+  "naiAgent_bundledNodeRequiresMacOS135": "内置 Agent 需要 macOS 13.5 或更高版本。你仍可在这台 Mac 上使用生图功能。",
   "naiAgent_runtimeMissing": "Agent 运行组件尚未安装，请使用完整更新包。",
   "naiAgent_usage": "模型用量",
   "naiAgent_globalScope": "全局默认",
@@ -9514,6 +9699,7 @@
   "set_apDark": "深色",
   "set_apSystem": "跟随系统",
   "set_apSystemSub": "按 Windows 设置自动切换",
+  "set_apSystemSubMac": "按 macOS 设置自动切换",
   "set_apText": "文字",
   "set_apFont": "界面字体",
   "set_apFontSub": "中文用 HarmonyOS Sans SC，数字与代码用 Geist Mono",
@@ -9729,6 +9915,12 @@
   "@set_stFree": {
     "placeholders": {
       "disk": {},
+      "size": {}
+    }
+  },
+  "set_stFreeMac": "剩余 {size}",
+  "@set_stFreeMac": {
+    "placeholders": {
       "size": {}
     }
   },
@@ -10162,6 +10354,10 @@
   "set_rgInstallHint": "下载 Python 与推理依赖，不下载模型权重。NVIDIA 显卡选 CUDA（约需数 GB）；其他选 CPU，下载较小。",
   "set_rgInstallCuda": "CUDA · NVIDIA",
   "set_rgInstallCpu": "CPU",
+  "set_rgInstallHintMac": "下载 Python 与推理依赖（约 200 MB），不下载模型权重。需要 Apple 芯片的 Mac。“自动”在内存 18 GB 及以上的 Mac 上用 GPU，16 GB 及以下用 CPU。",
+  "set_rgPythonSubMac": "默认用自动安装的独立环境；也可以选一个已有的 python3。",
+  "set_rgNeedsAppleSilicon": "需要 Apple 芯片的 Mac。PyTorch 已不再提供 Intel 芯片 Mac 的版本，这台 Mac 装不了运行环境。",
+  "set_rgEnvUnsupported": "不支持",
   "set_rgPhaseExisting": "正在检测已有环境",
   "set_rgPhaseDownload": "正在下载安装工具",
   "set_rgPhaseCreate": "正在准备 Python 环境",
@@ -11253,6 +11449,7 @@
   "ag_psNoCharacters": "当前模型不支持角色提示词",
   "ag_psMissing": "这张卡的数据已不在",
   "startup_dataTitle": "无法准备应用数据",
+  "startup_profileInUse": "另一份应用正在使用此数据目录。请先退出那份应用，再点重试。",
   "startup_dataHelp": "应用数据尚未准备完成，请保留现有文件。内容不同的文件不会合并或覆盖。请先备份并核对数据目录，检查磁盘空间和访问权限，再重试。",
   "startup_dataCurrent": "当前数据目录",
   "startup_dataLegacy": "旧数据目录",

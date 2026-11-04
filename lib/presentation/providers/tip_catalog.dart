@@ -17,7 +17,12 @@ final Map<TipSurface, List<Tip>> _tipCatalog = {
     Tip.trick((l) => l.tips_studio_trick_3),
     Tip.trick((l) => l.tips_studio_trick_4),
     Tip.trick((l) => l.tips_studio_trick_5),
-    Tip.trick((l) => l.tips_studio_trick_6),
+    // macOS 上翻译块用 ⌘+点击切换（触控板没有中键）
+    Tip.trick(
+      (l) => usesMacOSConventions
+          ? l.tips_studio_trick_6_mac
+          : l.tips_studio_trick_6,
+    ),
     Tip.trick((l) => l.tips_studio_trick_7),
     Tip.wolf((l) => l.tips_studio_wolf_1),
     Tip.wolf((l) => l.tips_studio_wolf_2),

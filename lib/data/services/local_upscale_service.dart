@@ -23,19 +23,19 @@ class LocalUpscaleService {
     this.models, {
     UpscaleProcessStarter? startProcess,
     this.timeout = const Duration(minutes: 10),
-    bool? supportedPlatform,
+    LocalUpscalePlatform? platform,
     this.advanced,
     this.beforeInference,
     this.afterInference,
   }) : _startProcess =
            startProcess ?? ((exe, args) => Process.start(exe, args)),
-       _supportedPlatform = supportedPlatform ?? Platform.isWindows;
+       _platform = platform ?? LocalUpscalePlatform.host;
 
   final LocalUpscaleModelManager models;
   final AdvancedUpscaleComponentManager? advanced;
   final Future<void> Function()? beforeInference, afterInference;
   final UpscaleProcessStarter _startProcess;
-  final bool _supportedPlatform;
+  final LocalUpscalePlatform _platform;
   final Duration timeout;
   bool _running = false;
   bool get isRunning => _running;
@@ -48,7 +48,13 @@ class LocalUpscaleService {
     Seedvr2Options seedvr2Options = const Seedvr2Options(),
     void Function(LocalUpscaleProgress)? onProgress,
   }) async {
-    if (!_supportedPlatform) {
+    final method =
+        advancedUpscaleCatalog
+            .where((m) => m.id == modelId)
+            .firstOrNull
+            ?.method ??
+        LocalUpscaleMethod.standard;
+    if (!_platform.supports(method)) {
       throw const LocalUpscaleException(LocalUpscaleError.unsupportedPlatform);
     }
     if (_running) throw const LocalUpscaleException(LocalUpscaleError.busy);
@@ -82,8 +88,12 @@ class LocalUpscaleService {
           : ('', '', optional);
       await models.initialize();
       cancellation.check();
-      // The pinned native engine builds model paths into a 256-character buffer.
-      if (modelPath.length + model.engineName.length + 12 > 245) {
+      // The pinned native engine builds model paths into a 256-unit buffer:
+      // UTF-16 on Windows, UTF-8 bytes through an unbounded sprintf elsewhere.
+      int units(String value) => _platform == LocalUpscalePlatform.windows
+          ? value.length
+          : utf8.encode(value).length;
+      if (units(modelPath) + units(model.engineName) + 12 > 245) {
         throw const LocalUpscaleException(LocalUpscaleError.modelMissing);
       }
       final nativeScale = model.inferenceScale(scale);

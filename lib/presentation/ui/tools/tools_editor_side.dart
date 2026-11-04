@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/utils/localization_extension.dart';
+import '../../../core/utils/platform_shortcut_text.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_controls.dart';
 import '../kit/ui_glyph.dart';
@@ -225,7 +226,7 @@ class _Layers extends StatelessWidget {
                   UiGlyph(ToolsGlyphs.kbd, size: 13, color: c.faint),
                   Expanded(
                     child: Text(
-                      l.tools_layerHint,
+                      platformShortcutText(l.tools_layerHint),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: UiText.sans(11, color: c.faint),

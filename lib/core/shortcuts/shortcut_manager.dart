@@ -8,35 +8,63 @@ class AppShortcutManager {
   /// 解析快捷键字符串为Flutter的ShortcutActivator
   /// 格式: "ctrl+shift+enter" 或 "alt+f1"
   static ShortcutActivator? parseActivator(String? shortcut) {
-    if (shortcut == null || shortcut.isEmpty) return null;
+    final key = parseSingleActivator(shortcut);
+    if (key == null || ShortcutParser.primaryIsCommand) return key;
+    return LogicalKeySet.fromSet({
+      key.trigger,
+      if (key.control) LogicalKeyboardKey.control,
+      if (key.alt) LogicalKeyboardKey.alt,
+      if (key.shift) LogicalKeyboardKey.shift,
+      if (key.meta) LogicalKeyboardKey.meta,
+    });
+  }
 
+  /// Viewer commands and AppKit menu equivalents match a trigger and its
+  /// modifiers, even when another non-modifier key has a missing key-up.
+  static SingleActivator? parseSingleActivator(String? shortcut) {
+    if (shortcut == null || shortcut.isEmpty) return null;
     final parsed = ShortcutParser.parse(shortcut);
     if (parsed == null) return null;
+    final trigger = _getLogicalKey(parsed.key);
+    if (trigger == null) return null;
+    return SingleActivator(
+      trigger,
+      control: parsed.modifiers.contains(ShortcutModifier.control),
+      alt: parsed.modifiers.contains(ShortcutModifier.alt),
+      shift: parsed.modifiers.contains(ShortcutModifier.shift),
+      meta: parsed.modifiers.contains(ShortcutModifier.meta),
+    );
+  }
 
-    // 构建LogicalKeySet
-    final keys = <LogicalKeyboardKey>{};
+  static final _numberPad = <LogicalKeyboardKey, LogicalKeyboardKey>{
+    LogicalKeyboardKey.digit0: LogicalKeyboardKey.numpad0,
+    LogicalKeyboardKey.digit1: LogicalKeyboardKey.numpad1,
+    LogicalKeyboardKey.digit2: LogicalKeyboardKey.numpad2,
+    LogicalKeyboardKey.digit3: LogicalKeyboardKey.numpad3,
+    LogicalKeyboardKey.digit4: LogicalKeyboardKey.numpad4,
+    LogicalKeyboardKey.digit5: LogicalKeyboardKey.numpad5,
+    LogicalKeyboardKey.digit6: LogicalKeyboardKey.numpad6,
+    LogicalKeyboardKey.digit7: LogicalKeyboardKey.numpad7,
+    LogicalKeyboardKey.digit8: LogicalKeyboardKey.numpad8,
+    LogicalKeyboardKey.digit9: LogicalKeyboardKey.numpad9,
+  };
 
-    // 添加修饰键
-    if (parsed.modifiers.contains(ShortcutModifier.control)) {
-      keys.add(LogicalKeyboardKey.control);
+  /// A Command + number shortcut also works on an external Mac number pad.
+  static Iterable<ShortcutActivator> activatorsFor(String? shortcut) sync* {
+    final primary = parseActivator(shortcut);
+    if (primary == null) return;
+    yield primary;
+    if (primary is! SingleActivator || !primary.meta) return;
+    final alias = _numberPad[primary.trigger];
+    if (alias != null) {
+      yield SingleActivator(
+        alias,
+        meta: true,
+        shift: primary.shift,
+        control: primary.control,
+        alt: primary.alt,
+      );
     }
-    if (parsed.modifiers.contains(ShortcutModifier.alt)) {
-      keys.add(LogicalKeyboardKey.alt);
-    }
-    if (parsed.modifiers.contains(ShortcutModifier.shift)) {
-      keys.add(LogicalKeyboardKey.shift);
-    }
-    if (parsed.modifiers.contains(ShortcutModifier.meta)) {
-      keys.add(LogicalKeyboardKey.meta);
-    }
-
-    // 添加主键
-    final mainKey = _getLogicalKey(parsed.key);
-    if (mainKey == null) return null;
-
-    keys.add(mainKey);
-
-    return LogicalKeySet.fromSet(keys);
   }
 
   /// 将ShortcutKey转换为Flutter的LogicalKeyboardKey
@@ -126,29 +154,16 @@ class AppShortcutManager {
   /// 获取快捷键的显示文本（平台适配）
   /// Windows/Linux: Ctrl+Shift+A
   /// Mac: ⌘⇧A
-  static String getDisplayLabel(String? shortcut, {bool useSymbols = false}) {
+  static String getDisplayLabel(String? shortcut, {bool? useSymbols}) {
     if (shortcut == null || shortcut.isEmpty) return '';
 
     final parsed = ShortcutParser.parse(shortcut);
     if (parsed == null) return shortcut;
 
-    if (useSymbols) {
+    // macOS 默认用符号（⇧⌘A），不显示成 Ctrl+Shift+A
+    if (useSymbols ?? ShortcutParser.primaryIsCommand) {
       // 使用符号表示（适合Mac）
-      final parts = <String>[];
-      if (parsed.modifiers.contains(ShortcutModifier.control)) {
-        parts.add('⌃');
-      }
-      if (parsed.modifiers.contains(ShortcutModifier.alt)) {
-        parts.add('⌥');
-      }
-      if (parsed.modifiers.contains(ShortcutModifier.shift)) {
-        parts.add('⇧');
-      }
-      if (parsed.modifiers.contains(ShortcutModifier.meta)) {
-        parts.add('⌘');
-      }
-      parts.add(parsed.key.displayName);
-      return parts.join();
+      return parsed.macKeyLabels.join();
     } else {
       // 使用文本表示（适合Windows/Linux）
       return parsed.displayLabel;
@@ -182,10 +197,9 @@ class AppShortcutManager {
       final shortcut = config.getEffectiveShortcut(shortcutId);
       if (shortcut == null) continue;
 
-      final activator = parseActivator(shortcut);
-      if (activator == null) continue;
-
-      map[activator] = intent;
+      for (final activator in activatorsFor(shortcut)) {
+        map[activator] = intent;
+      }
     }
 
     return map;
@@ -197,6 +211,15 @@ class AppShortcutManager {
   ) {
     return actionMap;
   }
+
+  /// Flutter 的按键转回 [ShortcutKey]（录快捷键用）；快捷键里用不了的键返回 null。
+  static ShortcutKey? shortcutKeyOf(LogicalKeyboardKey key) =>
+      _shortcutKeys[key];
+
+  static final _shortcutKeys = {
+    for (final key in ShortcutKey.values)
+      if (_getLogicalKey(key) case final logical?) logical: key,
+  };
 }
 
 /// 通用快捷键Intent基类

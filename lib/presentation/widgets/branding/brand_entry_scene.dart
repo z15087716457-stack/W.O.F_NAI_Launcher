@@ -101,7 +101,7 @@ class _BrandEntrySceneState extends ConsumerState<BrandEntryScene>
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final palette = EntryPalette.of(context);
-    final chromeInBar = TitleBarRegionService.isSupported;
+    final chromeInBar = TitleBarRegionService.chromeSupported;
     return Scaffold(
       backgroundColor: scheme.surface,
       body: MouseRegion(

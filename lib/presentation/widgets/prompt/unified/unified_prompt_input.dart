@@ -4,6 +4,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
 
+import '../../../../core/utils/desktop_platform.dart';
+import '../../../../core/utils/keyboard_modifier_utils.dart';
+import '../../../../core/utils/platform_shortcut_text.dart';
 import '../../../../core/utils/prompt_input_normalization.dart';
 import '../../../../data/models/character/character_prompt.dart';
 import '../../../../presentation/utils/text_selection_utils.dart';
@@ -18,6 +21,14 @@ import '../nai_syntax_controller.dart';
 import 'unified_prompt_config.dart';
 import 'package:nai_launcher/presentation/widgets/common/themed_input.dart';
 import 'package:nai_launcher/presentation/widgets/common/themed_text_selection_toolbar.dart';
+
+/// 「替换」在 macOS 上的快捷键。Windows 照旧 Ctrl+H；Mac 上 ⌘H 是系统的「隐藏」，
+/// 用 ⌥⌘F（Mac 编辑器「查找并替换」的习惯键）。要换键只改这里。
+const _macReplaceActivator = SingleActivator(
+  LogicalKeyboardKey.keyF,
+  alt: true,
+  meta: true,
+);
 
 /// 统一提示词输入组件
 ///
@@ -142,7 +153,8 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
   /// 替换功能是否可用（只读模式下禁用）
   bool get _canReplace => !widget.config.readOnly;
 
-  bool get _isDesktop => defaultTargetPlatform == TargetPlatform.windows;
+  bool get _isDesktop =>
+      defaultTargetPlatform == TargetPlatform.windows || usesMacOSConventions;
 
   bool _handleHardwareKeyEvent(KeyEvent event) {
     if (!_isDesktop || event is! KeyDownEvent) {
@@ -161,15 +173,26 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
     final isCtrl = HardwareKeyboard.instance.isControlPressed;
     final isShift = HardwareKeyboard.instance.isShiftPressed;
     final isMeta = HardwareKeyboard.instance.isMetaPressed;
+    // macOS 只认 ⌘：Mac 文本框里的 Control 组合是光标键（⌃F 前移一个字），⌃⌘F 是系统全屏
+    final mac = usesMacOSConventions;
+    final isPrimary = mac
+        ? isPrimaryShortcutModifierPressed()
+        : isCtrl || isMeta;
 
-    if ((isCtrl || isMeta) &&
-        !isShift &&
-        logicalKey == LogicalKeyboardKey.keyF) {
+    if (mac &&
+        _canReplace &&
+        _macReplaceActivator.accepts(event, HardwareKeyboard.instance)) {
+      _openSearch(showReplace: true);
+      return true;
+    }
+
+    if (isPrimary && !isShift && logicalKey == LogicalKeyboardKey.keyF) {
       _openSearch();
       return true;
     }
 
-    if ((isCtrl || isMeta) &&
+    if (!mac &&
+        isPrimary &&
         !isShift &&
         _canReplace &&
         logicalKey == LogicalKeyboardKey.keyH) {
@@ -186,7 +209,7 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
         // 搜索框回车跳转命中，替换框回车替换当前命中；
         // 替换框上叠加 Ctrl/Cmd 则执行全部替换（对齐常见编辑器）。
         if (replaceFocused) {
-          if (isCtrl || isMeta) {
+          if (isPrimary) {
             _replaceAllMatches();
           } else {
             _replaceActiveMatch();
@@ -1009,7 +1032,7 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
         _PromptSearchIconButton(
           key: const ValueKey('prompt_input_replace_all'),
           icon: Icons.done_all,
-          tooltip: context.l10n.prompt_replaceAll,
+          tooltip: platformShortcutText(context.l10n.prompt_replaceAll),
           onPressed: canRun ? _replaceAllMatches : null,
         ),
       ],

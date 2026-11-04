@@ -250,7 +250,7 @@ void main() {
           return null;
         },
       );
-      await AppWindowListener().onWindowClose();
+      await AppWindowListener(nativeResourceWindows: true).onWindowClose();
       expect(calls.map((call) => call.method), [
         'setPreventClose',
         'hide',

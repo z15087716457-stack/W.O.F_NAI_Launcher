@@ -74,6 +74,11 @@ class SettingsDirectoryMeasurement {
   final Map<String, SettingsMeasuredFile> files;
 }
 
+/// [path] is already resolved (resolveSymbolicLinksSync). Windows lowercases it.
+/// macOS volumes are case-insensitive by default too, but realpath spells every
+/// component the way it is stored on disk, so one file always yields one key;
+/// lowercasing would instead merge two files that differ only in case on a
+/// case-sensitive volume.
 String _physicalPath(String path) {
   final normalized = p.normalize(p.absolute(path));
   return Platform.isWindows ? normalized.toLowerCase() : normalized;
@@ -229,6 +234,7 @@ SettingsDirectoryMeasurement settingsMeasureDirectory(
 typedef SettingsDiskFree = Future<int?> Function(String path);
 final settingsDiskFreeProvider = Provider<SettingsDiskFree>(
   (ref) => (path) async {
+    if (Platform.isMacOS) return _macDiskFree(path);
     if (!Platform.isWindows) return null;
     try {
       final quoted = path.replaceAll("'", "''");
@@ -413,3 +419,21 @@ final settingsDictionaryDataProvider = FutureProvider<SettingsDictionaryData>((
     cooccurrence: cooccurrence,
   );
 });
+
+/// macOS 上用 `df -k` 读剩余空间（字节）；读不到回 null，和 Windows 读不到一样处理。
+Future<int?> _macDiskFree(String path) async {
+  try {
+    final result = await Process.run('df', [
+      '-k',
+      path,
+    ]).timeout(const Duration(seconds: 5));
+    if (result.exitCode != 0) return null;
+    final lines = '${result.stdout}'.trim().split('\n');
+    if (lines.length < 2) return null;
+    final columns = lines.last.trim().split(RegExp(r'\s+'));
+    final kilobytes = columns.length > 3 ? int.tryParse(columns[3]) : null;
+    return kilobytes == null ? null : kilobytes * 1024;
+  } catch (_) {
+    return null;
+  }
+}

@@ -41,6 +41,20 @@ void main() {
       studioSandboxRoot({'NAI_STUDIO_SANDBOX': Directory.systemTemp.path}),
       p.normalize(Directory.systemTemp.path),
     );
+    // macOS 启动时据此直接退出（Windows 由原生层先挡下）
+    expect(studioSandboxEnvironmentValid({}), isTrue);
+    expect(
+      studioSandboxEnvironmentValid({
+        'NAI_STUDIO_SANDBOX': Directory.systemTemp.path,
+      }),
+      isTrue,
+    );
+    for (final invalid in ['', 'relative']) {
+      expect(
+        studioSandboxEnvironmentValid({'NAI_STUDIO_SANDBOX': invalid}),
+        isFalse,
+      );
+    }
   });
   test(
     'actual environment routes support/documents/temp/legacy only to sandbox, otherwise delegates',

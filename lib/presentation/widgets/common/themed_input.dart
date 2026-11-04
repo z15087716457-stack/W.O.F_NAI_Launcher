@@ -1,6 +1,7 @@
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../core/utils/desktop_platform.dart';
 import '../../../core/utils/localization_extension.dart';
 import 'inset_shadow_container.dart';
 import 'themed_confirm_dialog.dart';
@@ -397,7 +398,8 @@ class _ThemedInputState extends State<ThemedInput> {
       contextMenuBuilder: widget.contextMenuBuilder ?? themedContextMenuBuilder,
     );
 
-    final textField = widget.enableNativeRedoShortcut
+    // Ctrl+Y 重做是 Windows 的习惯；macOS 上重做是系统自带的 ⇧⌘Z，Control+Y 留给文本框（yank）
+    final textField = widget.enableNativeRedoShortcut && !usesMacOSConventions
         ? Shortcuts(
             shortcuts: const <ShortcutActivator, Intent>{
               SingleActivator(LogicalKeyboardKey.keyY, control: true):

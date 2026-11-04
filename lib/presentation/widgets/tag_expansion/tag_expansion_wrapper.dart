@@ -24,6 +24,7 @@ import '../../../core/wiki/auto_tag_translation_controller.dart';
 import '../autocomplete/tag_category_visuals.dart';
 import '../autocomplete/tag_candidate_title.dart';
 import '../../router/app_router.dart';
+import '../../../core/utils/keyboard_modifier_utils.dart';
 import '../common/translation_icon.dart';
 import '../common/related_tags_icon.dart';
 import '../common/wiki_linked_body.dart';
@@ -100,6 +101,13 @@ class TagExpansionWrapper extends ConsumerStatefulWidget {
   final ValueChanged<CompletionCandidate>? onCandidateSelected;
   final ValueChanged<String>? onApplied;
   final ValueChanged<bool>? onActiveChanged;
+
+  /// 包在里面的组件在按下时认领这一下点击，相关 tag 就不处理它。
+  ///
+  /// 例如 macOS 上 ⌘+点击翻译块是切换原文 / 译文，不是查相关 tag。里面的组件比这一层先收到
+  /// 按下事件，在它的 onPointerDown 里调用即可。
+  static void claimPointer(int pointer) => _claimedPointer = pointer;
+  static int? _claimedPointer;
 
   @override
   ConsumerState<TagExpansionWrapper> createState() =>
@@ -228,6 +236,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
   }
 
   void _onPointerDown(PointerDownEvent event) {
+    if (event.pointer == TagExpansionWrapper._claimedPointer) return;
     if (_pointerId != null || event.buttons & kPrimaryMouseButton == 0) {
       return;
     }
@@ -237,8 +246,8 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     _selectionAtDown = widget.controller.selection;
     _textAtDown = widget.controller.text;
     _dragged = false;
-    final keyboard = HardwareKeyboard.instance;
-    _controlAtDown = keyboard.isControlPressed || keyboard.isMetaPressed;
+    // macOS 上只认 ⌘：Mac 上 Control+单击是右键
+    _controlAtDown = isControlOrCommandPressed();
   }
 
   void _onPointerMove(PointerMoveEvent event) {

@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -27,7 +25,6 @@ class ToolsSheetSession {
 }
 
 final toolsSheetProvider = StateProvider<ToolsSheetSession?>((ref) => null);
-final toolsWindowsProvider = Provider<bool>((ref) => Platform.isWindows);
 
 String toolsUpscaleStatus(LocalUpscaleProgress? progress) {
   final l = currentL10n;
@@ -52,6 +49,7 @@ ToolsEnhanceData toolsEnhanceView(Ref ref, GeneratedImage image) {
   final model = models
       .where((m) => m.id == workflow.upscale.localModel)
       .firstOrNull;
+  final platform = ref.watch(localUpscalePlatformProvider);
   return ToolsEnhanceData(
     sourceWidth: image.width,
     sourceHeight: image.height,
@@ -83,7 +81,8 @@ ToolsEnhanceData toolsEnhanceView(Ref ref, GeneratedImage image) {
     local: ToolsLocalUpscale(
       label: model?.name ?? workflow.upscale.localModel,
       factor: workflow.upscale.localScale,
-      ready: ref.watch(toolsWindowsProvider) && model?.installed == true,
+      ready:
+          model != null && model.installed && platform.supports(model.method),
     ),
     model: ModelDisplay.shortNameOf(draft.model),
     steps: draft.steps,
@@ -103,7 +102,7 @@ ToolsUpscaleData toolsUpscaleView(Ref ref, GeneratedImage image) {
   final model = models.where((m) => m.id == settings.localModel).firstOrNull;
   final method = model?.method ?? LocalUpscaleMethod.standard;
   final cloud = settings.backend == UpscaleBackend.novelai;
-  final windows = ref.watch(toolsWindowsProvider);
+  final platform = ref.watch(localUpscalePlatformProvider);
   final install = ref.watch(advancedUpscaleInstallProvider);
   final localTask = ref.watch(localUpscaleTaskProvider);
   final cloudTask = ref.watch(cloudUpscaleTaskProvider);
@@ -115,7 +114,7 @@ ToolsUpscaleData toolsUpscaleView(Ref ref, GeneratedImage image) {
       ? cloudCost < 0
             ? l.localUpscale_sizeLimit
             : null
-      : !windows
+      : !platform.supports(method)
       ? l.localUpscale_unsupportedPlatform
       : model?.installed != true
       ? l.localUpscale_modelMissing
@@ -143,7 +142,7 @@ ToolsUpscaleData toolsUpscaleView(Ref ref, GeneratedImage image) {
         id: 'local',
         title: l.localUpscale_local,
         detail: l.localUpscale_description,
-        enabled: windows,
+        enabled: platform.supports(LocalUpscaleMethod.standard),
       ),
       ToolsUpscaleBackend(
         id: 'novelai',

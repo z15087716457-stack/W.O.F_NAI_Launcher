@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:path/path.dart' as p;
 
 import '../../core/constants/api_constants.dart';
@@ -175,33 +174,9 @@ Map<ViewerCommand, List<SingleActivator>> viewerKeysOf(ShortcutConfig config) {
   for (final entry in ids.entries) {
     final binding = config.bindings[entry.value];
     if (binding == null) continue;
-    final parsed = AppShortcutManager.parseActivator(binding.effectiveShortcut);
-    if (parsed is! LogicalKeySet) {
-      result[entry.key] = [];
-      continue;
-    }
-    final keys = parsed.keys;
-    final trigger = keys
-        .where(
-          (key) => !{
-            LogicalKeyboardKey.control,
-            LogicalKeyboardKey.alt,
-            LogicalKeyboardKey.shift,
-            LogicalKeyboardKey.meta,
-          }.contains(key),
-        )
-        .firstOrNull;
-    result[entry.key] = trigger == null
-        ? []
-        : [
-            SingleActivator(
-              trigger,
-              control: keys.contains(LogicalKeyboardKey.control),
-              alt: keys.contains(LogicalKeyboardKey.alt),
-              shift: keys.contains(LogicalKeyboardKey.shift),
-              meta: keys.contains(LogicalKeyboardKey.meta),
-            ),
-          ];
+    result[entry.key] = [
+      ?AppShortcutManager.parseSingleActivator(binding.effectiveShortcut),
+    ];
   }
   return result;
 }

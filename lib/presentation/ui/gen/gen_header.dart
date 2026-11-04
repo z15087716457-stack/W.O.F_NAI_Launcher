@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/utils/desktop_platform.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../kit/ui_resource_kind.dart';
 import '../../widgets/navigation/window_chrome_layout.dart';
@@ -42,13 +43,15 @@ class GenHeader extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             spacing: 6,
             children: [
-              const Expanded(
+              Expanded(
                 child: Wrap(
                   alignment: WrapAlignment.spaceBetween,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   runSpacing: 4,
-                  spacing: 6,
-                  children: [_ModelCapsule(), _QuotaCapsule()],
+                  // spaceBetween keeps the full gap whenever it fits. At the
+                  // default 400px Mac width the two full capsules leave ~5px.
+                  spacing: usesMacOSConventions ? 2 : 6,
+                  children: const [_ModelCapsule(), _QuotaCapsule()],
                 ),
               ),
               if (collapsible)

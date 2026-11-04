@@ -36,6 +36,14 @@ function Get-AssetInfo {
       description = '解压即用，支持应用内一键更新，适合放在自定义目录。'
     }
   }
+  if ($name -match '_macOS_.*_Portable\.zip$') {
+    return [ordered]@{
+      platform = 'macos'
+      type = 'macos-portable'
+      label = 'macOS 版'
+      description = '通用版（Apple 芯片 / Intel，macOS 13.5+），解压后拖进“应用程序”；应用内下载更新后在访达中替换。'
+    }
+  }
   return $null
 }
 
@@ -144,6 +152,9 @@ function Get-DownloadBadge {
     'windows-portable' {
       return "[![Windows Portable x64](https://img.shields.io/badge/Portable-x64-56B4D3?style=flat-square&logo=windows11&logoColor=white)]($url)"
     }
+    'macos-portable' {
+      return "[![macOS Universal ZIP](https://img.shields.io/badge/ZIP-Universal-555555?style=flat-square&logo=apple&logoColor=white)]($url)"
+    }
     default {
       throw "Cannot create download badge for asset type: $type"
     }
@@ -155,9 +166,17 @@ $windowsBadges = @(
     Where-Object { $_['platform'] -eq 'windows' } |
     ForEach-Object { Get-DownloadBadge -Asset $_ }
 )
+$macosBadges = @(
+  $assets |
+    Where-Object { $_['platform'] -eq 'macos' } |
+    ForEach-Object { Get-DownloadBadge -Asset $_ }
+)
 $downloadRows = @()
 if ($windowsBadges.Count -gt 0) {
   $downloadRows += "| **Windows** | $($windowsBadges -join '<br>') |"
+}
+if ($macosBadges.Count -gt 0) {
+  $downloadRows += "| **macOS** | $($macosBadges -join '<br>') |"
 }
 $changelogSection = Get-ChangelogSection -Version ($Version -replace '\+.*$', '')
 
@@ -177,7 +196,17 @@ $releaseLines += @(
   "> **应用内更新：** Windows 安装版用户无需手动下载。应用会自动选择 Setup x64，完成下载与 SHA256 校验后退出旧版本、静默安装并重新启动。Portable 版也支持应用内自动更新和失败回滚。更新源为本仓库 Releases。",
   "",
   "> **安装提示：** Windows Setup 为普通用户的推荐版本，Portable 适合放在自定义目录。",
-  "",
+  ""
+)
+if ($macosBadges.Count -gt 0) {
+  $releaseLines += @(
+    '> **macOS 安装：** 通用包包含 Apple 芯片和 Intel 两种架构。完整包需要 macOS 13.5 或更新，应用主体的部署目标为 macOS 12。用访达解压后把 W.O.F NAI Studio 拖进“应用程序”。应用没有经过 Apple 公证：第一次打开时在访达里按住 Control 点按应用、选“打开”（macOS 15 起要到“系统设置 → 隐私与安全性”里点“仍要打开”）；如果提示“已损坏，无法打开”，在终端运行 `xattr -dr com.apple.quarantine "/Applications/W.O.F NAI Studio.app"` 后再打开。',
+    '',
+    '> **macOS 更新：** 应用内会下载并校验新版本，然后在访达中选中它；按 ⌘Q 退出旧版本，把新版本拖进“应用程序”替换即可。',
+    ''
+  )
+}
+$releaseLines += @(
   "## 📝 更新内容",
   "",
   $changelogSection,

@@ -206,12 +206,25 @@ jobs:
             dist/checksums.txt
           if-no-files-found: error
 
+  build-macos:
+    name: Build macOS
+    needs: prepare
+    permissions:
+      contents: read
+    uses: ./.github/workflows/macos-build.yml
+    with:
+      checkout-ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+      version: ${{ needs.prepare.outputs.version }}
+      artifact-name: macos-release
+
   publish:
     name: Publish GitHub Release
+    if: ${{ !cancelled() && needs.prepare.result == 'success' && needs['build-windows'].result == 'success' }}
     runs-on: ubuntu-latest
     needs:
       - prepare
       - build-windows
+      - build-macos
 
     steps:
       - name: Checkout
@@ -219,11 +232,18 @@ jobs:
         with:
           ref: ${{ env.RELEASE_TAG }}
 
-      - name: Download artifacts
+      - name: Download Windows release artifacts
         uses: actions/download-artifact@v4
         with:
+          name: windows-release
           path: release-assets
-          merge-multiple: true
+
+      - name: Download verified macOS release artifacts
+        if: ${{ needs['build-macos'].result == 'success' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-release
+          path: release-assets
 
       - name: Generate release metadata
         shell: pwsh

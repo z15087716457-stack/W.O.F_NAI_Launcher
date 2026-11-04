@@ -877,6 +877,7 @@ class _SettingsBackupPageState extends State<SettingsBackupPage> {
         ),
       ],
       children: [
+        if (bk.legacy case final legacy?) _LegacyDataSection(legacy),
         SettingsSection(
           title: l.set_bkPrefs,
           subtitle: l.set_bkPrefsSub,
@@ -1049,6 +1050,97 @@ class _SettingsBackupPageState extends State<SettingsBackupPage> {
               ),
             ),
           ],
+        ),
+      ],
+    );
+  }
+}
+
+/// 旧版（1.x）数据：只在 macOS、不是沙箱、检测到旧版数据时出现。同步、撤销和换回
+/// 都要重启，在下次启动、数据打开前进行；备份保留最近 2 份。
+class _LegacyDataSection extends StatelessWidget {
+  const _LegacyDataSection(this.legacy);
+
+  final SettingsLegacyData legacy;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final s = SettingsScope.of(context);
+    final a = s.actions;
+    final app = legacy.appName;
+    String stamp(DateTime t) =>
+        '${SettingsFormat.monthDay(t)} ${SettingsFormat.time(t)}';
+    final back = legacy.switchBack;
+    final redo = back?.kind == SettingsLegacySwitchKind.redo;
+    return SettingsSection(
+      key: const Key('legacy-data'),
+      title: l.set_bkLegacy,
+      subtitle: l.set_bkLegacySub(app),
+      children: [
+        SettingsRow(
+          title: l.set_bkLegacySync,
+          subtitle: switch ((legacy.syncedAt, legacy.copiedAt)) {
+            (final at?, _) => l.set_bkLegacySyncSynced(stamp(at)),
+            (_, final at?) => l.set_bkLegacySyncCopied(stamp(at)),
+            _ => l.set_bkLegacySyncNever,
+          },
+          control: SettingsBtn(
+            key: const Key('legacy-sync'),
+            label: l.set_bkLegacySyncBtn,
+            glyph: UiGlyphs.refresh,
+            small: true,
+            onTap: () => s.confirm(
+              title: l.set_bkLegacySyncTitle,
+              body: [
+                if (legacy.running) '${l.set_bkLegacySyncRunning(app)}\n',
+                l.set_bkLegacySyncBody(app),
+              ].join('\n'),
+              confirm: l.set_bkLegacySyncConfirm,
+              onConfirm: a.onLegacySync,
+            ),
+          ),
+        ),
+        // 同步前、同步后两份数据来回换：最近一份备份就是另一份。
+        SettingsRow(
+          title: redo ? l.set_bkLegacyRedo : l.set_bkLegacyUndo,
+          subtitle: switch (back) {
+            null => l.set_bkLegacyNoSync,
+            SettingsLegacySwitch(kind: SettingsLegacySwitchKind.undo) =>
+              l.set_bkLegacyUndoSub(stamp(back.at)),
+            SettingsLegacySwitch(kind: SettingsLegacySwitchKind.redo) =>
+              l.set_bkLegacyRedoSub(stamp(back.at)),
+            SettingsLegacySwitch(kind: SettingsLegacySwitchKind.undoAgain) =>
+              l.set_bkLegacyUndoAgainSub(stamp(back.at)),
+          },
+          control: SettingsBtn(
+            key: const Key('legacy-undo'),
+            label: l.set_bkLegacyUndoBtn,
+            small: true,
+            onTap: back == null
+                ? null
+                : () => s.confirm(
+                    title: redo
+                        ? l.set_bkLegacyRedoTitle
+                        : l.set_bkLegacyUndoTitle,
+                    body: switch (back.kind) {
+                      SettingsLegacySwitchKind.undo => l.set_bkLegacyUndoBody(
+                        stamp(back.at),
+                      ),
+                      SettingsLegacySwitchKind.redo => l.set_bkLegacyRedoBody(
+                        stamp(back.at),
+                      ),
+                      SettingsLegacySwitchKind.undoAgain =>
+                        l.set_bkLegacyUndoAgainBody(stamp(back.at)),
+                    },
+                    confirm: redo
+                        ? l.set_bkLegacyRedoConfirm
+                        : l.set_bkLegacyUndoConfirm,
+                    onConfirm: () => redo
+                        ? a.onLegacyRedo(back.backup)
+                        : a.onLegacyUndo(back.backup),
+                  ),
+          ),
         ),
       ],
     );

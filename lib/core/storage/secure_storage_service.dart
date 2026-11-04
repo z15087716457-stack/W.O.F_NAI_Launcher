@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -6,6 +8,7 @@ import '../constants/storage_keys.dart';
 import '../utils/app_logger.dart';
 import '../utils/studio_sandbox.dart';
 import 'sandbox_credential_store.dart';
+import 'mac_credential_store.dart';
 
 part 'secure_storage_service.g.dart';
 
@@ -43,23 +46,40 @@ class SecureStorageService {
   Map<String, String> get _memoryCache =>
       _memoryCaches.putIfAbsent(_sandbox ?? '', () => {});
   static int _authRevision = 0;
+  Future<void> _macSessionWrites = Future.value();
 
   /// 当前认证写入版本；同一个 Token 的重新登录也属于新会话。
   int get authRevision => _authRevision;
 
-  SecureStorageService({FlutterSecureStorage? storage})
-    : _sandbox = studioSandboxRoot(),
-      _storage = SandboxCredentialStore(
-        sandbox: studioSandboxRoot(),
-        storage: storage,
-      );
+  SecureStorageService({
+    FlutterSecureStorage? storage,
+    MacCredentialStore? macStore,
+  }) : _sandbox = studioSandboxRoot(),
+       _storage = SandboxCredentialStore(
+         sandbox: studioSandboxRoot(),
+         storage: storage,
+         macStore:
+             macStore ??
+             (storage == null && Platform.isMacOS
+                 ? const MacCredentialStore()
+                 : null),
+       );
 
   // ==================== Access Token ====================
 
   /// 保存 Access Token
   Future<void> saveAccessToken(String token) async {
-    _authRevision++;
     final normalizedToken = _normalizeToken(token);
+    if (_storage.macStore != null && _sandbox == null) {
+      await _storage.write(
+        key: StorageKeys.accessToken,
+        value: normalizedToken,
+      );
+      _authRevision++;
+      _memoryCache[StorageKeys.accessToken] = normalizedToken;
+      return;
+    }
+    _authRevision++;
 
     // 先保存到内存缓存
     _memoryCache[StorageKeys.accessToken] = normalizedToken;
@@ -97,6 +117,8 @@ class SecureStorageService {
         return normalizedToken;
       }
       return token;
+    } on LocalCredentialStoreException {
+      rethrow;
     } catch (e) {
       AppLogger.w('Failed to read token: $e', 'SecureStorage');
       return null;
@@ -149,6 +171,10 @@ class SecureStorageService {
     required DateTime expiry,
     required String email,
   }) async {
+    if (_storage.macStore != null && _sandbox == null) {
+      await _saveMacSession<void>(accessToken, expiry, email, () async {});
+      return;
+    }
     await Future.wait([
       saveAccessToken(accessToken),
       saveTokenExpiry(expiry),
@@ -156,17 +182,92 @@ class SecureStorageService {
     ]);
   }
 
+  /// Save session fields atomically. Register the account before publishing
+  /// the token in memory, and only roll back the fields that still match ours.
+  Future<T> saveAuthAndAccount<T>({
+    required String accessToken,
+    required DateTime expiry,
+    required String email,
+    required Future<T> Function() saveAccount,
+  }) async {
+    if (_storage.macStore != null && _sandbox == null) {
+      return _saveMacSession(accessToken, expiry, email, saveAccount);
+    }
+    await saveAuth(accessToken: accessToken, expiry: expiry, email: email);
+    return saveAccount();
+  }
+
+  Future<T> _saveMacSession<T>(
+    String token,
+    DateTime expiry,
+    String email,
+    Future<T> Function() saveAccount,
+  ) {
+    final write = _macSessionWrites.then(
+      (_) => _replaceMacSession(token, expiry, email, saveAccount),
+    );
+    _macSessionWrites = write.then<void>(
+      (_) {},
+      onError: (Object _, StackTrace _) {},
+    );
+    return write;
+  }
+
+  Future<T> _replaceMacSession<T>(
+    String token,
+    DateTime expiry,
+    String email,
+    Future<T> Function() saveAccount,
+  ) async {
+    final values = {
+      StorageKeys.tokenExpiry: expiry.toIso8601String(),
+      StorageKeys.userEmail: email,
+      StorageKeys.accessToken: _normalizeToken(token),
+    };
+    final vault = _storage.macStore!;
+    final previous = await vault.update(values);
+    final T account;
+    try {
+      account = await saveAccount();
+    } catch (_) {
+      await vault.update(previous, expected: values);
+      rethrow;
+    }
+    _authRevision++;
+    _memoryCache[StorageKeys.accessToken] = values[StorageKeys.accessToken]!;
+    return account;
+  }
+
   /// 清除所有认证信息
   Future<void> clearAuth() async {
+    if (_storage.macStore case final local? when _sandbox == null) {
+      await local.update({
+        StorageKeys.accessToken: null,
+        StorageKeys.tokenExpiry: null,
+        StorageKeys.userEmail: null,
+      });
+      _authRevision++;
+      _memoryCache.remove(StorageKeys.accessToken);
+      return;
+    }
     _authRevision++;
-    // 清除内存缓存
     _memoryCache.remove(StorageKeys.accessToken);
-
     await Future.wait([
       _storage.delete(key: StorageKeys.accessToken),
       _storage.delete(key: StorageKeys.tokenExpiry),
       _storage.delete(key: StorageKeys.userEmail),
     ]);
+  }
+
+  Future<bool> resetCorruptMacCredentials() async {
+    final vault = _storage.macStore;
+    if (vault == null || _sandbox != null) {
+      throw const LocalCredentialStoreException();
+    }
+    final reset = await vault.resetIfCorrupt();
+    _authRevision++;
+    _memoryCache.clear();
+    return reset;
   }
 
   /// 清除所有存储数据

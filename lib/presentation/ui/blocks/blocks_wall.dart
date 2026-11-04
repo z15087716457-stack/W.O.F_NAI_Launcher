@@ -6,7 +6,9 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
+import '../../../core/utils/keyboard_modifier_utils.dart';
 import '../../../core/utils/localization_extension.dart';
+import '../../../core/utils/platform_shortcut_text.dart';
 import '../../widgets/common/studio_icons.dart';
 import '../../widgets/common/workspace_text_scale_scope.dart';
 import '../../widgets/navigation/window_chrome_layout.dart';
@@ -29,11 +31,13 @@ import 'blocks_rag_badge.dart';
 String? _lastTapId;
 var _lastTapAt = DateTime(0);
 
-/// 单击选中、300ms 内再点同一张 = 编辑；多选中或按着 Ctrl / Shift 时切换勾选。
+/// 单击选中、300ms 内再点同一张 = 编辑；多选中或按着 Ctrl（macOS 上是 ⌘）/ Shift 时切换勾选。
 /// 不用 onDoubleTap：那会让单击和卡片上的按钮都等 300ms 才响应。
 void _tapBlock(BlocksLibraryPageState ctrl, BlocksLibraryActions a, String id) {
   final hw = HardwareKeyboard.instance;
-  if (ctrl.picking || hw.isControlPressed || hw.isShiftPressed) {
+  if (ctrl.picking ||
+      isPrimarySelectionModifierPressed(keyboard: hw) ||
+      hw.isShiftPressed) {
     ctrl.togglePick(id);
     return;
   }
@@ -274,7 +278,7 @@ class BlocksToolbar extends StatelessWidget {
                 UiBtn(
                   key: const Key('blocks-create'),
                   tone: UiBtnTone.primary,
-                  tooltip: l10n.blocks_newBlockTip,
+                  tooltip: platformShortcutText(l10n.blocks_newBlockTip),
                   onTap: () => ctrl.openEdit(null),
                   children: [
                     const UiGlyph(UiGlyphs.plus, size: 14, strokeWidth: 2.2),

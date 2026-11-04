@@ -58,6 +58,7 @@ class UiPopover extends StatefulWidget {
     required this.anchor,
     required this.onDismiss,
     required this.builder,
+    this.focusOnOpen = false,
   });
 
   final Widget child;
@@ -65,23 +66,39 @@ class UiPopover extends StatefulWidget {
   final VoidCallback onDismiss;
   final WidgetBuilder builder;
 
+  /// Menus take keyboard focus when opened. Suggestions can leave it in their editor.
+  final bool focusOnOpen;
+
   @override
   State<UiPopover> createState() => _UiPopoverState();
 }
 
 class _UiPopoverState extends State<UiPopover> {
   final _portal = OverlayPortalController();
+  final _focus = FocusNode();
 
   /// 每打开一次加一；淡入只按这个重放，锚点挪动或宿主重建不重放。
   var _session = 0;
+
+  void _show(Duration _) {
+    if (!mounted) return;
+    _portal.show();
+    if (widget.anchor != null && widget.focusOnOpen && !_focus.hasFocus) {
+      _focus.requestFocus();
+    }
+  }
+
+  @override
+  void dispose() {
+    _focus.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
     super.initState();
     // 浮层层常驻（不能在构建期间 show / hide）；关着时浮层里什么都不画。
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _portal.show();
-    });
+    WidgetsBinding.instance.addPostFrameCallback(_show);
   }
 
   @override
@@ -90,9 +107,7 @@ class _UiPopoverState extends State<UiPopover> {
     // 再次打开时提到最上层（多个浮层宿主、或大图查看器也在浮层里时，后打开的在上面）。
     if (oldWidget.anchor == null && widget.anchor != null) {
       _session++;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _portal.show();
-      });
+      WidgetsBinding.instance.addPostFrameCallback(_show);
     }
   }
 
@@ -125,6 +140,7 @@ class _UiPopoverState extends State<UiPopover> {
                   anchor.alignRight,
                 ),
                 child: Focus(
+                  focusNode: _focus,
                   autofocus: true,
                   onKeyEvent: (_, event) {
                     if (event is KeyDownEvent &&

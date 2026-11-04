@@ -64,6 +64,36 @@ void main() {
     expect(t.takeException(), isNull);
   });
 
+  testWidgets(
+    'the macOS editor icon picker uses the same elastic drag and bounded wheel as a list',
+    (t) async {
+      await _pump(t);
+      final grid = find.byKey(const Key('block-icon-scroll'));
+      final pos = t
+          .state<ScrollableState>(
+            find.descendant(of: grid, matching: find.byType(Scrollable)),
+          )
+          .position;
+      final point = t.getCenter(grid);
+      final trackpad = await t.createGesture(kind: PointerDeviceKind.trackpad);
+      await trackpad.panZoomStart(point);
+      await trackpad.moveBy(const Offset(0, 12));
+      await trackpad.moveBy(const Offset(0, 20));
+      expect(pos.pixels, lessThan(0));
+      await trackpad.up();
+      await t.pumpAndSettle();
+      expect(pos.pixels, 0);
+      await t.sendEventToBinding(
+        PointerScrollEvent(
+          position: point,
+          kind: PointerDeviceKind.mouse,
+          scrollDelta: const Offset(0, -60),
+        ),
+      );
+      expect(pos.pixels, 0);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.macOS),
+  );
   testWidgets('可见约 4.5 行，滚轮在网格内部滚动', (t) async {
     final picked = await _pump(t);
     final view = t.getRect(find.byKey(const Key('block-icon-scroll')));

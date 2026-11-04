@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -253,5 +254,89 @@ void main() {
     expect(await srcFileCopy.exists(), isTrue);
     expect(await File(copyRes!).exists(), isTrue);
     expect(p.isWithin(extDir.path, copyRes), isTrue);
+  });
+
+  // 外部源用本机的绝对路径（macOS 上是 /var/folders/…、/Users/…），只读保护按它判断
+  test('外部图库源只读：改名、移动、删除、建子分类都被拒绝，文件夹原样保留', () async {
+    final extDir = await Directory.systemTemp.createTemp('nai_ext_readonly_');
+    final renamedPath = p.join(
+      extDir.parent.path,
+      '${p.basename(extDir.path)}_renamed',
+    );
+    addTearDown(() async {
+      for (final path in [extDir.path, renamedPath]) {
+        if (await Directory(path).exists()) {
+          await Directory(path).delete(recursive: true);
+        }
+      }
+    });
+    final image = File(p.join(extDir.path, 'keep.png'));
+    await image.writeAsString('external image');
+    await Directory(p.join(galleryRoot.path, 'main')).create();
+
+    final external = GalleryCategory.create(
+      name: 'External',
+      folderPath: extDir.path,
+    );
+    final main = GalleryCategory.create(name: 'main', folderPath: 'main');
+    final all = [external, main];
+
+    expect(external.isExternal, isTrue);
+    expect(await repository.getCategoryAbsolutePath(external), extDir.path);
+    expect(
+      await repository.renameCategory(external, p.basename(renamedPath), all),
+      isNull,
+    );
+    expect(await repository.moveCategory(external, main.id, all), isNull);
+    expect(await repository.moveCategory(main, external.id, all), isNull);
+    expect(
+      await repository.createCategory(
+        name: 'child',
+        parentId: external.id,
+        existingCategories: all,
+      ),
+      isNull,
+    );
+    expect(
+      await repository.deleteCategory(external, all, recursive: true),
+      isFalse,
+    );
+    expect(
+      await repository.deleteCategory(external, all, deleteFolder: false),
+      isFalse,
+    );
+
+    expect(await image.readAsString(), 'external image');
+    expect(await Directory(renamedPath).exists(), isFalse);
+    expect(await Directory(p.join(galleryRoot.path, 'main')).exists(), isTrue);
+  });
+
+  test('外部图库源同步：子文件夹是外部源；隐藏名单里的绝对路径不拼到主根下面', () async {
+    final extRoot = await Directory.systemTemp.createTemp('nai_ext_sync_');
+    addTearDown(() async {
+      if (await extRoot.exists()) await extRoot.delete(recursive: true);
+    });
+    final hidden = await Directory(p.join(extRoot.path, 'Hidden')).create();
+    final shown = await Directory(p.join(extRoot.path, 'Shown')).create();
+    await Hive.box(
+      StorageKeys.settingsBox,
+    ).put(StorageKeys.galleryExtraRoots, [extRoot.path]);
+    // 隐藏名单里存的是外部源文件夹的绝对路径（统一成 / 分隔）
+    await File(
+      p.join(galleryRoot.path, '.gallery_category_suppressed_paths.json'),
+    ).writeAsString(jsonEncode([hidden.path.replaceAll(r'\', '/')]));
+
+    final synced = await repository.syncWithFileSystem(const []);
+
+    expect(synced.map((c) => c.name), isNot(contains('Hidden')));
+    final shownCategory = synced.firstWhere((c) => c.name == 'Shown');
+    expect(shownCategory.isExternal, isTrue);
+    expect(shownCategory.folderPath, shown.path);
+    expect(
+      await repository.renameCategory(shownCategory, 'Renamed', synced),
+      isNull,
+    );
+    expect(await shown.exists(), isTrue);
+    expect(await hidden.exists(), isTrue);
   });
 }

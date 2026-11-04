@@ -39,6 +39,34 @@ Pi 本地回归在 `tool/nai_agent/` 执行 `npm test`，使用本地合成服�
 
 Agent 依赖变化还须覆盖分发入口：`python -m unittest discover -s test/scripts -p windows_release_payload_test.py` 验证版本预检和包信息；Pi 组件版本从锁文件核对，发布元数据读取实际包内版本，不另留版本常量。
 
+## macOS 构建、测试与发布
+
+GitHub Actions 的 runner、签名和产物交付见 [macOS Actions](docs/macos-actions.md)。PR 与 Release 共用 `macos-build.yml`，固定 ad-hoc 签名，不需要 Apple 证书或 secret；Mac 专属 Dart 回归清单在 `scripts/test_macos.sh`，真实应用宿主的 XCTest 通过 `scripts/test_macos_native.sh` 运行。Node 归档中的 npm/npx 也随包复制，Agent 子进程将包内工具目录放到 PATH 前面，兼容访达启动；Git 来源的扩展仍需要系统 Git。
+
+工具：完整 Xcode（`scripts/build_macos.sh` 默认用 `/Applications/Xcode.app`，不改 `xcode-select`，别的位置用 `DEVELOPER_DIR`）、CocoaPods、rustup（`super_native_extensions` 用 cargokit 编 Rust；Homebrew 的 rustup 不进 PATH，脚本会补上）、Flutter 3.47.7（`FLUTTER_ROOT` 指向登记的 SDK，或放在 PATH 上）。应用主体的部署目标为 macOS 12，随包 Node 所需的最低系统版本为 macOS 13.5，bundle id `com.wof.naiStudio`；设置、数据库和 Agent 数据在「应用支持」目录（`~/Library/Application Support/com.wof.naiStudio/`），Agent 运行时和 `studio-bridge` 放在 `Contents/Resources/tools`，不往应用包里写（见 `lib/core/utils/app_bundle_paths.dart`）。
+
+```bash
+scripts/build_macos.sh                       # debug，本机架构
+scripts/build_macos.sh tools <应用包>         # flutter run 之后补进 Node、Pi、studio-bridge 和放大引擎
+scripts/build_macos.sh --release             # 通用应用包（arm64 + x86_64）
+scripts/package_macos_release.sh [--version <版本>] [--dist-dir <目录>]
+```
+
+- Node 和 Windows 包同一版本（v24.18.0），官方 darwin-arm64 / darwin-x64 两个包校验后用 `lipo` 合成；Pi 依赖用同版本的 npm 执行 `npm ci`。下载缓存在 `build/macos-runtime-cache/`。
+- `--release` 的 `studio-bridge` 也是通用二进制：Intel 那一份用官方 macOS x64 Dart SDK（版本同 Flutter 自带的 Dart，校验 `.sha256sum`）在 Rosetta 下编，所以发布构建要在装了 Rosetta 的 Apple 芯片 Mac 上做（`softwareupdate --install-rosetta`）。没有 Rosetta 时只编本机架构并给出警告，打包脚本默认拒收；只给自己用的本地包可以设 `ALLOW_HOST_ONLY_BRIDGE=1`。
+- 本地放大：Real-ESRGAN NCNN/Vulkan 用官方 v0.2.0 Release 里的 macOS 包（`realesrgan-ncnn-vulkan-v0.2.0-macos.zip`，和 Windows 包出自同一个 Release、同一份源码 37026f4）。它本身就是 arm64 + x86_64 的通用二进制，静态链接 MoltenVK 1.1.1（走 Metal）和 LLVM OpenMP，只依赖系统框架。`build_macos.sh` 按固定的 sha256 校验 zip 和程序，连同上游 LICENSE 和 `tool/local_upscale/macos/` 里 MoltenVK、cereal、LLVM OpenMP 的许可放进 `Contents/Resources/tools/local-upscale/`，签名后再重签整个包；固定的版本和 `assets/local_upscale/manifest.json` 的 `engine_version` 对不上时构建直接失败。模型照旧从 flutter_assets 释放到「应用支持」目录，下载的可选模型也和 Windows 共用同一个官方模型包。Mac 上不用 `studio_upscale_worker`：它只给 SeedVR2 / RTX 组件管进程（Windows Job Object）和调 RTX Video SDK（Direct3D 11），常规放大在 Windows 上也是直接启动引擎。真机审计：`RUN_LOCAL_UPSCALE_AUDIT=1 LOCAL_UPSCALE_MAC_TOOLS=<应用包>/Contents/Resources/tools flutter test test/data/services/local_upscale_service_test.dart`。设置页“本地放大”的显卡卡片在 Apple 芯片上显示芯片名（`sysctl -n machdep.cpu.brand_string`，如 Apple M2 Max，不带显存）；Intel Mac 那里读到的是 CPU，和读不到时一样，仍写“没有检测到独立显卡”。
+- `package_macos_release.sh` 先把应用包复制到 `build/release-stage/`（不改 Flutter 产物），由 `scripts/macos_release_payload.py` 检查：Release 构建、`Info.plist` 版本号和 `--version` 一致、没有开发机上的用户数据（`user-data`、`agent-data`、`.runs` 等）和指向包外的符号链接、数据库是真 SQLite 而不是 LFS 指针、锁文件中的 Pi 版本 / Node v24.18.0、放大引擎和许可在 `tools/local-upscale` 而 flutter_assets 里没有 Windows 放大程序、每个 Mach-O 都有 arm64 和 x86_64。然后写 `Contents/Resources/package-info.json`（`platform: macos-universal`）和许可文件，重签，用 `ditto -c -k --keepParent --norsrc` 打成 `WOF_NAI_Studio_macOS_<版本>_Portable.zip` 和 `.sha256`，最后解压一遍核对签名和符号链接。`--norsrc` 不能省：系统给每个文件打的 `com.apple.provenance` 会在 zip 里变成上万个 `._` 文件，用别的工具解压时落进应用包，签名一坏，系统就说应用“已损坏”。
+- 签名：没有证书时用 ad-hoc，用户第一次打开会被 Gatekeeper 拦，打开方法写在 README。有 Developer ID 证书时，两个脚本都用 `CODESIGN_IDENTITY` 指定；要公证还得加 hardened runtime（Node 需要 JIT 相关的 entitlements）、时间戳和 `notarytool`，目前没做。
+- 应用内更新：Mac 包和 Windows 一样下载、校验大小和 SHA-256，然后解压到更新目录、在访达中选中新版本，由用户退出后拖进「应用程序」替换；不在退出后自动覆盖（ad-hoc 包静默替换既要「应用程序」的写权限，也绕过了用户确认）。从安装位置运行新版本后清理更新包和解压目录。在临时目录直接打开时，应用保留这两处文件，并提示移动到「应用程序」。
+- RAG：Apple 芯片的 Mac 上可用。运行时和 Windows 一样在应用内安装到「应用支持」的 `rag/v1/`：固定版本的 uv 0.13.1（`uv-aarch64-apple-darwin.tar.gz`，sha256 写在 `rag_runtime.dart`）建 Python 3.12.11 venv（`runtime/bin/python3`），PyTorch 2.10.0 / torchvision 0.25.0 取自 PyPI（Mac 版自带 MPS），其余依赖同 `tool/rag/requirements.txt`。没有 CUDA；设备“自动”在内存 18 GB 及以上的 Mac 上走 MPS，16 GB 及以下或读不到内存（`hw.memsize`）时走 CPU，规则只在 `RagSettings.deviceOn`，平台和内存都能注入；手动选的设备照旧。MPS 仍是 fp32，向量和排序与 CPU 一致。Intel Mac 不支持（PyTorch 2.3 起没有 macOS x86_64 的包），界面显示“不支持”、安装按钮置灰。平台判断在 `rag_platform.dart`，服务和 `ragPlatformProvider` 都能注入。
+- RAG 进程宿主：`tool/rag/stdio_host.cpp` 的 macOS 实现用进程组代替 Job Object：子进程在执行前进新进程组；子进程退出、应用（argv[1]）退出或宿主收到 SIGTERM / SIGINT / SIGHUP 时整组 SIGKILL，宿主再以同一信号退出。`build_macos.sh` 的 `bundle_rag_host` 用 clang 直接编通用二进制（不需要 Rosetta）放进 `Contents/Resources/tools/rag-stdio-host` 并签名，同时在签名前从 flutter_assets 删掉 `assets/rag/windows/`、重签 App.framework；`macos_release_payload.py` 检查这两点。应用包里没有宿主（如直接 `flutter run`）时子进程直接启动，只能靠 stdin 关闭退出。宿主测试：`RAG_TEST_HOST=<编出的宿主> python3 -m unittest discover -s tool/rag -p test_host.py`。
+- 资源小窗：Windows 用 `desktop_multi_window` 开独立的原生子窗口（`windows/runner/resource_window.cpp`）；macOS 上 `nativeResourceWindowsProvider` 为 false，资源小窗开成主窗口里的浮动面板（`FloatingResourceWindowsHost`），不建子窗口，也不调 `com.nailauncher/resource_window_native` 通道（关主窗口时同样不调 `closeAll`，Mac 上那个通道没有实现）。`desktop_multi_window` 自带 macOS 实现，会随包编译、注册到主窗口，但 Mac 上没有代码调用它。
+- 只有 Windows 版的功能：本地放大的 SeedVR2 和 RTX Video 组件（要 CUDA、RTX Video SDK 和 Direct3D 11，界面上写明“目前只支持 Windows”，安装按钮不可点）。`assets/local_upscale/windows/`（Windows 引擎、worker、vcomp140.dll）在 `build_macos.sh` 签名前从 flutter_assets 里剔掉，Mac 的代码路径不读它们。
+- 沙箱（`NAI_STUDIO_SANDBOX` 设成一个绝对路径）：Mac 上同样只用沙箱里的 `user-data/`、`documents/` 和 `user-data/temp/`，偏好写在沙箱的 `shared_preferences.json`，登录凭据只放内存，不写正式的凭据目录，窗口标题带 `[sandbox]`，也不做 1.x 旧数据的首启复制。Windows 原生层按沙箱区分单实例和唤醒消息。Mac 在迁移、同步和开库前锁定当前资料目录。单独运行另一个沙箱时直接启动可执行文件，例如 `NAI_STUDIO_SANDBOX="$(mktemp -d)" "build/macos/Build/Products/Debug/W.O.F NAI Studio.app/Contents/MacOS/W.O.F NAI Studio"`。值不是绝对路径时和 Windows 一样直接退出、不碰数据。核对：`NAI_STUDIO_SANDBOX=<绝对路径> flutter test test/core/utils/studio_sandbox_test.dart`。
+- 测试：在 Mac 上跑 `flutter test` 时，一批按 Windows 窗口写的组件测试（集成标题栏、页头拖动、窗口外框等）本来就不过，结果以 Windows CI 为准，比对时看有没有新增失败。测平台分支用 `debugDefaultTargetPlatformOverride` 或给服务注入平台，不依赖跑测试的机器。
+- 发布：`Release` 的 `build-macos` 与 PR 校验的 `macos-validation` 共用 `.github/workflows/macos-build.yml`，在 `macos-15` 构建和打包。PR 上传 Actions 产物供核对；Release 的 Mac 包和 Windows 包发布到同一个 Release，`generate_release_metadata.ps1` 将 Mac 包登记到 `release_manifest.json`（`type: macos-portable`），供应用内更新选择。Mac 回归清单统一在 `scripts/test_macos.sh`，其余全量测试仍由 Windows 任务执行；两种入口都采用 ad-hoc 签名，详见 `docs/macos-actions.md`。
+- 首次启动复制旧版数据（`lib/core/services/mac_legacy_data_import.dart`）：来源默认是 bundle id `com.aaalice.naiLauncher`（W.O.F 1.x 和上游 NAI Launcher）。开发构建可以用 `--dart-define=MAC_LEGACY_BUNDLE_ID=<bundle id>` 指向别的应用，用 `--dart-define=MAC_LEGACY_APP_NAME=<程序坞里的名字>` 改提示里的名字；`MAC_LEGACY_BUNDLE_ID` 设为空就不复制。`flutter test` 下不运行，测试用临时目录注入新旧目录。
+
 ## 当前 Glass 包交付
 
 本机桌面实际使用 `E:/A.I/NovelAI/nai-launcher-src/build/windows-glass-preview/runner/Release/`，不是标准 Release 或 Debug 目录。完整交付状态以该源码根 `.dart_tool/glass-rollout-delivery.json` 与安装文件为准；当前有效源码位置从工作区接手说明读取。
@@ -94,7 +122,7 @@ flutter gen-l10n
 
 ## Changelog、README 与发布
 
-`CHANGELOG.md` 记录用户可见结果；当前开发变化放 Unreleased，真正发布时核对上一 tag 至当前代码、版本号、LFS、Windows 构建、release notes 和资产清单，再整理对应版本段落。交付到本机和发布 GitHub Release 是不同状态，不能把本地安装当新 Release 已发布。
+`CHANGELOG.md` 记录用户可见结果；当前开发变化放 Unreleased，真正发布时核对上一 tag 至当前代码、版本号、LFS、Windows 和 macOS 构建、release notes 和资产清单，再整理对应版本段落。交付到本机和发布 GitHub Release 是不同状态，不能把本地安装当新 Release 已发布。
 
 README 中英文同批同步，保留相互切换和上游归属链接。截图须说明是否为历史界面或合成数据的部件实绘，不能把旧图包装成当前窗口。保留原创项目归属、许可和本分支更新仓库；观察上游后自主实现需要的变化，不 merge / cherry-pick 上游。
 

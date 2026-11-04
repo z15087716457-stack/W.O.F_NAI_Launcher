@@ -127,7 +127,7 @@ void main() {
       messenger.setMockMethodCallHandler(const MethodChannel('tray_manager'), (
         call,
       ) async {
-        expect(Hive.isBoxOpen(StorageKeys.settingsBox), isFalse);
+        expect(Hive.isBoxOpen(StorageKeys.settingsBox), Platform.isMacOS);
         calls.add('tray:${call.method}');
         return null;
       });
@@ -169,7 +169,11 @@ void main() {
       await started.future;
       expect(DesktopAppShutdownService.isShuttingDown, isTrue);
       expect(DesktopAppShutdownService.shutdownAndExit(99), same(quit));
-      expect(calls, ['window:hide', 'owner:cancel']);
+      expect(calls, [
+        if (Platform.isWindows || Platform.isMacOS) 'window:hide',
+        if (Platform.isMacOS) 'tray:destroy',
+        'owner:cancel',
+      ]);
       expect(Hive.isBoxOpen(StorageKeys.settingsBox), isTrue);
 
       // During real exit, neither the tray nor a late window event can reopen it
@@ -184,16 +188,22 @@ void main() {
       await WindowStateObserver().didChangeAppLifecycleState(
         AppLifecycleState.paused,
       );
-      expect(calls, ['window:hide', 'owner:cancel']);
+      expect(calls, [
+        if (Platform.isWindows || Platform.isMacOS) 'window:hide',
+        if (Platform.isMacOS) 'tray:destroy',
+        'owner:cancel',
+      ]);
 
       release.complete();
       await exited;
       expect(exits, 1);
       expect(calls, [
-        'window:hide',
+        if (Platform.isWindows || Platform.isMacOS) 'window:hide',
+        if (Platform.isMacOS) 'tray:destroy',
         'owner:cancel',
         'owner:saved',
-        'tray:destroy',
+        if (Platform.isWindows) 'tray:destroy',
+        if (Platform.isMacOS) ...['window:setPreventClose', 'window:destroy'],
         'exit:7',
       ]);
       expect(Hive.isBoxOpen(StorageKeys.settingsBox), isFalse);

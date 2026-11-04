@@ -801,23 +801,29 @@ class EntryPrimaryButton extends StatelessWidget {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (busy) ...[
-                  EntryBusyDots(color: foreground),
-                  const SizedBox(width: 8),
-                ],
-                Flexible(
-                  child: Text(
-                    busy ? (busyLabel ?? label) : label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+            Align(
+              heightFactor: 1,
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: enabled ? 20 : 0),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (busy) ...[
+                      EntryBusyDots(color: foreground),
+                      const SizedBox(width: 8),
+                    ],
+                    Flexible(
+                      child: Text(
+                        busy ? (busyLabel ?? label) : label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
-            if (!busy && onPressed != null)
+            if (enabled)
               Positioned(
                 right: 0,
                 child: ExcludeSemantics(

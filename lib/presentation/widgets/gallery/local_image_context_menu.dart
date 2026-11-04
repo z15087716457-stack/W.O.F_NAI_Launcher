@@ -2,6 +2,7 @@ import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 import '../../../core/utils/localization_extension.dart';
+import '../../utils/platform_labels.dart';
 import '../common/image_action_menu.dart';
 
 enum LocalImageContextAction {
@@ -91,7 +92,7 @@ class LocalImageContextMenu {
         ),
         item(
           LocalImageContextAction.showInFolder,
-          l.localGallery_showInFolder,
+          showInFileManagerLabel(l, l.localGallery_showInFolder),
           StudioIcons.galleryReveal,
         ),
         const ImageMenuAction.divider(),

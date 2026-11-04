@@ -181,6 +181,62 @@ void main() {
       ]);
     });
 
+    /// 按住 [modifiers] 按 [key]，返回这次按键有没有被处理。
+    Future<bool> chord(
+      WidgetTester t,
+      List<LogicalKeyboardKey> modifiers,
+      LogicalKeyboardKey key,
+    ) async {
+      for (final m in modifiers) {
+        await t.sendKeyDownEvent(m);
+      }
+      final handled = await t.sendKeyEvent(key);
+      for (final m in modifiers.reversed) {
+        await t.sendKeyUpEvent(m);
+      }
+      await t.pump();
+      return handled;
+    }
+
+    const cmd = LogicalKeyboardKey.metaLeft;
+    const control = LogicalKeyboardKey.controlLeft;
+
+    testWidgets('macOS：墙上 ⌘C 复制、⌘F 聚焦搜索不收藏，⌃⌘F 留给系统', (t) async {
+      await pumpOnline(t, data: OnlineFixture.view(), actions: rec.actions);
+      await t.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await chord(t, [cmd], LogicalKeyboardKey.keyC);
+      expect(rec.copies, hasLength(1));
+      expect(await chord(t, [control, cmd], LogicalKeyboardKey.keyF), false);
+      expect(rec.favorites, isEmpty);
+      expect(await chord(t, [control], LogicalKeyboardKey.keyC), false);
+      expect(rec.copies, hasLength(1));
+      await chord(t, [cmd], LogicalKeyboardKey.keyF);
+      expect(rec.favorites, isEmpty);
+      expect(FocusManager.instance.primaryFocus?.debugLabel, 'online-search');
+    }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
+
+    testWidgets('macOS：大图里 ⌘C 复制，⌘F、⌃⌘F 不当收藏', (t) async {
+      await pumpOnline(
+        t,
+        data: OnlineFixture.view(selectedKey: 'c14'),
+        actions: rec.actions,
+      );
+      await t.tap(_k('online-card-c14'));
+      await t.pump(const Duration(milliseconds: 50));
+      await t.tap(_k('online-card-c14'));
+      await t.pumpAndSettle();
+      expect(_k('online-viewer'), findsOneWidget);
+      await chord(t, [cmd], LogicalKeyboardKey.keyC);
+      expect(rec.copies.single, ['c14']);
+      expect(await chord(t, [control, cmd], LogicalKeyboardKey.keyF), false);
+      expect(rec.favorites, isEmpty);
+      await t.sendKeyEvent(LogicalKeyboardKey.keyF);
+      expect(rec.favorites, ['c14']);
+      // ⌘F 同 Windows 的 Ctrl+F：交给页面聚焦搜索，不再收藏一次
+      await chord(t, [cmd], LogicalKeyboardKey.keyF);
+      expect(rec.favorites, ['c14']);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
+
     testWidgets('悬停操作条：收藏、复制、更多菜单', (t) async {
       await pumpOnline(
         t,

@@ -1,3 +1,5 @@
+import 'package:flutter/services.dart';
+import '../widgets/navigation/workspace_navigation.dart';
 import 'dart:async';
 import '../wiring/style_explore_platform.dart';
 import '../widgets/navigation/integrated_title_bar.dart';
@@ -8,6 +10,7 @@ import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
+import '../../core/utils/desktop_platform.dart';
 import '../../core/utils/localization_extension.dart';
 import '../../core/shortcuts/default_shortcuts.dart';
 import '../providers/auth_provider.dart' show authNotifierProvider, AuthStatus;
@@ -36,8 +39,8 @@ import '../widgets/drop/global_drop_handler.dart';
 import '../wiring/nav_wiring.dart';
 import '../providers/nav_activity_provider.dart';
 
+import '../widgets/shortcuts/page_focus.dart';
 import '../widgets/shortcuts/shortcut_aware_widget.dart';
-import '../widgets/shortcuts/shortcut_help_dialog.dart';
 import 'app_branch.dart';
 
 part 'app_router.g.dart';
@@ -419,6 +422,24 @@ class MainShell extends ConsumerStatefulWidget {
 
 class _MainShellState extends ConsumerState<MainShell> {
   int? _previousIndex;
+  AppBranch _settingsReturn = AppBranch.generation;
+  final _settingsDeparture = SettingsDeparture();
+
+  void _selectBranch(AppBranch branch) {
+    final current = widget.navigationShell.currentIndex;
+    if (current == branch.index) return;
+    void navigate() {
+      if (!mounted) return;
+      ref.read(navActivityProvider.notifier).setCurrentBranch(branch);
+      widget.navigationShell.goBranch(branch.index);
+    }
+
+    if (current == AppBranch.settings.index) {
+      _settingsDeparture.leave(navigate);
+    } else {
+      navigate();
+    }
+  }
 
   @override
   void initState() {
@@ -433,6 +454,9 @@ class _MainShellState extends ConsumerState<MainShell> {
 
     // 页面切换检测（已移除互锁逻辑，不再需要重置标志）
     if (_previousIndex != null && _previousIndex != currentIndex) {
+      if (currentIndex == AppBranch.settings.index) {
+        _settingsReturn = AppBranch.values[_previousIndex!];
+      }
       // 不同页面间的图像详情页不再互锁
       final session = ref.read(imageViewerSessionProvider);
       if (session != null) {
@@ -486,7 +510,10 @@ class _MainShellState extends ConsumerState<MainShell> {
 
         // 保活页面始终保持在树中，通过 TickerMode 控制动画
         if (keepAliveBranches.any((branch) => branch.index == index)) {
-          return TickerMode(enabled: isActive, child: child);
+          return TickerMode(
+            enabled: isActive,
+            child: RefocusWhenActive(active: isActive, child: child),
+          );
         }
 
         // 其他索引：非活动时显示空容器（不保活）
@@ -502,50 +529,45 @@ class _MainShellState extends ConsumerState<MainShell> {
       child: GlobalDropHandler(child: contentStack),
     );
 
-    // 定义全局快捷键动作映射（使用 ShortcutIds 常量）
-    final globalShortcuts = <String, VoidCallback>{
-      for (final entry in globalNavigationShortcutBranches.entries)
-        entry.key: () {
-          ref.read(navActivityProvider.notifier).setCurrentBranch(entry.value);
-          widget.navigationShell.goBranch(entry.value.index);
-        },
-      // 显示快捷键帮助
-      ShortcutIds.showShortcutHelp: () {
-        ShortcutHelpDialog.show(context);
-      },
-    };
-
-    // 使用 ShortcutAwareWidget 包装全局快捷键
-    final shortcutEnabledContent = ShortcutAwareWidget(
-      contextType: ShortcutContext.global,
-      shortcuts: globalShortcuts,
-      autofocus: true,
-      child: dropEnabledContent,
-    );
-
-    if (ref.watch(imageViewerWindowProvider).fullscreen ||
+    final fullscreen =
+        ref.watch(imageViewerWindowProvider).fullscreen ||
         currentIndex == AppBranch.styleExplore.index &&
             ref.watch(styleExploreWindowProvider).fullscreen ||
         currentIndex == AppBranch.generation.index &&
-            ref.watch(generationViewerWindowProvider).fullscreen) {
-      return shortcutEnabledContent;
-    }
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // 桌面端：使用侧边导航
-        if (constraints.maxWidth >= 800) {
-          return DesktopShell(
-            navigationShell: widget.navigationShell,
-            content: shortcutEnabledContent,
+            ref.watch(generationViewerWindowProvider).fullscreen;
+    final shell = fullscreen
+        ? dropEnabledContent
+        : LayoutBuilder(
+            builder: (context, constraints) => constraints.maxWidth >= 800
+                ? DesktopShell(
+                    navigationShell: widget.navigationShell,
+                    content: dropEnabledContent,
+                  )
+                : MobileShell(
+                    navigationShell: widget.navigationShell,
+                    content: dropEnabledContent,
+                  ),
           );
-        }
-
-        // 移动端：使用底部导航
-        return MobileShell(
-          navigationShell: widget.navigationShell,
-          content: shortcutEnabledContent,
-        );
-      },
+    return WorkspaceNavigation(
+      select: _selectBranch,
+      closeSettings: () => _selectBranch(_settingsReturn),
+      settingsDeparture: _settingsDeparture,
+      child: CallbackShortcuts(
+        bindings: {
+          if (usesMacOSConventions && currentIndex == AppBranch.settings.index)
+            const SingleActivator(LogicalKeyboardKey.escape): () =>
+                _selectBranch(_settingsReturn),
+        },
+        child: ShortcutAwareWidget(
+          contextType: ShortcutContext.global,
+          autofocus: true,
+          shortcuts: {
+            for (final e in globalNavigationShortcutBranches.entries)
+              e.key: () => _selectBranch(e.value),
+          },
+          child: shell,
+        ),
+      ),
     );
   }
 }
@@ -628,7 +650,7 @@ class MobileShell extends ConsumerWidget {
         selectedIndex: mobileNavigationIndexForBranch(
           navigationShell.currentIndex,
         ),
-        onDestinationSelected: (index) => _onNavigate(index),
+        onDestinationSelected: (index) => _onNavigate(context, index),
         destinations: [
           NavigationDestination(
             icon: const Icon(StudioIcons.generation),
@@ -659,12 +681,17 @@ class MobileShell extends ConsumerWidget {
   }
 
   /// 映射 mobile navigation index 到 branch index
-  void _onNavigate(int mobileIndex) {
+  void _onNavigate(BuildContext context, int mobileIndex) {
     final branch =
         mobileIndex >= 0 && mobileIndex < mobileNavigationBranches.length
         ? mobileNavigationBranches[mobileIndex]
         : AppBranch.generation;
-    navigationShell.goBranch(branch.index);
+    final workspace = WorkspaceNavigation.maybeOf(context);
+    if (workspace != null) {
+      workspace.select(branch);
+    } else {
+      navigationShell.goBranch(branch.index);
+    }
   }
 }
 

@@ -424,6 +424,9 @@ class UpdateCheckService {
 /// UpdateCheckService Provider (internal async provider)
 @riverpod
 Future<UpdateCheckService> _updateCheckServiceFuture(Ref ref) async {
+  // Startup reads the future before the settings page has a listener. Retain
+  // the ready service while pending update metadata is read from disk.
+  ref.keepAlive();
   final gitHubApiService = ref.watch(gitHubApiServiceProvider);
   final localStorageService = ref.watch(localStorageServiceProvider);
   final installationService = ref.watch(appInstallationServiceProvider);

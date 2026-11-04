@@ -31,6 +31,7 @@ const Map<String, String> zhTwInterfaceTerms = {
   '像素': '像素',
   '退出登录': '登出',
   '托盘': '系統匣',
+  '菜单栏': '選單列',
   '蒙版': '遮罩',
   '裁剪': '裁切',
   '访问': '存取',
@@ -53,4 +54,8 @@ const Map<String, String> zhTwInterfaceTerms = {
   '卸载': '卸載',
   '端口': '連接埠',
   '十六进制': '十六進位',
+  // macOS 的访达在台湾叫 Finder，前后和中文之间留空格。
+  '访达': 'Finder',
+  '在访达中': '在 Finder 中',
+  '到访达中': '到 Finder 中',
 };

@@ -87,6 +87,32 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUpAll(AppLoggerTestIsolation.setUp);
   tearDownAll(AppLoggerTestIsolation.tearDown);
+  test(
+    'macOS leaves Documents Hive files and the active profile alone',
+    () async {
+      final root = await Directory.systemTemp.createTemp('mac_hive_migration_');
+      final previous = PathProviderPlatform.instance;
+      try {
+        final docs = await Directory('${root.path}/documents').create();
+        final target = await Directory('${root.path}/active').create();
+        final source = await File(
+          '${docs.path}/settings.hive',
+        ).writeAsBytes(List.filled(5000, 9));
+        final current = await File(
+          '${target.path}/settings.hive',
+        ).writeAsBytes([1]);
+        PathProviderPlatform.instance = MigrationPaths(root.path);
+        await HiveStorageHelper.instance.migrateFromOldLocation(target.path);
+        expect(await current.readAsBytes(), [1]);
+        expect(await source.readAsBytes(), List.filled(5000, 9));
+      } finally {
+        PathProviderPlatform.instance = previous;
+        await root.delete(recursive: true);
+      }
+    },
+    skip: !Platform.isMacOS,
+  );
+
   for (final mode in ['partial', 'corrupt', 'success']) {
     test(
       'Hive migration preserves source and publishes only verified copy: $mode',
@@ -109,11 +135,13 @@ void main() {
           if (mode == 'success') {
             await HiveStorageHelper.instance.migrateFromOldLocation(
               target.path,
+              isWindows: true,
             );
           } else {
             await IOOverrides.runZoned(
               () => HiveStorageHelper.instance.migrateFromOldLocation(
                 target.path,
+                isWindows: true,
               ),
               createDirectory: (path) => SourceDirectory(
                 nativeZone.run(() => Directory(path)),

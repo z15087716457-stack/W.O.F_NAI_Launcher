@@ -5,13 +5,16 @@ This folder contains the Krita-side Python plugin for the NAI Launcher Krita Bri
 ## Manual Install
 
 1. Enable the Krita Bridge in NAI Launcher settings.
-2. Copy both entries below into `%APPDATA%/krita/pykrita/`:
+2. Copy both entries below into `%APPDATA%/krita/pykrita/` (macOS: `~/Library/Application Support/krita/pykrita/`):
    - `nai_launcher_bridge.desktop`
    - `nai_launcher_bridge/`
 3. Start Krita, open `Settings > Configure Krita > Python Plugin Manager`, enable `NAI Launcher Bridge`, then restart Krita.
 4. Open the docker from `Settings > Dockers > NAI Launcher Bridge`.
 
-The plugin reads `%APPDATA%/nai-launcher/krita-bridge.json`, connects to `ws://127.0.0.1:{port}/krita`, and authenticates with the session secret from that discovery file. It prefers Krita's bundled `PyQt5.QtWebSockets.QWebSocket`; if that module is unavailable, it uses the bundled stdlib WebSocket fallback client. It never reads or stores NovelAI credentials.
+The plugin reads `%APPDATA%/nai-launcher/krita-bridge.json` (macOS: `~/.nai-launcher/krita-bridge.json`, where the Launcher writes it), connects to `ws://127.0.0.1:{port}/krita`, and authenticates with the session secret from that discovery file. It prefers Krita's bundled `PyQt5.QtWebSockets.QWebSocket`; if that module is unavailable, it uses the bundled stdlib WebSocket fallback client. It never reads or stores NovelAI credentials.
+
+The profile installer, preflight and acceptance tooling below use the Windows
+profile layout; on macOS install the plugin by hand as above.
 
 ## Profile Installer
 
@@ -159,7 +162,8 @@ unblocks the controls, and retries the bridge connection automatically. Launcher
 errors are shown in red and clear after a short delay.
 
 Click `Diagnostics` after installation to write
-`%APPDATA%/nai-launcher/krita-bridge-diagnostics.json`. The report checks the
+`%APPDATA%/nai-launcher/krita-bridge-diagnostics.json` (macOS:
+`~/.nai-launcher/krita-bridge-diagnostics.json`). The report checks the
 plugin layout, QtWebSockets availability, Launcher discovery file, active
 document, PNG export/writeback, and active Krita selection input. Open a
 Krita document before running diagnostics when validating canvas round trips.

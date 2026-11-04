@@ -6,7 +6,10 @@ import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:markdown/markdown.dart' as md;
 
 import '../../../core/utils/localization_extension.dart';
+import '../../../core/utils/platform_shortcut_text.dart';
+import '../../../core/utils/primary_activator.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../utils/platform_labels.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_preview_image.dart';
 import '../kit/ui_text.dart';
@@ -778,10 +781,7 @@ class _UserLineState extends State<_UserLine> {
             CallbackShortcuts(
               bindings: {
                 const SingleActivator(LogicalKeyboardKey.escape): _cancel,
-                const SingleActivator(
-                  LogicalKeyboardKey.enter,
-                  control: true,
-                ): () =>
+                const PrimaryActivator(LogicalKeyboardKey.enter): () =>
                     _send(s),
               },
               child: TextField(
@@ -856,7 +856,7 @@ class _UserLineState extends State<_UserLine> {
                   onPressed: _sending ? null : _cancel,
                 ),
                 Tooltip(
-                  message: 'Ctrl + Enter',
+                  message: platformShortcutLabel('Ctrl + Enter'),
                   waitDuration: const Duration(milliseconds: 600),
                   child: AgentButton(
                     key: Key('agent-edit-send-${m.entryId}'),
@@ -3673,7 +3673,11 @@ class _ThumbActions extends StatelessWidget {
         button(AgentImageAction.vibe, AgentGlyphs.wand, l.ag_imageVibe),
         button(AgentImageAction.params, AgentGlyphs.sliders, l.ag_imageParams),
         if (image.path != null)
-          button(AgentImageAction.folder, AgentGlyphs.folder, l.ag_imageFolder),
+          button(
+            AgentImageAction.folder,
+            AgentGlyphs.folder,
+            showInFileManagerLabel(l, l.ag_imageFolder),
+          ),
       ],
     );
   }
@@ -3753,7 +3757,11 @@ Future<void> showAgentImageMenu(
         item('params', AgentGlyphs.sliders, l.ag_imageParams),
       ],
       if (img.path != null)
-        item('folder', AgentGlyphs.folder, l.ag_imageFolder),
+        item(
+          'folder',
+          AgentGlyphs.folder,
+          showInFileManagerLabel(l, l.ag_imageFolder),
+        ),
     ],
   );
   if (!context.mounted) return;

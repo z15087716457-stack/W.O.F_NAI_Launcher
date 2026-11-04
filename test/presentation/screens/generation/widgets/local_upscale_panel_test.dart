@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:ui' as ui;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -191,6 +192,79 @@ void main() {
       variant: TargetPlatformVariant.only(TargetPlatform.windows),
     );
   }
+  testWidgets(
+    'Real-ESRGAN starts on both systems; SeedVR2 and RTX say they need Windows on macOS',
+    (tester) async {
+      final mac = defaultTargetPlatform == TargetPlatform.macOS;
+      final container = ProviderContainer(
+        overrides: [
+          localStorageServiceProvider.overrideWith((_) => _Storage()),
+          generationParamsNotifierProvider.overrideWith(_Params.new),
+          imageGenerationNotifierProvider.overrideWith(_Generation.new),
+          imageWorkflowControllerProvider.overrideWith(_Workflow.new),
+          // Advanced receipts are faked as installed to isolate the platform.
+          localUpscaleModelsProvider.overrideWith(
+            (_) async => [
+              for (final model in localUpscaleCatalog)
+                model.withInstalled(model.bundled),
+              for (final model in advancedUpscaleCatalog)
+                model.withInstalled(true),
+            ],
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            locale: const Locale('zh'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            theme: GeistTheme.light,
+            home: const Scaffold(
+              body: SingleChildScrollView(
+                child: LocalUpscalePanel(
+                  onCloudStart: _noop,
+                  cloudRunning: false,
+                  sourceWidth: 832,
+                  sourceHeight: 1216,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final l = AppLocalizations.of(
+        tester.element(find.byType(LocalUpscalePanel)),
+      )!;
+      VoidCallback? start() => tester
+          .widget<FilledButton>(
+            find.byWidgetPredicate((widget) => widget is FilledButton),
+          )
+          .onPressed;
+      expect(start(), isNotNull);
+      expect(find.text(l.localUpscale_unsupportedPlatform), findsNothing);
+      for (final id in ['seedvr2-3b', 'rtx-vsr']) {
+        container
+            .read(imageWorkflowControllerProvider.notifier)
+            .updateLocalUpscaleModel(id);
+        await tester.pumpAndSettle();
+        expect(start(), mac ? isNull : isNotNull, reason: id);
+        expect(
+          find.text(l.localUpscale_unsupportedPlatform),
+          mac ? findsOneWidget : findsNothing,
+          reason: id,
+        );
+      }
+      expect(tester.takeException(), isNull);
+    },
+    variant: const TargetPlatformVariant({
+      TargetPlatform.windows,
+      TargetPlatform.macOS,
+    }),
+  );
   for (final locale in const [
     Locale('zh'),
     Locale('zh', 'TW'),

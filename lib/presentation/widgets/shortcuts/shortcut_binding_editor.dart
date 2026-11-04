@@ -399,14 +399,10 @@ class _ShortcutBindingEditorState extends ConsumerState<ShortcutBindingEditor> {
     }
 
     // 构建快捷键字符串
-    final parts = <String>[];
-    if (modifiers.contains(ShortcutModifier.control)) parts.add('ctrl');
-    if (modifiers.contains(ShortcutModifier.alt)) parts.add('alt');
-    if (modifiers.contains(ShortcutModifier.shift)) parts.add('shift');
-    if (modifiers.contains(ShortcutModifier.meta)) parts.add('meta');
-    parts.add(mainKey.logicalKey);
-
-    final shortcutString = parts.join('+');
+    // 走 ShortcutParser.serialize，macOS 上按下的 ⌘ 存成主修饰键 ctrl（见 ShortcutParser）
+    final shortcutString = ShortcutParser.serialize(
+      ParsedShortcut(modifiers: modifiers, key: mainKey, raw: ''),
+    );
 
     // 检查冲突
     final conflicts = ref

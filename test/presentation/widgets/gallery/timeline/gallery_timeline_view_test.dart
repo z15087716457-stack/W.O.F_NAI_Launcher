@@ -3,6 +3,7 @@ import 'package:irondash_message_channel/irondash_message_channel.dart';
 // ignore: implementation_imports, depend_on_referenced_packages
 import 'package:super_native_extensions/src/native/context.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -76,6 +77,7 @@ void main() {
   Future<void> pumpView(
     WidgetTester tester, {
     List<LocalImageRecord>? images,
+    VoidCallback? onDeleteRequested,
   }) async {
     tester.view.physicalSize = const Size(1000, 700);
     tester.view.devicePixelRatio = 1;
@@ -118,12 +120,14 @@ void main() {
           supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: GalleryTimelineView(
-              onDeleteRequested: () => deleteRequests.add(
-                container
-                    .read(localGallerySelectionNotifierProvider)
-                    .selectedIds
-                    .toList(),
-              ),
+              onDeleteRequested:
+                  onDeleteRequested ??
+                  () => deleteRequests.add(
+                    container
+                        .read(localGallerySelectionNotifierProvider)
+                        .selectedIds
+                        .toList(),
+                  ),
               onOpenViewer: opened.add,
               onContextMenu: (record, _) => contextMenus.add(record.path),
               onUseImage: (_) async {},
@@ -206,6 +210,29 @@ void main() {
     expect(focused(), isNull);
     await dispose(tester);
   });
+
+  testWidgets(
+    'Delete asks to delete the focused image; macOS also Cmd+Backspace',
+    (tester) async {
+      var deletes = 0;
+      await pumpView(tester, onDeleteRequested: () => deletes++);
+      await tester.tap(card(1));
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.sendKeyEvent(LogicalKeyboardKey.delete);
+      expect(deletes, 1);
+      await tester.sendKeyEvent(LogicalKeyboardKey.backspace);
+      expect(deletes, 1);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.backspace);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+      expect(deletes, defaultTargetPlatform == TargetPlatform.macOS ? 2 : 1);
+      await dispose(tester);
+    },
+    variant: const TargetPlatformVariant({
+      TargetPlatform.macOS,
+      TargetPlatform.windows,
+    }),
+  );
 
   for (final mode in GalleryViewMode.values) {
     testWidgets(
@@ -312,6 +339,40 @@ void main() {
     });
     await dispose(tester);
   });
+
+  testWidgets(
+    'modifiers are read when the button goes down, not when it comes up',
+    (tester) async {
+      await pumpView(tester);
+      final modifier = defaultTargetPlatform == TargetPlatform.macOS
+          ? LogicalKeyboardKey.metaLeft
+          : LogicalKeyboardKey.controlLeft;
+
+      // A quick click often lets go of the modifier before the button.
+      await tester.sendKeyDownEvent(modifier);
+      final gesture = await tester.startGesture(tester.getCenter(card(2)));
+      await tester.sendKeyUpEvent(modifier);
+      await gesture.up();
+      await tester.pump();
+      expect(selection().isActive, isTrue);
+      expect(selection().selectedIds, {records[2].path});
+
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      final range = await tester.startGesture(tester.getCenter(card(4)));
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+      await range.up();
+      await tester.pump();
+      expect(selection().selectedIds, {
+        for (var i = 2; i <= 4; i++) records[i].path,
+      });
+      await dispose(tester);
+    },
+    variant: const TargetPlatformVariant({
+      TargetPlatform.macOS,
+      TargetPlatform.windows,
+    }),
+  );
 
   testWidgets('Shift+tap selects the range from the focused image', (
     tester,

@@ -408,6 +408,9 @@ void main() {
         expect(tester.takeException(), isNull);
         await tester.pumpWidget(const SizedBox());
       },
+      variant: TargetPlatformVariant.only(
+        Platform.isWindows ? TargetPlatform.windows : TargetPlatform.macOS,
+      ),
     );
   }
 
@@ -613,6 +616,48 @@ void main() {
     await tester.pump();
     return router;
   }
+
+  testWidgets(
+    'macOS without a preview releases the native fullscreen shortcut and a selected image claims it',
+    (t) async {
+      await t.runAsync(
+        () => container.read(shortcutConfigNotifierProvider.future),
+      );
+      await pumpViewer(t, startInViewer: false);
+      await t.pumpAndSettle();
+      Future<bool> fullscreenKey() async {
+        await t.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+        await t.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
+        final handled = await t.sendKeyDownEvent(LogicalKeyboardKey.keyF);
+        await t.sendKeyUpEvent(LogicalKeyboardKey.keyF);
+        await t.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+        await t.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+        await t.pumpAndSettle();
+        return handled;
+      }
+
+      final page = find.byType(GenerationPage);
+      final generation =
+          container.read(imageGenerationNotifierProvider.notifier)
+              as DataGeneration;
+      final history = generation.state;
+      generation.publish(const ImageGenerationState());
+      await t.pumpAndSettle();
+      expect(t.widget<GenerationPage>(page).data.canvas.info, isNull);
+      expect(await fullscreenKey(), isFalse);
+      generation.publish(history);
+      await t.pumpAndSettle();
+      expect(
+        t.widget<GenerationPage>(page).data.canvas.info?.tileId,
+        'viewer-image',
+      );
+      expect(await fullscreenKey(), isTrue);
+      expect(find.byType(ImageViewerPage), findsOneWidget);
+      await t.pumpWidget(const SizedBox());
+      await t.pumpAndSettle();
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.macOS),
+  );
 
   for (final output in ['canvas', 'simple']) {
     testWidgets('历史单击实时遵循设置并打开真实大图路由：$output', (tester) async {

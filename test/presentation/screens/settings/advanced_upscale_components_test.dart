@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -245,6 +246,57 @@ void main() {
       }
     }
   }
+
+  testWidgets(
+    'SeedVR2 and RTX installs stay disabled on macOS and say they need Windows',
+    (tester) async {
+      final mac = defaultTargetPlatform == TargetPlatform.macOS;
+      final install = _Install();
+      final container = ProviderContainer(
+        overrides: [
+          localUpscaleModelsProvider.overrideWith(
+            (_) async => [
+              for (final model in advancedUpscaleCatalog)
+                model.withInstalled(false),
+            ],
+          ),
+          advancedUpscaleInstallProvider.overrideWith(() => install),
+        ],
+      );
+      addTearDown(container.dispose);
+      await _pump(tester, container, GlobalKey());
+      await tester.pumpAndSettle();
+      final l = AppLocalizations.of(
+        tester.element(find.byType(AdvancedUpscaleComponents)),
+      )!;
+      for (final id in ['seedvr2-3b', 'rtx-vsr']) {
+        final button = find.byKey(ValueKey('upscale-management-install-$id'));
+        expect(
+          tester.widget<TextButton>(button).onPressed,
+          mac ? isNull : isNotNull,
+          reason: id,
+        );
+        await tester.tap(button);
+        await tester.pumpAndSettle();
+        install.cancel();
+        await tester.pumpAndSettle();
+      }
+      expect(install.installs, mac ? isEmpty : ['seedvr2-3b', 'rtx-vsr']);
+      expect(
+        find.text(l.localUpscale_unsupportedPlatform),
+        mac ? findsNWidgets(2) : findsNothing,
+      );
+      expect(
+        find.text(l.localUpscale_notInstalledShort),
+        mac ? findsNothing : findsNWidgets(2),
+      );
+      expect(tester.takeException(), isNull);
+    },
+    variant: const TargetPlatformVariant({
+      TargetPlatform.windows,
+      TargetPlatform.macOS,
+    }),
+  );
 
   testWidgets(
     'Selected model install locks selection, exposes cancellation and refreshes its action',

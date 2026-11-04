@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../storage/local_storage_service.dart';
+import 'rag_platform.dart';
 
 enum RagContextMode { before, around }
 
@@ -33,6 +34,26 @@ class RagSettings {
   final String embedding, reranker, python;
   final RagContextMode mode;
   final RagDevice device;
+
+  /// Macs with more memory than this run "auto" on the GPU (MPS), so 18 GB
+  /// and up; the cut sits between the two sizes Apple sells. The GPU path
+  /// peaks at about 1.5 times the memory of the CPU path.
+  static const macGpuMemory = 17 << 30;
+
+  /// The device sent to the worker. Windows sends the choice as it is. On a
+  /// Mac "auto" means the GPU only with more than [macGpuMemory]; with 16 GB
+  /// or less, or when [memoryBytes] is unknown, it means the CPU. A Mac has
+  /// no CUDA, so a saved "cuda" counts as auto there.
+  RagDevice deviceOn(RagPlatform platform, {int? memoryBytes}) {
+    if (!platform.isMacOS) {
+      return device == RagDevice.cuda && !platform.supportsCuda
+          ? RagDevice.auto
+          : device;
+    }
+    if (device == RagDevice.cpu) return RagDevice.cpu;
+    return (memoryBytes ?? 0) > macGpuMemory ? RagDevice.auto : RagDevice.cpu;
+  }
+
   static const tokenBudget = 120;
   Map<String, Object> toJson() => {
     'version': 1,

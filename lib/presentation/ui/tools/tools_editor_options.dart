@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/utils/localization_extension.dart';
+import '../../../core/utils/platform_shortcut_text.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_controls.dart';
 import '../kit/ui_glyph.dart';
@@ -81,8 +82,12 @@ class ToolsOptionsBar extends StatelessWidget {
   static Widget _label(BuildContext context, String text) =>
       Text(text, style: UiText.sans(12, color: context.ui.muted));
 
-  static Widget _hint(BuildContext context, String text) =>
-      Text(text, maxLines: 1, style: UiText.sans(12, color: context.ui.muted));
+  // 说明里的 Ctrl / Alt 在 macOS 上写成 ⌘ / ⌥（见 platformShortcutText）
+  static Widget _hint(BuildContext context, String text) => Text(
+    platformShortcutText(text),
+    maxLines: 1,
+    style: UiText.sans(12, color: context.ui.muted),
+  );
 
   static String _icon(ToolsTool t) => switch (t) {
     ToolsTool.brush => 'inpaint_brush',

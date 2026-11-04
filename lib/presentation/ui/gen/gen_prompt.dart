@@ -2,11 +2,11 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/gestures.dart';
 
 import '../../../core/utils/localization_extension.dart';
 import '../kit/ui_new_badge.dart';
 import '../../widgets/common/studio_icons.dart';
+import '../../widgets/common/studio_scroll_behavior.dart';
 import '../../widgets/common/translation_icon.dart';
 import '../../widgets/bridge/bridge_link_icon.dart';
 import '../agent/agent_glyphs.dart';
@@ -293,26 +293,7 @@ class _PromptToolsStripState extends State<_PromptToolsStrip> {
           width: width,
           height: 28,
           child: Listener(
-            onPointerSignal: (event) {
-              if (event is! PointerScrollEvent ||
-                  !_scroll.hasClients ||
-                  _scroll.position.maxScrollExtent <= 0) {
-                return;
-              }
-              GestureBinding.instance.pointerSignalResolver.register(event, (
-                _,
-              ) {
-                final delta = event.scrollDelta.dx != 0
-                    ? event.scrollDelta.dx
-                    : event.scrollDelta.dy;
-                _scroll.jumpTo(
-                  (_scroll.offset + delta).clamp(
-                    0.0,
-                    _scroll.position.maxScrollExtent,
-                  ),
-                );
-              });
-            },
+            onPointerSignal: (event) => scrollStripWithWheel(_scroll, event),
             child: ShaderMask(
               key: const Key('gen-prompt-tools-fade'),
               blendMode: BlendMode.dstIn,

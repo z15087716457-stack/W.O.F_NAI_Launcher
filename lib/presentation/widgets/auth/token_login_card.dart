@@ -5,7 +5,6 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/utils/localization_extension.dart';
 import '../../../data/datasources/remote/nai_auth_api_service.dart';
-import '../../providers/account_manager_provider.dart';
 import '../../providers/auth_provider.dart';
 import 'entry_controls.dart';
 
@@ -155,45 +154,19 @@ class _TokenLoginCardState extends ConsumerState<TokenLoginCard> {
 
     // 保存 notifier 引用，避免 widget disposed 后使用 ref
     final authNotifier = ref.read(authNotifierProvider.notifier);
-    final accountNotifier = ref.read(accountManagerNotifierProvider.notifier);
-
-    // 执行登录验证
-    final success = await authNotifier.loginWithToken(
+    final success = await authNotifier.signInWithEnteredToken(
       token,
-      displayName: nickname,
+      nickname: nickname,
     );
-
-    if (success) {
-      // 默认保存账号（首次使用）
-      final identifier = 'token_${DateTime.now().millisecondsSinceEpoch}';
-      final account = await accountNotifier.addAccount(
-        identifier: identifier,
-        token: token,
-        nickname: nickname,
-        setAsDefault: true,
-      );
-
-      // 更新 AuthState 中的 accountId
-      await authNotifier.loginWithToken(
-        token,
-        accountId: account.id,
-        displayName: account.displayName,
-      );
-
-      // 检查 widget 是否仍然 mounted
-      if (mounted) {
-        widget.onLoginSuccess?.call();
-      }
-    } else {
-      // 登录失败
-      // 注意：这里不需要手动显示 Toast，因为 LoginScreen 监听了 AuthState 变化
-      // 当 AuthState 变为 error 时，LoginScreen 会自动显示 Toast
-      // 保留这里的 else 分支是为了逻辑清晰，如果有其他本地状态需要处理可以在这里添加
-    }
+    if (success && mounted) widget.onLoginSuccess?.call();
   }
 
   String _getErrorMessage(AuthErrorCode? errorCode) {
     switch (errorCode) {
+      case AuthErrorCode.credentialStorageCorrupt:
+        return context.l10n.auth_credentialStorageCorrupt;
+      case AuthErrorCode.credentialStorageUnavailable:
+        return context.l10n.auth_credentialStorageUnavailable;
       case AuthErrorCode.networkTimeout:
         return context.l10n.auth_error_networkTimeout;
       case AuthErrorCode.networkError:
@@ -215,6 +188,10 @@ class _TokenLoginCardState extends ConsumerState<TokenLoginCard> {
   /// 获取错误恢复建议
   String? _getErrorRecoveryHint(AuthErrorCode? errorCode, int? httpStatusCode) {
     switch (errorCode) {
+      case AuthErrorCode.credentialStorageCorrupt:
+        return context.l10n.auth_credentialResetExplanation;
+      case AuthErrorCode.credentialStorageUnavailable:
+        return context.l10n.auth_credentialStorageUnavailableHint;
       case AuthErrorCode.networkTimeout:
         return context.l10n.api_error_timeout_hint;
       case AuthErrorCode.networkError:
