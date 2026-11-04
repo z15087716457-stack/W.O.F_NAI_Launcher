@@ -430,30 +430,41 @@ class _BlockTempCardState extends State<BlockTempCard> {
         spacing: 10,
         children: [
           info,
-          Row(
+          Wrap(
             spacing: 6,
+            runSpacing: 6,
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              Text(
-                l.blocks_content,
-                style: UiText.sans(
-                  11.5,
-                  weight: FontWeight.w600,
-                  color: c.muted,
-                  letterSpacing: .23,
-                ),
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  Text(
+                    l.blocks_content,
+                    style: UiText.sans(
+                      11.5,
+                      weight: FontWeight.w600,
+                      color: c.muted,
+                      letterSpacing: .23,
+                    ),
+                  ),
+                  if (_hasNegative)
+                    BlockSeg<bool>(
+                      mini: true,
+                      wrap: true,
+                      values: const [false, true],
+                      selected: _negative,
+                      keyOf: (v) => Key('block-temp-face-${v ? 'neg' : 'pos'}'),
+                      labelOf: (v) => v ? l.blocks_negative : l.blocks_positive,
+                      onTap: _switchFace,
+                    ),
+                ],
               ),
-              if (_hasNegative)
-                BlockSeg<bool>(
-                  mini: true,
-                  values: const [false, true],
-                  selected: _negative,
-                  keyOf: (v) => Key('block-temp-face-${v ? 'neg' : 'pos'}'),
-                  labelOf: (v) => v ? l.blocks_negative : l.blocks_positive,
-                  onTap: _switchFace,
-                ),
-              const Spacer(),
               if (!d.standalone)
                 BlockSeg<bool>(
+                  wrap: true,
                   values: const [false, true],
                   selected: _compare,
                   keyOf: (v) => Key('block-temp-${v ? 'compare' : 'edit'}'),
@@ -528,10 +539,13 @@ class _BlockTempCardState extends State<BlockTempCard> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
+          Wrap(
             spacing: 8,
+            runSpacing: 8,
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              if (d.standalone) ...quickActions,
+              if (d.standalone) Wrap(spacing: 8, children: quickActions),
               if (!d.standalone)
                 UiBtn(
                   key: const Key('block-temp-revert'),
@@ -546,54 +560,50 @@ class _BlockTempCardState extends State<BlockTempCard> {
                     Text(l.blocks_tempRevert),
                   ],
                 ),
-              Expanded(
-                child: Wrap(
-                  alignment: WrapAlignment.end,
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
+              Wrap(
+                alignment: WrapAlignment.end,
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  UiBtn(
+                    key: const Key('block-temp-apply'),
+                    size: UiBtnSize.small,
+                    tone: _dirty ? UiBtnTone.primary : UiBtnTone.normal,
+                    onTap: _busy
+                        ? null
+                        : _dirty
+                        ? _applyEdit
+                        : () => setState(() {
+                            _compare = false;
+                            _editingTranslations = true;
+                            WidgetsBinding.instance.addPostFrameCallback(
+                              (_) => _focus.requestFocus(),
+                            );
+                          }),
+                    children: [
+                      UiGlyph(
+                        _dirty ? UiGlyphs.check : UiGlyphs.pencil,
+                        size: 13,
+                      ),
+                      Text(
+                        _dirty ? l.blocks_tempApply : l.blocks_tempKeepEditing,
+                      ),
+                    ],
+                  ),
+                  if (a.onSaveTempAsNewBlock != null)
                     UiBtn(
-                      key: const Key('block-temp-apply'),
+                      key: const Key('block-temp-save-as'),
                       size: UiBtnSize.small,
-                      tone: _dirty ? UiBtnTone.primary : UiBtnTone.normal,
+                      tone: _saving ? UiBtnTone.normal : UiBtnTone.primary,
                       onTap: _busy
                           ? null
-                          : _dirty
-                          ? _applyEdit
-                          : () => setState(() {
-                              _compare = false;
-                              _editingTranslations = true;
-                              WidgetsBinding.instance.addPostFrameCallback(
-                                (_) => _focus.requestFocus(),
-                              );
-                            }),
+                          : () => setState(() => _saving = !_saving),
                       children: [
-                        UiGlyph(
-                          _dirty ? UiGlyphs.check : UiGlyphs.pencil,
-                          size: 13,
-                        ),
-                        Text(
-                          _dirty
-                              ? l.blocks_tempApply
-                              : l.blocks_tempKeepEditing,
-                        ),
+                        const UiGlyph(UiGlyphs.saveAs, size: 13),
+                        Text(l.blocks_tempSaveAs),
                       ],
                     ),
-                    if (a.onSaveTempAsNewBlock != null)
-                      UiBtn(
-                        key: const Key('block-temp-save-as'),
-                        size: UiBtnSize.small,
-                        tone: _saving ? UiBtnTone.normal : UiBtnTone.primary,
-                        onTap: _busy
-                            ? null
-                            : () => setState(() => _saving = !_saving),
-                        children: [
-                          const UiGlyph(UiGlyphs.saveAs, size: 13),
-                          Text(l.blocks_tempSaveAs),
-                        ],
-                      ),
-                  ],
-                ),
+                ],
               ),
             ],
           ),

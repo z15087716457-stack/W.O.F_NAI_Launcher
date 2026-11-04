@@ -425,8 +425,9 @@ class BlockSeg<T> extends StatelessWidget {
     this.enabledOf,
     this.mini = false,
     this.expand = false,
+    this.wrap = false,
     this.keyOf,
-  });
+  }) : assert(!expand || !wrap);
 
   final List<T> values;
   final T? selected;
@@ -439,6 +440,9 @@ class BlockSeg<T> extends StatelessWidget {
 
   /// 撑满宽度、各项等分。
   final bool expand;
+
+  /// Narrow cards can keep translated options visible on multiple rows.
+  final bool wrap;
   final Key Function(T value)? keyOf;
 
   @override
@@ -456,7 +460,7 @@ class BlockSeg<T> extends StatelessWidget {
           return Container(
             height: mini ? 22 : 26,
             padding: EdgeInsets.symmetric(horizontal: mini ? 8 : 10),
-            alignment: Alignment.center,
+            alignment: wrap ? null : Alignment.center,
             decoration: BoxDecoration(
               color: on ? (c.dark ? c.hover : c.raised) : null,
               borderRadius: BorderRadius.circular(5),
@@ -502,11 +506,17 @@ class BlockSeg<T> extends StatelessWidget {
         color: c.control,
         borderRadius: BorderRadius.circular(7),
       ),
-      child: Row(
-        mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
-        spacing: 2,
-        children: [for (final v in values) item(v)],
-      ),
+      child: wrap
+          ? Wrap(
+              spacing: 2,
+              runSpacing: 2,
+              children: [for (final v in values) item(v)],
+            )
+          : Row(
+              mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
+              spacing: 2,
+              children: [for (final v in values) item(v)],
+            ),
     );
   }
 }
