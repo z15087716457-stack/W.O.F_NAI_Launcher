@@ -334,7 +334,7 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
         ? ref.read(estimatedCostForBatchSizeProvider(1))
         : ref.read(estimatedCostProvider);
     final quoted = shownPrice();
-    final confirmed = await AssetProtectionGuard.confirmHighAnlasCost(
+    final confirmed = await AssetProtectionGuard.validateAnlasCost(
       context: context,
       ref: ref,
       cost: quoted,

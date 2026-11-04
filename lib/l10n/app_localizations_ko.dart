@@ -4535,7 +4535,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String settings_warnHighAnlasCostSubtitle(Object threshold) {
-    return '요청 한 번의 예상 비용이 $threshold Anlas에 도달하면 생성 전에 확인을 표시합니다.';
+    return '예상 비용이 $threshold Anlas 이상이면 가격을 빨간색으로 표시하고 생성 전에 확인합니다.';
   }
 
   @override
@@ -4549,7 +4549,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get settings_highAnlasCostThresholdHelper =>
-      '생성 한 번의 예상 비용이 이 값 이상이면 확인을 표시합니다.';
+      '예상 비용이 이 값 이상이면 생성 전에 확인합니다.';
 
   @override
   String get settings_limitGenerationIntervalTitle => '생성 빈도 제한';
@@ -6118,7 +6118,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get tips_studio_guide_8 =>
-      'Anlas를 실수로 왕창 쓸까 걱정된다면 설정에서 높은 Anlas 비용 경고를 켜 두세요. 한 번에 드는 예상 비용이 정한 값을 넘으면 생성 전에 한 번 더 묻습니다.';
+      '설정에서 높은 Anlas 비용 경고를 켜면 예상 비용이 설정한 값 이상일 때 생성 전에 확인합니다.';
 
   @override
   String get tips_studio_trick_1 =>
@@ -18063,13 +18063,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get set_gnCost => 'Anlas 보호';
 
   @override
-  String get set_gnCostSub => '임계값을 넘는 요청은 보내기 전에 확인합니다.';
+  String get set_gnCostSub => '예상 비용이 기준에 도달하면 가격을 빨간색으로 표시합니다.';
 
   @override
-  String get set_gnWarn => '고비용 경고';
+  String get set_gnWarn => '높은 Anlas 비용 경고';
 
   @override
-  String get set_gnWarnSub => '임계값을 넘으면 확인';
+  String get set_gnWarnSub => '기준 이상이면 생성 전에 확인';
 
   @override
   String get set_gnThreshold => '임계값';
@@ -22419,4 +22419,8 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get ag_tool_agent_manage => 'Agent 관리';
+
+  @override
+  String get gen_invalidSettings =>
+      '이 크기와 스텝 수 조합은 지원되지 않습니다. 크기 또는 스텝 수를 줄여 주세요.';
 }

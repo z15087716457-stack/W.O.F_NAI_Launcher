@@ -8240,7 +8240,7 @@ abstract class AppLocalizations {
   /// No description provided for @settings_warnHighAnlasCostSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Show a confirmation before generation when the estimated single request cost reaches {threshold} Anlas.'**
+  /// **'At {threshold} Anlas or more, the price turns red and generation asks for confirmation.'**
   String settings_warnHighAnlasCostSubtitle(Object threshold);
 
   /// No description provided for @settings_highAnlasCostThresholdTitle.
@@ -8264,7 +8264,7 @@ abstract class AppLocalizations {
   /// No description provided for @settings_highAnlasCostThresholdHelper.
   ///
   /// In en, this message translates to:
-  /// **'Show a confirmation when the estimated single generation cost reaches or exceeds this value.'**
+  /// **'Confirm before generating when the estimate reaches this amount.'**
   String get settings_highAnlasCostThresholdHelper;
 
   /// No description provided for @settings_limitGenerationIntervalTitle.
@@ -10933,7 +10933,7 @@ abstract class AppLocalizations {
   /// settings_warnHighAnlasCostTitle.
   ///
   /// In en, this message translates to:
-  /// **'Worried about burning a pile of Anlas by accident? Turn on the High Anlas cost warning in Settings, and any generation estimated above your threshold will ask before it runs.'**
+  /// **'Turn on the High Anlas cost warning in Settings to confirm before generating whenever the estimate reaches your threshold.'**
   String get tips_studio_guide_8;
 
   /// NovelAI output is deterministic for identical parameters and seed.
@@ -32251,19 +32251,19 @@ abstract class AppLocalizations {
   /// No description provided for @set_gnCostSub.
   ///
   /// In en, this message translates to:
-  /// **'Ask before sending a request that costs more than the threshold.'**
+  /// **'The price turns red when the estimate reaches the warning threshold.'**
   String get set_gnCostSub;
 
   /// No description provided for @set_gnWarn.
   ///
   /// In en, this message translates to:
-  /// **'High-cost warning'**
+  /// **'High Anlas cost warning'**
   String get set_gnWarn;
 
   /// No description provided for @set_gnWarnSub.
   ///
   /// In en, this message translates to:
-  /// **'Confirm above the threshold'**
+  /// **'Ask before generating at or above the threshold'**
   String get set_gnWarnSub;
 
   /// No description provided for @set_gnThreshold.
@@ -40089,6 +40089,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Manage Agent'**
   String get ag_tool_agent_manage;
+
+  /// No description provided for @gen_invalidSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'This size and step combination is not supported. Reduce the size or steps.'**
+  String get gen_invalidSettings;
 }
 
 class _AppLocalizationsDelegate

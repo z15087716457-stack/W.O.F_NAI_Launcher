@@ -35,6 +35,7 @@ import 'package:nai_launcher/presentation/providers/quality_preset_provider.dart
 import 'package:nai_launcher/presentation/providers/uc_preset_provider.dart';
 import 'package:nai_launcher/presentation/providers/prompt_token_counter_provider.dart';
 import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
+import 'package:nai_launcher/presentation/providers/share_image_settings_provider.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_contract.dart';
 import 'package:nai_launcher/presentation/wiring/generation_data_wiring.dart';
 import '../providers/krita/agent_bridge_draft_test.dart'
@@ -98,6 +99,21 @@ void main() {
   late ProviderSubscription<GenViewData> subscription;
   late Completer<NaiImageMetadata?> pendingMetadata;
   late _DraftStorage draftStorage;
+
+  test(
+    'high price preference reaches the view without implying low balance',
+    () async {
+      final settings = container.read(shareImageSettingsProvider.notifier);
+      await settings.setHighAnlasCostThreshold(10);
+      await settings.setWarnHighAnlasCost(true);
+      final view = container.read(provider);
+      expect(view.generate.cost, 12);
+      expect(view.generate.highCost, isTrue);
+      expect(view.generate.insufficient, isFalse);
+      await settings.setHighAnlasCostThreshold(13);
+      expect(container.read(provider).generate.highCost, isFalse);
+    },
+  );
   setUp(() async {
     draftStorage = _DraftStorage();
     pendingMetadata = Completer<NaiImageMetadata?>();

@@ -217,7 +217,9 @@ class ExploreGenerateButton extends StatelessWidget {
     final scope = ExploreScope.of(context);
     final g = scope.data.generate;
     final running = g.phase == ExploreGeneratePhase.running;
-    final enabled = g.phase == ExploreGeneratePhase.ready || running;
+    final invalidCost = g.cost < 0;
+    final enabled =
+        (g.phase == ExploreGeneratePhase.ready && !invalidCost) || running;
     final label = switch (g.phase) {
       ExploreGeneratePhase.ready => l.explore_draw(g.count),
       ExploreGeneratePhase.running => l.explore_stopGenerating,
@@ -272,33 +274,47 @@ class ExploreGenerateButton extends StatelessWidget {
                   style: UiText.mono(12, color: c.muted),
                 ),
               if (g.phase == ExploreGeneratePhase.ready && !compact)
-                _Cost(cost: g.cost, insufficient: g.insufficient),
+                _Cost(
+                  cost: g.cost,
+                  insufficient: g.insufficient,
+                  highCost: g.highCost,
+                ),
             ],
           ),
         );
       },
     );
-    return Opacity(opacity: enabled ? 1 : .6, child: button);
+    final result = Opacity(opacity: enabled ? 1 : .6, child: button);
+    return invalidCost && !running
+        ? Tooltip(message: l.gen_invalidSettings, child: result)
+        : result;
   }
 }
 
 /// 价格角标：22 高、圆角 5、白底黑字 12 / w700 + Anlas 图标 10；余额不够时红底。
 class _Cost extends StatelessWidget {
-  const _Cost({required this.cost, required this.insufficient});
+  const _Cost({
+    required this.cost,
+    required this.insufficient,
+    required this.highCost,
+  });
   final int cost;
   final bool insufficient;
+  final bool highCost;
 
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    final ink = insufficient ? Colors.white : const Color(0xFF111111);
+    final ink = insufficient || highCost
+        ? Colors.white
+        : const Color(0xFF111111);
     return Tooltip(
       message: insufficient ? context.l10n.explore_insufficient : '',
       child: Container(
         height: 22,
         padding: const EdgeInsets.symmetric(horizontal: 6),
         decoration: BoxDecoration(
-          color: insufficient ? c.error : Colors.white,
+          color: insufficient || highCost ? c.error : Colors.white,
           borderRadius: BorderRadius.circular(5),
         ),
         child: Row(
@@ -306,7 +322,7 @@ class _Cost extends StatelessWidget {
           spacing: 3,
           children: [
             Text(
-              '$cost',
+              cost < 0 ? '—' : '$cost',
               style: UiText.sans(
                 12,
                 weight: FontWeight.w700,

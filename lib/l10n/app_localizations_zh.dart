@@ -4462,7 +4462,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String settings_warnHighAnlasCostSubtitle(Object threshold) {
-    return '单次生成预计消耗达到 $threshold Anlas 时，生成前弹出确认。';
+    return '预计消耗达到 $threshold Anlas 时，价签标红，生成前需要确认。';
   }
 
   @override
@@ -4475,7 +4475,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_threshold => '阈值';
 
   @override
-  String get settings_highAnlasCostThresholdHelper => '当单次生成预计消耗达到或超过该值时弹出确认。';
+  String get settings_highAnlasCostThresholdHelper => '预计消耗达到这个数值时，生成前需要确认。';
 
   @override
   String get settings_limitGenerationIntervalTitle => '限制生图频率';
@@ -6014,7 +6014,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get tips_studio_guide_8 =>
-      '担心一不小心花掉一大笔 Anlas？在设置里打开「Anlas 高消耗警告」，单次预计消耗超过你设定的数值时，生成前会先问你一句。';
+      '在设置里打开「Anlas 高消耗警告」后，预计消耗达到你设定的数值时，生成前会先请你确认。';
 
   @override
   String get tips_studio_trick_1 =>
@@ -17779,13 +17779,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_gnCost => '额度保护';
 
   @override
-  String get set_gnCostSub => '单次请求的消耗超过阈值时，先弹出确认再发送。';
+  String get set_gnCostSub => '预计消耗达到提醒阈值时，价签标红。';
 
   @override
-  String get set_gnWarn => '高消耗提醒';
+  String get set_gnWarn => 'Anlas 高消耗警告';
 
   @override
-  String get set_gnWarnSub => '超过阈值时先确认';
+  String get set_gnWarnSub => '生成前先确认这笔消耗';
 
   @override
   String get set_gnThreshold => '提醒阈值';
@@ -22080,6 +22080,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ag_tool_agent_manage => '管理 Agent';
+
+  @override
+  String get gen_invalidSettings => '当前尺寸与步数组合不可用，请降低尺寸或步数。';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -26540,7 +26543,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String settings_warnHighAnlasCostSubtitle(Object threshold) {
-    return '單次生成預計消耗達到 $threshold Anlas 時，生成前彈出確認。';
+    return '預計消耗達到 $threshold Anlas 時，價籤標紅，生成前需要確認。';
   }
 
   @override
@@ -26553,7 +26556,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get settings_threshold => '閾值';
 
   @override
-  String get settings_highAnlasCostThresholdHelper => '當單次生成預計消耗達到或超過該值時彈出確認。';
+  String get settings_highAnlasCostThresholdHelper => '預計消耗達到這個數值時，生成前需要確認。';
 
   @override
   String get settings_limitGenerationIntervalTitle => '限制生圖頻率';
@@ -28092,7 +28095,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get tips_studio_guide_8 =>
-      '擔心一不小心花掉一大筆 Anlas？在設定裡開啟「Anlas 高消耗警告」，單次預計消耗超過你設定的數值時，生成前會先問你一句。';
+      '在設定裡開啟「Anlas 高消耗警告」後，預計消耗達到你設定的數值時，生成前會先請你確認。';
 
   @override
   String get tips_studio_trick_1 =>
@@ -39857,13 +39860,13 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get set_gnCost => '額度保護';
 
   @override
-  String get set_gnCostSub => '單次請求的消耗超過閾值時，先彈出確認再發送。';
+  String get set_gnCostSub => '預計消耗達到提醒閾值時，價籤標紅。';
 
   @override
-  String get set_gnWarn => '高消耗提醒';
+  String get set_gnWarn => 'Anlas 高消耗警告';
 
   @override
-  String get set_gnWarnSub => '超過閾值時先確認';
+  String get set_gnWarnSub => '生成前先確認這筆消耗';
 
   @override
   String get set_gnThreshold => '提醒閾值';
@@ -44158,4 +44161,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get ag_tool_agent_manage => '管理 Agent';
+
+  @override
+  String get gen_invalidSettings => '當前尺寸與步數組合不可用，請降低尺寸或步數。';
 }

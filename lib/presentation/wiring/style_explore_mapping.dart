@@ -486,11 +486,13 @@ ui.ExploreGenerate styleExploreGenerate({
   required String? activeRunId,
   required int cooldown,
   bool otherBusy = false,
+  bool highCost = false,
 }) => ui.ExploreGenerate(
   count: count,
   maxCount: 100,
   cost: cost,
   insufficient: balance != null && balance < cost,
+  highCost: highCost,
   phase: capture.armed && capture.runId == activeRunId
       ? ui.ExploreGeneratePhase.running
       : generation.isGenerating || runner.isRunning || otherBusy

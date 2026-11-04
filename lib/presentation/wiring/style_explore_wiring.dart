@@ -23,6 +23,7 @@ import '../providers/style_explore/explore_run_provider.dart';
 import '../providers/style_explore/explore_run_runner.dart';
 import '../providers/style_explore_provider.dart';
 import '../providers/subscription_provider.dart';
+import '../providers/share_image_settings_provider.dart';
 import '../screens/generation/widgets/generation_controls/generation_controls.dart';
 import '../utils/explore_auto_run_name.dart';
 import '../utils/explore_display_data.dart';
@@ -176,7 +177,7 @@ class _StyleExploreWiringState extends ConsumerState<StyleExploreWiring> {
       await _recheckCandidatePrice();
       if (!mounted) return;
       final cost = ref.read(styleExploreCostForCountProvider(count));
-      final confirmed = await AssetProtectionGuard.confirmHighAnlasCost(
+      final confirmed = await AssetProtectionGuard.validateAnlasCost(
         context: context,
         ref: ref,
         cost: cost,
@@ -225,7 +226,7 @@ class _StyleExploreWiringState extends ConsumerState<StyleExploreWiring> {
       await _recheckCandidatePrice();
       if (!mounted) return;
       final cost = ref.read(styleExploreCostForCountProvider(targets.length));
-      final confirmed = await AssetProtectionGuard.confirmHighAnlasCost(
+      final confirmed = await AssetProtectionGuard.validateAnlasCost(
         context: context,
         ref: ref,
         cost: cost,
@@ -342,6 +343,11 @@ class _StyleExploreWiringState extends ConsumerState<StyleExploreWiring> {
       generate: styleExploreGenerate(
         count: params.nSamples,
         cost: ref.watch(estimatedCostForBatchSizeProvider(1)),
+        highCost: ref
+            .watch(shareImageSettingsProvider)
+            .shouldHighlightAnlasCost(
+              ref.watch(estimatedCostForBatchSizeProvider(1)),
+            ),
         balance: ref.watch(anlasBalanceProvider),
         generation: generation,
         runner: runner,

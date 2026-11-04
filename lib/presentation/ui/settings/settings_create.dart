@@ -122,13 +122,17 @@ class SettingsGenerationPage extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        est.cost == 0
+                        est.cost < 0
+                            ? '—'
+                            : est.cost == 0
                             ? l.set_gnFree
                             : '${SettingsFormat.count(est.cost)} Anlas',
                         style: UiText.mono(
                           12,
                           weight: FontWeight.w500,
-                          color: c.ink,
+                          color: warnOn && est.cost >= threshold
+                              ? c.error
+                              : c.ink,
                         ),
                       ),
                       if (warnOn && est.cost >= threshold)

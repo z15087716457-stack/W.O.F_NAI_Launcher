@@ -44,6 +44,12 @@ class ShareImageSettings {
   bool get effectiveWarnHighAnlasCost =>
       warnHighAnlasCost && highAnlasCostThreshold > 0;
 
+  /// Price labels and generation confirmation use the same inclusive threshold.
+  bool shouldHighlightAnlasCost(int? cost) =>
+      effectiveWarnHighAnlasCost &&
+      cost != null &&
+      cost >= highAnlasCostThreshold;
+
   int get effectiveGenerationIntervalSeconds =>
       limitGenerationInterval ? generationIntervalSeconds : 0;
 

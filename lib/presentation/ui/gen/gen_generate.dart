@@ -43,9 +43,10 @@ class GenGenerateButton extends StatelessWidget {
     final l = context.l10n;
     final reduce = MediaQuery.disableAnimationsOf(context);
     final running = g.state == GenRunState.generating;
-    final ready = g.state == GenRunState.ready;
+    final invalidCost = g.cost != null && g.cost! < 0;
+    final ready = g.state == GenRunState.ready && !invalidCost;
     final onTap = switch (g.state) {
-      GenRunState.ready => scope.actions.onGenerate,
+      GenRunState.ready => invalidCost ? null : scope.actions.onGenerate,
       GenRunState.generating => scope.actions.onStop,
       _ => null,
     };
@@ -131,6 +132,7 @@ class GenGenerateButton extends StatelessWidget {
                       _Cost(
                         cost: g.cost,
                         insufficient: g.insufficient,
+                        highCost: g.highCost,
                         dim: !ready,
                       ),
                   ],
@@ -141,12 +143,14 @@ class GenGenerateButton extends StatelessWidget {
         );
       },
     );
-    final tip = switch (g.state) {
-      GenRunState.blocked => g.blocked,
-      GenRunState.ready when g.insufficient => l.gen_insufficient,
-      GenRunState.ready when g.cost == 0 => l.gen_free,
-      _ => null,
-    };
+    final tip = invalidCost
+        ? l.gen_invalidSettings
+        : switch (g.state) {
+            GenRunState.blocked => g.blocked,
+            GenRunState.ready when g.insufficient => l.gen_insufficient,
+            GenRunState.ready when g.cost == 0 => l.gen_free,
+            _ => null,
+          };
     return tip == null ? button : Tooltip(message: tip, child: button);
   }
 }
@@ -156,16 +160,20 @@ class _Cost extends StatelessWidget {
   const _Cost({
     required this.cost,
     required this.insufficient,
+    required this.highCost,
     this.dim = false,
   });
   final int? cost;
   final bool insufficient;
+  final bool highCost;
   final bool dim;
 
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    final ink = insufficient ? Colors.white : const Color(0xFF111111);
+    final ink = insufficient || highCost
+        ? Colors.white
+        : const Color(0xFF111111);
     return Opacity(
       opacity: dim ? .6 : 1,
       child: Container(
@@ -174,7 +182,7 @@ class _Cost extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 6),
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: insufficient ? c.error : Colors.white,
+          color: insufficient || highCost ? c.error : Colors.white,
           borderRadius: BorderRadius.circular(5),
         ),
         child: cost == null
@@ -182,7 +190,7 @@ class _Cost extends StatelessWidget {
                 width: 22,
                 child: Center(child: UiSpinner(size: 12)),
               )
-            : GenAnlas('$cost', color: ink),
+            : GenAnlas(cost! < 0 ? '—' : '$cost', color: ink),
       ),
     );
   }

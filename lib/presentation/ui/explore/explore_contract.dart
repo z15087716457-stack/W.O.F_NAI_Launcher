@@ -470,6 +470,7 @@ class ExploreGenerate {
     this.maxCount = 100,
     this.cost = 0,
     this.insufficient = false,
+    this.highCost = false,
     this.phase = ExploreGeneratePhase.ready,
     this.done = 0,
     this.total = 0,
@@ -483,6 +484,7 @@ class ExploreGenerate {
 
   /// 余额不够：价格角标变红。
   final bool insufficient;
+  final bool highCost;
   final ExploreGeneratePhase phase;
   final int done;
   final int total;

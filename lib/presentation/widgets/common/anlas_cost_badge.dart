@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../providers/cost_estimate_provider.dart';
 import '../../providers/subscription_provider.dart';
+import '../../providers/share_image_settings_provider.dart';
 
 /// Anlas 成本徽章
 ///
@@ -33,13 +34,17 @@ class AnlasCostBadge extends ConsumerWidget {
     final isInsufficient = costOverride == null
         ? ref.watch(isBalanceInsufficientProvider)
         : balance != null && balance < cost;
+    final highCost = ref
+        .watch(shareImageSettingsProvider)
+        .shouldHighlightAnlasCost(cost);
+    final highlighted = isInsufficient || highCost;
 
     // 页面底色小框：浅色白底黑字黑钻石、深色炭黑底白字白钻石，
     // 数字与图标同色；余额不足时整框换 error
-    final Color badgeColor = isInsufficient
+    final Color badgeColor = highlighted
         ? theme.colorScheme.error
         : theme.colorScheme.surface;
-    final Color inkColor = isInsufficient
+    final Color inkColor = highlighted
         ? theme.colorScheme.onError
         : theme.colorScheme.onSurface;
 
@@ -54,7 +59,7 @@ class AnlasCostBadge extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            '$cost',
+            cost < 0 ? '—' : '$cost',
             style: TextStyle(
               color: inkColor,
               fontSize: 11,

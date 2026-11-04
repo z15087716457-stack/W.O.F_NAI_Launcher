@@ -4648,7 +4648,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String settings_warnHighAnlasCostSubtitle(Object threshold) {
-    return 'Show a confirmation before generation when the estimated single request cost reaches $threshold Anlas.';
+    return 'At $threshold Anlas or more, the price turns red and generation asks for confirmation.';
   }
 
   @override
@@ -4663,7 +4663,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_highAnlasCostThresholdHelper =>
-      'Show a confirmation when the estimated single generation cost reaches or exceeds this value.';
+      'Confirm before generating when the estimate reaches this amount.';
 
   @override
   String get settings_limitGenerationIntervalTitle =>
@@ -6267,7 +6267,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tips_studio_guide_8 =>
-      'Worried about burning a pile of Anlas by accident? Turn on the High Anlas cost warning in Settings, and any generation estimated above your threshold will ask before it runs.';
+      'Turn on the High Anlas cost warning in Settings to confirm before generating whenever the estimate reaches your threshold.';
 
   @override
   String get tips_studio_trick_1 =>
@@ -18547,13 +18547,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get set_gnCostSub =>
-      'Ask before sending a request that costs more than the threshold.';
+      'The price turns red when the estimate reaches the warning threshold.';
 
   @override
-  String get set_gnWarn => 'High-cost warning';
+  String get set_gnWarn => 'High Anlas cost warning';
 
   @override
-  String get set_gnWarnSub => 'Confirm above the threshold';
+  String get set_gnWarnSub => 'Ask before generating at or above the threshold';
 
   @override
   String get set_gnThreshold => 'Threshold';
@@ -23129,4 +23129,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ag_tool_agent_manage => 'Manage Agent';
+
+  @override
+  String get gen_invalidSettings =>
+      'This size and step combination is not supported. Reduce the size or steps.';
 }

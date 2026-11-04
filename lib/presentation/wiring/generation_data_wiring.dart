@@ -41,6 +41,7 @@ import '../providers/prompt_token_counter_provider.dart';
 import '../providers/prompt_translation_provider.dart';
 import '../providers/quality_preset_provider.dart';
 import '../providers/subscription_provider.dart';
+import '../providers/share_image_settings_provider.dart';
 import '../providers/uc_preset_provider.dart';
 import '../screens/generation/widgets/generation_controls/generate_button_copy.dart';
 import '../ui/gen/gen_contract.dart';
@@ -316,7 +317,10 @@ final generationViewDataProvider = Provider.autoDispose
             );
       final runState = generation.isGenerating
           ? GenRunState.generating
-          : busy || !auth.isAuthenticated || request.prompt.trim().isEmpty
+          : busy ||
+                !auth.isAuthenticated ||
+                request.prompt.trim().isEmpty ||
+                cost < 0
           ? GenRunState.blocked
           : cooldown > 0
           ? GenRunState.cooldown
@@ -581,6 +585,9 @@ final generationViewDataProvider = Provider.autoDispose
               : generatedLabel,
           cost: cost,
           insufficient: ref.watch(isBalanceInsufficientProvider),
+          highCost: ref
+              .watch(shareImageSettingsProvider)
+              .shouldHighlightAnlasCost(cost),
           done: done,
           total: generation.isGenerating ? remaining : params.nSamples * count,
           progress: generation.isGenerating
@@ -592,6 +599,8 @@ final generationViewDataProvider = Provider.autoDispose
                     ? l.kritaBridge_busyGenerating
                     : !auth.isAuthenticated
                     ? l.onlineGallery_pleaseLogin
+                    : cost < 0
+                    ? l.gen_invalidSettings
                     : l.generation_pleaseInputPrompt
               : null,
         ),

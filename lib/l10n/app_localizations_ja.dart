@@ -4533,11 +4533,11 @@ class AppLocalizationsJa extends AppLocalizations {
       '既存のアセットを誤って置き換えることを避けるために、重複するエクスポートまたはパッケージのパスに自動的に番号を付けます。';
 
   @override
-  String get settings_warnHighAnlasCostTitle => 'Anlas コストが高いという警告';
+  String get settings_warnHighAnlasCostTitle => 'Anlas の高コスト警告';
 
   @override
   String settings_warnHighAnlasCostSubtitle(Object threshold) {
-    return '単一リクエストの推定コストが $threshold Anlas に達したときに、生成前に確認を表示します。';
+    return '見積もりが $threshold Anlas 以上になると、料金を赤く表示し、生成前に確認します。';
   }
 
   @override
@@ -4551,7 +4551,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get settings_highAnlasCostThresholdHelper =>
-      '1 回の生成にかかる推定コストがこの値以上になった場合に確認を表示します。';
+      '見積もりがこの値以上になると、生成前に確認します。';
 
   @override
   String get settings_limitGenerationIntervalTitle => '画像生成の頻度を制限';
@@ -6118,7 +6118,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get tips_studio_guide_8 =>
-      'うっかり Anlas を大量に使うのが心配なら、設定で Anlas の高コスト警告をオンに。1 回の見積もりが設定値を超えると、生成前に確認が入ります。';
+      '設定で「Anlas の高コスト警告」をオンにすると、見積もりが設定値に達したとき、生成前に確認できます。';
 
   @override
   String get tips_studio_trick_1 =>
@@ -18009,13 +18009,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get set_gnCost => 'Anlas 保護';
 
   @override
-  String get set_gnCostSub => 'しきい値を超えるリクエストは送信前に確認します。';
+  String get set_gnCostSub => '見積もりがしきい値に達すると、料金が赤く表示されます。';
 
   @override
-  String get set_gnWarn => '高コスト警告';
+  String get set_gnWarn => 'Anlas の高コスト警告';
 
   @override
-  String get set_gnWarnSub => 'しきい値超過時に確認';
+  String get set_gnWarnSub => 'しきい値以上の場合は生成前に確認';
 
   @override
   String get set_gnThreshold => 'しきい値';
@@ -22344,4 +22344,8 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get ag_tool_agent_manage => 'Agent を管理';
+
+  @override
+  String get gen_invalidSettings =>
+      'このサイズとステップ数の組み合わせには対応していません。サイズまたはステップ数を減らしてください。';
 }

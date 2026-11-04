@@ -7,8 +7,8 @@ import 'package:path/path.dart' as p;
 
 import '../providers/cost_estimate_provider.dart';
 import '../providers/share_image_settings_provider.dart';
-import '../widgets/common/themed_confirm_dialog.dart';
 import '../widgets/common/anlas_cost_dialog.dart';
+import '../widgets/common/themed_confirm_dialog.dart';
 import '../../core/utils/localization_extension.dart';
 import '../../data/services/anlas_usage_metrics.dart';
 
@@ -66,18 +66,16 @@ class AssetProtectionGuard {
     );
   }
 
-  static Future<bool> confirmHighAnlasCost({
+  /// A valid quote at the warning threshold needs explicit consent to proceed.
+  static Future<bool> validateAnlasCost({
     required BuildContext context,
     required WidgetRef ref,
     int? cost,
   }) {
     final settings = ref.read(shareImageSettingsProvider);
-    if (!settings.effectiveWarnHighAnlasCost) {
-      return Future.value(true);
-    }
-
     final estimatedCost = cost ?? ref.read(estimatedCostProvider) ?? 0;
-    if (estimatedCost < settings.highAnlasCostThreshold) {
+    if (estimatedCost < 0) return Future.value(false);
+    if (!settings.shouldHighlightAnlasCost(estimatedCost)) {
       return Future.value(true);
     }
 

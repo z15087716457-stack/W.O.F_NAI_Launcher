@@ -215,6 +215,7 @@ class GenerationBackend {
         if (!unchanged()) return;
       }
       final cost = ref.read(estimatedCostProvider);
+      if (cost < 0) return;
       bool valid() => unchanged() && cost == ref.read(estimatedCostProvider);
       if (!await confirm(cost) || !valid()) return;
       await ref.read(generationPlatformProvider).backupDraft(_snapshot());
@@ -288,6 +289,7 @@ class GenerationBackend {
         if (!unchanged()) return;
       }
       final quoted = billed();
+      if (quoted < 0) return;
       bool valid() => unchanged() && quoted == billed();
       if (!await confirm(quoted) || !valid()) return;
       await write(() {});

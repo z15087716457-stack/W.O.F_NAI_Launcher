@@ -22,7 +22,7 @@ Future<void> generateWithProtection(BuildContext context, WidgetRef ref) async {
   if (currentParams.prompt.isEmpty) {
     return;
   }
-  final confirmed = await AssetProtectionGuard.confirmHighAnlasCost(
+  final confirmed = await AssetProtectionGuard.validateAnlasCost(
     context: context,
     ref: ref,
   );

@@ -2360,7 +2360,7 @@
   "settings_preventOverwriteTitle": "내보낼 때 기존 파일 덮어쓰지 않기",
   "settings_preventOverwriteSubtitle": "내보내기나 묶기 경로가 겹치면 자동으로 번호를 붙여 기존 자산을 실수로 바꾸지 않게 합니다.",
   "settings_warnHighAnlasCostTitle": "높은 Anlas 비용 경고",
-  "settings_warnHighAnlasCostSubtitle": "요청 한 번의 예상 비용이 {threshold} Anlas에 도달하면 생성 전에 확인을 표시합니다.",
+  "settings_warnHighAnlasCostSubtitle": "예상 비용이 {threshold} Anlas 이상이면 가격을 빨간색으로 표시하고 생성 전에 확인합니다.",
   "@settings_warnHighAnlasCostSubtitle": {
     "placeholders": {
       "threshold": {}
@@ -2369,7 +2369,7 @@
   "settings_highAnlasCostThresholdTitle": "Anlas 경고 기준값",
   "settings_setHighAnlasCostThresholdTitle": "Anlas 경고 기준값 설정",
   "settings_threshold": "기준값",
-  "settings_highAnlasCostThresholdHelper": "생성 한 번의 예상 비용이 이 값 이상이면 확인을 표시합니다.",
+  "settings_highAnlasCostThresholdHelper": "예상 비용이 이 값 이상이면 생성 전에 확인합니다.",
   "settings_limitGenerationIntervalTitle": "생성 빈도 제한",
   "settings_limitGenerationIntervalSubtitle": "생성 시작 사이에 설정한 최소 간격을 둡니다. 대기 시간 동안 생성 버튼을 사용할 수 없습니다.",
   "settings_generationIntervalTitle": "생성 간격",
@@ -3387,7 +3387,7 @@
   "@tips_studio_guide_7": {
     "description": "Default shortcuts: showShortcutHelp f1, navigateTo* ctrl+1/2/3, settings ctrl+comma."
   },
-  "tips_studio_guide_8": "Anlas를 실수로 왕창 쓸까 걱정된다면 설정에서 높은 Anlas 비용 경고를 켜 두세요. 한 번에 드는 예상 비용이 정한 값을 넘으면 생성 전에 한 번 더 묻습니다.",
+  "tips_studio_guide_8": "설정에서 높은 Anlas 비용 경고를 켜면 예상 비용이 설정한 값 이상일 때 생성 전에 확인합니다.",
   "@tips_studio_guide_8": {
     "description": "settings_warnHighAnlasCostTitle."
   },
@@ -9902,9 +9902,9 @@
   "set_scEmpty": "일치하는 단축키가 없습니다",
   "set_gnDesc": "Anlas 사용, 요청 간격, 프롬프트 입력 도우미를 설정합니다.",
   "set_gnCost": "Anlas 보호",
-  "set_gnCostSub": "임계값을 넘는 요청은 보내기 전에 확인합니다.",
-  "set_gnWarn": "고비용 경고",
-  "set_gnWarnSub": "임계값을 넘으면 확인",
+  "set_gnCostSub": "예상 비용이 기준에 도달하면 가격을 빨간색으로 표시합니다.",
+  "set_gnWarn": "높은 Anlas 비용 경고",
+  "set_gnWarnSub": "기준 이상이면 생성 전에 확인",
   "set_gnThreshold": "임계값",
   "set_gnEstimate": "현재: {model} · {w}×{h} · {steps}단계 · {n}장",
   "@set_gnEstimate": {
@@ -11872,5 +11872,6 @@
   "set_agMcpTest": "연결 테스트",
   "set_agMcpJsonOne": "MCP 서버를 한 번에 하나씩 가져오세요.",
   "set_agMcpPending": "다음 턴에 적용",
-  "ag_tool_agent_manage": "Agent 관리"
+  "ag_tool_agent_manage": "Agent 관리",
+  "gen_invalidSettings": "이 크기와 스텝 수 조합은 지원되지 않습니다. 크기 또는 스텝 수를 줄여 주세요."
 }

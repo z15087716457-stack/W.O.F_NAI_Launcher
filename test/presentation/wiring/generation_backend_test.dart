@@ -137,7 +137,9 @@ void main() {
   late ProviderContainer container;
   late MemoryGenerationPlatform platform;
   late GenerationBackend backend;
+  late int displayedCost;
   setUp(() async {
+    displayedCost = 12;
     SharedPreferences.setMockInitialValues({});
     directory = await Directory.systemTemp.createTemp('gen-backend-');
     Hive.init(directory.path);
@@ -152,7 +154,7 @@ void main() {
         authNotifierProvider.overrideWith(SwitchingAuth.new),
         subscriptionNotifierProvider.overrideWith(DataSubscription.new),
         generationPlatformProvider.overrideWithValue(platform),
-        estimatedCostProvider.overrideWith((ref) => 12),
+        estimatedCostProvider.overrideWith((ref) => displayedCost),
       ],
     );
     await container.read(promptBlockLibraryNotifierProvider.future);
@@ -498,6 +500,29 @@ void main() {
   // Isolated hosts and tests never start the balance notifier: starting it
   // would ask NovelAI for the balance. The price check reads it only where
   // the screens already keep it.
+  test(
+    'invalid estimate never confirms, backs up or sends a generation',
+    () async {
+      displayedCost = -3;
+      container.invalidate(estimatedCostProvider);
+      var confirmations = 0;
+      await backend.generate(
+        confirm: (_) async {
+          confirmations++;
+          return true;
+        },
+      );
+      expect(confirmations, 0);
+      expect(platform.backups, isEmpty);
+      expect(
+        (container.read(imageGenerationNotifierProvider.notifier)
+                as RecordingGeneration)
+            .requests,
+        isEmpty,
+      );
+    },
+  );
+
   test('generate leaves a balance notifier that never started alone', () async {
     await backend.generate(confirm: (_) async => true);
     expect(

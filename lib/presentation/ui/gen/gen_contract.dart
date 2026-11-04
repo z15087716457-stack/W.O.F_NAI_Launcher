@@ -834,6 +834,7 @@ class GenGenerateData with _GenValue {
     this.label = '',
     this.cost,
     this.insufficient = false,
+    this.highCost = false,
     this.done = 0,
     this.total = 1,
     this.progress,
@@ -852,6 +853,9 @@ class GenGenerateData with _GenValue {
   /// 余额不够：价格角标变红。
   final bool insufficient;
 
+  /// Whether the estimate reaches the configured high-cost warning threshold.
+  final bool highCost;
+
   /// 生成中：第几张已完成 / 一共几张，整批进度 0–1（null = 还没开始出图）。
   final int done;
   final int total;
@@ -868,6 +872,7 @@ class GenGenerateData with _GenValue {
     label,
     cost,
     insufficient,
+    highCost,
     done,
     total,
     progress,

@@ -2360,7 +2360,7 @@
   "settings_preventOverwriteTitle": "Avoid overwriting existing files on export",
   "settings_preventOverwriteSubtitle": "Automatically number duplicate export or package paths to avoid replacing existing assets by mistake.",
   "settings_warnHighAnlasCostTitle": "High Anlas cost warning",
-  "settings_warnHighAnlasCostSubtitle": "Show a confirmation before generation when the estimated single request cost reaches {threshold} Anlas.",
+  "settings_warnHighAnlasCostSubtitle": "At {threshold} Anlas or more, the price turns red and generation asks for confirmation.",
   "@settings_warnHighAnlasCostSubtitle": {
     "placeholders": {
       "threshold": {}
@@ -2369,7 +2369,7 @@
   "settings_highAnlasCostThresholdTitle": "Anlas Warning Threshold",
   "settings_setHighAnlasCostThresholdTitle": "Set Anlas Warning Threshold",
   "settings_threshold": "Threshold",
-  "settings_highAnlasCostThresholdHelper": "Show a confirmation when the estimated single generation cost reaches or exceeds this value.",
+  "settings_highAnlasCostThresholdHelper": "Confirm before generating when the estimate reaches this amount.",
   "settings_limitGenerationIntervalTitle": "Limit generation frequency",
   "settings_limitGenerationIntervalSubtitle": "Require the configured minimum time between generation starts. The Generate button is disabled during the cooldown.",
   "settings_generationIntervalTitle": "Generation interval",
@@ -3387,7 +3387,7 @@
   "@tips_studio_guide_7": {
     "description": "Default shortcuts: showShortcutHelp f1, navigateTo* ctrl+1/2/3, settings ctrl+comma."
   },
-  "tips_studio_guide_8": "Worried about burning a pile of Anlas by accident? Turn on the High Anlas cost warning in Settings, and any generation estimated above your threshold will ask before it runs.",
+  "tips_studio_guide_8": "Turn on the High Anlas cost warning in Settings to confirm before generating whenever the estimate reaches your threshold.",
   "@tips_studio_guide_8": {
     "description": "settings_warnHighAnlasCostTitle."
   },
@@ -9922,9 +9922,9 @@
   "set_scEmpty": "No matching shortcuts",
   "set_gnDesc": "Control Anlas spending, request pacing and prompt input helpers.",
   "set_gnCost": "Anlas safeguard",
-  "set_gnCostSub": "Ask before sending a request that costs more than the threshold.",
-  "set_gnWarn": "High-cost warning",
-  "set_gnWarnSub": "Confirm above the threshold",
+  "set_gnCostSub": "The price turns red when the estimate reaches the warning threshold.",
+  "set_gnWarn": "High Anlas cost warning",
+  "set_gnWarnSub": "Ask before generating at or above the threshold",
   "set_gnThreshold": "Threshold",
   "set_gnEstimate": "Current: {model} · {w}×{h} · {steps} steps · {n} per request",
   "@set_gnEstimate": {
@@ -11902,5 +11902,6 @@
   "set_agMcpTest": "Test connection",
   "set_agMcpJsonOne": "Import one MCP server at a time.",
   "set_agMcpPending": "Applies next turn",
-  "ag_tool_agent_manage": "Manage Agent"
+  "ag_tool_agent_manage": "Manage Agent",
+  "gen_invalidSettings": "This size and step combination is not supported. Reduce the size or steps."
 }

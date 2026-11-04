@@ -2275,7 +2275,7 @@
   "settings_preventOverwriteTitle": "匯出時避免覆蓋已有檔案",
   "settings_preventOverwriteSubtitle": "匯出/打包路徑重名時自動編號，避免誤覆蓋原有資產。",
   "settings_warnHighAnlasCostTitle": "Anlas 高消耗警告",
-  "settings_warnHighAnlasCostSubtitle": "單次生成預計消耗達到 {threshold} Anlas 時，生成前彈出確認。",
+  "settings_warnHighAnlasCostSubtitle": "預計消耗達到 {threshold} Anlas 時，價籤標紅，生成前需要確認。",
   "@settings_warnHighAnlasCostSubtitle": {
     "placeholders": {
       "threshold": {}
@@ -2284,7 +2284,7 @@
   "settings_highAnlasCostThresholdTitle": "Anlas 警告閾值",
   "settings_setHighAnlasCostThresholdTitle": "設定 Anlas 警告閾值",
   "settings_threshold": "閾值",
-  "settings_highAnlasCostThresholdHelper": "當單次生成預計消耗達到或超過該值時彈出確認。",
+  "settings_highAnlasCostThresholdHelper": "預計消耗達到這個數值時，生成前需要確認。",
   "settings_limitGenerationIntervalTitle": "限制生圖頻率",
   "settings_limitGenerationIntervalSubtitle": "開啟後，兩次生圖開始時間必須至少間隔設定秒數；冷卻期間生圖按鈕不可點選。",
   "settings_generationIntervalTitle": "生圖間隔",
@@ -3387,7 +3387,7 @@
   "@tips_studio_guide_7": {
     "description": "Default shortcuts: showShortcutHelp f1, navigateTo* ctrl+1/2/3, settings ctrl+comma."
   },
-  "tips_studio_guide_8": "擔心一不小心花掉一大筆 Anlas？在設定裡開啟「Anlas 高消耗警告」，單次預計消耗超過你設定的數值時，生成前會先問你一句。",
+  "tips_studio_guide_8": "在設定裡開啟「Anlas 高消耗警告」後，預計消耗達到你設定的數值時，生成前會先請你確認。",
   "@tips_studio_guide_8": {
     "description": "settings_warnHighAnlasCostTitle."
   },
@@ -9978,9 +9978,9 @@
   "set_scEmpty": "沒有匹配的快速鍵",
   "set_gnDesc": "控制 Anlas 消耗和請求節奏，以及寫提示詞時的輸入輔助。",
   "set_gnCost": "額度保護",
-  "set_gnCostSub": "單次請求的消耗超過閾值時，先彈出確認再發送。",
-  "set_gnWarn": "高消耗提醒",
-  "set_gnWarnSub": "超過閾值時先確認",
+  "set_gnCostSub": "預計消耗達到提醒閾值時，價籤標紅。",
+  "set_gnWarn": "Anlas 高消耗警告",
+  "set_gnWarnSub": "生成前先確認這筆消耗",
   "set_gnThreshold": "提醒閾值",
   "set_gnEstimate": "當前生圖參數：{model} · {w}×{h} · {steps} 步 · 每次 {n} 張",
   "@set_gnEstimate": {
@@ -12463,5 +12463,6 @@
   "set_agMcpTest": "測試連線",
   "set_agMcpJsonOne": "請一次匯入一個 MCP 伺服器。",
   "set_agMcpPending": "下輪生效",
-  "ag_tool_agent_manage": "管理 Agent"
+  "ag_tool_agent_manage": "管理 Agent",
+  "gen_invalidSettings": "當前尺寸與步數組合不可用，請降低尺寸或步數。"
 }

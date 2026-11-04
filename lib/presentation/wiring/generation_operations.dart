@@ -133,7 +133,7 @@ class GenerationOperations {
 
   Future<void> openPalette(Rect rect) =>
       PromptBlockPaletteButton.showAt(context, rect);
-  Future<bool> confirm(int cost) => AssetProtectionGuard.confirmHighAnlasCost(
+  Future<bool> confirm(int cost) => AssetProtectionGuard.validateAnlasCost(
     context: context,
     ref: ref,
     cost: cost,
@@ -426,10 +426,6 @@ class GenerationOperations {
   Future<void> variations(String id) async {
     final image = input(id);
     final write = backend.captureDraft(alive: () => mounted);
-    final cost = ref.read(imageVariationCostProvider(image));
-    if (!await confirm(cost ?? 0) || !context.mounted || !alive()) return;
-    await write(() {});
-    if (!context.mounted || !alive()) return;
     await ImageWorkflowLauncher.generateVariations(
       context,
       ref,

@@ -9,6 +9,9 @@ import '../../core/utils/localization_extension.dart';
 import '../../core/utils/nai_resolution_adapter.dart';
 import '../../data/services/image_metadata_service.dart';
 import '../providers/generation/image_workflow_controller.dart';
+import '../providers/generation/image_action_providers.dart';
+import '../providers/subscription_provider.dart';
+import '../providers/auth_provider.dart';
 import '../providers/image_generation_provider.dart';
 import '../providers/generation/preview_selection_provider.dart';
 import '../screens/generation/widgets/canvas/canvas_feed_layout.dart';
@@ -185,7 +188,7 @@ class ImageWorkflowLauncher {
       await ref
           .read(generationBackendProvider)
           .generate(
-            confirm: (cost) => AssetProtectionGuard.confirmHighAnlasCost(
+            confirm: (cost) => AssetProtectionGuard.validateAnlasCost(
               context: context,
               ref: ref,
               cost: cost,
@@ -266,6 +269,11 @@ class ImageWorkflowLauncher {
       return;
     }
     _variationsLaunching = true;
+    final session = ref.exists(authNotifierProvider)
+        ? ref.read(authNotifierProvider)
+        : null;
+    bool sameSession() =>
+        session == null || identical(session, ref.read(authNotifierProvider));
     try {
       // 所有闸门必须先于任何工作流/参数改动：
       // 被拦截的动作不得修改用户当前草稿与画布状态。
@@ -275,8 +283,10 @@ class ImageWorkflowLauncher {
 
       // 先解析元数据再动笔；解析期间闸门状态可能翻转，await 后必须复核。
       final metadata =
-          await ImageMetadataService().getMetadataFromBytes(imageBytes) ??
-          sourceImage?.metadata;
+          sourceImage != null && identical(imageBytes, sourceImage.bytes)
+          ? await ref.read(generatedImageMetadataProvider(sourceImage).future)
+          : await ImageMetadataService().getMetadataFromBytes(imageBytes) ??
+                sourceImage?.metadata;
       if (!context.mounted || _isVariationLaunchBlocked(context, ref)) {
         return;
       }
@@ -304,8 +314,50 @@ class ImageWorkflowLauncher {
         height: height,
         metadata: metadata,
       );
+      final container = ProviderScope.containerOf(context, listen: false);
+      Future<bool>? refreshDepletedPrice() => recheckOpusPriceForAction(
+        container,
+        (subscription) => variationRequestCost(params, subscription),
+        checkLow: false,
+      );
+      final recheck = refreshDepletedPrice();
+      if (recheck != null) await recheck;
+      if (!context.mounted ||
+          !sameSession() ||
+          _isVariationLaunchBlocked(context, ref)) {
+        return;
+      }
+      int quote() => variationRequestCost(
+        params,
+        ref.exists(subscriptionNotifierProvider)
+            ? ref.read(subscriptionNotifierProvider).subscription
+            : null,
+      );
+      final cost = quote();
+      if (!await AssetProtectionGuard.validateAnlasCost(
+            context: context,
+            ref: ref,
+            cost: cost,
+          ) ||
+          !context.mounted ||
+          _isVariationLaunchBlocked(context, ref)) {
+        return;
+      }
       await beforeSubmit?.call();
-      if (!context.mounted || _isVariationLaunchBlocked(context, ref)) return;
+      if (!context.mounted ||
+          !sameSession() ||
+          _isVariationLaunchBlocked(context, ref)) {
+        return;
+      }
+      final finalCheck = refreshDepletedPrice();
+      if (finalCheck != null) {
+        await finalCheck;
+        if (!context.mounted || _isVariationLaunchBlocked(context, ref)) return;
+      }
+      if (!sameSession() || quote() != cost) {
+        AppToast.warning(context, context.l10n.bridge_conflict);
+        return;
+      }
       final original = GeneratedImage.create(
         imageBytes,
         width: width,
