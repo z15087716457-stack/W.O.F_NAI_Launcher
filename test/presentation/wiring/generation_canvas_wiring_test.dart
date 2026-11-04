@@ -132,6 +132,7 @@ void main() {
       expect(tester.getSize(scene).width, panelWidth + 60);
       expect(tester.getSize(scene).height, viewport.height + 60);
       expect(side.camera.scale, center.camera.scale);
+      expect(side.welcome, center.welcome);
       expect(side.settings.fixed, center.settings.fixed);
       expect(side.settings.seed, center.settings.seed);
       expect(side.settings.motion, ChannelMotion.off);
@@ -576,7 +577,11 @@ void main() {
     expect(logo.center.dx, closeTo(viewport.center.dx, .01));
     expect(quietCenter, closeTo(logo.center.dx, .01));
     expect(tip.center.dx, closeTo(quietCenter, .01));
-    expect(background.camera.scale, 1);
+    expect(background.welcome, isTrue);
+    expect(
+      background.camera.scale,
+      closeTo((880 / 1216) * viewport.width / 922, 1e-8),
+    );
     expect(logo.left, greaterThanOrEqualTo(quietCenter - 416));
     expect(logo.right, lessThanOrEqualTo(quietCenter + 416));
     expect(tip.left, greaterThanOrEqualTo(quietCenter - 416));
@@ -588,8 +593,193 @@ void main() {
     expect(world.camera.scale, background.camera.scale);
   }
 
+  testWidgets('空画布切简洁查看器保留欢迎页与合成图构图', (tester) async {
+    publish(const ImageGenerationState());
+    await container
+        .read(canvasChannelNotifierProvider.notifier)
+        .set(
+          const ChannelSettings(
+            mode: ChannelMode.fixed,
+            fixed: ChannelTheme.score,
+            motion: ChannelMotion.off,
+            seed: 7,
+          ),
+        );
+    await pump(tester, fullPage: true, dark: true);
+    for (final width in [1280.0, 1600.0, 2240.0]) {
+      tester.view.physicalSize = Size(width, 900);
+      await tester.pumpAndSettle();
+      expectWelcomeCentered(tester);
+      final original = tester
+          .widget<ChannelBackdrop>(canvasBackdrop())
+          .data
+          .camera;
+      await container
+          .read(simpleOutputViewerNotifierProvider.notifier)
+          .setSimple(true);
+      await tester.pumpAndSettle();
+      final simple = tester
+          .widget<ChannelBackdrop>(
+            find.byKey(const ValueKey('gen-panel-backdrop-center')),
+          )
+          .data
+          .camera;
+      expect(simple, original);
+      expect(find.byKey(const Key('tip-welcome-text')), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await container
+          .read(simpleOutputViewerNotifierProvider.notifier)
+          .setSimple(false);
+      await tester.pumpAndSettle();
+      expectWelcomeCentered(tester);
+    }
+  });
+
+  testWidgets('turning off the channel restores the plain welcome viewport', (
+    tester,
+  ) async {
+    publish(const ImageGenerationState());
+    await pump(tester, fullPage: true);
+    await container
+        .read(canvasChannelNotifierProvider.notifier)
+        .set(const ChannelSettings(mode: ChannelMode.off));
+    await tester.pumpAndSettle();
+    expect(canvasBackdrop(), findsNothing);
+    final world = tester.widget<CanvasWorldViewport>(
+      find.byType(CanvasWorldViewport),
+    );
+    final viewport = tester.getSize(find.byKey(const Key('gen-canvas')));
+    expect(world.camera.scale, 1);
+    expect(world.camera.offset, viewport.center(Offset.zero));
+  });
+
+  testWidgets(
+    'empty canvas frames the full Git composition between the actual panels',
+    (tester) async {
+      publish(const ImageGenerationState());
+      await pump(tester, fullPage: true, dark: true);
+      for (final screen in [
+        const Size(1280, 850),
+        const Size(1552, 868),
+        const Size(2240, 1000),
+      ]) {
+        tester.view.physicalSize = screen;
+        await tester.pumpAndSettle();
+        final viewport = tester.getRect(find.byKey(const Key('gen-canvas')));
+        final camera = tester
+            .widget<ChannelBackdrop>(canvasBackdrop())
+            .data
+            .camera;
+        final k = viewport.width / 922;
+        // The original composite's 832 x 1216 portrait starts at (461, 50)
+        // on its 922 x 1000 canvas. Include its vertical framing as well.
+        expect(
+          camera.worldToScreen(Offset.zero).dx,
+          closeTo(viewport.width / 2, .001),
+        );
+        expect(
+          camera.worldToScreen(Offset.zero).dy,
+          closeTo(viewport.height / 2 - 450 * k, .001),
+        );
+        expect(camera.scale, closeTo((880 / 1216) * k, .000001));
+        expectPanelBackdropAligned(tester);
+      }
+    },
+  );
+
+  testWidgets('地层空画布的年代尺与钻杆回到旧版合成图的侧栏边距', (tester) async {
+    addTearDown(() => tester.pumpWidget(const SizedBox.shrink()));
+    publish(const ImageGenerationState());
+    await container
+        .read(canvasChannelNotifierProvider.notifier)
+        .set(
+          const ChannelSettings(
+            mode: ChannelMode.fixed,
+            fixed: ChannelTheme.strata,
+            motion: ChannelMotion.off,
+            seed: 7,
+          ),
+        );
+    await pump(tester, fullPage: true, dark: true);
+    // 1600×900 native window excluding its 48px rail and 32px titlebar.
+    tester.view.physicalSize = const Size(1552, 868);
+    await tester.pumpAndSettle();
+    expectWelcomeCentered(tester);
+    final viewport = tester.getRect(find.byKey(const Key('gen-canvas')));
+    final edges = await tester.runAsync(() async {
+      final boundaryRender =
+          boundary.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      final image = await boundaryRender.toImage(pixelRatio: 1);
+      final raw = (await image.toByteData(
+        format: ui.ImageByteFormat.rawRgba,
+      ))!.buffer.asUint8List();
+      final reference = pixels.decodePng(
+        await File(
+          'test/presentation/ui/channel/goldens/v2/strata-dark.png',
+        ).readAsBytes(),
+      )!;
+      final k = viewport.width / 922;
+
+      // Each rim has several antialiased columns. Their weighted centre is
+      // stable when the strongest column swaps sides at a fractional scale.
+      double rim(bool left, int from, int to, {required bool fromGit}) {
+        double weight = 0, moment = 0;
+        for (
+          var inset = (from * k).floor();
+          inset <= (to * k).ceil();
+          inset++
+        ) {
+          for (var y = 90; y < 320; y++) {
+            final int contrast;
+            if (fromGit) {
+              final x = left
+                  ? 420 + (inset / k).round()
+                  : 1342 - (inset / k).round();
+              final row = (500 + (y - viewport.height / 2) / k).round();
+              contrast =
+                  (reference.getPixel(x, row).r -
+                          reference.getPixel(x - 1, row).r)
+                      .abs()
+                      .toInt();
+            } else {
+              final x = left
+                  ? viewport.left.round() + inset
+                  : viewport.right.round() - inset;
+              final i = 4 * ((viewport.top.round() + y) * image.width + x);
+              contrast = (raw[i] - raw[i - 4]).abs();
+            }
+            weight += contrast;
+            moment += inset * contrast;
+          }
+        }
+        expect(weight, greaterThan(1000));
+        return moment / weight;
+      }
+
+      try {
+        return [
+          for (final (left, from, to) in [
+            (true, 104, 113),
+            (false, 121, 127),
+            (false, 128, 133),
+          ])
+            (
+              rim(left, from, to, fromGit: false),
+              rim(left, from, to, fromGit: true),
+            ),
+        ];
+      } finally {
+        image.dispose();
+      }
+    });
+    for (final (actual, fromGit) in edges!) {
+      expect(actual, closeTo(fromGit, 1.0));
+    }
+    await capture(tester, 'welcome-strata-g05-1552');
+  });
+
   for (final dark in [false, true]) {
-    testWidgets('空态六种背景与 Logo 同轴，缩窗和重进不继承偏移：$dark', (tester) async {
+    testWidgets('空态所有背景与 Logo 同轴，缩窗和重进不继承偏移：$dark', (tester) async {
       publish(const ImageGenerationState());
       final controller = container.read(
         generationCanvasCameraProvider.notifier,

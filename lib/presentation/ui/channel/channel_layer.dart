@@ -239,6 +239,7 @@ ChannelViewData _inflate(ChannelViewData d, double margin) => ChannelViewData(
   now: d.now,
   generating: d.generating,
   pinboard: d.pinboard,
+  welcome: d.welcome,
 );
 
 /// 微动：子组件比自己四周各大 [step]，按 [orbit] 指的那一格平移着画。
@@ -388,8 +389,29 @@ class ChannelBackdropPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    final camera = data.camera;
+    if (!data.welcome) {
+      _paintFrame(canvas, size, camera);
+      return;
+    }
+    // Resizing the empty art scales one composition, including screen-space
+    // labels. A narrow welcome canvas is not a zoomed-out history map.
+    final factor = camera.scale / ChannelCamera.welcomeZoom;
+    canvas.save();
+    canvas.scale(factor);
+    _paintFrame(
+      canvas,
+      size / factor,
+      ChannelCamera(
+        offset: camera.offset / factor,
+        scale: ChannelCamera.welcomeZoom,
+      ),
+    );
+    canvas.restore();
+  }
+
+  void _paintFrame(Canvas canvas, Size size, ChannelCamera cam) {
     final s = data.settings;
-    final cam = data.camera;
     final spec = ChannelSceneSpec(
       env: env,
       camera: cam,

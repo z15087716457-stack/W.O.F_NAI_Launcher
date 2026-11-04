@@ -32,6 +32,7 @@ flutter test --no-pub --concurrency=3 \
   test/core/services/desktop_app_shutdown_service_test.dart \
   test/presentation/providers/nai_agent/workspace_controller_test.dart \
   test/presentation/providers/nai_agent/app_shutdown_test.dart \
+  test/presentation/ui/channel/channel_viewport_test.dart \
   test/app_exit_shortcuts_test.dart \
   test/core/services/mac_legacy_data_import_test.dart \
   test/core/services/mac_legacy_data_sync_test.dart \

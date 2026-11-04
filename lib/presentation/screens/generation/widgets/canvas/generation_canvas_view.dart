@@ -347,10 +347,13 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     );
   }
 
-  // The welcome layout is in viewport space. Keep the background's quiet
-  // world-x=0 corridor on that same centre, regardless of a retained camera.
-  CanvasCamera _welcomeCamera() =>
-      CanvasCamera(offset: _viewport.center(Offset.zero), scale: 1);
+  CanvasCamera _welcomeCamera({required bool channelActive}) {
+    if (!channelActive) {
+      return CanvasCamera(offset: _viewport.center(Offset.zero), scale: 1);
+    }
+    final view = ChannelCamera.welcome(_viewport);
+    return CanvasCamera(offset: view.offset, scale: view.scale);
+  }
 
   void _setViewport(Size size) {
     final changed = _viewport != size;
@@ -527,7 +530,10 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
         if (widget.visualChannel && prev?.groups.isEmpty == true) {
           // Start the first focus flight from what was actually on screen,
           // rather than a camera left behind by an earlier canvas visit.
-          _camera.jump(_welcomeCamera(), notifyIdle: false);
+          _camera.jump(
+            _welcomeCamera(channelActive: channelActive),
+            notifyIdle: false,
+          );
         }
         _manualOverview = false;
         ref
@@ -693,7 +699,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
                           );
                           final camera =
                               widget.visualChannel && layout.groups.isEmpty
-                              ? _welcomeCamera()
+                              ? _welcomeCamera(channelActive: channelActive)
                               : retainedCamera;
                           final visible = camera
                               .visibleWorldRect(_viewport)
@@ -710,6 +716,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
                                     offset: camera.offset,
                                     scale: camera.scale,
                                   ),
+                                  welcome: layout.groups.isEmpty,
                                   batches: channelFeed.batches,
                                   pinboard: channelFeed.pinboard,
                                   now: channelFeed.now,

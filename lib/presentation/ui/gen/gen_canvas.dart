@@ -289,7 +289,8 @@ class GenSimpleStage extends StatelessWidget {
   Widget build(BuildContext context) {
     final scope = GenScope.of(context, GenAspect.canvas);
     final cv = scope.data.canvas;
-    final tiles = cv.focus!.tiles;
+    final tiles = cv.focus?.tiles;
+    if (tiles == null || tiles.isEmpty) return const SizedBox.expand();
     return LayoutBuilder(
       builder: (context, box) {
         final padding = GenCanvas.focusPadding(

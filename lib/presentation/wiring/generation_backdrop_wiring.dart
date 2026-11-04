@@ -69,10 +69,11 @@ class _GenerationPanelBackdropWiringState
     ref.listen(generationCanvasCameraProvider, (_, _) => _refresh());
     final feed = ref.read(canvasChannelFeedProvider);
     final empty = ref.read(canvasFeedLayoutProvider).groups.isEmpty;
-    final camera = ref.read(generationCanvasCameraProvider);
-    final offset = empty
-        ? widget.canvasViewport.center
-        : camera.offset + widget.canvasViewport.topLeft;
+    final world = ref.read(generationCanvasCameraProvider);
+    final camera = empty
+        ? ChannelCamera.welcome(widget.canvasViewport.size)
+        : ChannelCamera(offset: world.offset, scale: world.scale);
+    final offset = camera.offset + widget.canvasViewport.topLeft;
     return LayoutBuilder(
       builder: (context, constraints) {
         final bounds = Offset.zero & constraints.biggest;
@@ -90,8 +91,9 @@ class _GenerationPanelBackdropWiringState
               ),
               camera: ChannelCamera(
                 offset: offset - origin,
-                scale: empty ? 1 : camera.scale,
+                scale: camera.scale,
               ),
+              welcome: empty,
               batches: feed.batches,
               pinboard: feed.pinboard,
               now: feed.now,

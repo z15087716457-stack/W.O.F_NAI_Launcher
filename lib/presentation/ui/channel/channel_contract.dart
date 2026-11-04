@@ -154,6 +154,19 @@ class ChannelSettings {
 @immutable
 class ChannelCamera {
   const ChannelCamera({required this.offset, required this.scale});
+  // The original channel compositions show a 832 × 1216 portrait at y=50
+  // in a 922 × 1000 canvas, with 70 pixels below it.
+  static const welcomeZoom = (1000 - 50 - 70) / 1216;
+
+  factory ChannelCamera.welcome(Size viewport) {
+    final factor = viewport.width > 0 ? viewport.width / 922 : 1.0;
+    return ChannelCamera(
+      offset:
+          viewport.center(Offset.zero) - Offset(0, (1000 / 2 - 50) * factor),
+      scale: welcomeZoom * factor,
+    );
+  }
+
   final Offset offset;
   final double scale;
 
@@ -210,6 +223,7 @@ class ChannelViewData {
     required this.now,
     this.generating = false,
     this.pinboard,
+    this.welcome = false,
   });
 
   final ChannelSettings settings;
@@ -226,6 +240,9 @@ class ChannelViewData {
 
   /// 钉图板的世界矩形（有钉图时给）：这一片的装饰压暗，不和钉住的图抢。
   final Rect? pinboard;
+
+  /// Fit the whole welcome illustration, including its text and fine strokes.
+  final bool welcome;
 }
 
 class ChannelActions {
