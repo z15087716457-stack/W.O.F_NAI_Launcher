@@ -294,6 +294,27 @@ void main() {
     await done(t);
   });
 
+  testWidgets('触控板双指捏合以指针处缩放（触控板不发滚轮事件）', (t) async {
+    await pump(t, ViewerFixture.gallery(zoomHintSeen: true));
+    await key(t, LogicalKeyboardKey.digit1);
+    expect(zoomLabel(t), '100%');
+    final center = t.getCenter(find.byKey(const Key('viewer-view')));
+    final trackpad = TestPointer(1, PointerDeviceKind.trackpad);
+    await t.sendEventToBinding(trackpad.panZoomStart(center));
+    await t.sendEventToBinding(trackpad.panZoomUpdate(center, scale: 1.5));
+    await t.sendEventToBinding(trackpad.panZoomUpdate(center, scale: 2));
+    await t.sendEventToBinding(trackpad.panZoomEnd());
+    await t.pumpAndSettle();
+    expect(zoomLabel(t), '200%');
+
+    await t.sendEventToBinding(trackpad.panZoomStart(center));
+    await t.sendEventToBinding(trackpad.panZoomUpdate(center, scale: .5));
+    await t.sendEventToBinding(trackpad.panZoomEnd());
+    await t.pumpAndSettle();
+    expect(zoomLabel(t), '100%');
+    await done(t);
+  });
+
   testWidgets('复用参数：Ctrl R / 主按钮；没有元数据时灰掉', (t) async {
     await pump(t, ViewerFixture.gallery());
     await key(t, LogicalKeyboardKey.keyR, ctrl: true);

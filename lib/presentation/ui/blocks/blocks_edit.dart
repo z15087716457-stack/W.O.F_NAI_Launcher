@@ -955,8 +955,8 @@ class _BlockEditDialogState extends State<BlockEditDialog> {
       UiBtn(size: UiBtnSize.small, onTap: onTap, children: [Text(text)]);
 }
 
-/// 预览图裁剪：拖动平移、滚轮缩放（1…3）；左下“换图”、右上清除、右下提示。
-class _Crop extends StatelessWidget {
+/// 预览图裁剪：拖动平移、滚轮或触控板捏合缩放（1…3）；左下“换图”、右上清除、右下提示。
+class _Crop extends StatefulWidget {
   const _Crop({
     required this.thumb,
     required this.onChanged,
@@ -969,32 +969,69 @@ class _Crop extends StatelessWidget {
   final VoidCallback onClear;
 
   @override
+  State<_Crop> createState() => _CropState();
+}
+
+class _CropState extends State<_Crop> {
+  /// 触控板捏合开始时的缩放；触控板不发滚轮事件，捏合走平移缩放手势。
+  double? _pinchStartScale;
+
+  /// 交给 onChanged、父级还没重建回来的值。触控板的一次手势同时带缩放和平移，
+  /// 两个回调在同一帧里先后改，后一个要接着前一个改，不能都从旧值算。
+  BlockThumb? _pending;
+
+  BlockThumb get _thumb => _pending ?? widget.thumb;
+
+  void _change(BlockThumb next) {
+    _pending = next;
+    widget.onChanged(next);
+  }
+
+  @override
+  void didUpdateWidget(covariant _Crop oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _pending = null;
+  }
+
+  @override
   Widget build(BuildContext context) {
     final c = context.ui;
     final l10n = context.l10n;
+    final thumb = widget.thumb;
+    final onPick = widget.onPick;
+    final onClear = widget.onClear;
     return LayoutBuilder(
       builder: (context, box) => Listener(
         onPointerSignal: (e) {
           if (e is PointerScrollEvent) {
-            onChanged(
-              thumb.copyWith(
-                scale: (thumb.scale - e.scrollDelta.dy / 600).clamp(1.0, 3.0),
+            _change(
+              _thumb.copyWith(
+                scale: (_thumb.scale - e.scrollDelta.dy / 600).clamp(1.0, 3.0),
               ),
             );
           }
         },
+        onPointerPanZoomStart: (_) => _pinchStartScale = _thumb.scale,
+        onPointerPanZoomUpdate: (e) {
+          final start = _pinchStartScale;
+          if (start == null || e.scale == 1.0) return;
+          final scale = (start * e.scale).clamp(1.0, 3.0);
+          if (scale != _thumb.scale) _change(_thumb.copyWith(scale: scale));
+        },
+        onPointerPanZoomEnd: (_) => _pinchStartScale = null,
         child: GestureDetector(
           key: const Key('block-edit-crop'),
-          onPanUpdate: (e) => onChanged(
-            thumb.copyWith(
-              offsetX:
-                  (thumb.offsetX - e.delta.dx / box.maxWidth * 2 / thumb.scale)
-                      .clamp(-1.0, 1.0),
-              offsetY:
-                  (thumb.offsetY - e.delta.dy / box.maxHeight * 2 / thumb.scale)
-                      .clamp(-1.0, 1.0),
-            ),
-          ),
+          onPanUpdate: (e) {
+            final t = _thumb;
+            _change(
+              t.copyWith(
+                offsetX: (t.offsetX - e.delta.dx / box.maxWidth * 2 / t.scale)
+                    .clamp(-1.0, 1.0),
+                offsetY: (t.offsetY - e.delta.dy / box.maxHeight * 2 / t.scale)
+                    .clamp(-1.0, 1.0),
+              ),
+            );
+          },
           child: MouseRegion(
             cursor: SystemMouseCursors.move,
             child: Container(

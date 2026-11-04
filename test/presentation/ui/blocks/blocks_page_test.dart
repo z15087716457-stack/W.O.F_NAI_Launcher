@@ -2,6 +2,7 @@ import 'package:flutter/rendering.dart';
 import 'dart:ui' as ui;
 import 'dart:io';
 // 块系统交互测试：每个按钮 / 快捷键 / 拖放都回调到契约，接线方照着这些回调接 provider。
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -495,6 +496,32 @@ void main() {
       expect(d.text, '1girl, (solo:1.2)');
       expect(d.thumbToken, 'c12');
       expect(d.params, BlocksFixture.y99Params);
+    });
+
+    testWidgets('封面裁剪保存同一次双指手势的平移和缩放', (t) async {
+      await open(t);
+      final crop = t.getRect(find.byKey(const Key('block-edit-crop')));
+      final start = crop.topLeft + crop.size.center(Offset.zero) * .6;
+      final original = BlocksFixture.byId('y99', blocksTestImage).thumb!;
+      final trackpad = TestPointer(1, PointerDeviceKind.trackpad);
+      await t.sendEventToBinding(trackpad.panZoomStart(start));
+      // Cross the drag threshold, then change pan and scale in the same frame.
+      await t.sendEventToBinding(
+        trackpad.panZoomUpdate(start, pan: const Offset(32, -24)),
+      );
+      await t.sendEventToBinding(
+        trackpad.panZoomUpdate(start, pan: const Offset(72, -44), scale: 1.5),
+      );
+      await t.sendEventToBinding(
+        trackpad.panZoomUpdate(start, pan: const Offset(88, -50), scale: 2),
+      );
+      await t.sendEventToBinding(trackpad.panZoomEnd());
+      await t.pumpAndSettle();
+      await tapKey(t, 'block-edit-save');
+      final saved = rec.drafts.single.thumb!;
+      expect(saved.scale, closeTo(2.0, 1e-9));
+      expect(saved.offsetX, lessThan(original.offsetX));
+      expect(saved.offsetY, greaterThan(original.offsetY));
     });
 
     testWidgets('附带参数质量词与 UC 预设可编辑并随保存返回', (t) async {

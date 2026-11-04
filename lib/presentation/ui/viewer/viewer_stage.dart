@@ -356,6 +356,9 @@ class _ViewState extends State<_View> {
   Offset? _tapAt;
   var _dragging = false;
 
+  /// 触控板捏合上一帧的累计缩放；触控板不发滚轮事件，捏合走平移缩放手势。
+  double? _pinchScale;
+
   @override
   Widget build(BuildContext context) {
     final scope = ViewerPageScope.of(context);
@@ -416,6 +419,14 @@ class _ViewState extends State<_View> {
                   );
                 }
               },
+              onPointerPanZoomStart: (_) => _pinchScale = 1,
+              onPointerPanZoomUpdate: (e) {
+                final last = _pinchScale;
+                if (last == null || item.missing || e.scale == last) return;
+                _pinchScale = e.scale;
+                z.zoomBy(e.scale / last, focal: e.localPosition);
+              },
+              onPointerPanZoomEnd: (_) => _pinchScale = null,
               child: ClipRect(
                 child: Stack(
                   children: [
