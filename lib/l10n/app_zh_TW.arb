@@ -3409,9 +3409,9 @@
   "@tips_studio_trick_6": {
     "description": "promptTranslation_guideMiddleText."
   },
-  "tips_studio_trick_6_mac": "在翻譯塊上按住 ⌘ 點一下，原文和譯文來回切換。AI 翻得再好，偶爾也值得偷看一眼原文，確認它沒把 cat ears 翻成什麼奇怪的東西。",
+  "tips_studio_trick_6_mac": "在翻譯塊上按住 ⌘ 點一下，原文和譯文來回切換，右鍵選單裡也有這一項。AI 翻得再好，偶爾也值得偷看一眼原文，確認它沒把 cat ears 翻成什麼奇怪的東西。",
   "@tips_studio_trick_6_mac": {
-    "description": "macOS variant of tips_studio_trick_6: Cmd+click toggles a translation block."
+    "description": "macOS variant of tips_studio_trick_6: Cmd+click toggles a translation block (promptTranslation_toggleFace)."
   },
   "tips_studio_trick_7": "設定裡的「限制生圖頻率」可以讓兩次生圖之間強制冷卻，再加一點隨機抖動，節奏就沒那麼機械。適合掛著慢慢抽的夜晚，也適合管不住手的自己。",
   "@tips_studio_trick_7": {
@@ -4938,6 +4938,7 @@
   "promptTranslation_guideMiddleTitle": "中鍵點塊",
   "promptTranslation_guideCommandClickTitle": "⌘ + 點選塊",
   "promptTranslation_guideMiddleText": "切換原文與譯文",
+  "promptTranslation_toggleFace": "切換原文 / 譯文",
   "promptTranslation_guideSourceTitle": "左鍵點原文",
   "promptTranslation_guideSourceText": "定位游標，直接修改",
   "promptTranslation_guideReadingTitle": "左鍵點譯文",

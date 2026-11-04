@@ -3409,9 +3409,9 @@
   "@tips_studio_trick_6": {
     "description": "promptTranslation_guideMiddleText."
   },
-  "tips_studio_trick_6_mac": "翻訳ブロックを ⌘ を押しながらクリックすると、原文と訳文を切り替えられます。AI の翻訳がどれだけ優秀でも、たまには原文をのぞいて cat ears が変なものになっていないか確かめましょう。",
+  "tips_studio_trick_6_mac": "翻訳ブロックを ⌘ を押しながらクリックすると、原文と訳文を切り替えられます。右クリックメニューからも切り替えられます。AI の翻訳がどれだけ優秀でも、たまには原文をのぞいて cat ears が変なものになっていないか確かめましょう。",
   "@tips_studio_trick_6_mac": {
-    "description": "macOS variant of tips_studio_trick_6: Cmd+click toggles a translation block."
+    "description": "macOS variant of tips_studio_trick_6: Cmd+click toggles a translation block (promptTranslation_toggleFace)."
   },
   "tips_studio_trick_7": "設定の「画像生成の頻度を制限」を使うと、生成と生成のあいだに強制クールダウンを入れられます。少しランダムな揺らぎも足せば、リズムが機械っぽくなりません。のんびり回す夜にも、手が止まらない自分にも。",
   "@tips_studio_trick_7": {
@@ -4938,6 +4938,7 @@
   "promptTranslation_guideMiddleTitle": "ブロックを中クリック",
   "promptTranslation_guideCommandClickTitle": "⌘ + ブロックをクリック",
   "promptTranslation_guideMiddleText": "原文と訳文を切り替え",
+  "promptTranslation_toggleFace": "原文 / 訳文を切り替え",
   "promptTranslation_guideSourceTitle": "原文を左クリック",
   "promptTranslation_guideSourceText": "カーソルを置いて直接編集",
   "promptTranslation_guideReadingTitle": "訳文を左クリック",

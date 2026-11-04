@@ -24,6 +24,7 @@ class BlockSelectionToolbar extends StatelessWidget {
     required this.onSaveAsBlock,
     required this.onCopy,
     this.onLookup,
+    this.extraItems = const [],
   });
 
   final VoidCallback onSaveAsBlock;
@@ -32,18 +33,22 @@ class BlockSelectionToolbar extends StatelessWidget {
   /// 查词条（标签百科）；null 不显示。
   final VoidCallback? onLookup;
 
+  /// 接线方追加的项，排在最后、只有文字（比如右键点在翻译块上时的「切换原文 / 译文」）。
+  final List<ContextMenuButtonItem> extraItems;
+
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
     final l10n = context.l10n;
-    Widget btn(Key key, Widget icon, String label, VoidCallback onTap) => UiBtn(
-      key: key,
-      size: UiBtnSize.small,
-      tone: UiBtnTone.ghost,
-      color: c.ink,
-      onTap: onTap,
-      children: [icon, Text(label)],
-    );
+    Widget btn(Key? key, Widget? icon, String label, VoidCallback? onTap) =>
+        UiBtn(
+          key: key,
+          size: UiBtnSize.small,
+          tone: UiBtnTone.ghost,
+          color: c.ink,
+          onTap: onTap,
+          children: [?icon, Text(label)],
+        );
     return UiPopoverSurface(
       key: const Key('block-selection-toolbar'),
       radius: 9,
@@ -70,6 +75,13 @@ class BlockSelectionToolbar extends StatelessWidget {
               const UiGlyph(UiGlyphs.search, size: 13),
               l10n.blocks_lookup,
               onLookup!,
+            ),
+          for (final item in extraItems)
+            btn(
+              null,
+              null,
+              AdaptiveTextSelectionToolbar.getButtonLabel(context, item),
+              item.onPressed,
             ),
         ],
       ),

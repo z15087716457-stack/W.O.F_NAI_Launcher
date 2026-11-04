@@ -742,11 +742,10 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
       context: context,
       initial: widget.config.enableAutoFormat
           ? initial.copyWith(
-              source: PromptInputNormalization.normalize(
+              source: PromptInputNormalization.normalizeTranslationFragment(
                 initial.source,
                 autoFormat: true,
-                sdAutoConvert: false,
-              ).text,
+              ),
             )
           : initial,
       globalPosition: position,

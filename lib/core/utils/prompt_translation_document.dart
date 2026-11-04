@@ -364,11 +364,7 @@ class PromptTranslationBatch {
         instances[marker] = PillInstance(
           blockId: '',
           translation: TranslationPill(
-            source: PromptInputNormalization.normalize(
-              original.text.substring(group.start, group.end),
-              autoFormat: autoFormat,
-              sdAutoConvert: false,
-            ).text,
+            source: _groupSource(original.text, group, autoFormat: autoFormat),
             zh: group.zh,
             marks: group.marks,
             languageCode: PromptTranslationLanguage.fromCode(languageCode).code,
@@ -379,6 +375,22 @@ class PromptTranslationBatch {
       result[entry.key] = PillDocument(text: text, instances: instances);
     }
     return result;
+  }
+
+  // A group is a fragment of the prompt. Its leading space and trailing
+  // comma/newline may separate it from the next group or an existing pill.
+  // Formatting the fragment as a whole prompt would remove those boundaries.
+  static String _groupSource(
+    String text,
+    PromptTranslationGroup group, {
+    required bool autoFormat,
+  }) {
+    return PromptInputNormalization.normalizeTranslationFragment(
+      text.substring(group.start, group.end),
+      autoFormat: autoFormat,
+      preserveLeading: group.start != 0,
+      preserveTrailing: group.end < text.length,
+    );
   }
 
   /// Convenience for a single model response.

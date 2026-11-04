@@ -15,6 +15,41 @@ class PromptInputNormalization {
 
   bool get changed => sdConverted || formatted;
 
+  /// A translated pill can own the whitespace and separator before its neighbour.
+  static String normalizeTranslationFragment(
+    String source, {
+    required bool autoFormat,
+    bool preserveLeading = true,
+    bool preserveTrailing = true,
+  }) {
+    if (!autoFormat) return source;
+    final prefix = !preserveLeading
+        ? ''
+        : RegExp(r'^\s+').stringMatch(source) ?? '';
+    var bodyEnd = source.length;
+    if (preserveTrailing) {
+      for (final token in NaiPromptSyntax.scan(source).reversed) {
+        if (token.kind == NaiPromptTokenKind.comma) {
+          bodyEnd = token.start;
+        } else if (token.kind == NaiPromptTokenKind.text) {
+          final trailing = RegExp(r'\s+$').firstMatch(token.source(source));
+          if (trailing == null) break;
+          bodyEnd = token.start + trailing.start;
+          if (trailing.start != 0) break;
+        } else {
+          break;
+        }
+      }
+    }
+    if (bodyEnd <= prefix.length) return source;
+    final body = normalize(
+      source.substring(prefix.length, bodyEnd),
+      autoFormat: true,
+      sdAutoConvert: false,
+    ).text;
+    return '$prefix$body${source.substring(bodyEnd)}';
+  }
+
   static PromptInputNormalization normalize(
     String text, {
     required bool autoFormat,

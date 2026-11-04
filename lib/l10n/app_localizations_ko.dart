@@ -6125,7 +6125,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get tips_studio_trick_6_mac =>
-      '번역 블록을 ⌘를 누른 채 클릭하면 원문과 번역문이 번갈아 바뀌어요. AI 번역이 아무리 좋아도 가끔은 원문을 슬쩍 보고 cat ears가 이상한 말로 바뀌지 않았는지 확인해 보세요.';
+      '번역 블록을 ⌘를 누른 채 클릭하면 원문과 번역문이 번갈아 바뀌어요. 오른쪽 클릭 메뉴에도 있어요. AI 번역이 아무리 좋아도 가끔은 원문을 슬쩍 보고 cat ears가 이상한 말로 바뀌지 않았는지 확인해 보세요.';
 
   @override
   String get tips_studio_trick_7 =>
@@ -8944,6 +8944,9 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get promptTranslation_guideMiddleText => '원문과 번역문 전환';
+
+  @override
+  String get promptTranslation_toggleFace => '원문 / 번역문 전환';
 
   @override
   String get promptTranslation_guideSourceTitle => '원문 왼쪽 클릭';

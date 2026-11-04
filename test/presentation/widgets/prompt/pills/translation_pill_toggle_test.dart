@@ -1,4 +1,6 @@
-// 翻译块切换原文 / 译文：Windows 用鼠标中键，macOS 用 ⌘+点击。
+// 翻译块切换原文 / 译文：Windows 用鼠标中键，macOS 用 ⌘+点击（触控板没有中键），
+// 所有平台的右键菜单里都有「切换原文 / 译文」（翻译块在输入框里时的菜单见
+// prompt_pill_editor_test）。
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +21,7 @@ import 'package:nai_launcher/presentation/widgets/tag_expansion/tag_expansion_wr
 
 const _source = 'blue eyes';
 const _reading = '蓝眼睛';
+const _toggleLabel = '切换原文 / 译文';
 
 final _popup = find.byKey(const Key('tag-expansion-popup'));
 final _sourceField = find.byKey(const Key('translation-pill-source-input'));
@@ -186,6 +189,26 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
   }, variant: TargetPlatformVariant.only(TargetPlatform.windows));
 
+  testWidgets(
+    '可编辑的原文：右键是原文输入框自己的菜单，多一项切换',
+    (tester) async {
+      await pumpPill(tester, editableSource: true, original: true);
+      expect(_sourceField, findsOneWidget);
+
+      await tester.tap(_sourceField, buttons: kSecondaryMouseButton);
+      await tester.pumpAndSettle();
+      expect(find.text(_toggleLabel), findsOneWidget);
+      await tester.tap(find.text(_toggleLabel));
+      await tester.pumpAndSettle();
+      expect(pill.showOriginal, isFalse);
+      expect(_sourceField, findsNothing);
+      expect(edits, isEmpty);
+    },
+    variant: const TargetPlatformVariant({
+      TargetPlatform.macOS,
+      TargetPlatform.windows,
+    }),
+  );
 }
 
 class _EmptySource implements CompletionSource {

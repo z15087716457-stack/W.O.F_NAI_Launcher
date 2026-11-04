@@ -1,4 +1,5 @@
 import 'package:nai_launcher/presentation/widgets/common/translation_icon.dart';
+import 'package:flutter/foundation.dart';
 import 'package:nai_launcher/presentation/utils/prompt_block_bundle_insertion.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
@@ -23,6 +24,7 @@ import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
 import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
 import 'package:nai_launcher/data/models/image/image_params.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
+import 'package:nai_launcher/presentation/utils/control_click.dart';
 import 'package:nai_launcher/presentation/providers/pill_workspace_provider.dart';
 import 'package:nai_launcher/presentation/providers/generation/generation_params_notifier.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
@@ -68,7 +70,12 @@ class _TestBlocksPlatform extends BlocksPlatform {
   }
 }
 
+// Control+click is a right click on macOS, as in the app.
+class _ControlClickTestBinding extends AutomatedTestWidgetsFlutterBinding
+    with ControlClickBinding {}
+
 void main() {
+  _ControlClickTestBinding();
   setUp(() => SharedPreferences.setMockInitialValues({}));
   for (final scope in [
     PillScopes.main,
@@ -1403,6 +1410,154 @@ void main() {
     variant: TargetPlatformVariant.only(TargetPlatform.macOS),
   );
 
+  group('translation pill right click', () {
+    // The field keeps the right click and its own menu; the pill only adds
+    // the toggle at the end.
+    void mockClipboard(WidgetTester tester) {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (call) async => switch (call.method) {
+          'Clipboard.hasStrings' => {'value': true},
+          'Clipboard.getData' => {'text': 'red hair, '},
+          _ => null,
+        },
+      );
+      addTearDown(() {
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        );
+      });
+    }
+
+    Future<ProviderContainer> pumpPill(WidgetTester tester) async {
+      final container = await _pump(
+        tester,
+        libraryState: PromptBlockLibraryState(blocks: [], folders: []),
+      );
+      container
+          .read(pillWorkspaceNotifierProvider.notifier)
+          .insertTranslationAt(offset: 0, source: 'blue eyes', zh: '蓝眼睛');
+      await tester.pump();
+      return container;
+    }
+
+    bool showsOriginal(ProviderContainer container) => container
+        .read(pillWorkspaceNotifierProvider)
+        .document
+        .instances
+        .values
+        .single
+        .translation!
+        .showOriginal;
+
+    Future<void> rightClickPill(WidgetTester tester) async {
+      await tester.tap(
+        find.byType(TranslationPillView),
+        buttons: kSecondaryMouseButton,
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('without a selection: the field menu, then the toggle', (
+      tester,
+    ) async {
+      mockClipboard(tester);
+      final container = await pumpPill(tester);
+
+      await rightClickPill(tester);
+      expect(find.text('粘贴'), findsOneWidget);
+      expect(find.text('全选'), findsOneWidget);
+      expect(
+        tester.getTopLeft(find.text('全选')).dy,
+        lessThan(tester.getTopLeft(find.text('切换原文 / 译文')).dy),
+      );
+      await tester.tap(find.text('粘贴'));
+      await tester.pumpAndSettle();
+      expect(
+        container.read(pillWorkspaceNotifierProvider).document.text,
+        contains('red hair, '),
+      );
+      expect(find.text('切换原文 / 译文'), findsNothing);
+
+      await rightClickPill(tester);
+      await tester.tap(find.text('切换原文 / 译文'));
+      await tester.pumpAndSettle();
+      expect(showsOriginal(container), isTrue);
+      expect(find.text('切换原文 / 译文'), findsNothing);
+      expect(find.text('blue eyes'), findsOneWidget);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.windows));
+
+    testWidgets(
+      'with a selection: Save as block and Copy stay, then the toggle',
+      (tester) async {
+        final container = await pumpPill(tester);
+        final field = find
+            .descendant(
+              of: find.byType(PromptPillEditor),
+              matching: find.byType(EditableText),
+            )
+            .first;
+        await tester.tapAt(tester.getTopRight(field) + const Offset(-10, 10));
+        await tester.pump(const Duration(milliseconds: 400));
+        final selectAll = defaultTargetPlatform == TargetPlatform.macOS
+            ? LogicalKeyboardKey.metaLeft
+            : LogicalKeyboardKey.controlLeft;
+        await tester.sendKeyDownEvent(selectAll);
+        await tester.sendKeyEvent(LogicalKeyboardKey.keyA);
+        await tester.sendKeyUpEvent(selectAll);
+        await tester.pump();
+        expect(
+          tester
+              .state<EditableTextState>(field)
+              .textEditingValue
+              .selection
+              .isCollapsed,
+          isFalse,
+        );
+
+        await rightClickPill(tester);
+        expect(find.byKey(const Key('block-sel-save')), findsOneWidget);
+        expect(find.byKey(const Key('block-sel-copy')), findsOneWidget);
+        expect(
+          tester.getTopLeft(find.byKey(const Key('block-sel-copy'))).dx,
+          lessThan(tester.getTopLeft(find.text('切换原文 / 译文')).dx),
+        );
+        await tester.tap(find.text('切换原文 / 译文'));
+        await tester.pumpAndSettle();
+        expect(showsOriginal(container), isTrue);
+        expect(find.byKey(const Key('block-selection-toolbar')), findsNothing);
+      },
+      variant: const TargetPlatformVariant({
+        TargetPlatform.macOS,
+        TargetPlatform.windows,
+      }),
+    );
+
+    testWidgets(
+      'macOS: Control+click opens the same menu, not the editor or related tags',
+      (tester) async {
+        final container = await pumpPill(tester);
+        await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+        final mouse = await tester.startGesture(
+          tester.getCenter(find.byType(TranslationPillView)),
+          kind: PointerDeviceKind.mouse,
+        );
+        await mouse.up();
+        await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+        await tester.pumpAndSettle();
+        expect(find.text('切换原文 / 译文'), findsOneWidget);
+        expect(
+          find.byKey(const Key('translation-pill-editor-popover')),
+          findsNothing,
+        );
+        expect(find.byKey(const Key('tag-expansion-popup')), findsNothing);
+        expect(showsOriginal(container), isFalse);
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.macOS),
+    );
+  });
+
   testWidgets(
     'original translation edits at the clicked caret and retains IME composition',
     (tester) async {
@@ -1781,6 +1936,64 @@ void main() {
       );
     },
   );
+
+  for (final action in ['save', 'plain-text']) {
+    testWidgets('translation fragment boundaries survive editor $action', (
+      t,
+    ) async {
+      final c = await _pump(
+        t,
+        autoFormat: true,
+        libraryState: PromptBlockLibraryState(blocks: [], folders: []),
+      );
+      final n = c.read(pillWorkspaceNotifierProvider.notifier);
+      n.setText('girl,QA alpha');
+      n.insertTranslationAt(offset: 5, source: ' red hair,\n', zh: '红发');
+      await t.pump();
+      await t.tap(find.byType(TranslationPillView));
+      await t.pump();
+      final source = find.byKey(const Key('translation-pill-source-field'));
+      final shown = t.widget<TextField>(source).controller!.text;
+      expect(shown, ' red hair,\n');
+      await t.enterText(source, shown.replaceFirst('red', 'blue'));
+      await t.tap(find.byKey(Key('translation-pill-$action')));
+      await t.pump();
+      expect(
+        c.read(pillWorkspaceNotifierProvider).projection,
+        'girl, blue hair,\nQA alpha',
+      );
+    });
+  }
+
+  testWidgets('translation fragment boundaries survive inline editing', (
+    t,
+  ) async {
+    final c = await _pump(
+      t,
+      autoFormat: true,
+      libraryState: PromptBlockLibraryState(blocks: [], folders: []),
+    );
+    final n = c.read(pillWorkspaceNotifierProvider.notifier);
+    n.setText('girl,QA alpha');
+    n.insertTranslationAt(
+      offset: 5,
+      source: ' red hair,\n',
+      zh: '红发',
+      needsReview: true,
+    );
+    await t.pump();
+    final field = find.byKey(const Key('translation-pill-source-input'));
+    await t.tap(field);
+    await t.pump();
+    final shown = t.widget<TextField>(field).controller!.text;
+    expect(shown, ' red hair,\n');
+    await t.enterText(field, shown.replaceFirst('red', 'blue'));
+    await t.pump();
+    expect(
+      c.read(pillWorkspaceNotifierProvider).projection,
+      'girl, blue hair,\nQA alpha',
+    );
+  });
 
   testWidgets('translation pill converts to editable source text in place', (
     tester,

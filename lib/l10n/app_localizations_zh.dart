@@ -6024,7 +6024,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get tips_studio_trick_6_mac =>
-      '在翻译块上按住 ⌘ 点一下，原文和译文来回切换。AI 翻得再好，偶尔也值得偷看一眼原文，确认它没把 cat ears 翻成什么奇怪的东西。';
+      '在翻译块上按住 ⌘ 点一下，原文和译文来回切换，右键菜单里也有这一项。AI 翻得再好，偶尔也值得偷看一眼原文，确认它没把 cat ears 翻成什么奇怪的东西。';
 
   @override
   String get tips_studio_trick_7 =>
@@ -8747,6 +8747,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get promptTranslation_guideMiddleText => '切换原文与译文';
+
+  @override
+  String get promptTranslation_toggleFace => '切换原文 / 译文';
 
   @override
   String get promptTranslation_guideSourceTitle => '左键点原文';
@@ -28039,7 +28042,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get tips_studio_trick_6_mac =>
-      '在翻譯塊上按住 ⌘ 點一下，原文和譯文來回切換。AI 翻得再好，偶爾也值得偷看一眼原文，確認它沒把 cat ears 翻成什麼奇怪的東西。';
+      '在翻譯塊上按住 ⌘ 點一下，原文和譯文來回切換，右鍵選單裡也有這一項。AI 翻得再好，偶爾也值得偷看一眼原文，確認它沒把 cat ears 翻成什麼奇怪的東西。';
 
   @override
   String get tips_studio_trick_7 =>
@@ -30762,6 +30765,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get promptTranslation_guideMiddleText => '切換原文與譯文';
+
+  @override
+  String get promptTranslation_toggleFace => '切換原文 / 譯文';
 
   @override
   String get promptTranslation_guideSourceTitle => '左鍵點原文';

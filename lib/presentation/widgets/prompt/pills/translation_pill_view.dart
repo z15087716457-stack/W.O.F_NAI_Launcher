@@ -11,6 +11,7 @@ import '../nai_syntax_controller.dart';
 import '../../tag_expansion/tag_expansion_wrapper.dart';
 import 'translation_tag_span.dart';
 import '../../common/translation_icon.dart';
+import '../../common/inline_context_menu_items.dart';
 import '../../../../core/utils/localization_extension.dart';
 
 export 'translation_pill_editor.dart';
@@ -106,6 +107,10 @@ class _TranslationPillViewState extends State<TranslationPillView> {
   void _onPointerDown(PointerDownEvent event) {
     _commandDownAt = null;
     _commandClicked = false;
+    if (event.buttons == kSecondaryMouseButton) {
+      _addToFieldMenu(event);
+      return;
+    }
     if (!usesMacOSConventions ||
         event.buttons != kPrimaryMouseButton ||
         !HardwareKeyboard.instance.isMetaPressed) {
@@ -138,13 +143,41 @@ class _TranslationPillViewState extends State<TranslationPillView> {
     }
   }
 
+  /// 右键交给外层输入框，菜单内容照它自己的（剪切 / 复制 / 粘贴、有选区时的存为块……），
+  /// 这里只在最后加一项切换原文 / 译文（所有平台都有，用触控板的人不用找中键）。
+  void _addToFieldMenu(PointerDownEvent event) {
+    final field = context.findAncestorStateOfType<EditableTextState>();
+    if (field == null) return;
+    InlineContextMenuItems.register(field, event.position, [
+      ContextMenuButtonItem(
+        label: context.l10n.promptTranslation_toggleFace,
+        onPressed: widget.onToggle,
+      ),
+    ]);
+  }
+
+  /// 原文输入框自己的右键菜单，多一项切换原文 / 译文。
+  Widget _sourceContextMenu(BuildContext context, EditableTextState state) =>
+      AdaptiveTextSelectionToolbar.buttonItems(
+        anchors: state.contextMenuAnchors,
+        buttonItems: [
+          ...state.contextMenuButtonItems,
+          ContextMenuButtonItem(
+            label: context.l10n.promptTranslation_toggleFace,
+            onPressed: () {
+              state.hideToolbar();
+              widget.onToggle();
+            },
+          ),
+        ],
+      );
+
   String _displayText(TranslationPill pill) {
     if (!pill.showOriginal) return pill.zh;
-    return PromptInputNormalization.normalize(
+    return PromptInputNormalization.normalizeTranslationFragment(
       pill.source,
       autoFormat: widget.autoFormat,
-      sdAutoConvert: false,
-    ).text;
+    );
   }
 
   @override
@@ -280,6 +313,7 @@ class _TranslationPillViewState extends State<TranslationPillView> {
                     focusedErrorBorder: InputBorder.none,
                   ),
                   onTapOutside: (_) => _sourceFocus.unfocus(),
+                  contextMenuBuilder: _sourceContextMenu,
                   onChanged: (source) {
                     setState(() {});
                     widget.onSourceChanged!(source);

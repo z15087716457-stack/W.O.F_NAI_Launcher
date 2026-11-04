@@ -19,6 +19,7 @@ import '../../tag_expansion/tag_expansion_wrapper.dart';
 import '../comfyui_import_wrapper.dart';
 import '../nai_syntax_controller.dart';
 import 'unified_prompt_config.dart';
+import 'package:nai_launcher/presentation/widgets/common/inline_context_menu_items.dart';
 import 'package:nai_launcher/presentation/widgets/common/themed_input.dart';
 import 'package:nai_launcher/presentation/widgets/common/themed_text_selection_toolbar.dart';
 
@@ -787,6 +788,16 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
       _effectiveController,
     );
     final hasSelection = selectedText.isNotEmpty;
+    // 右键点在框里的内联块（比如翻译块）上时，块追加的项排在最后
+    final extraItems = [
+      for (final item in InlineContextMenuItems.of(editableTextState))
+        item.copyWith(
+          onPressed: () {
+            editableTextState.hideToolbar();
+            item.onPressed?.call();
+          },
+        ),
+    ];
     if (hasSelection && !widget.config.readOnly) {
       final anchors = editableTextState.contextMenuAnchors;
       return TextSelectionToolbar(
@@ -800,6 +811,7 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
             },
             onCopy: () =>
                 editableTextState.copySelection(SelectionChangedCause.toolbar),
+            extraItems: extraItems,
           ),
         ],
       );
@@ -826,7 +838,7 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
     return buildThemedTextSelectionToolbar(
       context,
       anchors: editableTextState.contextMenuAnchors,
-      buttonItems: buttonItems,
+      buttonItems: [...buttonItems, ...extraItems],
     );
   }
 

@@ -10936,10 +10936,10 @@ abstract class AppLocalizations {
   /// **'Middle-click a translation block to flip between the original and the translation. However good the AI is, peek at the original now and then to make sure \"cat ears\" didn\'t become something strange.'**
   String get tips_studio_trick_6;
 
-  /// macOS variant of tips_studio_trick_6: Cmd+click toggles a translation block.
+  /// macOS variant of tips_studio_trick_6: Cmd+click toggles a translation block (promptTranslation_toggleFace).
   ///
   /// In en, this message translates to:
-  /// **'⌘-click a translation block to flip between the original and the translation. However good the AI is, peek at the original now and then to make sure \"cat ears\" didn\'t become something strange.'**
+  /// **'⌘-click a translation block to flip between the original and the translation; it is also in the right-click menu. However good the AI is, peek at the original now and then to make sure \"cat ears\" didn\'t become something strange.'**
   String get tips_studio_trick_6_mac;
 
   /// settings_limitGenerationIntervalTitle / settings_setGenerationIntervalJitterTitle.
@@ -15985,6 +15985,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Switch original and translation'**
   String get promptTranslation_guideMiddleText;
+
+  /// No description provided for @promptTranslation_toggleFace.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch original / translation'**
+  String get promptTranslation_toggleFace;
 
   /// No description provided for @promptTranslation_guideSourceTitle.
   ///

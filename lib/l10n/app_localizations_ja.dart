@@ -6125,7 +6125,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get tips_studio_trick_6_mac =>
-      '翻訳ブロックを ⌘ を押しながらクリックすると、原文と訳文を切り替えられます。AI の翻訳がどれだけ優秀でも、たまには原文をのぞいて cat ears が変なものになっていないか確かめましょう。';
+      '翻訳ブロックを ⌘ を押しながらクリックすると、原文と訳文を切り替えられます。右クリックメニューからも切り替えられます。AI の翻訳がどれだけ優秀でも、たまには原文をのぞいて cat ears が変なものになっていないか確かめましょう。';
 
   @override
   String get tips_studio_trick_7 =>
@@ -8921,6 +8921,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get promptTranslation_guideMiddleText => '原文と訳文を切り替え';
+
+  @override
+  String get promptTranslation_toggleFace => '原文 / 訳文を切り替え';
 
   @override
   String get promptTranslation_guideSourceTitle => '原文を左クリック';

@@ -3409,9 +3409,9 @@
   "@tips_studio_trick_6": {
     "description": "promptTranslation_guideMiddleText."
   },
-  "tips_studio_trick_6_mac": "⌘-click a translation block to flip between the original and the translation. However good the AI is, peek at the original now and then to make sure \"cat ears\" didn't become something strange.",
+  "tips_studio_trick_6_mac": "⌘-click a translation block to flip between the original and the translation; it is also in the right-click menu. However good the AI is, peek at the original now and then to make sure \"cat ears\" didn't become something strange.",
   "@tips_studio_trick_6_mac": {
-    "description": "macOS variant of tips_studio_trick_6: Cmd+click toggles a translation block."
+    "description": "macOS variant of tips_studio_trick_6: Cmd+click toggles a translation block (promptTranslation_toggleFace)."
   },
   "tips_studio_trick_7": "Limit generation frequency in Settings forces a cooldown between runs, and a little random jitter keeps the rhythm from feeling mechanical. Good for slow late-night sessions — and for anyone whose finger won't leave the button.",
   "@tips_studio_trick_7": {
@@ -4938,6 +4938,7 @@
   "promptTranslation_guideMiddleTitle": "Middle-click a block",
   "promptTranslation_guideCommandClickTitle": "⌘ + click a block",
   "promptTranslation_guideMiddleText": "Switch original and translation",
+  "promptTranslation_toggleFace": "Switch original / translation",
   "promptTranslation_guideSourceTitle": "Left-click the original",
   "promptTranslation_guideSourceText": "Place the cursor and edit directly",
   "promptTranslation_guideReadingTitle": "Left-click the translation",
