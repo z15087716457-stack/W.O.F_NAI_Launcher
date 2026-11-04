@@ -21,6 +21,7 @@ import 'package:nai_launcher/presentation/themes/app_theme.dart';
 import 'package:nai_launcher/presentation/ui/agent/agent_panel.dart';
 import 'package:nai_launcher/presentation/wiring/nai_agent/agent_wiring.dart';
 import 'package:nai_launcher/presentation/widgets/nai_agent/nai_agent_image_input.dart';
+import 'package:path/path.dart' as p;
 import 'package:super_clipboard/super_clipboard.dart';
 
 const agentTestConfig = PromptAssistantConfigState(
@@ -99,7 +100,7 @@ class AgentTestAuth extends AuthNotifier {
 }
 
 class AgentTestStore extends AgentWorkspaceStore {
-  AgentTestStore(super.root);
+  AgentTestStore(super.root, {super.builtinSkillsDirectory});
   AgentSettings value = const AgentSettings();
   final attachments = <String, Uint8List>{};
   @override
@@ -209,13 +210,25 @@ class AgentWiringHarness {
   late AgentTestController c;
   late ProviderContainer container;
   Future<List<DataReader>> Function() clipboard = () async => [];
+
+  /// [listInventories] keeps the real skill and command list providers (with
+  /// the built-in skills inside [root]); the caller then overrides the runtime
+  /// paths and how Node is started.
   Future<void> init({
     List<Override> overrides = const [],
     NaiAgentSkillInventory? skills,
     AgentTestController Function(AgentWorkspaceStore)? controller,
+    bool listInventories = false,
   }) async {
     root = await Directory.systemTemp.createTemp('agent-command-desk-');
-    c = (controller ?? AgentTestController.new)(AgentTestStore(root));
+    c = (controller ?? AgentTestController.new)(
+      AgentTestStore(
+        root,
+        builtinSkillsDirectory: listInventories
+            ? Directory(p.join(root.path, 'runtime', 'nai-agent', 'skills'))
+            : null,
+      ),
+    );
     await c.initialize(restoreHistory: false);
     await c.updateSettings({'providerId': 'local', 'modelId': 'model'});
     container = ProviderContainer(
@@ -227,10 +240,12 @@ class AgentWiringHarness {
         localStorageServiceProvider.overrideWithValue(AgentTestStorage()),
         secureStorageServiceProvider.overrideWithValue(AgentTestSecrets()),
         authNotifierProvider.overrideWith(AgentTestAuth.new),
-        naiAgentCommandsProvider.overrideWith((_, __) async => []),
-        naiAgentSkillsProvider.overrideWith(
-          (_, __) async => skills ?? const NaiAgentSkillInventory([], 0, {}),
-        ),
+        if (!listInventories) ...[
+          naiAgentCommandsProvider.overrideWith((_, __) async => []),
+          naiAgentSkillsProvider.overrideWith(
+            (_, __) async => skills ?? const NaiAgentSkillInventory([], 0, {}),
+          ),
+        ],
         ...overrides,
       ],
     );

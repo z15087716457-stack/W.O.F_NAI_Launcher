@@ -32,6 +32,7 @@ flutter test --no-pub --concurrency=3 \
   test/core/services/desktop_app_shutdown_service_test.dart \
   test/presentation/providers/nai_agent/workspace_controller_test.dart \
   test/presentation/providers/nai_agent/app_shutdown_test.dart \
+  test/presentation/providers/nai_agent/inventory_stamp_real_scripts_test.dart \
   test/app_exit_shortcuts_test.dart \
   test/core/services/mac_legacy_data_import_test.dart \
   test/core/services/mac_legacy_data_sync_test.dart \
@@ -43,5 +44,9 @@ flutter test --no-pub --concurrency=3 \
   test/app_test.dart \
   test/presentation/wiring/settings_storage_inventory_test.dart \
   test/presentation/providers/nai_agent/nai_agent_builtin_skills_path_test.dart \
+  test/presentation/providers/nai_agent/inventory_cache_test.dart \
+  test/presentation/providers/nai_agent/skill_command_lists_test.dart \
+  test/presentation/providers/nai_agent/host_reaper_test.dart \
+  test/presentation/providers/nai_agent/package_inventory_refresh_test.dart \
   test/presentation/wiring/generation_data_wiring_test.dart \
   test/presentation/wiring/generation_canvas_wiring_test.dart

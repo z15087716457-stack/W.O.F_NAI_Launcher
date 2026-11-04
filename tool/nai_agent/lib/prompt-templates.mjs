@@ -7,6 +7,10 @@ export async function resolveStudioPromptTemplates({ cwd, agentDir, globalDirect
   packagePrompts ??= (await resolveStudioPackages({ ...packages, cwd, agentDir })).prompts;
   const workspace = resolve(workspaceDirectory ?? join(cwd, '.W.O.F', 'prompts'));
   const global = resolve(globalDirectory ?? join(agentDir, 'prompts'));
+  // What Pi reads from these folders (each one's .md files) is stamped by hand in
+  // lib/presentation/providers/nai_agent/nai_agent_inventory_cache.dart, copied from Pi 1.3.0's
+  // loadTemplatesFromDir. After upgrading Pi run
+  // test/presentation/providers/nai_agent/inventory_stamp_real_scripts_test.dart.
   const loader = new DefaultResourceLoader({ cwd, agentDir, settingsManager: SettingsManager.inMemory(),
     noExtensions: true, noSkills: true, noPromptTemplates: true, noThemes: true, noContextFiles: true,
     additionalPromptTemplatePaths: [workspace, global, ...packagePrompts.map(p => p.path)],

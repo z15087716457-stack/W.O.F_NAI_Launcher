@@ -1,5 +1,7 @@
 // One-shot skill inventory for Studio settings, using the same resolver as sessions.
 // Input: one JSON line on stdin (the init `skills` object). Output: one JSON line.
+// Studio keeps the answer until the files this reads change (stamped in
+// lib/presentation/providers/nai_agent/nai_agent_inventory_cache.dart); read other files here, stamp them there.
 import { createInterface } from 'node:readline';
 import { resolveStudioSkills } from './lib/skills.mjs';
 import { resolveStudioPackages } from './lib/packages.mjs';

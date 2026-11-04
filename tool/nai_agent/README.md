@@ -28,4 +28,6 @@ CodeMode 使用官方 QuickJS，没有另造执行器。MCP 调用继续走原 S
 
 MCP 重连时从官方会话恢复仍可用的工具，隐藏／禁用与后续卸载保持有效。agent_settled 的 aborted 和工具 durationMs 经原 JSONL 直接传递。Pi 1.5.0 沿用现有宿主协议、MCP 辅助接口和缓存保温接线；1.3.0 会话兼容已验证。工具声明继续直接使用 typebox 生成 JSON Schema，实际参数交给 Pi 的 pi-schema 验证与转换。
 
-Skill（2026-10-18）：宿主启用 Pi 原生 Skill，来源由 Studio 决定——内置 `skills/`（只读，随版本更新）、全局 `agent-data/skills/`、当前工作区 `.W.O.F/skills/`，同名时工作区 > 全局 > 内置；不读取工作区内 `.agents/skills` 或 `.pi`。`lib/skills.mjs` 用 Pi 的加载器解析并应用开关／“仅手动”，Pi 负责目录格式与 `/skill:` 展开；`list-skills.mjs` 供设置页列出同一结果。系统提示词只留入口地图，业务工具用法在 `nai-studio`。
+升级 Pi 后，在仓库根运行 `flutter test test/presentation/providers/nai_agent/inventory_stamp_real_scripts_test.dart`，核对技能和命令列表的缓存与实际扫描结果。
+
+Skill（2026-10-18）：宿主启用 Pi 原生 Skill，来源由 Studio 决定——内置 `skills/`（只读，随版本更新）、全局 `agent-data/skills/`、当前工作区 `.W.O.F/skills/`，同名时工作区 > 全局 > 内置；不读取工作区内 `.agents/skills` 或 `.pi`。`lib/skills.mjs` 用 Pi 的加载器解析并应用开关／“仅手动”，Pi 负责目录格式与 `/skill:` 展开；`list-skills.mjs` 供设置页和 Agent 面板列出同一结果，`list-commands.mjs` 同样列出命令模板；Studio 在这次运行里留着它们列出的结果，它们读的文件（`nai_agent_inventory_cache.dart` 打戳）、开关和刷新序号都没变就不再起 Node，所以脚本改读别的文件时，那里的戳要一起改。系统提示词只留入口地图，业务工具用法在 `nai-studio`。

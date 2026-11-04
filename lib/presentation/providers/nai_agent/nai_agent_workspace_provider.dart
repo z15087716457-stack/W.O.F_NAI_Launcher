@@ -5,6 +5,7 @@ import 'package:path/path.dart' as p;
 import '../../../core/utils/app_bundle_paths.dart';
 import '../../../core/nai_agent/agent_tool.dart';
 import '../../../data/services/nai_agent/agent_workspace_store.dart';
+import 'nai_agent_host_reaper.dart';
 import 'nai_agent_session_provider.dart';
 import 'nai_agent_workspace_controller.dart';
 import 'nai_agent_questions.dart';
@@ -210,6 +211,9 @@ final naiAgentControllerProvider =
       controller.addListener(() {
         ref.read(naiAgentUiPreferencesProvider).replace(controller.settings);
       });
+      // Panel closed and nothing running for 30 minutes: close the Node host.
+      final reaper = NaiAgentHostReaper(controller);
+      ref.onDispose(reaper.dispose);
       controller.ready = controller
           .initialize(restoreHistory: false)
           .catchError(controller.initializationFailed);

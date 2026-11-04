@@ -18,6 +18,10 @@ export function skillErrorCode(message = '') {
 function scan(directory, source) {
   const entries = [];
   if (!directory || !existsSync(directory)) return entries;
+  // What Pi reads here (SKILL.md, ignore files, which folders count) is stamped by hand in
+  // lib/presentation/providers/nai_agent/nai_agent_inventory_cache.dart, copied from Pi 1.3.0's
+  // loadSkillsFromDir. After upgrading Pi run
+  // test/presentation/providers/nai_agent/inventory_stamp_real_scripts_test.dart.
   const { skills, diagnostics } = loadSkillsFromDir({ dir: directory, source: 'path' });
   const byFile = new Map(skills.map(skill => [resolve(skill.filePath), skill]));
   const errors = new Map();
