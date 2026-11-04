@@ -241,7 +241,7 @@ class SettingSpec {
       _c,
       _cv,
       choices: ['openDetail', 'linkedPreview'],
-      defaultValue: 'openDetail',
+      defaultValue: 'linkedPreview',
     ),
     SettingKey.outputViewer: SettingSpec._(
       _c,

@@ -1396,7 +1396,7 @@ void main() {
         await container
             .read(simpleOutputViewerNotifierProvider.notifier)
             .setSimple(true);
-        final old = image(1);
+        final old = image(1, 1);
         final previous = image(2);
         final first = image(9);
         final last = image(9, 1);
@@ -1432,8 +1432,16 @@ void main() {
         expect(find.byKey(const Key('gen-tile-slot:run:9:0')), findsOneWidget);
 
         if (browseHistory) {
-          container.read(generationHistoryActionsProvider).focusTile(old.id);
+          // The right panel shows a batch cover when grouped, a single image
+          // otherwise. This earlier run only has its second slot in history.
+          final row = grouped ? 'run:1' : 'img:${old.id}';
+          await tester.tap(find.byKey(Key('gen-batch-tile-$row')));
           await tester.pump();
+          expect(container.read(generationPreviewSelectionProvider), old.id);
+          expect(
+            container.read(generationCanvasGroupSelectionProvider)?.subimage,
+            1,
+          );
         }
         publish(
           loading(9, count: 2).copyWith(
@@ -1467,6 +1475,13 @@ void main() {
               ? [first.id, last.id]
               : [last.id],
         );
+        if (browseHistory) {
+          expect(container.read(generationPreviewSelectionProvider), old.id);
+          expect(
+            container.read(generationCanvasGroupSelectionProvider)?.subimage,
+            1,
+          );
+        }
         expect(tester.takeException(), isNull);
       });
     }

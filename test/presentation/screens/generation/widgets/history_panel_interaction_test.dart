@@ -229,7 +229,9 @@ void main() {
       final tile = find.byKey(const Key('gen-batch-tile-run:7'));
       await tester.tap(tile);
       await tester.pumpAndSettle();
-      expect(container.read(canvasHistoryFocusRequestProvider)?.group, 'run:7');
+      final focus = container.read(canvasTileFocusRequestProvider);
+      expect(focus?.group, 'run:7');
+      expect(focus?.subimage, 0);
       expect(container.read(generationPreviewSelectionProvider), 'batch-0');
       await tester.tap(find.byKey(const Key('gen-history-select')));
       await tester.pumpAndSettle();

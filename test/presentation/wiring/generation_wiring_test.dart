@@ -6,6 +6,7 @@ import 'package:nai_launcher/presentation/ui/tools/tools_sheets.dart';
 import 'dart:io';
 import 'package:nai_launcher/presentation/providers/prompt_translation_provider.dart';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:nai_launcher/core/shortcuts/default_shortcuts.dart';
@@ -16,6 +17,7 @@ import 'package:hive/hive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image/image.dart' as img;
 import 'package:nai_launcher/data/models/gallery/nai_image_metadata.dart';
+import 'package:nai_launcher/data/models/image/image_operation.dart';
 import 'package:nai_launcher/presentation/ui/viewer/viewer_contract.dart';
 import 'package:nai_launcher/presentation/ui/viewer/viewer_page.dart';
 import 'package:nai_launcher/presentation/wiring/generation_viewer_wiring.dart';
@@ -48,6 +50,7 @@ import 'package:nai_launcher/presentation/wiring/generation_backend.dart';
 import 'package:nai_launcher/presentation/wiring/generation_operations.dart';
 import 'package:nai_launcher/presentation/providers/krita/bridge_draft_snapshot.dart';
 import 'package:nai_launcher/presentation/providers/pill_workspace_provider.dart';
+import 'package:nai_launcher/presentation/providers/simple_viewer_group_batches_provider.dart';
 import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
 import 'package:nai_launcher/presentation/providers/generation/preview_selection_provider.dart';
 import '../providers/krita/agent_bridge_draft_test.dart'
@@ -566,18 +569,26 @@ void main() {
   Future<GoRouter> pumpViewer(
     WidgetTester tester, {
     bool startInViewer = true,
+    List<GeneratedImage>? history,
   }) async {
-    final image = GeneratedImage(
-      id: 'viewer-image',
-      bytes: img.encodePng(img.Image(width: 512, height: 768)),
-      width: 512,
-      height: 768,
-      metadata: const NaiImageMetadata(prompt: 'image prompt'),
-    );
+    final images =
+        history ??
+        [
+          GeneratedImage(
+            id: 'viewer-image',
+            bytes: img.encodePng(img.Image(width: 512, height: 768)),
+            width: 512,
+            height: 768,
+            metadata: const NaiImageMetadata(prompt: 'image prompt'),
+          ),
+        ];
     (container.read(imageGenerationNotifierProvider.notifier) as DataGeneration)
-        .publish(ImageGenerationState(history: [image]));
+        .publish(ImageGenerationState(history: images));
     final router = GoRouter(
       initialLocation: startInViewer ? '/generation/viewer' : '/generation',
+      initialExtra: startInViewer
+          ? GenerationViewerRequest(images, images.first.id)
+          : null,
       routes: [
         GoRoute(
           path: '/generation',
@@ -585,8 +596,8 @@ void main() {
           routes: [
             GoRoute(
               path: 'viewer',
-              builder: (_, _) => GenerationViewerWiring(
-                request: GenerationViewerRequest([image], image.id),
+              builder: (_, state) => GenerationViewerWiring(
+                request: state.extra! as GenerationViewerRequest,
               ),
             ),
           ],
@@ -659,14 +670,95 @@ void main() {
     variant: TargetPlatformVariant.only(TargetPlatform.macOS),
   );
 
+  for (final (simple, grouped) in [
+    (false, false),
+    (false, true),
+    (true, false),
+    (true, true),
+  ]) {
+    testWidgets('单击历史缩略图在画布定位对应图片，简洁=$simple 分组=$grouped', (tester) async {
+      final images = [
+        for (var index = -1; index < 3; index++)
+          GeneratedImage(
+            id: index == -1 ? 'original' : 'variation-$index',
+            bytes: img.encodePng(
+              img.Image(width: 64, height: 96)
+                ..clear(img.ColorRgb8(60 * (index + 1), 80, 160)),
+            ),
+            width: 512,
+            height: 768,
+            generationRunId: 7,
+            batchIndex: index,
+            isVariationOriginal: index == -1,
+            operation: index == -1 ? null : ImageOperation.variations,
+          ),
+      ];
+      final settings = container.read(settingsValueStoreProvider);
+      if (simple) {
+        await settings.write(SettingKey.outputViewer, 'simple');
+      }
+      if (grouped) {
+        await container
+            .read(simpleViewerGroupBatchesProvider.notifier)
+            .setGrouped(true);
+        await settings.write(SettingKey.historyClick, 'linkedPreview');
+      }
+      final router = await pumpViewer(
+        tester,
+        startInViewer: false,
+        history: images,
+      );
+      addTearDown(() => tester.pumpWidget(const SizedBox()));
+      await tester.pumpAndSettle();
+      final id = grouped ? 'original' : 'variation-1';
+      final group = grouped ? 'run:7' : 'img:variation-1';
+      final tile = find.byKey(Key('gen-batch-tile-$group'));
+      await tester.ensureVisible(tile);
+      await tester.tap(tile);
+      await tester.pumpAndSettle();
+      expect(find.byType(ImageViewerPage), findsNothing);
+      if (simple) {
+        final page = tester.widget<GenerationPage>(find.byType(GenerationPage));
+        expect(page.data.canvas.info?.tileId, id);
+        await settings.write(SettingKey.outputViewer, 'canvas');
+        await tester.pumpAndSettle();
+      }
+      expect(container.read(generationPreviewSelectionProvider), id);
+      final focus = container.read(generationCanvasGroupSelectionProvider)!;
+      expect(focus.group, group);
+      expect(focus.subimage, 0);
+      final canvasCenter = tester.getCenter(
+        find.byKey(const Key('gen-canvas')),
+      );
+      final imageCenter = tester.getCenter(find.byKey(Key('gen-tile-$id')));
+      expect((imageCenter - canvasCenter).distance, lessThan(30));
+
+      await tester.tap(tile, buttons: kSecondaryButton);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('gen-history-open')));
+      await tester.pumpAndSettle();
+      expect(find.byType(ImageViewerPage), findsOneWidget);
+      expect(
+        tester
+            .widget<GenerationViewerWiring>(find.byType(GenerationViewerWiring))
+            .request
+            .selected,
+        id,
+      );
+      router.pop();
+      await tester.pumpAndSettle();
+    }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
+  }
+
   for (final output in ['canvas', 'simple']) {
-    testWidgets('历史单击实时遵循设置并打开真实大图路由：$output', (tester) async {
+    testWidgets('历史单击实时遵循设置与恢复默认，双击打开真实大图路由：$output', (tester) async {
       final settings = container.read(settingsValueStoreProvider);
       await tester.runAsync(() async {
+        await Hive.openBox('accounts');
         await settings.write(SettingKey.outputViewer, output);
-        await settings.write(SettingKey.historyClick, 'linkedPreview');
       });
       final router = await pumpViewer(tester, startInViewer: false);
+      addTearDown(() => tester.pumpWidget(const SizedBox()));
       await tester.pumpAndSettle();
       final before = container.read(generationParamsNotifierProvider);
       final batch = tester
@@ -706,7 +798,9 @@ void main() {
       router.pop();
       await tester.pumpAndSettle();
       await tester.runAsync(
-        () => settings.write(SettingKey.historyClick, 'linkedPreview'),
+        () => container
+            .read(settingsEditsProvider.notifier)
+            .reset(SettingKey.historyClick, title: 'History'),
       );
       await tester.pump();
       await tester.tap(tile);
@@ -721,7 +815,6 @@ void main() {
       expect(find.byType(ImageViewerPage), findsOneWidget);
       expect(container.read(generationParamsNotifierProvider), same(before));
       expect(tester.takeException(), isNull);
-      await tester.pumpWidget(const SizedBox());
     });
   }
 
