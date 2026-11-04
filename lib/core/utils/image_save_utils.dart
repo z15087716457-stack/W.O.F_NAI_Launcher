@@ -338,6 +338,52 @@ class ImageSaveUtils {
     );
   }
 
+  /// The inpaint display uses source pixels around the mask, but its recipe
+  /// belongs to the response. Preserve unknown response fields and resize only
+  /// the recipe dimensions when a focused crop was pasted onto a larger canvas.
+  static Future<Uint8List> attachInpaintResponseMetadata({
+    required Uint8List displayBytes,
+    required Uint8List responseBytes,
+    required int width,
+    required int height,
+  }) async {
+    var fields = <String, String>{};
+    if (UnifiedMetadataParser.isPngHeader(responseBytes)) {
+      try {
+        fields = UnifiedMetadataParser.extractPngTextData(responseBytes);
+      } on FormatException {
+        // An invalid ancillary chunk must not discard a successful image.
+      }
+    }
+    final display = UnifiedMetadataParser.embedPngTextFields(
+      displayBytes,
+      fields,
+    );
+    var parsed = UnifiedMetadataParser.parseFromTextData(fields);
+    if (!parsed.success) {
+      parsed = UnifiedMetadataParser.parseFromImageBytes(responseBytes);
+    }
+    final meta = parsed.metadata;
+    if (meta == null ||
+        parsed.sourceFormat?.toLowerCase().contains('novelai') != true ||
+        (fields.containsKey('Comment') &&
+            meta.width == width &&
+            meta.height == height)) {
+      return display;
+    }
+    try {
+      return await _embedSourceMetadataWithResolution(
+        imageBytes: display,
+        sourceBytes: responseBytes,
+        source: meta,
+        width: width,
+        height: height,
+      );
+    } on FormatException {
+      return display;
+    }
+  }
+
   /// A derived image inherits its source metadata, never the current draft.
   /// Outputs with their own metadata and sources without metadata stay intact.
   static Future<Uint8List> inheritSourceMetadata({

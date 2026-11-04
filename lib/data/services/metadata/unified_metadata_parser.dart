@@ -1029,18 +1029,43 @@ class UnifiedMetadataParser {
     String keyword,
     String text,
   ) {
+    return embedPngTextFields(originalPng, {keyword: text});
+  }
+
+  /// Write a set of PNG text fields without re-encoding pixels or losing UTF-8.
+  static Uint8List embedPngTextFields(
+    Uint8List originalPng,
+    Map<String, String> fields,
+  ) {
+    if (fields.isEmpty) return originalPng;
     final chunks = _parsePngChunks(originalPng);
     final output = BytesBuilder()..add(originalPng.sublist(0, 8));
     var added = false;
     for (final chunk in chunks) {
-      if (_pngTextKeyword(chunk) == keyword) continue;
+      if (fields.containsKey(_pngTextKeyword(chunk))) continue;
       if (chunk.type == 'IDAT' && !added) {
-        _writeTextChunk(output, keyword, text);
+        for (final field in fields.entries) {
+          _writeTextChunk(output, field.key, field.value);
+        }
         added = true;
       }
       _writeChunk(output, chunk.type, chunk.data);
     }
     return output.toBytes();
+  }
+
+  /// A composite must not expose the previous generation through its alpha
+  /// channel. Invalidate only an actual marker, preserving all ordinary pixels.
+  static void clearStealthMarker(img.Image image) {
+    if (!image.hasAlpha || image.hasPalette) return;
+    final marker = _magic.codeUnits;
+    final prefix = _readAlphaLsbBytes(image, marker.length);
+    if (prefix == null) return;
+    for (var i = 0; i < marker.length; i++) {
+      if (prefix[i] != marker[i]) return;
+    }
+    final first = image.getPixel(0, 0);
+    first.a = first.a.toInt() ^ 1;
   }
 
   /// 渐进式读取策略

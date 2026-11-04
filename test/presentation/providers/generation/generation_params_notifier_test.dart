@@ -146,6 +146,32 @@ void main() {
     expect(storage.getLastVarietyPlus(), isTrue);
   });
 
+  test(
+    'transparent background survives reopening while seed stays session-only',
+    () {
+      for (final enabled in [true, false]) {
+        final original = ProviderContainer();
+        try {
+          final notifier = original.read(
+            generationParamsNotifierProvider.notifier,
+          );
+          notifier.updateTransparentBackground(enabled);
+          notifier.updateSeed(12345);
+        } finally {
+          original.dispose();
+        }
+        final reopened = ProviderContainer();
+        try {
+          final params = reopened.read(generationParamsNotifierProvider);
+          expect(params.transparentBackground, enabled);
+          expect(params.seed, -1);
+        } finally {
+          reopened.dispose();
+        }
+      }
+    },
+  );
+
   test('build should restore the persisted V5 Light quality preset', () async {
     final storage = LocalStorageService();
     await storage.setQualityPresetMode(PromptPresetMode.naiLight.index);

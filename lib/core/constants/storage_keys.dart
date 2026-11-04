@@ -154,6 +154,7 @@ class StorageKeys {
   static const String lastCfgRescale = 'last_cfg_rescale';
   static const String lastNoiseSchedule = 'last_noise_schedule';
   static const String lastVarietyPlus = 'last_variety_plus';
+  static const String lastTransparentBackground = 'last_transparent_background';
   static const String generationImg2ImgEnabled = 'generation_img2img_enabled';
 
   // Gallery Keys (画廊相关)

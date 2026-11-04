@@ -618,6 +618,16 @@ class LocalStorageService {
     await setSetting(StorageKeys.lastVarietyPlus, value);
   }
 
+  bool getLastTransparentBackground() =>
+      getSetting<bool>(
+        StorageKeys.lastTransparentBackground,
+        defaultValue: false,
+      ) ??
+      false;
+
+  Future<void> setLastTransparentBackground(bool value) =>
+      setSetting(StorageKeys.lastTransparentBackground, value);
+
   // ==================== UI Layout State ====================
 
   /// 获取右侧面板展开状态 (默认展开)

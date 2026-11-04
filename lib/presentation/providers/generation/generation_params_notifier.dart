@@ -175,6 +175,7 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
       cfgRescale: storage.getLastCfgRescale(),
       noiseSchedule: storage.getLastNoiseSchedule(),
       varietyPlus: storage.getLastVarietyPlus(),
+      transparentBackground: storage.getLastTransparentBackground(),
       qualityToggle: qualityPresetState.usesNativePreset,
       qualityTagPreset: qualityPresetState.nativePreset,
       furryMode: storage.getDefaultModelMode(),
@@ -378,6 +379,7 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
     _storage.setLastCfgRescale(state.cfgRescale);
     _storage.setLastNoiseSchedule(state.noiseSchedule);
     _storage.setLastVarietyPlus(state.varietyPlus);
+    _storage.setLastTransparentBackground(state.transparentBackground);
     for (final vibe in state.vibeReferencesV4) {
       _primeVibeEncodingCache(vibe);
     }
@@ -1612,6 +1614,7 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
   /// 更新透明背景开关（V5 专属）
   void updateTransparentBackground(bool transparentBackground) {
     state = state.copyWith(transparentBackground: transparentBackground);
+    _storage.setLastTransparentBackground(transparentBackground);
   }
 
   /// 更新增强工作流标记（请求层用，非 Max 增强注入防糊词）
