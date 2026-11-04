@@ -489,6 +489,30 @@ void main() {
         FileExplorerUtils.windowsRevealFileArguments(absolutePath),
       );
     });
+
+    test(
+      'opens skill directories as one native path rather than a file URL',
+      () async {
+        final temp = await Directory.systemTemp.createTemp('nai_open_skill_');
+        addTearDown(() => temp.delete(recursive: true));
+        final directory = await Directory(
+          '${temp.path}${Platform.pathSeparator}Skill 目录 + 100%, refs',
+        ).create();
+        String? executable;
+        List<String>? arguments;
+        await FileExplorerUtils.openDirectory(
+          directory.path,
+          startProcess: (exe, args) async {
+            executable = exe;
+            arguments = List.of(args);
+          },
+        );
+        expect(executable, 'explorer.exe');
+      expect(arguments, [
+        FileExplorerUtils.normalizeWindowsExplorerPath(directory.absolute.path),
+      ]);
+      },
+    );
   });
 
   group('ComfyUI upscale workflows', () {

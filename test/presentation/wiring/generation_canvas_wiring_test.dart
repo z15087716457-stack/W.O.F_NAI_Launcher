@@ -1368,7 +1368,6 @@ void main() {
     publish(loading(9, count: 2));
     await tester.pump();
     expect(container.read(generationFocusViewProvider)!.tiles, hasLength(2));
-    container.read(generationPreviewSelectionProvider.notifier).select(old.id);
     final first = image(9, 0);
     final last = image(9, 1);
     publish(
@@ -1387,6 +1386,91 @@ void main() {
     expect(find.byKey(Key('gen-tile-${last.id}')), findsOneWidget);
     expect(find.byKey(Key('gen-tile-${first.id}')), findsNothing);
   });
+
+  for (final grouped in [false, true]) {
+    for (final browseHistory in [false, true]) {
+      testWidgets('简洁分组=$grouped 新生成跟随新批次，手动历史=$browseHistory', (tester) async {
+        await container
+            .read(simpleViewerGroupBatchesProvider.notifier)
+            .setGrouped(grouped);
+        await container
+            .read(simpleOutputViewerNotifierProvider.notifier)
+            .setSimple(true);
+        final old = image(1);
+        final previous = image(2);
+        final first = image(9);
+        final last = image(9, 1);
+        publish(
+          ImageGenerationState(
+            status: GenerationStatus.completed,
+            generationRunId: 2,
+            currentImages: [previous],
+            history: [previous, old],
+            displayImages: [previous],
+          ),
+        );
+        await pump(tester, fullPage: true);
+        container.read(generationHistoryActionsProvider).focusTile(old.id);
+        await tester.pumpAndSettle();
+        expect(
+          container.read(generationFocusViewProvider)!.tiles.single.id,
+          old.id,
+        );
+
+        publish(
+          loading(
+            9,
+            count: 2,
+          ).copyWith(history: [previous, old], displayImages: [previous]),
+        );
+        await tester.pump();
+        expect(container.read(generationFocusViewProvider)!.id, 'run:9');
+        expect(
+          container.read(generationFocusViewProvider)!.tiles,
+          hasLength(2),
+        );
+        expect(find.byKey(const Key('gen-tile-slot:run:9:0')), findsOneWidget);
+
+        if (browseHistory) {
+          container.read(generationHistoryActionsProvider).focusTile(old.id);
+          await tester.pump();
+        }
+        publish(
+          loading(9, count: 2).copyWith(
+            currentImages: [first],
+            history: [first, previous, old],
+            displayImages: [previous],
+            currentImage: 2,
+            progress: .4,
+          ),
+        );
+        await tester.pump();
+        final during = container.read(generationFocusViewProvider)!;
+        expect(during.tiles.first.id, browseHistory ? old.id : first.id);
+
+        publish(
+          ImageGenerationState(
+            status: GenerationStatus.completed,
+            generationRunId: 9,
+            currentImages: [first, last],
+            history: [first, last, previous, old],
+            displayImages: [first, last],
+          ),
+        );
+        await tester.pumpAndSettle();
+        final done = container.read(generationFocusViewProvider)!;
+        expect(
+          done.tiles.map((tile) => tile.id),
+          browseHistory
+              ? [old.id]
+              : grouped
+              ? [first.id, last.id]
+              : [last.id],
+        );
+        expect(tester.takeException(), isNull);
+      });
+    }
+  }
 
   testWidgets('简单模式不挂相机，切回后定位原选择且可反复切换', (tester) async {
     publish(ImageGenerationState(history: [image(2), image(1)]));

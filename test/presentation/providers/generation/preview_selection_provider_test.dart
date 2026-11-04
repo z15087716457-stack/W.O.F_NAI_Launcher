@@ -162,6 +162,49 @@ void main() {
     });
 
     test(
+      'new generation resets both focuses and later frames keep manual focus',
+      () {
+        final preview = container.read(
+          generationPreviewSelectionProvider.notifier,
+        );
+        final groups = container.read(
+          generationCanvasGroupSelectionProvider.notifier,
+        );
+        preview.select('c');
+        groups.selectTile('run:1', 0);
+        generationNotifier.replace(
+          const ImageGenerationState(
+            status: GenerationStatus.generating,
+            generationRunId: 2,
+          ),
+        );
+        expect(container.read(generationPreviewSelectionProvider), isNull);
+        expect(container.read(generationCanvasGroupSelectionProvider), isNull);
+
+        preview.select('c');
+        groups.selectTile('run:1', 0);
+        generationNotifier.replace(
+          const ImageGenerationState(
+            status: GenerationStatus.generating,
+            generationRunId: 2,
+            progress: .5,
+          ),
+        );
+        generationNotifier.replace(
+          const ImageGenerationState(
+            status: GenerationStatus.completed,
+            generationRunId: 2,
+          ),
+        );
+        expect(container.read(generationPreviewSelectionProvider), 'c');
+        expect(
+          container.read(generationCanvasGroupSelectionProvider)?.group,
+          'run:1',
+        );
+      },
+    );
+
+    test(
       'switching to classic clears selection and linked mode can resume',
       () {
         final notifier = container.read(

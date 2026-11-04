@@ -52,9 +52,7 @@ class GenParamStrip extends StatelessWidget {
             key: const Key('gen-param-seed'),
             label: p.seedPinned ? l.gen_seedPinned : l.gen_seed,
             tooltip: p.seedPinned ? l.gen_seedUnpinTip : l.gen_seedPinTip,
-            onTap: p.seed == null && !p.seedPinned
-                ? null
-                : () => scope.actions.onSeedPinned(!p.seedPinned),
+            onTap: () => scope.actions.onSeedPinned(!p.seedPinned),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               spacing: 4,
@@ -699,9 +697,7 @@ class _SeedFieldState extends State<_SeedField> {
               glyphSize: 14,
               color: p.seedPinned ? c.accent : null,
               tooltip: p.seedPinned ? l.gen_seedUnpinTip : l.gen_seedPinTip,
-              onTap: p.seed == null && !p.seedPinned
-                  ? null
-                  : () => scope.actions.onSeedPinned(!p.seedPinned),
+              onTap: () => scope.actions.onSeedPinned(!p.seedPinned),
             ),
           ],
         ),

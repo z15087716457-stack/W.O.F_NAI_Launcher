@@ -2,13 +2,13 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/cache/gallery_cache_manager.dart';
 import '../../../core/tag_expansion/tag_semantics_store.dart';
 import '../../../core/wiki/auto_tag_translation_controller.dart';
 import '../../../core/database/datasources/gallery_data_source.dart';
 import '../../../core/utils/localization_extension.dart';
+import '../../../core/utils/file_explorer_utils.dart';
 import '../../../data/repositories/gallery_folder_repository.dart';
 import '../../../data/services/gallery/index.dart';
 import '../../../data/services/thumbnail_service.dart';
@@ -82,13 +82,7 @@ class SettingsStorageActions {
     }
   }
 
-  Future<void> open(String path) async {
-    if (!await launchUrl(Uri.directory(path))) {
-      throw StateError(
-        context.mounted ? context.l10n.common_error : 'Unable to open folder',
-      );
-    }
-  }
+  Future<void> open(String path) => FileExplorerUtils.openDirectory(path);
 
   Future<void> openFolder(SettingsFolder folder) async {
     final paths = await ref.read(settingsFoldersProvider.future);

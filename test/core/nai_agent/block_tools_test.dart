@@ -56,6 +56,7 @@ void main() {
     backups = 0;
     instanceEdits = 0;
     tools = NaiAgentBlockTools(
+      loadImage: (_, __) => throw UnimplementedError(),
       readLibrary: repository.load,
       repository: repository,
       refresh: () async {},
@@ -240,6 +241,38 @@ void main() {
       }
     },
   );
+
+  test('preview framing is bounded and raw managed paths are not writable', () {
+    for (final changes in [
+      {'thumbnailOffsetX': -1, 'thumbnailOffsetY': 1, 'thumbnailScale': 3},
+      {'thumbnail': null},
+      {
+        'thumbnail': {'image_id': 'selected'},
+      },
+      {
+        'thumbnail': {'path': 'outputs/preview.webp'},
+      },
+    ]) {
+      expect(validateNaiAgentBlockChanges(changes), isNotEmpty);
+    }
+    for (final changes in [
+      {'thumbnail': 'C:/external.png'},
+      {
+        'thumbnail': {'file': 'outside.png'},
+      },
+      {'thumbnailOffsetX': -1.1},
+      {'thumbnailOffsetY': 1.1},
+      {'thumbnailScale': .9},
+      {'thumbnailScale': 3.1},
+      {'thumbnailScale': double.nan},
+      {'thumbnailOffsetX': double.infinity},
+    ]) {
+      expect(
+        () => validateNaiAgentBlockChanges(changes),
+        throwsA(error('invalid_changes')),
+      );
+    }
+  });
 
   test(
     'final Hive comparison detects an edit after the repository has read its old row',

@@ -38,6 +38,8 @@ No dedicated actions; compose them. Each write returns the next `draft_version`,
 
 `create(changes.title/content)`, `update(id, changes)`, `delete(id)` and `insert(id)` manage entries and insert them into a prompt.
 
+`changes.thumbnail: {image_id:"..."}` or `{path:"workspace/relative/image.png"}` copies a preview into managed storage; `null` removes it. `thumbnailOffsetX/Y` (-1..1, left/top to right/bottom) and `thumbnailScale` (1..3) select the visible area, using the native editor's coordinates. New previews default to center/1x; omit thumbnail to adjust only the framing. Read current framing and version with `block_query(id)`.
+
 `changes.generationSettings`: model, width, height, steps, scale, sampler, noiseSchedule, cfgRescale, qualityPreset (`standard/light/none`), ucPreset (`0/1/2/3/7/8/9`), qualityCustomBlockId/ucCustomBlockId (library IDs replacing native presets). Content edits clear obsolete atom pools unless new atoms are given.
 
 Folders/collections: create/update with `changes.name/parentId/sortOrder` (collection_create also `isFolder`); `parent_id` null = root; reorders take every sibling in `ordered_ids`; folder_delete needs an empty folder; collection_delete keeps the blocks; collection_add/remove take `id` + `block_id`.

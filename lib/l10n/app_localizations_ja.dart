@@ -9266,6 +9266,21 @@ class AppLocalizationsJa extends AppLocalizations {
   String get imageUse_characterMode => 'キャラクターの処理';
 
   @override
+  String imageUse_featureRecorded(String feature) {
+    return '元画像は$featureを使用しています。';
+  }
+
+  @override
+  String imageUse_referenceAvailable(String feature) {
+    return '元画像は$featureを使用しています。「参照画像」から参照素材を読み込めます。';
+  }
+
+  @override
+  String imageUse_referenceUnavailable(String feature) {
+    return '元画像は$featureを使用しています。使用記録のみが残っており、読み込める参照素材は含まれていません。';
+  }
+
+  @override
   String get imageMenu_details => '詳細';
 
   @override

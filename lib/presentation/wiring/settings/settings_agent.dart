@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/nai_agent/tool_catalog.dart';
 import '../../../core/nai_agent/mcp_config.dart';
+import '../../../core/utils/file_explorer_utils.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../data/services/nai_agent/agent_workspace_store.dart';
 import '../../providers/nai_agent/nai_agent_skills_provider.dart';
@@ -385,9 +386,7 @@ class SettingsAgentBackend {
 
   Future<void> openPath(String path) async {
     await Directory(path).create(recursive: true);
-    if (!await launchUrl(Uri.directory(path))) {
-      throw StateError('Unable to open folder');
-    }
+    await FileExplorerUtils.openDirectory(path);
   }
 
   /// Opens a text file in the system editor, creating it empty if missing.

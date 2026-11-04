@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:image/image.dart' as img;
+import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
 import 'package:nai_launcher/core/storage/pill_workspace_storage.dart';
 import 'package:nai_launcher/core/utils/pill_document_editor.dart';
@@ -36,6 +38,13 @@ import 'package:nai_launcher/presentation/providers/prompt_block_library_provide
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_studio_provider.dart';
 import '../krita/agent_bridge_draft_test.dart'
     show MemoryDraftSettings, MemoryCharacters, OfflineAuth, IdleGeneration;
+
+class _PreviewPaths extends PathProviderPlatform {
+  _PreviewPaths(this.root);
+  final String root;
+  @override
+  Future<String?> getApplicationDocumentsPath() async => root;
+}
 
 class _Library extends PromptBlockLibraryNotifier {
   @override
@@ -229,6 +238,15 @@ void main() {
       (await run('block_query', {'id': id}))['block'] as Map<String, dynamic>;
   Future<Map<String, dynamic>> create(Map<String, dynamic> changes) async =>
       await run('block_manage', {'action': 'create', 'changes': changes});
+  Future<File> previewSource() async {
+    final previous = PathProviderPlatform.instance;
+    PathProviderPlatform.instance = _PreviewPaths(root.path);
+    addTearDown(() => PathProviderPlatform.instance = previous);
+    return File(
+      '${workspace.path}/preview.jpg',
+    ).writeAsBytes(img.encodeJpg(img.Image(width: 90, height: 160)));
+  }
+
   BridgeDraftSnapshot draft() => container.read(_draftProvider)();
   Future<Map<String, dynamic>> insert(
     String id, {
@@ -1081,7 +1099,13 @@ void main() {
     () async {
       var busy = false, alive = true;
       final toolsProvider = Provider(
-        (ref) => bindNaiAgentBlocks(ref, workspace, () => busy, () => alive),
+        (ref) => bindNaiAgentBlocks(
+          ref,
+          workspace,
+          () => busy,
+          () => alive,
+          loadImage: (_, __) => throw UnimplementedError(),
+        ),
       );
       final tools = container.read(toolsProvider);
       final created = await instance('instance_create', {
@@ -1120,7 +1144,13 @@ void main() {
     () async {
       var busy = true, alive = true;
       final toolsProvider = Provider(
-        (ref) => bindNaiAgentBlocks(ref, workspace, () => busy, () => alive),
+        (ref) => bindNaiAgentBlocks(
+          ref,
+          workspace,
+          () => busy,
+          () => alive,
+          loadImage: (_, __) => throw UnimplementedError(),
+        ),
       );
       final tools = container.read(toolsProvider);
       for (final code in ['busy', 'closed']) {
@@ -2180,6 +2210,156 @@ void main() {
         await dir.list().length,
         count + 1,
       ); // only the valid insertion added a backup
+    },
+  );
+
+  test(
+    'Agent previews copy workspace images and reuse native framing and image IDs',
+    () async {
+      final source = await previewSource();
+      final before = draft().acknowledgementVersion;
+      final created = await create({
+        'title': 'preview',
+        'content': 'raw prompt',
+        'thumbnail': {'path': 'preview.jpg'},
+        'thumbnailOffsetX': .4,
+        'thumbnailOffsetY': -.2,
+        'thumbnailScale': 1.8,
+      });
+      var value = created['block'] as Map;
+      final id = value['id'] as String;
+      final firstPath = value['thumbnail'] as String;
+      expect(firstPath, contains('prompt_block_thumbnails'));
+      expect(firstPath, isNot(source.path));
+      expect(img.decodePng(await File(firstPath).readAsBytes()), isNotNull);
+      expect(value['thumbnailOffsetX'], .4);
+      expect(value['thumbnailScale'], 1.8);
+      await source.delete();
+      expect(await File(firstPath).exists(), true);
+      final adjusted = await run('block_manage', {
+        'action': 'update',
+        'id': id,
+        'expected_version': value['version'],
+        'changes': {'thumbnailOffsetY': .7},
+      });
+      value = adjusted['block'] as Map;
+      expect(value['thumbnail'], firstPath);
+      expect(value['thumbnailOffsetY'], .7);
+      expect(value['thumbnailOffsetX'], .4);
+      expect(draft().acknowledgementVersion, before);
+
+      final bytes = img.encodePng(img.Image(width: 160, height: 90));
+      container
+          .read(generationParamsNotifierProvider.notifier)
+          .restoreAgentSnapshot(
+            container
+                .read(generationParamsNotifierProvider)
+                .copyWith(sourceImage: bytes),
+          );
+      final replaced = await run('block_manage', {
+        'action': 'update',
+        'id': id,
+        'expected_version': value['version'],
+        'changes': {
+          'thumbnail': {'image_id': 'draft:source'},
+        },
+      });
+      value = replaced['block'] as Map;
+      final secondPath = value['thumbnail'] as String;
+      expect(secondPath, isNot(firstPath));
+      expect(await File(firstPath).exists(), false);
+      expect(img.decodePng(await File(secondPath).readAsBytes())!.width, 160);
+      expect(value['thumbnailOffsetX'], 0);
+      expect(value['thumbnailOffsetY'], 0);
+      expect(value['thumbnailScale'], 1);
+      final backup = jsonDecode(
+        await File(replaced['backup_path'] as String).readAsString(),
+      );
+      expect(backup['generation']['affected_thumbnail']['path'], firstPath);
+      expect(
+        base64Decode(backup['generation']['affected_thumbnail']['data_base64']),
+        isNotEmpty,
+      );
+      final cleared = await run('block_manage', {
+        'action': 'update',
+        'id': id,
+        'expected_version': value['version'],
+        'changes': {'thumbnail': null},
+      });
+      expect((cleared['block'] as Map)['thumbnail'], isNull);
+      expect(await File(secondPath).exists(), false);
+    },
+  );
+
+  test(
+    'replacing a preview preserves a managed file used by another block',
+    () async {
+      await previewSource();
+      final created = await create({
+        'title': 'first',
+        'content': '',
+        'thumbnail': {'path': 'preview.jpg'},
+      });
+      final value = created['block'] as Map;
+      final path = value['thumbnail'] as String;
+      await repository.createBlock(
+        title: 'shared',
+        content: '',
+        thumbnail: path,
+      );
+      await run('block_manage', {
+        'action': 'update',
+        'id': value['id'],
+        'expected_version': value['version'],
+        'changes': {'thumbnail': null},
+      });
+      expect(await File(path).exists(), true);
+    },
+  );
+
+  test(
+    'a preview write conflict removes its staged file and keeps the new draft',
+    () async {
+      final source = await previewSource();
+      repository.beforeCreateWrite = () =>
+          editor().setText('newer human draft');
+      await expectLater(
+        create({
+          'title': 'preview',
+          'content': '',
+          'thumbnail': {'path': 'preview.jpg'},
+        }),
+        throwsA(toolError('draft_conflict')),
+      );
+      expect((await repository.load()).blocks, isEmpty);
+      expect(lane().document.text, 'newer human draft');
+      expect(
+        await Directory('${root.path}/prompt_block_thumbnails').list().length,
+        0,
+      );
+      expect(await source.exists(), true);
+    },
+  );
+
+  test(
+    'invalid preview sources fail through the shared image loader before writing',
+    () async {
+      final source = await previewSource();
+      for (final (thumbnail, code) in [
+        (<String, dynamic>{}, 'invalid_image'),
+        ({'path': source.path}, 'path_outside_workspace'),
+        ({'path': 'preview.jpg', 'image_id': 'draft:source'}, 'invalid_image'),
+      ]) {
+        await expectLater(
+          create({'title': 'preview', 'content': '', 'thumbnail': thumbnail}),
+          throwsA(toolError(code)),
+        );
+      }
+      expect((await repository.load()).blocks, isEmpty);
+      expect(
+        await Directory('${root.path}/prompt_block_thumbnails').exists(),
+        false,
+      );
     },
   );
 

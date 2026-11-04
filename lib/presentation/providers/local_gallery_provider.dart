@@ -114,7 +114,7 @@ class LocalGalleryError {
 /// 连续画廊的数据集：当前过滤与排序下的全部轻量条目。
 ///
 /// 按身份比较（不覆写 ==），整库条目不参与 freezed 深比较；
-/// [datasetId] 只在筛选/范围/排序变化时递增，视图据此回到顶部，
+/// [datasetId] 只在筛选/范围/排序变化时递增，视图据此切换浏览位置，
 /// 删除、收藏、新增等内容变化保持滚动位置。
 class GalleryTimeline {
   const GalleryTimeline(
@@ -555,7 +555,7 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
 
   /// 重新读取当前范围的全部条目。
   ///
-  /// [newDataset] 为 true 表示筛选/范围/排序变化（视图回到顶部）；
+  /// [newDataset] 为 true 表示筛选/范围/排序变化（视图更新浏览位置）；
   /// false 表示内容变化（保持滚动位置）。
   Future<void> _reloadTimeline({
     required bool newDataset,
@@ -790,9 +790,14 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
     await ref.read(galleryRecentViewsStoreProvider).record(path);
   }
 
-  Future<void> setBrowseScope(GalleryBrowseScope scope) async {
+  Future<void> setBrowseScope(
+    GalleryBrowseScope scope, {
+    FilterCriteria? filterCriteria,
+  }) async {
     final request = ++_browseRequest;
-    if (scope == state.browseScope && scope != GalleryBrowseScope.recent) {
+    if (scope == state.browseScope &&
+        scope != GalleryBrowseScope.recent &&
+        (filterCriteria == null || filterCriteria == state.filterCriteria)) {
       return;
     }
     if (scope == GalleryBrowseScope.recent) {
@@ -803,7 +808,9 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
     _setState(
       state.copyWith(
         browseScope: scope,
-        filterCriteria: FilterCriteria(naiOnly: state.filterCriteria.naiOnly),
+        filterCriteria:
+            filterCriteria ??
+            FilterCriteria(naiOnly: state.filterCriteria.naiOnly),
       ),
     );
     await _applyFilters();

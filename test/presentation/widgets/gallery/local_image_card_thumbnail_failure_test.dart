@@ -13,16 +13,12 @@ import 'package:nai_launcher/presentation/widgets/gallery/local_image_card.dart'
 
 /// P5 回归：缩略图生成失败时卡片保持轻量占位、不再回退解码数 MB 原图。
 ///
-/// 环境说明：widget 测试里真实 isolate 缩略图生成不推进（先前探针验证），
-/// 因此用「缓存层已有失败记录 → 冷却期内直接判失败」这条真实失败路径
-/// 驱动卡片，全程不进 isolate。真实 FS 调用需经 `tester.runAsync` 窗口
-/// 推进（假异步区里真实 IO 回调不落地）。
+/// 通过缓存层失败冷却驱动占位态；完成通知测试走真实服务与图片生成。
+/// 真实 FS 和 isolate 调用在 `tester.runAsync` 窗口中推进。
 void main() {
   final seededPaths = <String>[];
 
   setUp(() {
-    // 假时钟下的重试延迟：由 tester.pump(duration) 精确控制触不发触发
-    thumbnailFailureRetryDelayForTesting = const Duration(milliseconds: 500);
     // 冷却拉长：种入的失败记录在测试期内持续有效
     ThumbnailCacheService.instance.setFailureRetryCooldownForTesting(
       const Duration(minutes: 10),
@@ -30,7 +26,6 @@ void main() {
   });
 
   tearDown(() {
-    thumbnailFailureRetryDelayForTesting = const Duration(seconds: 30);
     ThumbnailCacheService.instance.setFailureRetryCooldownForTesting(
       const Duration(seconds: 10),
     );
@@ -67,13 +62,18 @@ void main() {
     metadata: const NaiImageMetadata(width: 1000, height: 1000),
   );
 
-  Widget wrap(LocalImageRecord record) => ProviderScope(
+  Widget wrap(LocalImageRecord record, {VoidCallback? onTap}) => ProviderScope(
     child: MaterialApp(
       locale: const Locale('en'),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(
-        body: LocalImageCard(record: record, width: 180, height: 180),
+        body: LocalImageCard(
+          record: record,
+          width: 180,
+          height: 180,
+          onTap: onTap,
+        ),
       ),
     ),
   );
@@ -246,7 +246,7 @@ void main() {
     // 正向断言：确实走到了失败占位态（而非卡在加载中）
     expect(find.byIcon(Icons.image_not_supported_outlined), findsOneWidget);
 
-    // 卸载卡片并清掉服务层重试定时器（挂载期安排的延迟重试）
+    // 卸载卡片并清掉服务层重试任务。
     await tester.pumpWidget(const SizedBox.shrink());
     ThumbnailService.instance.cancelAll();
   });
@@ -331,4 +331,116 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
     ThumbnailService.instance.cancelAll();
   });
+
+  for (final recovery in ['background completion', 'click retry']) {
+    testWidgets('failed card recovers through $recovery without remounting', (
+      tester,
+    ) async {
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetDevicePixelRatio);
+      late Directory temp;
+      late File original;
+      final cache = ThumbnailCacheService.instance;
+      final service = ThumbnailService.instance;
+      await tester.runAsync(() async {
+        temp = await Directory.systemTemp.createTemp('card-recovery-');
+        original = await File(
+          '${temp.path}/original.png',
+        ).writeAsBytes(img.encodePng(img.Image(width: 300, height: 300)));
+        for (final tier in ThumbnailSize.values) {
+          cache.seedFailureRecordForTesting(
+            original.path,
+            failedAt: DateTime.now(),
+            size: tier,
+          );
+        }
+      });
+      addTearDown(() async {
+        service.cancelAll();
+        for (final tier in ThumbnailSize.values) {
+          cache.clearFailureRecordForTesting(original.path, size: tier);
+        }
+        PaintingBinding.instance.imageCache.clear();
+        PaintingBinding.instance.imageCache.clearLiveImages();
+        await temp.delete(recursive: true);
+      });
+
+      var cardTaps = 0;
+      await tester.pumpWidget(
+        wrap(record(original.path), onTap: () => cardTaps++),
+      );
+      final failed = find.byIcon(Icons.image_not_supported_outlined);
+      await settleUntil(tester, () => failed.evaluate().isNotEmpty);
+      expect(failed, findsOneWidget);
+      expect(displayedFilePaths(tester), isEmpty);
+      service.cancelAll();
+
+      if (recovery == 'background completion') {
+        await tester.runAsync(() async {
+          for (final tier in ThumbnailSize.values) {
+            cache.clearFailureRecordForTesting(original.path, size: tier);
+          }
+          // 用真正的服务完成事件驱动恢复，不再次向卡片发起加载或重建。
+          for (final tier in ThumbnailSize.values) {
+            final path = await service.getThumbnail(original.path, size: tier);
+            expect(path, isNotNull);
+          }
+        });
+      } else {
+        await tester.runAsync(() async {
+          final folder = await Directory(
+            '${temp.path}/${ThumbnailCacheService.thumbsDirName}',
+          ).create();
+          final bytes = img.encodeJpg(img.Image(width: 300, height: 300));
+          for (final tier in ThumbnailSize.values.where(
+            (tier) => tier != ThumbnailSize.micro,
+          )) {
+            await File(
+              '${folder.path}/${ThumbnailCacheService.buildThumbnailFileNameForTest(original.path, size: tier)}',
+            ).writeAsBytes(bytes);
+          }
+        });
+        // 对应缓存已可用，其他路径或档位完成也不能唤醒这张失败卡片。
+        for (final otherPath in ['${temp.path}/unrelated.png', original.path]) {
+          await tester.runAsync(() async {
+            if (otherPath != original.path) {
+              await original.copy(otherPath);
+            }
+            final tier = otherPath == original.path
+                ? ThumbnailSize.micro
+                : ThumbnailSize.medium;
+            cache.clearFailureRecordForTesting(otherPath, size: tier);
+            expect(
+              await service.getThumbnail(otherPath, size: tier),
+              isNotNull,
+            );
+          });
+          await settleUntil(
+            tester,
+            () => displayedFilePaths(tester).isNotEmpty,
+            maxRounds: 10,
+          );
+          expect(failed, findsOneWidget);
+        }
+        // 无对应完成事件时保持占位；点击现有图标即可重新取缓存。
+        await tester.pump();
+        expect(failed, findsOneWidget);
+        await tester.tap(failed);
+      }
+
+      await settleUntil(
+        tester,
+        () => find
+            .byType(RawImage)
+            .evaluate()
+            .any((element) => (element.widget as RawImage).image != null),
+      );
+      expect(failed, findsNothing);
+      expect(displayedFilePaths(tester), isNot(contains(original.path)));
+      expect(displayedFilePaths(tester).single, endsWith('.thumb.jpg'));
+      expect(cardTaps, 0, reason: '重试图标不触发卡片查看或双击');
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+    });
+  }
 }

@@ -16580,6 +16580,24 @@ abstract class AppLocalizations {
   /// **'Character handling'**
   String get imageUse_characterMode;
 
+  /// No description provided for @imageUse_featureRecorded.
+  ///
+  /// In en, this message translates to:
+  /// **'The source image used {feature}.'**
+  String imageUse_featureRecorded(String feature);
+
+  /// No description provided for @imageUse_referenceAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The source image used {feature}. Import its reference material with “References”.'**
+  String imageUse_referenceAvailable(String feature);
+
+  /// No description provided for @imageUse_referenceUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The source image used {feature}. Only the usage record remains; no importable reference material is attached.'**
+  String imageUse_referenceUnavailable(String feature);
+
   /// No description provided for @imageMenu_details.
   ///
   /// In en, this message translates to:

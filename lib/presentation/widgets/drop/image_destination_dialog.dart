@@ -173,6 +173,7 @@ class _ImageDestinationDialogState extends State<ImageDestinationDialog> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = context.l10n;
+    final metadata = widget.metadata;
     final size = MediaQuery.sizeOf(context);
     final choices = widget.metadata == null
         ? <_ImportChoice>[]
@@ -341,47 +342,78 @@ class _ImageDestinationDialogState extends State<ImageDestinationDialog> {
                       ),
                       const SizedBox(height: 12),
                       Wrap(
+                        alignment: WrapAlignment.spaceBetween,
                         spacing: 12,
                         runSpacing: 4,
                         crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
-                          Text(
-                            l10n.imageUse_characterMode,
-                            style: theme.textTheme.bodySmall,
-                          ),
-                          DropdownButton<OfficialCharacterImportMode>(
-                            key: const Key('image-use-character-mode'),
-                            value: _selection.characterMode,
-                            isDense: true,
-                            underline: const SizedBox.shrink(),
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurface,
-                            ),
-                            items: [
-                              DropdownMenuItem(
-                                value: OfficialCharacterImportMode.replace,
-                                child: Text(
-                                  l10n.metadataImport_replaceCharacters,
-                                ),
+                          Wrap(
+                            spacing: 12,
+                            runSpacing: 4,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            children: [
+                              Text(
+                                l10n.imageUse_characterMode,
+                                style: theme.textTheme.bodySmall,
                               ),
-                              DropdownMenuItem(
-                                value: OfficialCharacterImportMode.append,
-                                child: Text(
-                                  l10n.metadataImport_appendCharacters,
+                              DropdownButton<OfficialCharacterImportMode>(
+                                key: const Key('image-use-character-mode'),
+                                value: _selection.characterMode,
+                                isDense: true,
+                                underline: const SizedBox.shrink(),
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onSurface,
                                 ),
+                                items: [
+                                  DropdownMenuItem(
+                                    value: OfficialCharacterImportMode.replace,
+                                    child: Text(
+                                      l10n.metadataImport_replaceCharacters,
+                                    ),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: OfficialCharacterImportMode.append,
+                                    child: Text(
+                                      l10n.metadataImport_appendCharacters,
+                                    ),
+                                  ),
+                                ],
+                                onChanged: !_selection.importCharacters
+                                    ? null
+                                    : (mode) {
+                                        if (mode != null) {
+                                          setState(
+                                            () => _selection = _selection
+                                                .copyWith(characterMode: mode),
+                                          );
+                                        }
+                                      },
                               ),
                             ],
-                            onChanged: !_selection.importCharacters
-                                ? null
-                                : (mode) {
-                                    if (mode != null) {
-                                      setState(
-                                        () => _selection = _selection.copyWith(
-                                          characterMode: mode,
-                                        ),
-                                      );
-                                    }
-                                  },
+                          ),
+                          Wrap(
+                            spacing: 6,
+                            runSpacing: 4,
+                            children: [
+                              if (metadata!.usedVibeTransfer ||
+                                  metadata.vibeReferences.isNotEmpty)
+                                _usageBadge(
+                                  'vibe',
+                                  'Vibe',
+                                  referenceAvailable:
+                                      metadata.vibeReferences.isNotEmpty,
+                                ),
+                              if (metadata.usedPreciseReference ||
+                                  metadata.preciseReferenceImages.isNotEmpty)
+                                _usageBadge(
+                                  'pr',
+                                  'PR',
+                                  referenceAvailable:
+                                      metadata.preciseReferences.isNotEmpty,
+                                ),
+                              if (metadata.usedInpainting)
+                                _usageBadge('inpaint', l10n.img2img_inpaint),
+                            ],
                           ),
                         ],
                       ),
@@ -449,6 +481,33 @@ class _ImageDestinationDialogState extends State<ImageDestinationDialog> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _usageBadge(String id, String label, {bool? referenceAvailable}) {
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final message = switch (referenceAvailable) {
+      true => l10n.imageUse_referenceAvailable(label),
+      false => l10n.imageUse_referenceUnavailable(label),
+      null => l10n.imageUse_featureRecorded(label),
+    };
+    return Tooltip(
+      message: message,
+      child: Container(
+        key: Key('image-use-recorded-$id'),
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Text(
+          label,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
         ),
       ),
     );

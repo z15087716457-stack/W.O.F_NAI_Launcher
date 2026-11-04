@@ -52,9 +52,9 @@ Both versions support in-app updates. Your settings, gallery database and Agent 
 
 **2.2.1 additions**: Let the Agent split prompts into temporary blocks, with whole-module or multiple translations inside. This update also fixes single-click history details, caret visibility over weighted text and update-manifest parsing, and adds individual-image browsing to the infinite canvas.
 
-**2.2.5 update**: Pi 1.5.0, per-chat prompt prefixes, automatic MCP connections and separate display names. Improved image selection, WebP metadata imports, precise-reference inpainting, editable upscale factors, manual saving, startup and shutdown, loading transitions and update errors.
+**2.2.6 update**: Fixes intermittent gallery refresh failures, failed-thumbnail recovery and blocking folder opens. Gallery categories remember their browsing positions; image imports show reference-use records, seed pinning can be toggled repeatedly, and the simple viewer follows new batches correctly. The Agent can manage block preview images.
 
-See the [complete 2.2.5 changelog](CHANGELOG.md#225---2026-11-03) and [release downloads](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/tag/v2.2.5). Agent suggestions, cache warming and translation adjustments use your own model service; their settings are configurable.
+See the [complete 2.2.6 changelog](CHANGELOG.md#226---2026-11-04) and [release downloads](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/tag/v2.2.6). Agent suggestions, cache warming and translation adjustments use your own model service; their settings are configurable.
 
 ## Get started in three steps
 

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/krita/bridge_draft_guard.dart';
 import '../../../core/nai_agent/agent_tool.dart';
 import '../../../core/nai_agent/block_tools.dart';
+import '../../../core/nai_agent/studio_tools.dart';
 import '../../../core/utils/prompt_block_thumbnails.dart';
 import '../../../core/utils/pill_document_editor.dart';
 import '../../../core/utils/prompt_translation_language.dart';
@@ -164,8 +165,13 @@ NaiAgentBlockTools bindNaiAgentBlocks(
   Ref ref,
   Directory workspace,
   bool Function() isBusy,
-  bool Function() isAlive,
-) {
+  bool Function() isAlive, {
+  required Future<NaiAgentImage> Function(
+    Map<String, dynamic>,
+    NaiAgentCancellation,
+  )
+  loadImage,
+}) {
   Future<void> recordUse(String id) async {
     try {
       await ref.read(blocksPreferencesProvider.notifier).recordUse(id);
@@ -218,6 +224,7 @@ NaiAgentBlockTools bindNaiAgentBlocks(
   }
 
   return NaiAgentBlockTools(
+    loadImage: loadImage,
     readLibrary: library,
     repository: ref.read(promptBlockRepositoryProvider),
     refresh: () => ref

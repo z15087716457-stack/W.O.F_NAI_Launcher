@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/cache/thumbnail_cache_service.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/models/gallery/local_image_record.dart';
+import '../../../../data/services/gallery/gallery_filter_service.dart';
 import '../../../../data/services/gallery/gallery_group_mode.dart';
 import '../../../../data/services/gallery/gallery_sort.dart';
 import '../../../../data/services/gallery/gallery_view_mode.dart';
@@ -80,6 +81,15 @@ class GalleryTimelineView extends ConsumerStatefulWidget {
       _GalleryTimelineViewState();
 }
 
+typedef _BrowseKey = (GalleryBrowseScope, bool, String?, String?);
+typedef _BrowseQuery = (FilterCriteria, GallerySortField, GallerySortDirection);
+typedef _BrowsePosition = ({
+  String? path,
+  double tileOffset,
+  double offset,
+  _BrowseQuery query,
+});
+
 class _GalleryTimelineViewState extends ConsumerState<GalleryTimelineView> {
   final ScrollController _scroll = ScrollController();
   final FocusNode _focusNode = FocusNode(debugLabel: 'gallery-timeline');
@@ -87,6 +97,10 @@ class _GalleryTimelineViewState extends ConsumerState<GalleryTimelineView> {
   GalleryTimelineLayout _layout = GalleryTimelineLayout.empty;
   _LayoutKey? _layoutKey;
   int? _datasetId;
+  GalleryTimeline? _displayedTimeline;
+  _BrowseKey? _browseKey;
+  _BrowseQuery? _browseQuery;
+  final _browsePositions = <_BrowseKey, _BrowsePosition>{};
   double _viewportHeight = 0;
 
   /// 已构建区域（内容坐标），滚动离开时才重建可见卡片
@@ -392,14 +406,53 @@ class _GalleryTimelineViewState extends ConsumerState<GalleryTimelineView> {
     return _layout;
   }
 
-  void _syncDataset(GalleryTimeline timeline) {
-    if (_datasetId == timeline.datasetId) return;
+  void _syncDataset(LocalGalleryState state) {
+    final timeline = state.timeline;
+    if (_datasetId == timeline.datasetId) {
+      _displayedTimeline = timeline;
+      return;
+    }
+    final criteria = state.filterCriteria;
+    final key = (
+      state.browseScope,
+      criteria.showFavoritesOnly,
+      criteria.categoryId,
+      criteria.collectionId,
+    );
+    final query = (criteria, state.sortField, state.sortDirection);
+    if (_browseKey != null && _scroll.hasClients) {
+      final offset = _scroll.offset;
+      final index = _layout
+          .indicesIn(offset + _layout.headerHeight, offset + _viewportHeight)
+          .firstOrNull;
+      _browsePositions[_browseKey!] = (
+        path: index == null ? null : _displayedTimeline!.entries[index].path,
+        tileOffset: index == null ? 0 : offset - _layout.tiles[index].top,
+        offset: offset,
+        query: _browseQuery!,
+      );
+    }
+    final saved = _browseKey != key ? _browsePositions[key] : null;
     final isFirst = _datasetId == null;
     _datasetId = timeline.datasetId;
+    _displayedTimeline = timeline;
+    _browseKey = key;
+    _browseQuery = query;
     if (isFirst) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || !_scroll.hasClients) return;
-      if (_scroll.offset != 0) _scroll.jumpTo(0);
+      if (!mounted || !_scroll.hasClients || _datasetId != timeline.datasetId) {
+        return;
+      }
+      var offset = 0.0;
+      if (saved != null && saved.query == query) {
+        final index = saved.path == null
+            ? -1
+            : timeline.indexOfPath(saved.path!);
+        offset = index < 0
+            ? saved.offset
+            : _layout.tiles[index].top + saved.tileOffset;
+      }
+      _scroll.jumpTo(offset.clamp(0.0, _scroll.position.maxScrollExtent));
     });
   }
 
@@ -420,7 +473,7 @@ class _GalleryTimelineViewState extends ConsumerState<GalleryTimelineView> {
       ),
     );
     final galleryState = ref.read(localGalleryNotifierProvider);
-    _syncDataset(state.timeline);
+    _syncDataset(galleryState);
 
     if (!state.isInitialized || (state.isLoading && state.timeline.isEmpty)) {
       return const GalleryLoadingView();

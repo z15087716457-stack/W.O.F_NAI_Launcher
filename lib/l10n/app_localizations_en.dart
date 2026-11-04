@@ -9588,6 +9588,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get imageUse_characterMode => 'Character handling';
 
   @override
+  String imageUse_featureRecorded(String feature) {
+    return 'The source image used $feature.';
+  }
+
+  @override
+  String imageUse_referenceAvailable(String feature) {
+    return 'The source image used $feature. Import its reference material with “References”.';
+  }
+
+  @override
+  String imageUse_referenceUnavailable(String feature) {
+    return 'The source image used $feature. Only the usage record remains; no importable reference material is attached.';
+  }
+
+  @override
   String get imageMenu_details => 'Details';
 
   @override

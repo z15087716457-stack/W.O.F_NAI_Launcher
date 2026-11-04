@@ -201,6 +201,18 @@ void main() {
     await settings.seed(31);
     expect(container.read(generationParamsNotifierProvider).seed, 31);
   });
+  test('导入种子解除后、无图片种子时均可反复固定', () async {
+    await settings.seed(4278418688);
+    for (var i = 0; i < 3; i++) {
+      await settings.pinSeed(false);
+      expect(container.read(generationParamsNotifierProvider).seed, -1);
+      await settings.pinSeed(true);
+      expect(
+        container.read(generationParamsNotifierProvider).seed,
+        inInclusiveRange(0, 4294967295),
+      );
+    }
+  });
   test(
     'resource window pin uses the settings callback and restores persisted state',
     () async {

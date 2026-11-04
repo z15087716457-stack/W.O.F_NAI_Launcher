@@ -110,7 +110,15 @@ class CanvasFocus {
 @Riverpod(keepAlive: true)
 class GenerationCanvasGroupSelection extends _$GenerationCanvasGroupSelection {
   @override
-  CanvasFocus? build() => null;
+  CanvasFocus? build() {
+    ref.listen(imageGenerationNotifierProvider, (previous, next) {
+      if (previous?.status != GenerationStatus.generating &&
+          next.status == GenerationStatus.generating) {
+        state = null;
+      }
+    });
+    return null;
+  }
 
   /// 夺焦到组（subimage=null = 整组展开态入口）
   void selectGroup(String groupKey) => state = CanvasFocus(group: groupKey);

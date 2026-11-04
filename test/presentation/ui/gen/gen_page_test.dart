@@ -693,6 +693,30 @@ void main() {
       expect(r.last('onSamplerChanged'), 'onSamplerChanged(k_euler)');
     });
 
+    testWidgets('无种子时参数条与抽屉仍可固定，解除后可以再次固定', (t) async {
+      final random = GenFixture.view().copyWith(params: const GenParamsData());
+      await pump(t, random);
+      await tapKey(t, 'gen-param-seed');
+      expect(r.last('onSeedPinned'), 'onSeedPinned(true)');
+
+      r.calls.clear();
+      await tapKey(t, 'gen-params-toggle');
+      await tapKey(t, 'gen-seed-lock');
+      expect(r.last('onSeedPinned'), 'onSeedPinned(true)');
+
+      await pump(
+        t,
+        random.copyWith(
+          params: const GenParamsData(seed: 4278418688, seedPinned: true),
+        ),
+      );
+      await tapKey(t, 'gen-param-seed');
+      expect(r.last('onSeedPinned'), 'onSeedPinned(false)');
+      await pump(t, random);
+      await tapKey(t, 'gen-param-seed');
+      expect(r.last('onSeedPinned'), 'onSeedPinned(true)');
+    });
+
     testWidgets('参数抽屉：展开、点遮罩收起', (t) async {
       await pump(t);
       await tapKey(t, 'gen-params-toggle');

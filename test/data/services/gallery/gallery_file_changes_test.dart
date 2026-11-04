@@ -166,6 +166,72 @@ void main() {
   );
 
   test(
+    'initialization with soft-deleted records keeps file updates mutable',
+    () async {
+      final stable = await write('stable.png', 'stable');
+      final deleted = await write('deleted.png', 'deleted');
+      await seed(stable);
+      await seed(deleted);
+      await db.markAsDeleted(deleted.path);
+      await service.initialize();
+
+      final added = await write('added.png', 'added');
+      final changes = GalleryFileChanges()..files.add(added.path);
+      expect(await service.applyFileChanges(changes), {added.path});
+      expect((await service.getTimelineEntries()).map((e) => e.path).toSet(), {
+        stable.path,
+        added.path,
+      });
+      expect(await db.getDeletedImagePaths(), contains(deleted.path));
+
+      await db.markAsDeleted(stable.path);
+      service.removeImagesFromMemory([stable.path]);
+      service.removeImagesFromMemory([stable.path]);
+      expect((await service.getTimelineEntries()).map((e) => e.path), [
+        added.path,
+      ]);
+      expect(await service.applyFileChanges(changes), isEmpty);
+    },
+  );
+
+  test(
+    'refresh with soft-deleted records preserves filtered file updates',
+    () async {
+      final stable = await write('stable.png', 'stable');
+      final deleted = await write('deleted.png', 'deleted');
+      final stableId = await seed(stable);
+      await db.toggleFavorite(stableId);
+      await seed(deleted);
+      await service.initialize();
+      await service.applyFilter(const FilterCriteria(showFavoritesOnly: true));
+      await db.markAsDeleted(deleted.path);
+      service.removeImagesFromMemory([deleted.path]);
+      await service.refresh(scan: false);
+
+      final added = await write('added.png', 'added');
+      expect(
+        await service.applyFileChanges(
+          GalleryFileChanges()..files.add(added.path),
+        ),
+        {added.path},
+      );
+      expect(service.currentFilter.showFavoritesOnly, isTrue);
+      expect((await service.getTimelineEntries()).map((e) => e.path), [
+        stable.path,
+      ]);
+
+      expect(await service.toggleFavorite(added.path), isTrue);
+      expect((await service.getTimelineEntries()).map((e) => e.path).toSet(), {
+        stable.path,
+        added.path,
+      });
+      await service.clearFilters();
+      expect(service.totalCount, 2);
+      expect(await db.getDeletedImagePaths(), contains(deleted.path));
+    },
+  );
+
+  test(
     'directory move retains soft deletion and all active image IDs',
     () async {
       final active = await write('old/a.png', 'active');

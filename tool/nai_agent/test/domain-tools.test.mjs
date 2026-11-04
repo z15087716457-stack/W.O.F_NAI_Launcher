@@ -13,6 +13,18 @@ test('Dart production catalog and Pi schemas expose exactly the same actual tool
   assert.deepEqual(actual.toSorted(), dartNames.toSorted());
 });
 
+test('block previews reuse block_manage with image sources and bounded native framing', () => {
+  const schema = domainTools.find(tool => tool.name === 'block_manage').parameters;
+  for (const thumbnail of [{image_id:'selected'}, {path:'outputs/preview.png'}, null]) {
+    assert.equal(Value.Check(schema, {action:'create', changes:{title:'preview', content:'',
+      thumbnail, thumbnailOffsetX:-1, thumbnailOffsetY:1, thumbnailScale:3}}), true);
+  }
+  for (const changes of [{thumbnail:'/external.png'}, {thumbnail:{url:'https://example.com/a.png'}},
+    {thumbnailOffsetX:1.1}, {thumbnailOffsetY:-1.1}, {thumbnailScale:.9}, {thumbnailScale:3.1}]) {
+    assert.equal(Value.Check(schema, {action:'update', id:'a', expected_version:'v', changes}), false);
+  }
+});
+
 test('studio_search schema exposes only supported sources and bounded inputs', () => {
   const tool = domainTools.find(tool => tool.name === 'studio_search');
   assert.ok(tool);

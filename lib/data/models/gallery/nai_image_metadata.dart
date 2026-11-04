@@ -175,6 +175,15 @@ class NaiImageMetadata with _$NaiImageMetadata {
 
     /// V5 请求元数据中明确记录的 UC 档位；与 uc_preset 编码不同。
     @HiveField(39) int? ucPresetTagHint,
+
+    /// 使用记录与可还原的参考素材分开保存。
+    @HiveField(40, defaultValue: false) @Default(false) bool usedVibeTransfer,
+
+    @HiveField(41, defaultValue: false)
+    @Default(false)
+    bool usedPreciseReference,
+
+    @HiveField(42, defaultValue: false) @Default(false) bool usedInpainting,
   }) = _NaiImageMetadata;
 
   const NaiImageMetadata._();
@@ -258,6 +267,10 @@ class NaiImageMetadata with _$NaiImageMetadata {
         preciseReferenceFidelities: base.preciseReferenceFidelities.isEmpty
             ? reparsed.preciseReferenceFidelities
             : base.preciseReferenceFidelities,
+        usedVibeTransfer: base.usedVibeTransfer || reparsed.usedVibeTransfer,
+        usedPreciseReference:
+            base.usedPreciseReference || reparsed.usedPreciseReference,
+        usedInpainting: base.usedInpainting || reparsed.usedInpainting,
       );
     } catch (e) {
       PortableLogger.w(
@@ -429,6 +442,26 @@ class NaiImageMetadata with _$NaiImageMetadata {
         preciseReferenceTypes: preciseReferenceMetadata.types,
         preciseReferenceStrengths: preciseReferenceMetadata.strengths,
         preciseReferenceFidelities: preciseReferenceMetadata.fidelities,
+        usedVibeTransfer:
+            vibeReferences.isNotEmpty ||
+            _firstDoubleList(commentData, const [
+              'reference_strength_multiple',
+              'reference_strengths',
+              'referenceStrengthMultiple',
+              'referenceStrengths',
+              'reference_strength',
+              'referenceStrength',
+            ]).any((value) => value.isFinite),
+        usedPreciseReference:
+            preciseReferenceMetadata.images.isNotEmpty ||
+            _safeGetBool(commentData, 'use_precise_ref') == true ||
+            _firstDoubleList(commentData, const [
+              'director_reference_strengths',
+              'director_reference_strength_values',
+            ]).any((value) => value.isFinite),
+        usedInpainting:
+            commentData['request_type'] == 'NativeInfillingRequest' ||
+            commentData['action'] == 'infill',
       );
     } catch (e, stack) {
       PortableLogger.e(
@@ -552,9 +585,15 @@ class NaiImageMetadata with _$NaiImageMetadata {
     final text = raw.toLowerCase();
     const markers = [
       'reference_image',
+      'reference_strength',
+      'referencestrength',
       'vibereferences',
       'vibe_references',
       'director_reference_images',
+      'director_reference_strength',
+      'use_precise_ref',
+      'request_type',
+      'infill',
       'variety_plus',
       'varietyplus',
       'skip_cfg_above_sigma',

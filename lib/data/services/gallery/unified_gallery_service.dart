@@ -731,7 +731,7 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
               .where(
                 (file) => !deletedKeys.contains(galleryFilePathKey(file.path)),
               )
-              .toList(growable: false);
+              .toList();
         }
       } catch (e) {
         AppLogger.w(

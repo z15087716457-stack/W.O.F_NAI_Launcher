@@ -119,6 +119,49 @@ void main() {
   });
 
   testWidgets(
+    'sidebar navigation restores all and favorites through recent browsing',
+    (tester) async {
+      final container = await _pumpScreen(
+        tester,
+        records: records.map((r) => r.copyWith(isFavorite: true)).toList(),
+        dimensions: dimensions,
+        locale: const Locale('zh'),
+        dark: true,
+        size: const Size(1600, 700),
+      );
+      final scroll = find.byKey(const Key('gallery-timeline-scroll'));
+      ScrollController controller() =>
+          tester.widget<SingleChildScrollView>(scroll).controller!;
+      final allOffset = controller().position.maxScrollExtent * .6;
+      expect(allOffset, greaterThan(0));
+      controller().jumpTo(allOffset);
+      await _settle(tester);
+      await tester.tap(find.byKey(const Key('gallery-sidebar-favorites')));
+      await _settle(tester);
+      expect(controller().offset, 0);
+      final favoriteOffset = controller().position.maxScrollExtent * .25;
+      controller().jumpTo(favoriteOffset);
+      await _settle(tester);
+      await tester.tap(find.byKey(const Key('gallery-sidebar-recent')));
+      await _settle(tester);
+      await tester.tap(find.byKey(const Key('gallery-sidebar-all')));
+      await _settle(tester);
+      expect(controller().offset, closeTo(allOffset, .01));
+      await tester.tap(find.byKey(const Key('gallery-sidebar-favorites')));
+      await _settle(tester);
+      expect(controller().offset, closeTo(favoriteOffset, .01));
+      expect(
+        container.read(localGallerySelectionNotifierProvider).selectedIds,
+        isEmpty,
+      );
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+      container.dispose();
+      await tester.pump(const Duration(seconds: 1));
+    },
+  );
+
+  testWidgets(
     'recent and trash reuse the gallery without a dialog or sidebar shift',
     (tester) async {
       final container = await _pumpScreen(

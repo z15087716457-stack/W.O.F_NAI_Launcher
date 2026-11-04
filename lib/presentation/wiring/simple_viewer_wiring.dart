@@ -28,13 +28,6 @@ class SimpleViewerNavigation extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    ref.listen(imageGenerationNotifierProvider, (previous, next) {
-      if (previous?.isGenerating == true &&
-          !next.isGenerating &&
-          ref.read(simpleViewerSingleImagesProvider)) {
-        ref.read(generationPreviewSelectionProvider.notifier).clear();
-      }
-    });
     return Focus(
       focusNode: ref.watch(generationPreviewFocusNodeProvider),
       onKeyEvent: (_, event) {

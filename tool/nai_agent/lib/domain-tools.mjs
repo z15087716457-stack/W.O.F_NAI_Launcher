@@ -16,7 +16,16 @@ const blockGenerationSettings = Type.Object({
   qualityCustomBlockId: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   ucCustomBlockId: Type.Optional(Type.Union([Type.String(), Type.Null()])),
 }, {additionalProperties:false});
-const blockChanges = Type.Object({generationSettings:Type.Optional(Type.Union([blockGenerationSettings, Type.Null()]))}, {additionalProperties:true});
+const blockChanges = Type.Object({
+  generationSettings:Type.Optional(Type.Union([blockGenerationSettings, Type.Null()])),
+  thumbnail:Type.Optional(Type.Union([Type.Object({
+    image_id:Type.Optional(Type.String({minLength:1})),
+    path:Type.Optional(Type.String({minLength:1})),
+  }, {additionalProperties:false}), Type.Null()])),
+  thumbnailOffsetX:Type.Optional(Type.Number({minimum:-1,maximum:1})),
+  thumbnailOffsetY:Type.Optional(Type.Number({minimum:-1,maximum:1})),
+  thumbnailScale:Type.Optional(Type.Number({minimum:1,maximum:3})),
+}, {additionalProperties:true});
 const blockTranslation = Type.Object({
   source:Type.Optional(Type.String({minLength:1,maxLength:100000})),
   zh:Type.Optional(Type.String({minLength:1,maxLength:100000})),

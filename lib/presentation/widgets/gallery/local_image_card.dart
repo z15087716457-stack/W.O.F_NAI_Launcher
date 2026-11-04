@@ -18,13 +18,6 @@ import '../common/app_toast.dart';
 import 'gallery_nai_versions.dart';
 import '../common/studio_icons.dart';
 
-/// 缩略图失败后的自动重试延迟（蓝图 P5：失败不再永久回退解码原图）。
-const Duration _thumbnailFailureRetryDelay = Duration(seconds: 30);
-
-/// 失败重试延迟的可覆写值（仅测试用；生产恒为 [_thumbnailFailureRetryDelay]）。
-@visibleForTesting
-Duration thumbnailFailureRetryDelayForTesting = _thumbnailFailureRetryDelay;
-
 enum _ImageLoadState { idle, loading, loaded, error, failed }
 
 /// 本地画廊图片卡片。
@@ -106,11 +99,8 @@ class _LocalImageCardState extends ConsumerState<LocalImageCard> {
   /// 停止 ~300ms 后才真正换档重载，避免拖动过程反复入队。
   Timer? _reloadDebounceTimer;
 
-  /// 缩略图失败后的延迟重试器（30s 后重新走一次完整加载）。
-  Timer? _failureRetryTimer;
-
-  /// 本次挂载是否已安排过自动重试（保证失败文件不会形成无界重试循环）。
-  bool _failureRetryScheduled = false;
+  /// 只在失败时等待后台完成，避免缩略图已落盘而卡片仍停留在占位态。
+  StreamSubscription<ThumbnailTask>? _thumbnailCompletionSubscription;
 
   /// 手动双击判定：单击立即生效（查看/选择），第二下在时限内再打开大图，
   /// 不挂 onDoubleTap 识别器——它会让每次单击等满 300ms。
@@ -139,8 +129,7 @@ class _LocalImageCardState extends ConsumerState<LocalImageCard> {
       final previousPath = _displayPath;
       _displayPath = null;
       _loadState = _ImageLoadState.idle;
-      _failureRetryScheduled = false;
-      _failureRetryTimer?.cancel();
+      _stopWaitingForThumbnail();
       unawaited(() async {
         if (previousPath != null) {
           final decode = thumbnailCoverDecodeSize(
@@ -255,8 +244,7 @@ class _LocalImageCardState extends ConsumerState<LocalImageCard> {
       );
       // getThumbnailPath 非空即保证文件存在（内部已做异步 exists 校验）
       if (existingPath != null) {
-        _failureRetryTimer?.cancel();
-        _failureRetryScheduled = false;
+        _stopWaitingForThumbnail();
         if (isCurrent()) {
           setState(() {
             _displayPath = existingPath;
@@ -283,15 +271,13 @@ class _LocalImageCardState extends ConsumerState<LocalImageCard> {
       if (!isCurrent()) return;
 
       if (generatedPath != null) {
-        _failureRetryTimer?.cancel();
-        _failureRetryScheduled = false;
+        _stopWaitingForThumbnail();
         setState(() {
           _displayPath = generatedPath;
           _loadState = _ImageLoadState.loaded;
         });
       } else {
-        // 生成失败/超时不再回退解码原图（数 MB 内存尖峰），
-        // 保持轻量占位并挂一次延迟重试。
+        // 生成失败/超时保持轻量占位，等待后台重试完成，不解码原图。
         _markThumbnailFailed();
       }
     } catch (e, stack) {
@@ -313,24 +299,23 @@ class _LocalImageCardState extends ConsumerState<LocalImageCard> {
     }
   }
 
-  /// 缩略图失败：保持轻量占位态（不回退解码原图），挂一次延迟重试。
-  ///
-  /// 每次挂载只自动重试一次，避免失败文件形成无界重试循环；滚动重新挂载
-  /// 会再走一次完整加载。延迟后重试先走 `getThumbnailPath` 快速路径。
+  /// 服务自行重试；卡片只响应对应路径、档位的成功通知，不另设重试循环。
   void _markThumbnailFailed() {
     if (!mounted) return;
     setState(() => _loadState = _ImageLoadState.failed);
-    _scheduleFailureRetry();
+    _thumbnailCompletionSubscription ??= ThumbnailService.instance.taskStream
+        .listen((task) {
+          if (task.state == ThumbnailTaskState.completed &&
+              task.originalPath == widget.record.path &&
+              task.size == _requestedSize) {
+            unawaited(_loadThumbnail());
+          }
+        });
   }
 
-  void _scheduleFailureRetry() {
-    if (_failureRetryScheduled) return;
-    _failureRetryScheduled = true;
-    _failureRetryTimer?.cancel();
-    _failureRetryTimer = Timer(thumbnailFailureRetryDelayForTesting, () {
-      if (!mounted) return;
-      unawaited(_loadThumbnail());
-    });
+  void _stopWaitingForThumbnail() {
+    unawaited(_thumbnailCompletionSubscription?.cancel());
+    _thumbnailCompletionSubscription = null;
   }
 
   void _handleTapUp(TapUpDetails details) {
@@ -599,6 +584,7 @@ class _LocalImageCardState extends ConsumerState<LocalImageCard> {
       ),
       _ImageLoadState.failed => _buildPlaceholderIcon(
         Icons.image_not_supported_outlined,
+        onRetry: () => unawaited(_loadThumbnail()),
       ),
       _ when path != null => _buildOptimizedImage(path, quality),
       _ => const SizedBox.shrink(),
@@ -663,7 +649,7 @@ class _LocalImageCardState extends ConsumerState<LocalImageCard> {
   @override
   void dispose() {
     _reloadDebounceTimer?.cancel();
-    _failureRetryTimer?.cancel();
+    _stopWaitingForThumbnail();
     super.dispose();
   }
 }

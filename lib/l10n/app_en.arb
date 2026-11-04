@@ -5152,6 +5152,24 @@
   "imageUse_importContent": "Import content",
   "imageUse_characters": "Characters",
   "imageUse_characterMode": "Character handling",
+  "imageUse_featureRecorded": "The source image used {feature}.",
+  "@imageUse_featureRecorded": {
+    "placeholders": {
+      "feature": {"type": "String"}
+    }
+  },
+  "imageUse_referenceAvailable": "The source image used {feature}. Import its reference material with “References”.",
+  "@imageUse_referenceAvailable": {
+    "placeholders": {
+      "feature": {"type": "String"}
+    }
+  },
+  "imageUse_referenceUnavailable": "The source image used {feature}. Only the usage record remains; no importable reference material is attached.",
+  "@imageUse_referenceUnavailable": {
+    "placeholders": {
+      "feature": {"type": "String"}
+    }
+  },
   "imageMenu_details": "Details",
   "imageMenu_creation": "Create & reference",
   "imageMenu_editAndDerive": "Edit & derive",

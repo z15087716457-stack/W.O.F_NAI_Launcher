@@ -1,11 +1,13 @@
 import 'dart:convert';
 import '../constants/api_constants.dart';
+import '../utils/prompt_block_thumbnails.dart';
 import 'package:crypto/crypto.dart';
 import '../../data/models/prompt_block/prompt_block.dart';
 import '../../data/repositories/prompt_block_repository.dart';
 import '../krita/bridge_draft_guard.dart';
 import 'agent_tool.dart';
 import 'block_organization_tools.dart';
+import 'studio_tools.dart';
 
 String naiAgentBlockVersion(PromptBlock value) {
   final data = value.toJson()
@@ -33,6 +35,10 @@ const naiAgentBlockEditableFields = {
   'readingTranslationEdited',
   'readingTranslationNeedsReview',
   'sortOrder',
+  'thumbnail',
+  'thumbnailOffsetX',
+  'thumbnailOffsetY',
+  'thumbnailScale',
 };
 
 Map<String, dynamic> validateNaiAgentBlockChanges(
@@ -51,6 +57,38 @@ Map<String, dynamic> validateNaiAgentBlockChanges(
       'invalid_changes',
       'Unknown or read-only block field',
     );
+  }
+  if (changes.containsKey('thumbnail')) {
+    final source = changes['thumbnail'];
+    if (source != null) {
+      if (source is! Map ||
+          source.keys.any((key) => key != 'image_id' && key != 'path')) {
+        throw const NaiAgentToolError(
+          'invalid_changes',
+          'thumbnail expects an image_id or workspace-relative path object, or null',
+        );
+      }
+      changes['thumbnail'] = Map<String, dynamic>.from(source);
+    }
+    changes.putIfAbsent('thumbnailOffsetX', () => 0.0);
+    changes.putIfAbsent('thumbnailOffsetY', () => 0.0);
+    changes.putIfAbsent('thumbnailScale', () => 1.0);
+  }
+  for (final key in [
+    'thumbnailOffsetX',
+    'thumbnailOffsetY',
+    'thumbnailScale',
+  ]) {
+    if (!changes.containsKey(key)) continue;
+    final value = changes[key];
+    final min = key == 'thumbnailScale' ? 1 : -1;
+    final max = key == 'thumbnailScale' ? 3 : 1;
+    if (value is! num || !value.isFinite || value < min || value > max) {
+      throw NaiAgentToolError(
+        'invalid_changes',
+        '$key must be between $min and $max',
+      );
+    }
   }
   if (create &&
       (changes['title'] is! String || changes['content'] is! String)) {
@@ -183,7 +221,7 @@ Map<String, dynamic> validateNaiAgentBlockChanges(
   try {
     PromptBlock.fromJson({
       ...PromptBlock.create(title: 'validation', content: '').toJson(),
-      ...changes,
+      ...Map<String, dynamic>.of(changes)..remove('thumbnail'),
     });
   } catch (error) {
     throw NaiAgentToolError(
@@ -241,6 +279,7 @@ class NaiAgentBlockTools {
     required this.isAlive,
     required this.editInstance,
     required this.validateInstance,
+    required this.loadImage,
     this.afterDelete,
     this.promoteInstance,
   });
@@ -259,6 +298,11 @@ class NaiAgentBlockTools {
   editInstance;
   final void Function(Map<String, dynamic>, PromptBlock?, BridgeDraftSnapshot)
   validateInstance;
+  final Future<NaiAgentImage> Function(
+    Map<String, dynamic>,
+    NaiAgentCancellation,
+  )
+  loadImage;
   final Future<void> Function(PromptBlock)? afterDelete;
   final Future<Map<String, dynamic>> Function(
     Map<String, dynamic>,
@@ -468,6 +512,10 @@ class NaiAgentBlockTools {
 
     check(block);
     if (instanceAction) validateInstance(params, block, before);
+    final source = changes?['thumbnail'];
+    final thumbnailImage = source == null
+        ? null
+        : await loadImage(source as Map<String, dynamic>, cancellation);
     final path = await backup(library, before, block);
     check(block);
     if (instanceAction) {
@@ -487,41 +535,65 @@ class NaiAgentBlockTools {
       });
     }
     PromptBlock? actual;
-    if (action == 'create') {
-      final value = PromptBlock.fromJson({
-        ...PromptBlock.create(
-          title: changes!['title'] as String,
-          content: changes['content'] as String,
-        ).toJson(),
-        ...changes,
-      });
-      actual = await repository.createBlock(
-        title: value.title,
-        content: value.content,
-        negativeContent: value.negativeContent,
-        atoms: value.atoms,
-        negativeAtoms: value.negativeAtoms,
-        folderId: value.folderId,
-        color: value.color,
-        appearance: value.appearance,
-        iconName: value.iconName,
-        generationSettings: value.generationSettings,
-        tags: value.tags,
-        readingTranslationZh: value.readingTranslationZh,
-        isFavorite: value.isFavorite,
-        readingTranslationMarks: value.readingTranslationMarks,
-        readingTranslationLanguageCode: value.readingTranslationLanguageCode,
-        readingTranslationNeedsReview: value.readingTranslationNeedsReview,
-        readingTranslationEdited: value.readingTranslationEdited,
-        sortOrder: changes.containsKey('sortOrder') ? value.sortOrder : null,
-        beforeWrite: () => check(),
-      );
-    } else if (action == 'update') {
-      final updated = PromptBlock.fromJson({...block!.toJson(), ...changes!});
-      actual = await repository.updateBlock(updated, beforeWrite: check);
-    } else {
-      await repository.deleteBlock(block!.id, beforeWrite: check);
-      await afterDelete?.call(block);
+    String? createdThumbnail;
+    var committed = false;
+    try {
+      if (thumbnailImage != null) {
+        createdThumbnail = await savePromptBlockThumbnail(thumbnailImage.bytes);
+        changes!['thumbnail'] = createdThumbnail;
+      }
+      if (action == 'create') {
+        final value = PromptBlock.fromJson({
+          ...PromptBlock.create(
+            title: changes!['title'] as String,
+            content: changes['content'] as String,
+          ).toJson(),
+          ...changes,
+        });
+        actual = await repository.createBlock(
+          title: value.title,
+          content: value.content,
+          negativeContent: value.negativeContent,
+          atoms: value.atoms,
+          negativeAtoms: value.negativeAtoms,
+          folderId: value.folderId,
+          color: value.color,
+          appearance: value.appearance,
+          iconName: value.iconName,
+          thumbnail: value.thumbnail,
+          thumbnailOffsetX: value.thumbnailOffsetX,
+          thumbnailOffsetY: value.thumbnailOffsetY,
+          thumbnailScale: value.thumbnailScale,
+          generationSettings: value.generationSettings,
+          tags: value.tags,
+          readingTranslationZh: value.readingTranslationZh,
+          isFavorite: value.isFavorite,
+          readingTranslationMarks: value.readingTranslationMarks,
+          readingTranslationLanguageCode: value.readingTranslationLanguageCode,
+          readingTranslationNeedsReview: value.readingTranslationNeedsReview,
+          readingTranslationEdited: value.readingTranslationEdited,
+          sortOrder: changes.containsKey('sortOrder') ? value.sortOrder : null,
+          beforeWrite: () => check(),
+        );
+      } else if (action == 'update') {
+        final updated = PromptBlock.fromJson({...block!.toJson(), ...changes!});
+        actual = await repository.updateBlock(updated, beforeWrite: check);
+      } else {
+        await repository.deleteBlock(block!.id, beforeWrite: check);
+        await afterDelete?.call(block);
+      }
+      committed = true;
+    } finally {
+      if (!committed && createdThumbnail != null) {
+        await deletePromptBlockThumbnail(createdThumbnail);
+      }
+    }
+    if (action == 'update' &&
+        block!.thumbnail != actual?.thumbnail &&
+        !repository.currentLibrary.blocks.any(
+          (other) => other.thumbnail == block.thumbnail,
+        )) {
+      await deletePromptBlockThumbnail(block.thumbnail);
     }
     await refresh();
     final readBack = actual == null

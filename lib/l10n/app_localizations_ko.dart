@@ -9288,6 +9288,21 @@ class AppLocalizationsKo extends AppLocalizations {
   String get imageUse_characterMode => '캐릭터 처리';
 
   @override
+  String imageUse_featureRecorded(String feature) {
+    return '원본 이미지에 $feature 기능이 사용되었습니다.';
+  }
+
+  @override
+  String imageUse_referenceAvailable(String feature) {
+    return '원본 이미지에 $feature 기능이 사용되었습니다. “참조 이미지”에서 참조 자료를 가져올 수 있습니다.';
+  }
+
+  @override
+  String imageUse_referenceUnavailable(String feature) {
+    return '원본 이미지에 $feature 기능이 사용되었습니다. 사용 기록만 남아 있으며 가져올 수 있는 참조 자료는 첨부되어 있지 않습니다.';
+  }
+
+  @override
   String get imageMenu_details => '상세 정보';
 
   @override

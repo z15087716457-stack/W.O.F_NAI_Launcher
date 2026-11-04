@@ -1,6 +1,6 @@
 # 开发与发布参考
 
-本机版本、实际载荷、有效源码与恢复边界统一见[工作区接手说明](../../../04_工具/启动器接手说明.md)。公开功能及产物验证见 [2.2.4 发布报告](docs/release-2.2.4-2026-10-31.md)。用户完成应用内更新后的运行状态另行核对，历史直装收据不自动代表当前安装。
+本机版本、实际载荷、有效源码与恢复边界统一见[工作区接手说明](../../../04_工具/启动器接手说明.md)。公开功能及产物验证见 [2.2.5 发布报告](docs/release-2.2.5-2026-11-03.md)。用户完成应用内更新后的运行状态另行核对，历史直装收据不自动代表当前安装。
 
 命令在当前有效源码执行。通用约束见 [AGENTS.md](AGENTS.md)，功能不变量见 [OPERATIONAL_NOTES.md](OPERATIONAL_NOTES.md)，当前待修与暂缓项见[活跃待办](../../../04_工具/开发计划/待办清单.md)。
 
@@ -9,7 +9,7 @@
 当前整合分支使用登记的 `E:/A.I/NovelAI/.devin/sdk/flutter-3.47.7/`（Flutter 3.47.7 / Dart 3.13.5），最低约束以 `pubspec.yaml` 为准。执行前核对登记 SDK，不使用 PATH 中的旧版。Shell 优先 Bash；使用 PowerShell 且输出含中文时设 UTF-8，原生 `.ps1` 用 PowerShell 执行。以下按实际修改选用，不是每次必跑清单：
 
 ```bash
-studio_sdk="E:/A.I/NovelAI/.devin/sdk/flutter-3.47.7"
+studio_sdk="/e/A.I/NovelAI/.devin/sdk/flutter-3.47.7"
 export PATH="$studio_sdk/bin:$PATH"
 flutter --version
 flutter pub get
@@ -49,7 +49,7 @@ Agent 依赖变化还须覆盖分发入口：`python -m unittest discover -s tes
 
 覆盖前现场检查 `nai_launcher` 进程路径，等用户从托盘完全退出，备份当前程序 `data/` 与记录；安装后逐项复验并保存单步回退，不自动启动。不要用标准 `build/windows/x64/runner/Release/` 整目录覆盖既有 Glass 包，尤其不能移除其原生插件。Release 发布流程另按下方规范执行。
 
-安装和回退核验通过后，按当批清单清理已用 `payload` 与空暂存目录，保留 `rollback`、当前编译缓存和核验记录；这是同次更新的收尾。清理前核对绝对路径、清单和当前用途，不把回退材料当作暂存删除。
+安装和回退核验通过后，通常按当批清单清理已用 `payload` 与空暂存目录，保留 `rollback`、当前编译缓存和核验记录。当前本机安装暂存清理已有自动审批拦截并暂停的记录，适用[接手说明](../../../04_工具/启动器接手说明.md)的具体边界，不据本节重试或改道清理。其他获准清理前仍核对绝对路径、清单和当前用途，不把回退材料当作暂存删除。
 
 ## 代码风格与输入组件
 

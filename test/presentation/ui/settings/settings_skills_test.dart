@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_contract.dart';
+import 'package:nai_launcher/presentation/ui/settings/settings_controls.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_kit.dart';
 
 import '../../../helpers/studio_capture_fonts.dart';
@@ -136,6 +137,24 @@ void main() {
     await t.tap(find.byKey(const Key('skill-new')));
     expect(rec.calls, containsAll(['addSkill', 'newSkill']));
     expect(find.text('5 个已加载'), findsOneWidget);
+  });
+
+  testWidgets('Skill 子菜单打开各自目录后收起，页面仍可操作', (t) async {
+    final rec = await open(t);
+    for (final id in ['builtin/nai-studio', 'global/style-replica']) {
+      final row = find.byKey(Key('skill-$id'));
+      await t.ensureVisible(row);
+      await t.pump();
+      await t.tap(
+        find.descendant(of: row, matching: find.byType(SettingsMoreButton)),
+      );
+      await t.pumpAndSettle();
+      await t.tap(find.text('打开文件夹'));
+      await t.pumpAndSettle();
+      expect(rec.calls.where((call) => call == 'openSkill:$id').length, 1);
+      expect(find.text('打开文件夹'), findsNothing);
+      expect(t.takeException(), isNull);
+    }
   });
 
   testWidgets('侧栏：常驻上下文与 Skill 位置；指令顺序末环是 Skill 目录', (t) async {

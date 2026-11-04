@@ -14,6 +14,98 @@ import 'package:nai_launcher/presentation/widgets/common/image_detail/image_deta
 
 void main() {
   group('NaiImageMetadata', () {
+    test('records reference usage without inventing importable material', () {
+      final metadata = NaiImageMetadata.fromNaiComment({
+        'prompt': 'source prompt',
+        'reference_strength_multiple': [0.6],
+        'director_reference_strengths': [1.0],
+        'request_type': 'NativeInfillingRequest',
+      });
+      expect(metadata.usedVibeTransfer, isTrue);
+      expect(metadata.usedPreciseReference, isTrue);
+      expect(metadata.usedInpainting, isTrue);
+      expect(metadata.vibeReferences, isEmpty);
+      expect(metadata.preciseReferences, isEmpty);
+      final restored = NaiImageMetadata.fromJson(metadata.toJson());
+      expect(restored, metadata);
+    });
+
+    test(
+      'empty reference defaults and ordinary img2img are not usage evidence',
+      () {
+        final metadata = NaiImageMetadata.fromNaiComment({
+          'prompt': 'source prompt',
+          'reference_image_multiple': <String>[],
+          'reference_strength_multiple': <double>[],
+          'director_reference_images': <String>[],
+          'director_reference_strengths': [null, 'invalid'],
+          'use_precise_ref': false,
+          'request_type': 'Img2ImgRequest',
+          'image': 'source',
+          'strength': .7,
+          'noise': .2,
+        });
+        expect(metadata.usedVibeTransfer, isFalse);
+        expect(metadata.usedPreciseReference, isFalse);
+        expect(metadata.usedInpainting, isFalse);
+      },
+    );
+
+    test('recognizes explicit legacy PR and request action records', () {
+      final metadata = NaiImageMetadata.fromNaiComment({
+        'prompt': 'source',
+        'reference_strength': .4,
+        'use_precise_ref': true,
+        'action': 'infill',
+      });
+      expect(metadata.usedVibeTransfer, isTrue);
+      expect(metadata.usedPreciseReference, isTrue);
+      expect(metadata.usedInpainting, isTrue);
+    });
+
+    test(
+      'old caches recover marker-only usage from their original Comment',
+      () {
+        final raw = jsonEncode({
+          'Software': 'NovelAI',
+          'Comment': jsonEncode({
+            'prompt': 'original',
+            'reference_strength_multiple': [0.5],
+            'director_reference_strength_values': [.8],
+            'request_type': 'NativeInfillingRequest',
+          }),
+        });
+        final oldJson = const NaiImageMetadata(prompt: 'original').toJson()
+          ..remove('usedVibeTransfer')
+          ..remove('usedPreciseReference')
+          ..remove('usedInpainting')
+          ..['rawJson'] = raw;
+        final metadata = NaiImageMetadata.fromJson(
+          oldJson,
+        ).upgradeFromRawJsonIfNeeded();
+        expect(metadata.usedVibeTransfer, isTrue);
+        expect(metadata.usedPreciseReference, isTrue);
+        expect(metadata.usedInpainting, isTrue);
+        expect(metadata.rawJson, raw);
+        expect(metadata.vibeReferences, isEmpty);
+        expect(metadata.preciseReferences, isEmpty);
+        expect(metadata.upgradeFromRawJsonIfNeeded(), metadata);
+      },
+    );
+
+    test(
+      'old wrapped caches recognize an infill action without other markers',
+      () {
+        final cached = NaiImageMetadata(
+          prompt: 'source',
+          rawJson: jsonEncode({
+            'Comment': jsonEncode({'prompt': 'source', 'action': 'infill'}),
+          }),
+        );
+        expect(cached.upgradeFromRawJsonIfNeeded().usedInpainting, isTrue);
+      },
+    );
+
     test('old Furry import restores only explicitly recorded presets', () {
       final metadata = NaiImageMetadata(
         prompt: 'masterpiece, best quality, anthro wolf',

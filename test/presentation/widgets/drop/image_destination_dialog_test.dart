@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
@@ -154,6 +155,11 @@ void main() {
             (tester) async {
               await _mount(
                 tester,
+                metadata: _metadata.copyWith(
+                  usedVibeTransfer: true,
+                  usedPreciseReference: true,
+                  usedInpainting: true,
+                ),
                 locale: locale,
                 brightness: brightness,
                 portrait: portrait,
@@ -250,6 +256,83 @@ void main() {
     expect(selection.importGenerationParams, isFalse);
     expect(selection.importVibeReferences, isFalse);
     expect(selection.importPreciseReferences, isFalse);
+  });
+  testWidgets(
+    'usage badges explain missing references and do not enable import',
+    (tester) async {
+      ImageDestinationResult? result;
+      await _mount(
+        tester,
+        metadata: NaiImageMetadata.fromNaiComment({
+          'prompt': 'source',
+          'reference_strength_multiple': [.6],
+          'director_reference_strengths': [1.0],
+          'request_type': 'NativeInfillingRequest',
+        }),
+        onResult: (value) => result = value,
+      );
+      for (final id in ['vibe', 'pr', 'inpaint']) {
+        expect(find.byKey(Key('image-use-recorded-$id')), findsOneWidget);
+      }
+      final tooltip = tester.widget<Tooltip>(
+        find
+            .ancestor(
+              of: find.byKey(const Key('image-use-recorded-pr')),
+              matching: find.byType(Tooltip),
+            )
+            .first,
+      );
+      expect(tooltip.message, contains('未附带可导入的参考素材'));
+      final left = tester.getRect(
+        find.byKey(const Key('image-use-character-mode')),
+      );
+      final right = tester.getRect(
+        find.byKey(const Key('image-use-recorded-vibe')),
+      );
+      expect(right.left, greaterThan(left.right));
+      expect((right.center.dy - left.center.dy).abs(), lessThan(1));
+      await tester.tap(find.byKey(const Key('image-use-select-all')));
+      await tester.tap(find.byKey(const Key('image-use-import')));
+      await tester.pumpAndSettle();
+      expect(result!.selection!.importVibeReferences, isFalse);
+      expect(result!.selection!.importPreciseReferences, isFalse);
+    },
+  );
+  testWidgets(
+    'attached references retain import and explain their usage badges',
+    (tester) async {
+      ImageDestinationResult? result;
+      await _mount(
+        tester,
+        metadata: NaiImageMetadata(
+          prompt: 'source',
+          vibeReferences: const [
+            VibeReference(displayName: 'vibe', vibeEncoding: 'encoded'),
+          ],
+          preciseReferenceImages: [base64Encode(_portrait)],
+        ),
+        onResult: (value) => result = value,
+      );
+      final tooltip = tester.widget<Tooltip>(
+        find
+            .ancestor(
+              of: find.byKey(const Key('image-use-recorded-pr')),
+              matching: find.byType(Tooltip),
+            )
+            .first,
+      );
+      expect(tooltip.message, contains('可通过“参考图”导入'));
+      await tester.tap(find.byKey(const Key('image-use-import')));
+      await tester.pumpAndSettle();
+      expect(result!.selection!.importVibeReferences, isTrue);
+      expect(result!.selection!.importPreciseReferences, isTrue);
+    },
+  );
+  testWidgets('ordinary metadata has no feature badges', (tester) async {
+    await _mount(tester);
+    expect(find.byKey(const Key('image-use-recorded-vibe')), findsNothing);
+    expect(find.byKey(const Key('image-use-recorded-pr')), findsNothing);
+    expect(find.byKey(const Key('image-use-recorded-inpaint')), findsNothing);
   });
   testWidgets('no metadata keeps image actions available and import disabled', (
     tester,

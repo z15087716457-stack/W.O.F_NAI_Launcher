@@ -9087,6 +9087,21 @@ class AppLocalizationsZh extends AppLocalizations {
   String get imageUse_characterMode => '角色处理';
 
   @override
+  String imageUse_featureRecorded(String feature) {
+    return '原图使用过$feature。';
+  }
+
+  @override
+  String imageUse_referenceAvailable(String feature) {
+    return '原图使用过$feature，参考素材可通过“参考图”导入。';
+  }
+
+  @override
+  String imageUse_referenceUnavailable(String feature) {
+    return '原图使用过$feature，仅保留使用记录，未附带可导入的参考素材。';
+  }
+
+  @override
   String get imageMenu_details => '详情';
 
   @override
@@ -30792,6 +30807,21 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get imageUse_characterMode => '角色處理';
+
+  @override
+  String imageUse_featureRecorded(String feature) {
+    return '原圖使用過$feature。';
+  }
+
+  @override
+  String imageUse_referenceAvailable(String feature) {
+    return '原圖使用過$feature，參考素材可通過“參考圖”匯入。';
+  }
+
+  @override
+  String imageUse_referenceUnavailable(String feature) {
+    return '原圖使用過$feature，僅保留使用記錄，未附帶可匯入的參考素材。';
+  }
 
   @override
   String get imageMenu_details => '詳情';

@@ -10,6 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/data/models/gallery/local_image_record.dart';
 import 'package:nai_launcher/data/models/gallery/nai_image_metadata.dart';
 import 'package:nai_launcher/data/services/gallery/gallery_filter_service.dart';
+import 'package:nai_launcher/data/services/gallery/gallery_sort.dart';
 import 'package:nai_launcher/data/services/gallery/gallery_view_mode.dart';
 import 'package:nai_launcher/data/services/gallery/unified_gallery_service.dart';
 import 'package:nai_launcher/data/services/thumbnail_service.dart';
@@ -17,6 +18,7 @@ import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/krita/krita_bridge_notifier.dart';
 import 'package:nai_launcher/presentation/providers/local_gallery_focus_provider.dart';
 import 'package:nai_launcher/presentation/providers/gallery_recent_views_provider.dart';
+import 'package:nai_launcher/presentation/providers/gallery_trash_provider.dart';
 import 'package:nai_launcher/presentation/providers/local_gallery_provider.dart';
 import 'package:nai_launcher/presentation/providers/selection_mode_provider.dart';
 import 'package:nai_launcher/presentation/widgets/gallery/local_image_card.dart';
@@ -71,11 +73,14 @@ void main() {
   final contextMenus = <String>[];
   final deleteRequests = <List<String>>[];
 
-  Future<void> pumpView(WidgetTester tester) async {
+  Future<void> pumpView(
+    WidgetTester tester, {
+    List<LocalImageRecord>? images,
+  }) async {
     tester.view.physicalSize = const Size(1000, 700);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
-    records = _records();
+    records = images ?? _records();
     service = FakeLocalGalleryService(records);
     opened.clear();
     contextMenus.clear();
@@ -84,6 +89,17 @@ void main() {
       overrides: [
         galleryServiceProvider.overrideWith(
           () => FakeGalleryServiceNotifier(service),
+        ),
+        galleryTrashTimelineProvider.overrideWith(
+          (ref) async => [
+            for (final r in records)
+              GalleryTimelineEntry(
+                path: r.path,
+                modifiedAt: r.modifiedAt,
+                width: r.metadata?.width,
+                height: r.metadata?.height,
+              ),
+          ],
         ),
         kritaBridgeNotifierProvider.overrideWith(
           (ref) => _TestKritaBridgeNotifier(),
@@ -337,6 +353,180 @@ void main() {
     expect(contextMenus, [records[2].path]);
     await dispose(tester);
   });
+
+  for (final category in ['favorites', 'folder', 'collection']) {
+    testWidgets('$category and all images remember separate scroll positions', (
+      tester,
+    ) async {
+      await pumpView(
+        tester,
+        images: _records().map((r) => r.copyWith(isFavorite: true)).toList(),
+      );
+      final notifier = container.read(localGalleryNotifierProvider.notifier);
+      final controller = tester
+          .widget<SingleChildScrollView>(
+            find.byKey(const Key('gallery-timeline-scroll')),
+          )
+          .controller!;
+      Future<void> select(bool selected) async {
+        await notifier.setBrowseScope(
+          GalleryBrowseScope.library,
+          filterCriteria: FilterCriteria(
+            showFavoritesOnly: category == 'favorites' && selected,
+            categoryId: category == 'folder' && selected ? 'folder' : null,
+            categoryFolderPath: category == 'folder' && selected
+                ? 'C:/gallery'
+                : null,
+            collectionId: category == 'collection' && selected
+                ? 'collection'
+                : null,
+          ),
+        );
+        await tester.pump();
+        await tester.pump();
+      }
+
+      controller.jumpTo(600);
+      await tester.pump();
+      final requests = service.timelineRequests;
+      await select(true);
+      expect(service.timelineRequests, requests + 1);
+      expect(controller.offset, 0, reason: '首次进入分类从顶部开始');
+      controller.jumpTo(900);
+      await tester.pump();
+      await select(false);
+      expect(controller.offset, closeTo(600, .01));
+      await select(true);
+      expect(controller.offset, closeTo(900, .01));
+      await dispose(tester);
+    });
+  }
+
+  for (final scope in [GalleryBrowseScope.recent, GalleryBrowseScope.trash]) {
+    testWidgets('$scope and all images retain independent browse positions', (
+      tester,
+    ) async {
+      await pumpView(tester);
+      final notifier = container.read(localGalleryNotifierProvider.notifier);
+      if (scope == GalleryBrowseScope.recent) {
+        for (final record in records.reversed) {
+          await notifier.recordViewed(record.path);
+        }
+      }
+      final controller = tester
+          .widget<SingleChildScrollView>(
+            find.byKey(const Key('gallery-timeline-scroll')),
+          )
+          .controller!;
+      controller.jumpTo(600);
+      await tester.pump();
+      await notifier.setBrowseScope(scope);
+      await tester.pump();
+      await tester.pump();
+      expect(controller.offset, 0);
+      final scoped = tester
+          .widget<SingleChildScrollView>(
+            find.byKey(const Key('gallery-timeline-scroll')),
+          )
+          .controller!;
+      scoped.jumpTo(300);
+      await tester.pump();
+      await notifier.setBrowseScope(GalleryBrowseScope.library);
+      await tester.pump();
+      await tester.pump();
+      expect(controller.offset, closeTo(600, .01));
+      await notifier.setBrowseScope(scope);
+      await tester.pump();
+      await tester.pump();
+      expect(scoped.offset, closeTo(300, .01));
+      await dispose(tester);
+    });
+  }
+
+  testWidgets(
+    'returning restores the same image after earlier images are removed',
+    (tester) async {
+      await pumpView(
+        tester,
+        images: _records().map((r) => r.copyWith(isFavorite: true)).toList(),
+      );
+      final notifier = container.read(localGalleryNotifierProvider.notifier);
+      final controller = tester
+          .widget<SingleChildScrollView>(
+            find.byKey(const Key('gallery-timeline-scroll')),
+          )
+          .controller!;
+      controller.jumpTo(600);
+      await tester.pump();
+      final visible = find
+          .byType(LocalImageCard)
+          .evaluate()
+          .firstWhere(
+            (e) => tester
+                .getRect(find.byWidget(e.widget))
+                .overlaps(const Rect.fromLTWH(0, 44, 1000, 656)),
+          );
+      final path = (visible.widget as LocalImageCard).record.path;
+      Finder anchor() => find.byWidgetPredicate(
+        (w) => w is LocalImageCard && w.record.path == path,
+      );
+      final top = tester.getTopLeft(anchor()).dy;
+      await notifier.setShowFavoritesOnly(true);
+      await tester.pump();
+      await tester.pump();
+      await notifier.removeDeletedImagesFromMemory(
+        records.take(8).map((r) => r.path).toList(),
+      );
+      await tester.pump();
+      await notifier.setShowFavoritesOnly(false);
+      await tester.pump();
+      await tester.pump();
+      expect(controller.offset, lessThan(600));
+      expect(tester.getTopLeft(anchor()).dy, closeTo(top, .01));
+      await dispose(tester);
+    },
+  );
+
+  for (final change in ['search', 'sort']) {
+    testWidgets(
+      '$change changes invalidate positions saved in other categories',
+      (tester) async {
+        await pumpView(
+          tester,
+          images: _records().map((r) => r.copyWith(isFavorite: true)).toList(),
+        );
+        final notifier = container.read(localGalleryNotifierProvider.notifier);
+        final controller = tester
+            .widget<SingleChildScrollView>(
+              find.byKey(const Key('gallery-timeline-scroll')),
+            )
+            .controller!;
+        controller.jumpTo(600);
+        await tester.pump();
+        await notifier.setShowFavoritesOnly(true);
+        await tester.pump();
+        await tester.pump();
+        controller.jumpTo(300);
+        await tester.pump();
+        if (change == 'search') {
+          await notifier.setSearchQuery('img_');
+        } else {
+          await notifier.setSort(
+            GallerySortField.fileName,
+            GallerySortDirection.ascending,
+          );
+        }
+        await tester.pump();
+        await tester.pump();
+        expect(controller.offset, 0);
+        await notifier.setShowFavoritesOnly(false);
+        await tester.pump();
+        await tester.pump();
+        expect(controller.offset, 0, reason: '查询已变化时不恢复旧结果的位置');
+        await dispose(tester);
+      },
+    );
+  }
 
   testWidgets('filter change scrolls back to top; deletion keeps position', (
     tester,

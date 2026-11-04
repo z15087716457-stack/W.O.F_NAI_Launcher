@@ -89,7 +89,14 @@ final naiAgentStudioFactoryProvider = Provider<NaiAgentStudioFactory>((ref) {
 
     bool busy() => naiAgentGenerationBusy(ref);
     final snapshots = bindNaiAgentSnapshots(ref, workspace, busy, () => alive);
-    final blocks = bindNaiAgentBlocks(ref, workspace, busy, () => alive);
+    late final NaiAgentStudioTools studio;
+    final blocks = bindNaiAgentBlocks(
+      ref,
+      workspace,
+      busy,
+      () => alive,
+      loadImage: (params, token) => studio.loadImage(params, token),
+    );
     final settings = bindNaiAgentSettings(ref, workspace, () => alive);
     final wikiImages = NaiAgentWikiImages(ref, () => alive);
     final exploration = NaiAgentExploreBinding(
@@ -106,7 +113,6 @@ final naiAgentStudioFactoryProvider = Provider<NaiAgentStudioFactory>((ref) {
       isBusy: busy,
       owner: owner,
     );
-    late final NaiAgentStudioTools studio;
     final search = NaiAgentSearchBinding(
       ref,
       workspace,

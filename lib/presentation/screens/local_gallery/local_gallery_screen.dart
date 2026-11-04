@@ -26,6 +26,7 @@ import '../../../data/models/gallery/nai_image_metadata.dart';
 import '../../../data/repositories/gallery_category_repository.dart';
 import '../../../data/repositories/gallery_folder_repository.dart';
 import '../../../data/services/gallery/gallery_column_width_store.dart';
+import '../../../data/services/gallery/gallery_filter_service.dart';
 import '../../../data/services/gallery/gallery_group_mode.dart';
 import '../../../data/services/gallery/gallery_nai_only_store.dart';
 import '../../../data/services/gallery/gallery_sort_store.dart';
@@ -848,69 +849,36 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
     final request = ++_categoryRequest;
     ref.read(localGallerySelectionNotifierProvider.notifier).exit();
     ref.read(localGalleryFocusNotifierProvider.notifier).clear();
-    await ref.read(localGalleryNotifierProvider.notifier).setBrowseScope(
-      switch (id) {
-        'recent' => GalleryBrowseScope.recent,
-        'trash' => GalleryBrowseScope.trash,
-        _ => GalleryBrowseScope.library,
-      },
-    );
-    if (!mounted || request != _categoryRequest) return;
-    // 更新分类选中状态
-    ref.read(galleryCategoryNotifierProvider.notifier).selectCategory(id);
-    if (id == 'recent' || id == 'trash') return;
-
-    // 获取分类信息以便应用过滤
+    final gallery = ref.read(localGalleryNotifierProvider);
+    final scope = switch (id) {
+      'recent' => GalleryBrowseScope.recent,
+      'trash' => GalleryBrowseScope.trash,
+      _ => GalleryBrowseScope.library,
+    };
     final categoryState = ref.read(galleryCategoryNotifierProvider);
     final category = id != null ? categoryState.categories.findById(id) : null;
-
-    if (id == 'favorites') {
-      // 收藏特殊处理
-      ref
-          .read(localGalleryNotifierProvider.notifier)
-          .setShowFavoritesOnly(true);
-      ref
-          .read(localGalleryNotifierProvider.notifier)
-          .setSelectedCategory(null, null);
-      ref
-          .read(localGalleryNotifierProvider.notifier)
-          .setSelectedCollection(null);
-    } else if (id != null && isCollectionSelectedId(id)) {
-      // 收藏集：membership 过滤
-      ref
-          .read(localGalleryNotifierProvider.notifier)
-          .setShowFavoritesOnly(false);
-      ref
-          .read(localGalleryNotifierProvider.notifier)
-          .setSelectedCategory(null, null);
-      ref
-          .read(localGalleryNotifierProvider.notifier)
-          .setSelectedCollection(
-            id.substring(collectionSelectedIdPrefix.length),
-          );
-    } else if (id != null && category != null) {
-      // 普通分类：按文件夹路径过滤
-      ref
-          .read(localGalleryNotifierProvider.notifier)
-          .setShowFavoritesOnly(false);
-      ref
-          .read(localGalleryNotifierProvider.notifier)
-          .setSelectedCategory(id, category.folderPath);
-      ref
-          .read(localGalleryNotifierProvider.notifier)
-          .setSelectedCollection(null);
-    } else {
-      // 全部：清除分类过滤
-      ref
-          .read(localGalleryNotifierProvider.notifier)
-          .setShowFavoritesOnly(false);
-      ref
-          .read(localGalleryNotifierProvider.notifier)
-          .setSelectedCategory(null, null);
-      ref
-          .read(localGalleryNotifierProvider.notifier)
-          .setSelectedCollection(null);
-    }
+    final collection = id != null && isCollectionSelectedId(id)
+        ? id.substring(collectionSelectedIdPrefix.length)
+        : null;
+    final criteria = scope == gallery.browseScope
+        ? gallery.filterCriteria
+        : FilterCriteria(naiOnly: gallery.filterCriteria.naiOnly);
+    await ref
+        .read(localGalleryNotifierProvider.notifier)
+        .setBrowseScope(
+          scope,
+          filterCriteria: criteria.copyWith(
+            showFavoritesOnly: id == 'favorites',
+            categoryId: category?.id,
+            categoryFolderPath: category?.folderPath,
+            clearCategoryId: category == null,
+            clearCategoryFolderPath: category == null,
+            collectionId: collection,
+            clearCollectionId: collection == null,
+          ),
+        );
+    if (!mounted || request != _categoryRequest) return;
+    ref.read(galleryCategoryNotifierProvider.notifier).selectCategory(id);
   }
 
   Future<void> _handleCategoryDelete(String id) async {
