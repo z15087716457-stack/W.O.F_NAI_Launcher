@@ -1,3 +1,4 @@
+import 'package:fake_async/fake_async.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -21,6 +22,79 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUpAll(AppLoggerTestIsolation.setUp);
   tearDownAll(AppLoggerTestIsolation.tearDown);
+
+  test('a stalled startup scan cannot hold shutdown indefinitely', () {
+    fakeAsync((clock) {
+      final stall = Completer<void>();
+      var drained = false;
+      unawaited(
+        DesktopAppShutdownService.runStartupTask(
+          'stalled scan',
+          () => stall.future,
+          maintenance: true,
+        ),
+      );
+      unawaited(
+        DesktopAppShutdownService.prepareBackgroundShutdown().then(
+          (_) => drained = true,
+        ),
+      );
+      clock.flushMicrotasks();
+      expect(drained, isFalse);
+      clock.elapse(const Duration(seconds: 10));
+      clock.flushMicrotasks();
+      expect(drained, isTrue);
+      stall.complete();
+      clock.flushMicrotasks();
+    });
+  });
+
+  test(
+    'essential initialization is not abandoned at the maintenance deadline',
+    () {
+      fakeAsync((clock) {
+        final writing = Completer<void>();
+        var drained = false;
+        unawaited(
+          DesktopAppShutdownService.runStartupTask(
+            'Startup services',
+            () => writing.future,
+          ),
+        );
+        unawaited(
+          DesktopAppShutdownService.prepareBackgroundShutdown().then(
+            (_) => drained = true,
+          ),
+        );
+        clock.elapse(const Duration(seconds: 10));
+        expect(drained, isFalse);
+        writing.complete();
+        clock.flushMicrotasks();
+        expect(drained, isTrue);
+      });
+    },
+  );
+
+  test('shutdown waits for an active first-frame startup write', () async {
+    final release = Completer<void>();
+    final events = <String>[];
+    final write = DesktopAppShutdownService.runStartupTask('Startup', () async {
+      await release.future;
+      events.add('written');
+    });
+    final drain = DesktopAppShutdownService.prepareBackgroundShutdown().then(
+      (_) => events.add('drained'),
+    );
+    await Future<void>.delayed(Duration.zero);
+    try {
+      expect(events, isEmpty);
+    } finally {
+      release.complete();
+      await write;
+      await drain;
+    }
+    expect(events, ['written', 'drained']);
+  });
 
   test('all owners start cancelling before either finishes', () async {
     final first = Completer<void>();
@@ -169,6 +243,15 @@ void main() {
       await started.future;
       expect(DesktopAppShutdownService.isShuttingDown, isTrue);
       expect(DesktopAppShutdownService.shutdownAndExit(99), same(quit));
+      var lateStarted = false;
+      await DesktopAppShutdownService.runStartupTask(
+        'Late first frame',
+        () async {
+          lateStarted = true;
+        },
+      );
+      expect(lateStarted, isFalse);
+
       expect(calls, [
         if (Platform.isWindows || Platform.isMacOS) 'window:hide',
         if (Platform.isMacOS) 'tray:destroy',

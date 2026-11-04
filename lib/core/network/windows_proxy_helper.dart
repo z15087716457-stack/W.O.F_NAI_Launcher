@@ -4,6 +4,13 @@ import 'package:win32_registry/win32_registry.dart';
 
 import '../utils/app_logger.dart';
 
+/// 注册表 Internet Settings 下的两项：ProxyEnable（REG_DWORD）和 ProxyServer（REG_SZ）。
+/// ProxyEnable 不是 1 时不读 ProxyServer，为 null。
+typedef WindowsProxyRegistryValues = ({int? enable, String? server});
+
+/// 读 [WindowsProxyRegistryValues]。只查注册表、不写日志，能放到后台 isolate 里跑。
+typedef WindowsProxyRegistryRead = WindowsProxyRegistryValues Function();
+
 /// Windows 系统代理辅助类
 /// 用于读取 Windows 注册表中的代理设置
 class WindowsProxyHelper {
@@ -29,60 +36,76 @@ class WindowsProxyHelper {
     }
 
     try {
-      // 打开注册表项
-      final key = Registry.openPath(
-        RegistryHive.currentUser,
-        path: _registryPath,
-      );
-
-      // 读取代理启用状态 (REG_DWORD)
-      final proxyEnableValue = key.getValue(_proxyEnableKey);
-      int? proxyEnable;
-      if (proxyEnableValue != null && proxyEnableValue.data is int) {
-        proxyEnable = proxyEnableValue.data as int;
-      }
-
-      AppLogger.d(
-        'Windows Proxy Enable: $proxyEnable (type: ${proxyEnable?.runtimeType})',
-        'PROXY',
-      );
-
-      // 如果代理未启用，返回 DIRECT
-      if (proxyEnable != 1) {
-        key.close();
-        AppLogger.d('Proxy disabled, using DIRECT', 'PROXY');
-        return 'DIRECT';
-      }
-
-      // 读取代理服务器地址 (REG_SZ)
-      final proxyServerValue = key.getValue(_proxyServerKey);
-      String? proxyServer;
-      if (proxyServerValue != null && proxyServerValue.data is String) {
-        proxyServer = proxyServerValue.data as String;
-      }
-
-      key.close();
-
-      AppLogger.d('Raw Proxy Server string: "$proxyServer"', 'PROXY');
-
-      // 解析代理服务器字符串
-      final parsedProxy = _parseProxyServer(proxyServer);
-
-      if (parsedProxy != null) {
-        AppLogger.d('Parsed proxy: $parsedProxy', 'PROXY');
-        return 'PROXY $parsedProxy';
-      } else {
-        AppLogger.d('Invalid proxy format, using DIRECT', 'PROXY');
-        return 'DIRECT';
-      }
+      return proxyFromRegistryValues(readRegistryValues());
     } catch (e, stackTrace) {
-      AppLogger.e(
-        'Failed to read Windows proxy settings: $e',
-        'PROXY',
-        stackTrace,
-      );
+      logReadFailure(e, stackTrace);
       return 'DIRECT';
     }
+  }
+
+  /// 读注册表里的 ProxyEnable 和 ProxyServer（见 [WindowsProxyRegistryValues]）。
+  ///
+  /// 只调 Win32、不写日志：`SystemProxyReader` 在后台 isolate 里调它，界面线程不用等注册表。
+  static WindowsProxyRegistryValues readRegistryValues() {
+    // 打开注册表项
+    final key = Registry.openPath(
+      RegistryHive.currentUser,
+      path: _registryPath,
+    );
+    try {
+      // 读取代理启用状态 (REG_DWORD)
+      final proxyEnableData = key.getValue(_proxyEnableKey)?.data;
+      final proxyEnable = proxyEnableData is int ? proxyEnableData : null;
+      // 代理未启用时不读服务器地址
+      if (proxyEnable != 1) return (enable: proxyEnable, server: null);
+
+      // 读取代理服务器地址 (REG_SZ)
+      final proxyServerData = key.getValue(_proxyServerKey)?.data;
+      return (
+        enable: proxyEnable,
+        server: proxyServerData is String ? proxyServerData : null,
+      );
+    } finally {
+      key.close();
+    }
+  }
+
+  /// 由 [readRegistryValues] 读到的两项得出 "PROXY host:port"；代理未启用或格式不对时是 "DIRECT"。
+  static String proxyFromRegistryValues(WindowsProxyRegistryValues values) {
+    final proxyEnable = values.enable;
+    AppLogger.d(
+      'Windows Proxy Enable: $proxyEnable (type: ${proxyEnable?.runtimeType})',
+      'PROXY',
+    );
+
+    // 如果代理未启用，返回 DIRECT
+    if (proxyEnable != 1) {
+      AppLogger.d('Proxy disabled, using DIRECT', 'PROXY');
+      return 'DIRECT';
+    }
+
+    final proxyServer = values.server;
+    AppLogger.d('Raw Proxy Server string: "$proxyServer"', 'PROXY');
+
+    // 解析代理服务器字符串
+    final parsedProxy = _parseProxyServer(proxyServer);
+
+    if (parsedProxy != null) {
+      AppLogger.d('Parsed proxy: $parsedProxy', 'PROXY');
+      return 'PROXY $parsedProxy';
+    } else {
+      AppLogger.d('Invalid proxy format, using DIRECT', 'PROXY');
+      return 'DIRECT';
+    }
+  }
+
+  /// 读注册表出错时记的日志，同步、异步两条路记的一样。
+  static void logReadFailure(Object error, StackTrace stackTrace) {
+    AppLogger.e(
+      'Failed to read Windows proxy settings: $error',
+      'PROXY',
+      stackTrace,
+    );
   }
 
   /// 解析代理服务器字符串

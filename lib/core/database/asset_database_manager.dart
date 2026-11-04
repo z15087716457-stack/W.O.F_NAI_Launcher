@@ -33,6 +33,9 @@ class AssetDatabaseManager {
   static Future<void>? _initialization;
   static bool _initialized = false;
 
+  @visibleForTesting
+  static int debugInstalledHashChecks = 0;
+
   String get tagCatalogDbPath =>
       _dictionaryStore?.activePath(DictionaryKind.tags) ??
       _requirePath(_tagCatalogDbPath);
@@ -56,6 +59,7 @@ class AssetDatabaseManager {
 
   @visibleForTesting
   static void resetForTesting() {
+    debugInstalledHashChecks = 0;
     _initialized = false;
     _initialization = null;
     _instance._tagCatalogDbPath = null;
@@ -199,14 +203,18 @@ class AssetDatabaseManager {
     if (await target.exists()) {
       try {
         final stat = await target.stat();
-        if (stat.size == metadata['size'] &&
-            await _stateMatches(state, expectedHash, stat)) {
+        final record = await _readInstallState(state);
+        final verifiedHash = _verifiedHash(record, stat);
+        final sizeMatches = stat.size == metadata['size'];
+        if (sizeMatches &&
+            verifiedHash == expectedHash &&
+            record?['schemaVersion'] == metadata['schemaVersion'] &&
+            record?['dataVersion'] == metadata['dataVersion']) {
           return;
         }
         final matches =
-            stat.size == metadata['size'] &&
-            (await sha256.bind(target.openRead()).first).toString() ==
-                expectedHash;
+            sizeMatches &&
+            (verifiedHash ?? await _hashInstalled(target)) == expectedHash;
         await _validateDatabase(
           target.path,
           requiredTables: requiredTables,
@@ -219,7 +227,7 @@ class AssetDatabaseManager {
         );
         existingUsable = true;
         if (matches) {
-          await _writeInstallState(state, metadata, await target.stat());
+          await _writeInstallState(state, metadata, stat);
           return;
         }
       } catch (error) {
@@ -339,26 +347,40 @@ class AssetDatabaseManager {
       ...metadata,
       'size': stat.size,
       'modified': stat.modified.microsecondsSinceEpoch,
+      'changed': stat.changed.microsecondsSinceEpoch,
     }),
     encoding: utf8,
     flush: true,
   );
 
-  static Future<bool> _stateMatches(
-    File state,
-    String hash,
-    FileStat stat,
-  ) async {
+  static Future<Map<String, dynamic>?> _readInstallState(File state) async {
     try {
-      if (!await state.exists()) return false;
-      final data =
-          jsonDecode(await state.readAsString()) as Map<String, dynamic>;
-      return data['sha256'] == hash &&
-          data['size'] == stat.size &&
-          data['modified'] == stat.modified.microsecondsSinceEpoch;
+      return jsonDecode(await state.readAsString()) as Map<String, dynamic>;
     } catch (_) {
-      return false;
+      return null;
     }
+  }
+
+  static String? _verifiedHash(Map<String, dynamic>? record, FileStat stat) {
+    // +78 used a nested identity. Earlier flat records without a change time
+    // are revalidated once before accepting a restored modification time.
+    final identity = record?['file'] ?? record;
+    final hash = record?['sha256'];
+    if (identity is! Map ||
+        hash is! String ||
+        stat.type != FileSystemEntityType.file) {
+      return null;
+    }
+    return identity['size'] == stat.size &&
+            identity['modified'] == stat.modified.microsecondsSinceEpoch &&
+            identity['changed'] == stat.changed.microsecondsSinceEpoch
+        ? hash
+        : null;
+  }
+
+  static Future<String> _hashInstalled(File target) async {
+    debugInstalledHashChecks++;
+    return (await sha256.bind(target.openRead()).first).toString();
   }
 
   static Future<void> _removeLegacyTranslationDatabase(Directory dir) async {

@@ -399,7 +399,8 @@ SettingsViewData settingsViewData(
     ),
     bridges: settingsBridgesData(context, ref),
     network: SettingsNetworkData(
-      systemProxy: ref.watch(detectedSystemProxyProvider),
+      // 读完之前是 null；读取不占界面线程，30 秒内再进设置页直接用上次的结果。
+      systemProxy: ref.watch(detectedSystemProxyProvider).valueOrNull,
       endpoints: network.endpoints,
       checking: network.checking,
       checkedAt: network.checkedAt,

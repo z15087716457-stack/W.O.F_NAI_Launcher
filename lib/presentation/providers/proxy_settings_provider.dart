@@ -1,8 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/constants/storage_keys.dart';
-import '../../core/network/proxy_service.dart';
+import '../../core/network/system_proxy_reader.dart';
 import '../../core/storage/local_storage_service.dart';
 import '../../data/models/settings/proxy_settings.dart';
 
@@ -104,10 +106,22 @@ String? currentProxyAddress(Ref ref) {
   return settings.effectiveProxyAddress;
 }
 
+/// 设置页读系统代理用的读取器：读这台机器自己的系统设置（见 [SystemProxyPlatform.host]）。
+final systemProxyReaderProvider = Provider<SystemProxyReader>(
+  (ref) => SystemProxyReader(),
+);
+
+/// 设置页显示系统代理用的缓存，设置页关了也留着：30 秒内再打开不用重读。
+@Riverpod(keepAlive: true)
+SystemProxyCache systemProxyCache(Ref ref) =>
+    SystemProxyCache(ref.watch(systemProxyReaderProvider).read);
+
 /// 检测到的系统代理地址
 ///
-/// 用于在 UI 中显示当前系统代理配置
+/// 用于在 UI 中显示当前系统代理配置。读取不占界面线程（见 [SystemProxyReader]），读完之前没有值；
+/// 30 秒内读过就直接用上次的结果，代理设置一改就重读（见 [SystemProxyCache]）。
 @riverpod
-String? detectedSystemProxy(Ref ref) {
-  return ProxyService.getSystemProxyAddress();
+FutureOr<String?> detectedSystemProxy(Ref ref) {
+  final settings = ref.watch(proxySettingsNotifierProvider);
+  return ref.watch(systemProxyCacheProvider).read(scope: settings);
 }

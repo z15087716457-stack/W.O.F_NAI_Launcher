@@ -30,6 +30,31 @@ class DesktopAppShutdownService {
     return () => _cleanups.remove(cleanup);
   }
 
+  /// Track startup work once it actually begins. A pending first frame or
+  /// delayed timer must not keep a hidden, quitting application alive.
+  static Future<void> runStartupTask(
+    String name,
+    Future<void> Function() action, {
+    bool maintenance = false,
+  }) async {
+    if (isShuttingDown) return;
+    final finished = Completer<void>();
+    // Optional maintenance may block on an external disk. Give it a grace
+    // period, while essential initialization keeps its original write barrier.
+    final unregister = registerCleanup(
+      () => maintenance
+          ? finished.future.timeout(const Duration(seconds: 5))
+          : finished.future,
+      name: name,
+    );
+    try {
+      await action();
+    } finally {
+      unregister();
+      finished.complete();
+    }
+  }
+
   static Future<void> prepareBackgroundShutdown() async {
     await Future.wait([
       for (final entry in List.of(_cleanups.entries))

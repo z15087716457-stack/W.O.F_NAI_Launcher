@@ -39,6 +39,9 @@ class ProxyService {
   /// 获取系统代理地址
   ///
   /// 返回格式: "host:port" 或 null（未检测到代理）
+  ///
+  /// 同步读取：macOS 上要等 `scutil --proxy` 子进程跑完，调用的线程这期间停着。
+  /// 界面上显示用 `SystemProxyReader`（不占界面线程）。
   static String? getSystemProxyAddress() {
     try {
       if (Platform.isWindows) {
@@ -54,8 +57,11 @@ class ProxyService {
   }
 
   /// Windows: 通过注册表读取代理
-  static String? _getWindowsProxy() {
-    final proxyString = WindowsProxyHelper.getSystemProxy();
+  static String? _getWindowsProxy() =>
+      addressFromWindowsProxy(WindowsProxyHelper.getSystemProxy());
+
+  /// [WindowsProxyHelper] 给的 "PROXY host:port" 取出 host:port；"DIRECT" 或 null 是没有代理。
+  static String? addressFromWindowsProxy(String? proxyString) {
     if (proxyString == null || proxyString == 'DIRECT') {
       return null;
     }
@@ -69,17 +75,21 @@ class ProxyService {
   /// macOS: 通过 scutil 命令读取代理
   static String? _getMacOSProxy() {
     try {
-      final result = Process.runSync('scutil', ['--proxy']);
-      if (result.exitCode != 0) {
-        AppLogger.w('scutil --proxy failed: ${result.stderr}', 'PROXY');
-        return null;
-      }
-
-      return macOSProxyAddress(result.stdout as String);
+      return macOSProxyFrom(Process.runSync('scutil', ['--proxy']));
     } catch (e) {
       AppLogger.w('Failed to read macOS proxy: $e', 'PROXY');
       return null;
     }
+  }
+
+  /// 由 `scutil --proxy` 跑完的结果得出 host:port：HTTP 代理开着、主机和端口都有才算，否则 null。
+  static String? macOSProxyFrom(ProcessResult result) {
+    if (result.exitCode != 0) {
+      AppLogger.w('scutil --proxy failed: ${result.stderr}', 'PROXY');
+      return null;
+    }
+
+    return macOSProxyAddress(result.stdout as String);
   }
 
   /// 创建测试用的 Dio 实例

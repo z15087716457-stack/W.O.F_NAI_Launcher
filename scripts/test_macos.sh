@@ -43,5 +43,8 @@ flutter test --no-pub --concurrency=3 \
   test/app_test.dart \
   test/presentation/wiring/settings_storage_inventory_test.dart \
   test/presentation/providers/nai_agent/nai_agent_builtin_skills_path_test.dart \
+  test/core/network/system_proxy_reader_test.dart \
+  test/presentation/providers/detected_system_proxy_test.dart \
+  test/core/database/asset_database_manager_test.dart \
   test/presentation/wiring/generation_data_wiring_test.dart \
   test/presentation/wiring/generation_canvas_wiring_test.dart

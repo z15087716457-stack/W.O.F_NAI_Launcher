@@ -116,7 +116,11 @@ void _runDeferredStartupStep(
     unawaited(
       _runNonFatalStartupStep(name, () async {
         await servicesReady;
-        await action();
+        await DesktopAppShutdownService.runStartupTask(
+          name,
+          action,
+          maintenance: true,
+        );
       }),
     );
   });
@@ -819,7 +823,10 @@ Future<void> _bootstrapPreparedApplication() async {
   }
 
   final servicesReady = WidgetsBinding.instance.endOfFrame.then(
-    (_) => _initializeMainServices(),
+    (_) => DesktopAppShutdownService.runStartupTask(
+      'Startup services',
+      _initializeMainServices,
+    ),
   );
   final container = ProviderContainer(
     overrides: [appStartupReadyProvider.overrideWithValue(servicesReady)],
@@ -840,7 +847,10 @@ Future<void> _bootstrapPreparedApplication() async {
       final rootPath = await GalleryFolderRepository.instance.getRootPath();
       if (rootPath != null) {
         final cleanedCount = await ThumbnailService.instance
-            .cleanupNestedThumbs(rootPath);
+            .cleanupNestedThumbs(
+              rootPath,
+              shouldStop: () => DesktopAppShutdownService.isShuttingDown,
+            );
         if (cleanedCount > 0) {
           AppLogger.i('启动清理完成: 删除了 $cleanedCount 个嵌套缩略图目录', 'Main');
         }
@@ -874,6 +884,7 @@ Future<void> _bootstrapPreparedApplication() async {
   // 启动时自动同步在线画廊黑名单（不阻塞启动）
   Future.delayed(const Duration(seconds: 8), () async {
     await servicesReady;
+    if (DesktopAppShutdownService.isShuttingDown) return;
     try {
       await container
           .read(onlineGalleryBlacklistNotifierProvider.notifier)

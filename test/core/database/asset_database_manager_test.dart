@@ -416,6 +416,149 @@ void main() {
     },
   );
 
+  group('start-up check of installed databases', () {
+    const catalog = AssetDatabaseManager.tagCatalogDb;
+    const cooccurrence = AssetDatabaseManager.cooccurrenceDb;
+    File installed(String name) =>
+        File(p.join(appSupportDir.path, 'asset_databases', name));
+    int loads(String name) => assetLoadCounts['assets/databases/$name'] ?? 0;
+    Future<void> restart() async {
+      AssetDatabaseManager.resetForTesting();
+      await AssetDatabaseManager.initialize();
+    }
+
+    test('an unchanged installation is not hashed again', () async {
+      await AssetDatabaseManager.initialize();
+      expect((loads(catalog), loads(cooccurrence)), (1, 1));
+      await restart();
+      // Before: every start hashed each installed database in full and ran
+      // quick_check over it twice (about 4.6 s for the real 370 MB).
+      expect(AssetDatabaseManager.debugInstalledHashChecks, 0);
+      expect((loads(catalog), loads(cooccurrence)), (1, 1));
+      final state = jsonDecode(
+        await File(
+          '${installed(cooccurrence).path}.install.json',
+        ).readAsString(),
+      );
+      expect(state['size'], await installed(cooccurrence).length());
+      expect(
+        state['changed'],
+        (await installed(cooccurrence).stat()).changed.microsecondsSinceEpoch,
+      );
+    });
+
+    test('an installation from an earlier version is hashed once, then '
+        'trusted', () async {
+      final dbDir = await Directory(
+        p.join(appSupportDir.path, 'asset_databases'),
+      ).create(recursive: true);
+      final databases = manifest['databases'] as Map<String, dynamic>;
+      for (final name in [catalog, cooccurrence]) {
+        final target = File(p.join(dbDir.path, name));
+        await target.writeAsBytes(assets['assets/databases/$name']!);
+        // What earlier versions wrote: no file identity.
+        await File(
+          '${target.path}.install.json',
+        ).writeAsString(jsonEncode({'sha256': databases[name]['sha256']}));
+      }
+      await AssetDatabaseManager.initialize();
+      expect(AssetDatabaseManager.debugInstalledHashChecks, 2);
+      await restart();
+      expect(AssetDatabaseManager.debugInstalledHashChecks, 0);
+      expect((loads(catalog), loads(cooccurrence)), (0, 0));
+    });
+
+    test('the verified +78 Mac install record can be reused', () async {
+      await AssetDatabaseManager.initialize();
+      for (final name in [catalog, cooccurrence]) {
+        final file = installed(name);
+        final receipt = File('${file.path}.install.json');
+        final latest =
+            jsonDecode(await receipt.readAsString()) as Map<String, dynamic>;
+        await receipt.writeAsString(
+          jsonEncode({
+            'sha256': latest['sha256'],
+            'schemaVersion': latest['schemaVersion'],
+            'dataVersion': latest['dataVersion'],
+            'file': {
+              for (final key in ['size', 'modified', 'changed'])
+                key: latest[key],
+            },
+          }),
+        );
+      }
+      await restart();
+      expect(AssetDatabaseManager.debugInstalledHashChecks, 0);
+      expect((loads(catalog), loads(cooccurrence)), (1, 1));
+    });
+
+    test('a changed database is hashed and replaced', () async {
+      await AssetDatabaseManager.initialize();
+      final target = installed(cooccurrence);
+      final original = await target.readAsBytes();
+      await target.writeAsBytes(
+        Uint8List.fromList(original)..[original.length - 1] ^= 0xFF,
+      );
+      await restart();
+      expect(loads(cooccurrence), 2, reason: 'installed again');
+      expect(await target.readAsBytes(), original);
+      expect(loads(catalog), 1);
+    });
+
+    test(
+      'a change that sets the modification time back is caught too',
+      () async {
+        await AssetDatabaseManager.initialize();
+        final target = installed(cooccurrence);
+        final before = await target.stat();
+        final original = await target.readAsBytes();
+        await target.writeAsBytes(
+          Uint8List.fromList(original)..[original.length - 1] ^= 0xFF,
+        );
+        await target.setLastModified(before.modified);
+        final after = await target.stat();
+        expect((after.size, after.modified), (before.size, before.modified));
+        // The inode change time moved and cannot be set back.
+        expect(after.changed, isNot(before.changed));
+        await restart();
+        expect(loads(cooccurrence), 2, reason: 'installed again');
+        expect(await target.readAsBytes(), original);
+      },
+      skip: Platform.isWindows
+          ? 'Windows reports the creation time as FileStat.changed'
+          : false,
+    );
+
+    test('a new bundled version replaces the installed one', () async {
+      await AssetDatabaseManager.initialize();
+      final newer = File(p.join(tempDir.path, 'cooccurrence-newer.db'));
+      final db = sqlite3.open(newer.path);
+      db.execute('''
+        CREATE TABLE cooccurrences(tag1 TEXT, tag2 TEXT, count INTEGER);
+        INSERT INTO cooccurrences VALUES ('rain', 'umbrella', 3);
+      ''');
+      db.dispose();
+      final bytes = await newer.readAsBytes();
+      (manifest['databases'] as Map<String, dynamic>)[cooccurrence] = {
+        'sha256': sha256.convert(bytes).toString(),
+        'size': bytes.length,
+      };
+      assets['assets/databases/manifest.json'] = Uint8List.fromList(
+        utf8.encode(jsonEncode(manifest)),
+      );
+      assets['assets/databases/$cooccurrence'] = bytes;
+      // A new app version: its manifest, not the one cached by this process.
+      rootBundle.evict('assets/databases/manifest.json');
+      addTearDown(() => rootBundle.evict('assets/databases/manifest.json'));
+      await restart();
+      expect(loads(cooccurrence), 2);
+      expect(await installed(cooccurrence).readAsBytes(), bytes);
+      expect(AssetDatabaseManager.debugInstalledHashChecks, 0);
+      await restart();
+      expect(loads(cooccurrence), 2, reason: 'trusted from now on');
+    });
+  });
+
   test('legacy autocomplete migration preserves local gallery data', () async {
     final runtimeDir = await Directory(
       p.join(appSupportDir.path, 'databases'),

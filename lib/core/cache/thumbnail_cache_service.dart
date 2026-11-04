@@ -943,7 +943,11 @@ class ThumbnailCacheService {
   /// 修复缩略图递归生成bug遗留的嵌套目录问题
   /// [rootPath] 画廊根目录路径
   /// 返回清理的嵌套目录数量
-  Future<int> cleanupNestedThumbs(String rootPath) async {
+  Future<int> cleanupNestedThumbs(
+    String rootPath, {
+    bool Function()? shouldStop,
+  }) async {
+    if (shouldStop?.call() == true) return 0;
     final rootDir = Directory(rootPath);
     if (!await rootDir.exists()) return 0;
 
@@ -956,6 +960,7 @@ class ThumbnailCacheService {
         recursive: true,
         followLinks: false,
       )) {
+        if (shouldStop?.call() == true) return cleanedCount;
         if (entity is Directory) {
           final dirName = p.basename(entity.path);
           if (dirName == thumbsDirName) {
@@ -966,6 +971,7 @@ class ThumbnailCacheService {
 
       // 检查每个.thumbs目录是否有嵌套的.thumbs子目录
       for (final thumbsDir in thumbsDirs) {
+        if (shouldStop?.call() == true) return cleanedCount;
         await for (final entity in thumbsDir.list(
           recursive: true,
           followLinks: false,
@@ -974,6 +980,7 @@ class ThumbnailCacheService {
             final dirName = p.basename(entity.path);
             if (dirName == thumbsDirName) {
               try {
+                if (shouldStop?.call() == true) return cleanedCount;
                 await entity.delete(recursive: true);
                 cleanedCount++;
               } catch (e) {

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/core/database/dictionary_data_store.dart';
@@ -8,6 +9,7 @@ import 'package:nai_launcher/core/database/dictionary_revision.dart';
 import 'package:nai_launcher/core/database/dictionary_update_checker.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_contract.dart';
 import 'package:nai_launcher/presentation/wiring/settings/settings_dictionary_update.dart';
+import 'package:nai_launcher/presentation/wiring/settings/settings_inventory.dart';
 
 class _Job extends DictionaryDownloader {
   _Job(super.store);
@@ -62,6 +64,9 @@ void main() {
   late List<_Checker> checks;
   late _Store store;
   late DateTime checkedAt;
+  // Stands for the bundled-dictionaries check on the settings page (Wiki
+  // quick_check and counts); the real one reads the installed databases.
+  late int recounts;
   setUp(() {
     root = Directory.systemTemp.createTempSync('dictionary_wiring_');
     context = Completer();
@@ -69,8 +74,13 @@ void main() {
     checks = [];
     store = _Store(root);
     checkedAt = DateTime.now().toUtc().subtract(const Duration(minutes: 1));
+    recounts = 0;
     container = ProviderContainer(
       overrides: [
+        settingsDictionaryDataProvider.overrideWith((ref) async {
+          recounts++;
+          return const SettingsDictionaryData();
+        }),
         dictionaryUpdateCheckerFactoryProvider.overrideWithValue(() {
           final checker = _Checker();
           checks.add(checker);
@@ -340,6 +350,64 @@ void main() {
       );
     },
   );
+  // The settings page no longer re-checks the bundled dictionaries on a
+  // timer, so an update action that finished has to recount them itself.
+  // The updater has no platform branch; it runs the same way on both.
+  for (final platform in [TargetPlatform.macOS, TargetPlatform.windows]) {
+    group(platform.name, () {
+      setUp(() => debugDefaultTargetPlatformOverride = platform);
+      tearDown(() => debugDefaultTargetPlatformOverride = null);
+
+      test(
+        'a finished check or install recounts the bundled dictionaries once; '
+        'a failed one does not',
+        () async {
+          installed();
+          ready();
+          final page = container.listen(
+            settingsDictionaryDataProvider,
+            (_, __) {},
+          );
+          await container.read(settingsDictionaryDataProvider.future);
+          final controller = container.read(
+            settingsDictionaryUpdateProvider.notifier,
+          );
+          await Future<void>.delayed(Duration.zero);
+          expect(recounts, 1);
+
+          var check = controller.check();
+          await Future<void>.delayed(Duration.zero);
+          checks.last.result.complete(result());
+          await check;
+          await container.pump();
+          expect(recounts, 2, reason: 'a finished check recounts once');
+
+          check = controller.check();
+          await Future<void>.delayed(Duration.zero);
+          checks.last.result.completeError(StateError('network fixture'));
+          await check;
+          await container.pump();
+          expect(recounts, 2, reason: 'a failed check changed nothing');
+
+          var install = controller.start(SettingsDictionaryKind.wiki);
+          await Future<void>.delayed(Duration.zero);
+          jobs.last.result.completeError(StateError('fixture failure'));
+          await install;
+          await container.pump();
+          expect(recounts, 2, reason: 'a failed install changed nothing');
+
+          install = controller.start(SettingsDictionaryKind.wiki);
+          await Future<void>.delayed(Duration.zero);
+          jobs.last.result.complete({'count': 5, 'added': 1});
+          await install;
+          await container.pump();
+          expect(recounts, 3, reason: 'a finished install recounts once');
+          page.close();
+        },
+      );
+    });
+  }
+
   test(
     'commit point cannot be cancelled after a verified database is ready',
     () async {

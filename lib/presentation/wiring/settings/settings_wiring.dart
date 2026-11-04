@@ -37,7 +37,7 @@ import 'settings_data.dart';
 import 'settings_edits.dart';
 import 'settings_inventory.dart';
 import 'settings_legacy_data.dart';
-import 'settings_caches.dart';
+import 'settings_dictionary_refresh.dart';
 import 'settings_dictionary_update.dart';
 import 'settings_models.dart';
 import 'providers_workbench.dart';
@@ -106,7 +106,7 @@ class SettingsWiring extends ConsumerStatefulWidget {
 
 class _SettingsWiringState extends ConsumerState<SettingsWiring> {
   late SettingsPageId _page = widget.initialPage;
-  Timer? _cacheTimer;
+  late final _dictionaryRefresh = SettingsDictionaryRefresh.forSettings(ref);
   @override
   void didUpdateWidget(covariant SettingsWiring oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -115,7 +115,7 @@ class _SettingsWiringState extends ConsumerState<SettingsWiring> {
 
   @override
   void dispose() {
-    _cacheTimer?.cancel();
+    _dictionaryRefresh.dispose();
     super.dispose();
   }
 
@@ -571,19 +571,10 @@ class _SettingsWiringState extends ConsumerState<SettingsWiring> {
       (_, __) => setState(() => _page = SettingsPageId.bridges),
     );
     final data = settingsViewData(context, ref, _page);
-    if (_page == SettingsPageId.dictionaries &&
-        data.values.flag(SettingKey.cacheStatsAutoRefresh)) {
-      _cacheTimer ??= Timer.periodic(const Duration(seconds: 10), (_) {
-        if (mounted) {
-          ref.invalidate(settingsCacheStatsProvider);
-          ref.invalidate(settingsDictionaryDataProvider);
-          ref.invalidate(settingsCacheFootprintProvider);
-        }
-      });
-    } else {
-      _cacheTimer?.cancel();
-      _cacheTimer = null;
-    }
+    _dictionaryRefresh.update(
+      open: _page == SettingsPageId.dictionaries,
+      autoRefresh: data.values.flag(SettingKey.cacheStatsAutoRefresh),
+    );
     return SettingsPage(
       data: data,
       actions: _actions(data),

@@ -162,7 +162,11 @@ class SettingsDictionaryUpdater extends Notifier<SettingsDictionaryUpdate> {
         }
       }
       await DictionaryUpdateChecker.save(_store!.root, result);
-      if (!_disposed) _checked = result;
+      if (!_disposed) {
+        _checked = result;
+        // 词库页不再定时重查只读库，检查完在这里重数一次。
+        ref.invalidate(settingsDictionaryDataProvider);
+      }
     } catch (_) {
       if (!_disposed) _checkFailed = true;
     } finally {

@@ -715,9 +715,15 @@ class ThumbnailService {
   /// 清理嵌套的缩略图目录
   ///
   /// 修复缩略图递归生成bug遗留的嵌套目录问题
-  Future<int> cleanupNestedThumbs(String rootPath) async {
+  Future<int> cleanupNestedThumbs(
+    String rootPath, {
+    bool Function()? shouldStop,
+  }) async {
     _ensureInitialized();
-    return await _cacheService!.cleanupNestedThumbs(rootPath);
+    return await _cacheService!.cleanupNestedThumbs(
+      rootPath,
+      shouldStop: shouldStop,
+    );
   }
 
   // ==================== 私有方法 ====================
