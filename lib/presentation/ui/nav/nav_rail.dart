@@ -595,14 +595,17 @@ class _NavTasksGlyphState extends State<NavTasksGlyph>
       child: Stack(
         alignment: Alignment.center,
         children: [
-          RotationTransition(
-            turns: _spin,
-            child: CustomPaint(
-              size: const Size.square(22),
-              painter: _TaskRingPainter(
-                f == null ? 1 / 6 : math.max(.08, f),
-                track: c.line,
-                arc: c.accent,
+          // 进度未知时一直转：自己一个重绘边界，不连累整条导航栏
+          RepaintBoundary(
+            child: RotationTransition(
+              turns: _spin,
+              child: CustomPaint(
+                size: const Size.square(22),
+                painter: _TaskRingPainter(
+                  f == null ? 1 / 6 : math.max(.08, f),
+                  track: c.line,
+                  arc: c.accent,
+                ),
               ),
             ),
           ),

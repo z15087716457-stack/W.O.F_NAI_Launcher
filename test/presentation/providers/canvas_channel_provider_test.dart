@@ -83,7 +83,7 @@ void main() {
             pool: {ChannelTheme.wave, ChannelTheme.herb},
             level: ChannelLevel.strong,
             ruler: false,
-            motion: false,
+            motion: ChannelMotion.antiBurnIn,
             seed: 999,
           );
       await first.read(canvasChannelNotifierProvider.notifier).set(value);
@@ -165,6 +165,62 @@ void main() {
       ChannelTheme.luna,
     });
   });
+
+  test('idle motion is off by default; any older saved "on" resets to off', () {
+    final storage = MemoryDraftSettings();
+    final fresh = _container(storage, 3);
+    addTearDown(fresh.dispose);
+    expect(fresh.read(canvasChannelNotifierProvider).motion, ChannelMotion.off);
+    // v1 / v2 / 没版本号：开关存的是 true；v3（只在开发分支上出现过）也是开关
+    for (final version in [null, 1, 2, 3]) {
+      storage.values[StorageKeys.canvasChannelPreferences] = jsonEncode({
+        'version': ?version,
+        'mode': 'fixed',
+        'motion': true,
+      });
+      final old = _container(storage, 3);
+      addTearDown(old.dispose);
+      final read = old.read(canvasChannelNotifierProvider);
+      expect(read.motion, ChannelMotion.off, reason: 'version $version');
+      expect(read.mode, ChannelMode.fixed);
+    }
+    // 不认识的档位名也按关闭
+    storage.values[StorageKeys.canvasChannelPreferences] = jsonEncode({
+      'version': 4,
+      'motion': 'sparkle',
+    });
+    final unknown = _container(storage, 3);
+    addTearDown(unknown.dispose);
+    expect(
+      unknown.read(canvasChannelNotifierProvider).motion,
+      ChannelMotion.off,
+    );
+  });
+
+  for (final motion in ChannelMotion.values) {
+    test(
+      'choosing ${motion.name} is saved as v4 and survives restart',
+      () async {
+        final storage = MemoryDraftSettings();
+        final first = _container(storage, 3);
+        addTearDown(first.dispose);
+        await first
+            .read(canvasChannelNotifierProvider.notifier)
+            .set(ChannelSettings(motion: motion));
+        final saved =
+            jsonDecode(
+                  storage.values[StorageKeys.canvasChannelPreferences]!
+                      as String,
+                )
+                as Map;
+        expect(saved['version'], 4);
+        expect(saved['motion'], motion.name);
+        final restarted = _container(storage, 4);
+        addTearDown(restarted.dispose);
+        expect(restarted.read(canvasChannelNotifierProvider).motion, motion);
+      },
+    );
+  }
 
   test(
     'rapid changes write in order; a failed write does not break later saves',

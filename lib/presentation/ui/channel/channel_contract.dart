@@ -29,6 +29,21 @@ enum ChannelTheme {
 /// 关闭（保留现有底纹，本层什么都不画）／固定一个主题／每次随机一组顺序。
 enum ChannelMode { off, fixed, random }
 
+/// 空闲微动（设置里三选一）。生成中、系统 / 应用“减少动态效果”、窗口看不见时界面自己停，
+/// 不用接线方管。
+enum ChannelMotion {
+  /// 不动（默认）。
+  off,
+
+  /// 防烧屏：给 OLED 屏用，画面空闲时整层每秒轻微挪一下；场景只画一次、挪动不重画，
+  /// 几乎不耗电。
+  antiBurnIn,
+
+  /// 原本效果：光点、闪烁、摆动、漂浮这些逐个元素的动画（和上游一样），画面每 33ms 换
+  /// 一次，会持续占用 CPU 和显卡。
+  original,
+}
+
 /// 浓淡：装饰整体透明度倍数。
 enum ChannelLevel {
   soft(0.6),
@@ -48,7 +63,7 @@ class ChannelSettings {
     this.pool = allThemes,
     this.level = ChannelLevel.standard,
     this.ruler = true,
-    this.motion = true,
+    this.motion = ChannelMotion.off,
     this.seed = 0,
   });
 
@@ -78,8 +93,8 @@ class ChannelSettings {
   /// 时间刻度：每批左上角的“时间 · 张数”、换日分隔线、右侧刻度条。
   final bool ruler;
 
-  /// 空闲微动（光点、闪烁、摆动……）。生成中、系统“减少动态效果”时界面自己停，不用接线方管。
-  final bool motion;
+  /// 空闲微动三档，默认关（见 [ChannelMotion]）。
+  final ChannelMotion motion;
 
   /// 本次会话的随机种子：决定主题顺序和每个元素的位置。**不持久化**——每次启动换一个
   /// （例如启动时 `Random().nextInt(1 << 31)`），这就是“每次进来都不一样”。
@@ -92,7 +107,7 @@ class ChannelSettings {
     Set<ChannelTheme>? pool,
     ChannelLevel? level,
     bool? ruler,
-    bool? motion,
+    ChannelMotion? motion,
     int? seed,
   }) => ChannelSettings(
     mode: mode ?? this.mode,
@@ -132,7 +147,7 @@ class ChannelSettings {
       'ChannelSettings(${mode.name}, fixed: ${fixed.name}, '
       'pool: ${[for (final t in ChannelTheme.values)
         if (pool.contains(t)) t.name]}, '
-      '${level.name}, ruler: $ruler, motion: $motion, seed: $seed)';
+      '${level.name}, ruler: $ruler, motion: ${motion.name}, seed: $seed)';
 }
 
 /// 相机：屏幕 = 世界 × [scale] + [offset]（直接取 `generationCanvasCameraProvider`）。

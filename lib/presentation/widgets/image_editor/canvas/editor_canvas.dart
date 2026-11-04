@@ -30,7 +30,7 @@ class _EditorCanvasState extends State<EditorCanvas>
   /// 输入处理器
   late InputHandler _inputHandler;
 
-  /// 选区动画控制器
+  /// 选区动画控制器：只在画面上有蚂蚁线（正在框选，或有选区）时转。
   late AnimationController _selectionAnimationController;
 
   /// 焦点节点
@@ -48,19 +48,60 @@ class _EditorCanvasState extends State<EditorCanvas>
       onStateChanged: () => setState(() {}),
     );
 
-    // 初始化选区动画
+    // 初始化选区动画：没有选区时不转，选区出现、消失时跟着开停
     _selectionAnimationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 500),
-    )..repeat();
+    );
+    _listenSelection(widget.state);
+    _syncMarchingAnts();
 
     // 添加硬件键盘监听（优先级高于 IME，解决中文输入法下快捷键失效问题）
     HardwareKeyboard.instance.addHandler(_inputHandler.handleHardwareKey);
   }
 
   @override
+  void didUpdateWidget(EditorCanvas oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (identical(oldWidget.state, widget.state)) return;
+    _unlistenSelection(oldWidget.state);
+    _listenSelection(widget.state);
+    _syncMarchingAnts();
+  }
+
+  void _listenSelection(EditorState state) {
+    state.selectionManager.addListener(_syncMarchingAnts);
+    state.renderNotifier.addListener(_syncMarchingAnts);
+  }
+
+  void _unlistenSelection(EditorState state) {
+    state.selectionManager.removeListener(_syncMarchingAnts);
+    state.renderNotifier.removeListener(_syncMarchingAnts);
+  }
+
+  /// 画面上有没有蚂蚁线：和 [SelectionPainter] 画蚂蚁线的条件一致
+  ///（框选中的预览，或已确认的选区；非局部重绘下拖动选区内容时画的是控制点，不转）。
+  bool get _hasMarchingAnts {
+    final state = widget.state;
+    if (state.previewPath != null) return true;
+    if (state.selectionPath == null) return false;
+    return state.inpaint || !state.editSelection.active;
+  }
+
+  void _syncMarchingAnts() {
+    final run = _hasMarchingAnts;
+    final ants = _selectionAnimationController;
+    if (run && !ants.isAnimating) {
+      ants.repeat();
+    } else if (!run && ants.isAnimating) {
+      ants.stop();
+    }
+  }
+
+  @override
   void dispose() {
     HardwareKeyboard.instance.removeHandler(_inputHandler.handleHardwareKey);
+    _unlistenSelection(widget.state);
     _selectionAnimationController.dispose();
     _focusNode.dispose();
     super.dispose();

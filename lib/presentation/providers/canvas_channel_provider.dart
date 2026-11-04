@@ -66,7 +66,7 @@ class CanvasChannelNotifier extends Notifier<ChannelSettings> {
           ChannelLevel.standard,
         ),
         ruler: value['ruler'] is bool ? value['ruler'] as bool : true,
-        motion: value['motion'] is bool ? value['motion'] as bool : true,
+        motion: _storedMotion(value),
         seed: seed,
       );
     } catch (error, stack) {
@@ -99,7 +99,7 @@ class CanvasChannelNotifier extends Notifier<ChannelSettings> {
       ],
       'level': next.level.name,
       'ruler': next.ruler,
-      'motion': next.motion,
+      'motion': next.motion.name,
     });
     final storage = ref.read(localStorageServiceProvider);
     return _writes = _writes.then((_) async {
@@ -117,7 +117,16 @@ class CanvasChannelNotifier extends Notifier<ChannelSettings> {
   }
 }
 
-const _version = 2;
+/// v4：空闲微动从开关改成三档（关闭 / 防烧屏 / 原本效果），默认关闭。
+const _version = 4;
+
+/// v4 之前存的是开关：那时的“开”多半只是当时的默认值（改别的设置时整份一起存下），
+/// 一律按没选过处理、回到关闭，不迁成另外两档；v4 起照存的档位来。
+ChannelMotion _storedMotion(Map<dynamic, dynamic> value) {
+  final version = value['version'];
+  if (version is! int || version < 4) return ChannelMotion.off;
+  return _named(ChannelMotion.values, value['motion'], ChannelMotion.off);
+}
 
 /// 存储 v1 之后新增的主题。
 const _addedAfterV1 = [

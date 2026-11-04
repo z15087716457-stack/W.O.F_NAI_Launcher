@@ -1,10 +1,10 @@
+import 'dart:async';
 import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
-import 'package:flutter/scheduler.dart';
 
 import '../../themes/presets/geist_theme.dart';
 import '../../themes/studio_typography.dart';
@@ -18,6 +18,10 @@ import '../../themes/studio_typography.dart';
 ///
 /// 时钟与去噪程度跨实例保留：载入页换成登录页时画面接着走，文字墙
 /// 慢慢散回噪点，而不是从头开始。
+///
+/// 每秒最多 [frameInterval] 一帧（约 30 帧，和原来按 33ms 节流更新画面一样快）：
+/// 用定时器按这个节拍要帧，不再每次屏幕刷新都要一帧。窗口藏起来、最小化、被完全挡住
+/// （`TickerMode` 关）或系统减少动态效果时停。
 class EntryField extends StatefulWidget {
   const EntryField({
     super.key,
@@ -45,6 +49,9 @@ class EntryField extends StatefulWidget {
 
   /// 登录中的去噪程度下限。
   static const double busyLevel = 0.42;
+
+  /// 画面更新的节拍（约 30 帧）。
+  static const frameInterval = Duration(milliseconds: _frameMs);
 
   /// 最近一次解码使用的种子，供页脚显示。
   static final ValueNotifier<int> seed = ValueNotifier<int>(2481937562);
@@ -152,16 +159,15 @@ class _Repaint extends ChangeNotifier {
   void tick() => notifyListeners();
 }
 
-class _EntryFieldState extends State<EntryField>
-    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
-  late final Ticker _ticker = createTicker(_onTick);
+class _EntryFieldState extends State<EntryField> with WidgetsBindingObserver {
+  Timer? _clock;
   final _repaint = _Repaint();
   final _rng = math.Random();
 
   bool _animate = true;
   bool _visible = true;
+  bool _ticking = true;
   bool _primed = false;
-  int _lastMs = -1000;
   int _lastHudMs = -1000;
   double _nextEvent = 0;
   final _events = <_DecodeEvent>[];
@@ -193,7 +199,8 @@ class _EntryFieldState extends State<EntryField>
   void didChangeDependencies() {
     super.didChangeDependencies();
     _animate = !MediaQuery.disableAnimationsOf(context);
-    _syncTicker();
+    _ticking = TickerMode.valuesOf(context).enabled;
+    _syncClock();
   }
 
   @override
@@ -211,15 +218,16 @@ class _EntryFieldState extends State<EntryField>
     _visible =
         state == AppLifecycleState.resumed ||
         state == AppLifecycleState.inactive;
-    _syncTicker();
+    _syncClock();
   }
 
-  void _syncTicker() {
-    final run = _animate && _visible;
-    if (run && !_ticker.isActive) {
-      _ticker.start();
-    } else if (!run && _ticker.isActive) {
-      _ticker.stop();
+  void _syncClock() {
+    final run = _animate && _visible && _ticking;
+    if (run && _clock == null) {
+      _clock = Timer.periodic(EntryField.frameInterval, (_) => _onFrame());
+    } else if (!run && _clock != null) {
+      _clock!.cancel();
+      _clock = null;
     }
     if (!_animate) _scheduleStillFrame();
   }
@@ -237,7 +245,7 @@ class _EntryFieldState extends State<EntryField>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _ticker.dispose();
+    _clock?.cancel();
     _repaint.dispose();
     _atlas?.dispose();
     super.dispose();
@@ -247,10 +255,9 @@ class _EntryFieldState extends State<EntryField>
       ? math.max(widget.signal, EntryField.busyLevel)
       : widget.signal.clamp(0.0, 1.0);
 
-  void _onTick(Duration _) {
+  void _onFrame() {
+    if (!mounted) return;
     final ms = EntryField._clock.elapsedMilliseconds;
-    if (ms - _lastMs < _frameMs) return;
-    _lastMs = ms;
     final target = _target;
     final level = EntryField._level;
     // 往上跟得快（进度、登录中），往下散得慢（载入页换成登录页）。

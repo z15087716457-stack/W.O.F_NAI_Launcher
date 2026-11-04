@@ -30,7 +30,7 @@ ChannelSettings channelSettings({
   Set<ChannelTheme> pool = channelLegacyThemes,
   ChannelLevel level = ChannelLevel.standard,
   bool ruler = true,
-  bool motion = true,
+  ChannelMotion motion = ChannelMotion.original,
 }) => ChannelSettings(
   mode: mode,
   fixed: fixed,

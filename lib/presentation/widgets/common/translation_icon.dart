@@ -101,16 +101,19 @@ class _TranslationIconState extends State<TranslationIcon>
           );
     return ExcludeSemantics(
       child: widget.busy
-          ? SizedBox(
-              width: widget.style == TranslationIconStyle.pill
-                  ? dimension * 10 / 12
-                  : dimension,
-              height: dimension,
-              child: FittedBox(
-                child: SizedBox.square(
-                  dimension: dimension,
-                  child: CustomPaint(
-                    painter: TranslationIconPainter(ink, _motion),
+          // 翻译中一直在转：自己一个重绘边界，不连累所在的输入框
+          ? RepaintBoundary(
+              child: SizedBox(
+                width: widget.style == TranslationIconStyle.pill
+                    ? dimension * 10 / 12
+                    : dimension,
+                height: dimension,
+                child: FittedBox(
+                  child: SizedBox.square(
+                    dimension: dimension,
+                    child: CustomPaint(
+                      painter: TranslationIconPainter(ink, _motion),
+                    ),
                   ),
                 ),
               ),

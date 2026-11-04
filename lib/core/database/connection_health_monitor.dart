@@ -4,6 +4,7 @@ import 'dart:math' as math;
 
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
+import '../services/app_visibility.dart';
 import '../utils/app_logger.dart';
 import 'connection_pool_holder.dart';
 
@@ -213,6 +214,8 @@ typedef HealthAlertCallback =
 /// 5. 健康状态分级（healthy, degraded, unhealthy）
 /// 6. 状态变化时触发回调
 /// 7. 可配置告警阈值
+/// 8. 传了 [windowVisibility] 时，主窗口藏起来（托盘 / 菜单栏、最小化）就停定时检查，
+///    显示时立即补查一次再恢复
 ///
 /// 使用示例：
 /// ```dart
@@ -228,8 +231,10 @@ class ConnectionHealthMonitor {
   final HealthCheckConfig _config;
   final HealthStatusChangeCallback? _onStatusChange;
   final HealthAlertCallback? _onAlert;
+  final AppVisibility? _windowVisibility;
 
   Timer? _checkTimer;
+  bool _started = false;
   int _checkGeneration = 0;
   ConnectionHealthStatus _currentStatus = ConnectionHealthStatus.healthy;
   HealthCheckResult? _lastResult;
@@ -241,25 +246,31 @@ class ConnectionHealthMonitor {
   /// 最后一次检查结果
   HealthCheckResult? get lastResult => _lastResult;
 
-  /// 是否正在运行
-  bool get isRunning => _checkTimer != null;
+  /// 是否正在运行（窗口藏起来暂停定时检查时也算）
+  bool get isRunning => _started;
+
+  /// 已启动、但因为窗口藏起来暂停了定时检查
+  bool get isPaused => _started && _checkTimer == null;
 
   ConnectionHealthMonitor({
     HealthCheckConfig? config,
     HealthStatusChangeCallback? onStatusChange,
     HealthAlertCallback? onAlert,
     ConnectionMetricsCollector? metricsCollector,
+    AppVisibility? windowVisibility,
   }) : _config = config ?? HealthCheckConfig(),
        _onStatusChange = onStatusChange,
        _onAlert = onAlert,
+       _windowVisibility = windowVisibility,
        _metricsCollector = metricsCollector ?? ConnectionMetricsCollector();
 
   /// 启动健康检查
   void start() {
-    if (_checkTimer != null) {
+    if (_started) {
       AppLogger.w('Health monitor already running', 'ConnectionHealthMonitor');
       return;
     }
+    _started = true;
 
     AppLogger.i(
       'Starting health monitor with interval: ${_config.checkInterval.inSeconds}s',
@@ -269,13 +280,41 @@ class ConnectionHealthMonitor {
     // 立即执行一次检查
     _performCheck();
 
-    // 设置定时检查
+    // 设置定时检查（窗口藏着时等显示再开）
+    _windowVisibility?.addListener(_windowVisibilityChanged);
+    if (_windowVisibility?.isVisible ?? true) _startTimer();
+  }
+
+  void _startTimer() {
+    _checkTimer?.cancel();
     _checkTimer = Timer.periodic(_config.checkInterval, (_) => _performCheck());
+  }
+
+  void _windowVisibilityChanged() {
+    if (!_started) return;
+    if (_windowVisibility!.isVisible) {
+      if (_checkTimer != null) return;
+      AppLogger.d(
+        'Window shown, resuming health checks',
+        'ConnectionHealthMonitor',
+      );
+      _performCheck();
+      _startTimer();
+    } else if (_checkTimer != null) {
+      _checkTimer!.cancel();
+      _checkTimer = null;
+      AppLogger.d(
+        'Window hidden, pausing health checks',
+        'ConnectionHealthMonitor',
+      );
+    }
   }
 
   /// 停止健康检查
   void stop() {
     _checkGeneration++;
+    _started = false;
+    _windowVisibility?.removeListener(_windowVisibilityChanged);
     _checkTimer?.cancel();
     _checkTimer = null;
     AppLogger.i('Health monitor stopped', 'ConnectionHealthMonitor');
@@ -524,6 +563,7 @@ class ConnectionHealthMonitor {
   Map<String, dynamic> get diagnostics => {
     'currentStatus': _currentStatus.name,
     'isRunning': isRunning,
+    'isPaused': isPaused,
     'checkIntervalMs': _config.checkInterval.inMilliseconds,
     'lastResult': _lastResult?.toDiagnostics(),
     'metrics': _metricsCollector.snapshot.toDiagnostics(),

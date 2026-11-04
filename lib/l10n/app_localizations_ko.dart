@@ -16714,7 +16714,17 @@ class AppLocalizationsKo extends AppLocalizations {
   String get channel_motion => '대기 중 움직임';
 
   @override
-  String get channel_motionSub => '아주 가벼운 움직임. 생성 중에는 자동으로 멈춥니다';
+  String get channel_motionSub =>
+      '“번인 방지”는 OLED 화면용으로, 대기 중 1초마다 살짝 움직일 뿐이라 전력을 거의 쓰지 않습니다. “원래 효과”는 예전의 반짝이고 떠다니는 애니메이션으로 CPU와 GPU를 계속 사용합니다';
+
+  @override
+  String get channel_motionOff => '끄기';
+
+  @override
+  String get channel_motionAntiBurnIn => '번인 방지';
+
+  @override
+  String get channel_motionOriginal => '원래 효과';
 
   @override
   String get channel_toastTitle => '이번 채널';
@@ -17838,7 +17848,8 @@ class AppLocalizationsKo extends AppLocalizations {
   String get set_cvMotion => '대기 중 움직임';
 
   @override
-  String get set_cvMotionSub => '생성 중이거나 동작 줄이기를 켜면 멈춥니다';
+  String get set_cvMotionSub =>
+      '“번인 방지”(OLED용)는 1초마다 살짝 움직여 전력을 거의 쓰지 않고, “원래 효과”는 CPU와 GPU를 계속 사용합니다. 생성 중이거나 동작 줄이기를 켜면 멈춥니다';
 
   @override
   String get set_cvOps => '캔버스 조작';

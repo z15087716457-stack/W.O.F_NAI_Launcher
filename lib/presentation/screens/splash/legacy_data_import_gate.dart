@@ -12,6 +12,7 @@ import '../../themes/app_theme.dart';
 import '../../widgets/auth/entry_controls.dart';
 import '../../widgets/branding/brand_logo.dart';
 import '../../widgets/branding/entry_field.dart';
+import '../../widgets/common/studio_root_scope.dart';
 
 /// Shows the first-launch copy of the previous macOS version's data, or a
 /// sync, undo or redo requested in Settings (see [MacLegacyDataImport]), in
@@ -122,7 +123,7 @@ class LegacyDataImportApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    final app = MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: AppTheme.getTheme(AppStyle.geist, Brightness.light),
       darkTheme: AppTheme.getTheme(AppStyle.geist, Brightness.dark),
@@ -140,6 +141,7 @@ class LegacyDataImportApp extends StatelessWidget {
             LegacyDataImportPage(appName: appName, view: value),
       ),
     );
+    return StudioRootScope(child: app);
   }
 }
 

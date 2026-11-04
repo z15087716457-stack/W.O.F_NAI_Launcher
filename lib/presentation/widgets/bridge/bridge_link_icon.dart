@@ -50,18 +50,22 @@ class _BridgeLinkIconState extends State<BridgeLinkIcon>
   }
 
   @override
-  Widget build(BuildContext context) => SizedBox.square(
-    dimension: widget.size,
-    child: AnimatedBuilder(
-      animation: _motion,
-      builder: (_, _) => CustomPaint(
-        painter: BridgeLinkPainter(
-          color: widget.color,
-          progress: _motion.value,
+  Widget build(BuildContext context) {
+    final icon = SizedBox.square(
+      dimension: widget.size,
+      child: AnimatedBuilder(
+        animation: _motion,
+        builder: (_, _) => CustomPaint(
+          painter: BridgeLinkPainter(
+            color: widget.color,
+            progress: _motion.value,
+          ),
         ),
       ),
-    ),
-  );
+    );
+    // 连接中一直在动：自己一个重绘边界，不连累所在的工具栏
+    return widget.working ? RepaintBoundary(child: icon) : icon;
+  }
 
   @override
   void dispose() {

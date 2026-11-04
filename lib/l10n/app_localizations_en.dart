@@ -17164,7 +17164,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get channel_motion => 'Idle motion';
 
   @override
-  String get channel_motionSub => 'Subtle animation, paused while generating';
+  String get channel_motionSub =>
+      'Burn-in guard is for OLED screens: it shifts the decorations slightly once a second while idle and uses almost no power. Original is the old twinkling, drifting animation and keeps the CPU and GPU busy';
+
+  @override
+  String get channel_motionOff => 'Off';
+
+  @override
+  String get channel_motionAntiBurnIn => 'Burn-in guard';
+
+  @override
+  String get channel_motionOriginal => 'Original';
 
   @override
   String get channel_toastTitle => 'This session';
@@ -18312,7 +18322,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get set_cvMotionSub =>
-      'Pauses while generating or when reduce motion is on';
+      'Burn-in guard (for OLED) shifts slightly once a second and uses almost no power; Original keeps the CPU and GPU busy. Pauses while generating or when reduce motion is on';
 
   @override
   String get set_cvOps => 'Canvas controls';

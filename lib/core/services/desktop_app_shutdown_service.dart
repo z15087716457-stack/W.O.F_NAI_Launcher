@@ -7,6 +7,7 @@ import 'package:window_manager/window_manager.dart';
 
 import '../database/database_manager.dart';
 import '../utils/app_logger.dart';
+import 'app_visibility.dart';
 
 /// 桌面应用统一退出入口。
 ///
@@ -49,6 +50,7 @@ class DesktopAppShutdownService {
     final elapsed = Stopwatch()..start();
     AppLogger.i('Application shutdown started', 'AppShutdown');
     if (Platform.isMacOS || Platform.isWindows) {
+      AppVisibilitySources.instance.markHidden();
       await _cleanup('Window hide', windowManager.hide);
     }
     if (Platform.isMacOS) await _cleanup('Tray', trayManager.destroy);

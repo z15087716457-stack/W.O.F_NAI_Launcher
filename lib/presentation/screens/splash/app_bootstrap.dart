@@ -14,6 +14,7 @@ import '../../providers/update_provider.dart';
 import '../../providers/warmup_provider.dart';
 import 'splash_screen.dart';
 import '../../providers/theme_provider.dart';
+import '../../widgets/common/studio_root_scope.dart';
 import '../../widgets/common/workspace_typography_scope.dart';
 import '../../widgets/branding/entry_language_button.dart';
 import '../../widgets/navigation/integrated_title_bar.dart';
@@ -44,7 +45,9 @@ class _AppBootstrapState extends ConsumerState<AppBootstrap> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => StudioRootScope(child: _build(context));
+
+  Widget _build(BuildContext context) {
     final warmupState = ref.watch(warmupNotifierProvider);
 
     // 预加载完成后显示主应用。账号还在自动验证时先停在载入页，

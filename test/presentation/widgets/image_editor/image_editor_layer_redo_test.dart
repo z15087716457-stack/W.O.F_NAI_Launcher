@@ -129,6 +129,9 @@ void main() {
       expect(afterFirst, isNot(before));
       final activeAfter = editor.layerManager.activeLayerId;
       actions().onUndo();
+      // 撤销是异步的（先等 3D 图层落盘），它引起的重建在下一帧；编辑器没有选区时
+      // 不再一直出帧，要再推一帧才看得到
+      await t.pump();
       await t.pump();
       expect(order(), before);
       expect(

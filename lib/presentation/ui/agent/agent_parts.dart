@@ -612,9 +612,12 @@ class _AgentStepDotState extends State<AgentStepDot>
             stroke: 2,
           ),
         ),
-        AgentDotKind.running => RotationTransition(
-          turns: _spin,
-          child: CustomPaint(painter: _ArcPainter(c.accent)),
+        // 一直在转：自己一个重绘边界，不连累整条步骤列表
+        AgentDotKind.running => RepaintBoundary(
+          child: RotationTransition(
+            turns: _spin,
+            child: CustomPaint(painter: _ArcPainter(c.accent)),
+          ),
         ),
         AgentDotKind.pending => CustomPaint(painter: _DashPainter(c.strong)),
       },

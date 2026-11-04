@@ -7,12 +7,14 @@ import 'package:flutter/services.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../themes/presets/geist_theme.dart';
 import '../../themes/studio_typography.dart';
+import '../common/system_display_options_scope.dart';
 
 /// 登录 / 载入页共用的颜色：沿用 Geist 中性灰，只有操作用品牌蓝。
 @immutable
 class EntryPalette {
   const EntryPalette._({
     required this.dark,
+    required this.frosted,
     required this.ink,
     required this.muted,
     required this.faint,
@@ -33,8 +35,11 @@ class EntryPalette {
   factory EntryPalette.of(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final dark = scheme.brightness == Brightness.dark;
+    // 系统「降低透明度」：卡片不透出背后的字符场，改成实底（见 [EntryCard]）
+    final solid = SystemDisplayOptionsScope.reduceTransparencyOf(context);
     return EntryPalette._(
       dark: dark,
+      frosted: !solid,
       ink: scheme.onSurface,
       muted: scheme.onSurfaceVariant,
       faint: dark ? const Color(0xFF6B6B6B) : const Color(0xFF8F8F8F),
@@ -45,8 +50,8 @@ class EntryPalette {
           ? Colors.white.withValues(alpha: 0.05)
           : Colors.black.withValues(alpha: 0.045),
       card: dark
-          ? const Color(0xFF181818).withValues(alpha: 0.70)
-          : Colors.white.withValues(alpha: 0.72),
+          ? const Color(0xFF181818).withValues(alpha: solid ? 1 : 0.70)
+          : Colors.white.withValues(alpha: solid ? 1 : 0.72),
       input: dark ? const Color(0xFF0C0C0C) : Colors.white,
       segment: dark ? const Color(0xFF2B2B2B) : Colors.white,
       error: scheme.error,
@@ -96,12 +101,24 @@ class EntryPalette {
   }
 
   final bool dark;
+
+  /// 卡片磨砂（背后模糊）；系统开了「降低透明度」时为 false，卡片是实底。
+  final bool frosted;
   final Color ink, muted, faint, border, borderStrong, control, hover;
   final Color card, input, segment, error, blueHover, ring;
   final List<BoxShadow> cardShadow, segmentShadow;
 
   Color get blue => GeistTheme.blue;
 }
+
+/// 磨砂：背后的字符场透过来被模糊；系统开了「降低透明度」时不模糊，卡片是实底
+///（[EntryPalette.frosted]、[EntryPalette.card]）。
+Widget _frosted(EntryPalette palette, Widget child) => palette.frosted
+    ? BackdropFilter(
+        filter: ui.ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+        child: child,
+      )
+    : child;
 
 /// 磨砂卡片：背后的字符场透过来被模糊，卡片本身只有一条细边和软阴影。
 class EntryCard extends StatelessWidget {
@@ -121,9 +138,9 @@ class EntryCard extends StatelessWidget {
       painter: _OutsetShadowPainter(palette.cardShadow, 12),
       child: ClipRRect(
         borderRadius: radius,
-        child: BackdropFilter(
-          filter: ui.ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-          child: Container(
+        child: _frosted(
+          palette,
+          Container(
             padding: padding,
             decoration: BoxDecoration(
               color: palette.card,
@@ -319,9 +336,9 @@ class _EntryMorphCardState extends State<EntryMorphCard>
                   painter: _OutsetShadowPainter(shadows, radius),
                   child: ClipRRect(
                     borderRadius: shape,
-                    child: BackdropFilter(
-                      filter: ui.ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-                      child: DecoratedBox(
+                    child: _frosted(
+                      palette,
+                      DecoratedBox(
                         decoration: BoxDecoration(
                           color: Color.lerp(palette.blue, palette.card, fill),
                           borderRadius: shape,
@@ -876,7 +893,11 @@ class _EntryBusyDotsState extends State<EntryBusyDots>
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) =>
+      // 自己一个重绘边界：明灭只重画三个小方块，不连累背后的卡片
+      RepaintBoundary(child: _dots());
+
+  Widget _dots() {
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, _) {

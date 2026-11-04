@@ -31,6 +31,6 @@ To enable it: gear at the bottom left of the canvas → “Canvas display” →
 - **Mode**: Off, One theme or Shuffle (keep at least two themes for Shuffle; use “Reshuffle” to change the selection).
 - **Strength**: Soft, Normal or Bold.
 - **Time marks**: Show batch times, day dividers and the scrubber on the right.
-- **Idle motion**: Subtle movement when not generating; pauses automatically during generation.
+- **Idle motion**: Three settings, Off by default. Burn-in guard is for OLED screens: the decoration shifts slightly once a second while idle and uses almost no power. Original is the old twinkling, drifting animation and keeps the CPU and GPU busy. Both pause during generation and while the window is minimized or hidden to the tray or menu bar; on a Mac they also pause while other windows fully cover it.
 
 <img src="../../images/readme/en/channel-themes.webp" alt="Visual channel themes" width="100%">

@@ -29900,8 +29900,26 @@ abstract class AppLocalizations {
   /// No description provided for @channel_motionSub.
   ///
   /// In en, this message translates to:
-  /// **'Subtle animation, paused while generating'**
+  /// **'Burn-in guard is for OLED screens: it shifts the decorations slightly once a second while idle and uses almost no power. Original is the old twinkling, drifting animation and keeps the CPU and GPU busy'**
   String get channel_motionSub;
+
+  /// No description provided for @channel_motionOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get channel_motionOff;
+
+  /// No description provided for @channel_motionAntiBurnIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Burn-in guard'**
+  String get channel_motionAntiBurnIn;
+
+  /// No description provided for @channel_motionOriginal.
+  ///
+  /// In en, this message translates to:
+  /// **'Original'**
+  String get channel_motionOriginal;
 
   /// No description provided for @channel_toastTitle.
   ///
@@ -31873,7 +31891,7 @@ abstract class AppLocalizations {
   /// No description provided for @set_cvMotionSub.
   ///
   /// In en, this message translates to:
-  /// **'Pauses while generating or when reduce motion is on'**
+  /// **'Burn-in guard (for OLED) shifts slightly once a second and uses almost no power; Original keeps the CPU and GPU busy. Pauses while generating or when reduce motion is on'**
   String get set_cvMotionSub;
 
   /// No description provided for @set_cvOps.

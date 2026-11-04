@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import '../../core/services/app_image_cache.dart';
 import '../../core/utils/desktop_platform.dart';
 
 /// macOS 上按住 Control 单击当右键（次键）用，和系统、浏览器一样。
@@ -59,8 +60,10 @@ mixin ControlClickBinding on GestureBinding {
   }
 }
 
-/// 应用用的 binding：[WidgetsFlutterBinding] 加上 [ControlClickBinding]。
-class AppWidgetsBinding extends WidgetsFlutterBinding with ControlClickBinding {
+/// 应用用的 binding：[WidgetsFlutterBinding] 加上 [ControlClickBinding]，图片缓存换成
+/// [AppImageCache]（[AppImageCacheBinding]：窗口藏着时也认得屏幕上的图）。
+class AppWidgetsBinding extends WidgetsFlutterBinding
+    with ControlClickBinding, AppImageCacheBinding {
   static AppWidgetsBinding? _instance;
 
   /// 在 main 里代替 [WidgetsFlutterBinding.ensureInitialized]，最先调用。

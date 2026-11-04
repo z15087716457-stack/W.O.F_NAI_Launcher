@@ -2,5 +2,8 @@
   "viewer_fullscreen": "全螢幕（F11）",
   "common_showInFinder": "在 Finder 中顯示",
   "imageViewer_missingHintFinder": "可能已經在 Finder 裡被移動、改名或刪除",
-  "shortcut_action_hide_to_menu_bar": "隱藏到選單列"
+  "shortcut_action_hide_to_menu_bar": "隱藏到選單列",
+  "channel_motionSub": "「防烙印」給 OLED 螢幕用，畫面閒置時每秒輕微移動一次，幾乎不耗電；「原本效果」是原來的閃爍、漂浮動畫，會持續佔用 CPU 和顯示卡",
+  "channel_motionAntiBurnIn": "防烙印",
+  "set_cvMotionSub": "「防烙印」給 OLED 螢幕用，每秒輕微移動一次，幾乎不耗電；「原本效果」會持續佔用 CPU 和顯示卡。生成中和開啟“減少動態效果”時暫停"
 }

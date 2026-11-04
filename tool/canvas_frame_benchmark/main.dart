@@ -48,10 +48,10 @@ class ProbeChannel extends CanvasChannelNotifier {
   ChannelSettings build() => ChannelSettings(
     seed: 7,
     mode: variant == 'off' ? ChannelMode.off : ChannelMode.random,
-    motion: true,
+    motion: ChannelMotion.original,
   );
 
-  void freeze() => state = state.copyWith(motion: false);
+  void freeze() => state = state.copyWith(motion: ChannelMotion.off);
 }
 
 Future<Uint8List> syntheticImage(int i) async {

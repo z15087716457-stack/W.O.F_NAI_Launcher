@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'core/services/app_visibility.dart';
 import 'core/services/desktop_app_shutdown_service.dart';
 import 'core/utils/studio_sandbox.dart';
 import 'presentation/widgets/navigation/integrated_title_bar.dart';
@@ -157,6 +158,7 @@ class NAILauncherApp extends ConsumerWidget {
         if (dialogContext != null) ShortcutHelpDialog.show(dialogContext);
       },
       ShortcutIds.minimizeToTray: () {
+        AppVisibilitySources.instance.markHidden();
         windowManager.hide();
       },
       ShortcutIds.quitApp: () {

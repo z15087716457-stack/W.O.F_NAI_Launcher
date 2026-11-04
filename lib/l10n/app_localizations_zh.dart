@@ -16445,7 +16445,17 @@ class AppLocalizationsZh extends AppLocalizations {
   String get channel_motion => '空闲微动';
 
   @override
-  String get channel_motionSub => '很轻的动效，生成时自动暂停';
+  String get channel_motionSub =>
+      '「防烧屏」给 OLED 屏用，画面空闲时每秒轻微移动一次，几乎不耗电；「原本效果」是原来的闪烁、漂浮动画，会持续占用 CPU 和显卡';
+
+  @override
+  String get channel_motionOff => '关闭';
+
+  @override
+  String get channel_motionAntiBurnIn => '防烧屏';
+
+  @override
+  String get channel_motionOriginal => '原本效果';
 
   @override
   String get channel_toastTitle => '本次通道';
@@ -17559,7 +17569,8 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_cvMotion => '空闲微动';
 
   @override
-  String get set_cvMotionSub => '生成中和开启“减少动态效果”时自动暂停';
+  String get set_cvMotionSub =>
+      '「防烧屏」给 OLED 屏用，每秒轻微移动一次，几乎不耗电；「原本效果」会持续占用 CPU 和显卡。生成中和开启“减少动态效果”时暂停';
 
   @override
   String get set_cvOps => '画布操作';
@@ -38460,7 +38471,17 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get channel_motion => '空閒微動';
 
   @override
-  String get channel_motionSub => '很輕的動效，生成時自動暫停';
+  String get channel_motionSub =>
+      '「防烙印」給 OLED 螢幕用，畫面閒置時每秒輕微移動一次，幾乎不耗電；「原本效果」是原來的閃爍、漂浮動畫，會持續佔用 CPU 和顯示卡';
+
+  @override
+  String get channel_motionOff => '關閉';
+
+  @override
+  String get channel_motionAntiBurnIn => '防烙印';
+
+  @override
+  String get channel_motionOriginal => '原本效果';
 
   @override
   String get channel_toastTitle => '本次通道';
@@ -39574,7 +39595,8 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get set_cvMotion => '空閒微動';
 
   @override
-  String get set_cvMotionSub => '生成中和開啟“減少動態效果”時自動暫停';
+  String get set_cvMotionSub =>
+      '「防烙印」給 OLED 螢幕用，每秒輕微移動一次，幾乎不耗電；「原本效果」會持續佔用 CPU 和顯示卡。生成中和開啟“減少動態效果”時暫停';
 
   @override
   String get set_cvOps => '畫布操作';

@@ -52,6 +52,15 @@ abstract final class ChannelFormat {
     };
   }
 
+  static String motion(BuildContext context, ChannelMotion v) {
+    final l = context.l10n;
+    return switch (v) {
+      ChannelMotion.off => l.channel_motionOff,
+      ChannelMotion.antiBurnIn => l.channel_motionAntiBurnIn,
+      ChannelMotion.original => l.channel_motionOriginal,
+    };
+  }
+
   static String mode(BuildContext context, ChannelMode v) {
     final l = context.l10n;
     return switch (v) {

@@ -212,7 +212,11 @@ class _AgentActivityIconState extends State<AgentActivityIcon>
         builder: (_, child) => _animated(kind, _loop.value, child!, color),
       );
     }
-    return SizedBox.square(
+    final moving =
+        !_still &&
+        (widget.state == AgentActivityState.running ||
+            widget.state == AgentActivityState.waiting);
+    final box = SizedBox.square(
       key: ValueKey('agent-activity-${kind.name}-${widget.state.name}'),
       dimension: 16,
       child: Stack(
@@ -246,6 +250,8 @@ class _AgentActivityIconState extends State<AgentActivityIcon>
         ],
       ),
     );
+    // 一直在动（工作中 / 等你处理）时自己一个重绘边界，不连累整条对话流
+    return moving ? RepaintBoundary(child: box) : box;
   }
 
   /// 0→1→0 的缓动。
@@ -376,17 +382,20 @@ class _AgentShimmerState extends State<AgentShimmer>
   Widget build(BuildContext context) {
     if (!widget.enabled || _still) return widget.child;
     final c = context.ui;
-    return AnimatedBuilder(
-      animation: _c,
-      child: widget.child,
-      builder: (_, child) => ShaderMask(
-        blendMode: BlendMode.srcIn,
-        shaderCallback: (rect) => LinearGradient(
-          colors: [c.muted, c.muted, c.ink, c.muted, c.muted],
-          stops: const [0, .35, .5, .65, 1],
-          transform: _Slide(_c.value * 2 - 1),
-        ).createShader(rect),
-        child: child,
+    // 光扫过时只换遮罩：文字录一次，整行也不连累所在的列表重画
+    return RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: _c,
+        child: RepaintBoundary(child: widget.child),
+        builder: (_, child) => ShaderMask(
+          blendMode: BlendMode.srcIn,
+          shaderCallback: (rect) => LinearGradient(
+            colors: [c.muted, c.muted, c.ink, c.muted, c.muted],
+            stops: const [0, .35, .5, .65, 1],
+            transform: _Slide(_c.value * 2 - 1),
+          ).createShader(rect),
+          child: child,
+        ),
       ),
     );
   }
@@ -656,22 +665,25 @@ class _AgentWorkingLineState extends State<AgentWorkingLine>
           dimension: 16,
           child: _still
               ? star
-              : AnimatedBuilder(
-                  animation: _breath,
-                  child: star,
-                  builder: (_, child) {
-                    final e = .5 - .5 * math.cos(2 * math.pi * _breath.value);
-                    return Opacity(
-                      opacity: .75 + .25 * e,
-                      child: Transform.rotate(
-                        angle: .35 * e,
-                        child: Transform.scale(
-                          scale: .82 + .22 * e,
-                          child: child,
+              // 一直在呼吸：自己一个重绘边界
+              : RepaintBoundary(
+                  child: AnimatedBuilder(
+                    animation: _breath,
+                    child: star,
+                    builder: (_, child) {
+                      final e = .5 - .5 * math.cos(2 * math.pi * _breath.value);
+                      return Opacity(
+                        opacity: .75 + .25 * e,
+                        child: Transform.rotate(
+                          angle: .35 * e,
+                          child: Transform.scale(
+                            scale: .82 + .22 * e,
+                            child: child,
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
         ),
         Flexible(

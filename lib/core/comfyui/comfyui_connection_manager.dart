@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:uuid/uuid.dart';
 
+import '../services/app_visibility.dart';
 import '../utils/app_logger.dart';
 import 'comfyui_api_service.dart';
 import 'comfyui_models.dart';
@@ -14,7 +15,7 @@ import 'comfyui_websocket_service.dart';
 /// - HTTP API 服务实例
 /// - WebSocket 进度服务实例
 /// - 连接状态追踪
-/// - 心跳检测
+/// - 心跳检测（主窗口藏起来时暂停，显示时先查一次再继续）
 class ComfyUIConnectionManager {
   static const String _tag = 'ComfyUI-Conn';
 
@@ -38,9 +39,18 @@ class ComfyUIConnectionManager {
   ComfyUIApiService? get api => _apiService;
   ComfyUIWebSocketService? get ws => _wsService;
 
-  ComfyUIConnectionManager({String serverUrl = 'http://127.0.0.1:8188'})
-    : _serverUrl = normalizeComfyUIBaseUrl(serverUrl),
-      clientId = const Uuid().v4();
+  ComfyUIConnectionManager({
+    String serverUrl = 'http://127.0.0.1:8188',
+    this.heartbeatInterval = const Duration(seconds: 30),
+    AppVisibility? visibility,
+  }) : _serverUrl = normalizeComfyUIBaseUrl(serverUrl),
+       clientId = const Uuid().v4(),
+       _visibility = visibility ?? AppVisibility.instance {
+    _visibility.addListener(_visibilityChanged);
+  }
+
+  final Duration heartbeatInterval;
+  final AppVisibility _visibility;
 
   /// 更新服务器地址（需要重新连接）
   void updateServerUrl(String url) {
@@ -107,8 +117,36 @@ class ComfyUIConnectionManager {
 
   /// 释放所有资源
   void dispose() {
+    _visibility.removeListener(_visibilityChanged);
     disconnect();
     _statusController.close();
+  }
+
+  /// Hidden window: no heartbeat. Shown again while connected: check once
+  /// right away, then every [heartbeatInterval] as before.
+  void _visibilityChanged() {
+    if (_statusController.isClosed ||
+        _apiService == null ||
+        _status != ComfyUIConnectionStatus.connected) {
+      return;
+    }
+    if (!_visibility.isVisible) {
+      _heartbeatTimer?.cancel();
+      _heartbeatTimer = null;
+      return;
+    }
+    if (_heartbeatTimer != null) return;
+    unawaited(_checkConnection(_connectionRevision, _apiService!));
+    _startHeartbeat();
+  }
+
+  Future<void> _checkConnection(int revision, ComfyUIApiService api) async {
+    final ok = await api.testConnection();
+    if (revision == _connectionRevision &&
+        !ok &&
+        _status == ComfyUIConnectionStatus.connected) {
+      _setStatus(ComfyUIConnectionStatus.error);
+    }
   }
 
   void _setStatus(ComfyUIConnectionStatus newStatus) {
@@ -119,15 +157,13 @@ class ComfyUIConnectionManager {
 
   void _startHeartbeat() {
     _heartbeatTimer?.cancel();
+    _heartbeatTimer = null;
+    if (!_visibility.isVisible) return;
     final revision = _connectionRevision;
     final api = _apiService!;
-    _heartbeatTimer = Timer.periodic(const Duration(seconds: 30), (_) async {
-      final ok = await api.testConnection();
-      if (revision == _connectionRevision &&
-          !ok &&
-          _status == ComfyUIConnectionStatus.connected) {
-        _setStatus(ComfyUIConnectionStatus.error);
-      }
-    });
+    _heartbeatTimer = Timer.periodic(
+      heartbeatInterval,
+      (_) => unawaited(_checkConnection(revision, api)),
+    );
   }
 }

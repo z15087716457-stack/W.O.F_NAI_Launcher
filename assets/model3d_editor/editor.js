@@ -129,7 +129,8 @@ window.naiEditor = {
     Promise.resolve()
       .then(() => fn(msg))
       .then((data) => done(true, data))
-      .catch((e) => done(false, { error: String(e && e.message || e) }));
+      .catch((e) => done(false, { error: String(e && e.message || e) }))
+      .finally(requestRender); // 命令可能改了场景、相机或尺寸:画一帧
   },
 };
 
@@ -180,6 +181,7 @@ window.addEventListener('keydown', (event) => {
   controls.target.add(delta);
   controls.update();
   markDirty();
+  requestRender();
 });
 
 // ---- 尺寸与渲染循环 ----
@@ -194,15 +196,32 @@ function resize() {
     camera.top = half; camera.bottom = -half;
   }
   camera.updateProjectionMatrix();
+  requestRender(); // 改尺寸会清空画布
 }
-window.addEventListener('resize', resize);
-resize();
 
-renderer.setAnimationLoop(() => {
-  controls.update();
+// 按需渲染:有变化才画一帧,静止时不画(原来 setAnimationLoop 按屏幕刷新率一直整场景重画)。
+// 会引起变化的:相机控制和变换手柄的 change、Dart 发来的命令、窗口尺寸、快捷键、选骨。
+// 同一帧里多次请求只画一次。
+let renderQueued = false;
+function requestRender() {
+  if (renderQueued) return;
+  renderQueued = true;
+  requestAnimationFrame(renderFrame);
+}
+function renderFrame() {
+  // 开了阻尼 / 自转时,相机停稳前 update() 一直返回 true,接着画下一帧
+  const moving = controls.update();
   syncBoneMarkers();
   renderer.render(scene, camera);
-});
+  renderQueued = false;
+  if (moving) requestRender();
+}
+controls.addEventListener('change', requestRender);
+canvas.addEventListener('webglcontextrestored', requestRender);
+
+window.addEventListener('resize', resize);
+resize();
+requestRender(); // 第一帧(画布尺寸还是 0 时 resize 不会要帧)
 
 // ---- 模型加载 ----
 function clearCurrentModel() {
@@ -322,6 +341,7 @@ transformControls.addEventListener('dragging-changed', (event) => {
   else emitState();
 });
 transformControls.addEventListener('objectChange', markDirty);
+transformControls.addEventListener('change', requestRender); // 悬停高亮、拖动
 
 // 骨骼标记球:挂在 helpers 下(渲染输出时随 helpers 整组隐藏),
 // visible 由 pose 模式独立控制(嵌套 visible 为 AND 关系)。
@@ -393,6 +413,7 @@ function selectBone(marker) {
   marker.material.color.copy(markerSelectedColor);
   transformControls.attach(marker.userData.bone);
   emitState();
+  requestRender();
 }
 
 const raycaster = new THREE.Raycaster();
@@ -496,6 +517,7 @@ window.addEventListener('keydown', (event) => {
   if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z') {
     event.preventDefault();
     if (event.shiftKey) commands.get('redoPose')({}); else undoPose();
+    requestRender();
   }
 });
 
@@ -655,6 +677,7 @@ function applySettings(values) {
     camera.position.copy(old.position); camera.quaternion.copy(old.quaternion);
     controls.dispose(); controls = new OrbitControls(camera, canvas);
     controls.target.copy(target); controls.addEventListener('end', markDirty);
+    controls.addEventListener('change', requestRender);
     transformControls.camera = camera;
     ctx.camera = camera; ctx.controls = controls;
   }

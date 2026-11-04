@@ -159,7 +159,6 @@ Widget generation(
     mode: ChannelMode.fixed,
     fixed: theme,
     level: ChannelLevel.strong,
-    motion: false,
     ruler: true,
     seed: 7,
   );
@@ -579,7 +578,6 @@ void main() {
                           mode: ChannelMode.fixed,
                           fixed: theme,
                           level: ChannelLevel.strong,
-                          motion: false,
                           ruler: false,
                           seed: 7,
                         ),

@@ -2,8 +2,13 @@ import 'dart:ui' as ui;
 
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 
+import 'system_display_options_scope.dart';
+
 /// Glass finish for compact in-app surfaces. The optional backdrop pass samples
 /// only pixels behind this clipped surface; child text and controls stay sharp.
+///
+/// With the system's "reduce transparency" on (macOS), a blurred surface falls
+/// back to the solid finish below.
 class StudioGlassSurface extends StatelessWidget {
   const StudioGlassSurface({
     super.key,
@@ -44,7 +49,9 @@ class StudioGlassSurface extends StatelessWidget {
         ),
       );
     }
-    if (backdropBlur && !highContrast) {
+    if (backdropBlur &&
+        !highContrast &&
+        !SystemDisplayOptionsScope.reduceTransparencyOf(context)) {
       final base = theme.colorScheme.surfaceContainerLow;
       final colors = dark
           ? [
@@ -84,7 +91,8 @@ class StudioGlassSurface extends StatelessWidget {
                 Colors.white.withValues(alpha: dark ? .22 : .92),
                 theme.colorScheme.outline.withValues(alpha: dark ? .4 : .32),
               ),
-              child: child,
+              // 按钮悬停、价格变化只重画内容，颗粒和边缘高光录一次就够
+              child: RepaintBoundary(child: child),
             ),
           ),
         ),

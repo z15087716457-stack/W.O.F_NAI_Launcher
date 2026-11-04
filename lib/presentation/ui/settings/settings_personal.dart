@@ -1129,8 +1129,10 @@ class _ChannelSectionState extends State<_ChannelSection> {
           l.set_cvMotionSub,
           ch.motion != _def.motion,
           () => set(ch.copyWith(motion: _def.motion)),
-          SettingsSwitch(
-            value: ch.motion,
+          UiSegmented<ChannelMotion>(
+            values: ChannelMotion.values,
+            selected: ch.motion,
+            labelOf: (x) => ChannelFormat.motion(context, x),
             onChanged: (x) => set(ch.copyWith(motion: x)),
           ),
         ),

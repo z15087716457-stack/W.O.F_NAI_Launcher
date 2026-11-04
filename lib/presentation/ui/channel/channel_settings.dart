@@ -95,7 +95,7 @@ class _ChannelSettingsSectionState extends State<ChannelSettingsSection> {
               l.channel_title,
               style: UiText.sans(13, weight: FontWeight.w700, color: c.ink),
             ),
-            if (widget.generating && s.motion && !off)
+            if (widget.generating && s.motion != ChannelMotion.off && !off)
               Flexible(
                 child: Text(
                   l.channel_paused,
@@ -180,12 +180,29 @@ class _ChannelSettingsSectionState extends State<ChannelSettingsSection> {
         ),
         const SizedBox(height: 9),
         dim(
-          _SwitchRow(
+          Column(
             key: const Key('channel-motion'),
-            title: l.channel_motion,
-            sub: l.channel_motionSub,
-            value: s.motion,
-            onTap: () => _set(s.copyWith(motion: !s.motion)),
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                l.channel_motion,
+                style: UiText.sans(12.5, color: c.ink, height: 1.45),
+              ),
+              const SizedBox(height: 5),
+              _FillSegmented<ChannelMotion>(
+                key: const Key('channel-motion-mode'),
+                values: ChannelMotion.values,
+                selected: s.motion,
+                labelOf: (v) => ChannelFormat.motion(context, v),
+                keyOf: (v) => 'channel-motion-${v.name}',
+                onChanged: (v) => _set(s.copyWith(motion: v)),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                l.channel_motionSub,
+                style: UiText.sans(11, color: c.muted, height: 1.45),
+              ),
+            ],
           ),
         ),
       ],

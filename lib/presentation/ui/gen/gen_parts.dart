@@ -635,8 +635,20 @@ class _GenSliderRowState extends State<GenSliderRow> {
 }
 
 /// 三条画布工具条：沿用新控件布局，恢复旧玻璃背景、颗粒与边缘高光。
+///
+/// 每条单独一个重绘边界：工具条里悬停、换价格不连累画布那一层重录，画布那边变了也
+/// 不重录工具条。
 class GenFloat extends StatelessWidget {
   const GenFloat({super.key, required this.children});
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) =>
+      RepaintBoundary(child: _GenFloatBody(children: children));
+}
+
+class _GenFloatBody extends StatelessWidget {
+  const _GenFloatBody({required this.children});
   final List<Widget> children;
 
   @override

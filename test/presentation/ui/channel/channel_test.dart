@@ -148,8 +148,10 @@ void main() {
       expect(calls.last, contains('strong,'));
       await tapKey(t, 'channel-ruler');
       expect(calls.last, contains('ruler: false'));
-      await tapKey(t, 'channel-motion');
-      expect(calls.last, contains('motion: false'));
+      await tapKey(t, 'channel-motion-antiBurnIn');
+      expect(calls.last, contains('motion: antiBurnIn'));
+      await tapKey(t, 'channel-motion-off');
+      expect(calls.last, contains('motion: off'));
     });
 
     testWidgets('随机：去掉主题、至少留两个、换一组', (t) async {
@@ -251,14 +253,14 @@ void main() {
       expect(after.top, lessThan(before.top));
     });
 
-    testWidgets('空闲微动：开着且没在生成时 ticker 在跑，生成中停', (t) async {
+    testWidgets('空闲微动·防烧屏：没在生成时每秒挪一次（不逐帧），生成中停', (t) async {
       Widget host({required bool generating}) => MaterialApp(
         theme: GeistTheme.light,
         home: MediaQuery(
           data: const MediaQueryData(size: Size(800, 600)),
           child: ChannelBackdrop(
             data: ChannelViewData(
-              settings: channelSettings(),
+              settings: channelSettings(motion: ChannelMotion.antiBurnIn),
               camera: const ChannelCamera(offset: Offset(400, 300), scale: .5),
               batches: [for (final g in ChannelFixture.groups()) g.batch],
               now: ChannelFixture.now,
@@ -267,10 +269,15 @@ void main() {
           ),
         ),
       );
+      // 逐帧的数和挪动细节见 channel_motion_test.dart
+      final scene = find.byKey(const Key('channel-backdrop'));
       await t.pumpWidget(host(generating: false));
-      expect(SchedulerBinding.instance.transientCallbackCount, greaterThan(0));
-      await t.pumpWidget(host(generating: true));
       expect(SchedulerBinding.instance.transientCallbackCount, 0);
+      expect(t.getSize(scene), const Size(802, 602), reason: '四周多画一格');
+      await t.pumpWidget(host(generating: true));
+      await t.pump(const Duration(seconds: 3));
+      expect(SchedulerBinding.instance.hasScheduledFrame, isFalse);
+      expect(t.getSize(scene), const Size(800, 600));
     });
 
     testWidgets('所有主题在各种缩放、明暗、钉板下都能画', (t) async {

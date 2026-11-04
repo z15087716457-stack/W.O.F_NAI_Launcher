@@ -6,6 +6,7 @@ import 'package:nai_launcher/core/utils/app_support_directory.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import '../utils/app_logger.dart';
+import '../services/app_visibility.dart';
 import 'asset_database_manager.dart';
 import 'connection_health_monitor.dart' as health_monitor;
 import 'data_source.dart' show HealthStatus;
@@ -404,6 +405,8 @@ class DatabaseManager {
     try {
       _healthMonitor = health_monitor.ConnectionHealthMonitor(
         config: health_monitor.HealthCheckConfig(),
+        // 窗口藏到托盘 / 菜单栏或最小化时不做 30 秒一次的检查
+        windowVisibility: AppVisibility.instance,
         onStatusChange: (oldStatus, newStatus, result) {
           AppLogger.w(
             'Database health changed: $oldStatus -> $newStatus '

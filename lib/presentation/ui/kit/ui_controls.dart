@@ -298,6 +298,10 @@ class _UiIconButtonState extends State<UiIconButton>
     super.dispose();
   }
 
+  /// 转着的时候自己一个重绘边界，不连累整页；不转时不多占一层。
+  Widget _spinBoundary(Widget child) =>
+      widget.spinning ? RepaintBoundary(child: child) : child;
+
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
@@ -321,12 +325,14 @@ class _UiIconButtonState extends State<UiIconButton>
               border: Border.all(color: c.border),
               borderRadius: BorderRadius.circular(7),
             ),
-            child: RotationTransition(
-              turns: _spin,
-              child: UiGlyph(
-                widget.glyph,
-                size: widget.glyphSize,
-                color: _hover ? c.ink : c.muted,
+            child: _spinBoundary(
+              RotationTransition(
+                turns: _spin,
+                child: UiGlyph(
+                  widget.glyph,
+                  size: widget.glyphSize,
+                  color: _hover ? c.ink : c.muted,
+                ),
               ),
             ),
           ),
@@ -371,11 +377,14 @@ class _UiSpinnerState extends State<UiSpinner>
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    return RotationTransition(
-      turns: _c,
-      child: CustomPaint(
-        size: Size.square(widget.size),
-        painter: _SpinnerPainter(track: c.border, arc: c.accent),
+    // 自己一个重绘边界：转动只重画这个小圈，不连累所在的整页
+    return RepaintBoundary(
+      child: RotationTransition(
+        turns: _c,
+        child: CustomPaint(
+          size: Size.square(widget.size),
+          painter: _SpinnerPainter(track: c.border, arc: c.accent),
+        ),
       ),
     );
   }

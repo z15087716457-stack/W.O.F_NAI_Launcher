@@ -27,7 +27,9 @@ import 'core/shortcuts/shortcut_storage.dart';
 import 'core/database/database_manager.dart';
 import 'core/services/data_migration_service.dart';
 import 'core/services/app_data_startup.dart';
+import 'core/services/app_visibility.dart';
 import 'core/services/desktop_app_shutdown_service.dart';
+import 'core/services/hidden_window_memory_trim.dart';
 import 'core/services/resource_window_bootstrap.dart';
 import 'core/services/resource_window_protocol.dart';
 import 'core/services/resource_window_service.dart';
@@ -162,7 +164,7 @@ class WindowStateObserver extends WidgetsBindingObserver {
 
 /// 系统托盘监听器，处理托盘图标交互
 ///
-/// 退出期间忽略托盘与菜单栏操作，防止重新显示窗口。
+/// macOS 上（[macOS] 默认按真实系统）退出过程中点菜单栏图标不再把窗口打开；Windows 照原来的行为。
 /// 最小化的窗口（macOS 上 ⌘M 收进程序坞的）由 windowManager.show() 自己先恢复，两个平台都是。
 class AppTrayListener extends TrayListener {
   AppTrayListener({bool Function()? shuttingDown})
@@ -177,6 +179,7 @@ class AppTrayListener extends TrayListener {
     // 左键点击托盘图标 - 恢复窗口
     try {
       await windowManager.show();
+      AppVisibilitySources.instance.markShown();
       await windowManager.focus();
       await refreshWindowFrame();
       AppLogger.d('Window restored from tray (left click)', 'TrayListener');
@@ -199,6 +202,7 @@ class AppTrayListener extends TrayListener {
       if (menuItem.key == 'show') {
         // 显示窗口
         await windowManager.show();
+        AppVisibilitySources.instance.markShown();
         await windowManager.focus();
         await refreshWindowFrame();
         AppLogger.d('Window shown via tray menu', 'TrayListener');
@@ -229,6 +233,7 @@ class AppWindowListener extends WindowListener {
     try {
       // 阻止窗口关闭
       await windowManager.setPreventClose(true);
+      AppVisibilitySources.instance.markHidden();
       await windowManager.hide();
       if (_nativeResourceWindows) {
         await ResourceWindowService.instance.closeAll();
@@ -318,6 +323,7 @@ void setupWindowsWakeUpChannel() {
       try {
         // 确保窗口显示并置于前台
         await windowManager.show();
+        AppVisibilitySources.instance.markShown();
         await windowManager.focus();
         await windowManager.restore();
         await refreshWindowFrame();
@@ -538,6 +544,8 @@ Future<void> _bootstrapPreparedApplication() async {
   // 增加图片缓存限制，防止本地画廊滚动时图片被回收变白
   PaintingBinding.instance.imageCache.maximumSize = 500; // 最大缓存 500 张图片
   PaintingBinding.instance.imageCache.maximumSizeBytes = 200 << 20; // 200MB
+  // 窗口藏起来满 1 分钟：放掉没在用的已解码图片，回来按需重新解码
+  HiddenWindowMemoryTrim.instance.start();
 
   try {
     // 初始化桌面端视频播放支持 (media_kit)

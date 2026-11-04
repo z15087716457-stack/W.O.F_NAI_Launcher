@@ -702,7 +702,9 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
                               ? null
                               : ChannelViewData(
                                   settings: reducedChannelMotion
-                                      ? channelSettings.copyWith(motion: false)
+                                      ? channelSettings.copyWith(
+                                          motion: ChannelMotion.off,
+                                        )
                                       : channelSettings!,
                                   camera: ChannelCamera(
                                     offset: camera.offset,
@@ -1676,56 +1678,60 @@ class _CanvasGeneratingContentState
   Widget build(BuildContext context) {
     ref.listen(canvasReducedMotionNotifierProvider, (_, _) => _updateMotion());
     final theme = Theme.of(context);
-    return AnimatedBuilder(
-      animation: _dots,
-      builder: (context, _) {
-        // 官网三点弹跳：三圆依次起落的 loading 节奏
-        Widget dot(int i) {
-          final phase = (_dots.value * 3 - i).clamp(0.0, 1.0);
-          final bump = math.sin(phase * math.pi);
-          return Transform.translate(
-            offset: Offset(0, -6 * bump),
-            child: Container(
-              width: 10,
-              height: 10,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: theme.colorScheme.onSurface.withValues(
-                  alpha: 0.55 + 0.35 * bump,
+    // 只有三个点在动：它们自己一个重绘边界，提示文字和图块不跟着每帧重建、重画
+    final dots = RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: _dots,
+        builder: (context, _) {
+          // 官网三点弹跳：三圆依次起落的 loading 节奏
+          Widget dot(int i) {
+            final phase = (_dots.value * 3 - i).clamp(0.0, 1.0);
+            final bump = math.sin(phase * math.pi);
+            return Transform.translate(
+              offset: Offset(0, -6 * bump),
+              child: Container(
+                width: 10,
+                height: 10,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: theme.colorScheme.onSurface.withValues(
+                    alpha: 0.55 + 0.35 * bump,
+                  ),
                 ),
               ),
-            ),
-          );
-        }
+            );
+          }
 
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                dot(0),
-                const SizedBox(width: 8),
-                dot(1),
-                const SizedBox(width: 8),
-                dot(2),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Text(
-                _tip.text(context.l10n),
-                key: const Key('canvas-inflight-tip'),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.bodyMedium,
-              ),
-            ),
-          ],
-        );
-      },
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              dot(0),
+              const SizedBox(width: 8),
+              dot(1),
+              const SizedBox(width: 8),
+              dot(2),
+            ],
+          );
+        },
+      ),
+    );
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        dots,
+        const SizedBox(height: 12),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Text(
+            _tip.text(context.l10n),
+            key: const Key('canvas-inflight-tip'),
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.bodyMedium,
+          ),
+        ),
+      ],
     );
   }
 }

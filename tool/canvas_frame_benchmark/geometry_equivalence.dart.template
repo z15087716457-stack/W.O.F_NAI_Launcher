@@ -22,9 +22,9 @@ void main() {
       final canvas = Canvas(recorder);
       final base = dark ? const Color(0xff171717) : const Color(0xfffafafa);
       if (reference) {
-        old.paintChannelScene(canvas, size, old.ChannelSceneSpec(env: old_geometry.ChannelEnv.of(settings), camera: camera, dark: dark, base: base, level: settings.level.factor, seed: settings.seed, names: names, t: time, motion: settings.motion));
+        old.paintChannelScene(canvas, size, old.ChannelSceneSpec(env: old_geometry.ChannelEnv.of(settings), camera: camera, dark: dark, base: base, level: settings.level.factor, seed: settings.seed, names: names, t: time, motion: settings.motion == ChannelMotion.original));
       } else {
-        current.paintChannelScene(canvas, size, current.ChannelSceneSpec(env: geometry.ChannelEnv.of(settings), camera: camera, dark: dark, base: base, level: settings.level.factor, seed: settings.seed, names: names, t: time, motion: settings.motion));
+        current.paintChannelScene(canvas, size, current.ChannelSceneSpec(env: geometry.ChannelEnv.of(settings), camera: camera, dark: dark, base: base, level: settings.level.factor, seed: settings.seed, names: names, t: time, motion: settings.motion == ChannelMotion.original));
       }
       final picture = recorder.endRecording();
       final image = await picture.toImage(size.width.round(), size.height.round());
@@ -37,7 +37,7 @@ void main() {
           for (final motion in [false, true]) {
             for (final seed in [7, 29]) {
               for (final y in [0.0, 3421.25]) {
-                final settings = ChannelSettings(mode: ChannelMode.fixed, fixed: theme, seed: seed, motion: motion);
+                final settings = ChannelSettings(mode: ChannelMode.fixed, fixed: theme, seed: seed, motion: motion ? ChannelMotion.original : ChannelMotion.off);
                 final camera = ChannelCamera(offset: size.center(Offset.zero) - Offset(83.5, y) * scale, scale: scale);
                 final label = '${theme.name}/$dark/$scale/$motion/$seed/$y';
                 final before = await render(settings, camera, dark, 3.75, true);

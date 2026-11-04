@@ -134,7 +134,7 @@ void main() {
       expect(side.camera.scale, center.camera.scale);
       expect(side.settings.fixed, center.settings.fixed);
       expect(side.settings.seed, center.settings.seed);
-      expect(side.settings.motion, isFalse);
+      expect(side.settings.motion, ChannelMotion.off);
       expect(side.settings.ruler, isFalse);
       expect(
         find.ancestor(of: scene, matching: find.byType(ImageFiltered)),
@@ -613,7 +613,11 @@ void main() {
         await settings.set(
           container
               .read(canvasChannelNotifierProvider)
-              .copyWith(mode: ChannelMode.fixed, fixed: theme, motion: false),
+              .copyWith(
+                mode: ChannelMode.fixed,
+                fixed: theme,
+                motion: ChannelMotion.off,
+              ),
         );
         for (final width in [2240.0, 1280.0]) {
           tester.view.physicalSize = Size(width, width == 2240 ? 1345 : 850);
@@ -684,7 +688,7 @@ void main() {
     expect(backdrop.camera.scale, camera().scale);
     expect(
       backdrop.settings.motion,
-      isFalse,
+      ChannelMotion.off,
     ); // Application reduced-motion setting.
     final tile = find.byKey(const Key('gen-tile-1-0'));
     final element = tester.element(tile);

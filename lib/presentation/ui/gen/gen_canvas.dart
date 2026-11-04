@@ -673,6 +673,11 @@ class _DotsState extends State<_Dots> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
+    // 自己一个重绘边界：跳动只重画三个点，不重录下面模糊的预览图
+    return RepaintBoundary(child: _dots(c));
+  }
+
+  Widget _dots(UiColors c) {
     return AnimatedBuilder(
       animation: _a,
       builder: (context, _) => Row(

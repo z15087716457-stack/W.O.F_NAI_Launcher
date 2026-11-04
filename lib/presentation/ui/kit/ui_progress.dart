@@ -57,7 +57,7 @@ class _UiProgressBarState extends State<UiProgressBar>
     final fill = DecoratedBox(
       decoration: BoxDecoration(color: c.accent, borderRadius: r),
     );
-    return ClipRRect(
+    final bar = ClipRRect(
       borderRadius: r,
       child: SizedBox(
         height: widget.height,
@@ -81,5 +81,7 @@ class _UiProgressBarState extends State<UiProgressBar>
         ),
       ),
     );
+    // 来回滑动时自己一个重绘边界，不连累整页
+    return widget.value == null ? RepaintBoundary(child: bar) : bar;
   }
 }

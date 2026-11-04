@@ -47,7 +47,7 @@ void main() {
         ),
       ];
       var now = DateTime(2026, 10, 16, 23, 59);
-      const base = ChannelSettings(seed: 7, motion: false);
+      const base = ChannelSettings(seed: 7);
       Future<ChannelBackdropPainter> pump({
         String locale = 'zh',
         bool ruler = true,
