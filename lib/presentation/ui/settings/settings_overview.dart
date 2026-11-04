@@ -938,7 +938,7 @@ class _QuickCard extends StatelessWidget {
         rows: [
           row(
             l.set_quickDark,
-            v.text(SettingKey.themeMode) == 'dark',
+            Theme.of(context).brightness == Brightness.dark,
             (on) => s.actions.onChanged(
               SettingKey.themeMode,
               on ? 'dark' : 'light',
