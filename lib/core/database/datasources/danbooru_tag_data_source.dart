@@ -92,6 +92,17 @@ enum TagSearchMode {
 class DanbooruTagDataSource extends BaseDataSource {
   static const String _tableName = 'danbooru_tags';
 
+  /// 本进程写 danbooru_tags 的次数：标签同步的每一批、清除标签缓存、
+  /// 自动补全迁移删表，各在写完之后加一。
+  ///
+  /// danbooru.db 也存本地图库，每存一张图文件都会变；RAG 进程闲置关掉以后，
+  /// 标签索引只凭这个数决定要不要把它叫起来。
+  static int get tableRevision => _tableRevision;
+  static int _tableRevision = 0;
+
+  /// 写完 danbooru_tags 之后调用，写在别的文件里的也一样。
+  static void markTableChanged() => _tableRevision++;
+
   // 热门标签缓存
   List<DanbooruTagRecord>? _hotTagsCache;
 
@@ -514,5 +525,6 @@ class DanbooruTagDataSource extends BaseDataSource {
       // 清除热门标签缓存
       _hotTagsCache = null;
     });
+    markTableChanged();
   }
 }

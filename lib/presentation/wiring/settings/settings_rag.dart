@@ -230,7 +230,11 @@ class SettingsRagSession extends Notifier<SettingsRagSessionState> {
       plan: SettingsRagPlan(kind: kind, rebuild: rebuild, loading: true),
     );
     try {
-      final plan = await controller.preview(source: settingsRagSource(kind));
+      // Asked for: every document is checked again (RagController.preview).
+      final plan = await controller.preview(
+        source: settingsRagSource(kind),
+        verify: true,
+      );
       final roots = kind == SettingsRagSourceKind.gallery
           ? await ref.read(ragGalleryRootsProvider)()
           : const <String>[];

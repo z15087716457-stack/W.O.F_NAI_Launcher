@@ -122,8 +122,21 @@ class GalleryDataSource extends EnhancedBaseDataSource
   /// 供上层缓存感知底层数据已变化。
   int get dataRevision => _dataRevision;
 
-  void _markDataChanged() {
+  /// 本进程改动图片行（gallery_images、gallery_metadata）的次数：存图、扫描、
+  /// 移动、删除与恢复、写元数据、导入、回填、清空，各在写完之后加一；收藏、
+  /// 合集、标签不算。
+  ///
+  /// danbooru.db 还存收藏、合集和标签，这些写入也会改动文件；RAG 进程闲置
+  /// 关掉以后，图库索引只凭这个数决定要不要把它叫起来。
+  static int get imageRevision => _imageRevision;
+  static int _imageRevision = 0;
+
+  static void _markImageRowsChanged() => _imageRevision++;
+
+  /// [imageRows]：false 表示这次只写了收藏、合集或标签，没动图片行。
+  void _markDataChanged({bool imageRows = true}) {
     _dataRevision++;
+    if (imageRows) _markImageRowsChanged();
     _queryCache.clear();
   }
 
@@ -1461,7 +1474,7 @@ class GalleryDataSource extends EnhancedBaseDataSource
     });
     if (inserted == 1) {
       _favoriteCache.add(imageId);
-      _markDataChanged();
+      _markDataChanged(imageRows: false);
       AppLogger.d('Added favorite (idempotent): $imageId', 'GalleryDS');
       return true;
     }
@@ -1492,7 +1505,7 @@ class GalleryDataSource extends EnhancedBaseDataSource
       _favoriteCache.remove(id);
     }
     if (removed > 0) {
-      _markDataChanged();
+      _markDataChanged(imageRows: false);
       AppLogger.i('Removed $removed favorites in batch', 'GalleryDS');
     }
     return removed;
@@ -1532,7 +1545,7 @@ class GalleryDataSource extends EnhancedBaseDataSource
       maxRetries: 3,
     );
 
-    _markDataChanged();
+    _markDataChanged(imageRows: false);
     return isFavorite;
   }
 
@@ -2024,7 +2037,7 @@ class GalleryDataSource extends EnhancedBaseDataSource
       AppLogger.d('Added tag "$normalizedTag" to image $imageId', 'GalleryDS');
     });
 
-    _markDataChanged();
+    _markDataChanged(imageRows: false);
   }
 
   Future<void> removeTag(int imageId, String tagName) async {
@@ -2059,7 +2072,7 @@ class GalleryDataSource extends EnhancedBaseDataSource
       );
     });
 
-    _markDataChanged();
+    _markDataChanged(imageRows: false);
   }
 
   Future<List<String>> getImageTags(int imageId) async {
@@ -2197,7 +2210,7 @@ class GalleryDataSource extends EnhancedBaseDataSource
       );
     });
 
-    _markDataChanged();
+    _markDataChanged(imageRows: false);
   }
 
   String _generateTagId(String tagName) {
@@ -2349,6 +2362,7 @@ class GalleryDataSource extends EnhancedBaseDataSource
 
       // 清除内存缓存
       clearCache();
+      _markImageRowsChanged();
     } catch (e, stack) {
       AppLogger.e('Failed to delete all images', e, stack, 'GalleryDS');
       rethrow;
@@ -2367,6 +2381,7 @@ class GalleryDataSource extends EnhancedBaseDataSource
         timeout: const Duration(seconds: 30),
         maxRetries: 2,
       );
+      _markImageRowsChanged();
     } catch (e, stack) {
       AppLogger.e('Failed to delete all metadata', e, stack, 'GalleryDS');
       rethrow;

@@ -6,6 +6,10 @@ import 'package:path/path.dart' as p;
 import 'package:nai_launcher/core/utils/app_support_directory.dart';
 import '../../core/autocomplete/completion_models.dart';
 import '../../core/database/asset_database_manager.dart';
+import '../../core/database/datasources/danbooru_tag_data_source.dart'
+    show DanbooruTagDataSource;
+import '../../core/database/datasources/gallery_data_source.dart'
+    show GalleryDataSource;
 import '../../core/tag_expansion/tag_semantics_store.dart';
 import '../../core/rag/rag_client.dart';
 import '../../core/rag/rag_maintenance.dart';
@@ -16,6 +20,8 @@ import '../../core/rag/rag_runtime_probe.dart';
 import '../../core/rag/rag_text_search.dart';
 import '../../core/rag/rag_block_snapshot.dart';
 import '../../core/rag/rag_gallery_search.dart';
+import '../../core/utils/app_logger.dart';
+import '../../data/models/prompt_block/prompt_block.dart';
 import '../../data/repositories/gallery_folder_repository.dart';
 import 'prompt_block_library_provider.dart';
 import '../../core/services/desktop_app_shutdown_service.dart';
@@ -143,6 +149,20 @@ final ragInitializationIdleTimeoutProvider = Provider<Duration>(
   (ref) => const Duration(minutes: 2),
 );
 
+/// A worker nobody used for this long is closed: no search, index action,
+/// settings visit or index progress. Running work is never cut off, and the
+/// next use opens the worker again. The user chose 30 minutes.
+final ragIdleShutdownProvider = Provider<Duration>(
+  (ref) => const Duration(minutes: 30),
+);
+
+/// How often a live worker reports its status and starts automatic index
+/// updates. A closed worker's source files are checked as often, so a new
+/// image still starts its update within this interval.
+final ragHeartbeatIntervalProvider = Provider<Duration>(
+  (ref) => const Duration(seconds: 30),
+);
+
 typedef RagClientStarter =
     Future<RagClient> Function({
       required String python,
@@ -249,6 +269,40 @@ class RagController extends Notifier<RagStatus> {
   Object? _refreshToken;
   final _plans = <String, ({RagSource source, int epoch, DateTime expires})>{};
 
+  /// Closes the worker after [ragIdleShutdownProvider] without use.
+  Timer? _idleTimer;
+  DateTime _lastUse = DateTime.now();
+
+  /// Runs while the worker is closed for idleness and a source would update
+  /// itself; reopens the worker when what that source reads changes.
+  Timer? _dormantWatch;
+
+  /// The files each enabled source is read from, as the worker signs them
+  /// (tool/rag: engine.py Sources for tags, documents.py WikiSources for the
+  /// wiki). Blocks have no file to watch; the library itself is compared (see
+  /// [_blocksChanged]). The tag index reads only the tag table of
+  /// danbooru.db, which every saved image writes as well: it follows that
+  /// table through [DanbooruTagDataSource.tableRevision] instead of the file.
+  /// The gallery index reads only the picture rows of danbooru.db (gallery.py
+  /// GallerySources), and favourites, collections and tags write the file as
+  /// well: it follows [GalleryDataSource.imageRevision] and watches no file.
+  Map<RagSource, List<String>> _sourcePaths = const {};
+
+  /// Size and modification time of those files and their WAL files, by file,
+  /// as of the last status the worker reported.
+  Map<String, String> _statusFiles = const {};
+
+  /// [DanbooruTagDataSource.tableRevision] as of the last status the worker
+  /// reported.
+  int _statusTagRevision = 0;
+
+  /// [GalleryDataSource.imageRevision] as of the last status the worker
+  /// reported.
+  int _statusImageRevision = 0;
+
+  /// Sources whose index updates itself when its source changes.
+  Set<RagSource> _autoUpdating = const {};
+
   Future<T> _maintain<T>(Future<T> Function() action) async {
     final release = ref
         .read(ragMaintenanceProvider)
@@ -266,6 +320,8 @@ class RagController extends Notifier<RagStatus> {
       _disposed = true;
       _epoch++;
       _refresh?.cancel();
+      _idleTimer?.cancel();
+      _dormantWatch?.cancel();
       _installer?.cancel();
       _initializationCancellation?.cancel();
       await _openingClient?.close();
@@ -286,6 +342,8 @@ class RagController extends Notifier<RagStatus> {
       _disposed = true;
       _epoch++;
       _refresh?.cancel();
+      _idleTimer?.cancel();
+      _dormantWatch?.cancel();
       unawaited(_events?.cancel());
       _initializationCancellation?.cancel();
       unawaited(_openingClient?.close());
@@ -306,6 +364,9 @@ class RagController extends Notifier<RagStatus> {
   Future<void> _reset() async {
     final epoch = ++_epoch;
     _refresh?.cancel();
+    _idleTimer?.cancel();
+    _idleTimer = null;
+    _stopDormantWatch();
     _connecting = null;
     _initializationCancellation?.cancel();
     final opening = _openingClient;
@@ -334,8 +395,10 @@ class RagController extends Notifier<RagStatus> {
     if (_enabled) await refresh();
   }
 
-  Future<RagClient> _connect() {
+  /// [use]: false only for the heartbeat, which keeps no worker alive.
+  Future<RagClient> _connect({bool use = true}) {
     if (!_enabled) return Future.error(const RagException('disabled'));
+    if (use) _markUsed();
     if (_client case final client? when !client.isClosed) {
       return Future.value(client);
     }
@@ -359,6 +422,9 @@ class RagController extends Notifier<RagStatus> {
   Future<RagClient> _open() async {
     final epoch = _epoch;
     final settings = ref.read(ragSettingsProvider);
+    // A new connection verifies both snapshots on disk once.
+    _blockSnapshot = null;
+    _galleryRootsSnapshot = null;
     final cancellation = _initializationCancellation = RagCancellation();
     state = state.copyWith(
       initializing: true,
@@ -396,6 +462,29 @@ class RagController extends Notifier<RagStatus> {
       final tagPaths = settings.tagsEnabled
           ? await ref.read(ragTagSemanticsPathsProvider)()
           : null;
+      final translations = await ref.read(ragWikiTranslationsPathProvider)();
+      _sourcePaths = {
+        for (final (source, files) in [
+          // Catalog, wiki, profiles; the runtime tag table in danbooru.db by
+          // its revision.
+          (
+            RagSource.tags,
+            [paths.catalog, paths.wiki, tagPaths?.base, tagPaths?.supplements],
+          ),
+          // Wiki pages, the catalog's categories, saved translations.
+          (RagSource.wiki, [paths.wiki, paths.catalog, translations]),
+          // No file for the gallery: its picture rows in danbooru.db go by
+          // their revision.
+        ])
+          if (settings.enabledFor(source))
+            source: [
+              for (final path in files)
+                if (path != null && path.isNotEmpty) path,
+            ],
+      };
+      final tagRevision = DanbooruTagDataSource.tableRevision;
+      final imageRevision = GalleryDataSource.imageRevision;
+      final files = await _sourceFiles();
       final client = await ref.read(ragClientStarterProvider)(
         python: python,
         directory: root,
@@ -423,7 +512,7 @@ class RagController extends Notifier<RagStatus> {
             if (tagPaths != null) 'tag_semantics': tagPaths.base,
             if (tagPaths != null && await File(tagPaths.supplements).exists())
               'tag_supplements': tagPaths.supplements,
-            'translations': await ref.read(ragWikiTranslationsPathProvider)(),
+            'translations': translations,
             'blocks': snapshot,
             'gallery_roots': galleryRoots,
             'sources': [
@@ -470,6 +559,8 @@ class RagController extends Notifier<RagStatus> {
             return;
           }
           if (event['event'] == 'index') {
+            // Index progress is use: a long build is never closed mid-way.
+            _markUsed();
             final source = RagSource.values.firstWhere(
               (s) => s.name == event['source'],
               orElse: () => RagSource.tags,
@@ -497,10 +588,15 @@ class RagController extends Notifier<RagStatus> {
           }
         });
         _apply(result);
+        _statusFiles = files;
+        _statusTagRevision = tagRevision;
+        _statusImageRevision = imageRevision;
         _configuration = (client: client, status: result);
         state = state.copyWith(initializing: false);
+        _stopDormantWatch();
+        _markUsed();
         _refresh?.cancel();
-        _refresh = Timer.periodic(const Duration(seconds: 30), (_) {
+        _refresh = Timer.periodic(ref.read(ragHeartbeatIntervalProvider), (_) {
           if (!_disposed) unawaited(refresh(autoUpdate: true));
         });
         if (_gpuHolds > 0) {
@@ -527,6 +623,11 @@ class RagController extends Notifier<RagStatus> {
   void _apply(Map<String, dynamic> result) {
     if (_disposed) return;
     if (result['sources'] case final Map sources) {
+      _autoUpdating = {
+        for (final source in RagSource.values)
+          if ((sources[source.name] as Map?)?['auto_update_allowed'] == true)
+            source,
+      };
       for (final source in RagSource.values) {
         if (sources[source.name] case final Map value) {
           _applyIndex(value.cast<String, dynamic>(), source);
@@ -634,7 +735,7 @@ class RagController extends Notifier<RagStatus> {
     final epoch = _epoch;
     try {
       final previousClient = _client;
-      final c = await _connect();
+      final c = await _connect(use: !autoUpdate);
       if (_disposed || epoch != _epoch) return;
       // A refresh waiting for a new connection already received authoritative
       // status and snapshots from configure. Existing connections still refresh
@@ -653,6 +754,9 @@ class RagController extends Notifier<RagStatus> {
         if (ref.read(ragSettingsProvider).enabledFor(RagSource.gallery)) {
           await _writeGalleryRoots(await ref.read(ragDirectoryProvider)());
         }
+        final tagRevision = DanbooruTagDataSource.tableRevision;
+        final imageRevision = GalleryDataSource.imageRevision;
+        final files = await _sourceFiles();
         status = await c.request(
           'status',
           const {},
@@ -661,6 +765,9 @@ class RagController extends Notifier<RagStatus> {
         );
         if (_disposed || epoch != _epoch) return;
         _apply(status);
+        _statusFiles = files;
+        _statusTagRevision = tagRevision;
+        _statusImageRevision = imageRevision;
       }
       final sources = status['sources'] as Map? ?? {'tags': status};
       for (final source in RagSource.values) {
@@ -698,12 +805,176 @@ class RagController extends Notifier<RagStatus> {
     }
   }
 
-  Future<Map<String, dynamic>> preview({RagSource source = RagSource.tags}) =>
-      _maintain(() => _preview(source));
+  void _markUsed() {
+    if (_disposed) return;
+    _lastUse = DateTime.now();
+    _idleTimer ??= Timer(ref.read(ragIdleShutdownProvider), _closeWhenIdle);
+  }
+
+  /// Anything in flight or holding the worker: never close then.
+  bool get _workerBusy =>
+      _refreshToken != null ||
+      _connecting != null ||
+      _openingClient != null ||
+      _installer != null ||
+      _gpuHolds > 0 ||
+      state.initializing ||
+      state.installPhase != null ||
+      state.anyBusy ||
+      (_client?.pendingRequests ?? 0) > 0 ||
+      ref.read(ragMaintenanceProvider).busy ||
+      RagSource.values.any((source) {
+        final s = state.forSource(source);
+        return s.searching > 0 || (s.jobId != null && s.phase != 'paused');
+      });
+
+  void _closeWhenIdle() {
+    _idleTimer = null;
+    if (_disposed || _client == null) return;
+    final idle = ref.read(ragIdleShutdownProvider);
+    final quiet = DateTime.now().difference(_lastUse);
+    if (quiet < idle) {
+      _idleTimer = Timer(idle - quiet, _closeWhenIdle);
+    } else if (_workerBusy) {
+      _markUsed();
+    } else {
+      _sleep();
+    }
+  }
+
+  /// Close an idle worker but keep the last known index status on screen. The
+  /// next search or index action opens it again through [_connect]; a change
+  /// to a self-updating source reopens it from [_dormantWatch].
+  void _sleep() {
+    final client = _client;
+    if (client == null) return;
+    AppLogger.i(
+      'Worker unused for ${ref.read(ragIdleShutdownProvider).inMinutes} min, closing it',
+      'RAG',
+    );
+    _refresh?.cancel();
+    _refresh = null;
+    _client = null;
+    _configuration = null;
+    _plans.clear();
+    final events = _events;
+    _events = null;
+    final previousRetirement = _retiring;
+    // A reopen waits for this checkpointing shutdown, as after a reset.
+    _retiring = () async {
+      await previousRetirement;
+      await events?.cancel();
+      await client.close();
+    }();
+    // Jobs live in the worker; a paused index resumes as a new plan later.
+    for (final source in RagSource.values) {
+      _change(source, (s) => s.copyWith(clearJob: true));
+    }
+    if (_autoUpdating.isEmpty) return;
+    _dormantWatch = Timer.periodic(
+      ref.read(ragHeartbeatIntervalProvider),
+      (_) => unawaited(_checkDormantSources()),
+    );
+  }
+
+  void _stopDormantWatch() {
+    _dormantWatch?.cancel();
+    _dormantWatch = null;
+  }
+
+  Future<void> _checkDormantSources() async {
+    if (_disposed || _client != null || _connecting != null) {
+      _stopDormantWatch();
+      return;
+    }
+    // Only what an enabled, self-updating source reads: with the block
+    // library alone, a saved image (danbooru.db) or tag translation is not
+    // a reason to start the worker. Nor is a saved image for the tag index,
+    // which wakes only when the app writes the tag table, or a favourite,
+    // collection or tag for the gallery index, which wakes only when the app
+    // writes picture rows.
+    final settings = ref.read(ragSettingsProvider);
+    final watched = _autoUpdating.where(settings.enabledFor).toSet();
+    final blocksChanged =
+        watched.contains(RagSource.blocks) && _blocksChanged();
+    final tagsChanged =
+        watched.contains(RagSource.tags) &&
+        DanbooruTagDataSource.tableRevision != _statusTagRevision;
+    final imagesChanged =
+        watched.contains(RagSource.gallery) &&
+        GalleryDataSource.imageRevision != _statusImageRevision;
+    final files = await _sourceFiles(watched);
+    final filesChanged = files.entries.any(
+      (file) => _statusFiles[file.key] != file.value,
+    );
+    if (_dormantWatch == null ||
+        (!blocksChanged && !tagsChanged && !imagesChanged && !filesChanged)) {
+      return;
+    }
+    _stopDormantWatch();
+    AppLogger.i(
+      'Sources changed while the worker was closed, reopening',
+      'RAG',
+    );
+    unawaited(refresh(autoUpdate: true));
+  }
+
+  /// Whether the library no longer gives the block snapshot on disk. Every
+  /// insert into a prompt (its use count), a favourite, folder or collection
+  /// replaces the block list as well, without touching the snapshot.
+  bool _blocksChanged() {
+    final written = _blockSnapshot;
+    final blocks = ref
+        .read(promptBlockLibraryNotifierProvider)
+        .valueOrNull
+        ?.blocks;
+    if (written == null ||
+        blocks == null ||
+        identical(blocks, written.blocks)) {
+      return false;
+    }
+    if (!sameRagBlocks(written.blocks, blocks)) return true;
+    // Its snapshot is the one on disk, so the next check is identity again.
+    _blockSnapshot = (blocks: blocks, path: written.path, epoch: written.epoch);
+    return false;
+  }
+
+  /// Size and modification time of the files of [sources] (every enabled
+  /// source by default) and their WAL files, by file.
+  Future<Map<String, String>> _sourceFiles([
+    Iterable<RagSource>? sources,
+  ]) async {
+    final result = <String, String>{};
+    for (final source in sources ?? _sourcePaths.keys) {
+      for (final path in _sourcePaths[source] ?? const <String>[]) {
+        for (final file in [path, '$path-wal']) {
+          if (result.containsKey(file)) continue;
+          final stat = await FileStat.stat(file);
+          result[file] = jsonEncode([
+            stat.type.toString(),
+            stat.size,
+            stat.modified.microsecondsSinceEpoch,
+          ]);
+        }
+      }
+    }
+    return result;
+  }
+
+  /// [verify]: a build someone asked for (the settings' build buttons), which
+  /// checks every document again: the gallery index then reads every picture,
+  /// not only those whose rows changed. The app's own updates leave it out.
+  Future<Map<String, dynamic>> preview({
+    RagSource source = RagSource.tags,
+    bool verify = false,
+  }) => _maintain(() => _preview(source, verify: verify));
 
   void discardPlan(String id) => _plans.remove(id);
 
-  Future<Map<String, dynamic>> _preview(RagSource source) async {
+  Future<Map<String, dynamic>> _preview(
+    RagSource source, {
+    bool verify = false,
+  }) async {
     final epoch = _epoch;
     final c = await _connect();
     if (source == RagSource.blocks) {
@@ -712,7 +983,10 @@ class RagController extends Notifier<RagStatus> {
     if (source == RagSource.gallery) {
       await _writeGalleryRoots(await ref.read(ragDirectoryProvider)());
     }
-    final plan = await c.request('preview', {'source': source.name});
+    final plan = await c.request('preview', {
+      'source': source.name,
+      if (verify) 'verify': true,
+    });
     if (_disposed || epoch != _epoch) throw const RagException('cancelled');
     _plans.removeWhere((_, value) => value.source == source);
     _plans[plan['plan_id'] as String] = (
@@ -851,11 +1125,25 @@ class RagController extends Notifier<RagStatus> {
     if (!_disposed) state = state.copyWith(suspended: false);
   }
 
+  /// The block list (an unmodifiable list, replaced on every library change)
+  /// whose snapshot is already on disk. The 30 s heartbeat skips encoding the
+  /// whole library on the UI thread while it is unchanged. While the worker is
+  /// closed, a new list with the same snapshot takes its place
+  /// ([_blocksChanged]).
+  ({List<PromptBlock> blocks, String path, int epoch})? _blockSnapshot;
+
   Future<String> _writeBlockSnapshot(Directory root) async {
     final epoch = _epoch;
     final library = await ref.read(promptBlockLibraryNotifierProvider.future);
-    final content = encodeRagBlocks(library.blocks);
     final file = File(p.join(root.path, 'sources', 'blocks.json'));
+    final written = _blockSnapshot;
+    if (written != null &&
+        identical(written.blocks, library.blocks) &&
+        written.path == file.path &&
+        written.epoch == epoch) {
+      return file.path;
+    }
+    final content = encodeRagBlocks(library.blocks);
     final write = _snapshotWrites.catchError((Object _) {}).then((_) async {
       if (_disposed || epoch != _epoch) throw const RagException('cancelled');
       await file.parent.create(recursive: true);
@@ -867,6 +1155,7 @@ class RagController extends Notifier<RagStatus> {
     });
     _snapshotWrites = write;
     await write;
+    _blockSnapshot = (blocks: library.blocks, path: file.path, epoch: epoch);
     return file.path;
   }
 
@@ -926,12 +1215,21 @@ class RagController extends Notifier<RagStatus> {
     }
   }
 
+  ({String content, String path, int epoch})? _galleryRootsSnapshot;
+
   Future<String> _writeGalleryRoots(Directory root) async {
     final roots = (await ref.read(ragGalleryRootsProvider)()).toSet().toList()
       ..sort();
     final content = jsonEncode({'version': 1, 'roots': roots});
     final file = File(p.join(root.path, 'sources', 'gallery-roots.json'));
     final epoch = _epoch;
+    final written = _galleryRootsSnapshot;
+    if (written != null &&
+        written.content == content &&
+        written.path == file.path &&
+        written.epoch == epoch) {
+      return file.path;
+    }
     final write = _snapshotWrites.catchError((Object _) {}).then((_) async {
       if (_disposed || epoch != _epoch) throw const RagException('cancelled');
       await file.parent.create(recursive: true);
@@ -943,6 +1241,7 @@ class RagController extends Notifier<RagStatus> {
     });
     _snapshotWrites = write;
     await write;
+    _galleryRootsSnapshot = (content: content, path: file.path, epoch: epoch);
     return file.path;
   }
 
@@ -1189,6 +1488,27 @@ class RagController extends Notifier<RagStatus> {
   }
 }
 
+/// The block list a block search ran against, equal to a later list while
+/// the library gives the same snapshot ([sameRagBlocks]): a use count,
+/// favourite, folder or collection change does not search again. Every
+/// library change and every new query compare it without encoding the
+/// library; only blocks that are new objects compare their text.
+class _SearchedBlocks {
+  const _SearchedBlocks(this.blocks);
+  final List<PromptBlock>? blocks;
+
+  @override
+  bool operator ==(Object other) {
+    if (other is! _SearchedBlocks) return false;
+    final (a, b) = (blocks, other.blocks);
+    return identical(a, b) || (a != null && b != null && sameRagBlocks(a, b));
+  }
+
+  // Equal lists can differ in everything the snapshot leaves out.
+  @override
+  int get hashCode => 0;
+}
+
 final ragTextSearchProvider = FutureProvider.autoDispose
     .family<List<RagSearchHit>, RagTextQuery>((ref, query) async {
       final settings = ref.watch(ragSettingsProvider);
@@ -1207,9 +1527,7 @@ final ragTextSearchProvider = FutureProvider.autoDispose
       if (query.source == RagSource.blocks) {
         ref.watch(
           promptBlockLibraryNotifierProvider.select(
-            (s) => s.valueOrNull == null
-                ? null
-                : encodeRagBlocks(s.requireValue.blocks),
+            (s) => _SearchedBlocks(s.valueOrNull?.blocks),
           ),
         );
       }

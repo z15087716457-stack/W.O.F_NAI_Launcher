@@ -18,6 +18,16 @@ from gallery import GalleryEngine
 
 write_lock = threading.Lock()
 protocol_stdout = sys.stdout
+# Loaded models are unloaded after this long without a search or a build.
+IDLE_UNLOAD_SECONDS = 120
+# The shared ANN after an update of the gallery's changed pictures is saved
+# once no other update came for this long (each save writes the whole ANN of
+# every source, about 3.2 KB a vector; while a batch of pictures is saved an
+# update comes every heartbeat). After a crash before it, the next start loads
+# the last save and replays the vectors changed since (VectorPool.reload).
+CHECKPOINT_QUIET_SECONDS = 120
+# Wakes the inference thread so it sees shutdown; never reaches execute().
+WAKE = {'_wake': True}
 
 
 def emit(value):
@@ -32,6 +42,9 @@ class Worker:
         self.sequence = 0; self.tokens = {}; self.jobs = {}
         self.engine = None; self.models = None; self.engines = {}; self.settings = None; self.pool = None
         self.last_use = time.monotonic(); self.running = True; self.suspended = False
+        # When the deferred save of the shared ANN is due (see _settle_pool),
+        # and (source, job id) of the build it waits for, told of a failure.
+        self.checkpoint_due = None; self.checkpoint_for = None
 
     def enqueue(self, value, priority=0):
         self.sequence += 1
@@ -40,27 +53,58 @@ class Worker:
     def _event(self, **values):
         emit({'event': 'index', **values})
 
-    def _settle_pool(self):
-        if self.pool and (self.suspended or not any(not j['paused'] for j in self.jobs.values())):
+    def _settle_pool(self, deferred=None):
+        """Save the shared ANN once no build runs, and map it. After a build
+        whose engine defers it (the gallery's updates; deferred: its source
+        and job id), wait CHECKPOINT_QUIET_SECONDS instead, counted again from
+        each such build (_idle saves then)."""
+        if not self.pool: return
+        if deferred and self.pool.unsaved():
+            self._defer_checkpoint(*deferred)
+            return
+        if self.suspended or not any(not j['paused'] for j in self.jobs.values()):
             self.pool.checkpoint(remap=True)
+            self.checkpoint_due = None
+
+    def _defer_checkpoint(self, source, job_id):
+        self.checkpoint_due = time.monotonic() + CHECKPOINT_QUIET_SECONDS
+        self.checkpoint_for = source, job_id
+
+    def _report_checkpoint(self, error):
+        """A deferred save failed: tell the app as of a save that fails when
+        a build ends (an index error event of that build), unless a job of
+        its source is there (paused), whose own end reports."""
+        source, job_id = self.checkpoint_for or (None, None)
+        engine = self.engines.get(source)
+        if engine is None or any(j['source'] == source for j in self.jobs.values()): return
+        try: status = engine.status()
+        except Exception: status = {}
+        self._event(source=source, job_id=job_id, phase='error', code=self.error_code(error), **status)
 
     def _step(self, job_id):
         job = self.jobs.get(job_id)
         if job is None or job['paused'] or self.suspended: return
         engine = self.engines[job['source']]
+        deferrable = getattr(engine, 'defers_checkpoint', False)
         try:
             progress = next(job['generator'])
             self._event(source=job['source'],job_id=job_id, phase='building' if progress.get('building') else 'checking', **progress)
             self.enqueue({'_step':job_id}, 10)
         except StopIteration:
             self.jobs.pop(job_id, None)
-            try: self._settle_pool()
+            # A build uses the models as a search does: the next update of a
+            # batch of saved pictures finds them still loaded.
+            self.last_use = time.monotonic()
+            try: self._settle_pool((job['source'], job_id) if deferrable else None)
             except Exception as error:
                 self._event(source=job['source'],job_id=job_id,phase='error',code=self.error_code(error),**engine.status())
                 return
             self._event(source=job['source'],job_id=job_id, phase='paused' if job['cancel'].is_set() else 'complete', **engine.status())
         except Exception as error:
             self.jobs.pop(job_id, None)
+            # Its committed steps are saved later, as after an update.
+            if deferrable and self.pool and self.pool.unsaved():
+                self._defer_checkpoint(job['source'], job_id)
             self._event(source=job['source'],job_id=job_id, phase='error', code=self.error_code(error), **engine.status())
 
     @staticmethod
@@ -82,6 +126,7 @@ class Worker:
         # only closes its scoped connection; the pool publishes one checkpoint.
         jobs, engines, pool, models = self.jobs, self.engines, self.pool, self.models
         self.jobs = {}; self.engines = {}; self.engine = self.pool = self.models = None
+        self.checkpoint_due = self.checkpoint_for = None  # the pool saves as it closes
         error = None
         def attempt(action):
             nonlocal error
@@ -135,7 +180,12 @@ class Worker:
         if source not in ('tags','wiki','blocks','gallery'): raise ValueError('invalid_source')
         engine = self.engines.get(source)
         if engine is None: raise ValueError('disabled_source')
-        if op == 'preview': return engine.preview()
+        if op == 'preview':
+            # 'verify': a check someone asked for (the settings' build button),
+            # which makes the gallery read every picture; without it the
+            # gallery guesses as before.
+            if source == 'gallery' and 'verify' in p: return engine.preview(verify=p['verify'] is True)
+            return engine.preview()
         if op == 'start':
             # Validate before clearing, in this same serialized command.
             engine.validate_plan(p['plan_id'])
@@ -222,13 +272,54 @@ class Worker:
         return {**tags,'sources':sources,'suspended':self.suspended,
                 'jobs':[{k:v for k,v in j.items() if k in ('id','paused','source')} for j in self.jobs.values()]}
 
+    def _models_loaded(self):
+        models = self.models
+        return models is not None and (getattr(models,'encoder',None) is not None
+                                       or getattr(models,'scorer',None) is not None)
+
+    def _unload_due_in(self):
+        """Seconds until idle models unload; None while nothing would unload.
+
+        The inference thread sleeps until a request arrives or this deadline
+        passes instead of waking every second. Unloaded models, or a build in
+        progress, need no deadline at all."""
+        if not self._models_loaded() or any(not j['paused'] for j in self.jobs.values()):
+            return None
+        return max(0.0, self.last_use + IDLE_UNLOAD_SECONDS - time.monotonic())
+
+    def _checkpoint_due_in(self):
+        """Seconds until the deferred save of the shared ANN; None while none
+        waits, or while a build runs (it settles the pool when it ends)."""
+        if self.checkpoint_due is None or any(not j['paused'] for j in self.jobs.values()):
+            return None
+        return max(0.0, self.checkpoint_due - time.monotonic())
+
+    def _wait(self):
+        """How long the inference thread may sleep without a request."""
+        due = [d for d in (self._unload_due_in(), self._checkpoint_due_in()) if d is not None]
+        return min(due) if due else None
+
+    def _idle(self):
+        """A sleep without a request ended: do what has come due."""
+        if self._checkpoint_due_in() == 0:
+            try: self._settle_pool()
+            except Exception as error:
+                # Kept in memory and searchable, and in the rows: a start after
+                # a crash replays what changed since the last save. Not tried
+                # again while idle (each try writes the whole ANN first, on a
+                # full disk too); the next build, pause, suspend or close does.
+                self.checkpoint_due = None
+                self._report_checkpoint(error)
+        if self._unload_due_in() == 0:
+            self.models.unload(); self.last_use = time.monotonic()
+
     def run(self):
         while self.running:
-            try: _,_,request = self.queue.get(timeout=1)
+            try: _,_,request = self.queue.get(timeout=self._wait())
             except queue.Empty:
-                if self.models and not any(not j['paused'] for j in self.jobs.values()) and time.monotonic()-self.last_use > 120:
-                    self.models.unload(); self.last_use = time.monotonic()
+                self._idle()
                 continue
+            if request is WAKE: continue
             if '_step' in request:
                 self._step(request['_step']); continue
             request_id = request['id']; token = self.tokens.get(request_id,threading.Event())
@@ -282,6 +373,8 @@ class Worker:
         self.running = False
         for token in self.tokens.values(): token.set()
         for job in list(self.jobs.values()): job['cancel'].set()
+        # The inference thread may be asleep without a deadline; wake it first.
+        self.enqueue(WAKE, -2)
         # The owning client bounds graceful shutdown and can terminate its Job.
         # Do not abandon a daemon writer halfway through a large checkpoint.
         thread.join()

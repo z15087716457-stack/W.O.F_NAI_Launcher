@@ -16,6 +16,8 @@ import 'package:nai_launcher/presentation/providers/rag_model_download_provider.
 import 'package:nai_launcher/presentation/screens/settings/sections/rag_settings_section.dart';
 import 'package:nai_launcher/presentation/screens/settings/widgets/settings_ui_theme.dart';
 import 'package:nai_launcher/presentation/screens/settings/widgets/settings_typography_scope.dart';
+import 'package:nai_launcher/presentation/ui/settings/settings_contract.dart';
+import 'package:nai_launcher/presentation/wiring/settings/settings_rag.dart';
 import '../../../helpers/studio_capture_fonts.dart';
 
 class _FakeRag extends RagController {
@@ -25,12 +27,17 @@ class _FakeRag extends RagController {
     installDetail: 'Downloading torch (2.5 GiB)',
   );
   final previews = <RagSource>[];
+
+  /// Whether each preview asked for a check of every document (verify).
+  final verified = <bool>[];
   final starts = <RagSource>[];
   @override
   Future<Map<String, dynamic>> preview({
     RagSource source = RagSource.tags,
+    bool verify = false,
   }) async {
     previews.add(source);
+    verified.add(verify);
     return {
       'plan_id': 'preview-${source.name}',
       'documents': 20,
@@ -286,7 +293,30 @@ void main() {
       await tester.tap(find.widgetWithText(FilledButton, start));
       await tester.pumpAndSettle();
       expect(controller.starts, [RagSource.wiki]);
+      // A build asked for checks every document again (the gallery: every
+      // picture, also while the index is behind).
+      expect(controller.verified, [true, true, true, true]);
       expect(tester.takeException(), isNull);
     },
   );
+  test('the studio settings page asks for a check of every document '
+      'too', () async {
+    final container = ProviderContainer(
+      overrides: [
+        ragControllerProvider.overrideWith(_FakeRag.new),
+        ragSettingsProvider.overrideWith(_EnabledSettings.new),
+        ragGalleryRootsProvider.overrideWithValue(
+          () async => ['C:/Gallery/NAI'],
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+    final plans = container.read(settingsRagSessionProvider.notifier);
+    await plans.preview(SettingsRagSourceKind.gallery);
+    await plans.preview(SettingsRagSourceKind.gallery, rebuild: true);
+    final controller =
+        container.read(ragControllerProvider.notifier) as _FakeRag;
+    expect(controller.previews, [RagSource.gallery, RagSource.gallery]);
+    expect(controller.verified, [true, true]);
+  });
 }

@@ -35,22 +35,23 @@ class GalleryTests(unittest.TestCase):
         self.database=self.root/'gallery.sqlite';self.roots=self.root/'roots.json'
         self.roots.write_text(json.dumps({'version':1,'roots':[str(self.library)]}),encoding='utf-8')
         db=sqlite3.connect(self.database)
-        db.executescript('''CREATE TABLE gallery_images(id INTEGER PRIMARY KEY,file_path TEXT,is_deleted INTEGER);
+        db.executescript('''CREATE TABLE gallery_images(id INTEGER PRIMARY KEY,file_path TEXT,is_deleted INTEGER,
+          file_size INTEGER NOT NULL DEFAULT 0,modified_at INTEGER NOT NULL DEFAULT 0);
           CREATE TABLE gallery_metadata(image_id INTEGER PRIMARY KEY,prompt TEXT,positive_prompt_text TEXT,negative_prompt TEXT,
           model TEXT,sampler TEXT,steps INTEGER,cfg_scale REAL,seed INTEGER,width INTEGER,height INTEGER,
           software TEXT,source TEXT,raw_json TEXT,has_metadata INTEGER);''')
         for i,color in enumerate(('red','blue','green'),1):
             path=self.library/f'{i}.png';info=PngImagePlugin.PngInfo();info.add_text('private-preserve','untouched')
             Image.new('RGB',(32,24),color).save(path,pnginfo=info)
-            db.execute('INSERT INTO gallery_images VALUES(?,?,0)',(i,str(path)))
+            db.execute('INSERT INTO gallery_images(id,file_path,is_deleted) VALUES(?,?,0)',(i,str(path)))
             db.execute('INSERT INTO gallery_metadata VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
               (i,'umbrella' if i==1 else 'beach','umbrella' if i==1 else 'beach','rain','nai-diffusion-4' if i<3 else 'other',
                'k_euler',28,5.0,1,32,24,'NovelAI' if i<3 else 'Other','', 'private_raw_never_export',1))
         self.broken=self.library/'bad.png';self.broken.write_bytes(b'broken')
-        db.execute('INSERT INTO gallery_images VALUES(4,?,0)',(str(self.broken),))
+        db.execute('INSERT INTO gallery_images(id,file_path,is_deleted) VALUES(4,?,0)',(str(self.broken),))
         outside=self.root/'outside.png';Image.new('RGB',(4,4),'red').save(outside)
-        db.execute('INSERT INTO gallery_images VALUES(5,?,0)',(str(outside),))
-        db.execute('INSERT INTO gallery_images VALUES(6,?,1)',(str(self.library/'deleted.png'),))
+        db.execute('INSERT INTO gallery_images(id,file_path,is_deleted) VALUES(5,?,0)',(str(outside),))
+        db.execute('INSERT INTO gallery_images(id,file_path,is_deleted) VALUES(6,?,1)',(str(self.library/'deleted.png'),))
         db.commit();db.close()
         self.models=GalleryModels(self.root)
         self.engine=GalleryEngine(self.root/'index',self.models,self.database,self.roots)

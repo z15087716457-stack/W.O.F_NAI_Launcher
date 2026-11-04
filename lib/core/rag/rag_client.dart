@@ -91,6 +91,9 @@ class RagClient {
   String _stderrTail = '', _diagnostic = 'none';
   Future<void>? _closeFuture;
   bool get isClosed => _closed;
+
+  /// Requests sent and not answered yet.
+  int get pendingRequests => _pending.length;
   Stream<Map<String, dynamic>> get events => _events.stream;
 
   static Future<RagClient> start({

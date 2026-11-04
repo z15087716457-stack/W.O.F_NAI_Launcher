@@ -50,7 +50,7 @@ extension GalleryDataSourceCollections on GalleryDataSource {
       }
       return true;
     });
-    if (migrated) _markDataChanged();
+    if (migrated) _markDataChanged(imageRows: false);
     return migrated;
   });
 
@@ -109,7 +109,7 @@ extension GalleryDataSourceCollections on GalleryDataSource {
         'parent_id': parentId,
         'is_folder': isFolder ? 1 : 0,
       });
-      _markDataChanged();
+      _markDataChanged(imageRows: false);
     });
     return id;
   }
@@ -124,7 +124,7 @@ extension GalleryDataSourceCollections on GalleryDataSource {
         whereArgs: [id],
       );
     });
-    if (updated > 0) _markDataChanged();
+    if (updated > 0) _markDataChanged(imageRows: false);
     return updated > 0;
   }
 
@@ -155,7 +155,7 @@ extension GalleryDataSourceCollections on GalleryDataSource {
           whereArgs: [id],
         );
       });
-      if (count > 0) _markDataChanged();
+      if (count > 0) _markDataChanged(imageRows: false);
       return count;
     });
     return deleted > 0;
@@ -188,7 +188,7 @@ extension GalleryDataSourceCollections on GalleryDataSource {
         where: 'id = ?',
         whereArgs: [id],
       );
-      if (count > 0) _markDataChanged();
+      if (count > 0) _markDataChanged(imageRows: false);
       return count;
     });
     return moved > 0;
@@ -329,7 +329,7 @@ extension GalleryDataSourceCollections on GalleryDataSource {
           );
         }
       });
-      _markDataChanged();
+      _markDataChanged(imageRows: false);
       return true;
     });
   }
@@ -346,7 +346,7 @@ extension GalleryDataSourceCollections on GalleryDataSource {
         [collectionId, imageId, DateTime.now().millisecondsSinceEpoch],
       );
     });
-    if (changed == 1) _markDataChanged();
+    if (changed == 1) _markDataChanged(imageRows: false);
     return changed == 1;
   }
 
@@ -362,7 +362,7 @@ extension GalleryDataSourceCollections on GalleryDataSource {
         whereArgs: [collectionId, imageId],
       );
     });
-    if (deleted > 0) _markDataChanged();
+    if (deleted > 0) _markDataChanged(imageRows: false);
     return deleted > 0;
   }
 
@@ -385,7 +385,7 @@ extension GalleryDataSourceCollections on GalleryDataSource {
           'WHERE image_id IN ($placeholders)',
           chunk,
         );
-        if (count > 0) _markDataChanged();
+        if (count > 0) _markDataChanged(imageRows: false);
         return count;
       });
     }

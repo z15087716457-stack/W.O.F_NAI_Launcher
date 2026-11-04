@@ -6,6 +6,7 @@ import '../../services/danbooru_tags_lazy_service.dart';
 import '../../utils/app_logger.dart';
 import '../connection_pool_lifecycle_manager.dart';
 import '../database.dart';
+import '../datasources/danbooru_tag_data_source.dart';
 import '../gate/database_access_gate.dart';
 import '../operations/atomic_clear_operation.dart';
 import '../state/database_state.dart';
@@ -144,6 +145,7 @@ class DatabaseStatusNotifier extends _$DatabaseStatusNotifier {
               await db.execute('DELETE FROM $table');
             }
             await db.execute('COMMIT');
+            DanbooruTagDataSource.markTableChanged();
             return stats;
           } catch (e) {
             await db.execute('ROLLBACK');

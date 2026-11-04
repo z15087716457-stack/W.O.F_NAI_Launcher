@@ -115,7 +115,7 @@ class _RagSettingsSectionState extends ConsumerState<RagSettingsSection> {
     RagSource source = RagSource.tags,
   }) async {
     final controller = ref.read(ragControllerProvider.notifier);
-    final plan = await controller.preview(source: source);
+    final plan = await controller.preview(source: source, verify: true);
     final roots = source == RagSource.gallery
         ? await ref.read(ragGalleryRootsProvider)()
         : const <String>[];

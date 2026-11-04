@@ -185,4 +185,102 @@ class IndexTests(unittest.TestCase):
         self.assertTrue(self.engine.status()['complete'])
 
 
+class RuntimeTagTests(unittest.TestCase):
+    """danbooru.db also stores the local gallery; only its tag rows are a tag source."""
+    def setUp(self):
+        self.temp=tempfile.TemporaryDirectory();self.root=Path(self.temp.name)
+        self.source=self.root/'catalog.db';fixture(self.source)
+        self.runtime=self.root/'danbooru.db'
+        # The app keeps danbooru.db open, so every write lands in its WAL.
+        self.app=sqlite3.connect(self.runtime,isolation_level=None)
+        self.app.executescript('''PRAGMA journal_mode=WAL;
+            CREATE TABLE danbooru_tags(tag TEXT PRIMARY KEY,category INTEGER NOT NULL DEFAULT 0,
+                post_count INTEGER NOT NULL DEFAULT 0,last_updated INTEGER NOT NULL DEFAULT 0);
+            CREATE TABLE gallery_images(id INTEGER PRIMARY KEY,file_path TEXT UNIQUE);''')
+        self.app.executemany('INSERT INTO danbooru_tags VALUES(?,0,?,0)',[(f'runtime_{i}',i) for i in range(20)])
+        self.sources=Sources(self.source,self.runtime)
+    def tearDown(self): self.app.close();self.temp.cleanup()
+    def save_image(self,i): self.app.execute('INSERT INTO gallery_images(file_path) VALUES(?)',(f'/images/{i}.png',))
+
+    def test_saved_images_leave_the_tag_index_complete(self):
+        signature=self.sources.signature();state=self.sources.change_state();total=self.sources.count()
+        for i in range(3): self.save_image(i)
+        # A column the index never reads, either.
+        self.app.execute('UPDATE danbooru_tags SET last_updated=1')
+        self.assertEqual(self.sources.signature(),signature)
+        self.assertEqual(self.sources.change_state(),state)
+        self.assertEqual(self.sources.count(),total)
+
+    def test_saved_images_do_not_invalidate_tags_after_worker_restart(self):
+        import subprocess
+        import sys
+        before = self.sources.signature()
+        self.save_image(1)
+        self.app.execute('UPDATE danbooru_tags SET last_updated=123')
+        # A new process has no cached database digest from before the save.
+        after = subprocess.check_output([
+            sys.executable, '-B', '-c',
+            'import sys; from engine import Sources; print(Sources(sys.argv[1],sys.argv[2]).signature())',
+            str(self.source), str(self.runtime),
+        ], text=True).strip()
+        self.assertEqual(after, before)
+
+    def test_every_change_to_the_tag_rows_changes_the_signature(self):
+        changes={'added':"INSERT INTO danbooru_tags VALUES('runtime_new',0,5,0)",
+            'replaced by a sync':"INSERT OR REPLACE INTO danbooru_tags VALUES('runtime_1',0,999,0)",
+            'count edited in place':"UPDATE danbooru_tags SET post_count=7 WHERE tag='runtime_2'",
+            'category edited in place':"UPDATE danbooru_tags SET category=4 WHERE tag='runtime_5'",
+            'renamed in place':"UPDATE danbooru_tags SET tag='runtime_renamed' WHERE tag='runtime_6'",
+            'removed':"DELETE FROM danbooru_tags WHERE tag='runtime_3'",
+            'dropped':'DROP TABLE danbooru_tags'}
+        for change,sql in changes.items():
+            before=self.sources.signature();self.app.execute(sql)
+            self.assertNotEqual(self.sources.signature(),before,change)
+        self.assertEqual(self.sources.count(),70)
+
+    def test_a_refill_with_the_same_row_count_and_rowids_changes_the_signature(self):
+        shape=lambda: self.app.execute('SELECT COUNT(*),MAX(rowid) FROM danbooru_tags').fetchone()
+        before,rows=self.sources.signature(),shape()
+        self.app.executescript('''BEGIN;DELETE FROM danbooru_tags;
+            WITH RECURSIVE n(i) AS (SELECT 0 UNION ALL SELECT i+1 FROM n WHERE i<19)
+            INSERT INTO danbooru_tags SELECT 'refilled_'||i,0,i,0 FROM n;COMMIT;''')
+        # A row count or the last rowid alone would miss these other rows.
+        self.assertEqual(shape(),rows)
+        self.assertNotEqual(self.sources.signature(),before)
+
+    def test_a_read_that_missed_a_commit_is_read_again_once_the_files_hold_still(self):
+        from unittest.mock import patch
+        import engine
+        clock=[1000.0]
+        with patch.object(engine.time,'monotonic',lambda: clock[0]):
+            before=self.sources.signature()
+            # SQLite writes a commit to the WAL before it publishes it; a read in
+            # between still sees the old rows, as a snapshot held from before does.
+            stale=engine.readonly(self.runtime);stale.execute('BEGIN')
+            stale.execute('SELECT COUNT(*) FROM danbooru_tags').fetchone()
+            self.app.execute("INSERT INTO danbooru_tags VALUES('runtime_new',0,5,0)")
+            with patch.object(engine,'readonly',return_value=stale):
+                self.assertEqual(self.sources.signature(),before)
+            # Publishing changes neither file, so only the time can tell.
+            clock[0]+=60
+            self.assertNotEqual(self.sources.signature(),before)
+
+    def test_tag_rows_are_read_once_after_each_change_and_once_when_it_held_still(self):
+        from unittest.mock import patch
+        import engine
+        clock=[1000.0];settle=Sources.runtime_settle_seconds
+        def calls():
+            for _ in range(5): self.assertEqual(self.sources.signature(),before)
+        with patch.object(engine,'readonly',wraps=engine.readonly) as opened,\
+             patch.object(engine.time,'monotonic',lambda: clock[0]):
+            before=self.sources.signature();calls()
+            clock[0]+=settle/2;calls()
+            clock[0]+=settle/2;calls()
+            clock[0]+=settle*10;calls()
+            self.save_image(0);calls()
+            clock[0]+=settle;calls()
+        runtime=[c for c in opened.call_args_list if c.args[0]==self.sources.paths[1]]
+        self.assertEqual(len(runtime),4)
+
+
 if __name__=='__main__': unittest.main()

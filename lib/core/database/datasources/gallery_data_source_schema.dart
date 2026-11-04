@@ -98,6 +98,7 @@ mixin GalleryDataSourceSchema on EnhancedBaseDataSource {
       if (done.isNotEmpty) return;
 
       final updated = await _backfillModelColumnImpl(db);
+      if (updated > 0) GalleryDataSource._markImageRowsChanged();
       await db.insert(GalleryDataSource._galleryMetaTable, {
         'key': 'model_backfill_v3',
         'value': '$updated',

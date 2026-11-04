@@ -5,6 +5,7 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/core/database/asset_database_manager.dart';
+import 'package:nai_launcher/core/database/datasources/danbooru_tag_data_source.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:sqlite3/sqlite3.dart';
@@ -610,6 +611,29 @@ void main() {
       ).exists(),
       isTrue,
     );
+  });
+
+  test('the dropped tag table counts as a write to the runtime tag table, '
+      'once', () async {
+    // A closed RAG worker wakes for the tag index on this revision only.
+    final runtimeDir = await Directory(
+      p.join(appSupportDir.path, 'databases'),
+    ).create(recursive: true);
+    final runtimeDb = sqlite3.open(p.join(runtimeDir.path, 'danbooru.db'));
+    runtimeDb.execute('''
+      CREATE TABLE danbooru_tags(tag TEXT PRIMARY KEY);
+      INSERT INTO danbooru_tags(tag) VALUES ('legacy_tag');
+    ''');
+    runtimeDb.dispose();
+    final before = DanbooruTagDataSource.tableRevision;
+
+    await AssetDatabaseManager.initialize();
+    expect(DanbooruTagDataSource.tableRevision, before + 1);
+
+    // The next start finds the migration done and leaves the table alone.
+    AssetDatabaseManager.resetForTesting();
+    await AssetDatabaseManager.initialize();
+    expect(DanbooruTagDataSource.tableRevision, before + 1);
   });
 }
 

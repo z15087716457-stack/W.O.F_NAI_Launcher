@@ -30,6 +30,25 @@ class VectorPool:
             CREATE TABLE IF NOT EXISTS pool_state(key TEXT PRIMARY KEY,value INTEGER);
             CREATE TABLE IF NOT EXISTS pool_migrations(collection TEXT PRIMARY KEY);
             CREATE TABLE IF NOT EXISTS pool_sizes(collection TEXT PRIMARY KEY,bytes INTEGER NOT NULL);
+            -- For a collection kept by owner (one picture of the gallery): the
+            -- fingerprint of the row its documents were made of and how many
+            -- there are (gallery.OwnerIndex). Not part of the ANN generation.
+            CREATE TABLE IF NOT EXISTS pool_owners(collection TEXT NOT NULL,owner TEXT NOT NULL,
+                fingerprint TEXT NOT NULL,documents INTEGER NOT NULL,PRIMARY KEY(collection,owner)) WITHOUT ROWID;
+            -- The ids whose vectors changed, one row for each change of the
+            -- generation (the triggers below fire when those do). A start
+            -- after a crash loads the saved ANN and replays the rows after
+            -- its mark (ann.json 'journal') instead of rebuilding every vector.
+            CREATE TABLE IF NOT EXISTS pool_changes(seq INTEGER PRIMARY KEY AUTOINCREMENT,id INTEGER NOT NULL);
+            CREATE TRIGGER IF NOT EXISTS pool_change_insert AFTER INSERT ON pool_documents BEGIN
+                INSERT INTO pool_changes(id) VALUES(NEW.id); END;
+            CREATE TRIGGER IF NOT EXISTS pool_change_update AFTER UPDATE ON pool_documents
+                WHEN OLD.id IS NOT NEW.id OR OLD.vector IS NOT NEW.vector
+                     OR OLD.collection IS NOT NEW.collection BEGIN
+                INSERT INTO pool_changes(id) VALUES(NEW.id);
+                INSERT INTO pool_changes(id) SELECT OLD.id WHERE OLD.id IS NOT NEW.id; END;
+            CREATE TRIGGER IF NOT EXISTS pool_change_delete AFTER DELETE ON pool_documents BEGIN
+                INSERT INTO pool_changes(id) VALUES(OLD.id); END;
             INSERT OR IGNORE INTO pool_state VALUES('generation',0);
             CREATE TRIGGER IF NOT EXISTS pool_insert AFTER INSERT ON pool_documents BEGIN
                 UPDATE pool_state SET value=value+1 WHERE key='generation'; END;
@@ -118,18 +137,35 @@ class VectorPool:
         try:
             try:
                 saved = json.loads((self.folder / 'ann.json').read_text('utf-8'))
-                if saved['generation'] != generation: raise ValueError('stale_ann')
-                try:
-                    ann.view(str(self.folder / 'vectors.usearch'))
-                    mapped = True
-                except (OSError,ValueError,RuntimeError):
-                    # A view failure alone must not rebuild a valid graph or
-                    # alter approximate neighbours: retain the old load path.
-                    ann.reset()
-                    ann = Index(ndim=768, metric='cos', dtype='f32')
+                if saved['generation'] != generation:
+                    # Saved before the last changes (a crash before a save):
+                    # load it and replay them, if the journal has them all.
+                    changes = self._changes(saved, generation)
+                    if changes is None: raise ValueError('stale_ann')
                     ann.load(str(self.folder / 'vectors.usearch'))
+                    if progress: progress('restoring', 0, len(changes))
+                    self._replay(ann, changes, check)
+                    # usearch keeps the place of a removed vector, in the file
+                    # and in a writable copy, until an add takes it. With more
+                    # places empty than vectors (most of the pool cleared), the
+                    # rest is built again from the rows: a smaller file, for
+                    # less work than the vectors removed.
+                    if ann.stats.nodes > 2*len(ann): raise ValueError('sparse_ann')
+                    if progress: progress('restoring', len(changes), len(changes))
+                    rebuilt = True  # saved again at once, as after a rebuild
+                else:
+                    try:
+                        ann.view(str(self.folder / 'vectors.usearch'))
+                        mapped = True
+                    except (OSError,ValueError,RuntimeError):
+                        # A view failure alone must not rebuild a valid graph or
+                        # alter approximate neighbours: retain the old load path.
+                        ann.reset()
+                        ann = Index(ndim=768, metric='cos', dtype='f32')
+                        ann.load(str(self.folder / 'vectors.usearch'))
                 if len(ann) != total: raise ValueError('invalid_ann')
             except (OSError,ValueError,KeyError,RuntimeError):
+                # A cancelled replay stops at the check below, as a rebuild would.
                 ann.reset()
                 check()
                 rebuilt = True
@@ -155,27 +191,76 @@ class VectorPool:
         for view in self.views.values(): view.refresh()
         return rebuilt
 
+    def _changes(self, saved, generation):
+        """The ids changed since a checkpoint saved at an older generation, or
+        None when the journal cannot account for every change since: a
+        checkpoint without a mark (older code), or fewer rows after it than
+        changes of the generation."""
+        mark = saved.get('journal')
+        if not isinstance(mark, int) or generation < saved['generation']: return None
+        rows = [r[0] for r in self.db.execute('SELECT id FROM pool_changes WHERE seq>? ORDER BY seq', (mark,))]
+        if len(rows) < generation - saved['generation']: return None
+        return list(dict.fromkeys(rows))
+
+    def _replay(self, ann, changes, check):
+        """Bring a loaded ANN in line with the rows of the changed ids."""
+        import numpy as np
+        for key in changes:
+            if key in ann: ann.remove(key)
+        for offset in range(0, len(changes), 256):
+            check()
+            batch = changes[offset:offset+256]
+            rows = self.db.execute('SELECT id,vector FROM pool_documents WHERE id IN ('+','.join('?' for _ in batch)+')',
+                                   batch).fetchall()
+            if rows:
+                ann.add(np.array([r[0] for r in rows],dtype=np.uint64),
+                        np.stack([np.frombuffer(r[1],dtype=np.float32) for r in rows]))
+
+    def _saved(self):
+        """(generation, count) of the ANN now, and whether its checkpoint has them."""
+        generation = self.db.execute("SELECT value FROM pool_state WHERE key='generation'").fetchone()[0]
+        state = (generation, len(self.ann))
+        return state, (state == self._checkpoint_state and (self.folder/'vectors.usearch').is_file()
+                       and (self.folder/'ann.json').is_file())
+
+    def unsaved(self):
+        """Whether committed vector changes are not in the saved checkpoint yet.
+        Until checkpoint() saves them, a new process loads the last save and
+        replays them (reload)."""
+        return not self._saved()[1]
+
     def checkpoint(self, *, cancelled=lambda: False, remap=None):
         if cancelled(): raise ValueError('cancelled')
         remap = not self._builders if remap is None else remap
-        generation = self.db.execute("SELECT value FROM pool_state WHERE key='generation'").fetchone()[0]
-        state = (generation, len(self.ann))
-        if (state == self._checkpoint_state and (self.folder/'vectors.usearch').is_file()
-                and (self.folder/'ann.json').is_file()):
+        state, saved = self._saved(); generation = state[0]
+        if saved:
             if remap: self._map_checkpoint()
             return
         # An unusual metadata-only publication can still arrive while mapped.
         # Detach before replacing the mapped path; the live ANN remains usable
         # if saving, cancellation or either atomic publication fails.
         self.writable()
+        # The changes up to here are in the ANN saved now.
+        mark = self.db.execute('SELECT COALESCE(MAX(seq),0) FROM pool_changes').fetchone()[0]
         temporary = self.folder / 'vectors.usearch.tmp'
-        self.ann.save(str(temporary))
-        if cancelled(): raise ValueError('cancelled')
-        os.replace(temporary,self.folder/'vectors.usearch')
+        try:
+            self.ann.save(str(temporary))
+            if cancelled(): raise ValueError('cancelled')
+            os.replace(temporary,self.folder/'vectors.usearch')
+        except BaseException:
+            # What a failed save wrote (of a full disk, as big as the ANN)
+            # must not stay behind.
+            try: temporary.unlink(missing_ok=True)
+            except OSError: pass
+            raise
         temp = self.folder/'ann.json.tmp'
-        temp.write_text(json.dumps({'generation':generation,'count':len(self.ann)}),'utf-8')
+        temp.write_text(json.dumps({'generation':generation,'count':len(self.ann),'journal':mark}),'utf-8')
         os.replace(temp,self.folder/'ann.json')
         self._checkpoint_state = state
+        try:
+            with self.db: self.db.execute('DELETE FROM pool_changes WHERE seq<=?', (mark,))
+        except sqlite3.Error:
+            pass  # rows left over are replayed again after a crash, to the same result
         if remap: self._map_checkpoint()
 
     def collection_bytes(self, name):

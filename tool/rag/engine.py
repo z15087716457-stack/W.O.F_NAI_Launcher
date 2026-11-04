@@ -33,12 +33,39 @@ def _database_digest(path, stamp):
     finally: db.close()
 
 
+def wal_stamp(path):
+    """Size and modification time of a SQLite file and of its WAL."""
+    return [(s.st_size, s.st_mtime_ns) for p in (Path(path), Path(str(path) + '-wal'))
+            if p.exists() for s in (p.stat(),)]
+
+
+def settled(cache, stamp, read, settle):
+    """(value, cache): what read() gives for rows of a file other writes keep
+    changing, read again only after the stamp of that file changed.
+
+    Take the stamp before the read, so a write during it reads again. SQLite
+    writes a commit to the WAL before it publishes it, and publishing changes
+    neither file, so a read just after the WAL changed can still see the rows
+    from before. That value is used until the stamp has held for settle
+    seconds; the value read then is kept. Pass back the cache returned."""
+    now = seen = time.monotonic()
+    if cache and cache[0] == stamp:
+        seen = cache[2]
+        if seen is None or now - seen < settle: return cache[1], cache
+    value = read()
+    return value, (stamp, value, None if now - seen >= settle else seen)
+
+
 class Sources:
     representation_version = 'tag-profile-v2'
+    # A runtime tag read is final once its stamp has held this long (see
+    # settled); SQLite publishes a commit right after syncing the WAL.
+    runtime_settle_seconds = 5.0
 
     def __init__(self, catalog, runtime='', wiki='', semantics='', supplements='', *, optional_supplements=False):
         self.paths = [str(Path(p).resolve(strict=True)) if p else '' for p in (catalog, runtime, wiki, semantics, supplements)]
         self._count_cache = None
+        self._runtime_cache = None
         self.optional_supplements = optional_supplements
         self.degraded = False
 
@@ -46,6 +73,8 @@ class Sources:
         records = []
         for name in paths:
             if not name: continue
+            if name == self.paths[1]:
+                records.append((name, self._runtime_tags())); continue
             for p in (Path(name), Path(name + '-wal')):
                 if p.exists():
                     s = p.stat()
@@ -55,8 +84,35 @@ class Sources:
         return hashlib.sha256(json.dumps([self.representation_version, records]).encode()).hexdigest()
 
     def _file_signature(self, paths):
-        records = [(name, _database_digest(name, self._file_stamp([name]))) for name in paths if name]
+        # Runtime storage also contains the gallery. Its identity must stay
+        # tag-only after a worker restart, not just while a full-file digest
+        # happens to remain cached. Other databases use the upstream SQLite
+        # snapshot digest so an empty WAL/checkpoint cannot change identity.
+        records = [(name, self._runtime_tags() if name == self.paths[1]
+                    else _database_digest(name, self._file_stamp([name])))
+                   for name in paths if name]
         return hashlib.sha256(json.dumps([self.representation_version, records]).encode()).hexdigest()
+
+    def _runtime_tags(self):
+        """Digest of the runtime tag rows the index reads (see connect).
+
+        danbooru.db also stores the local gallery, written for every saved
+        image, so its size and time alone would start a full check each time.
+        The rows are read again only after the file or its WAL changed, and
+        once more when that stamp has held for runtime_settle_seconds (see
+        settled)."""
+        def read():
+            if not Path(self.paths[1]).exists(): return None
+            db = readonly(self.paths[1])
+            try:
+                if not db.execute("SELECT 1 FROM sqlite_master WHERE name='danbooru_tags'").fetchone(): return None
+                rows = db.execute("SELECT group_concat(tag||char(31)||category||char(31)||post_count,char(30)) "
+                                  'FROM danbooru_tags').fetchone()[0]
+                return hashlib.sha256((rows or '').encode()).hexdigest()
+            finally: db.close()
+        digest, self._runtime_cache = settled(self._runtime_cache, wal_stamp(self.paths[1]), read,
+                                              self.runtime_settle_seconds)
+        return digest
 
     def change_state(self):
         revision = 0
@@ -527,7 +583,8 @@ class Engine:
 
     def clear(self):
         if self.active: raise ValueError('index_busy')
-        self.db.execute('DELETE FROM documents'); self.db.execute('DELETE FROM metadata'); self.db.commit()
+        self.db.execute('DELETE FROM documents'); self.db.execute('DELETE FROM metadata')
+        self.db.execute('DELETE FROM pool_owners WHERE collection=?', (self.collection,)); self.db.commit()
         self._load_ann(); self._checkpoint(); self.db.execute('VACUUM')
 
     def close(self):

@@ -94,4 +94,102 @@ void main() {
       expect((stale['blocks'] as List).single.containsKey('reading'), isFalse);
     },
   );
+  test('blocks compare the same exactly when their snapshot is the same', () {
+    final block = PromptBlock.create(
+      id: 'saved',
+      title: 'Storm',
+      content: 'rain',
+      negativeContent: 'sunlight',
+      readingTranslationZh: '雨景',
+      tags: const [
+        PromptBlockTag(name: 'weather'),
+        PromptBlockTag(name: 'night'),
+      ],
+    );
+    final other = PromptBlock.create(id: 'other', title: 'Snow', content: '');
+    final library = [block, other];
+    // Same snapshot: what the snapshot leaves out.
+    final same = <String, List<PromptBlock>>{
+      'use count': [block.copyWith(useCount: 7), other],
+      'favourite': [block.copyWith(isFavorite: true), other],
+      'folder and order': [
+        other.copyWith(sortOrder: 3),
+        block.copyWith(folderId: 'weather', sortOrder: 9),
+      ],
+      'looks': [
+        block.copyWith(color: '#FF000000', iconName: 'star', thumbnail: 'a'),
+        other,
+      ],
+      'tag colours and order': [
+        block.copyWith(
+          tags: const [
+            PromptBlockTag(name: 'night', color: '#FFFFFFFF'),
+            PromptBlockTag(name: 'weather'),
+          ],
+        ),
+        other,
+      ],
+      'times and import': [
+        block.copyWith(updatedAt: DateTime(2030), sourcePath: 'a.txt'),
+        other,
+      ],
+      'atoms and settings': [
+        block.copyWith(
+          atoms: const ['rain'],
+          generationSettings: const PromptBlockGenerationSettings(steps: 9),
+        ),
+        other,
+      ],
+      'an archived block': [
+        ...library,
+        block.copyWith(id: 'gone', isArchived: true),
+      ],
+      'copies of the same blocks': [
+        for (final b in library) PromptBlock.fromJson(b.toJson()),
+      ],
+    };
+    // Another snapshot: each field it holds.
+    final different = <String, List<PromptBlock>>{
+      'title': [block.copyWith(title: 'Storms'), other],
+      'positive text': [block.copyWith(content: 'rain at night'), other],
+      'negative text': [block.copyWith(negativeContent: 'sun'), other],
+      'a tag name': [
+        block.copyWith(tags: const [PromptBlockTag(name: 'weather')]),
+        other,
+      ],
+      'the reading': [block.copyWith(readingTranslationZh: '夜雨'), other],
+      'the reading now needs review': [
+        block.copyWith(readingTranslationNeedsReview: true),
+        other,
+      ],
+      'a block added': [
+        ...library,
+        PromptBlock.create(id: 'fog', title: 'Fog', content: 'fog'),
+      ],
+      'a block removed': [block],
+      'a block archived': [block, other.copyWith(isArchived: true)],
+      'a block twice': [...library, other],
+    };
+    // A reading waiting for review is left out, so editing it changes nothing.
+    final unreviewed = [
+      block.copyWith(readingTranslationNeedsReview: true),
+      other,
+    ];
+    final edited = [
+      unreviewed.first.copyWith(readingTranslationZh: '夜雨'),
+      other,
+    ];
+    expect(encodeRagBlocks(edited), encodeRagBlocks(unreviewed));
+    expect(sameRagBlocks(unreviewed, edited), isTrue);
+    for (final (expected, cases) in [(true, same), (false, different)]) {
+      for (final MapEntry(key: change, value: changed) in cases.entries) {
+        expect(
+          encodeRagBlocks(changed) == encodeRagBlocks(library),
+          expected,
+          reason: '$change: the snapshot',
+        );
+        expect(sameRagBlocks(library, changed), expected, reason: change);
+      }
+    }
+  });
 }

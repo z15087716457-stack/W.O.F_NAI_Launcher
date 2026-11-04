@@ -80,6 +80,21 @@ class LifecycleTests(unittest.TestCase):
             reopened = VectorPool(self.root/'indices',self.models.fingerprint)
             reopened.close()
 
+    def test_a_failed_save_leaves_no_partial_file_behind(self):
+        # A full disk: what the save wrote of the ANN would keep it full.
+        self.build(self.tags); self.change_vector()
+        before = (self.pool.folder/'vectors.usearch').read_bytes()
+        def full_disk(index, path, *args, **kwargs):
+            with open(path, 'wb') as stream: stream.write(b'partial fixture')
+            raise OSError('No space left on device')
+        with patch('usearch.index.Index.save', autospec=True, side_effect=full_disk):
+            with self.assertRaises(OSError): self.pool.checkpoint()
+        self.assertFalse((self.pool.folder/'vectors.usearch.tmp').exists())
+        self.assertEqual((self.pool.folder/'vectors.usearch').read_bytes(), before)
+        self.assertTrue(self.pool.unsaved())
+        self.pool.checkpoint()
+        self.assertFalse(self.pool.unsaved())
+
     def test_missing_checkpoint_is_republished_even_when_generation_is_unchanged(self):
         self.build(self.tags)
         # Simulate external loss after the reader has released its file view.

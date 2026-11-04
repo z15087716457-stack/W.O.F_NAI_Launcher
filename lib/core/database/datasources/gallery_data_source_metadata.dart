@@ -36,7 +36,12 @@ extension GalleryDataSourceMetadataQueries on GalleryDataSource {
   /// 直跑 model 列回填（迁移一次性闸门之外的入口，供测试与手动触发）。
   ///
   /// 逻辑与启动迁移 [_migrateBackfillModelColumn] 完全一致，返回更新行数。
-  Future<int> backfillModelColumn() {
-    return executeWrite('backfillModelColumn', _backfillModelColumnImpl);
+  Future<int> backfillModelColumn() async {
+    final updated = await executeWrite(
+      'backfillModelColumn',
+      _backfillModelColumnImpl,
+    );
+    if (updated > 0) GalleryDataSource._markImageRowsChanged();
+    return updated;
   }
 }

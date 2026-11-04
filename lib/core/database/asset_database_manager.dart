@@ -9,6 +9,7 @@ import 'package:nai_launcher/core/utils/app_support_directory.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import '../utils/app_logger.dart';
+import 'datasources/danbooru_tag_data_source.dart';
 import 'dictionary_data_store.dart';
 
 class AssetDatabaseManager {
@@ -407,6 +408,7 @@ class AssetDatabaseManager {
         // danbooru.db also stores the local gallery. Only the obsolete tag
         // cache is disposable during the autocomplete migration.
         await db.execute('DROP TABLE IF EXISTS danbooru_tags');
+        DanbooruTagDataSource.markTableChanged();
       } finally {
         await db.close();
       }
