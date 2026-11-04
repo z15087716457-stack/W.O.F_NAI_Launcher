@@ -54,6 +54,9 @@ class CanvasCamera {
   }
 }
 
+/// The canvas size reported by layout, published separately from camera motion.
+final generationCanvasViewportProvider = StateProvider<Size?>((ref) => null);
+
 class GenerationCanvasCameraNotifier extends Notifier<CanvasCamera> {
   AnimationController? _anim;
   bool _disposed = false;
@@ -438,7 +441,20 @@ class GenerationCanvasCameraNotifier extends Notifier<CanvasCamera> {
   }
 
   Size? _viewportSize;
-  void setViewport(Size size) => _viewportSize = size;
+  void setViewport(Size size) {
+    if (_viewportSize == size) return;
+    _viewportSize = size;
+    // Layout also uses the size immediately to fit the camera. Publish to tiles
+    // after layout so changing the window or a side panel can refresh decodes.
+    scheduleMicrotask(() {
+      if (!_disposed && _viewportSize == size) {
+        ref.read(generationCanvasViewportProvider.notifier).state = size;
+      }
+    });
+  }
+
+  /// The canvas viewport last laid out (null before the first layout).
+  Size? get viewportSize => _viewportSize;
 
   /// 当前相机下的可见世界矩形（剔除用，委托 CanvasCamera）
   Rect visibleWorldRect(Size viewport) => state.visibleWorldRect(viewport);

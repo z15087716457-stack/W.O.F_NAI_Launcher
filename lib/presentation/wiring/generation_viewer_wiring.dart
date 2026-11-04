@@ -16,6 +16,7 @@ import '../../core/utils/localization_extension.dart';
 import '../../data/models/gallery/nai_image_metadata.dart';
 import '../../data/models/prompt_block/pill_document.dart';
 import '../../data/services/image_metadata_service.dart';
+import '../providers/canvas_image_residency_provider.dart';
 import '../providers/image_generation_provider.dart';
 import '../providers/prompt_translation_provider.dart';
 import 'blocks_edit_wiring.dart';
@@ -166,6 +167,9 @@ class _GenerationViewerWiringState
   late GenerationViewerWindow window;
   late StateController<({bool fullscreen, bool captionOverStage})> chrome;
   late StateController<Object?> owner;
+
+  /// Images shown here keep full resolution on the canvas for a while.
+  late CanvasImageResidencyNotifier residency;
   final identity = Object();
   int revision = 0;
   GenerationOperations get operations =>
@@ -178,6 +182,7 @@ class _GenerationViewerWiringState
     window = GenerationViewerWindow(ref.read(generationViewerPlatformProvider));
     chrome = ref.read(generationViewerWindowProvider.notifier);
     owner = ref.read(generationViewerOwnerProvider.notifier);
+    residency = ref.read(canvasImageResidencyProvider.notifier);
     final storage = ref.read(localStorageServiceProvider);
     info =
         storage.getSetting<bool>('viewer_info_open', defaultValue: true) ??
@@ -194,6 +199,7 @@ class _GenerationViewerWiringState
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       owner.state = identity;
+      residency.markViewed(current);
       operations.run(load);
     });
   }
@@ -215,6 +221,9 @@ class _GenerationViewerWiringState
 
   void select(String id) {
     if (!_images.any((image) => image.id == id)) return;
+    residency
+      ..markViewed(current)
+      ..markViewed(id);
     setState(() {
       current = id;
       revision++;
@@ -242,6 +251,10 @@ class _GenerationViewerWiringState
   @override
   void dispose() {
     unawaited(restore().catchError((Object _) {}));
+    // Looked at until now; providers can't change while the tree finalizes.
+    final viewed = current;
+    final canvas = residency;
+    scheduleMicrotask(() => canvas.markViewed(viewed));
     super.dispose();
   }
 

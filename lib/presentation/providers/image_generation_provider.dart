@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
+import 'canvas_image_residency_provider.dart';
 import '../../data/models/image/image_operation.dart';
 
 import 'package:dio/dio.dart';
@@ -2555,7 +2556,9 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
 
   /// 清除历史记录（包含当前批次图像）
   void clearHistory() {
+    final previous = state;
     state = state.copyWith(currentImages: [], history: []);
+    _releaseDeletedDecodes([previous.currentImages, previous.history]);
     _retainSharePreparationCacheForCurrentHistory();
   }
 
@@ -2563,6 +2566,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
   /// 只移除内存记录；已保存到磁盘的文件保留不删。
   void removeImages(Set<String> imageIds) {
     if (imageIds.isEmpty) return;
+    final previous = state;
     state = state.copyWith(
       currentImages: state.currentImages
           .where((img) => !imageIds.contains(img.id))
@@ -2574,7 +2578,24 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
           .where((img) => !imageIds.contains(img.id))
           .toList(),
     );
+    _releaseDeletedDecodes([
+      previous.currentImages,
+      previous.history,
+      previous.displayImages,
+    ], ids: imageIds);
     _retainSharePreparationCacheForCurrentHistory();
+  }
+
+  void _releaseDeletedDecodes(
+    List<List<GeneratedImage>> lists, {
+    Set<String>? ids,
+  }) {
+    if (!ref.exists(canvasImageResidencyProvider)) return;
+    ref.read(canvasImageResidencyProvider.notifier).releaseRemovedImages([
+      for (final list in lists)
+        for (final image in list)
+          if (ids == null || ids.contains(image.id)) image,
+    ]);
   }
 
   /// 更新显示图像列表

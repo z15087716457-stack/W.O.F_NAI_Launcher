@@ -106,6 +106,23 @@ class ParseStatistics {
   }
 }
 
+/// Whether a PNG can carry NovelAI's alpha-channel ("stealth") metadata, as
+/// far as its header and first rows tell.
+enum _StealthPresence {
+  /// No alpha channel, or the first column's alpha bits are not the marker.
+  absent,
+
+  /// The marker is there: the full image has to be decoded for the payload.
+  present,
+
+  /// This (partial) file does not reach the rows that hold the marker.
+  incomplete,
+
+  /// An uncommon layout (16-bit, interlaced, palette transparency...): only
+  /// the full decoder can tell.
+  unknown,
+}
+
 /// 统一元数据解析器
 ///
 /// 支持多种 AI 绘画工具的元数据格式：
@@ -153,6 +170,10 @@ class UnifiedMetadataParser {
 
   /// 解析结果缓存（避免重复解析相同字节）
   static final Map<String, MetadataParseResult> _resultCache = {};
+
+  /// Full pixel decodes done to look for stealth metadata (diagnostics and
+  /// tests; this file stays free of Flutter imports for the Dart tools).
+  static int debugStealthDecodes = 0;
 
   /// 解析统计
   static final ParseStatistics _statistics = ParseStatistics();
@@ -432,9 +453,26 @@ class UnifiedMetadataParser {
 
       // 使用 textData 解析
       var result = parseFromTextData(textData);
-      if (!result.success) {
+      final stealth = result.success
+          ? _StealthPresence.unknown
+          : _stealthPresence(bytes);
+      if (!result.success &&
+          (stealth == _StealthPresence.absent ||
+              stealth == _StealthPresence.incomplete)) {
+        // Decoding every pixel in Dart would not find stealth data: there is
+        // no alpha channel, the marker is not in the first column, or this
+        // partial read stops before the marker's rows (the full file follows).
+        result = MetadataParseResult.failed(
+          result.triedParsers,
+          result.errorMessage ?? 'No metadata found in PNG',
+          parseTime: stopwatch.elapsed,
+          bytesRead: bytes.length,
+          metadataAbsent: stealth == _StealthPresence.absent,
+        );
+      } else if (!result.success) {
         img.Image? decoded;
         try {
+          debugStealthDecodes++;
           decoded = img.decodePng(bytes);
         } catch (e) {
           return MetadataParseResult.failed(
@@ -1638,6 +1676,89 @@ class UnifiedMetadataParser {
       PortableLogger.d('Failed to extract stealth_pngcomp metadata: $e', _tag);
       return null;
     }
+  }
+
+  /// Reads only what decides whether stealth data can be there. The data is
+  /// written to the alpha LSBs column by column, so its marker and length
+  /// (19 bytes, 152 bits) are the alpha of the first pixel in the first 152
+  /// rows: inflate just those rows instead of decoding the whole image.
+  static _StealthPresence _stealthPresence(Uint8List bytes) {
+    try {
+      final chunks = _parsePngChunks(bytes, allowPartial: true);
+      final header = ByteData.sublistView(chunks.first.data);
+      final width = header.getUint32(0);
+      final height = header.getUint32(4);
+      final bitDepth = header.getUint8(8);
+      final colorType = header.getUint8(9);
+      final interlaced = header.getUint8(12) != 0;
+      final transparency = chunks.any((chunk) => chunk.type == 'tRNS');
+      // Grey, RGB and palette images without tRNS have no alpha channel.
+      if (colorType != 4 && colorType != 6 && !transparency) {
+        return _StealthPresence.absent;
+      }
+      final markerBits = (utf8.encode(_magic).length + 4) * 8;
+      if ((colorType != 4 && colorType != 6) ||
+          bitDepth != 8 ||
+          interlaced ||
+          width == 0 ||
+          height < markerBits) {
+        return _StealthPresence.unknown;
+      }
+      final channels = colorType == 6 ? 4 : 2;
+      final stride = width * channels + 1;
+      final rows = _inflateAtLeast(
+        chunks.where((chunk) => chunk.type == 'IDAT').map((c) => c.data),
+        stride * markerBits,
+      );
+      if (rows == null) return _StealthPresence.incomplete;
+
+      // The first pixel of a row has no left neighbours: Sub adds 0, Average
+      // adds half the pixel above, Up and Paeth add the pixel above.
+      final above = List<int>.filled(channels, 0);
+      final marker = Uint8List(markerBits ~/ 8);
+      for (var row = 0; row < markerBits; row++) {
+        final start = row * stride;
+        final filter = rows[start];
+        for (var channel = 0; channel < channels; channel++) {
+          final value = rows[start + 1 + channel];
+          final up = above[channel];
+          above[channel] = switch (filter) {
+            0 || 1 => value,
+            2 || 4 => (value + up) & 0xFF,
+            3 => (value + (up >> 1)) & 0xFF,
+            _ => throw FormatException('Invalid PNG filter $filter'),
+          };
+        }
+        final bit = above[channels - 1] & 1;
+        marker[row >> 3] |= bit << (7 - (row & 7));
+      }
+      final magic = utf8.encode(_magic);
+      for (var i = 0; i < magic.length; i++) {
+        if (marker[i] != magic[i]) return _StealthPresence.absent;
+      }
+      return _StealthPresence.present;
+    } catch (_) {
+      return _StealthPresence.unknown;
+    }
+  }
+
+  /// At least [length] inflated bytes of the image data, or null when the
+  /// data (a partial read) ends before that.
+  static Uint8List? _inflateAtLeast(Iterable<Uint8List> data, int length) {
+    final filter = RawZLibFilter.inflateFilter();
+    final output = BytesBuilder(copy: false);
+    for (final chunk in data) {
+      filter.process(chunk, 0, chunk.length);
+      for (
+        var piece = filter.processed(flush: false);
+        piece != null;
+        piece = filter.processed(flush: false)
+      ) {
+        output.add(piece);
+      }
+      if (output.length >= length) return output.takeBytes();
+    }
+    return null;
   }
 
   static List<int>? _readAlphaLsbBytes(

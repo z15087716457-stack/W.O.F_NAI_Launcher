@@ -284,6 +284,28 @@ void main() {
   );
 
   testWidgets(
+    'remembering a wheel offset keeps the populated gallery mounted',
+    (tester) async {
+      final harness = await _pump(tester);
+      final page = find.byType(OnlineGalleryPage);
+      final before = tester.widget<OnlineGalleryPage>(page);
+      before.actions.onScrollOffset(123);
+      await tester.pumpAndSettle();
+      expect(
+        harness.container.read(onlineGalleryNotifierProvider).scrollOffset,
+        123,
+      );
+      expect(tester.widget<OnlineGalleryPage>(page), same(before));
+      before.actions.onModeChanged(OnlineMode.ranking);
+      await tester.pumpAndSettle();
+      expect(
+        tester.widget<OnlineGalleryPage>(page).data.mode,
+        OnlineMode.ranking,
+      );
+    },
+  );
+
+  testWidgets(
     'a prior source scroll callback cannot overwrite the new source offset',
     (tester) async {
       final harness = await _pump(tester);

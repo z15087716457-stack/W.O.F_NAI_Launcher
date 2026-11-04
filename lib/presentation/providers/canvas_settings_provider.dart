@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'canvas_image_residency_provider.dart';
+
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -202,8 +204,13 @@ class CanvasPinnedNotifier extends _$CanvasPinnedNotifier {
     if (_disposed || !state.contains(imageId)) return;
     await _repo.removePin(imageId);
     if (_disposed) return;
-    _images.remove(imageId);
+    final removed = _images.remove(imageId);
     state = {...state}..remove(imageId);
+    if (removed != null && ref.exists(canvasImageResidencyProvider)) {
+      ref.read(canvasImageResidencyProvider.notifier).releaseRemovedImages([
+        removed,
+      ]);
+    }
   }
 
   Future<void> _restore() async {

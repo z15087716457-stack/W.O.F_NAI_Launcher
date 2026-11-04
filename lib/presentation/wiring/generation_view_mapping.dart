@@ -236,11 +236,17 @@ MemoryImage? _historyPendingPreview(
   );
 }
 
-GenTile generationTileView(GeneratedImage image) => GenTile(
+/// [display] replaces the full-resolution image the tile shows (the canvas
+/// decodes old images at their size on screen); everything else keeps the
+/// original bytes.
+GenTile generationTileView(
+  GeneratedImage image, {
+  ImageProvider? display,
+}) => GenTile(
   id: image.id,
   width: image.width,
   height: image.height,
-  image: MemoryImage(image.bytes),
+  image: display ?? MemoryImage(image.bytes),
   originalImage: image.canCompareOriginal
       ? MemoryImage(image.originalBytes!)
       : null,

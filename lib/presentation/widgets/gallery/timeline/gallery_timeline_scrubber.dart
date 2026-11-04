@@ -87,8 +87,8 @@ class _GalleryTimelineScrubberState extends State<GalleryTimelineScrubber> {
   List<(double, _ScrubberMark)> _placeMarks(
     List<_ScrubberMark> marks,
     double trackHeight,
+    double maxScroll,
   ) {
-    final maxScroll = _maxScroll;
     if (maxScroll <= 0 || marks.isEmpty) return const [];
     double toY(double offset) =>
         _trackInset + (offset / maxScroll).clamp(0.0, 1.0) * trackHeight;
@@ -141,130 +141,131 @@ class _GalleryTimelineScrubberState extends State<GalleryTimelineScrubber> {
           0.0,
           constraints.maxHeight - _trackInset * 2,
         );
-        return AnimatedBuilder(
-          animation: widget.scrollController,
-          builder: (context, _) {
-            final maxScroll = _maxScroll;
-            if (maxScroll <= 0) return const SizedBox.shrink();
-            final offset = widget.scrollController.offset;
-            final thumbY =
-                _trackInset +
-                (offset / maxScroll).clamp(0.0, 1.0) * trackHeight;
-            final placed = _placeMarks(_buildMarks(locale), trackHeight);
-            final hoverY = _hoverY;
-            final hoverLabel = hoverY == null
-                ? null
-                : _labelAt(hoverY, trackHeight, locale);
-            final active = _dragging || hoverY != null;
+        // Both gallery viewports size their scroll child from this layout.
+        // Calendar marks only depend on geometry; only the thumb follows each tick.
+        final maxScroll = widget.layout.extent - constraints.maxHeight;
+        if (maxScroll <= 0) return const SizedBox.shrink();
+        final placed = _placeMarks(_buildMarks(locale), trackHeight, maxScroll);
+        final hoverY = _hoverY;
+        final hoverLabel = hoverY == null
+            ? null
+            : _labelAt(hoverY, trackHeight, locale);
+        final active = _dragging || hoverY != null;
 
-            return MouseRegion(
-              cursor: SystemMouseCursors.click,
-              onHover: (event) =>
-                  setState(() => _hoverY = event.localPosition.dy),
-              onExit: (_) => setState(() => _hoverY = null),
-              child: GestureDetector(
-                key: const Key('gallery-timeline-scrubber'),
-                behavior: HitTestBehavior.opaque,
-                onTapDown: (details) =>
-                    _jumpTo(details.localPosition.dy, trackHeight),
-                onVerticalDragStart: (details) {
-                  setState(() => _dragging = true);
-                  _jumpTo(details.localPosition.dy, trackHeight);
-                },
-                onVerticalDragUpdate: (details) {
-                  setState(() => _hoverY = details.localPosition.dy);
-                  _jumpTo(details.localPosition.dy, trackHeight);
-                },
-                onVerticalDragEnd: (_) => setState(() => _dragging = false),
-                onVerticalDragCancel: () => setState(() => _dragging = false),
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Positioned(
-                      right: 8,
-                      top: _trackInset,
-                      bottom: _trackInset,
-                      width: 1,
-                      child: ColoredBox(color: theme.dividerColor),
+        return MouseRegion(
+          cursor: SystemMouseCursors.click,
+          onHover: (event) => setState(() => _hoverY = event.localPosition.dy),
+          onExit: (_) => setState(() => _hoverY = null),
+          child: GestureDetector(
+            key: const Key('gallery-timeline-scrubber'),
+            behavior: HitTestBehavior.opaque,
+            onTapDown: (details) =>
+                _jumpTo(details.localPosition.dy, trackHeight),
+            onVerticalDragStart: (details) {
+              setState(() => _dragging = true);
+              _jumpTo(details.localPosition.dy, trackHeight);
+            },
+            onVerticalDragUpdate: (details) {
+              setState(() => _hoverY = details.localPosition.dy);
+              _jumpTo(details.localPosition.dy, trackHeight);
+            },
+            onVerticalDragEnd: (_) => setState(() => _dragging = false),
+            onVerticalDragCancel: () => setState(() => _dragging = false),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Positioned(
+                  right: 8,
+                  top: _trackInset,
+                  bottom: _trackInset,
+                  width: 1,
+                  child: ColoredBox(color: theme.dividerColor),
+                ),
+                for (final (y, mark) in placed) ...[
+                  Positioned(
+                    right: 6,
+                    top: y - 2.5,
+                    width: 5,
+                    height: 5,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: colors.outline,
+                        shape: BoxShape.circle,
+                      ),
                     ),
-                    for (final (y, mark) in placed) ...[
-                      Positioned(
-                        right: 6,
-                        top: y - 2.5,
-                        width: 5,
-                        height: 5,
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            color: colors.outline,
-                            shape: BoxShape.circle,
-                          ),
+                  ),
+                  Positioned(
+                    right: 15,
+                    top: y - 8,
+                    height: 16,
+                    child: Center(
+                      child: Text(
+                        mark.label,
+                        maxLines: 1,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          fontSize: 10.5,
+                          fontWeight: mark.isYear
+                              ? FontWeight.w500
+                              : FontWeight.w400,
+                          color: mark.isYear
+                              ? colors.onSurface
+                              : colors.onSurfaceVariant,
                         ),
                       ),
-                      Positioned(
-                        right: 15,
-                        top: y - 8,
-                        height: 16,
-                        child: Center(
-                          child: Text(
-                            mark.label,
-                            maxLines: 1,
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              fontSize: 10.5,
-                              fontWeight: mark.isYear
-                                  ? FontWeight.w500
-                                  : FontWeight.w400,
-                              color: mark.isYear
-                                  ? colors.onSurface
-                                  : colors.onSurfaceVariant,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                    Positioned(
+                    ),
+                  ),
+                ],
+                AnimatedBuilder(
+                  animation: widget.scrollController,
+                  child: DecoratedBox(
+                    key: const Key('gallery-timeline-scrubber-thumb'),
+                    decoration: BoxDecoration(
+                      color: colors.primary,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  builder: (context, thumb) {
+                    final offset = widget.scrollController.hasClients
+                        ? widget.scrollController.offset
+                        : 0.0;
+                    final thumbY =
+                        _trackInset +
+                        (offset / maxScroll).clamp(0.0, 1.0) * trackHeight;
+                    return Positioned(
                       right: 3,
                       top: thumbY - (active ? 2 : 1.5),
                       width: active ? 13 : 11,
                       height: active ? 4 : 3,
-                      child: DecoratedBox(
-                        key: const Key('gallery-timeline-scrubber-thumb'),
+                      child: thumb!,
+                    );
+                  },
+                ),
+                if (hoverY != null && hoverLabel != null)
+                  Positioned(
+                    right: constraints.maxWidth + 4,
+                    top: (hoverY - 12).clamp(0.0, constraints.maxHeight - 24),
+                    child: IgnorePointer(
+                      child: Container(
+                        height: 24,
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          color: colors.primary,
-                          borderRadius: BorderRadius.circular(2),
+                          color: colors.inverseSurface,
+                          borderRadius: BorderRadius.circular(6),
                         ),
-                      ),
-                    ),
-                    if (hoverY != null && hoverLabel != null)
-                      Positioned(
-                        right: constraints.maxWidth + 4,
-                        top: (hoverY - 12).clamp(
-                          0.0,
-                          constraints.maxHeight - 24,
-                        ),
-                        child: IgnorePointer(
-                          child: Container(
-                            height: 24,
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: colors.inverseSurface,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              hoverLabel,
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                color: colors.onInverseSurface,
-                                fontSize: 11.5,
-                              ),
-                            ),
+                        child: Text(
+                          hoverLabel,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: colors.onInverseSurface,
+                            fontSize: 11.5,
                           ),
                         ),
                       ),
-                  ],
-                ),
-              ),
-            );
-          },
+                    ),
+                  ),
+              ],
+            ),
+          ),
         );
       },
     );

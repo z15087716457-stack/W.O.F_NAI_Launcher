@@ -1749,6 +1749,65 @@ void main() {
       );
     }
   });
+  testWidgets('旧图按画布上的显示尺寸解码，最新十张和选中图保持原图', (tester) async {
+    // Newest first: runs 13..4 are the ten newest, 3..1 are old.
+    publish(
+      ImageGenerationState(
+        history: [for (var run = 13; run > 0; run--) image(run)],
+      ),
+    );
+    await pump(tester);
+    final items = container.read(canvasFeedLayoutProvider).items;
+    final world = items
+        .map((item) => item.worldRect)
+        .reduce((a, b) => a.expandToInclude(b));
+    const scale = 0.04;
+    Future<void> overview() async {
+      container
+          .read(generationCanvasCameraProvider.notifier)
+          .jump(
+            CanvasCamera(
+              offset: const Offset(40, 40) - world.topLeft * scale,
+              scale: scale,
+            ),
+            notifyIdle: false,
+          );
+      await tester.pumpAndSettle();
+    }
+
+    await overview();
+    ImageProvider shown(int run) => tester
+        .widget<Image>(
+          find
+              .descendant(
+                of: find.byKey(Key('gen-tile-$run-0')),
+                matching: find.byType(Image),
+              )
+              .first,
+        )
+        .image;
+    for (var run = 13; run > 3; run--) {
+      expect(shown(run), isA<MemoryImage>(), reason: 'run $run');
+    }
+    for (var run = 3; run > 0; run--) {
+      // 512 wide * 0.04 * 1x * 1.5 headroom, up to the 64px minimum.
+      expect(
+        shown(run),
+        isA<ResizeImage>().having((image) => image.width, 'width', 64),
+        reason: 'run $run',
+      );
+    }
+    // Selecting flies the camera there; back in the overview the selected
+    // image keeps full resolution, its neighbours do not.
+    container
+        .read(generationPreviewSelectionProvider.notifier)
+        .select(image(2).id);
+    await tester.pumpAndSettle();
+    await overview();
+    expect(shown(2), isA<MemoryImage>(), reason: 'selected');
+    expect(shown(1), isA<ResizeImage>());
+    expect(shown(3), isA<ResizeImage>());
+  });
   testWidgets('替换图块构建器会刷新缓存且保留相机宿主', (tester) async {
     publish(ImageGenerationState(history: [image(1)]));
     await pump(

@@ -9,8 +9,11 @@ import '../providers/shortcuts_provider.dart';
 import '../providers/canvas_settings_provider.dart';
 import '../providers/tips_provider.dart';
 
+import '../providers/canvas_image_residency_provider.dart';
 import '../providers/image_generation_provider.dart';
 import '../screens/generation/widgets/canvas/canvas_feed_layout.dart';
+import '../screens/generation/widgets/canvas/generation_canvas_controller.dart'
+    show generationCanvasViewportProvider;
 import '../screens/generation/widgets/canvas/generation_canvas_view.dart';
 import '../ui/gen/gen_canvas.dart';
 import '../ui/gen/gen_contract.dart';
@@ -129,6 +132,12 @@ class _GenerationCanvasWiringState
     final pins = ref.read(canvasPinnedNotifierProvider);
 
     final tile = generationCanvasItemView(item, state);
+    final image = item.image;
+    Widget buildTile(BuildContext context, GenTile tile) => widget.tileBuilder(
+      context,
+      tile,
+      focused: focused && item.group.tiles.length > 1,
+    );
     final slot = item.tile.slot;
     final content = GenCanvasTileScope(
       allowTap: allowTap,
@@ -169,11 +178,16 @@ class _GenerationCanvasWiringState
               filterQuality: FilterQuality.medium,
             )
           : null,
-      child: widget.tileBuilder(
-        context,
-        tile,
-        focused: focused && item.group.tiles.length > 1,
-      ),
+      child: image == null || image.isFailedStreamSnapshot
+          ? buildTile(context, tile)
+          : CanvasResidentTile(
+              image: image,
+              worldRect: item.worldRect,
+              builder: (context, display) => buildTile(
+                context,
+                generationTileView(image, display: display),
+              ),
+            ),
     );
     return buildCanvasTilePresentation(
       item: item,
@@ -188,6 +202,84 @@ class _GenerationCanvasWiringState
                   : '',
               child: content,
             ),
+    );
+  }
+}
+
+final _canvasDecodeViewProvider = Provider(
+  (ref) => (
+    camera: ref.watch(generationCanvasCameraProvider),
+    viewport:
+        ref.watch(generationCanvasViewportProvider) ??
+        ref.read(generationCanvasCameraProvider.notifier).viewportSize,
+  ),
+);
+
+/// A finished image on the canvas: at full resolution while it is resident
+/// (among the newest, selected, or looked at in the last few minutes), else
+/// decoded at the size the camera shows it, so old images do not each hold a
+/// full decode. Rebuilds only when that size changes.
+class CanvasResidentTile extends ConsumerStatefulWidget {
+  const CanvasResidentTile({
+    super.key,
+    required this.image,
+    required this.worldRect,
+    required this.builder,
+  });
+
+  final GeneratedImage image;
+
+  /// Where the tile sits in the world (native image pixels).
+  final Rect worldRect;
+
+  final Widget Function(BuildContext context, ImageProvider display) builder;
+
+  @override
+  ConsumerState<CanvasResidentTile> createState() => _CanvasResidentTileState();
+}
+
+class _CanvasResidentTileState extends ConsumerState<CanvasResidentTile> {
+  late final CanvasImageResidencyNotifier _residency;
+
+  @override
+  void initState() {
+    super.initState();
+    _residency = ref.read(canvasImageResidencyProvider.notifier)..attach();
+  }
+
+  @override
+  void dispose() {
+    _residency.detach();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final image = widget.image;
+    final clock = ref.read(canvasResidencyClockProvider);
+    final resident = ref.watch(
+      canvasImageResidencyProvider.select(
+        (residency) => residency.keepsFullResolution(image.id, at: clock()),
+      ),
+    );
+    int? width;
+    if (!resident) {
+      final ratio = MediaQuery.devicePixelRatioOf(context);
+      width = ref.watch(
+        _canvasDecodeViewProvider.select(
+          (view) => canvasTileDecodeWidth(
+            tileRect: widget.worldRect,
+            nativeWidth: image.width,
+            camera: view.camera,
+            viewport: view.viewport,
+            devicePixelRatio: ratio,
+          ),
+        ),
+      );
+    }
+    return widget.builder(
+      context,
+      canvasImageProvider(image, decodeWidth: width),
     );
   }
 }

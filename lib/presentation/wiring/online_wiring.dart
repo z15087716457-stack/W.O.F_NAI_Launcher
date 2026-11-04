@@ -547,7 +547,10 @@ class _OnlineWiringState extends ConsumerState<OnlineWiring>
         _accountChanged(GallerySourceId.gelbooru);
       }
     });
-    final state = ref.watch(onlineGalleryNotifierProvider);
+    // A discrete wheel ends a scroll on every tick. Keep its restoration
+    // offset current without rebuilding the page or remapping every post.
+    ref.watch(onlineGalleryNotifierProvider.select((s) => s.contentIdentity));
+    final state = ref.read(onlineGalleryNotifierProvider);
     final saved = ref.watch(onlineFavoritesNotifierProvider);
     final preferences = ref.watch(onlineGalleryPreferencesProvider);
     final blacklist = ref.watch(onlineGalleryBlacklistNotifierProvider);

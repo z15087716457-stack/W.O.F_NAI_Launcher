@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:isolate';
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -280,7 +282,10 @@ class ThumbnailCacheService {
   static const String thumbnailExt = '.thumb.jpg';
 
   /// 最大并发生成数
-  static const int maxConcurrentGenerations = 3;
+  ///
+  /// 解码交给引擎（各自的线程），JPEG 编码在后台 isolate；两个并发足够跟上滚动，
+  /// 第一次浏览大图库时也不会把核都占满。
+  static const int maxConcurrentGenerations = 2;
 
   /// 正在生成的缩略图任务集合
   final Set<ThumbnailTaskKey> _generatingThumbnails = {};
@@ -558,16 +563,7 @@ class ThumbnailCacheService {
         await thumbDir.create(recursive: true);
       }
 
-      final result = await ComputeGate()
-          .runCompute(_generateThumbnailBytesInIsolate, <String, Object?>{
-            'originalPath': originalPath,
-            'maxFileSizeBytes': _maxFileSizeBytes,
-            'targetWidth': size.width,
-            'targetHeight': size.height,
-            'jpegQuality': jpegQuality,
-          }, debugLabel: 'thumbnail_${p.basename(originalPath)}');
-
-      final thumbBytes = result['bytes'] as Uint8List;
+      final thumbBytes = await renderThumbnail(originalPath, size: size);
 
       await File(thumbnailPath).writeAsBytes(thumbBytes);
       _recentFailureTimes.remove(key);
@@ -603,6 +599,72 @@ class ThumbnailCacheService {
       _activeGenerationCount--;
       _processQueue();
     }
+  }
+
+  /// 引擎解码入口；测试换成失败的版本来走回退路（Windows 上 Skia 不认 TGA、
+  /// TIFF 时就是这条路，Mac 上引擎经 ImageIO 能解）。
+  @visibleForTesting
+  static Future<EngineThumbnail> Function(
+    Uint8List bytes, {
+    required int targetWidth,
+    required int targetHeight,
+  })
+  engineDecoder = decodeThumbnailWithEngine;
+
+  /// 读原图并生成缩略图 JPEG：先用引擎按目标尺寸直接解码（原生解码器，
+  /// 不在 Dart 里整张解 PNG），引擎不认的格式（TIFF、TGA、PSD……）回退到原来
+  /// 的纯 Dart 解码。两条路的格式（JPEG、质量）、尺寸和方向都一样，已有缓存照常用。
+  @visibleForTesting
+  Future<Uint8List> renderThumbnail(
+    String originalPath, {
+    required ThumbnailSize size,
+    bool engine = true,
+  }) async {
+    final file = File(originalPath);
+    final fileSize = await file.length();
+    if (fileSize > _maxFileSizeBytes) {
+      throw Exception(
+        'File too large: ${fileSize ~/ (1024 * 1024)}MB exceeds limit of '
+        '${_maxFileSizeBytes ~/ (1024 * 1024)}MB',
+      );
+    }
+    if (engine) {
+      try {
+        final decoded = await engineDecoder(
+          await file.readAsBytes(),
+          targetWidth: size.width,
+          targetHeight: size.height,
+        );
+        final jpeg = await ComputeGate().runCompute(
+          _encodeThumbnailJpegInIsolate,
+          <String, Object?>{
+            'rgba': TransferableTypedData.fromList([decoded.rgba]),
+            'width': decoded.width,
+            'height': decoded.height,
+            'jpegQuality': jpegQuality,
+          },
+          debugLabel: 'thumbnail_${p.basename(originalPath)}',
+        );
+        _stats.engineDecodes++;
+        return jpeg;
+      } catch (e) {
+        AppLogger.d(
+          'Engine decode unavailable for ${p.basename(originalPath)} ($e), '
+              'using the Dart decoder',
+          'ThumbnailCache',
+        );
+      }
+    }
+    final result = await ComputeGate()
+        .runCompute(_generateThumbnailBytesInIsolate, <String, Object?>{
+          'originalPath': originalPath,
+          'maxFileSizeBytes': _maxFileSizeBytes,
+          'targetWidth': size.width,
+          'targetHeight': size.height,
+          'jpegQuality': jpegQuality,
+        }, debugLabel: 'thumbnail_${p.basename(originalPath)}');
+    _stats.dartDecodes++;
+    return result['bytes'] as Uint8List;
   }
 
   void _completeGeneration(ThumbnailTaskKey key, String? path) {
@@ -1547,6 +1609,10 @@ class _ThumbnailStats {
   int failedCount = 0;
   int evictedCount = 0;
 
+  /// Thumbnails decoded by the engine / by the Dart fallback.
+  int engineDecodes = 0;
+  int dartDecodes = 0;
+
   void recordHit() => hitCount++;
   void recordMiss() => missCount++;
   void recordGenerated() => generatedCount++;
@@ -1559,6 +1625,8 @@ class _ThumbnailStats {
     generatedCount = 0;
     failedCount = 0;
     evictedCount = 0;
+    engineDecodes = 0;
+    dartDecodes = 0;
   }
 
   Map<String, dynamic> toMap() {
@@ -1571,10 +1639,106 @@ class _ThumbnailStats {
       'generatedCount': generatedCount,
       'failedCount': failedCount,
       'evictedCount': evictedCount,
+      'engineDecodes': engineDecodes,
+      'dartDecodes': dartDecodes,
       'hitRate': '${hitRate.toStringAsFixed(1)}%',
       'hitRateValue': hitRate,
     };
   }
+}
+
+/// 缩略图像素尺寸：按比例放进档位框，取整方式和磁盘上已有的缩略图一致
+/// （比档位小的原图会被放大到档位）。
+({int width, int height}) thumbnailPixelSize(
+  int sourceWidth,
+  int sourceHeight, {
+  required int targetWidth,
+  required int targetHeight,
+}) {
+  final aspectRatio = sourceHeight > 0 ? sourceWidth / sourceHeight : 1.0;
+  var thumbWidth = targetWidth;
+  var thumbHeight = targetHeight;
+
+  final targetAspectRatio = targetHeight > 0 ? targetWidth / targetHeight : 1.0;
+  if (aspectRatio > targetAspectRatio) {
+    thumbHeight = aspectRatio > 0
+        ? (targetWidth / aspectRatio).round()
+        : targetHeight;
+  } else {
+    thumbWidth = (targetHeight * aspectRatio).round();
+  }
+  return (width: math.max(1, thumbWidth), height: math.max(1, thumbHeight));
+}
+
+/// 引擎解码出的缩略图像素（非预乘 RGBA）和原图尺寸（已按 EXIF 方向转正）。
+typedef EngineThumbnail = ({
+  Uint8List rgba,
+  int width,
+  int height,
+  int sourceWidth,
+  int sourceHeight,
+});
+
+/// 用引擎直接按缩略图尺寸解码（只能在主 isolate 调；解码本身在引擎线程上）。
+///
+/// 和纯 Dart 路一样按 EXIF 方向转正；读出非预乘的 RGBA，半透明像素的颜色和
+/// 原来 JPEG 编码时用的一样。
+Future<EngineThumbnail> decodeThumbnailWithEngine(
+  Uint8List bytes, {
+  required int targetWidth,
+  required int targetHeight,
+}) async {
+  final buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
+  ui.ImageDescriptor? descriptor;
+  ui.Codec? codec;
+  ui.Image? image;
+  try {
+    descriptor = await ui.ImageDescriptor.encoded(buffer);
+    final fitted = thumbnailPixelSize(
+      descriptor.width,
+      descriptor.height,
+      targetWidth: targetWidth,
+      targetHeight: targetHeight,
+    );
+    codec = await descriptor.instantiateCodec(
+      targetWidth: fitted.width,
+      targetHeight: fitted.height,
+    );
+    image = (await codec.getNextFrame()).image;
+    final pixels = await image.toByteData(
+      format: ui.ImageByteFormat.rawStraightRgba,
+    );
+    if (pixels == null) throw StateError('Engine returned no pixels');
+    return (
+      rgba: pixels.buffer.asUint8List(
+        pixels.offsetInBytes,
+        pixels.lengthInBytes,
+      ),
+      width: image.width,
+      height: image.height,
+      sourceWidth: descriptor.width,
+      sourceHeight: descriptor.height,
+    );
+  } finally {
+    image?.dispose();
+    codec?.dispose();
+    descriptor?.dispose();
+    buffer.dispose();
+  }
+}
+
+Uint8List _encodeThumbnailJpegInIsolate(Map<String, Object?> request) {
+  final rgba = (request['rgba'] as TransferableTypedData).materialize();
+  final image = img.Image.fromBytes(
+    width: request['width'] as int,
+    height: request['height'] as int,
+    bytes: rgba,
+    numChannels: 4,
+    order: img.ChannelOrder.rgba,
+  );
+  return Uint8List.fromList(
+    img.encodeJpg(image, quality: request['jpegQuality'] as int),
+  );
 }
 
 Map<String, Object?> _generateThumbnailBytesInIsolate(
@@ -1600,27 +1764,16 @@ Map<String, Object?> _generateThumbnailBytesInIsolate(
     throw Exception('Failed to decode image: $originalPath');
   }
 
-  final aspectRatio = originalImage.height > 0
-      ? originalImage.width / originalImage.height
-      : 1.0;
-  var thumbWidth = targetWidth;
-  var thumbHeight = targetHeight;
-
-  final targetAspectRatio = targetHeight > 0 ? targetWidth / targetHeight : 1.0;
-  if (aspectRatio > targetAspectRatio) {
-    thumbHeight = aspectRatio > 0
-        ? (targetWidth / aspectRatio).round()
-        : targetHeight;
-  } else {
-    thumbWidth = (targetHeight * aspectRatio).round();
-  }
-
-  thumbWidth = math.max(1, thumbWidth);
-  thumbHeight = math.max(1, thumbHeight);
+  final fitted = thumbnailPixelSize(
+    originalImage.width,
+    originalImage.height,
+    targetWidth: targetWidth,
+    targetHeight: targetHeight,
+  );
   final thumbnail = img.copyResize(
     originalImage,
-    width: thumbWidth,
-    height: thumbHeight,
+    width: fitted.width,
+    height: fitted.height,
     interpolation: img.Interpolation.linear,
   );
 

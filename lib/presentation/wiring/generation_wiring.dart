@@ -15,6 +15,7 @@ import '../widgets/prompt/blocks/prompt_block_palette.dart';
 import '../widgets/shortcuts/shortcut_aware_widget.dart';
 import '../widgets/navigation/integrated_title_bar.dart';
 import 'tools_generation_wiring.dart';
+import '../providers/canvas_image_residency_provider.dart';
 import '../providers/character_prompt_provider.dart';
 import '../providers/canvas_channel_provider.dart';
 import '../providers/pill_workspace_provider.dart';
@@ -197,6 +198,9 @@ class _GenerationWiringState extends ConsumerState<GenerationWiring> {
   @override
   void initState() {
     super.initState();
+    // 随生成页建好画布解码管理：它也负责放掉被下一步换掉的流式预览，
+    // 第一批还没有成图图块、或用简单视图时也要在。
+    ref.read(canvasImageResidencyProvider.notifier);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         unawaited(

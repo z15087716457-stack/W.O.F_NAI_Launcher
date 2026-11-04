@@ -176,6 +176,8 @@ class GalleryTimelineStickyHeader extends StatelessWidget {
   final Widget Function(GalleryTimelineSection section) headerBuilder;
   @override
   Widget build(BuildContext context) {
+    GalleryTimelineSection? current;
+    Widget? header;
     return ClipRect(
       child: AnimatedBuilder(
         animation: scrollController,
@@ -197,10 +199,11 @@ class GalleryTimelineStickyHeader extends StatelessWidget {
               shift = nextTop - layout.headerHeight;
             }
           }
-          return Transform.translate(
-            offset: Offset(0, shift),
-            child: headerBuilder(section),
-          );
+          if (current != section) {
+            current = section;
+            header = headerBuilder(section);
+          }
+          return Transform.translate(offset: Offset(0, shift), child: header);
         },
       ),
     );

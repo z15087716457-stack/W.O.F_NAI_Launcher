@@ -23,6 +23,7 @@ import 'package:nai_launcher/presentation/providers/gallery_trash_provider.dart'
 import 'package:nai_launcher/presentation/providers/local_gallery_provider.dart';
 import 'package:nai_launcher/presentation/providers/selection_mode_provider.dart';
 import 'package:nai_launcher/presentation/widgets/gallery/local_image_card.dart';
+import 'package:nai_launcher/presentation/widgets/gallery/timeline/gallery_timeline_header.dart';
 import 'package:nai_launcher/presentation/widgets/gallery/timeline/gallery_timeline_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -164,6 +165,47 @@ void main() {
     await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
     await tester.pump();
   }
+
+  testWidgets(
+    'small scroll updates move the thumb without rebuilding stationary calendar labels',
+    (tester) async {
+      await pumpView(tester);
+      final scroll = tester
+          .widget<SingleChildScrollView>(
+            find.byKey(const Key('gallery-timeline-scroll')),
+          )
+          .controller!;
+      scroll.jumpTo(24);
+      await tester.pump();
+      final thumb = find.byKey(const Key('gallery-timeline-scrubber-thumb'));
+      final thumbY = tester.getCenter(thumb).dy;
+      final labels = find.descendant(
+        of: find.byKey(const Key('gallery-timeline-scrubber')),
+        matching: find.byType(Text),
+      );
+      final sticky = find.descendant(
+        of: find.byType(GalleryTimelineStickyHeader),
+        matching: find.byType(GalleryTimelineGroupHeader),
+      );
+      expect(labels, findsWidgets);
+      expect(sticky, findsOneWidget);
+      final stationaryElements = {...labels.evaluate(), ...sticky.evaluate()};
+      var builds = 0;
+      final original = debugOnRebuildDirtyWidget;
+      debugOnRebuildDirtyWidget = (element, builtOnce) {
+        original?.call(element, builtOnce);
+        if (stationaryElements.contains(element)) builds++;
+      };
+      addTearDown(() => debugOnRebuildDirtyWidget = original);
+      for (var i = 0; i < 12; i++) {
+        scroll.position.pointerScroll(2);
+        await tester.pump();
+      }
+      expect(tester.getCenter(thumb).dy, greaterThan(thumbY));
+      expect(builds, 0);
+      await dispose(tester);
+    },
+  );
 
   testWidgets('builds only cards near the viewport with day headers', (
     tester,
