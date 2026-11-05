@@ -156,14 +156,16 @@ void main() {
     TypeAdapter<T> adapter,
     int typeId,
     T value,
-    Map<int, Object?> legacyFields,
-  ) {
+    Map<int, Object?> legacyFields, {
+    Map<int, Object?> appendedFields = const {},
+  }) {
     test('$name retains its Hive type and field numbers', () {
       expect(adapter.typeId, typeId);
       final writer = _Writer();
       adapter.write(writer, value);
-      expect(writer.tokens.first, legacyFields.length);
-      expect(writer.fields, legacyFields);
+      final expected = {...legacyFields, ...appendedFields};
+      expect(writer.tokens.first, expected.length);
+      expect(writer.fields, expected);
     });
     test('$name reads the existing Hive field layout', () {
       expect(adapter.read(_LegacyReader(legacyFields)), value);
@@ -216,7 +218,7 @@ void main() {
     23: 'nai-diffusion-5-full',
     24: ['nai-diffusion-5-full', null],
   });
-  verify('metadata', NaiImageMetadataAdapter(), 24, metadata, {
+  final legacyMetadata = <int, Object?>{
     0: 'prompt',
     1: 'uc',
     2: 17,
@@ -257,7 +259,15 @@ void main() {
     36: ['uc suffix'],
     38: 1,
     39: 2,
-  });
+  };
+  verify(
+    'metadata',
+    NaiImageMetadataAdapter(),
+    24,
+    metadata,
+    legacyMetadata,
+    appendedFields: {40: false, 41: false, 42: false},
+  );
   verify('character', CharacterPromptInfoAdapter(), 25, character, {
     0: 'character',
     1: 'negative',
