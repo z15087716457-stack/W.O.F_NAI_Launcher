@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
@@ -49,6 +50,10 @@ class ProxyService {
       return null;
     }
   }
+
+  /// Runs the settings page's system read off the UI isolate.
+  static Future<String?> readSystemProxyAddress() =>
+      Isolate.run(getSystemProxyAddress);
 
   /// Windows: 通过注册表读取代理
   static String? _getWindowsProxy() {

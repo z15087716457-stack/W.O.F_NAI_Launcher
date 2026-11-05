@@ -28,6 +28,23 @@ class DesktopAppShutdownService {
     return () => _cleanups.remove(cleanup);
   }
 
+  /// Only register work after startup reaches it, so deferred callbacks never
+  /// keep the process alive while it is quitting.
+  static Future<void> runCriticalStartupTask(
+    String name,
+    Future<void> Function() action,
+  ) async {
+    if (isShuttingDown) return;
+    final finished = Completer<void>();
+    final unregister = registerCleanup(() => finished.future, name: name);
+    try {
+      await action();
+    } finally {
+      unregister();
+      finished.complete();
+    }
+  }
+
   static Future<void> prepareBackgroundShutdown() async {
     await Future.wait([
       for (final entry in List.of(_cleanups.entries))

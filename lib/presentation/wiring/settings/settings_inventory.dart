@@ -395,21 +395,20 @@ final settingsCacheStatsProvider = FutureProvider.autoDispose((ref) {
   ref.onDispose(() => manager.unregisterOnStatisticsInvalidated(invalidate));
   return manager.getStatistics(refresh: true);
 });
-final settingsDictionaryDataProvider = FutureProvider<SettingsDictionaryData>((
-  ref,
-) async {
-  final catalog = await ref.read(tagCatalogRepositoryProvider).metadata();
-  final database = await ref.read(databaseManagerProvider.future);
-  final cooccurrence = await database.cooccurrenceDataSource.getCount();
-  final wikiPath = await AssetDatabaseManager.instance.ensureTagWikiDb();
-  final wikiCount = await validateDictionaryInBackground(
-    wikiPath,
-    DictionaryKind.wiki,
-  );
-  return SettingsDictionaryData(
-    tagCount: int.tryParse(catalog['tag_count'] ?? '') ?? 0,
-    dataVersion: catalog['data_version'] ?? '',
-    wikiCount: wikiCount,
-    cooccurrence: cooccurrence,
-  );
-});
+final settingsDictionaryDataProvider =
+    FutureProvider.autoDispose<SettingsDictionaryData>((ref) async {
+      final catalog = await ref.read(tagCatalogRepositoryProvider).metadata();
+      final database = await ref.read(databaseManagerProvider.future);
+      final cooccurrence = await database.cooccurrenceDataSource.getCount();
+      final wikiPath = await AssetDatabaseManager.instance.ensureTagWikiDb();
+      final wikiCount = await validateDictionaryInBackground(
+        wikiPath,
+        DictionaryKind.wiki,
+      );
+      return SettingsDictionaryData(
+        tagCount: int.tryParse(catalog['tag_count'] ?? '') ?? 0,
+        dataVersion: catalog['data_version'] ?? '',
+        wikiCount: wikiCount,
+        cooccurrence: cooccurrence,
+      );
+    });

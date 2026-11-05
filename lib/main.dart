@@ -111,7 +111,7 @@ void _runDeferredStartupStep(
     unawaited(
       _runNonFatalStartupStep(name, () async {
         await servicesReady;
-        await action();
+        if (!DesktopAppShutdownService.isShuttingDown) await action();
       }),
     );
   });
@@ -766,7 +766,10 @@ Future<void> _bootstrapPreparedApplication() async {
   }
 
   final servicesReady = WidgetsBinding.instance.endOfFrame.then(
-    (_) => _initializeMainServices(),
+    (_) => DesktopAppShutdownService.runCriticalStartupTask(
+      'Startup services',
+      _initializeMainServices,
+    ),
   );
   final container = ProviderContainer(
     overrides: [appStartupReadyProvider.overrideWithValue(servicesReady)],
@@ -821,6 +824,7 @@ Future<void> _bootstrapPreparedApplication() async {
   // 启动时自动同步在线画廊黑名单（不阻塞启动）
   Future.delayed(const Duration(seconds: 8), () async {
     await servicesReady;
+    if (DesktopAppShutdownService.isShuttingDown) return;
     try {
       await container
           .read(onlineGalleryBlacklistNotifierProvider.notifier)
