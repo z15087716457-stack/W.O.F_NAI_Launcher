@@ -88,12 +88,14 @@ void main() {
     int Function()? readModelRevision,
     NaiAgentVisionAccess visionAccess = const NaiAgentVisionAccess(),
     Map<String, dynamic>? mcpConfig,
+    Duration hostIdleTimeout = const Duration(minutes: 30),
   }) {
     final value = NaiAgentWorkspaceController(
       store: AgentWorkspaceStore(root),
       initialWorkspaceName: '工作区',
       initialChatName: '新聊天',
       readModelRevision: readModelRevision,
+      hostIdleTimeout: hostIdleTimeout,
       startClient: (workspace, chat, settings, prompt, resume) =>
           PiHostClient.start(
             nodeExecutable: 'E:/node/node.exe',
@@ -140,7 +142,7 @@ void main() {
   }
 
   test(
-    'configured MCP connects before first send and display renames retain actual tool names',
+    'MCP connects before the first send and reconnects with the same chat after idle close',
     () async {
       final script = File('${root.path}/synthetic-mcp.mjs');
       await script.writeAsString(r'''
@@ -167,9 +169,12 @@ createInterface({input:process.stdin}).on('line', line=>{
           providerId: 'local',
           modelId: 'test',
           mcpServers: [server],
+          panelExpanded: true,
         ),
       );
+      const idle = Duration(milliseconds: 300);
       final c = controller(
+        hostIdleTimeout: idle,
         mcpConfig: {
           'command': 'E:/node/node.exe',
           'args': [script.path],
@@ -197,10 +202,62 @@ createInterface({input:process.stdin}).on('line', line=>{
         expect(names, contains('mcp__exa__lookup'));
         expect(names.any((name) => '$name'.contains('联网')), false);
       }
+      expect(calls, 2);
+      final runtime = c.selected!;
+      final session = runtime.chat.sessionFile;
+      final entered = Completer<void>();
+      final response = Completer<void>();
+      waitForResponse = () {
+        entered.complete();
+        return response.future;
+      };
+      final sending = c.sendText('Wait for this response');
+      try {
+        await entered.future;
+        await c.updateSettings({'panelExpanded': false});
+        await Future<void>.delayed(idle * 2);
+        expect(client.isClosed, isFalse);
+      } finally {
+        response.complete();
+      }
+      expect(await sending, isTrue);
+      await c.saveComposer('keep this draft');
+      for (var i = 0; i < 500 && !client.isClosed; i++) {
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+      }
+      expect(client.isClosed, isTrue);
+      expect(runtime.client, isNull);
+      expect(
+        runtime.displayMessages.where((m) => m['role'] == 'user'),
+        hasLength(3),
+      );
+      expect(runtime.error, isNull);
+
+      await c.updateSettings({'panelExpanded': true});
+      for (
+        var i = 0;
+        i < 800 && (runtime.client == null || runtime.starting);
+        i++
+      ) {
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+      }
+      final resumed = runtime.client!;
+      expect(resumed, isNot(same(client)));
+      expect(runtime.chat.sessionFile, session);
+      expect(
+        runtime.displayMessages.where((m) => m['role'] == 'user'),
+        hasLength(3),
+      );
+      expect(runtime.composer.text, 'keep this draft');
+      expect(
+        (await resumed.mcpCommand('status'))['mcpStatus'],
+        contains('exa: connected, 1 tool'),
+      );
+      expect(calls, 3, reason: 'Reopening does not send a model request');
+
       await c.createChat();
       expect(c.selected!.client, isNotNull);
-      expect(c.selected!.client, isNot(same(client)));
-      expect(calls, 2);
+      expect(c.selected!.client, isNot(same(resumed)));
     },
   );
 

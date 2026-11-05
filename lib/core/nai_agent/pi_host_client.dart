@@ -57,6 +57,7 @@ class PiHostClient {
   Stream<Map<String, dynamic>> get events => _events.stream;
   Map<String, dynamic> get initialState => Map.of(_initialState);
   bool get isClosed => _closed;
+  bool get hasPendingRequests => _requests.isNotEmpty;
   Future<void> get whenClosed => _process.exitCode.then((_) {});
 
   static Future<PiHostClient> start({
