@@ -205,17 +205,6 @@ List<ShortcutBinding> searchShortcuts(Ref ref, String query) {
   );
 }
 
-/// 快捷键帮助对话框显示状态
-@riverpod
-class ShortcutHelpDialogNotifier extends _$ShortcutHelpDialogNotifier {
-  @override
-  bool build() => false;
-
-  void show() => state = true;
-  void hide() => state = false;
-  void toggle() => state = !state;
-}
-
 /// 获取特定上下文的快捷键映射
 /// 用于构建Shortcuts widget
 Map<ShortcutActivator, VoidCallback> buildContextShortcuts(

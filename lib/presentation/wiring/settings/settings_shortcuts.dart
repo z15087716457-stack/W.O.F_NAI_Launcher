@@ -15,6 +15,7 @@ import '../../../core/utils/localization_extension.dart';
 import '../../providers/shortcuts_provider.dart';
 import '../../ui/settings/settings_contract.dart';
 import '../../utils/shortcut_labels.dart';
+import '../../widgets/shortcuts/shortcut_help_dialog.dart';
 
 final settingsShortcutOrderProvider = StateProvider<Map<String, int>>(
   (ref) => {},
@@ -167,5 +168,5 @@ class SettingsShortcutActions {
     });
   }
 
-  void help() => ref.read(shortcutHelpDialogNotifierProvider.notifier).show();
+  void help() => ShortcutHelpDialog.show(context);
 }
