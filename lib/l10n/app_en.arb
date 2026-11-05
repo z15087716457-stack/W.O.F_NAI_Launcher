@@ -8893,7 +8893,6 @@
   "naiAgent_mcpBuiltin": "NAI Studio · Built-in tools",
   "naiAgent_mcpBuiltinHint": "Prompt, block, wiki, image, history, reference, generation and settings tools. Discovered on demand by default; existing backups, version checks and user confirmations still apply.",
   "naiAgent_mcpAdd": "Add MCP server",
-  "naiAgent_mcpName": "Server name",
   "naiAgent_mcpConfig": "Server configuration (JSON)",
   "naiAgent_mcpStatus": "Check connections",
   "naiAgent_mcpReconnect": "Reconnect",

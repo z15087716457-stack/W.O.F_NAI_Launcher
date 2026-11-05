@@ -16714,9 +16714,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get naiAgent_mcpAdd => 'Add MCP server';
 
   @override
-  String get naiAgent_mcpName => 'Server name';
-
-  @override
   String get naiAgent_mcpConfig => 'Server configuration (JSON)';
 
   @override

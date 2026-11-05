@@ -4903,6 +4903,9 @@
   "update_errorCheckFailed": "检查更新失败",
   "update_errorRateLimited": "GitHub 请求已达上限，请稍后重试。",
   "update_retryAt": "请在 {time}（本地时间）后重试。",
+  "@update_retryAt": {
+    "placeholders": {"time": {"type": "String"}}
+  },
   "update_errorCheckUnknown": "检查更新时发生未知错误",
   "update_errorLogPath": "日志：{path}",
   "@update_errorLogPath": {
@@ -5153,8 +5156,23 @@
   "imageUse_characters": "多角色",
   "imageUse_characterMode": "角色处理",
   "imageUse_featureRecorded": "原图使用过{feature}。",
+  "@imageUse_featureRecorded": {
+    "placeholders": {
+      "feature": {"type": "String"}
+    }
+  },
   "imageUse_referenceAvailable": "原图使用过{feature}，参考素材可通过“参考图”导入。",
+  "@imageUse_referenceAvailable": {
+    "placeholders": {
+      "feature": {"type": "String"}
+    }
+  },
   "imageUse_referenceUnavailable": "原图使用过{feature}，仅保留使用记录，未附带可导入的参考素材。",
+  "@imageUse_referenceUnavailable": {
+    "placeholders": {
+      "feature": {"type": "String"}
+    }
+  },
   "imageMenu_details": "详情",
   "imageMenu_creation": "创作与参考",
   "imageMenu_editAndDerive": "编辑与派生",
@@ -8873,7 +8891,6 @@
   "naiAgent_mcpBuiltin": "NAI Studio · 内置工具组",
   "naiAgent_mcpBuiltinHint": "提示词、积木、百科、图片、历史、参考图、生图和设置工具。默认按需发现，原有备份、版本校验和真实确认继续生效。",
   "naiAgent_mcpAdd": "添加 MCP 服务器",
-  "naiAgent_mcpName": "服务器名称",
   "naiAgent_mcpConfig": "服务器配置（JSON）",
   "naiAgent_mcpStatus": "查看连接状态",
   "naiAgent_mcpReconnect": "重新连接",

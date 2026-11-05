@@ -16022,9 +16022,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get naiAgent_mcpAdd => '添加 MCP 服务器';
 
   @override
-  String get naiAgent_mcpName => '服务器名称';
-
-  @override
   String get naiAgent_mcpConfig => '服务器配置（JSON）';
 
   @override
@@ -37751,9 +37748,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get naiAgent_mcpAdd => '新增 MCP 伺服器';
-
-  @override
-  String get naiAgent_mcpName => '伺服器名稱';
 
   @override
   String get naiAgent_mcpConfig => '伺服器配置（JSON）';

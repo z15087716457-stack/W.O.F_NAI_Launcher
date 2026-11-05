@@ -16232,9 +16232,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get naiAgent_mcpAdd => 'MCP サーバーを追加';
 
   @override
-  String get naiAgent_mcpName => 'サーバー名';
-
-  @override
   String get naiAgent_mcpConfig => 'サーバー設定（JSON）';
 
   @override

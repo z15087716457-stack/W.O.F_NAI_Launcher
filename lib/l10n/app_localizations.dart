@@ -29165,12 +29165,6 @@ abstract class AppLocalizations {
   /// **'Add MCP server'**
   String get naiAgent_mcpAdd;
 
-  /// No description provided for @naiAgent_mcpName.
-  ///
-  /// In en, this message translates to:
-  /// **'Server name'**
-  String get naiAgent_mcpName;
-
   /// No description provided for @naiAgent_mcpConfig.
   ///
   /// In en, this message translates to:

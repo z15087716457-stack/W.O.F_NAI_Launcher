@@ -16269,9 +16269,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get naiAgent_mcpAdd => 'MCP 서버 추가';
 
   @override
-  String get naiAgent_mcpName => '서버 이름';
-
-  @override
   String get naiAgent_mcpConfig => '서버 설정 (JSON)';
 
   @override
