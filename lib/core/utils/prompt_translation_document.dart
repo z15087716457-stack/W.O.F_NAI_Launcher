@@ -364,11 +364,12 @@ class PromptTranslationBatch {
         instances[marker] = PillInstance(
           blockId: '',
           translation: TranslationPill(
-            source: PromptInputNormalization.normalize(
+            source: PromptInputNormalization.normalizeTranslationFragment(
               original.text.substring(group.start, group.end),
               autoFormat: autoFormat,
-              sdAutoConvert: false,
-            ).text,
+              preserveLeading: group.start > 0,
+              preserveTrailing: group.end < original.text.length,
+            ),
             zh: group.zh,
             marks: group.marks,
             languageCode: PromptTranslationLanguage.fromCode(languageCode).code,

@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:flutter/gestures.dart' show kSecondaryMouseButton;
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 
 import '../../../../data/models/prompt_block/pill_document.dart';
@@ -33,6 +34,17 @@ class TranslationPillView extends StatefulWidget {
   final bool highlightEnabled;
   final bool numericEmphasisEnabled;
   final bool autoFormat;
+
+  // Only the host field whose secondary-click anchor hit the pill gets a toggle.
+  static final _menuTargets =
+      Expando<({Offset position, VoidCallback toggle})>();
+
+  static VoidCallback? contextMenuToggle(EditableTextState field) {
+    final target = _menuTargets[field];
+    return target?.position == field.contextMenuAnchors.primaryAnchor
+        ? target?.toggle
+        : null;
+  }
 
   /// Embedded temporary-block reading: both mouse buttons only toggle display.
   final bool toggleOnTap;
@@ -95,12 +107,37 @@ class _TranslationPillViewState extends State<TranslationPillView> {
 
   String _displayText(TranslationPill pill) {
     if (!pill.showOriginal) return pill.zh;
-    return PromptInputNormalization.normalize(
+    return PromptInputNormalization.normalizeTranslationFragment(
       pill.source,
       autoFormat: widget.autoFormat,
-      sdAutoConvert: false,
-    ).text;
+    );
   }
+
+  void _registerContextMenu(PointerDownEvent event) {
+    if (event.buttons != kSecondaryMouseButton) return;
+    final field = context.findAncestorStateOfType<EditableTextState>();
+    if (field != null) {
+      TranslationPillView._menuTargets[field] = (
+        position: event.position,
+        toggle: widget.onToggle,
+      );
+    }
+  }
+
+  Widget _sourceContextMenu(BuildContext context, EditableTextState field) =>
+      AdaptiveTextSelectionToolbar.buttonItems(
+        anchors: field.contextMenuAnchors,
+        buttonItems: [
+          ...field.contextMenuButtonItems,
+          ContextMenuButtonItem(
+            label: context.l10n.promptTranslation_guideMiddleText,
+            onPressed: () {
+              field.hideToolbar();
+              widget.onToggle();
+            },
+          ),
+        ],
+      );
 
   @override
   void initState() {
@@ -235,6 +272,7 @@ class _TranslationPillViewState extends State<TranslationPillView> {
                     focusedErrorBorder: InputBorder.none,
                   ),
                   onTapOutside: (_) => _sourceFocus.unfocus(),
+                  contextMenuBuilder: _sourceContextMenu,
                   onChanged: (source) {
                     setState(() {});
                     widget.onSourceChanged!(source);
@@ -302,14 +340,17 @@ class _TranslationPillViewState extends State<TranslationPillView> {
               ],
             ),
           );
-          return GestureDetector(
-            onTapUp: editableSource
-                ? null
-                : (details) => widget.toggleOnTap
-                      ? widget.onToggle()
-                      : widget.onEdit(details.globalPosition),
-            onTertiaryTapUp: (_) => widget.onToggle(),
-            child: content,
+          return Listener(
+            onPointerDown: _registerContextMenu,
+            child: GestureDetector(
+              onTapUp: editableSource
+                  ? null
+                  : (details) => widget.toggleOnTap
+                        ? widget.onToggle()
+                        : widget.onEdit(details.globalPosition),
+              onTertiaryTapUp: (_) => widget.onToggle(),
+              child: content,
+            ),
           );
         },
       ),

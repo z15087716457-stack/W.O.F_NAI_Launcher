@@ -24,6 +24,7 @@ class BlockSelectionToolbar extends StatelessWidget {
     required this.onSaveAsBlock,
     required this.onCopy,
     this.onLookup,
+    this.onToggleTranslation,
   });
 
   final VoidCallback onSaveAsBlock;
@@ -31,19 +32,21 @@ class BlockSelectionToolbar extends StatelessWidget {
 
   /// 查词条（标签百科）；null 不显示。
   final VoidCallback? onLookup;
+  final VoidCallback? onToggleTranslation;
 
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
     final l10n = context.l10n;
-    Widget btn(Key key, Widget icon, String label, VoidCallback onTap) => UiBtn(
-      key: key,
-      size: UiBtnSize.small,
-      tone: UiBtnTone.ghost,
-      color: c.ink,
-      onTap: onTap,
-      children: [icon, Text(label)],
-    );
+    Widget btn(Key key, Widget? icon, String label, VoidCallback onTap) =>
+        UiBtn(
+          key: key,
+          size: UiBtnSize.small,
+          tone: UiBtnTone.ghost,
+          color: c.ink,
+          onTap: onTap,
+          children: [?icon, Text(label)],
+        );
     return UiPopoverSurface(
       key: const Key('block-selection-toolbar'),
       radius: 9,
@@ -70,6 +73,13 @@ class BlockSelectionToolbar extends StatelessWidget {
               const UiGlyph(UiGlyphs.search, size: 13),
               l10n.blocks_lookup,
               onLookup!,
+            ),
+          if (onToggleTranslation case final toggle?)
+            btn(
+              const Key('block-sel-translation'),
+              null,
+              l10n.promptTranslation_guideMiddleText,
+              toggle,
             ),
         ],
       ),
