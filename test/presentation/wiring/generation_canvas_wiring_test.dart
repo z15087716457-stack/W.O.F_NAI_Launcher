@@ -1396,7 +1396,7 @@ void main() {
         await container
             .read(simpleOutputViewerNotifierProvider.notifier)
             .setSimple(true);
-        final old = image(1);
+        final old = image(1, 1);
         final previous = image(2);
         final first = image(9);
         final last = image(9, 1);
@@ -1432,8 +1432,16 @@ void main() {
         expect(find.byKey(const Key('gen-tile-slot:run:9:0')), findsOneWidget);
 
         if (browseHistory) {
-          container.read(generationHistoryActionsProvider).focusTile(old.id);
+          // The right panel shows a batch cover when grouped, a single image
+          // otherwise. This earlier run only has its second slot in history.
+          final row = grouped ? 'run:1' : 'img:${old.id}';
+          await tester.tap(find.byKey(Key('gen-batch-tile-$row')));
           await tester.pump();
+          expect(container.read(generationPreviewSelectionProvider), old.id);
+          expect(
+            container.read(generationCanvasGroupSelectionProvider)?.subimage,
+            1,
+          );
         }
         publish(
           loading(9, count: 2).copyWith(
@@ -1467,26 +1475,41 @@ void main() {
               ? [first.id, last.id]
               : [last.id],
         );
+        if (browseHistory) {
+          expect(container.read(generationPreviewSelectionProvider), old.id);
+          expect(
+            container.read(generationCanvasGroupSelectionProvider)?.subimage,
+            1,
+          );
+        }
         expect(tester.takeException(), isNull);
       });
     }
   }
 
   testWidgets('简单模式不挂相机，切回后定位原选择且可反复切换', (tester) async {
-    publish(ImageGenerationState(history: [image(2), image(1)]));
+    final selected = image(1, 1);
+    publish(ImageGenerationState(history: [image(2), selected]));
     await container
         .read(simpleOutputViewerNotifierProvider.notifier)
         .setSimple(true);
     await pump(tester);
     expect(find.byType(GenerationCanvasView), findsNothing);
-    container.read(generationHistoryActionsProvider).focusTile(image(1).id);
+    container.read(generationHistoryActionsProvider).focusTile(selected.id);
     for (var i = 0; i < 3; i++) {
       await container
           .read(simpleOutputViewerNotifierProvider.notifier)
           .setSimple(false);
       await tester.pumpAndSettle();
-      expect(find.byKey(Key('gen-tile-${image(1).id}')), findsOneWidget);
-      expect(container.read(generationPreviewSelectionProvider), image(1).id);
+      expect(find.byKey(Key('gen-tile-${selected.id}')), findsOneWidget);
+      expect(container.read(generationPreviewSelectionProvider), selected.id);
+      final tile = container
+          .read(canvasFeedLayoutProvider)
+          .items
+          .singleWhere((item) => item.image?.id == selected.id);
+      final focus = container.read(generationCanvasGroupSelectionProvider)!;
+      expect(focus.group, tile.group.key);
+      expect(focus.subimage, tile.subimageIndex);
       await container
           .read(simpleOutputViewerNotifierProvider.notifier)
           .setSimple(true);

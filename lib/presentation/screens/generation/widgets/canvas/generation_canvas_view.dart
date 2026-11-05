@@ -252,6 +252,14 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     final layout = ref.read(canvasFeedLayoutProvider);
     if (layout.groups.isEmpty) return;
     final focus = ref.read(generationCanvasGroupSelectionProvider);
+    // Simple preview and the canvas may use different slots for the same image.
+    final imageId = ref.read(generationPreviewSelectionProvider);
+    if (focus?.subimage != null &&
+        imageId != null &&
+        _resolveSelectedImage(layout, focus)?.id != imageId &&
+        _focusImageById(imageId)) {
+      return;
+    }
     final g =
         layout.groups.where((x) => x.key == focus?.group).firstOrNull ??
         layout.groups.first;
@@ -455,22 +463,23 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
       _syncPreviewSelection(image.id);
 
   /// 历史栏点选 → 画布夺焦联动
-  void _focusImageById(String imageId) {
-    _manualOverview = false;
+  bool _focusImageById(String imageId) {
     final layout = ref.read(canvasFeedLayoutProvider);
     final item = layout.items
         .where((it) => it.image?.id == imageId)
         .firstOrNull;
-    if (item == null) return;
+    if (item == null) return false;
+    _manualOverview = false;
     final focus = ref.read(generationCanvasGroupSelectionProvider);
     if (focus?.group == item.group.key &&
         focus?.subimage == item.subimageIndex) {
-      return;
+      return true;
     }
     ref
         .read(generationCanvasGroupSelectionProvider.notifier)
         .selectTile(item.group.key, item.subimageIndex);
     _flyToSubimage(layout, item.group, item.subimageIndex);
+    return true;
   }
 
   @override

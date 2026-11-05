@@ -31,8 +31,7 @@ class _GenHistoryPanelState extends State<GenHistoryPanel> {
   final _scroll = ScrollController();
   var _locked = false;
   String? _first;
-  String? _lastTap;
-  DateTime? _lastTapAt;
+  ({String imageId, DateTime time})? _lastTap;
 
   @override
   void dispose() {
@@ -63,29 +62,31 @@ class _GenHistoryPanelState extends State<GenHistoryPanel> {
 
   void _tap(GenScope scope, GenBatch b) {
     final keys = HardwareKeyboard.instance;
-    final h = scope.data.history;
+    final previous = _lastTap;
+    _lastTap = null;
     if (scope.controller.selection.tap(
       b.images.map((image) => image.id).toList(),
       modify: keys.isControlPressed || keys.isMetaPressed,
       range: keys.isShiftPressed,
       pendingBatch: b.pending > 0 ? b.id : null,
     )) {
-      _lastTap = null;
-      _lastTapAt = null;
+      return;
+    }
+    final image = b.images.firstOrNull;
+    if (image == null) {
+      scope.actions.onFocusBatch(b.id);
       return;
     }
     final now = DateTime.now();
     final again =
-        _lastTap == b.id &&
-        _lastTapAt != null &&
-        now.difference(_lastTapAt!) < const Duration(milliseconds: 300);
-    _lastTap = b.id;
-    _lastTapAt = now;
-    if ((h.openDetailOnClick || again) && b.images.isNotEmpty) {
-      _lastTap = null;
-      scope.actions.onOpenViewer(b.images.first.id);
+        previous != null &&
+        previous.imageId == image.id &&
+        now.difference(previous.time) < const Duration(milliseconds: 300);
+    if (scope.data.history.openDetailOnClick || again) {
+      scope.actions.onOpenViewer(image.id);
     } else {
-      scope.actions.onFocusBatch(b.id);
+      _lastTap = (imageId: image.id, time: now);
+      scope.actions.onFocusTile(image.id);
     }
   }
 

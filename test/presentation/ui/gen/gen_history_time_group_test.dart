@@ -53,6 +53,7 @@ void main() {
     await tapKey(tester, 'gen-batch-tile-done');
     expect(recorder.last('onOpenViewer'), 'onOpenViewer(done-0)');
     expect(recorder.called('onFocusBatch'), isFalse);
+    expect(recorder.called('onFocusTile'), isFalse);
     await tapKey(tester, 'gen-batch-tile-pending');
     expect(recorder.last('onFocusBatch'), 'onFocusBatch(pending)');
     expect(recorder.calls.where((c) => c.startsWith('onOpenViewer')), [
@@ -138,7 +139,7 @@ void main() {
       );
     });
   }
-  testWidgets('共享标题仍保留批次张数、待出进度与批次回调', (tester) async {
+  testWidgets('共享标题仍保留批次张数、待出进度与封面定位', (tester) async {
     final recorder = GenRecorder();
     await pumpGen(
       tester,
@@ -152,7 +153,7 @@ void main() {
     expect(find.text('3 张'), findsOneWidget);
     expect(find.text('· 还剩 1 张'), findsOneWidget);
     await tapKey(tester, 'gen-batch-tile-old');
-    expect(recorder.last('onFocusBatch'), 'onFocusBatch(old)');
+    expect(recorder.last('onFocusTile'), 'onFocusTile(old-0)');
     await tester.tap(find.byKey(const Key('gen-batch-tile-old')));
     await tester.pumpAndSettle();
     expect(recorder.last('onOpenViewer'), 'onOpenViewer(old-0)');
