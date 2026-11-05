@@ -17,6 +17,7 @@ import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_knowledg
 import 'package:nai_launcher/presentation/providers/rag_provider.dart';
 
 import '../../../helpers/fetch_test_server.dart';
+import '../../../helpers/agent_test_node.dart';
 
 class _Catalog extends TagCatalogRepository {
   @override
@@ -251,8 +252,7 @@ text(result.structuredContent);
           Provider((ref) => naiAgentKnowledgeTools(ref)),
         );
         client = await PiHostClient.start(
-          nodeExecutable:
-              Platform.environment['NAI_AGENT_NODE'] ?? 'E:/node/node.exe',
+          nodeExecutable: agentTestNode,
           hostScript: File('tool/nai_agent/host.mjs').absolute.path,
           workspaceId: 'related-test',
           workspaceDirectory: root,

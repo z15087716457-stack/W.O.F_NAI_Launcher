@@ -11,6 +11,8 @@ import 'package:nai_launcher/core/nai_agent/mcp_config.dart';
 import 'package:nai_launcher/data/services/nai_agent/agent_workspace_store.dart';
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_workspace_controller.dart';
 
+import '../../../helpers/agent_test_node.dart';
+
 void main() {
   late Directory root;
   late HttpServer server;
@@ -98,7 +100,7 @@ void main() {
       hostIdleTimeout: hostIdleTimeout,
       startClient: (workspace, chat, settings, prompt, resume) =>
           PiHostClient.start(
-            nodeExecutable: 'E:/node/node.exe',
+            nodeExecutable: agentTestNode,
             hostScript: File('tool/nai_agent/host.mjs').absolute.path,
             workspaceId: workspace.id,
             workspaceDirectory: workspace.directory,
@@ -147,6 +149,7 @@ void main() {
       final script = File('${root.path}/synthetic-mcp.mjs');
       await script.writeAsString(r'''
 import {createInterface} from 'node:readline';
+
 createInterface({input:process.stdin}).on('line', line=>{
   const m=JSON.parse(line); if(m.id===undefined)return;
   const result=m.method==='initialize'
@@ -176,7 +179,7 @@ createInterface({input:process.stdin}).on('line', line=>{
       final c = controller(
         hostIdleTimeout: idle,
         mcpConfig: {
-          'command': 'E:/node/node.exe',
+          'command': agentTestNode,
           'args': [script.path],
         },
       );

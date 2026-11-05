@@ -30,6 +30,7 @@ import 'package:nai_launcher/presentation/providers/generation/preview_selection
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_image_tool_binding.dart';
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_studio_provider.dart';
 import '../krita/agent_bridge_draft_test.dart' show MemoryDraftSettings;
+import '../../../helpers/agent_test_node.dart';
 
 Uint8List png(int w, int h) => Uint8List.fromList(
   img.encodePng(img.Image(width: w, height: h, numChannels: 4)),
@@ -721,8 +722,7 @@ void main() {
       try {
         client = await PiHostClient.start(
           mcp: const {'builtinExposure': 'direct'},
-          nodeExecutable:
-              Platform.environment['NAI_AGENT_NODE'] ?? 'E:/node/node.exe',
+          nodeExecutable: agentTestNode,
           hostScript: File('tool/nai_agent/host.mjs').absolute.path,
           workspaceId: 'native-agent-upscale',
           workspaceDirectory: workspace,

@@ -9,6 +9,8 @@ import 'package:nai_launcher/core/nai_agent/pi_host_client.dart';
 import 'package:nai_launcher/data/services/nai_agent/agent_workspace_store.dart';
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_questions.dart';
 
+import '../../../helpers/agent_test_node.dart';
+
 void main() {
   late Directory root;
   setUp(
@@ -180,7 +182,7 @@ void main() {
       try {
         client =
             await PiHostClient.start(
-              nodeExecutable: 'E:/node/node.exe',
+              nodeExecutable: agentTestNode,
               hostScript: File('tool/nai_agent/host.mjs').absolute.path,
               workspaceId: 'w',
               workspaceDirectory: root,

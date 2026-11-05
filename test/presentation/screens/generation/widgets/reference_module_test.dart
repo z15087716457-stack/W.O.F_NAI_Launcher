@@ -25,6 +25,8 @@ import 'package:nai_launcher/presentation/screens/generation/widgets/precise_ref
 import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
 import 'package:nai_launcher/presentation/widgets/common/collapsible_image_panel.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_glass_surface.dart';
+import '../../../../helpers/generation_history_fixture.dart'
+    show generationFixtureFile;
 import '../../../../helpers/studio_capture_fonts.dart';
 import '../../../../helpers/light_theme_contrast.dart';
 
@@ -168,9 +170,7 @@ void main() {
     (tester) async {
       await tester.binding.setSurfaceSize(const Size(800, 1200));
       addTearDown(() => tester.binding.setSurfaceSize(null));
-      final bytes = File(
-        '../../mockups/generation/assets/g07.jpg',
-      ).readAsBytesSync();
+      final bytes = generationFixtureFile('g07').readAsBytesSync();
       final container = referenceContainer(
         ImageParams(model: 'nai-diffusion-4-5-full', sourceImage: bytes),
       );
@@ -233,8 +233,9 @@ void main() {
         final measurements = <Map<String, Object?>>[];
         final images = ['g07', 'g46']
             .map(
-              (name) => File(
-                '../../mockups/generation/assets/$name.jpg',
+              (name) => generationFixtureFile(
+                name,
+                usePrototype: true,
               ).readAsBytesSync(),
             )
             .toList();

@@ -38,6 +38,8 @@ import '../krita/agent_bridge_draft_test.dart'
 import 'generation_binding_test.dart' show GenerationTestLibrary;
 import 'studio_host_integration_test.dart' show tool;
 
+import '../../../helpers/agent_test_node.dart';
+
 class _Files extends VibeFileStorageService {
   bool retain = false;
   @override
@@ -983,8 +985,7 @@ void main() {
           workspaceId: 'native-reference-management',
           workspace: root,
           data: Directory('${root.path}/agent'),
-          nodeExecutable:
-              Platform.environment['NAI_AGENT_NODE'] ?? 'E:/node/node.exe',
+          nodeExecutable: agentTestNode,
           hostScript: File('tool/nai_agent/host.mjs').absolute.path,
           systemPrompt: '你是 NAI Agent。使用真实库并核对当前版本。',
           executeExtraTool: (name, params, cancel) => broker.askExtensionUi(

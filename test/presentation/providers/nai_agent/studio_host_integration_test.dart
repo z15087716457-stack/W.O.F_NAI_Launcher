@@ -38,6 +38,8 @@ import 'generation_binding_test.dart'
         GenerationTestVibes,
         waitForAgentStart;
 
+import '../../../helpers/agent_test_node.dart';
+
 class _Library extends PromptBlockLibraryNotifier {
   @override
   Future<PromptBlockLibraryState> build() async {
@@ -155,8 +157,7 @@ void main() {
             workspaceId: 'vision-test',
             workspace: root,
             data: Directory('${root.path}/agent'),
-            nodeExecutable:
-                Platform.environment['NAI_AGENT_NODE'] ?? 'E:/node/node.exe',
+            nodeExecutable: agentTestNode,
             hostScript: File('tool/nai_agent/host.mjs').absolute.path,
             systemPrompt: 'Synthetic image-read test',
             mcp: const {'builtinExposure': 'direct'},
@@ -280,8 +281,7 @@ void main() {
           workspaceId: 'synthetic-remaining',
           workspace: root,
           data: Directory('${root.path}/agent'),
-          nodeExecutable:
-              Platform.environment['NAI_AGENT_NODE'] ?? 'E:/node/node.exe',
+          nodeExecutable: agentTestNode,
           hostScript: File('tool/nai_agent/host.mjs').absolute.path,
           systemPrompt: '你是 NAI Agent。',
         );
@@ -512,8 +512,7 @@ void main() {
           mcp: const {'builtinExposure': 'direct'},
           providerId: 'local',
           modelId: 'synthetic',
-          nodeExecutable:
-              Platform.environment['NAI_AGENT_NODE'] ?? 'E:/node/node.exe',
+          nodeExecutable: agentTestNode,
           hostScript: File('tool/nai_agent/host.mjs').absolute.path,
           workspaceId: 'synthetic-workspace',
           workspace: root,
@@ -688,8 +687,7 @@ void main() {
           workspaceId: 'synthetic-domain',
           workspace: root,
           data: Directory('${root.path}/agent'),
-          nodeExecutable:
-              Platform.environment['NAI_AGENT_NODE'] ?? 'E:/node/node.exe',
+          nodeExecutable: agentTestNode,
           hostScript: File('tool/nai_agent/host.mjs').absolute.path,
           systemPrompt: '你是 NAI Agent。按需使用工具。',
         );
@@ -856,8 +854,7 @@ void main() {
           workspaceId: 'synthetic-block-tools',
           workspace: root,
           data: Directory('${root.path}/agent'),
-          nodeExecutable:
-              Platform.environment['NAI_AGENT_NODE'] ?? 'E:/node/node.exe',
+          nodeExecutable: agentTestNode,
           hostScript: File('tool/nai_agent/host.mjs').absolute.path,
           systemPrompt: '你是 NAI Agent。按需使用工具。',
         );
@@ -996,8 +993,7 @@ void main() {
           chatId: 'generation-chat',
           workspace: root,
           data: Directory('${root.path}/agent'),
-          nodeExecutable:
-              Platform.environment['NAI_AGENT_NODE'] ?? 'E:/node/node.exe',
+          nodeExecutable: agentTestNode,
           hostScript: File('tool/nai_agent/host.mjs').absolute.path,
           systemPrompt: '你是 NAI Agent。按需使用工具。',
         );

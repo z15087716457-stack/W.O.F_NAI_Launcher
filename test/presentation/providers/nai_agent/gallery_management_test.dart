@@ -40,6 +40,7 @@ import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_question
 import 'package:nai_launcher/data/services/gallery/gallery_stream_scanner.dart';
 import 'package:nai_launcher/data/models/gallery/gallery_category.dart';
 import '../krita/agent_bridge_draft_test.dart' show MemoryDraftSettings;
+import '../../../helpers/agent_test_node.dart';
 
 class _History extends ImageGenerationNotifier {
   _History(this.path);
@@ -2257,8 +2258,7 @@ void main() {
       try {
         client = await PiHostClient.start(
           mcp: const {'builtinExposure': 'direct'},
-          nodeExecutable:
-              Platform.environment['NAI_AGENT_NODE'] ?? 'E:/node/node.exe',
+          nodeExecutable: agentTestNode,
           hostScript: File('tool/nai_agent/host.mjs').absolute.path,
           workspaceId: 'native-gallery-management',
           workspaceDirectory: workspace,
@@ -2894,8 +2894,7 @@ void main() {
       try {
         client = await PiHostClient.start(
           mcp: const {'builtinExposure': 'direct'},
-          nodeExecutable:
-              Platform.environment['NAI_AGENT_NODE'] ?? 'E:/node/node.exe',
+          nodeExecutable: agentTestNode,
           hostScript: File('tool/nai_agent/host.mjs').absolute.path,
           workspaceId: 'native-collection-management',
           workspaceDirectory: workspace,

@@ -60,6 +60,7 @@ import '../../../widgets/character/character_module_test.dart'
 import '../../../../helpers/generation_history_fixture.dart'
     show
         HistoryCaptureStorage,
+        generationFixtureFile,
         historyCaptureImages,
         prepareHistoryCaptureImages;
 
@@ -158,7 +159,7 @@ class _Tokens implements PromptTokenEncoder {
       text == prototypeCharacterPrompt ? 46 : 220;
 }
 
-ProviderContainer _container(String model) {
+ProviderContainer _container(String model, {bool usePrototype = false}) {
   final params = ImageParams(
     model: model,
     prompt: _basePrompt,
@@ -176,8 +177,9 @@ ProviderContainer _container(String model) {
               VibeReference(
                 displayName: file,
                 vibeEncoding: 'fixture',
-                thumbnail: File(
-                  '../../mockups/generation/assets/$file.jpg',
+                thumbnail: generationFixtureFile(
+                  file,
+                  usePrototype: usePrototype,
                 ).readAsBytesSync(),
                 sourceType: VibeSourceType.png,
               ),
@@ -213,7 +215,7 @@ ProviderContainer _container(String model) {
         ),
     ],
   );
-  final images = historyCaptureImages();
+  final images = historyCaptureImages(usePrototype: usePrototype);
   final notifier = container.read(imageGenerationNotifierProvider.notifier);
   notifier.state = notifier.state.copyWith(
     history: images,
@@ -282,7 +284,9 @@ void main() {
     tester.view.physicalSize = const Size(1552, 1120);
     addTearDown(tester.view.reset);
     await tester.runAsync(
-      () => prepareHistoryCaptureImages(historyCaptureImages()),
+      () => prepareHistoryCaptureImages(
+        container.read(imageGenerationNotifierProvider).history,
+      ),
     );
     await tester.pumpWidget(_app(container, dark: false));
     await tester.pumpAndSettle();
@@ -335,7 +339,9 @@ void main() {
                 .read(layoutStateNotifierProvider.notifier)
                 .setRightPanelExpanded(true);
             await tester.runAsync(
-              () => prepareHistoryCaptureImages(historyCaptureImages()),
+              () => prepareHistoryCaptureImages(
+                container.read(imageGenerationNotifierProvider).history,
+              ),
             );
             // The navigation rail is outside this task; it occupies 48px.
             tester.view.physicalSize = Size(size.window - 48, 1120);
@@ -410,7 +416,7 @@ void main() {
         ),
       ];
       for (final entry in cases) {
-        final container = _container(entry.model);
+        final container = _container(entry.model, usePrototype: true);
         addTearDown(container.dispose);
         await container
             .read(layoutStateNotifierProvider.notifier)
@@ -422,7 +428,10 @@ void main() {
             .read(layoutStateNotifierProvider.notifier)
             .setRightPanelExpanded(true);
         await tester.runAsync(
-          () => prepareHistoryCaptureImages(historyCaptureImages()),
+          () => prepareHistoryCaptureImages(
+            container.read(imageGenerationNotifierProvider).history,
+            usePrototype: true,
+          ),
         );
         tester.view.physicalSize = Size(entry.mobile ? 420 : 1552, 1120);
         await tester.pumpWidget(

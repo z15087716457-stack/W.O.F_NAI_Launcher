@@ -1,14 +1,13 @@
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import '../../helpers/fetch_test_server.dart';
+import '../../helpers/agent_test_node.dart';
 
 void main() {
-  final node = Platform.environment['NAI_AGENT_NODE'] ?? 'E:/node/node.exe';
-
   test(
     'Node rejects a Fetch-blocked loopback port before HTTP dispatch',
     () async {
-      final result = await Process.run(node, [
+      final result = await Process.run(agentTestNode, [
         '--input-type=module',
         '--eval',
         "try { await fetch('http://127.0.0.1:10080/'); process.exitCode=1; } "
@@ -31,7 +30,7 @@ void main() {
         await request.response.close();
       });
       try {
-        final result = await Process.run(node, [
+        final result = await Process.run(agentTestNode, [
           '--input-type=module',
           '--eval',
           "console.log(await (await fetch('http://127.0.0.1:${server.port}/')).text());",

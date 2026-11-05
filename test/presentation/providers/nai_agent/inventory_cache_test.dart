@@ -12,6 +12,8 @@ import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_skills_p
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_workspace_provider.dart';
 import 'package:path/path.dart' as p;
 
+import '../../../helpers/agent_test_node.dart';
+
 void main() {
   late Directory root;
   late AgentWorkspaceStore store;
@@ -84,6 +86,7 @@ void main() {
       final original = File(p.join('tool', 'nai_agent', script)).absolute.uri;
       await write(p.join(root.path, script), '''
 import { appendFile, access } from 'node:fs/promises';
+
 await appendFile(${jsonEncode(calls.path)}, 'run\\n');
 const fail = ${name == 'commands'} &&
   await access(${jsonEncode(failCommands.path)}).then(() => true, () => false);
@@ -96,7 +99,7 @@ else await import(${jsonEncode(original.toString())});
         naiAgentWorkspaceStoreProvider.overrideWithValue(store),
         naiAgentRuntimePathsProvider.overrideWithValue(
           NaiAgentRuntimePaths(
-            node: Platform.environment['NAI_AGENT_NODE'] ?? 'E:/node/node.exe',
+            node: agentTestNode,
             host: p.join(root.path, 'host.mjs'),
           ),
         ),
