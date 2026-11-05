@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 import 'package:image/image.dart' as img;
+import 'package:nai_launcher/core/network/generation_failure.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/core/nai_agent/agent_tool.dart';
 import 'package:nai_launcher/core/nai_agent/generation_tools.dart';
@@ -463,6 +464,21 @@ void main() {
       final result = await runApproved(id, await quote(id));
       expect(generated, hasLength(1));
       expect(result['done_count'], 1);
+      expect(result['status'], 'paused');
+    },
+  );
+
+  test(
+    'a native balance rejection pauses remaining exploration requests',
+    () async {
+      final id = await create(3);
+      generate = (_) async => throw const GenerationFailure(
+        'API_ERROR_402|Insufficient balance',
+        statusCode: 402,
+      );
+      final result = await runApproved(id, await quote(id));
+      expect(generated, hasLength(1));
+      expect(result['failed_count'], 1);
       expect(result['status'], 'paused');
     },
   );

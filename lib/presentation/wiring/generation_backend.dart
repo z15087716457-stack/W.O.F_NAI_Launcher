@@ -82,7 +82,8 @@ class GenerationBackend {
       (_, _) {
         _intentRevision++;
         _accountRevision++;
-        if (ref.read(imageGenerationNotifierProvider).isGenerating) {
+        if (!ref.read(authNotifierProvider).generationRequestRejected &&
+            ref.read(imageGenerationNotifierProvider).isGenerating) {
           ref.read(imageGenerationNotifierProvider.notifier).cancel();
         }
       },

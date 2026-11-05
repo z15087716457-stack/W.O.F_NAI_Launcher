@@ -41,6 +41,7 @@ class AuthState {
   final AuthErrorCode? errorCode;
   final int? httpStatusCode;
   final Map<String, dynamic>? subscriptionInfo;
+  final bool generationRequestRejected;
 
   const AuthState({
     this.status = AuthStatus.initial,
@@ -49,6 +50,7 @@ class AuthState {
     this.errorCode,
     this.httpStatusCode,
     this.subscriptionInfo,
+    this.generationRequestRejected = false,
   });
 
   AuthState copyWith({
@@ -69,6 +71,7 @@ class AuthState {
           ? null
           : (httpStatusCode ?? this.httpStatusCode),
       subscriptionInfo: subscriptionInfo ?? this.subscriptionInfo,
+      generationRequestRejected: !clearError && generationRequestRejected,
     );
   }
 
@@ -886,7 +889,11 @@ class AuthNotifier extends _$AuthNotifier {
   /// 登出
   ///
   /// [errorCode] 和 [httpStatusCode] 用于在登出时保留错误信息，以便 UI 显示提示
-  Future<void> logout({AuthErrorCode? errorCode, int? httpStatusCode}) async {
+  Future<void> logout({
+    AuthErrorCode? errorCode,
+    int? httpStatusCode,
+    bool generationRequestRejected = false,
+  }) async {
     final request = _beginSession();
     _loginBase = null;
     AppLogger.w(
@@ -910,6 +917,7 @@ class AuthNotifier extends _$AuthNotifier {
         status: AuthStatus.error,
         errorCode: errorCode,
         httpStatusCode: httpStatusCode,
+        generationRequestRejected: generationRequestRejected,
       );
       AppLogger.w(
         '[AuthNotifier] state set to error: errorCode=$errorCode',

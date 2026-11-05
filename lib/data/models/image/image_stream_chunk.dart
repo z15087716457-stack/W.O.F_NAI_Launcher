@@ -1,5 +1,7 @@
 import 'dart:typed_data';
 
+import '../../../core/network/generation_failure.dart';
+
 /// Placement data for compositing an Inpaint stream preview over its source.
 ///
 /// Inpaint uses the full-frame `0, 0, 1, 1` placement. [maskImage] is the
@@ -83,6 +85,7 @@ class ImageStreamChunk {
 
   /// 错误信息
   final String? error;
+  final GenerationFailure? failure;
 
   /// Vibe 原始索引到请求编码的映射（仅完成块携带）。
   final Map<int, String>? vibeEncodings;
@@ -97,6 +100,7 @@ class ImageStreamChunk {
     this.currentStep,
     this.totalSteps,
     this.error,
+    this.failure,
     this.vibeEncodings,
   });
 
@@ -135,9 +139,15 @@ class ImageStreamChunk {
   }
 
   /// 创建错误块
-  factory ImageStreamChunk.error(String message) {
-    return ImageStreamChunk(error: message, isComplete: true);
-  }
+  factory ImageStreamChunk.error(String message) =>
+      ImageStreamChunk.failed(GenerationFailure.stream(message));
+
+  factory ImageStreamChunk.failed(GenerationFailure failure) =>
+      ImageStreamChunk(
+        error: failure.message,
+        failure: failure,
+        isComplete: true,
+      );
 
   /// 是否有预览图像
   bool get hasPreview => previewImage != null && previewImage!.isNotEmpty;

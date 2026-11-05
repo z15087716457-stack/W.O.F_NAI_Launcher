@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../core/network/generation_failure.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/explore_mutation_engine.dart';
 import '../../../data/models/image/image_params.dart';
@@ -696,9 +697,17 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
           ? admitted.generationRunId
           : null;
       session.generationOwner = generationOwner;
-      final result = await pendingResult;
-      session.activeGenerationId = null;
-      session.generationOwner = null;
+      ExploreGenerationResult? result;
+      GenerationFailure? failure;
+      try {
+        result = await pendingResult;
+      } on GenerationFailure catch (error) {
+        failure = error;
+        _pauseRequested = true;
+      } finally {
+        session.activeGenerationId = null;
+        session.generationOwner = null;
+      }
       if (result != null) {
         final storedPath = await ref
             .read(exploreRunImageStoreProvider)
@@ -721,8 +730,9 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
       } else {
         final errorText = _cancelRequested
             ? 'cancelled'
-            : (ref.read(imageGenerationNotifierProvider).errorMessage ??
-                  'generation failed');
+            : failure?.message ??
+                  ref.read(imageGenerationNotifierProvider).errorMessage ??
+                  'generation failed';
         await listNotifier.updateGeneration(
           session.runId,
           candidateId,

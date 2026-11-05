@@ -374,6 +374,10 @@ class ExploreManualCaptureNotifier extends Notifier<ExploreManualCaptureState> {
     final listNotifier = ref.read(exploreRunListNotifierProvider.notifier);
     final imageStore = ref.read(exploreRunImageStoreProvider);
     final firstIndex = event.slotStart - 1;
+    final imagesBySlot = {
+      for (final (offset, image) in event.images.indexed)
+        image.batchIndex ?? (firstIndex + offset): image,
+    };
     for (var offset = 0; offset < event.slotCount; offset++) {
       final index = firstIndex + offset;
       if (index < 0 || index >= capture.candidateIds.length) continue;
@@ -388,7 +392,7 @@ class ExploreManualCaptureNotifier extends Notifier<ExploreManualCaptureState> {
         continue;
       }
 
-      final image = offset < event.images.length ? event.images[offset] : null;
+      final image = imagesBySlot[index];
       if (image == null || !image.canSave) {
         await listNotifier.updateCandidate(
           runId,

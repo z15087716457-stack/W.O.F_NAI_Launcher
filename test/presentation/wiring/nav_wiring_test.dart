@@ -53,7 +53,11 @@ class _Auth extends AuthNotifier {
       const AuthState(status: AuthStatus.authenticated, accountId: 'current');
   void emit(AuthState value) => state = value;
   @override
-  Future<void> logout({AuthErrorCode? errorCode, int? httpStatusCode}) async {
+  Future<void> logout({
+    AuthErrorCode? errorCode,
+    int? httpStatusCode,
+    bool generationRequestRejected = false,
+  }) async {
     logouts++;
   }
 }

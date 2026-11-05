@@ -230,7 +230,8 @@ NaiAgentGenerationRun? startNaiAgentNativeGeneration(
 
   String? stopReason;
   final accountGuard = ref.listen(authNotifierProvider, (_, next) {
-    if ((!next.isAuthenticated || next.accountId != input.accountId) &&
+    if (!next.generationRequestRejected &&
+        (!next.isAuthenticated || next.accountId != input.accountId) &&
         cancel()) {
       stopReason = 'account_changed';
     }

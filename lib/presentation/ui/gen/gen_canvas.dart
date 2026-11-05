@@ -1726,16 +1726,17 @@ class _ErrorCard extends StatelessWidget {
                 Row(
                   spacing: 6,
                   children: [
-                    UiBtn(
-                      key: const Key('gen-retry'),
-                      size: UiBtnSize.small,
-                      tone: UiBtnTone.primary,
-                      onTap: scope.actions.onRetry,
-                      children: [
-                        const UiGlyph(UiGlyphs.retry, size: 12),
-                        Text(l.gen_retry),
-                      ],
-                    ),
+                    if (error.retry)
+                      UiBtn(
+                        key: const Key('gen-retry'),
+                        size: UiBtnSize.small,
+                        tone: UiBtnTone.primary,
+                        onTap: scope.actions.onRetry,
+                        children: [
+                          const UiGlyph(UiGlyphs.retry, size: 12),
+                          Text(l.gen_retry),
+                        ],
+                      ),
                     if (error.detail != null)
                       _CopyDetail(detail: error.detail!),
                   ],

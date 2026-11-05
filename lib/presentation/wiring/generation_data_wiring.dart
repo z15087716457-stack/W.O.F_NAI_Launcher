@@ -436,10 +436,17 @@ final generationViewDataProvider = Provider.autoDispose
           generation.errorMessage,
           l,
         );
+        final retry = ref
+            .read(imageGenerationNotifierProvider.notifier)
+            .lastRequest;
         error = GenError(
           title: title,
           hint: hint,
           detail: generation.errorMessage,
+          retry:
+              retry != null &&
+              auth.isAuthenticated &&
+              retry.accountId == auth.accountId,
         );
       }
       return GenViewData(
