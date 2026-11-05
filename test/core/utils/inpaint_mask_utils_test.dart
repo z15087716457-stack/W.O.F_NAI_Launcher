@@ -1,9 +1,12 @@
+import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
 import 'package:nai_launcher/core/utils/inpaint_mask_utils.dart';
+import 'package:nai_launcher/core/utils/inpaint_focus_region.dart';
+import 'package:nai_launcher/data/services/metadata/unified_metadata_parser.dart';
 
 void main() {
   group('InpaintMaskUtils', () {
@@ -511,9 +514,147 @@ void main() {
       expect(decoded.getPixel(3, 3).r.toInt(), equals(10));
     });
 
+    for (final focused in [false, true]) {
+      test(
+        'inpaint result reopens with the new parameters (focus: $focused)',
+        () async {
+          Uint8List png(int size) =>
+              img.encodePng(img.Image(width: size, height: size));
+          final source = UnifiedMetadataParser.embedTextChunkOnly(
+            png(32),
+            'Comment',
+            '{"prompt":"old","seed":11,"width":64,"height":64}',
+          );
+          final size = focused ? 16 : 32;
+          final fields = {
+            'prompt': '新書架',
+            'seed': 22,
+            'width': size,
+            'height': size,
+            'request_type': 'NativeInfillingRequest',
+            'extra_setting': {'value': 9},
+          };
+          var generated = UnifiedMetadataParser.embedTextChunkOnly(
+            png(size),
+            'Comment',
+            jsonEncode(fields),
+          );
+          generated = UnifiedMetadataParser.embedTextChunkOnly(
+            generated,
+            'Description',
+            '新書架',
+          );
+          generated = UnifiedMetadataParser.embedTextChunkOnly(
+            generated,
+            'Software',
+            'NovelAI',
+          );
+          generated = UnifiedMetadataParser.embedTextChunkOnly(
+            generated,
+            'Source',
+            'NovelAI Diffusion V5',
+          );
+          final result = await InpaintMaskUtils.composeGeneratedImageArtifact(
+            normalizedSourceImage: source,
+            compositeMaskImage: png(size),
+            generatedImage: generated,
+            focusRegion: focused
+                ? const InpaintFocusRegion(
+                    x: 8,
+                    y: 8,
+                    width: 16,
+                    height: 16,
+                    context: 0,
+                  )
+                : null,
+          );
+          final text = UnifiedMetadataParser.extractPngTextData(
+            result.displayImageBytes,
+          );
+          expect(jsonDecode(text['Comment']!), {
+            ...fields,
+            'width': 32,
+            'height': 32,
+          });
+          expect(text['Description'], '新書架');
+          expect(text['Source'], 'NovelAI Diffusion V5');
+        },
+      );
+    }
+
+    test(
+      'inpaint without response metadata does not label the output with the input prompt',
+      () async {
+        final pixels = img.encodePng(img.Image(width: 8, height: 8));
+        final source = UnifiedMetadataParser.embedTextChunkOnly(
+          pixels,
+          'Comment',
+          '{"prompt":"old","seed":11}',
+        );
+        final result = await InpaintMaskUtils.composeGeneratedImageArtifact(
+          normalizedSourceImage: source,
+          compositeMaskImage: pixels,
+          generatedImage: pixels,
+        );
+        expect(
+          UnifiedMetadataParser.extractPngTextData(result.displayImageBytes),
+          isNot(contains('Comment')),
+        );
+      },
+    );
+
+    test(
+      'hidden PNG parameters come from the inpaint reply, not the source alpha',
+      () async {
+        final pixels = img.encodePng(
+          img.Image(width: 64, height: 64, numChannels: 4)
+            ..clear(img.ColorRgba8(33, 66, 99, 255)),
+        );
+        Future<Uint8List> hidden(int seed) async {
+          final tagged = await UnifiedMetadataParser.embedMetadata(
+            pixels,
+            jsonEncode({
+              'prompt': 'scene',
+              'seed': seed,
+              'steps': 20,
+              'width': 64,
+              'height': 64,
+              'sampler': 'k_euler_ancestral',
+            }),
+            useStealth: true,
+          );
+          return img.encodePng(img.decodePng(tagged)!..textData = null);
+        }
+
+        final source = await hidden(11);
+        final reply = await hidden(22);
+        expect(
+          UnifiedMetadataParser.parseFromImageBytes(source).metadata?.seed,
+          11,
+        );
+        expect(
+          UnifiedMetadataParser.parseFromImageBytes(reply).metadata?.seed,
+          22,
+        );
+        for (final supplied in [true, false]) {
+          final result = await InpaintMaskUtils.composeGeneratedImageArtifact(
+            normalizedSourceImage: source,
+            compositeMaskImage: img.encodePng(img.Image(width: 64, height: 64)),
+            generatedImage: supplied ? reply : pixels,
+          );
+          expect(
+            UnifiedMetadataParser.parseFromImageBytes(
+              result.displayImageBytes,
+            ).metadata?.seed,
+            supplied ? 22 : null,
+          );
+        }
+      },
+    );
+
     test(
       'composeGeneratedImageArtifact patch reconstructs display without dark edges',
-      () {
+      () async {
         final source = img.Image(width: 256, height: 256, numChannels: 4);
         img.fill(source, color: img.ColorRgba8(10, 20, 30, 255));
         final generated = img.Image(width: 256, height: 256, numChannels: 4);
@@ -536,7 +677,7 @@ void main() {
           targetHeight: 256,
         );
 
-        final result = InpaintMaskUtils.composeGeneratedImageArtifact(
+        final result = await InpaintMaskUtils.composeGeneratedImageArtifact(
           normalizedSourceImage: sourceBytes,
           compositeMaskImage: artifacts.compositeMaskBytes,
           generatedImage: generatedBytes,

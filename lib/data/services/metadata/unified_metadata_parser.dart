@@ -1028,19 +1028,41 @@ class UnifiedMetadataParser {
     Uint8List originalPng,
     String keyword,
     String text,
+  ) => embedPngTextFields(originalPng, {keyword: text});
+
+  /// Replace the supplied PNG text fields without re-encoding pixels.
+  static Uint8List embedPngTextFields(
+    Uint8List originalPng,
+    Map<String, String> fields,
   ) {
+    if (fields.isEmpty) return originalPng;
     final chunks = _parsePngChunks(originalPng);
     final output = BytesBuilder()..add(originalPng.sublist(0, 8));
     var added = false;
     for (final chunk in chunks) {
-      if (_pngTextKeyword(chunk) == keyword) continue;
+      if (fields.containsKey(_pngTextKeyword(chunk))) continue;
       if (chunk.type == 'IDAT' && !added) {
-        _writeTextChunk(output, keyword, text);
+        for (final field in fields.entries) {
+          _writeTextChunk(output, field.key, field.value);
+        }
         added = true;
       }
       _writeChunk(output, chunk.type, chunk.data);
     }
     return output.toBytes();
+  }
+
+  /// Invalidate an inherited stealth header without touching ordinary pixels.
+  static void clearStealthMarker(img.Image image) {
+    if (!image.hasAlpha || image.hasPalette) return;
+    final magic = _magic.codeUnits;
+    final prefix = _readAlphaLsbBytes(image, magic.length);
+    if (prefix == null) return;
+    for (var i = 0; i < magic.length; i++) {
+      if (prefix[i] != magic[i]) return;
+    }
+    final first = image.getPixel(0, 0);
+    first.a = first.a.toInt() ^ 1;
   }
 
   /// 渐进式读取策略

@@ -5,7 +5,9 @@ import 'dart:typed_data';
 import 'inpaint_focus_region.dart';
 import 'package:image/image.dart' as img;
 
+import '../../data/services/metadata/unified_metadata_parser.dart';
 import '../models/image_generation_artifact.dart';
+import 'image_save_utils.dart';
 import 'isolate_pool.dart';
 import 'pica_lanczos_resizer.dart';
 
@@ -577,12 +579,12 @@ class InpaintMaskUtils {
   /// [compositeMaskImage] must be the request-size soft mask derived from the
   /// same latent mask as the HTTP payload. Patch RGB remains unassociated; only
   /// alpha is multiplied so later compositing does not darken edges.
-  static ImageGenerationArtifact composeGeneratedImageArtifact({
+  static Future<ImageGenerationArtifact> composeGeneratedImageArtifact({
     required Uint8List normalizedSourceImage,
     required Uint8List compositeMaskImage,
     required Uint8List generatedImage,
     InpaintFocusRegion? focusRegion,
-  }) {
+  }) async {
     img.Image? source;
     img.Image? mask;
     img.Image? generated;
@@ -601,6 +603,7 @@ class InpaintMaskUtils {
       return ImageGenerationArtifact(displayImageBytes: generatedImage);
     }
 
+    final img.Image patch;
     if (focusRegion != null) {
       final generatedAtRequestSize =
           generated.width == mask.width && generated.height == mask.height
@@ -619,7 +622,7 @@ class InpaintMaskUtils {
         width: focusRegion.width,
         height: focusRegion.height,
       );
-      final patch = img.Image(
+      patch = img.Image(
         width: source.width,
         height: source.height,
         numChannels: 4,
@@ -631,30 +634,28 @@ class InpaintMaskUtils {
         dstY: focusRegion.y,
         blend: img.BlendMode.direct,
       );
-      final display = img.Image.from(source, noAnimation: true);
-      img.compositeImage(display, patch, blend: img.BlendMode.alpha);
-      return ImageGenerationArtifact(
-        displayImageBytes: Uint8List.fromList(img.encodePng(display, level: 1)),
-        transparentPatchBytes: Uint8List.fromList(
-          img.encodePng(patch, level: 1),
-        ),
-      );
+    } else {
+      final generatedCanvas =
+          generated.width == source.width && generated.height == source.height
+          ? generated
+          : PicaLanczosResizer.resizeImage(
+              generated,
+              width: source.width,
+              height: source.height,
+            );
+      patch = applyCompositeMaskToGeneratedImage(generatedCanvas, mask);
     }
-
-    final generatedCanvas =
-        generated.width == source.width && generated.height == source.height
-        ? generated
-        : PicaLanczosResizer.resizeImage(
-            generated,
-            width: source.width,
-            height: source.height,
-          );
-    final patch = applyCompositeMaskToGeneratedImage(generatedCanvas, mask);
-    final display = img.Image.from(source, noAnimation: true);
+    final display = img.Image.from(source, noAnimation: true)..textData = null;
     img.compositeImage(display, patch, blend: img.BlendMode.alpha);
+    UnifiedMetadataParser.clearStealthMarker(display);
 
     return ImageGenerationArtifact(
-      displayImageBytes: Uint8List.fromList(img.encodePng(display, level: 1)),
+      displayImageBytes: await ImageSaveUtils.attachInpaintResponseMetadata(
+        displayBytes: img.encodePng(display, level: 1),
+        responseBytes: generatedImage,
+        width: display.width,
+        height: display.height,
+      ),
       transparentPatchBytes: Uint8List.fromList(img.encodePng(patch, level: 1)),
     );
   }

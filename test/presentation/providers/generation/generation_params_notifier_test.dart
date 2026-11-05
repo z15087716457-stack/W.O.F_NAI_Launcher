@@ -146,6 +146,24 @@ void main() {
     expect(storage.getLastVarietyPlus(), isTrue);
   });
 
+  test('transparent background is restored from the saved draft', () async {
+    for (final enabled in [true, false]) {
+      final original = ProviderContainer();
+      original
+          .read(generationParamsNotifierProvider.notifier)
+          .updateTransparentBackground(enabled);
+      original.dispose();
+      await Hive.box(StorageKeys.settingsBox).close();
+      await Hive.openBox(StorageKeys.settingsBox);
+      final reopened = ProviderContainer();
+      addTearDown(reopened.dispose);
+      expect(
+        reopened.read(generationParamsNotifierProvider).transparentBackground,
+        enabled,
+      );
+    }
+  });
+
   test('build should restore the persisted V5 Light quality preset', () async {
     final storage = LocalStorageService();
     await storage.setQualityPresetMode(PromptPresetMode.naiLight.index);
