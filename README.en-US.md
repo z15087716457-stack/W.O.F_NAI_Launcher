@@ -220,6 +220,7 @@ Use `scripts/package_windows_release.ps1` to package the installer and portable 
 ## Acknowledgments and license
 
 - This project is forked from [Aaalice233/Aaalice_NAI_Launcher](https://github.com/Aaalice233/Aaalice_NAI_Launcher) (MIT). Thanks to the original author for their open-source work. This fork is not affiliated with the upstream author; please report problems in this repository's Issues.
+- Thanks to contributor [Miint-Sunny](https://github.com/Miint-Sunny) for 18 pull requests and their test results, covering macOS support, gallery fixes, and generation improvements.
 - The style evolution algorithm draws on ideas from [monineko/PromptCard-Studio](https://github.com/monineko/PromptCard-Studio) (GPL-3.0). This project uses an independent Dart implementation and does not copy its source code.
 - NAI Agent is based on [Pi](https://github.com/earendil-works/pi) (MIT).
 - This project is open source under the [MIT License](LICENSE). Bundled data, fonts and components follow their own licenses; see [Third-party notices](THIRD_PARTY_NOTICES.md).

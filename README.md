@@ -220,6 +220,7 @@ flutter build windows --release --no-tree-shake-icons
 ## 致谢与许可
 
 - 本项目分支自 [Aaalice233/Aaalice_NAI_Launcher](https://github.com/Aaalice233/Aaalice_NAI_Launcher)（MIT），感谢原作者的开源工作。本分支与上游作者无关，问题请提到本仓库的 Issues。
+- 感谢项目贡献者 [Miint-Sunny](https://github.com/Miint-Sunny) 提交 macOS 支持、图库与生图改进等 18 个 PR，并提供测试验证。
 - 画风遗传的算法思路参考 [monineko/PromptCard-Studio](https://github.com/monineko/PromptCard-Studio)（GPL-3.0），本项目为独立的 Dart 实现，未复制其源码。
 - NAI Agent 基于 [Pi](https://github.com/earendil-works/pi)（MIT）。
 - 本项目以 [MIT License](LICENSE) 开源；随附的数据、字体和组件遵循各自许可，详见 [第三方声明](THIRD_PARTY_NOTICES.md)。
