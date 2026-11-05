@@ -355,6 +355,7 @@ class _View extends StatefulWidget {
 class _ViewState extends State<_View> {
   Offset? _tapAt;
   var _dragging = false;
+  double? _trackpadScale;
 
   @override
   Widget build(BuildContext context) {
@@ -408,6 +409,18 @@ class _ViewState extends State<_View> {
               rect = z.rectIn(view);
             }
             return Listener(
+              onPointerPanZoomStart: (_) => _trackpadScale = 1,
+              onPointerPanZoomUpdate: (event) {
+                final previous = _trackpadScale;
+                if (item.missing ||
+                    previous == null ||
+                    previous == event.scale) {
+                  return;
+                }
+                _trackpadScale = event.scale;
+                z.zoomBy(event.scale / previous, focal: event.localPosition);
+              },
+              onPointerPanZoomEnd: (_) => _trackpadScale = null,
               onPointerSignal: (e) {
                 if (e is PointerScrollEvent && !item.missing) {
                   z.zoomBy(

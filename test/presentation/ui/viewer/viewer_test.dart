@@ -8,6 +8,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/presentation/ui/viewer/viewer_contract.dart';
 import 'package:nai_launcher/presentation/ui/viewer/viewer_fixture.dart';
+import 'package:nai_launcher/presentation/ui/viewer/viewer_page.dart'
+    show ViewerPageScope;
 
 import 'package:nai_launcher/presentation/ui/viewer/viewer_prompt.dart';
 import '../../../helpers/studio_capture_fonts.dart';
@@ -291,6 +293,37 @@ void main() {
     await t.pumpAndSettle();
     expect(zoomLabel(t), isNot(startsWith('适应')));
     expect(find.byKey(const Key('viewer-zoom-hint')), findsNothing);
+    await done(t);
+  });
+
+  testWidgets('触控板双指缩放和平移复用查看器相机', (t) async {
+    await pump(t, ViewerFixture.gallery(zoomHintSeen: true));
+    await key(t, LogicalKeyboardKey.digit1);
+    expect(zoomLabel(t), '100%');
+    final stage = find.byKey(const Key('viewer-view'));
+    final center = t.getCenter(stage);
+    final zoom = ViewerPageScope.of(t.element(stage)).controller.zoom;
+    final trackpad = TestPointer(1, PointerDeviceKind.trackpad);
+    await t.sendEventToBinding(trackpad.panZoomStart(center));
+    await t.sendEventToBinding(trackpad.panZoomUpdate(center, scale: 1.5));
+    await t.sendEventToBinding(trackpad.panZoomUpdate(center, scale: 2));
+    final beforePan = zoom.center;
+    await t.sendEventToBinding(
+      trackpad.panZoomUpdate(center, pan: const Offset(0, 40), scale: 2),
+    );
+    await t.sendEventToBinding(
+      trackpad.panZoomUpdate(center, pan: const Offset(0, 80), scale: 2),
+    );
+    await t.sendEventToBinding(trackpad.panZoomEnd());
+    await t.pumpAndSettle();
+    expect(zoomLabel(t), '200%');
+    expect(zoom.center.dy, lessThan(beforePan.dy));
+
+    await t.sendEventToBinding(trackpad.panZoomStart(center));
+    await t.sendEventToBinding(trackpad.panZoomUpdate(center, scale: .5));
+    await t.sendEventToBinding(trackpad.panZoomEnd());
+    await t.pumpAndSettle();
+    expect(zoomLabel(t), '100%');
     await done(t);
   });
 
