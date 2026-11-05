@@ -132,6 +132,7 @@ void main() {
       expect(tester.getSize(scene).width, panelWidth + 60);
       expect(tester.getSize(scene).height, viewport.height + 60);
       expect(side.camera.scale, center.camera.scale);
+      expect(side.welcome, center.welcome);
       expect(side.settings.fixed, center.settings.fixed);
       expect(side.settings.seed, center.settings.seed);
       expect(side.settings.motion, isFalse);
@@ -576,7 +577,13 @@ void main() {
     expect(logo.center.dx, closeTo(viewport.center.dx, .01));
     expect(quietCenter, closeTo(logo.center.dx, .01));
     expect(tip.center.dx, closeTo(quietCenter, .01));
-    expect(background.camera.scale, 1);
+    expect(background.welcome, isTrue);
+    final scale = viewport.width / 922;
+    expect(background.camera.scale, closeTo((880 / 1216) * scale, .00001));
+    expect(
+      background.camera.offset.dy,
+      closeTo((viewport.height - 1000 * scale) / 2 + 50 * scale, .01),
+    );
     expect(logo.left, greaterThanOrEqualTo(quietCenter - 416));
     expect(logo.right, lessThanOrEqualTo(quietCenter + 416));
     expect(tip.left, greaterThanOrEqualTo(quietCenter - 416));
@@ -589,7 +596,7 @@ void main() {
   }
 
   for (final dark in [false, true]) {
-    testWidgets('空态六种背景与 Logo 同轴，缩窗和重进不继承偏移：$dark', (tester) async {
+    testWidgets('空态各通道背景与 Logo 同轴，缩窗和重进不继承偏移：$dark', (tester) async {
       publish(const ImageGenerationState());
       final controller = container.read(
         generationCanvasCameraProvider.notifier,
@@ -639,6 +646,30 @@ void main() {
     });
   }
 
+  testWidgets('空态切换简洁查看器时两侧背景与舞台沿用同一构图', (tester) async {
+    publish(const ImageGenerationState());
+    await pump(tester, fullPage: true);
+    final canvas = tester.widget<ChannelBackdrop>(canvasBackdrop()).data;
+    final viewport = tester.getRect(find.byKey(const Key('gen-canvas')));
+    await container
+        .read(simpleOutputViewerNotifierProvider.notifier)
+        .setSimple(true);
+    await tester.pumpAndSettle();
+    final center = find.byKey(const ValueKey('gen-panel-backdrop-center'));
+    final simple = tester.widget<ChannelBackdrop>(center).data;
+    expect(tester.getRect(center), viewport);
+    expect(simple.camera, canvas.camera);
+    expect(simple.welcome, isTrue);
+    expect(find.byKey(const Key('tip-welcome-text')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await container
+        .read(simpleOutputViewerNotifierProvider.notifier)
+        .setSimple(false);
+    await tester.pumpAndSettle();
+    expect(center, findsNothing);
+    expectWelcomeCentered(tester);
+  });
+
   testWidgets('首批从空态实际视图接续，完成后正常滚动，清空后恢复居中', (tester) async {
     storage.values[StorageKeys.canvasReducedMotion] = false;
     publish(const ImageGenerationState());
@@ -654,6 +685,13 @@ void main() {
     expect(find.byKey(const Key('tip-welcome-text')), findsNothing);
     expect(camera().offset, before.offset);
     expect(camera().scale, before.scale);
+    expect(
+      tester.widget<ChannelBackdrop>(canvasBackdrop()).data.welcome,
+      isFalse,
+    );
+    // The sibling panel rebuild is queued if layout changes during paint setup.
+    await tester.pump();
+    expectPanelBackdropAligned(tester);
     publish(ImageGenerationState(history: [image(71)]));
     await tester.pumpAndSettle();
     final viewport = tester.getRect(find.byKey(const Key('gen-canvas')));

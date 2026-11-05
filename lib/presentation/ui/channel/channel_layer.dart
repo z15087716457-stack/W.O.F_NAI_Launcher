@@ -198,8 +198,28 @@ class ChannelBackdropPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    final camera = data.camera;
+    if (!data.welcome) {
+      _paintFrame(canvas, size, camera);
+      return;
+    }
+    final factor = camera.scale / ChannelCamera.welcomeZoom;
+    canvas
+      ..save()
+      ..scale(factor);
+    _paintFrame(
+      canvas,
+      size / factor,
+      ChannelCamera(
+        offset: camera.offset / factor,
+        scale: ChannelCamera.welcomeZoom,
+      ),
+    );
+    canvas.restore();
+  }
+
+  void _paintFrame(Canvas canvas, Size size, ChannelCamera cam) {
     final s = data.settings;
-    final cam = data.camera;
     final spec = ChannelSceneSpec(
       env: env,
       camera: cam,
