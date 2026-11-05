@@ -27,10 +27,12 @@ import 'core/shortcuts/shortcut_storage.dart';
 import 'core/database/database_manager.dart';
 import 'core/services/data_migration_service.dart';
 import 'core/services/app_data_startup.dart';
+import 'core/services/app_visibility.dart';
 import 'core/services/desktop_app_shutdown_service.dart';
 import 'core/services/resource_window_bootstrap.dart';
 import 'core/services/resource_window_protocol.dart';
 import 'core/services/resource_window_service.dart';
+import 'presentation/ui/kit/app_visibility_scope.dart';
 import 'presentation/resource_window/resource_window_entry.dart';
 import 'core/services/sqflite_bootstrap_service.dart';
 import 'core/utils/app_error_reporter.dart';
@@ -352,6 +354,7 @@ Future<void> _bootstrapApplication() async {
 }
 
 Future<void> _bootstrapMainWindow() async {
+  AppVisibility.instance.attach();
   if (Platform.isWindows) {
     final resources = ResourceWindowService.instance;
     await resources.initialize();
@@ -375,6 +378,10 @@ Future<void> _bootstrapMainWindow() async {
   await _prepareDataAndStart();
 }
 
+void _runMainApp(Widget child) => runApp(
+  AppVisibilityScope(visibility: AppVisibility.instance, child: child),
+);
+
 Future<void> _prepareDataAndStart() => startWithPreparedAppData(
   prepare: getApplicationSupportDirectory,
   start: _bootstrapPreparedApplication,
@@ -385,12 +392,12 @@ Future<void> _prepareDataAndStart() => startWithPreparedAppData(
       source: 'Application data preparation',
       fatal: true,
     );
-    runApp(
+    _runMainApp(
       StartupDataRecoveryApp(
         error: error,
         onRetry: () async {
           await getApplicationSupportDirectory();
-          runApp(const StartupDataLoadingApp());
+          _runMainApp(const StartupDataLoadingApp());
           unawaited(_bootstrapPreparedApplication());
         },
         onCopy: (text) => Clipboard.setData(ClipboardData(text: text)),
@@ -853,7 +860,7 @@ Future<void> _bootstrapPreparedApplication() async {
     },
   );
 
-  runApp(
+  _runMainApp(
     UncontrolledProviderScope(
       container: container,
       child: const AppBootstrap(),
