@@ -49,7 +49,7 @@ bash scripts/build_macos.sh --release
 bash scripts/package_macos_release.sh
 ```
 
-`macos-build.yml` 可以单独构建并校验通用包。发布工作流通过手动 `include_macos` 纳入 Mac 资产，Windows 标签发布可独立运行。当前构建使用临时签名。对外分发前需完成 Mac 启动、更新、首次迁移与工具运行验证，并确认 Developer ID 签名与公证方案。
+`macos-build.yml` 在 `main` 或 `codex/macos-ci` 收到构建输入变更时自动构建，通用包与校验文件从 Actions 的 `macos-release-assets` 下载。发布工作流通过手动 `include_macos` 纳入 Mac 资产。当前构建使用临时签名，对外分发前需确认 Developer ID 签名与公证方案。
 
 ## 当前 Glass 包交付
 

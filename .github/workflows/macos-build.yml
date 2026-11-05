@@ -1,6 +1,23 @@
 name: Build macOS universal
 
 on:
+  push:
+    branches:
+      - main
+      - codex/macos-ci
+    paths:
+      - ".github/workflows/macos-build.yml"
+      - "analysis_options.yaml"
+      - "assets/**"
+      - "fonts/**"
+      - "l10n.yaml"
+      - "lib/**"
+      - "macos/**"
+      - "pubspec.lock"
+      - "pubspec.yaml"
+      - "scripts/**"
+      - "test/core/**"
+      - "tool/**"
   workflow_dispatch:
   workflow_call:
     inputs:
