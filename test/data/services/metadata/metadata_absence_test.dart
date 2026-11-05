@@ -29,6 +29,38 @@ void main() {
       ...ascii.encode('WEBP'),
     ]),
   };
+  test(
+    'RGBA probe distinguishes a complete PNG from truncated or damaged image data',
+    () {
+      final rgba = img.Image(width: 256, height: 256, numChannels: 4)
+        ..clear(img.ColorRgba8(20, 40, 60, 255));
+      final bytes = img.encodePng(rgba);
+      final missing = UnifiedMetadataParser.parseFromImageBytes(bytes);
+      expect(missing.metadataAbsent, isTrue);
+
+      final truncated = Uint8List.sublistView(bytes, 0, bytes.length - 12);
+      expect(
+        UnifiedMetadataParser.parseFromImageBytes(truncated).metadataAbsent,
+        isFalse,
+      );
+
+      final damaged = Uint8List.fromList(bytes);
+      final header = ByteData.sublistView(damaged);
+      for (var offset = 8; offset < damaged.length;) {
+        final length = header.getUint32(offset);
+        if (ascii.decode(damaged.sublist(offset + 4, offset + 8)) == 'IDAT') {
+          damaged[offset + 8 + length] ^= 1;
+          break;
+        }
+        offset += 12 + length;
+      }
+      expect(
+        UnifiedMetadataParser.parseFromImageBytes(damaged).metadataAbsent,
+        isFalse,
+      );
+    },
+  );
+
   late Directory directory;
   setUpAll(() async {
     AppLoggerTestIsolation.setUp();

@@ -300,7 +300,13 @@ class OnlineGalleryState {
     this.dateRangeStart,
     this.dateRangeEnd,
     this.authorReturnContext,
-  });
+    Object? contentIdentity,
+  }) : _contentIdentity = contentIdentity;
+
+  final Object? _contentIdentity;
+
+  /// Scroll persistence updates the cache without changing rendered content.
+  Object get contentIdentity => _contentIdentity ?? this;
 
   final bool isLoading;
   final bool isLoadingMore;
@@ -431,8 +437,10 @@ class OnlineGalleryState {
     bool clearDateRange = false,
     bool clearAiTagModelVersion = false,
     bool clearAuthorReturnContext = false,
+    Object? contentIdentity,
   }) {
     return OnlineGalleryState(
+      contentIdentity: contentIdentity,
       isLoading: isLoading ?? this.isLoading,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
       error: clearError ? null : (error ?? this.error),
@@ -482,18 +490,25 @@ class OnlineGalleryState {
     );
   }
 
-  OnlineGalleryState updateCurrentCache(ModeCache cache) {
-    final updated = {...caches, currentCacheKey: cache};
-    switch (viewMode) {
-      case GalleryViewMode.search:
-        return copyWith(caches: updated, searchCache: cache);
-      case GalleryViewMode.popular:
-        return copyWith(caches: updated, popularCache: cache);
-      case GalleryViewMode.favorites:
-        return favoritesSourceId == GallerySourceId.gelbooru
-            ? copyWith(caches: updated, gelbooruFavoritesCache: cache)
-            : copyWith(caches: updated, danbooruFavoritesCache: cache);
-    }
+  OnlineGalleryState updateCurrentCache(
+    ModeCache cache, {
+    bool offsetOnly = false,
+  }) {
+    final favorites = viewMode == GalleryViewMode.favorites;
+    return copyWith(
+      caches: {...caches, currentCacheKey: cache},
+      searchCache: viewMode == GalleryViewMode.search ? cache : null,
+      popularCache: viewMode == GalleryViewMode.popular ? cache : null,
+      gelbooruFavoritesCache:
+          favorites && favoritesSourceId == GallerySourceId.gelbooru
+          ? cache
+          : null,
+      danbooruFavoritesCache:
+          favorites && favoritesSourceId != GallerySourceId.gelbooru
+          ? cache
+          : null,
+      contentIdentity: offsetOnly ? contentIdentity : null,
+    );
   }
 
   OnlineGalleryState updateFavoritesCache(
@@ -709,8 +724,11 @@ class OnlineGalleryNotifier extends _$OnlineGalleryNotifier {
   }
 
   void saveScrollOffset(double offset) {
+    final cache = state.currentCache;
+    if (cache.scrollOffset == offset) return;
     state = state.updateCurrentCache(
-      state.currentCache.copyWith(scrollOffset: offset),
+      cache.copyWith(scrollOffset: offset),
+      offsetOnly: true,
     );
   }
 

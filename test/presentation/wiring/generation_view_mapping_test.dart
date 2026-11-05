@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/core/constants/api_constants.dart';
 import 'package:nai_launcher/data/models/image/image_params.dart';
@@ -7,6 +8,7 @@ import 'package:nai_launcher/data/models/image/image_operation.dart';
 import 'package:nai_launcher/presentation/providers/generation/generation_models.dart';
 import 'package:nai_launcher/presentation/providers/generation/preview_selection_provider.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_contract.dart';
+import 'package:nai_launcher/presentation/wiring/generation_canvas_wiring.dart';
 import 'package:nai_launcher/presentation/wiring/generation_view_mapping.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/canvas_feed_layout.dart';
 
@@ -30,6 +32,25 @@ GeneratedImage image(
 );
 
 void main() {
+  test(
+    'canvas decode buckets use screen pixels and preserve the original provider for detail',
+    () {
+      final source = image('original');
+      expect(canvasDecodeEdge(90, 768), 128);
+      expect(canvasDecodeEdge(100, 768), 128);
+      expect(canvasDecodeEdge(120, 768), 256);
+      expect(canvasDecodeEdge(640, 768), isNull);
+
+      final reduced =
+          generationTileView(source, decodeEdge: 256).image! as ResizeImage;
+      expect((reduced.width, reduced.height), (256, 256));
+      expect(reduced.policy, ResizeImagePolicy.fit);
+      expect((reduced.imageProvider as MemoryImage).bytes, same(source.bytes));
+      final detail = generationTileView(source).image! as MemoryImage;
+      expect(detail.bytes, same(source.bytes));
+    },
+  );
+
   test('history pending preview shares the first unfinished canvas slot', () {
     final bytes = Uint8List.fromList([1]);
     final state = ImageGenerationState(
