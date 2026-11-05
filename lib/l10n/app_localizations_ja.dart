@@ -1106,6 +1106,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get generation_variationOriginal => '元画像';
 
   @override
+  String get generation_requestCostInvalid =>
+      'このリクエストは対応範囲を超えています。画像サイズかステップ数を減らしてください。';
+
+  @override
   String get generation_variationSizeUnsupported =>
       'バリエーションは 300 万画素以下の元画像に対応しています。';
 
@@ -5085,6 +5089,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String updateDownloadedHint(Object version) {
     return 'v$version をダウンロードし、検証が完了しました。インストールするとアプリが終了し、自動的に再起動します。';
   }
+
+  @override
+  String get updateMacReveal => 'Finder に表示';
+
+  @override
+  String get updateMacReplaceHint => 'このアプリを終了してから、Finder で展開したアプリに置き換えてください。';
 
   @override
   String get updateInstallAndRestart => 'インストールして再起動';
@@ -16222,9 +16232,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get naiAgent_mcpAdd => 'MCP サーバーを追加';
 
   @override
-  String get naiAgent_mcpName => 'サーバー名';
-
-  @override
   String get naiAgent_mcpConfig => 'サーバー設定（JSON）';
 
   @override
@@ -18682,7 +18689,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get set_rgPython => 'Python インタープリター';
 
   @override
-  String get set_rgPythonSub => '既定は自動インストールの独立環境。既存の python.exe も選べます。';
+  String get set_rgPythonSub => 'このコンピューターにある Python インタープリターを選べます。';
 
   @override
   String get set_rgPythonAuto => '自動';

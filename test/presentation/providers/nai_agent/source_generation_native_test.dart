@@ -42,6 +42,7 @@ import '../krita/agent_bridge_draft_test.dart'
 import 'generation_binding_test.dart'
     show GenerationTestAuth, GenerationTestLibrary, GenerationTestVibes;
 import '../../../helpers/prompt_normalization_fixture.dart';
+import '../../../helpers/agent_test_node.dart';
 
 class _Api extends Mock implements NAIImageGenerationApiService {}
 
@@ -673,8 +674,7 @@ void main() {
           chatId: 'pi-source-chat',
           workspace: root,
           data: Directory('${root.path}/agent'),
-          nodeExecutable:
-              Platform.environment['NAI_AGENT_NODE'] ?? 'E:/node/node.exe',
+          nodeExecutable: agentTestNode,
           hostScript: File('tool/nai_agent/host.mjs').absolute.path,
           systemPrompt: '你是 NAI Agent。按需使用工具。',
         );

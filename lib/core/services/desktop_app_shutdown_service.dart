@@ -7,6 +7,7 @@ import 'package:window_manager/window_manager.dart';
 
 import '../database/database_manager.dart';
 import '../utils/app_logger.dart';
+import '../utils/desktop_platform.dart';
 
 /// 桌面应用统一退出入口。
 ///
@@ -28,6 +29,23 @@ class DesktopAppShutdownService {
     return () => _cleanups.remove(cleanup);
   }
 
+  /// Only register work after startup reaches it, so deferred callbacks never
+  /// keep the process alive while it is quitting.
+  static Future<void> runCriticalStartupTask(
+    String name,
+    Future<void> Function() action,
+  ) async {
+    if (isShuttingDown) return;
+    final finished = Completer<void>();
+    final unregister = registerCleanup(() => finished.future, name: name);
+    try {
+      await action();
+    } finally {
+      unregister();
+      finished.complete();
+    }
+  }
+
   static Future<void> prepareBackgroundShutdown() async {
     await Future.wait([
       for (final entry in List.of(_cleanups.entries))
@@ -35,20 +53,22 @@ class DesktopAppShutdownService {
     ]);
   }
 
-  static Future<void> shutdownAndExit(int code) {
-    return _shutdownFuture ??= _performShutdown(code);
-  }
+  static Future<void> prepareForExit() =>
+      _shutdownFuture ??= _performShutdown();
 
-  static Future<void> _performShutdown(int code) async {
+  static Future<void> shutdownAndExit(int code) =>
+      _shutdownFuture ??= _performShutdown(exitCode: code);
+
+  static Future<void> _performShutdown({int? exitCode}) async {
     final elapsed = Stopwatch()..start();
     AppLogger.i('Application shutdown started', 'AppShutdown');
-    if (Platform.isWindows) {
+    if (isSupportedDesktop) {
       await _cleanup('Window hide', windowManager.hide);
     }
     await prepareBackgroundShutdown();
     await _cleanup('Database', () => DatabaseManager.instance.dispose());
     await _cleanup('Hive', Hive.close);
-    if (Platform.isWindows) {
+    if (isSupportedDesktop) {
       await _cleanup('Tray', trayManager.destroy);
     }
     AppLogger.i(
@@ -56,7 +76,7 @@ class DesktopAppShutdownService {
       'AppShutdown',
     );
     await AppLogger.flush();
-    exit(code);
+    if (exitCode != null) exit(exitCode);
   }
 
   static Future<void> _cleanup(

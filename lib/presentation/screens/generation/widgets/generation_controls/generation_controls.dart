@@ -16,6 +16,8 @@ import 'package:nai_launcher/presentation/widgets/anlas/opus_usage_chip.dart';
 import 'generate_button.dart';
 import '../../../../providers/generation/image_workflow_controller.dart';
 import '../../../../providers/generation/local_upscale_provider.dart';
+import '../../../../providers/subscription_provider.dart';
+import '../../../../wiring/generation_backend.dart';
 
 /// An additional UI entry calls the exact same guarded generation handler.
 class GenerationControlsController {
@@ -282,7 +284,8 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
 
   Future<void> _handleGenerate(BuildContext context, WidgetRef ref) async {
     if (widget.canGenerate?.call() == false) return;
-    final params = widget.exploreMode
+    final explore = widget.exploreMode;
+    final params = explore
         ? ref.read(generationParamsNotifierProvider)
         : ref.read(generationRequestParamsProvider);
     if (params.prompt.isEmpty) {
@@ -290,17 +293,34 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
       return;
     }
 
+    final count = explore ? 1 : ref.read(imagesPerRequestProvider);
+    final workflow = explore
+        ? ref.read(draftImageWorkflowProvider)
+        : ref.read(imageWorkflowControllerProvider);
+    final accountIsCurrent = ref
+        .read(generationBackendProvider)
+        .captureAccount();
+    int quote() => generationRequestCost(
+      params,
+      workflow,
+      ref.read(subscriptionNotifierProvider).subscription,
+      count,
+    );
+    final cost = quote();
     final confirmed = await AssetProtectionGuard.confirmHighAnlasCost(
       context: context,
       ref: ref,
-      cost: widget.exploreMode
-          ? ref.read(estimatedCostForBatchSizeProvider(1))
-          : null,
+      cost: cost,
     );
-    if (!confirmed || !context.mounted) {
-      return;
-    }
-    if (widget.canGenerate?.call() == false) {
+    if (!confirmed || !context.mounted) return;
+    if (widget.canGenerate?.call() == false ||
+        !accountIsCurrent() ||
+        cost != quote() ||
+        (!explore && count != ref.read(imagesPerRequestProvider)) ||
+        params !=
+            (explore
+                ? ref.read(generationParamsNotifierProvider)
+                : ref.read(generationRequestParamsProvider))) {
       AppToast.info(context, context.l10n.bridge_conflict);
       return;
     }
@@ -311,7 +331,7 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
         .generate(
           params,
           onBatchEvent: widget.onBatchEvent,
-          imagesPerRequestOverride: widget.exploreMode ? 1 : null,
+          imagesPerRequestOverride: count,
         );
     widget.onGenerateInvoked?.call();
   }

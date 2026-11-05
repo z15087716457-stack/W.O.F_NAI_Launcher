@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
@@ -125,10 +127,45 @@ class _GenerationCanvasWiringState
     VoidCallback select,
     bool Function() allowTap,
   ) {
+    if (item.image case final image?) {
+      return Consumer(
+        builder: (context, ref, _) {
+          final pixelEdge =
+              item.worldRect.size.longestSide *
+              MediaQuery.devicePixelRatioOf(context);
+          final nativeEdge = math.max(image.width, image.height);
+          final decodeEdge = ref.watch(
+            generationCanvasCameraProvider.select(
+              (camera) =>
+                  canvasDecodeEdge(pixelEdge * camera.scale, nativeEdge),
+            ),
+          );
+          return _buildTileContent(
+            context,
+            item,
+            focused,
+            select,
+            allowTap,
+            decodeEdge: decodeEdge,
+          );
+        },
+      );
+    }
+    return _buildTileContent(context, item, focused, select, allowTap);
+  }
+
+  Widget _buildTileContent(
+    BuildContext context,
+    CanvasFeedItem item,
+    bool focused,
+    VoidCallback select,
+    bool Function() allowTap, {
+    int? decodeEdge,
+  }) {
     final state = ref.read(imageGenerationNotifierProvider);
     final pins = ref.read(canvasPinnedNotifierProvider);
 
-    final tile = generationCanvasItemView(item, state);
+    final tile = generationCanvasItemView(item, state, decodeEdge: decodeEdge);
     final slot = item.tile.slot;
     final content = GenCanvasTileScope(
       allowTap: allowTap,
@@ -192,11 +229,24 @@ class _GenerationCanvasWiringState
   }
 }
 
+/// Keep one cache key through small zoom changes and allow room for filtering.
+int? canvasDecodeEdge(double screenPixels, int nativeEdge) {
+  final wanted = screenPixels * 1.2;
+  var edge = 64;
+  while (edge < wanted && edge < nativeEdge) {
+    edge *= 2;
+  }
+  return edge < nativeEdge ? edge : null;
+}
+
 GenTile generationCanvasItemView(
   CanvasFeedItem item,
-  ImageGenerationState state,
-) {
-  if (item.image case final image?) return generationTileView(image);
+  ImageGenerationState state, {
+  int? decodeEdge,
+}) {
+  if (item.image case final image?) {
+    return generationTileView(image, decodeEdge: decodeEdge);
+  }
   final slot = item.tile.slot!;
   final preview = slot.previewBytes;
   final streaming =

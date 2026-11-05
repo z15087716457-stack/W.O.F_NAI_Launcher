@@ -615,21 +615,19 @@ void main() {
   }
 
   for (final output in ['canvas', 'simple']) {
-    testWidgets('历史单击实时遵循设置并打开真实大图路由：$output', (tester) async {
+    testWidgets('历史单击与放大填满遵循默认、偏好及重置：$output', (tester) async {
       final settings = container.read(settingsValueStoreProvider);
       await tester.runAsync(() async {
+        await Hive.openBox('accounts');
         await settings.write(SettingKey.outputViewer, output);
-        await settings.write(SettingKey.historyClick, 'linkedPreview');
       });
       final router = await pumpViewer(tester, startInViewer: false);
       await tester.pumpAndSettle();
       final before = container.read(generationParamsNotifierProvider);
-      final batch = tester
-          .widget<GenerationPage>(find.byType(GenerationPage))
-          .data
-          .history
-          .batches
-          .single;
+      GenViewData view() =>
+          tester.widget<GenerationPage>(find.byType(GenerationPage)).data;
+      expect(view().canvas.zoomToFill, isTrue);
+      final batch = view().history.batches.single;
       final tile = find.byKey(Key('gen-batch-tile-${batch.id}'));
       await tester.tap(tile);
       await tester.pumpAndSettle();
@@ -643,11 +641,13 @@ void main() {
       // remount or restart should be needed for the next click to open detail.
       await tester.runAsync(() async {
         await settings.write(SettingKey.historyClick, 'openDetail');
+        await settings.write(SettingKey.canvasZoomToFill, false);
         // History's double-click interval uses the wall clock. Keep this a
         // separate click, otherwise the old linked behavior also opens detail.
         await Future<void>.delayed(const Duration(milliseconds: 350));
       });
       await tester.pump();
+      expect(view().canvas.zoomToFill, isFalse);
       await tester.tap(tile);
       await tester.pumpAndSettle();
       expect(find.byType(ImageViewerPage), findsOneWidget);
@@ -660,10 +660,13 @@ void main() {
       );
       router.pop();
       await tester.pumpAndSettle();
-      await tester.runAsync(
-        () => settings.write(SettingKey.historyClick, 'linkedPreview'),
-      );
+      await tester.runAsync(() async {
+        final edits = container.read(settingsEditsProvider.notifier);
+        await edits.reset(SettingKey.historyClick, title: 'History');
+        await edits.reset(SettingKey.canvasZoomToFill, title: 'Zoom to fill');
+      });
       await tester.pump();
+      expect(view().canvas.zoomToFill, isTrue);
       await tester.tap(tile);
       await tester.pumpAndSettle();
       expect(find.byType(ImageViewerPage), findsNothing);

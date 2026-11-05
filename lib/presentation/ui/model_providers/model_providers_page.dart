@@ -1,3 +1,4 @@
+import 'package:nai_launcher/core/utils/primary_activator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -137,7 +138,7 @@ class ModelProvidersPanelState extends State<ModelProvidersPanel> {
         final listW = wide ? 212.0 : 196.0;
         return CallbackShortcuts(
           bindings: {
-            const SingleActivator(LogicalKeyboardKey.keyS, control: true): () {
+            const PrimaryActivator(LogicalKeyboardKey.keyS): () {
               if (ctrl.changes(p) > 0) _save(p);
             },
           },

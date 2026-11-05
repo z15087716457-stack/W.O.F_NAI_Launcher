@@ -1,5 +1,3 @@
-import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,6 +5,7 @@ import 'package:path/path.dart' as p;
 
 import '../../../data/services/nai_agent/agent_workspace_store.dart';
 import '../../../l10n/app_localizations.dart';
+import 'nai_agent_inventory.dart';
 import 'nai_agent_workspace_provider.dart';
 
 /// One skill copy as resolved by the host (`tool/nai_agent/lib/skills.mjs`).
@@ -75,27 +74,12 @@ Future<NaiAgentSkillInventory> listNaiAgentSkills({
   required String script,
   required Map<String, dynamic> config,
 }) async {
-  final process = await Process.start(node, [
-    script,
-  ], workingDirectory: p.dirname(script));
-  final stderr = process.stderr.transform(utf8.decoder).join();
-  process.stdin.writeln(jsonEncode(config));
-  await process.stdin.close();
-  final line = await process.stdout
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
-      .first
-      .timeout(
-        const Duration(seconds: 20),
-        onTimeout: () {
-          process.kill();
-          throw TimeoutException('Skill inventory timed out');
-        },
-      );
-  unawaited(stderr);
-  await process.exitCode;
-  final value = jsonDecode(line) as Map<String, dynamic>;
-  if (value['error'] != null) throw StateError(value['error'] as String);
+  final value = await readNaiAgentInventory(
+    node: node,
+    script: script,
+    config: config,
+    timeout: const Duration(seconds: 20),
+  );
   return NaiAgentSkillInventory(
     [
       for (final row in value['skills'] as List)
@@ -109,20 +93,22 @@ Future<NaiAgentSkillInventory> listNaiAgentSkills({
 /// Bumped after any skill change so settings re-read the folders.
 final naiAgentSkillRevisionProvider = StateProvider<int>((ref) => 0);
 
+final _skillsCacheProvider = Provider((ref) {
+  ref.watch(naiAgentSkillRevisionProvider);
+  ref.watch(naiAgentRuntimePathsProvider);
+  return NaiAgentInventoryCache<NaiAgentSkillInventory>();
+});
+
 final naiAgentSkillsProvider = FutureProvider.autoDispose
     .family<NaiAgentSkillInventory, String?>((ref, workspaceId) async {
-      ref.watch(naiAgentSkillRevisionProvider);
-      final settings = ref.watch(
-        naiAgentUiPreferencesProvider.select(
-          (value) => (
-            value.settings.disabledSkills,
-            value.settings.skillModes,
-            value.settings.packages,
-          ),
-        ),
+      final cache = ref.watch(_skillsCacheProvider);
+      final settings = watchNaiAgentInventorySettings(
+        ref,
+        workspaceId,
+        includeSkills: true,
       );
-      final store = ref.read(naiAgentWorkspaceStoreProvider);
-      final paths = ref.read(naiAgentRuntimePathsProvider);
+      final store = ref.watch(naiAgentWorkspaceStoreProvider);
+      final paths = ref.watch(naiAgentRuntimePathsProvider);
       final script = p.join(p.dirname(paths.host), 'list-skills.mjs');
       final workspace = workspaceId == null
           ? null
@@ -135,22 +121,23 @@ final naiAgentSkillsProvider = FutureProvider.autoDispose
               .skillSourceDirectory('workspace', workspaceId: workspaceId)
               .absolute
               .path,
-        'disabled': settings.$1,
-        'modes': settings.$2,
+        'disabled': settings.disabledSkills,
+        'modes': settings.skillModes,
         'cwd': (workspace?.directory ?? store.root).absolute.path,
         'agentDir': (workspace?.agentDirectory ?? store.root).absolute.path,
-        'packages': store.packageConfig(
-          workspace,
-          ref.read(naiAgentUiPreferencesProvider).settings,
-        ),
+        'packages': store.packageConfig(workspace, settings),
       };
       if (!await File(paths.node).exists() || !await File(script).exists()) {
         return NaiAgentSkillInventory(const [], 0, config);
       }
-      return listNaiAgentSkills(
-        node: paths.node,
-        script: script,
-        config: config,
+      return cache.read(
+        workspaceId,
+        config,
+        () => listNaiAgentSkills(
+          node: paths.node,
+          script: script,
+          config: config,
+        ),
       );
     });
 

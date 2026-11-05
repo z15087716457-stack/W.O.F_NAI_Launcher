@@ -132,6 +132,7 @@ void main() {
       expect(tester.getSize(scene).width, panelWidth + 60);
       expect(tester.getSize(scene).height, viewport.height + 60);
       expect(side.camera.scale, center.camera.scale);
+      expect(side.welcome, center.welcome);
       expect(side.settings.fixed, center.settings.fixed);
       expect(side.settings.seed, center.settings.seed);
       expect(side.settings.motion, isFalse);
@@ -576,7 +577,13 @@ void main() {
     expect(logo.center.dx, closeTo(viewport.center.dx, .01));
     expect(quietCenter, closeTo(logo.center.dx, .01));
     expect(tip.center.dx, closeTo(quietCenter, .01));
-    expect(background.camera.scale, 1);
+    expect(background.welcome, isTrue);
+    final scale = viewport.width / 922;
+    expect(background.camera.scale, closeTo((880 / 1216) * scale, .00001));
+    expect(
+      background.camera.offset.dy,
+      closeTo((viewport.height - 1000 * scale) / 2 + 50 * scale, .01),
+    );
     expect(logo.left, greaterThanOrEqualTo(quietCenter - 416));
     expect(logo.right, lessThanOrEqualTo(quietCenter + 416));
     expect(tip.left, greaterThanOrEqualTo(quietCenter - 416));
@@ -589,7 +596,7 @@ void main() {
   }
 
   for (final dark in [false, true]) {
-    testWidgets('空态六种背景与 Logo 同轴，缩窗和重进不继承偏移：$dark', (tester) async {
+    testWidgets('空态各通道背景与 Logo 同轴，缩窗和重进不继承偏移：$dark', (tester) async {
       publish(const ImageGenerationState());
       final controller = container.read(
         generationCanvasCameraProvider.notifier,
@@ -639,6 +646,30 @@ void main() {
     });
   }
 
+  testWidgets('空态切换简洁查看器时两侧背景与舞台沿用同一构图', (tester) async {
+    publish(const ImageGenerationState());
+    await pump(tester, fullPage: true);
+    final canvas = tester.widget<ChannelBackdrop>(canvasBackdrop()).data;
+    final viewport = tester.getRect(find.byKey(const Key('gen-canvas')));
+    await container
+        .read(simpleOutputViewerNotifierProvider.notifier)
+        .setSimple(true);
+    await tester.pumpAndSettle();
+    final center = find.byKey(const ValueKey('gen-panel-backdrop-center'));
+    final simple = tester.widget<ChannelBackdrop>(center).data;
+    expect(tester.getRect(center), viewport);
+    expect(simple.camera, canvas.camera);
+    expect(simple.welcome, isTrue);
+    expect(find.byKey(const Key('tip-welcome-text')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await container
+        .read(simpleOutputViewerNotifierProvider.notifier)
+        .setSimple(false);
+    await tester.pumpAndSettle();
+    expect(center, findsNothing);
+    expectWelcomeCentered(tester);
+  });
+
   testWidgets('首批从空态实际视图接续，完成后正常滚动，清空后恢复居中', (tester) async {
     storage.values[StorageKeys.canvasReducedMotion] = false;
     publish(const ImageGenerationState());
@@ -654,6 +685,13 @@ void main() {
     expect(find.byKey(const Key('tip-welcome-text')), findsNothing);
     expect(camera().offset, before.offset);
     expect(camera().scale, before.scale);
+    expect(
+      tester.widget<ChannelBackdrop>(canvasBackdrop()).data.welcome,
+      isFalse,
+    );
+    // The sibling panel rebuild is queued if layout changes during paint setup.
+    await tester.pump();
+    expectPanelBackdropAligned(tester);
     publish(ImageGenerationState(history: [image(71)]));
     await tester.pumpAndSettle();
     final viewport = tester.getRect(find.byKey(const Key('gen-canvas')));
@@ -1396,7 +1434,7 @@ void main() {
         await container
             .read(simpleOutputViewerNotifierProvider.notifier)
             .setSimple(true);
-        final old = image(1);
+        final old = image(1, 1);
         final previous = image(2);
         final first = image(9);
         final last = image(9, 1);
@@ -1432,8 +1470,16 @@ void main() {
         expect(find.byKey(const Key('gen-tile-slot:run:9:0')), findsOneWidget);
 
         if (browseHistory) {
-          container.read(generationHistoryActionsProvider).focusTile(old.id);
+          // The right panel shows a batch cover when grouped, a single image
+          // otherwise. This earlier run only has its second slot in history.
+          final row = grouped ? 'run:1' : 'img:${old.id}';
+          await tester.tap(find.byKey(Key('gen-batch-tile-$row')));
           await tester.pump();
+          expect(container.read(generationPreviewSelectionProvider), old.id);
+          expect(
+            container.read(generationCanvasGroupSelectionProvider)?.subimage,
+            1,
+          );
         }
         publish(
           loading(9, count: 2).copyWith(
@@ -1467,26 +1513,41 @@ void main() {
               ? [first.id, last.id]
               : [last.id],
         );
+        if (browseHistory) {
+          expect(container.read(generationPreviewSelectionProvider), old.id);
+          expect(
+            container.read(generationCanvasGroupSelectionProvider)?.subimage,
+            1,
+          );
+        }
         expect(tester.takeException(), isNull);
       });
     }
   }
 
   testWidgets('简单模式不挂相机，切回后定位原选择且可反复切换', (tester) async {
-    publish(ImageGenerationState(history: [image(2), image(1)]));
+    final selected = image(1, 1);
+    publish(ImageGenerationState(history: [image(2), selected]));
     await container
         .read(simpleOutputViewerNotifierProvider.notifier)
         .setSimple(true);
     await pump(tester);
     expect(find.byType(GenerationCanvasView), findsNothing);
-    container.read(generationHistoryActionsProvider).focusTile(image(1).id);
+    container.read(generationHistoryActionsProvider).focusTile(selected.id);
     for (var i = 0; i < 3; i++) {
       await container
           .read(simpleOutputViewerNotifierProvider.notifier)
           .setSimple(false);
       await tester.pumpAndSettle();
-      expect(find.byKey(Key('gen-tile-${image(1).id}')), findsOneWidget);
-      expect(container.read(generationPreviewSelectionProvider), image(1).id);
+      expect(find.byKey(Key('gen-tile-${selected.id}')), findsOneWidget);
+      expect(container.read(generationPreviewSelectionProvider), selected.id);
+      final tile = container
+          .read(canvasFeedLayoutProvider)
+          .items
+          .singleWhere((item) => item.image?.id == selected.id);
+      final focus = container.read(generationCanvasGroupSelectionProvider)!;
+      expect(focus.group, tile.group.key);
+      expect(focus.subimage, tile.subimageIndex);
       await container
           .read(simpleOutputViewerNotifierProvider.notifier)
           .setSimple(true);

@@ -1,8 +1,12 @@
 """Shared-pool persistence and exact summaries; no models or user data."""
 import hashlib
 import json
+from pathlib import Path
 import sqlite3
+import subprocess
+import sys
 import threading
+import time
 import weakref
 from types import SimpleNamespace
 import unittest
@@ -79,6 +83,74 @@ class LifecycleTests(unittest.TestCase):
         with patch('usearch.index.Index.add',side_effect=AssertionError('Published index rebuilt')):
             reopened = VectorPool(self.root/'indices',self.models.fingerprint)
             reopened.close()
+
+    def test_abrupt_child_exit_replays_added_replaced_and_deleted_vectors(self):
+        import numpy as np
+        self.build(self.tags)
+        folder = self.root/'indices'
+        fingerprint = self.models.fingerprint
+        graph = self.pool.folder/'vectors.usearch'
+        old_graph = graph.read_bytes()
+        self.tags.close()
+        self.pages.close()
+        self.pool.close()
+        script = """
+import os
+import sys
+from pool import VectorPool
+from test_rag import FakeModels
+pool = VectorPool(sys.argv[1], sys.argv[2])
+vector = FakeModels().embed(['changed fixture'])[0].tobytes()
+first, second = [r[0] for r in pool.db.execute('SELECT id FROM pool_documents ORDER BY id LIMIT 2')]
+with pool.db:
+    pool.db.execute('UPDATE pool_documents SET vector=? WHERE id=?', (vector, first))
+    pool.db.execute('DELETE FROM pool_documents WHERE id=?', (second,))
+    pool.db.execute(
+        "INSERT INTO pool_documents(collection,name,category,vector) VALUES('tags','new_fixture',0,?)",
+        (vector,))
+os._exit(0)
+"""
+        subprocess.run([sys.executable, '-c', script, str(folder), fingerprint],
+                       cwd=Path(__file__).resolve().parent, check=True, timeout=30)
+        self.assertEqual(graph.read_bytes(), old_graph)
+        progress = []
+        reopened = VectorPool(folder, fingerprint, progress=lambda *state: progress.append(state))
+        try:
+            self.assertIn(('restoring', 0, 3), progress)
+            rows = reopened.db.execute('SELECT id,vector FROM pool_documents').fetchall()
+            self.assertEqual(set(map(int, reopened.ann.keys)), {key for key, _ in rows})
+            for key, vector in rows:
+                np.testing.assert_array_equal(reopened.ann.get(key), np.frombuffer(vector, dtype=np.float32))
+            self.assertFalse(reopened.unsaved())
+            self.assertEqual(reopened.db.execute('SELECT COUNT(*) FROM pool_changes').fetchone()[0], 0)
+        finally:
+            reopened.close()
+
+    def test_executor_waits_without_polling_and_counts_idle_from_last_build(self):
+        worker = Worker()
+        worker.models = SimpleNamespace(encoder=None, scorer=None, unload=Mock())
+        with patch.object(worker.queue, 'get', side_effect=lambda *, timeout: stop(timeout)) as get:
+            def stop(timeout):
+                self.assertIsNone(timeout)
+                worker.running = False
+                return 0, 0, None
+            with patch('worker.emit'):
+                worker.run()
+            get.assert_called_once_with(timeout=None)
+
+        worker = Worker()
+        worker.models = SimpleNamespace(encoder=object(), scorer=None)
+        self.build(self.tags)
+        worker.engines = {'tags': self.tags}
+        worker.jobs['check'] = {'id': 'check', 'source': 'tags', 'paused': False,
+            'cancel': threading.Event(),
+            'generator': self.tags.build(self.tags.preview()['plan_id'], lambda: False)}
+        worker.last_use = time.monotonic() - 300
+        self.assertIsNone(worker._unload_in())
+        with patch('worker.emit'):
+            while 'check' in worker.jobs:
+                worker._step('check')
+        self.assertGreater(worker._unload_in(), 100)
 
     def test_missing_checkpoint_is_republished_even_when_generation_is_unchanged(self):
         self.build(self.tags)

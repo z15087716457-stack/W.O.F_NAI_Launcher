@@ -1,10 +1,8 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../core/constants/api_constants.dart';
 import '../../core/utils/app_logger.dart';
 import '../../data/datasources/remote/nai_user_info_api_service.dart';
 import '../../data/models/user/user_subscription.dart';
@@ -27,16 +25,10 @@ class SubscriptionNotifier extends _$SubscriptionNotifier {
   Future<bool>? _inflightBalanceRefresh;
   bool _balanceRefreshQueued = false;
   Timer? _postBillingRefreshTimer;
-  Timer? _networkRecoveryProbeTimer;
-  bool _isNetworkRecoveryProbing = false;
-  int _networkFailureCount = 0;
 
-  /// 自动刷新间隔
-  static const Duration _refreshInterval = Duration(seconds: 30);
+  // Paid actions refresh separately. Idle refresh covers changes outside Studio.
+  static const Duration _refreshInterval = Duration(minutes: 2);
   static const Duration _initialFetchTimeout = Duration(seconds: 6);
-  static const Duration _maxBackoffInterval = Duration(minutes: 2);
-  static const Duration _networkProbeInterval = Duration(seconds: 3);
-  static const Duration _networkProbeTimeout = Duration(seconds: 2);
   static const Duration postBillingRefreshDelay = Duration(milliseconds: 500);
 
   @override
@@ -61,12 +53,12 @@ class SubscriptionNotifier extends _$SubscriptionNotifier {
     if (switchedAccount || loggedOut) {
       // 旧请求无法取消，但会被 session 校验丢弃。切换账号时解除去重，
       // 让新账号无需等待旧请求结束即可立即拉取自己的余额。
-      if (switchedAccount) _inflightFetch = null;
+      _inflightFetch = null;
+      _inflightBalanceRefresh = null;
+      _balanceRefreshQueued = false;
       _lastKnownState = null;
       _hasInitiallyLoaded = false;
-      _networkFailureCount = 0;
       _stopAutoRefresh();
-      _stopNetworkRecoveryProbe();
       _cancelPostBillingRefresh();
     }
 
@@ -95,13 +87,15 @@ class SubscriptionNotifier extends _$SubscriptionNotifier {
     // Cleanup on dispose
     ref.onDispose(() {
       _stopAutoRefresh();
-      _stopNetworkRecoveryProbe();
       _cancelPostBillingRefresh();
     });
 
     if (hydratedState != null) {
       _lastKnownState = hydratedState;
       return hydratedState;
+    }
+    if (authState.isAuthenticated && _lastKnownState?.isLoaded == true) {
+      _startAutoRefresh();
     }
     return _lastKnownState ?? const SubscriptionState.initial();
   }
@@ -123,9 +117,7 @@ class SubscriptionNotifier extends _$SubscriptionNotifier {
         authState.subscriptionInfo!,
       );
       _hasInitiallyLoaded = true;
-      _networkFailureCount = 0;
       _startAutoRefresh();
-      Future.microtask(() => unawaited(refreshBalance()));
 
       final accountId = authState.accountId;
       if (accountId != null) {
@@ -171,98 +163,24 @@ class SubscriptionNotifier extends _$SubscriptionNotifier {
     });
   }
 
-  Duration _computeBackoffDuration() {
-    final exponent = _networkFailureCount.clamp(0, 8);
-    final nextSeconds = _refreshInterval.inSeconds * (1 << exponent);
-    final cappedSeconds = nextSeconds > _maxBackoffInterval.inSeconds
-        ? _maxBackoffInterval.inSeconds
-        : nextSeconds;
-    return Duration(seconds: cappedSeconds);
-  }
-
   Future<void> _runRefreshCycle() async {
-    if (!state.isLoaded) {
+    final session = ref.read(authNotifierProvider);
+    if (!session.isAuthenticated) return;
+    if (state.isLoaded) {
+      await refreshBalance();
+    } else {
       await fetchSubscription();
-      if (state.isLoaded) {
-        _networkFailureCount = 0;
-        _stopNetworkRecoveryProbe();
-        _scheduleNextRefresh(_refreshInterval);
-      }
-      return;
     }
-
-    final success = await refreshBalance();
-    if (success) {
-      _networkFailureCount = 0;
-      _stopNetworkRecoveryProbe();
-      _scheduleNextRefresh(_refreshInterval);
-      return;
-    }
-
-    _networkFailureCount += 1;
-    final backoff = _computeBackoffDuration();
-    AppLogger.w(
-      'Subscription refresh failed, applying exponential backoff: ${backoff.inSeconds}s (failures=$_networkFailureCount)',
-      'Subscription',
-    );
-    _scheduleNextRefresh(backoff);
-    _startNetworkRecoveryProbe();
-  }
-
-  void _startNetworkRecoveryProbe() {
-    if (_networkRecoveryProbeTimer != null) {
-      return;
-    }
-
-    AppLogger.d('Starting network recovery probe', 'Subscription');
-    _networkRecoveryProbeTimer = Timer.periodic(_networkProbeInterval, (
-      _,
-    ) async {
-      if (_isNetworkRecoveryProbing) {
-        return;
-      }
-
-      _isNetworkRecoveryProbing = true;
-      try {
-        final reachable = await _isNovelApiReachable();
-        if (!reachable) {
-          return;
-        }
-
-        AppLogger.i(
-          'Network recovered, triggering immediate subscription refresh',
-          'Subscription',
-        );
-        _networkFailureCount = 0;
-        _stopNetworkRecoveryProbe();
-        _scheduleNextRefresh(Duration.zero);
-      } finally {
-        _isNetworkRecoveryProbing = false;
-      }
-    });
-  }
-
-  void _stopNetworkRecoveryProbe() {
-    if (_networkRecoveryProbeTimer != null) {
-      AppLogger.d('Stopping network recovery probe', 'Subscription');
-      _networkRecoveryProbeTimer?.cancel();
-      _networkRecoveryProbeTimer = null;
-    }
-  }
-
-  Future<bool> _isNovelApiReachable() async {
-    try {
-      final result = await InternetAddress.lookup(
-        Uri.parse(ApiConstants.imageBaseUrl).host,
-      ).timeout(_networkProbeTimeout);
-      return result.isNotEmpty;
-    } catch (_) {
-      return false;
-    }
+    if (_isCurrentAuthSession(session)) _startAutoRefresh();
   }
 
   /// 获取订阅信息
   Future<void> fetchSubscription() async {
+    final refresh = _inflightBalanceRefresh;
+    if (refresh != null) {
+      await refresh;
+      return;
+    }
     if (_inflightFetch != null) {
       return _inflightFetch;
     }
@@ -348,9 +266,7 @@ class SubscriptionNotifier extends _$SubscriptionNotifier {
       } else {
         // 网络错误，不标记为已加载，允许在网络恢复后重试
         AppLogger.w('Network error detected, allowing retry', 'Subscription');
-        _networkFailureCount += 1;
-        _scheduleNextRefresh(_computeBackoffDuration());
-        _startNetworkRecoveryProbe();
+        _startAutoRefresh();
       }
     }
   }
@@ -372,7 +288,7 @@ class SubscriptionNotifier extends _$SubscriptionNotifier {
     _postBillingRefreshTimer?.cancel();
     _postBillingRefreshTimer = Timer(delay, () {
       _postBillingRefreshTimer = null;
-      unawaited(refreshBalance());
+      unawaited(_refreshBalance(afterBilling: true));
     });
   }
 
@@ -381,23 +297,30 @@ class SubscriptionNotifier extends _$SubscriptionNotifier {
     _postBillingRefreshTimer = null;
   }
 
-  /// 立即刷新余额。
-  ///
-  /// 刷新进行中收到的新请求不会被丢弃：当前请求结束后再拉取一次，确保生成
-  /// 完成时恰逢定时刷新也能拿到扣费后的余额。
-  Future<bool> refreshBalance() {
-    if (!ref.read(authNotifierProvider).isAuthenticated) {
-      return Future.value(false);
+  /// Join an existing refresh. A completed paid action may need a newer read.
+  Future<bool> refreshBalance() => _refreshBalance();
+
+  Future<bool> _refreshBalance({bool afterBilling = false}) {
+    final session = ref.read(authNotifierProvider);
+    if (!session.isAuthenticated) return Future.value(false);
+    final initialFetch = _inflightFetch;
+    if (initialFetch != null) {
+      return initialFetch.then((_) {
+        if (!_isCurrentAuthSession(session)) return false;
+        return afterBilling
+            ? _refreshBalance(afterBilling: true)
+            : state.isLoaded;
+      });
     }
 
     final inflightRefresh = _inflightBalanceRefresh;
     if (inflightRefresh != null) {
-      _balanceRefreshQueued = true;
+      if (afterBilling) _balanceRefreshQueued = true;
       return inflightRefresh;
     }
 
     late final Future<bool> trackedRefresh;
-    trackedRefresh = _drainBalanceRefreshQueue().whenComplete(() {
+    trackedRefresh = _drainBalanceRefreshQueue(session).whenComplete(() {
       if (identical(_inflightBalanceRefresh, trackedRefresh)) {
         _inflightBalanceRefresh = null;
       }
@@ -406,12 +329,12 @@ class SubscriptionNotifier extends _$SubscriptionNotifier {
     return trackedRefresh;
   }
 
-  Future<bool> _drainBalanceRefreshQueue() async {
+  Future<bool> _drainBalanceRefreshQueue(AuthState session) async {
     var latestRefreshSucceeded = false;
     do {
       _balanceRefreshQueued = false;
       latestRefreshSucceeded = await _refreshBalanceOnce();
-    } while (_balanceRefreshQueued);
+    } while (_balanceRefreshQueued && _isCurrentAuthSession(session));
     return latestRefreshSucceeded;
   }
 
@@ -455,6 +378,11 @@ class SubscriptionNotifier extends _$SubscriptionNotifier {
     final expectedAccountId = expected.accountId;
     return expectedAccountId != null && current.accountId == expectedAccountId;
   }
+}
+
+/// Refresh once before rejecting a known low balance at an Agent entry point.
+Future<void> refreshBalanceBeforeBlocking(Ref ref) async {
+  await ref.read(subscriptionNotifierProvider.notifier).refreshBalance();
 }
 
 /// 便捷的余额 Provider

@@ -500,6 +500,7 @@
   "img2img_inpaintReadyHint": "마스크를 불러왔습니다. 다음 생성에서는 마스크 영역만 다시 그립니다.",
   "img2img_inpaintMaskReady": "인페인트 마스크가 준비되었습니다",
   "generation_variationOriginal": "원본",
+  "generation_requestCostInvalid": "이 요청은 지원 범위를 초과합니다. 이미지 크기나 스텝 수를 줄여 주세요.",
   "generation_variationSizeUnsupported": "변형은 300만 화소 이하의 원본 이미지를 지원합니다.",
   "img2img_generateVariations": "베리에이션 생성",
   "img2img_directorTools": "디렉터 도구",
@@ -2670,6 +2671,8 @@
       "version": {}
     }
   },
+  "updateMacReveal": "Finder에서 보기",
+  "updateMacReplaceHint": "현재 앱을 종료한 뒤 Finder에서 압축을 푼 앱으로 교체하세요.",
   "updateInstallAndRestart": "설치 후 다시 시작",
   "updateInstallLater": "나중에 설치",
   "updateDownloadCancelled": "다운로드를 취소했습니다. 나중에 이어서 받을 수 있습니다",
@@ -4900,6 +4903,9 @@
   "update_errorCheckFailed": "업데이트를 확인하지 못했습니다",
   "update_errorRateLimited": "GitHub 요청 한도에 도달했습니다. 잠시 후 다시 시도하세요.",
   "update_retryAt": "{time}(현지 시간) 이후에 다시 시도하세요.",
+  "@update_retryAt": {
+    "placeholders": {"time": {"type": "String"}}
+  },
   "update_errorCheckUnknown": "업데이트를 확인하는 중 알 수 없는 오류가 발생했습니다",
   "update_errorLogPath": "로그: {path}",
   "@update_errorLogPath": {
@@ -5150,8 +5156,23 @@
   "imageUse_characters": "캐릭터",
   "imageUse_characterMode": "캐릭터 처리",
   "imageUse_featureRecorded": "원본 이미지에 {feature} 기능이 사용되었습니다.",
+  "@imageUse_featureRecorded": {
+    "placeholders": {
+      "feature": {"type": "String"}
+    }
+  },
   "imageUse_referenceAvailable": "원본 이미지에 {feature} 기능이 사용되었습니다. “참조 이미지”에서 참조 자료를 가져올 수 있습니다.",
+  "@imageUse_referenceAvailable": {
+    "placeholders": {
+      "feature": {"type": "String"}
+    }
+  },
   "imageUse_referenceUnavailable": "원본 이미지에 {feature} 기능이 사용되었습니다. 사용 기록만 남아 있으며 가져올 수 있는 참조 자료는 첨부되어 있지 않습니다.",
+  "@imageUse_referenceUnavailable": {
+    "placeholders": {
+      "feature": {"type": "String"}
+    }
+  },
   "imageMenu_details": "상세 정보",
   "imageMenu_creation": "생성 및 참조",
   "imageMenu_editAndDerive": "편집 및 파생",
@@ -8870,7 +8891,6 @@
   "naiAgent_mcpBuiltin": "NAI Studio · 내장 도구",
   "naiAgent_mcpBuiltinHint": "프롬프트, 블록, 위키, 이미지, 기록, 참조, 생성 및 설정 도구입니다. 기본적으로 필요할 때 검색하며 기존 백업, 버전 확인 및 사용자 확인이 유지됩니다.",
   "naiAgent_mcpAdd": "MCP 서버 추가",
-  "naiAgent_mcpName": "서버 이름",
   "naiAgent_mcpConfig": "서버 설정 (JSON)",
   "naiAgent_mcpStatus": "연결 상태 확인",
   "naiAgent_mcpReconnect": "다시 연결",
@@ -10151,7 +10171,7 @@
   "set_rgFind": "찾기",
   "set_rgModelsMissing": "찾지 못했습니다. 다운로드하거나 가중치 폴더를 직접 고르세요.",
   "set_rgPython": "Python 인터프리터",
-  "set_rgPythonSub": "기본은 자동 설치한 독립 환경이며 기존 python.exe도 고를 수 있습니다.",
+  "set_rgPythonSub": "이 컴퓨터에 설치된 Python 인터프리터를 선택할 수 있습니다.",
   "set_rgPythonAuto": "자동",
   "set_rgPythonNone": "설치 안 됨",
   "set_rgPythonPending": "아직 쓰지 않습니다. “이 인터프리터 사용”을 누르면 패키지를 다시 설치합니다.",

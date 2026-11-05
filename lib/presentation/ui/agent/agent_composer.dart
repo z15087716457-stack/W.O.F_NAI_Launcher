@@ -1,3 +1,4 @@
+import 'package:nai_launcher/core/utils/primary_activator.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -480,7 +481,7 @@ class AgentComposerState extends State<AgentComposer> {
                     final suggestion = _suggestion;
                     return Shortcuts(
                       shortcuts: const {
-                        SingleActivator(LogicalKeyboardKey.keyV, control: true):
+                        PrimaryActivator(LogicalKeyboardKey.keyV):
                             _PasteIntent(),
                         SingleActivator(LogicalKeyboardKey.keyV, meta: true):
                             _PasteIntent(),

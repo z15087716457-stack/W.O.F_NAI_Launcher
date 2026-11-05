@@ -1086,6 +1086,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get generation_variationOriginal => '原图';
 
   @override
+  String get generation_requestCostInvalid => '当前请求超出支持的范围，请减小图片尺寸或降低步数。';
+
+  @override
   String get generation_variationSizeUnsupported => '生成变体支持不超过 3 百万像素的原图。';
 
   @override
@@ -5002,6 +5005,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String updateDownloadedHint(Object version) {
     return '新版本 v$version 已下载并通过校验。安装将关闭应用，完成后会自动重启。';
   }
+
+  @override
+  String get updateMacReveal => '在访达中显示';
+
+  @override
+  String get updateMacReplaceHint => '退出当前应用后，在访达中将新版拖到原位置完成替换。';
 
   @override
   String get updateInstallAndRestart => '安装并重启';
@@ -16013,9 +16022,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get naiAgent_mcpAdd => '添加 MCP 服务器';
 
   @override
-  String get naiAgent_mcpName => '服务器名称';
-
-  @override
   String get naiAgent_mcpConfig => '服务器配置（JSON）';
 
   @override
@@ -18460,7 +18466,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_rgPython => 'Python 解释器';
 
   @override
-  String get set_rgPythonSub => '默认用自动安装的独立环境；也可以选一个已有的 python.exe。';
+  String get set_rgPythonSub => '可选择本机已有的 Python 解释器。';
 
   @override
   String get set_rgPythonAuto => '自动';
@@ -22808,6 +22814,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get generation_variationOriginal => '原圖';
 
   @override
+  String get generation_requestCostInvalid => '當前請求超出支援的範圍，請減小圖片尺寸或降低步數。';
+
+  @override
   String get generation_variationSizeUnsupported => '生成變體支援不超過 3 百萬像素的原圖。';
 
   @override
@@ -26724,6 +26733,12 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String updateDownloadedHint(Object version) {
     return '新版本 v$version 已下載並通過校驗。安裝將關閉應用，完成後會自動重啟。';
   }
+
+  @override
+  String get updateMacReveal => '在 Finder 中顯示';
+
+  @override
+  String get updateMacReplaceHint => '結束目前的應用程式後，在 Finder 中將新版拖到原位置完成取代。';
 
   @override
   String get updateInstallAndRestart => '安裝並重啟';
@@ -37735,9 +37750,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get naiAgent_mcpAdd => '新增 MCP 伺服器';
 
   @override
-  String get naiAgent_mcpName => '伺服器名稱';
-
-  @override
   String get naiAgent_mcpConfig => '伺服器配置（JSON）';
 
   @override
@@ -40182,7 +40194,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get set_rgPython => 'Python 直譯器';
 
   @override
-  String get set_rgPythonSub => '預設用自動安裝的獨立環境；也可以選一個已有的 python.exe。';
+  String get set_rgPythonSub => '可選擇本機已有的 Python 直譯器。';
 
   @override
   String get set_rgPythonAuto => '自動';

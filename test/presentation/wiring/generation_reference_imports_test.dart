@@ -22,6 +22,7 @@ import 'package:nai_launcher/presentation/providers/cost_estimate_provider.dart'
 import 'package:nai_launcher/presentation/providers/generation/image_workflow_controller.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
+import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_contract.dart';
 import 'package:nai_launcher/presentation/wiring/generation_backend.dart';
 import 'package:nai_launcher/presentation/wiring/generation_reference_identity.dart';
@@ -30,6 +31,7 @@ import '../providers/krita/agent_bridge_draft_test.dart'
     show MemoryCharacters, MemoryDraftSettings, EmptyBlocks;
 import 'generation_backend_test.dart'
     show MemoryGenerationPlatform, RecordingGeneration, SwitchingAuth;
+import 'generation_data_wiring_test.dart' show DataSubscription;
 
 class ImportStorage extends VibeLibraryStorageService {
   String? generationJson;
@@ -103,6 +105,7 @@ void main() {
         promptBlockLibraryNotifierProvider.overrideWith(EmptyBlocks.new),
         imageGenerationNotifierProvider.overrideWith(RecordingGeneration.new),
         authNotifierProvider.overrideWith(SwitchingAuth.new),
+        subscriptionNotifierProvider.overrideWith(DataSubscription.new),
         generationPlatformProvider.overrideWithValue(platform),
         generationReferenceDecoderProvider.overrideWithValue(decoder),
         vibeLibraryStorageServiceProvider.overrideWithValue(storage),

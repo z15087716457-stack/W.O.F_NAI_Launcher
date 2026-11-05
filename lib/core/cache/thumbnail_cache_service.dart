@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:isolate';
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -558,17 +560,7 @@ class ThumbnailCacheService {
         await thumbDir.create(recursive: true);
       }
 
-      final result = await ComputeGate()
-          .runCompute(_generateThumbnailBytesInIsolate, <String, Object?>{
-            'originalPath': originalPath,
-            'maxFileSizeBytes': _maxFileSizeBytes,
-            'targetWidth': size.width,
-            'targetHeight': size.height,
-            'jpegQuality': jpegQuality,
-          }, debugLabel: 'thumbnail_${p.basename(originalPath)}');
-
-      final thumbBytes = result['bytes'] as Uint8List;
-
+      final thumbBytes = await _renderThumbnail(originalPath, size);
       await File(thumbnailPath).writeAsBytes(thumbBytes);
       _recentFailureTimes.remove(key);
 
@@ -603,6 +595,22 @@ class ThumbnailCacheService {
       _activeGenerationCount--;
       _processQueue();
     }
+  }
+
+  Future<Uint8List> _renderThumbnail(String path, ThumbnailSize size) async {
+    final file = File(path);
+    final length = await file.length();
+    if (length > _maxFileSizeBytes) {
+      throw Exception('File too large for thumbnail: $length bytes');
+    }
+    final bytes = await file.readAsBytes();
+    final decoded = await _decodeThumbnail(bytes, size);
+    return ComputeGate().runCompute(_encodeThumbnail, (
+      bytes: TransferableTypedData.fromList([decoded?.pixels ?? bytes]),
+      decodedSize: decoded?.size,
+      size: size,
+      quality: jpegQuality,
+    ), debugLabel: 'thumbnail_${p.basename(path)}');
   }
 
   void _completeGeneration(ThumbnailTaskKey key, String? path) {
@@ -1577,60 +1585,93 @@ class _ThumbnailStats {
   }
 }
 
-Map<String, Object?> _generateThumbnailBytesInIsolate(
-  Map<String, Object?> request,
-) {
-  final originalPath = request['originalPath'] as String;
-  final maxFileSizeBytes = request['maxFileSizeBytes'] as int;
-  final targetWidth = request['targetWidth'] as int;
-  final targetHeight = request['targetHeight'] as int;
-  final jpegQuality = request['jpegQuality'] as int;
+(int, int) _thumbnailDimensions(int width, int height, ThumbnailSize size) {
+  final scale = math.min(size.width / width, size.height / height);
+  return (
+    math.max(1, (width * scale).round()),
+    math.max(1, (height * scale).round()),
+  );
+}
 
-  final file = File(originalPath);
-  final fileSize = file.lengthSync();
-  if (fileSize > maxFileSizeBytes) {
-    throw Exception(
-      'File too large: ${fileSize ~/ (1024 * 1024)}MB exceeds limit of '
-      '${maxFileSizeBytes ~/ (1024 * 1024)}MB',
+Future<({Uint8List pixels, (int, int) size})?> _decodeThumbnail(
+  Uint8List bytes,
+  ThumbnailSize size,
+) async {
+  ui.ImmutableBuffer? buffer;
+  ui.ImageDescriptor? descriptor;
+  ui.Codec? codec;
+  ui.Image? image;
+  try {
+    buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
+    descriptor = await ui.ImageDescriptor.encoded(buffer);
+    final (width, height) = _thumbnailDimensions(
+      descriptor.width,
+      descriptor.height,
+      size,
+    );
+    codec = await descriptor.instantiateCodec(
+      targetWidth: width,
+      targetHeight: height,
+    );
+    image = (await codec.getNextFrame()).image;
+    final data = await image.toByteData(
+      format: ui.ImageByteFormat.rawStraightRgba,
+    );
+    if (data == null) return null;
+    return (
+      pixels: data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes),
+      size: (image.width, image.height),
+    );
+  } on Exception {
+    // Some legacy formats can only be read by the Dart decoder.
+    return null;
+  } finally {
+    image?.dispose();
+    codec?.dispose();
+    descriptor?.dispose();
+    buffer?.dispose();
+  }
+}
+
+Uint8List _encodeThumbnail(
+  ({
+    TransferableTypedData bytes,
+    (int, int)? decodedSize,
+    ThumbnailSize size,
+    int quality,
+  })
+  request,
+) {
+  final buffer = request.bytes.materialize();
+  final img.Image thumbnail;
+  if (request.decodedSize case (final width, final height)) {
+    thumbnail = img.Image.fromBytes(
+      width: width,
+      height: height,
+      bytes: buffer,
+      numChannels: 4,
+      order: img.ChannelOrder.rgba,
+    );
+  } else {
+    final decoded = img.decodeImage(buffer.asUint8List());
+    if (decoded == null) {
+      throw const FormatException('Unsupported thumbnail image');
+    }
+    final orientation = decoded.exif.imageIfd.orientation ?? 1;
+    final swapAxes = orientation >= 5 && orientation <= 8;
+    final (width, height) = _thumbnailDimensions(
+      swapAxes ? decoded.height : decoded.width,
+      swapAxes ? decoded.width : decoded.height,
+      request.size,
+    );
+    thumbnail = img.copyResize(
+      decoded,
+      width: width,
+      height: height,
+      interpolation: img.Interpolation.linear,
     );
   }
-
-  final originalImage = img.decodeImage(file.readAsBytesSync());
-  if (originalImage == null) {
-    throw Exception('Failed to decode image: $originalPath');
-  }
-
-  final aspectRatio = originalImage.height > 0
-      ? originalImage.width / originalImage.height
-      : 1.0;
-  var thumbWidth = targetWidth;
-  var thumbHeight = targetHeight;
-
-  final targetAspectRatio = targetHeight > 0 ? targetWidth / targetHeight : 1.0;
-  if (aspectRatio > targetAspectRatio) {
-    thumbHeight = aspectRatio > 0
-        ? (targetWidth / aspectRatio).round()
-        : targetHeight;
-  } else {
-    thumbWidth = (targetHeight * aspectRatio).round();
-  }
-
-  thumbWidth = math.max(1, thumbWidth);
-  thumbHeight = math.max(1, thumbHeight);
-  final thumbnail = img.copyResize(
-    originalImage,
-    width: thumbWidth,
-    height: thumbHeight,
-    interpolation: img.Interpolation.linear,
-  );
-
-  return {
-    'bytes': Uint8List.fromList(img.encodeJpg(thumbnail, quality: jpegQuality)),
-    'originalWidth': originalImage.width,
-    'originalHeight': originalImage.height,
-    'thumbnailWidth': thumbnail.width,
-    'thumbnailHeight': thumbnail.height,
-  };
+  return img.encodeJpg(thumbnail, quality: request.quality);
 }
 
 /// ThumbnailCacheService Provider

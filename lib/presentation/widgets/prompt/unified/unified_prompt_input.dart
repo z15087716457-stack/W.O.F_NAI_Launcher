@@ -1,3 +1,4 @@
+import 'package:nai_launcher/core/utils/primary_activator.dart';
 import 'package:flutter/foundation.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter/services.dart';
@@ -15,6 +16,7 @@ import '../../common/weight_adjust_toolbar.dart';
 import '../../tag_expansion/tag_expansion_wrapper.dart';
 import '../comfyui_import_wrapper.dart';
 import '../nai_syntax_controller.dart';
+import '../pills/translation_pill_view.dart';
 import 'unified_prompt_config.dart';
 import 'package:nai_launcher/presentation/widgets/common/themed_input.dart';
 import 'package:nai_launcher/presentation/widgets/common/themed_text_selection_toolbar.dart';
@@ -158,7 +160,7 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
 
     final logicalKey = event.logicalKey;
 
-    final isCtrl = HardwareKeyboard.instance.isControlPressed;
+    final isCtrl = HardwareKeyboard.instance.isPrimaryPressed;
     final isShift = HardwareKeyboard.instance.isShiftPressed;
     final isMeta = HardwareKeyboard.instance.isMetaPressed;
 
@@ -763,8 +765,13 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
     final selectedText = TextSelectionUtils.getSelectedText(
       _effectiveController,
     );
-    final hasSelection = selectedText.isNotEmpty;
-    if (hasSelection && !widget.config.readOnly) {
+    final toggle = TranslationPillView.contextMenuToggle(editableTextState);
+    void toggleTranslation() {
+      editableTextState.hideToolbar();
+      toggle!();
+    }
+
+    if (selectedText.isNotEmpty && !widget.config.readOnly) {
       final anchors = editableTextState.contextMenuAnchors;
       return TextSelectionToolbar(
         anchorAbove: anchors.primaryAnchor,
@@ -777,33 +784,23 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
             },
             onCopy: () =>
                 editableTextState.copySelection(SelectionChangedCause.toolbar),
+            onToggleTranslation: toggle == null ? null : toggleTranslation,
           ),
         ],
-      );
-    }
-
-    // 获取默认的上下文菜单项
-    final List<ContextMenuButtonItem> buttonItems =
-        editableTextState.contextMenuButtonItems;
-
-    // 如果有选中文本，添加"保存到块库"选项
-    if (hasSelection && !widget.config.readOnly) {
-      buttonItems.insert(
-        0,
-        ContextMenuButtonItem(
-          onPressed: () {
-            editableTextState.hideToolbar();
-            _showSaveToLibraryDialog(context, selectedText);
-          },
-          label: context.l10n.promptBlockLibrary_saveToLibrary,
-        ),
       );
     }
 
     return buildThemedTextSelectionToolbar(
       context,
       anchors: editableTextState.contextMenuAnchors,
-      buttonItems: buttonItems,
+      buttonItems: [
+        ...editableTextState.contextMenuButtonItems,
+        if (toggle != null)
+          ContextMenuButtonItem(
+            label: context.l10n.promptTranslation_guideMiddleText,
+            onPressed: toggleTranslation,
+          ),
+      ],
     );
   }
 

@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 import 'package:nai_launcher/core/utils/app_support_directory.dart';
 
+import '../../core/services/anlas_calculator.dart';
 import '../../core/utils/localization_extension.dart';
 import '../../data/models/prompt_block/pill_document.dart';
 import '../providers/auth_provider.dart';
@@ -82,7 +83,8 @@ class GenerationBackend {
       (_, _) {
         _intentRevision++;
         _accountRevision++;
-        if (ref.read(imageGenerationNotifierProvider).isGenerating) {
+        if (!ref.read(authNotifierProvider).generationRequestRejected &&
+            ref.read(imageGenerationNotifierProvider).isGenerating) {
           ref.read(imageGenerationNotifierProvider.notifier).cancel();
         }
       },
@@ -159,6 +161,11 @@ class GenerationBackend {
     };
   }
 
+  bool Function() captureAccount() {
+    final revision = _accountRevision;
+    return () => !_disposed && revision == _accountRevision;
+  }
+
   Future<void> generate({
     required Future<bool> Function(int cost) confirm,
     bool Function()? alive,
@@ -179,7 +186,13 @@ class GenerationBackend {
       final workflow = ref.read(imageWorkflowControllerProvider);
       final auth = ref.read(authNotifierProvider);
       final count = ref.read(imagesPerRequestProvider);
-      final cost = ref.read(estimatedCostProvider);
+      int quote() => generationRequestCost(
+        request,
+        workflow,
+        ref.read(subscriptionNotifierProvider).subscription,
+        count,
+      );
+      final cost = quote();
       final intent = _intentRevision;
       final encodingRevision = _encodingRevision;
       bool valid() =>
@@ -196,8 +209,12 @@ class GenerationBackend {
           auth.accountId == ref.read(authNotifierProvider).accountId &&
           auth.status == ref.read(authNotifierProvider).status &&
           count == ref.read(imagesPerRequestProvider) &&
-          cost == ref.read(estimatedCostProvider);
-      if (!await confirm(cost) || !valid()) return;
+          cost == quote();
+      if (!await confirm(cost) ||
+          cost == AnlasCalculator.invalidCost ||
+          !valid()) {
+        return;
+      }
       await ref.read(generationPlatformProvider).backupDraft(_snapshot());
       if (!valid()) return;
       onStarted?.call();
@@ -254,7 +271,11 @@ class GenerationBackend {
         quoted == cost();
     _launching = true;
     try {
-      if (!await confirm(quoted) || !valid()) return;
+      if (!await confirm(quoted) ||
+          quoted == AnlasCalculator.invalidCost ||
+          !valid()) {
+        return;
+      }
       await write(() {});
       if (valid()) await notifier.retry(request);
     } finally {

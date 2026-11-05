@@ -1,3 +1,4 @@
+import 'package:nai_launcher/core/utils/primary_activator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -271,7 +272,7 @@ class _RefsLibraryPageState extends State<RefsLibraryPage>
     }
     final k = e.logicalKey;
     final hw = HardwareKeyboard.instance;
-    final ctrl = hw.isControlPressed || hw.isMetaPressed;
+    final ctrl = hw.isPrimaryOrWindowsMetaPressed;
     final shift = hw.isShiftPressed;
     if (ctrl && k == LogicalKeyboardKey.keyF) {
       _searchFocus.requestFocus();

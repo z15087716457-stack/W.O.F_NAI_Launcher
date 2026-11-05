@@ -29,14 +29,15 @@ W.O.F NAI Studio is a third-party NovelAI desktop client for Windows. It does mo
 
 ## Download
 
-Get the latest version from [Releases](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/latest). Choose one:
+Get the package for your operating system from [Releases](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/latest).
 
 | File | Who it's for |
 | --- | --- |
 | `WOF_NAI_Studio_Windows_<version>_Setup.exe` | **The choice for most people.** Installs to your user directory without administrator rights, with Start menu and desktop shortcuts. |
 | `WOF_NAI_Studio_Windows_<version>_Portable.zip` | For keeping the app in a folder of your choice, on a USB drive, or taking it between computers. Extract it and run `nai_launcher.exe`. |
+| `WOF_NAI_Studio_macOS_<version>_Portable.zip` | When listed in the release, extract and use it on Apple silicon or Intel Macs running macOS 13.5 or later. |
 
-Both versions support in-app updates. Your settings, gallery database and Agent data live in `user-data/` and `agent-data/` beside the program. Updates and uninstallation leave them intact.
+Both Windows packages support in-app updates. Settings, the gallery database and Agent data live in `user-data/` and `agent-data/` beside the program. On Mac, data lives in your Application Support directory. The app downloads and verifies updates, then opens Finder for you to replace the app.
 
 > **First upgrade from Portable 2.2.3 or earlier:** Exit the app completely, then extract the new release over the existing program folder, keeping `user-data/` and `agent-data/`. In-app updates work normally from 2.2.4 onward. Setup updates are unaffected by this older script issue.
 
@@ -220,6 +221,7 @@ Use `scripts/package_windows_release.ps1` to package the installer and portable 
 ## Acknowledgments and license
 
 - This project is forked from [Aaalice233/Aaalice_NAI_Launcher](https://github.com/Aaalice233/Aaalice_NAI_Launcher) (MIT). Thanks to the original author for their open-source work. This fork is not affiliated with the upstream author; please report problems in this repository's Issues.
+- Thanks to contributor [Miint-Sunny](https://github.com/Miint-Sunny) for 18 pull requests and their test results, covering macOS support, gallery fixes, and generation improvements.
 - The style evolution algorithm draws on ideas from [monineko/PromptCard-Studio](https://github.com/monineko/PromptCard-Studio) (GPL-3.0). This project uses an independent Dart implementation and does not copy its source code.
 - NAI Agent is based on [Pi](https://github.com/earendil-works/pi) (MIT).
 - This project is open source under the [MIT License](LICENSE). Bundled data, fonts and components follow their own licenses; see [Third-party notices](THIRD_PARTY_NOTICES.md).

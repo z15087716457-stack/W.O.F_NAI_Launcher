@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
@@ -43,12 +44,48 @@ class ProxyService {
       if (Platform.isWindows) {
         return _getWindowsProxy();
       }
+      if (Platform.isMacOS) {
+        final result = Process.runSync('/usr/sbin/scutil', ['--proxy']);
+        if (result.exitCode == 0) return parseMacProxy(result.stdout as String);
+      }
       return null;
     } catch (e, stackTrace) {
       AppLogger.e('Failed to get system proxy: $e', 'PROXY', stackTrace);
       return null;
     }
   }
+
+  /// Read static HTTP(S) settings. PAC scripts are handled by native apps.
+  static String? parseMacProxy(String output) {
+    final fields = <String, String>{
+      for (final line in output.split('\n'))
+        if (RegExp(
+              r'^\s*(HTTPS?(?:Enable|Proxy|Port))\s*:\s*(.+)$',
+            ).firstMatch(line)
+            case final match?)
+          match[1]!: match[2]!.trim(),
+    };
+    for (final kind in ['HTTPS', 'HTTP']) {
+      final host = fields['${kind}Proxy'];
+      final port = int.tryParse(fields['${kind}Port'] ?? '');
+      if (fields['${kind}Enable'] != '1' ||
+          host == null ||
+          host.isEmpty ||
+          port == null ||
+          port < 1 ||
+          port > 65535) {
+        continue;
+      }
+      return host.contains(':') && !host.startsWith('[')
+          ? '[$host]:$port'
+          : '$host:$port';
+    }
+    return null;
+  }
+
+  /// Runs the settings page's system read off the UI isolate.
+  static Future<String?> readSystemProxyAddress() =>
+      Isolate.run(getSystemProxyAddress);
 
   /// Windows: 通过注册表读取代理
   static String? _getWindowsProxy() {

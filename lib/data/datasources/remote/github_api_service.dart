@@ -277,6 +277,10 @@ class GitHubApiService {
     String platform,
   ) {
     final normalizedPlatform = platform.toLowerCase();
+    if (normalizedPlatform == 'macos-portable' ||
+        normalizedPlatform == 'macos') {
+      return _firstAssetOfType(assets, ReleaseAssetType.macosPortable);
+    }
     if (normalizedPlatform == 'windows-installer') {
       return _firstAssetOfType(assets, ReleaseAssetType.windowsInstaller);
     }

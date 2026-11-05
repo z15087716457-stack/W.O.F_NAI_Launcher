@@ -500,6 +500,7 @@
   "img2img_inpaintReadyHint": "マスクを読み込みました。次回の生成では、マスクされた領域のみを再描画します。",
   "img2img_inpaintMaskReady": "インペイントマスクの準備ができました",
   "generation_variationOriginal": "元画像",
+  "generation_requestCostInvalid": "このリクエストは対応範囲を超えています。画像サイズかステップ数を減らしてください。",
   "generation_variationSizeUnsupported": "バリエーションは 300 万画素以下の元画像に対応しています。",
   "img2img_generateVariations": "バリエーションの生成",
   "img2img_directorTools": "ディレクターツール",
@@ -2670,6 +2671,8 @@
       "version": {}
     }
   },
+  "updateMacReveal": "Finder に表示",
+  "updateMacReplaceHint": "このアプリを終了してから、Finder で展開したアプリに置き換えてください。",
   "updateInstallAndRestart": "インストールして再起動",
   "updateInstallLater": "後でインストール",
   "updateDownloadCancelled": "ダウンロードをキャンセルしました。後で再開できます",
@@ -4900,6 +4903,9 @@
   "update_errorCheckFailed": "更新の確認に失敗しました",
   "update_errorRateLimited": "GitHub のリクエスト上限に達しました。しばらくしてから再試行してください。",
   "update_retryAt": "{time}（現地時刻）以降に再試行してください。",
+  "@update_retryAt": {
+    "placeholders": {"time": {"type": "String"}}
+  },
   "update_errorCheckUnknown": "更新の確認中に不明なエラーが発生しました",
   "update_errorLogPath": "ログ：{path}",
   "@update_errorLogPath": {
@@ -5150,8 +5156,23 @@
   "imageUse_characters": "キャラクター",
   "imageUse_characterMode": "キャラクターの処理",
   "imageUse_featureRecorded": "元画像は{feature}を使用しています。",
+  "@imageUse_featureRecorded": {
+    "placeholders": {
+      "feature": {"type": "String"}
+    }
+  },
   "imageUse_referenceAvailable": "元画像は{feature}を使用しています。「参照画像」から参照素材を読み込めます。",
+  "@imageUse_referenceAvailable": {
+    "placeholders": {
+      "feature": {"type": "String"}
+    }
+  },
   "imageUse_referenceUnavailable": "元画像は{feature}を使用しています。使用記録のみが残っており、読み込める参照素材は含まれていません。",
+  "@imageUse_referenceUnavailable": {
+    "placeholders": {
+      "feature": {"type": "String"}
+    }
+  },
   "imageMenu_details": "詳細",
   "imageMenu_creation": "生成・参照",
   "imageMenu_editAndDerive": "編集・派生",
@@ -8870,7 +8891,6 @@
   "naiAgent_mcpBuiltin": "NAI Studio · 内蔵ツール",
   "naiAgent_mcpBuiltinHint": "プロンプト、ブロック、百科、画像、履歴、参照、生成、設定ツール。既定では必要時に検索します。バックアップ、バージョン確認、ユーザー確認は引き続き有効です。",
   "naiAgent_mcpAdd": "MCP サーバーを追加",
-  "naiAgent_mcpName": "サーバー名",
   "naiAgent_mcpConfig": "サーバー設定（JSON）",
   "naiAgent_mcpStatus": "接続状態を確認",
   "naiAgent_mcpReconnect": "再接続",
@@ -10151,7 +10171,7 @@
   "set_rgFind": "探す",
   "set_rgModelsMissing": "見つかりません。「ダウンロード」するか、重みのフォルダーを選んでください。",
   "set_rgPython": "Python インタープリター",
-  "set_rgPythonSub": "既定は自動インストールの独立環境。既存の python.exe も選べます。",
+  "set_rgPythonSub": "このコンピューターにある Python インタープリターを選べます。",
   "set_rgPythonAuto": "自動",
   "set_rgPythonNone": "未インストール",
   "set_rgPythonPending": "まだ使われていません。「このインタープリターを使う」で依存を入れ直します。",

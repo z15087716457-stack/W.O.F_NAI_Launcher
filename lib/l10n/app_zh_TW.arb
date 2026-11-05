@@ -456,6 +456,7 @@
   "img2img_inpaintReadyHint": "遮罩已載入。當前會按局部重繪方式提交，只有遮罩區域會被重新生成。",
   "img2img_inpaintMaskReady": "局部重繪遮罩已準備好",
   "generation_variationOriginal": "原圖",
+  "generation_requestCostInvalid": "當前請求超出支援的範圍，請減小圖片尺寸或降低步數。",
   "generation_variationSizeUnsupported": "生成變體支援不超過 3 百萬像素的原圖。",
   "img2img_generateVariations": "生成變體",
   "img2img_directorTools": "導演工具",
@@ -2552,6 +2553,8 @@
       "version": {}
     }
   },
+  "updateMacReveal": "在 Finder 中顯示",
+  "updateMacReplaceHint": "結束目前的應用程式後，在 Finder 中將新版拖到原位置完成取代。",
   "updateInstallAndRestart": "安裝並重啟",
   "updateInstallNow": "立即安裝",
   "updateInstallLater": "稍後安裝",
@@ -4900,6 +4903,13 @@
   "update_errorCheckFailed": "檢查更新失敗",
   "update_errorRateLimited": "GitHub 請求已達上限，請稍後重試。",
   "update_retryAt": "請在 {time}（本地時間）後重試。",
+  "@update_retryAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "update_errorCheckUnknown": "檢查更新時發生未知錯誤",
   "update_errorLogPath": "日誌：{path}",
   "@update_errorLogPath": {
@@ -5150,8 +5160,29 @@
   "imageUse_characters": "多角色",
   "imageUse_characterMode": "角色處理",
   "imageUse_featureRecorded": "原圖使用過{feature}。",
+  "@imageUse_featureRecorded": {
+    "placeholders": {
+      "feature": {
+        "type": "String"
+      }
+    }
+  },
   "imageUse_referenceAvailable": "原圖使用過{feature}，參考素材可通過“參考圖”匯入。",
+  "@imageUse_referenceAvailable": {
+    "placeholders": {
+      "feature": {
+        "type": "String"
+      }
+    }
+  },
   "imageUse_referenceUnavailable": "原圖使用過{feature}，僅保留使用記錄，未附帶可匯入的參考素材。",
+  "@imageUse_referenceUnavailable": {
+    "placeholders": {
+      "feature": {
+        "type": "String"
+      }
+    }
+  },
   "imageMenu_details": "詳情",
   "imageMenu_creation": "創作與參考",
   "imageMenu_editAndDerive": "編輯與派生",
@@ -8870,7 +8901,6 @@
   "naiAgent_mcpBuiltin": "NAI Studio · 內建工具組",
   "naiAgent_mcpBuiltinHint": "提示詞、積木、百科、圖片、歷史、參考圖、生圖和設定工具。預設按需發現，原有備份、版本校驗和真實確認繼續生效。",
   "naiAgent_mcpAdd": "新增 MCP 伺服器",
-  "naiAgent_mcpName": "伺服器名稱",
   "naiAgent_mcpConfig": "伺服器配置（JSON）",
   "naiAgent_mcpStatus": "檢視連線狀態",
   "naiAgent_mcpReconnect": "重新連線",
@@ -10256,7 +10286,7 @@
   "set_rgFind": "查詢",
   "set_rgModelsMissing": "沒找到。可以點“下載”，或手動選擇已下載的權重目錄。",
   "set_rgPython": "Python 直譯器",
-  "set_rgPythonSub": "預設用自動安裝的獨立環境；也可以選一個已有的 python.exe。",
+  "set_rgPythonSub": "可選擇本機已有的 Python 直譯器。",
   "set_rgPythonAuto": "自動",
   "set_rgPythonNone": "未安裝",
   "set_rgPythonPending": "選的直譯器還沒啟用，點“使用此直譯器”會按它重新安裝依賴。",

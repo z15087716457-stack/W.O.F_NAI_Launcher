@@ -76,7 +76,8 @@ void main() {
       AppLogger.w('警告信息', 'TestTag');
       AppLogger.e('错误信息', Exception('测试异常'), StackTrace.current, 'TestTag');
 
-      // 显式 flush 落盘（固定延迟在并发负载下不可靠）
+      // 错误日志开始刷新后，后续日志和显式刷新仍需按顺序落盘。
+      AppLogger.i('错误后的信息', 'TestTag');
       await AppLogger.flush();
 
       // 读取日志文件内容
@@ -89,6 +90,7 @@ void main() {
       expect(content, contains('警告信息'));
       expect(content, contains('错误信息'));
       expect(content, contains('[TestTag]'));
+      expect(content.indexOf('错误后的信息'), greaterThan(content.indexOf('错误信息')));
     });
 
     test('网络日志格式正确', () async {

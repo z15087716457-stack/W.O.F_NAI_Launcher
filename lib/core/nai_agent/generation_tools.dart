@@ -131,6 +131,7 @@ class NaiAgentGenerationTools {
     required this.backup,
     required this.start,
     required this.isAlive,
+    this.refreshBalance,
     DateTime Function()? clock,
   }) : clock = clock ?? DateTime.now;
   final NaiAgentGenerationInput Function(Map<String, dynamic>) readInput;
@@ -143,6 +144,7 @@ class NaiAgentGenerationTools {
   final Future<String> Function(NaiAgentGenerationInput) backup;
   final NaiAgentGenerationRun? Function(NaiAgentGenerationInput) start;
   final bool Function() isAlive;
+  final Future<void> Function()? refreshBalance;
   final DateTime Function() clock;
   final _quotes = <String, NaiAgentGenerationQuote>{};
   NaiAgentGenerationRun? _active;
@@ -178,7 +180,7 @@ class NaiAgentGenerationTools {
     Map<String, dynamic> params,
     NaiAgentCancellation token,
   ) async {
-    final quote = _prepareQuote(params, token);
+    final quote = await _prepareFreshQuote(params, token);
     _quotes.removeWhere(
       (_, quote) => !quote.expiresAt.isAfter(clock()) && !quote.reserved,
     );
@@ -194,6 +196,20 @@ class NaiAgentGenerationTools {
     }
     _quotes[quote.id] = quote;
     return naiAgentTextResult({'quote': quote.toJson()});
+  }
+
+  Future<NaiAgentGenerationQuote> _prepareFreshQuote(
+    Map<String, dynamic> params,
+    NaiAgentCancellation token,
+  ) async {
+    final quote = _prepareQuote(params, token);
+    final refresh = refreshBalance;
+    if (quote.input.blockedReason != 'insufficient_balance' ||
+        refresh == null) {
+      return quote;
+    }
+    await refresh();
+    return _prepareQuote(params, token);
   }
 
   Future<Map<String, dynamic>> run(
@@ -222,7 +238,7 @@ class NaiAgentGenerationTools {
         'This quote is already waiting or running',
       );
     }
-    void check() {
+    NaiAgentGenerationInput readCurrent() {
       token.check();
       if (!isAlive()) {
         throw const NaiAgentToolError('closed', 'Studio owner closed');
@@ -230,7 +246,10 @@ class NaiAgentGenerationTools {
       if (!quote.expiresAt.isAfter(clock())) {
         throw const NaiAgentToolError('quote_expired', 'Prepare a fresh quote');
       }
-      final current = readInput(quote.params);
+      return readInput(quote.params);
+    }
+
+    void validate(NaiAgentGenerationInput current) {
       if (!quote.input.sameRequest(current)) {
         throw const NaiAgentToolError(
           'quote_changed',
@@ -245,11 +264,32 @@ class NaiAgentGenerationTools {
       }
     }
 
+    var balanceChecked =
+        userButton && quote.input.blockedReason == 'insufficient_balance';
+    final refresh = refreshBalance;
+    bool needsBalanceCheck(NaiAgentGenerationInput input) =>
+        !balanceChecked &&
+        refresh != null &&
+        input.blockedReason == 'insufficient_balance';
+    Future<void>? check() {
+      final current = readCurrent();
+      if (needsBalanceCheck(current)) {
+        balanceChecked = true;
+        return refresh!().then((_) => validate(readCurrent()));
+      }
+      validate(current);
+      return null;
+    }
+
     quote.reserved = true;
     try {
-      check();
+      final initialCheck = check();
+      if (initialCheck != null) await initialCheck;
       if (!userButton && !quote.approved) {
-        final accepted = await approve(quote, token, check);
+        final accepted = await approve(quote, token, () {
+          final current = readCurrent();
+          if (!needsBalanceCheck(current)) validate(current);
+        });
         if (!accepted) {
           _quotes.remove(quote.id);
           return naiAgentTextResult({
@@ -257,11 +297,16 @@ class NaiAgentGenerationTools {
             'quote_id': quote.id,
           });
         }
-        check();
+        final approvedCheck = check();
+        if (approvedCheck != null) await approvedCheck;
         quote.approved = true;
       }
       final path = await backup(quote.input);
-      check(); // No await between this check and native admission/start.
+      final submissionCheck = check();
+      if (submissionCheck != null) {
+        await submissionCheck;
+        validate(readCurrent());
+      }
       final job = start(quote.input);
       if (job == null) {
         throw const NaiAgentToolError(
@@ -306,7 +351,7 @@ class NaiAgentGenerationTools {
   Future<Map<String, dynamic>> requestUserGeneration(
     NaiAgentCancellation token,
   ) async => _run(
-    _prepareQuote({'requests': 1, 'images_per_request': 1}, token),
+    await _prepareFreshQuote({'requests': 1, 'images_per_request': 1}, token),
     token,
     userButton: true,
   );

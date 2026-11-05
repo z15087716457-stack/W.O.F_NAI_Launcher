@@ -79,6 +79,10 @@ class FileExplorerUtils {
     }
 
     final launcher = startProcess ?? _startProcess;
+    if (Platform.isMacOS) {
+      await launcher('/usr/bin/open', [dir.absolute.path]);
+      return;
+    }
     final absolutePath = normalizeWindowsExplorerPath(dir.absolute.path);
     await launcher('explorer.exe', [absolutePath]);
   }
@@ -96,6 +100,10 @@ class FileExplorerUtils {
     }
 
     final launcher = startProcess ?? _startProcess;
+    if (Platform.isMacOS) {
+      await launcher('/usr/bin/open', ['-R', file.absolute.path]);
+      return;
+    }
     final absolutePath = normalizeWindowsExplorerPath(file.absolute.path);
     if (startProcess == null && _tryRevealFileWithShellApi(absolutePath)) {
       return;

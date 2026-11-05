@@ -2,6 +2,7 @@ import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../core/services/anlas_calculator.dart';
 import '../../providers/cost_estimate_provider.dart';
 import '../../providers/subscription_provider.dart';
 
@@ -54,7 +55,7 @@ class AnlasCostBadge extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            '$cost',
+            cost == AnlasCalculator.invalidCost ? '—' : '$cost',
             style: TextStyle(
               color: inkColor,
               fontSize: 11,

@@ -7,6 +7,8 @@ import 'package:nai_launcher/core/nai_agent/agent_tool.dart';
 import 'package:nai_launcher/core/nai_agent/pi_host_client.dart';
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_questions.dart';
 
+import '../../../helpers/agent_test_node.dart';
+
 void main() {
   test(
     'question cancellation and invalid input do not silently select an option',
@@ -104,7 +106,7 @@ void main() {
       PiHostClient? host;
       try {
         host = await PiHostClient.start(
-          nodeExecutable: 'E:/node/node.exe',
+          nodeExecutable: agentTestNode,
           hostScript: File('tool/nai_agent/host.mjs').absolute.path,
           workspaceId: 'workspace',
           workspaceDirectory: root,

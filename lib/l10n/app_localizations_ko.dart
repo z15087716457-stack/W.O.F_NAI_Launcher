@@ -1104,6 +1104,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get generation_variationOriginal => '원본';
 
   @override
+  String get generation_requestCostInvalid =>
+      '이 요청은 지원 범위를 초과합니다. 이미지 크기나 스텝 수를 줄여 주세요.';
+
+  @override
   String get generation_variationSizeUnsupported =>
       '변형은 300만 화소 이하의 원본 이미지를 지원합니다.';
 
@@ -5082,6 +5086,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String updateDownloadedHint(Object version) {
     return 'v$version을(를) 다운로드하고 확인했습니다. 설치하면 앱이 닫히고 자동으로 다시 시작됩니다.';
   }
+
+  @override
+  String get updateMacReveal => 'Finder에서 보기';
+
+  @override
+  String get updateMacReplaceHint => '현재 앱을 종료한 뒤 Finder에서 압축을 푼 앱으로 교체하세요.';
 
   @override
   String get updateInstallAndRestart => '설치 후 다시 시작';
@@ -16259,9 +16269,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get naiAgent_mcpAdd => 'MCP 서버 추가';
 
   @override
-  String get naiAgent_mcpName => '서버 이름';
-
-  @override
   String get naiAgent_mcpConfig => '서버 설정 (JSON)';
 
   @override
@@ -18741,7 +18748,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get set_rgPython => 'Python 인터프리터';
 
   @override
-  String get set_rgPythonSub => '기본은 자동 설치한 독립 환경이며 기존 python.exe도 고를 수 있습니다.';
+  String get set_rgPythonSub => '이 컴퓨터에 설치된 Python 인터프리터를 선택할 수 있습니다.';
 
   @override
   String get set_rgPythonAuto => '자동';

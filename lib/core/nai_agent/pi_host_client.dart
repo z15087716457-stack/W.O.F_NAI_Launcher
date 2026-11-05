@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'agent_tool.dart';
+import 'node_runtime_environment.dart';
 import 'model_request_gate.dart';
 import 'vision_access.dart';
 
@@ -57,6 +58,7 @@ class PiHostClient {
   Stream<Map<String, dynamic>> get events => _events.stream;
   Map<String, dynamic> get initialState => Map.of(_initialState);
   bool get isClosed => _closed;
+  bool get hasPendingRequests => _requests.isNotEmpty;
   Future<void> get whenClosed => _process.exitCode.then((_) {});
 
   static Future<PiHostClient> start({
@@ -90,6 +92,7 @@ class PiHostClient {
       nodeExecutable,
       [hostScript],
       workingDirectory: File(hostScript).parent.path,
+      environment: nodeRuntimeEnvironment(nodeExecutable),
       runInShell: false,
     );
     final client = PiHostClient._(

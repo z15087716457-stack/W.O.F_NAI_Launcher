@@ -68,8 +68,6 @@ abstract final class SettingsFixture {
   /// 和默认值不同的项（假数据里手工列出；真实接线由后端比较）。
   static const modified = {
     SettingKey.completionSoundFile,
-    SettingKey.historyClick,
-    SettingKey.canvasZoomToFill,
     SettingKey.costWarning,
     SettingKey.intervalLimit,
     SettingKey.intervalJitter,

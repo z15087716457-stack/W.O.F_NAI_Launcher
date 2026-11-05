@@ -63,7 +63,7 @@ void main() {
         expect(requestMask.getPixel(0, 0).r.toInt(), 0);
         expect(img.decodePng(result.fullInpaintSourceImageBytes!)!.width, 512);
         final generated = _png(1024, 1024, img.ColorRgb8(230, 30, 10));
-        final artifact = InpaintMaskUtils.composeGeneratedImageArtifact(
+        final artifact = await InpaintMaskUtils.composeGeneratedImageArtifact(
           normalizedSourceImage: result.fullInpaintSourceImageBytes!,
           compositeMaskImage: result.inpaintMaskArtifacts!.compositeMaskBytes,
           generatedImage: generated,

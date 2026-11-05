@@ -1,3 +1,4 @@
+import 'package:nai_launcher/core/utils/primary_activator.dart';
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -209,7 +210,7 @@ class _GalleryTimelineViewState extends ConsumerState<GalleryTimelineView> {
     );
     final focusNotifier = ref.read(localGalleryFocusNotifierProvider.notifier);
     final keyboard = HardwareKeyboard.instance;
-    final isCtrl = keyboard.isControlPressed || keyboard.isMetaPressed;
+    final isCtrl = keyboard.isPrimaryOrWindowsMetaPressed;
     final isShift = keyboard.isShiftPressed;
     _focusNode.requestFocus();
 

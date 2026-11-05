@@ -12,6 +12,7 @@ import '../../../core/network/nai_api_endpoint_service.dart';
 import '../../../data/models/image/image_params.dart';
 import '../../../data/services/nai_agent/agent_snapshot_files.dart';
 import '../auth_provider.dart';
+import '../subscription_provider.dart';
 import '../image_generation_provider.dart';
 import '../generation/image_workflow_controller.dart';
 import '../generation/image_workflow_snapshot.dart';
@@ -154,6 +155,7 @@ NaiAgentGenerationTools bindNaiAgentGeneration(
   return NaiAgentGenerationTools(
     readInput: read,
     isAlive: alive,
+    refreshBalance: () => refreshBalanceBeforeBlocking(ref),
     approve: (quote, token, check) => ref
         .read(naiAgentGenerationApprovalsProvider)
         .request(owner, quote, token, check),
@@ -228,7 +230,8 @@ NaiAgentGenerationRun? startNaiAgentNativeGeneration(
 
   String? stopReason;
   final accountGuard = ref.listen(authNotifierProvider, (_, next) {
-    if ((!next.isAuthenticated || next.accountId != input.accountId) &&
+    if (!next.generationRequestRejected &&
+        (!next.isAuthenticated || next.accountId != input.accountId) &&
         cancel()) {
       stopReason = 'account_changed';
     }

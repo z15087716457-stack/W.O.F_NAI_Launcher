@@ -32,7 +32,6 @@ class GalleryCategoryRepository {
   static const _categoriesFileName = '.gallery_categories.json';
   static const _suppressedCategoriesFileName =
       '.gallery_category_suppressed_paths.json';
-  static const _supportedExtensions = {'.png', '.jpg', '.jpeg', '.webp'};
 
   /// 获取图片保存根路径
   ///
@@ -781,7 +780,7 @@ class GalleryCategoryRepository {
           folderPath: extraRoot,
           parentId: null,
           sortOrder: updatedCategories.where((c) => c.parentId == null).length,
-        );
+        ).updateImageCount(await _countImagesInFolder(extraRoot));
         existingPaths.add(normalizedRoot);
         updatedCategories.add(rootCategory);
       }
@@ -1046,10 +1045,7 @@ class GalleryCategoryRepository {
       await for (final entity in Directory(
         folderPath,
       ).list(recursive: recursive, followLinks: false)) {
-        if (entity is File &&
-            _supportedExtensions.contains(
-              p.extension(entity.path).toLowerCase(),
-            )) {
+        if (entity is File && isGalleryIndexableImage(entity.path)) {
           count++;
         }
       }

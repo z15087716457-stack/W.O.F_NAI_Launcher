@@ -13,6 +13,8 @@ This folder contains the Krita-side Python plugin for the NAI Launcher Krita Bri
 
 The plugin reads `%APPDATA%/nai-launcher/krita-bridge.json`, connects to `ws://127.0.0.1:{port}/krita`, and authenticates with the session secret from that discovery file. It prefers Krita's bundled `PyQt5.QtWebSockets.QWebSocket`; if that module is unavailable, it uses the bundled stdlib WebSocket fallback client. It never reads or stores NovelAI credentials.
 
+While disconnected, automatic discovery retries after 5, 10, 20, then every 30 seconds. **Connect** rereads the discovery file and tries immediately.
+
 ## Profile Installer
 
 From the repository root, preview the exact profile paths and actions without

@@ -69,6 +69,24 @@ void main() {
     },
   );
 
+  test(
+    'legacy TIFF still generates a correctly fitted JPEG thumbnail',
+    () async {
+      final source = img.Image(width: 360, height: 240)
+        ..clear(img.ColorRgb8(8, 60, 240));
+      final file = File(p.join(directory.path, 'legacy.tiff'));
+      await file.writeAsBytes(img.encodeTiff(source));
+
+      final path = await service.generateThumbnail(
+        file.path,
+        size: ThumbnailSize.small,
+      );
+      final thumbnail = img.decodeJpg(await File(path!).readAsBytes())!;
+      expect((thumbnail.width, thumbnail.height), (180, 120));
+      expect(thumbnail.getPixel(0, 0).b, greaterThan(220));
+    },
+  );
+
   test('F20 ambiguous legacy cache is ignored without changing it', () async {
     final blue = await source('same.jpg', red: 0, blue: 255);
     final old = File(p.join(directory.path, '.thumbs', 'same.small.thumb.jpg'));

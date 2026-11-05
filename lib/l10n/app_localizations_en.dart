@@ -1130,6 +1130,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get generation_variationOriginal => 'ORIGINAL';
 
   @override
+  String get generation_requestCostInvalid =>
+      'This request exceeds the supported limits. Reduce the image size or steps.';
+
+  @override
   String get generation_variationSizeUnsupported =>
       'Variations support source images up to 3 megapixels.';
 
@@ -5203,6 +5207,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String updateDownloadedHint(Object version) {
     return 'v$version has been downloaded and verified. Installing will close the app and restart it automatically.';
   }
+
+  @override
+  String get updateMacReveal => 'Show in Finder';
+
+  @override
+  String get updateMacReplaceHint =>
+      'Quit this app, then use Finder to replace it with the extracted app.';
 
   @override
   String get updateInstallAndRestart => 'Install and Restart';
@@ -16703,9 +16714,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get naiAgent_mcpAdd => 'Add MCP server';
 
   @override
-  String get naiAgent_mcpName => 'Server name';
-
-  @override
   String get naiAgent_mcpConfig => 'Server configuration (JSON)';
 
   @override
@@ -19258,7 +19266,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get set_rgPythonSub =>
-      'Uses the standalone runtime by default; you can pick an existing python.exe.';
+      'You can select an existing local Python interpreter.';
 
   @override
   String get set_rgPythonAuto => 'Auto';

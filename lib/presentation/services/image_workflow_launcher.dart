@@ -8,8 +8,11 @@ import '../../core/utils/inpaint_mask_utils.dart';
 import '../../core/utils/localization_extension.dart';
 import '../../core/utils/nai_resolution_adapter.dart';
 import '../../data/services/image_metadata_service.dart';
+import '../providers/auth_provider.dart';
+import '../providers/generation/image_action_providers.dart';
 import '../providers/generation/image_workflow_controller.dart';
 import '../providers/image_generation_provider.dart';
+import '../providers/subscription_provider.dart';
 import '../providers/generation/preview_selection_provider.dart';
 import '../screens/generation/widgets/canvas/canvas_feed_layout.dart';
 import '../providers/krita/krita_bridge_notifier.dart';
@@ -273,11 +276,21 @@ class ImageWorkflowLauncher {
         return;
       }
 
-      // 先解析元数据再动笔；解析期间闸门状态可能翻转，await 后必须复核。
+      if (!ref.read(authNotifierProvider).isAuthenticated) {
+        AppToast.warning(context, context.l10n.onlineGallery_pleaseLogin);
+        return;
+      }
+      final accountIsCurrent = ref
+          .read(generationBackendProvider)
+          .captureAccount();
       final metadata =
-          await ImageMetadataService().getMetadataFromBytes(imageBytes) ??
-          sourceImage?.metadata;
-      if (!context.mounted || _isVariationLaunchBlocked(context, ref)) {
+          sourceImage != null && identical(imageBytes, sourceImage.bytes)
+          ? await ref.read(generatedImageMetadataProvider(sourceImage).future)
+          : await ImageMetadataService().getMetadataFromBytes(imageBytes) ??
+                sourceImage?.metadata;
+      if (!context.mounted || _isVariationLaunchBlocked(context, ref)) return;
+      if (!accountIsCurrent()) {
+        AppToast.info(context, context.l10n.bridge_conflict);
         return;
       }
 
@@ -304,8 +317,34 @@ class ImageWorkflowLauncher {
         height: height,
         metadata: metadata,
       );
-      await beforeSubmit?.call();
-      if (!context.mounted || _isVariationLaunchBlocked(context, ref)) return;
+      int quote() => variationRequestCost(
+        params,
+        ref.read(subscriptionNotifierProvider).subscription,
+      );
+      final quoted = quote();
+      bool canSubmit() {
+        if (!context.mounted || _isVariationLaunchBlocked(context, ref)) {
+          return false;
+        }
+        if (!accountIsCurrent() || quote() != quoted) {
+          AppToast.info(context, context.l10n.bridge_conflict);
+          return false;
+        }
+        return true;
+      }
+
+      if (!await AssetProtectionGuard.confirmHighAnlasCost(
+            context: context,
+            ref: ref,
+            cost: quoted,
+          ) ||
+          !canSubmit()) {
+        return;
+      }
+      if (beforeSubmit != null) {
+        await beforeSubmit();
+        if (!context.mounted || !canSubmit()) return;
+      }
       final original = GeneratedImage.create(
         imageBytes,
         width: width,
@@ -313,7 +352,9 @@ class ImageWorkflowLauncher {
         metadata: metadata,
         isVariationOriginal: true,
       );
-      AppToast.info(context, context.l10n.img2img_variationsStarted);
+      if (context.mounted) {
+        AppToast.info(context, context.l10n.img2img_variationsStarted);
+      }
       await generation.generateOfficialVariations(params, original: original);
     } catch (error) {
       AppLogger.w('Variation preparation failed: $error', 'ImageWorkflow');

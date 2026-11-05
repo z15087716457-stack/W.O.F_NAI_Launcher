@@ -37,6 +37,8 @@ import '../krita/agent_bridge_draft_test.dart'
 import 'generation_binding_test.dart' show GenerationTestLibrary;
 import 'studio_host_integration_test.dart' show tool;
 
+import '../../../helpers/agent_test_node.dart';
+
 class _Vibes extends VibeLibraryStorageService {
   @override
   Future<void> saveGenerationStateJson(String value) async {}
@@ -771,8 +773,7 @@ void main() {
           workspaceId: 'real-reference-library',
           workspace: root,
           data: Directory('${root.path}/agent'),
-          nodeExecutable:
-              Platform.environment['NAI_AGENT_NODE'] ?? 'E:/node/node.exe',
+          nodeExecutable: agentTestNode,
           hostScript: File('tool/nai_agent/host.mjs').absolute.path,
           systemPrompt: '你是 NAI Agent。按需读取真实参考库。',
         );

@@ -1,0 +1,87 @@
+name: Build macOS universal
+
+on:
+  push:
+    branches:
+      - main
+      - codex/macos-ci
+    paths:
+      - ".github/workflows/macos-build.yml"
+      - "analysis_options.yaml"
+      - "assets/**"
+      - "fonts/**"
+      - "l10n.yaml"
+      - "lib/**"
+      - "macos/**"
+      - "pubspec.lock"
+      - "pubspec.yaml"
+      - "scripts/**"
+      - "test/core/**"
+      - "tool/**"
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      checkout-ref:
+        type: string
+        default: ""
+      version:
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 60
+    env:
+      EXTRA_DART_DEFINES: "--no-pub"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.checkout-ref }}
+          lfs: true
+          persist-credentials: false
+      - id: sdk
+        run: echo "version=$(python3 -c 'import json; print(json.load(open("tool/flutter-sdk.json"))["flutterVersion"])')" >> "$GITHUB_OUTPUT"
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ steps.sdk.outputs.version }}
+          channel: stable
+          architecture: arm64
+          cache: true
+      - name: Prepare tools
+        run: |
+          rustup target add aarch64-apple-darwin x86_64-apple-darwin
+          sudo softwareupdate --install-rosetta --agree-to-license
+          flutter pub get --enforce-lockfile
+      - name: Validate bundled databases
+        run: dart run tool/tag_catalog/verify_bundled_databases.dart
+      - name: Generate application code
+        run: |
+          flutter gen-l10n
+          dart run tool/generate.dart
+      - name: Test shared platform boundaries
+        run: |
+          flutter test --no-pub \
+            test/core/services/app_data_startup_test.dart \
+            test/core/rag/rag_platform_test.dart \
+            test/core/nai_agent/node_runtime_environment_test.dart \
+            test/core/utils/macos_platform_test.dart \
+            test/core/services/macos_first_launch_test.dart
+      - name: Build and verify universal package
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: |
+          bash scripts/build_macos.sh --release
+          args=()
+          if [ -n "$RELEASE_VERSION" ]; then args+=(--version "$RELEASE_VERSION"); fi
+          bash scripts/package_macos_release.sh "${args[@]}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos-release-assets
+          if-no-files-found: error
+          path: |
+            dist/WOF_NAI_Studio_macOS_*_Portable.zip
+            dist/WOF_NAI_Studio_macOS_*_Portable.zip.sha256

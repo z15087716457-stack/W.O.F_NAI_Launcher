@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/core/services/app_installation_service.dart';
 import 'package:nai_launcher/core/services/update_installer_service.dart';
+import 'package:nai_launcher/core/utils/app_bundle_paths.dart';
 import 'package:nai_launcher/data/models/version/release_asset_info.dart';
 import 'package:nai_launcher/data/models/version/version_info.dart';
 
@@ -43,6 +44,53 @@ void main() {
         isTrue,
       );
       expect(UpdateInstallerService.equalsSha256(hash, 'bad'), isFalse);
+    });
+
+    test('verifies the macOS app before revealing it in Finder', () async {
+      final file = File('${tempDir.path}/update.zip');
+      await file.writeAsString('synthetic verified package');
+      final asset = ReleaseAssetInfo(
+        type: ReleaseAssetType.macosPortable,
+        platform: 'macos',
+        fileName: 'update.zip',
+        downloadUrl: 'https://example.invalid/update.zip',
+        sha256: await UpdateInstallerService.calculateSha256(file),
+        size: await file.length(),
+      );
+      final update = DownloadedUpdate(
+        file: file,
+        asset: asset,
+        version: '9.9.9',
+      );
+      final events = <String>[];
+      var validSignature = false;
+      final service = UpdateInstallerService(
+        dio: Dio(),
+        installationService: _SupportedInstallationService(),
+        updateDirectory: tempDir,
+        runProcess: (executable, args) async {
+          final command = executable.split('/').last;
+          events.add(command);
+          if (command == 'ditto') {
+            await Directory('${args.last}/W.O.F NAI Studio.app').create();
+          }
+          return ProcessResult(
+            0,
+            command == 'codesign' && !validSignature ? 1 : 0,
+            command == 'PlistBuddy' ? AppBundlePaths.macBundleId : '',
+            '',
+          );
+        },
+      );
+      await expectLater(
+        service.revealMacUpdate(update),
+        throwsA(isA<UpdateInstallException>()),
+      );
+      expect(events, ['ditto', 'PlistBuddy', 'codesign']);
+      events.clear();
+      validSignature = true;
+      await service.revealMacUpdate(update);
+      expect(events, ['ditto', 'PlistBuddy', 'codesign', 'open']);
     });
 
     test('writes a UTF-8 BOM script and launches before shutdown', () async {

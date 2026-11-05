@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 import 'package:image/image.dart' as img;
+import 'package:nai_launcher/core/network/generation_failure.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/core/nai_agent/agent_tool.dart';
 import 'package:nai_launcher/core/nai_agent/generation_tools.dart';
@@ -15,6 +16,7 @@ import 'package:nai_launcher/core/storage/style_explore_run_storage.dart';
 import 'package:nai_launcher/data/models/image/image_params.dart';
 import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
 import 'package:nai_launcher/data/models/style_explore/explore_run.dart';
+import 'package:nai_launcher/data/models/user/user_subscription.dart';
 import 'package:nai_launcher/data/repositories/character_prompt_repository.dart';
 import 'package:nai_launcher/data/repositories/prompt_block_repository.dart';
 import 'package:nai_launcher/data/services/explore_run_image_store.dart';
@@ -26,6 +28,7 @@ import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_generati
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_studio_provider.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/providers/pill_workspace_provider.dart';
+import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
 import 'package:nai_launcher/presentation/providers/style_explore/explore_run_provider.dart';
 import 'package:nai_launcher/presentation/providers/style_explore/explore_run_runner.dart';
 import '../krita/agent_bridge_draft_test.dart'
@@ -43,6 +46,23 @@ final _draft = Provider(
 );
 Matcher error(String code) =>
     isA<NaiAgentToolError>().having((e) => e.code, 'code', code);
+
+class _ExplorationSubscription extends SubscriptionNotifier {
+  var refreshes = 0;
+
+  void setBalance(int value) => state = SubscriptionState.loaded(
+    state.subscription!.copyWith(
+      trainingStepsLeft: TrainingStepsInfo(fixedTrainingStepsLeft: value),
+    ),
+  );
+
+  @override
+  Future<bool> refreshBalance() async {
+    refreshes++;
+    setBalance(10000);
+    return true;
+  }
+}
 
 void main() {
   late Directory root, workspace;
@@ -87,6 +107,7 @@ void main() {
           ControlledAgentGeneration.new,
         ),
         authNotifierProvider.overrideWith(GenerationTestAuth.new),
+        subscriptionNotifierProvider.overrideWith(_ExplorationSubscription.new),
         styleExploreRunStorageProvider.overrideWithValue(runs),
         exploreRunImageStoreProvider.overrideWithValue(
           ExploreRunImageStore(
@@ -399,6 +420,31 @@ void main() {
   );
 
   test(
+    'refreshes a low balance once before stopping the next candidate',
+    () async {
+      final id = await create(2);
+      container.read(generationParamsNotifierProvider.notifier).updateSteps(35);
+      final subscription =
+          container.read(subscriptionNotifierProvider.notifier)
+              as _ExplorationSubscription;
+      generate = (_) async {
+        if (generated.length == 1) subscription.setBalance(0);
+        return ExploreGenerationResult(
+          imageBytes: pixels,
+          seed: 1,
+          elapsedMs: 1,
+          imageWidth: 6,
+          imageHeight: 4,
+        );
+      };
+      final result = await runApproved(id, await quote(id));
+      expect(generated, hasLength(2));
+      expect(result['done_count'], 2);
+      expect(subscription.refreshes, 1);
+    },
+  );
+
+  test(
     'changed parameters between images stop before the next paid request',
     () async {
       final id = await create(3);
@@ -418,6 +464,21 @@ void main() {
       final result = await runApproved(id, await quote(id));
       expect(generated, hasLength(1));
       expect(result['done_count'], 1);
+      expect(result['status'], 'paused');
+    },
+  );
+
+  test(
+    'a native balance rejection pauses remaining exploration requests',
+    () async {
+      final id = await create(3);
+      generate = (_) async => throw const GenerationFailure(
+        'API_ERROR_402|Insufficient balance',
+        statusCode: 402,
+      );
+      final result = await runApproved(id, await quote(id));
+      expect(generated, hasLength(1));
+      expect(result['failed_count'], 1);
       expect(result['status'], 'paused');
     },
   );

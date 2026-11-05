@@ -618,6 +618,12 @@ class LocalStorageService {
     await setSetting(StorageKeys.lastVarietyPlus, value);
   }
 
+  bool getLastTransparentBackground() =>
+      getSetting<bool>(StorageKeys.lastTransparentBackground) ?? false;
+
+  Future<void> setLastTransparentBackground(bool value) =>
+      setSetting(StorageKeys.lastTransparentBackground, value);
+
   // ==================== UI Layout State ====================
 
   /// 获取右侧面板展开状态 (默认展开)
@@ -659,14 +665,9 @@ class LocalStorageService {
     await setSetting(StorageKeys.promptMaximized, maximized);
   }
 
-  /// 获取历史记录点击行为 (默认经典行为)
-  String getHistoryClickBehavior() {
-    return getSetting<String>(
-          StorageKeys.historyClickBehavior,
-          defaultValue: 'open_detail',
-        ) ??
-        'open_detail';
-  }
+  /// 获取历史记录点击行为，默认联动预览。
+  String getHistoryClickBehavior() =>
+      getSetting<String>(StorageKeys.historyClickBehavior) ?? 'select_preview';
 
   /// 保存历史记录点击行为
   Future<void> setHistoryClickBehavior(String behavior) async {

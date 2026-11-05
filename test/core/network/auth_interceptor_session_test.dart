@@ -33,7 +33,11 @@ class SessionAuth extends AuthNotifier {
   void publishB() =>
       state = const AuthState(status: AuthStatus.authenticated, accountId: 'B');
   @override
-  Future<void> logout({AuthErrorCode? errorCode, int? httpStatusCode}) async {
+  Future<void> logout({
+    AuthErrorCode? errorCode,
+    int? httpStatusCode,
+    bool generationRequestRejected = false,
+  }) async {
     logouts++;
     state = const AuthState(status: AuthStatus.unauthenticated);
   }

@@ -1,3 +1,4 @@
+import 'package:nai_launcher/core/utils/primary_activator.dart';
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -187,10 +188,7 @@ class _ResourceWindowPageState extends State<ResourceWindowPage> {
     return CallbackShortcuts(
       bindings: widget.viewer == null
           ? {
-              const SingleActivator(
-                LogicalKeyboardKey.keyF,
-                control: true,
-              ): () =>
+              const PrimaryActivator(LogicalKeyboardKey.keyF): () =>
                   _search.requestFocus(),
               const SingleActivator(LogicalKeyboardKey.arrowRight): () =>
                   _move(1),

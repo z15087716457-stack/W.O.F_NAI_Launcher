@@ -338,6 +338,50 @@ class ImageSaveUtils {
     );
   }
 
+  /// Use the inpaint reply's recipe on the composited display pixels.
+  static Future<Uint8List> attachInpaintResponseMetadata({
+    required Uint8List displayBytes,
+    required Uint8List responseBytes,
+    required int width,
+    required int height,
+  }) async {
+    var fields = const <String, String>{};
+    if (UnifiedMetadataParser.isPngHeader(responseBytes)) {
+      try {
+        fields = UnifiedMetadataParser.extractPngTextData(responseBytes);
+      } on FormatException {
+        // A broken ancillary chunk should not discard a successful image.
+      }
+    }
+    final display = UnifiedMetadataParser.embedPngTextFields(
+      displayBytes,
+      fields,
+    );
+    final text = UnifiedMetadataParser.parseFromTextData(fields);
+    final parsed = text.success
+        ? text
+        : UnifiedMetadataParser.parseFromImageBytes(responseBytes);
+    final recipe = parsed.metadata;
+    if (recipe == null ||
+        parsed.sourceFormat?.toLowerCase().contains('novelai') != true ||
+        (fields.containsKey('Comment') &&
+            recipe.width == width &&
+            recipe.height == height)) {
+      return display;
+    }
+    try {
+      return await _embedSourceMetadataWithResolution(
+        imageBytes: display,
+        sourceBytes: responseBytes,
+        source: recipe,
+        width: width,
+        height: height,
+      );
+    } on FormatException {
+      return display;
+    }
+  }
+
   /// A derived image inherits its source metadata, never the current draft.
   /// Outputs with their own metadata and sources without metadata stay intact.
   static Future<Uint8List> inheritSourceMetadata({

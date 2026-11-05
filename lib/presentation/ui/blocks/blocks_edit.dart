@@ -1,3 +1,4 @@
+import 'package:nai_launcher/core/utils/primary_activator.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
@@ -232,9 +233,8 @@ class _BlockEditDialogState extends State<BlockEditDialog> {
 
     return CallbackShortcuts(
       bindings: {
-        const SingleActivator(LogicalKeyboardKey.enter, control: true): _save,
-        const SingleActivator(LogicalKeyboardKey.numpadEnter, control: true):
-            _save,
+        const PrimaryActivator(LogicalKeyboardKey.enter): _save,
+        const PrimaryActivator(LogicalKeyboardKey.numpadEnter): _save,
       },
       child: UiPopover(
         anchor: _pop,
@@ -955,8 +955,8 @@ class _BlockEditDialogState extends State<BlockEditDialog> {
       UiBtn(size: UiBtnSize.small, onTap: onTap, children: [Text(text)]);
 }
 
-/// 预览图裁剪：拖动平移、滚轮缩放（1…3）；左下“换图”、右上清除、右下提示。
-class _Crop extends StatelessWidget {
+/// 预览图裁剪：拖动平移、滚轮或触控板捏合缩放（1…3）。
+class _Crop extends StatefulWidget {
   const _Crop({
     required this.thumb,
     required this.onChanged,
@@ -969,32 +969,71 @@ class _Crop extends StatelessWidget {
   final VoidCallback onClear;
 
   @override
+  State<_Crop> createState() => _CropState();
+}
+
+class _CropState extends State<_Crop> {
+  double? _pinchStartScale;
+  // Pan and pinch events can arrive before the parent rebuilds.
+  BlockThumb? _pending;
+
+  BlockThumb get _current => _pending ?? widget.thumb;
+
+  void _change(BlockThumb thumb) {
+    _pending = thumb;
+    widget.onChanged(thumb);
+  }
+
+  @override
+  void didUpdateWidget(covariant _Crop oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _pending = null;
+  }
+
+  @override
   Widget build(BuildContext context) {
     final c = context.ui;
     final l10n = context.l10n;
+    final thumb = widget.thumb;
     return LayoutBuilder(
       builder: (context, box) => Listener(
+        onPointerPanZoomStart: (_) => _pinchStartScale = _current.scale,
+        onPointerPanZoomUpdate: (event) {
+          final start = _pinchStartScale;
+          if (start == null) return;
+          final scale = (start * event.scale).clamp(1.0, 3.0);
+          if (scale != _current.scale) _change(_current.copyWith(scale: scale));
+        },
+        onPointerPanZoomEnd: (_) => _pinchStartScale = null,
         onPointerSignal: (e) {
           if (e is PointerScrollEvent) {
-            onChanged(
-              thumb.copyWith(
-                scale: (thumb.scale - e.scrollDelta.dy / 600).clamp(1.0, 3.0),
+            _change(
+              _current.copyWith(
+                scale: (_current.scale - e.scrollDelta.dy / 600).clamp(
+                  1.0,
+                  3.0,
+                ),
               ),
             );
           }
         },
         child: GestureDetector(
           key: const Key('block-edit-crop'),
-          onPanUpdate: (e) => onChanged(
-            thumb.copyWith(
-              offsetX:
-                  (thumb.offsetX - e.delta.dx / box.maxWidth * 2 / thumb.scale)
-                      .clamp(-1.0, 1.0),
-              offsetY:
-                  (thumb.offsetY - e.delta.dy / box.maxHeight * 2 / thumb.scale)
-                      .clamp(-1.0, 1.0),
-            ),
-          ),
+          onPanUpdate: (e) {
+            final current = _current;
+            _change(
+              current.copyWith(
+                offsetX:
+                    (current.offsetX -
+                            e.delta.dx / box.maxWidth * 2 / current.scale)
+                        .clamp(-1.0, 1.0),
+                offsetY:
+                    (current.offsetY -
+                            e.delta.dy / box.maxHeight * 2 / current.scale)
+                        .clamp(-1.0, 1.0),
+              ),
+            );
+          },
           child: MouseRegion(
             cursor: SystemMouseCursors.move,
             child: Container(
@@ -1024,7 +1063,7 @@ class _Crop extends StatelessWidget {
                     child: _darkBtn(
                       UiGlyphs.picture,
                       l10n.blocks_changeImage,
-                      onPick,
+                      widget.onPick,
                       const Key('block-edit-pick'),
                     ),
                   ),
@@ -1034,7 +1073,7 @@ class _Crop extends StatelessWidget {
                     child: _darkBtn(
                       UiGlyphs.close,
                       '',
-                      onClear,
+                      widget.onClear,
                       const Key('block-edit-clear-thumb'),
                       tip: l10n.blocks_clearThumb,
                     ),

@@ -9,9 +9,9 @@ enum HistoryClickBehavior {
   selectPreview;
 
   static HistoryClickBehavior fromStorageValue(String value) {
-    return value == 'select_preview'
-        ? HistoryClickBehavior.selectPreview
-        : HistoryClickBehavior.openDetail;
+    return value == 'open_detail'
+        ? HistoryClickBehavior.openDetail
+        : HistoryClickBehavior.selectPreview;
   }
 
   String get storageValue => this == HistoryClickBehavior.selectPreview

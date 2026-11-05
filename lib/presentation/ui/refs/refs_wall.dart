@@ -1,3 +1,4 @@
+import 'package:nai_launcher/core/utils/primary_activator.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -178,7 +179,7 @@ class _RefsCardState extends State<RefsCard> {
     final ctrl = scope.controller;
     final hw = HardwareKeyboard.instance;
     if (hw.isShiftPressed) return ctrl.pickRange(e.key);
-    if (hw.isControlPressed || hw.isMetaPressed || ctrl.picking) {
+    if (hw.isPrimaryOrWindowsMetaPressed || ctrl.picking) {
       return ctrl.togglePick(e.key);
     }
     final now = DateTime.now();

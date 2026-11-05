@@ -46,17 +46,14 @@ class _GalleryTimelineScrubberState extends State<GalleryTimelineScrubber> {
 
   double? _hoverY;
   bool _dragging = false;
-  List<_ScrubberMark>? _marks;
-  Object? _marksKey;
+  Widget? _scale;
+  Object? _scaleKey;
 
   double get _maxScroll => widget.scrollController.hasClients
       ? widget.scrollController.position.maxScrollExtent
       : 0;
 
   List<_ScrubberMark> _buildMarks(String locale) {
-    final key = (widget.layout, locale);
-    if (key == _marksKey && _marks != null) return _marks!;
-    _marksKey = key;
     final marks = <_ScrubberMark>[];
     int? lastYear;
     int? lastMonth;
@@ -80,7 +77,7 @@ class _GalleryTimelineScrubberState extends State<GalleryTimelineScrubber> {
       lastYear = date.year;
       lastMonth = date.month;
     }
-    return _marks = marks;
+    return marks;
   }
 
   /// 去重叠：年份优先，月份只填年份之间的空位。
@@ -130,6 +127,69 @@ class _GalleryTimelineScrubberState extends State<GalleryTimelineScrubber> {
         : DateFormat.yMMMd(locale).format(date);
   }
 
+  Widget _dateScale(
+    ThemeData theme,
+    String locale,
+    double trackHeight,
+    double maxScroll,
+  ) {
+    final key = (widget.layout, theme, locale, trackHeight, maxScroll);
+    if (_scaleKey == key) return _scale!;
+    final colors = theme.colorScheme;
+    final placed = _placeMarks(_buildMarks(locale), trackHeight);
+    _scaleKey = key;
+    return _scale = Positioned.fill(
+      child: RepaintBoundary(
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Positioned(
+              right: 8,
+              top: _trackInset,
+              bottom: _trackInset,
+              width: 1,
+              child: ColoredBox(color: theme.dividerColor),
+            ),
+            for (final (y, mark) in placed) ...[
+              Positioned(
+                right: 6,
+                top: y - 2.5,
+                width: 5,
+                height: 5,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: colors.outline,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+              Positioned(
+                right: 15,
+                top: y - 8,
+                height: 16,
+                child: Center(
+                  child: Text(
+                    mark.label,
+                    maxLines: 1,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      fontSize: 10.5,
+                      fontWeight: mark.isYear
+                          ? FontWeight.w500
+                          : FontWeight.w400,
+                      color: mark.isYear
+                          ? colors.onSurface
+                          : colors.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -150,7 +210,6 @@ class _GalleryTimelineScrubberState extends State<GalleryTimelineScrubber> {
             final thumbY =
                 _trackInset +
                 (offset / maxScroll).clamp(0.0, 1.0) * trackHeight;
-            final placed = _placeMarks(_buildMarks(locale), trackHeight);
             final hoverY = _hoverY;
             final hoverLabel = hoverY == null
                 ? null
@@ -180,47 +239,7 @@ class _GalleryTimelineScrubberState extends State<GalleryTimelineScrubber> {
                 child: Stack(
                   clipBehavior: Clip.none,
                   children: [
-                    Positioned(
-                      right: 8,
-                      top: _trackInset,
-                      bottom: _trackInset,
-                      width: 1,
-                      child: ColoredBox(color: theme.dividerColor),
-                    ),
-                    for (final (y, mark) in placed) ...[
-                      Positioned(
-                        right: 6,
-                        top: y - 2.5,
-                        width: 5,
-                        height: 5,
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            color: colors.outline,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        right: 15,
-                        top: y - 8,
-                        height: 16,
-                        child: Center(
-                          child: Text(
-                            mark.label,
-                            maxLines: 1,
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              fontSize: 10.5,
-                              fontWeight: mark.isYear
-                                  ? FontWeight.w500
-                                  : FontWeight.w400,
-                              color: mark.isYear
-                                  ? colors.onSurface
-                                  : colors.onSurfaceVariant,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                    _dateScale(theme, locale, trackHeight, maxScroll),
                     Positioned(
                       right: 3,
                       top: thumbY - (active ? 2 : 1.5),

@@ -1,3 +1,4 @@
+import 'package:nai_launcher/core/utils/primary_activator.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
@@ -33,7 +34,7 @@ var _lastTapAt = DateTime(0);
 /// 不用 onDoubleTap：那会让单击和卡片上的按钮都等 300ms 才响应。
 void _tapBlock(BlocksLibraryPageState ctrl, BlocksLibraryActions a, String id) {
   final hw = HardwareKeyboard.instance;
-  if (ctrl.picking || hw.isControlPressed || hw.isShiftPressed) {
+  if (ctrl.picking || hw.isPrimaryPressed || hw.isShiftPressed) {
     ctrl.togglePick(id);
     return;
   }

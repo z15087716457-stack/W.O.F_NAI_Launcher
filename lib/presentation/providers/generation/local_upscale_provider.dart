@@ -1,4 +1,7 @@
+import 'dart:io';
 import 'dart:typed_data';
+import 'package:path/path.dart' as p;
+import '../../../core/utils/app_bundle_paths.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/services/desktop_app_shutdown_service.dart';
 
@@ -17,7 +20,15 @@ import 'preview_selection_provider.dart';
 import '../../screens/generation/widgets/canvas/canvas_feed_layout.dart';
 
 final localUpscaleModelManagerProvider = Provider((ref) {
-  final manager = LocalUpscaleModelManager();
+  final manager = LocalUpscaleModelManager(
+    bundledExecutable: Platform.isMacOS
+        ? p.join(
+            AppBundlePaths.toolsDirectory,
+            'local-upscale',
+            'realesrgan-ncnn-vulkan',
+          )
+        : null,
+  );
   ref.onDispose(manager.dispose);
   return manager;
 });
@@ -40,7 +51,8 @@ final advancedUpscaleComponentManagerProvider = Provider((ref) {
 final localUpscaleModelsProvider = FutureProvider(
   (ref) async => [
     ...await ref.watch(localUpscaleModelManagerProvider).models(),
-    ...await ref.watch(advancedUpscaleComponentManagerProvider).models(),
+    if (Platform.isWindows)
+      ...await ref.watch(advancedUpscaleComponentManagerProvider).models(),
   ],
 );
 

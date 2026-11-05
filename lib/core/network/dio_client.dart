@@ -205,9 +205,7 @@ class AuthInterceptor extends Interceptor {
           .refreshCurrentToken();
       if (!refreshed) {
         if (_ownsSession(revision, session)) {
-          await _ref
-              .read(authNotifierProvider.notifier)
-              .logout(errorCode: AuthErrorCode.authFailed, httpStatusCode: 401);
+          await _logoutAfterUnauthorized(err.requestOptions);
         }
         handler.next(err);
         return;
@@ -231,13 +229,11 @@ class AuthInterceptor extends Interceptor {
       } on DioException catch (retryError) {
         if (retryError.response?.statusCode == 401 &&
             _ownsSession(retryRevision, session)) {
-          await _ref
-              .read(authNotifierProvider.notifier)
-              .logout(errorCode: AuthErrorCode.authFailed, httpStatusCode: 401);
+          await _logoutAfterUnauthorized(retryError.requestOptions);
         }
         handler.next(retryError);
       } finally {
-        retry.close(force: true);
+        retry.close();
       }
     } catch (error, stack) {
       AppLogger.e('Token refresh error', error, stack, 'DIO');
@@ -245,6 +241,19 @@ class AuthInterceptor extends Interceptor {
     } finally {
       _isRefreshing = false;
     }
+  }
+
+  Future<void> _logoutAfterUnauthorized(RequestOptions request) {
+    final path = request.uri.path;
+    return _ref
+        .read(authNotifierProvider.notifier)
+        .logout(
+          errorCode: AuthErrorCode.authFailed,
+          httpStatusCode: 401,
+          generationRequestRejected:
+              path.endsWith(ApiConstants.generateImageEndpoint) ||
+              path.endsWith(ApiConstants.generateImageStreamEndpoint),
+        );
   }
 
   bool _ownsSession(int revision, AuthState session) =>

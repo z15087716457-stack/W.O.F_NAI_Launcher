@@ -10,6 +10,7 @@ import 'package:path/path.dart' as p;
 
 import '../../../core/constants/app_version.dart';
 import '../../../core/rag/rag_settings.dart';
+import '../../../core/services/app_visibility.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../prompt_assistant/providers/prompt_assistant_config_provider.dart';
 import '../../providers/account_manager_provider.dart';
@@ -107,6 +108,12 @@ class _SettingsWiringState extends ConsumerState<SettingsWiring> {
   late SettingsPageId _page = widget.initialPage;
   Timer? _cacheTimer;
   @override
+  void initState() {
+    super.initState();
+    AppVisibility.instance.addListener(_syncCacheTimer);
+  }
+
+  @override
   void didUpdateWidget(covariant SettingsWiring oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.initialPage != widget.initialPage) _page = widget.initialPage;
@@ -114,8 +121,25 @@ class _SettingsWiringState extends ConsumerState<SettingsWiring> {
 
   @override
   void dispose() {
+    AppVisibility.instance.removeListener(_syncCacheTimer);
     _cacheTimer?.cancel();
     super.dispose();
+  }
+
+  void _syncCacheTimer() {
+    if (_page == SettingsPageId.dictionaries &&
+        AppVisibility.instance.value &&
+        ref
+            .read(settingsValuesProvider)
+            .flag(SettingKey.cacheStatsAutoRefresh)) {
+      _cacheTimer ??= Timer.periodic(const Duration(seconds: 10), (_) {
+        ref.invalidate(settingsCacheStatsProvider);
+        ref.invalidate(settingsCacheFootprintProvider);
+      });
+    } else {
+      _cacheTimer?.cancel();
+      _cacheTimer = null;
+    }
   }
 
   void _run(FutureOr<void> Function() action) {
@@ -133,9 +157,11 @@ class _SettingsWiringState extends ConsumerState<SettingsWiring> {
     final path =
         key == SettingKey.ragPythonPath || key == SettingKey.completionSoundFile
         ? (await FilePicker.platform.pickFiles(
-            type: FileType.custom,
+            type: key == SettingKey.ragPythonPath && Platform.isMacOS
+                ? FileType.any
+                : FileType.custom,
             allowedExtensions: key == SettingKey.ragPythonPath
-                ? ['exe']
+                ? (Platform.isMacOS ? null : ['exe'])
                 : ['mp3', 'wav', 'ogg', 'flac'],
           ))?.files.single.path
         : await FilePicker.platform.getDirectoryPath();
@@ -280,8 +306,10 @@ class _SettingsWiringState extends ConsumerState<SettingsWiring> {
       onUpdateDictionary: (kind) => _run(
         () => ref.read(settingsDictionaryUpdateProvider.notifier).start(kind),
       ),
-      onCheckDictionaryUpdates: () =>
-          _run(ref.read(settingsDictionaryUpdateProvider.notifier).check),
+      onCheckDictionaryUpdates: () => _run(() {
+        ref.invalidate(settingsDictionaryDataProvider);
+        return ref.read(settingsDictionaryUpdateProvider.notifier).check();
+      }),
       onCancelDictionaryUpdate: () =>
           ref.read(settingsDictionaryUpdateProvider.notifier).cancel(),
       onImportTagSemantics: () => _run(storage.importTagSemantics),
@@ -535,19 +563,7 @@ class _SettingsWiringState extends ConsumerState<SettingsWiring> {
       (_, __) => setState(() => _page = SettingsPageId.bridges),
     );
     final data = settingsViewData(context, ref, _page);
-    if (_page == SettingsPageId.dictionaries &&
-        data.values.flag(SettingKey.cacheStatsAutoRefresh)) {
-      _cacheTimer ??= Timer.periodic(const Duration(seconds: 10), (_) {
-        if (mounted) {
-          ref.invalidate(settingsCacheStatsProvider);
-          ref.invalidate(settingsDictionaryDataProvider);
-          ref.invalidate(settingsCacheFootprintProvider);
-        }
-      });
-    } else {
-      _cacheTimer?.cancel();
-      _cacheTimer = null;
-    }
+    _syncCacheTimer();
     return SettingsPage(
       data: data,
       actions: _actions(data),

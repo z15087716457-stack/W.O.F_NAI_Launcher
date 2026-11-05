@@ -6,6 +6,16 @@ library;
 
 import 'dart:io';
 
+import 'package:path/path.dart' as p;
+
+const _galleryImageExtensions = {'.png', '.jpg', '.jpeg', '.webp'};
+
+/// Original image filter shared by folder counts and the gallery scanner.
+bool isGalleryIndexableImage(String path) =>
+    _galleryImageExtensions.contains(p.extension(path).toLowerCase()) &&
+    !path.contains('.thumb.') &&
+    !(path.contains('.thumbs') && p.split(path).contains('.thumbs'));
+
 /// 规范化画廊文件路径
 ///
 /// - Windows 下去掉 `\\?\` / `\\?\UNC\` 前缀

@@ -88,10 +88,12 @@ void main() {
     expect(find.byTooltip('透明区域底色'), findsNothing);
     expect(find.text('平滑缩放（Ctrl+滚轮）'), findsNothing);
     expect(tester.getRect(fill).bottom, lessThan(anchor.top));
+    expect(container.read(canvasZoomToFillNotifierProvider), isTrue);
     await tester.tap(fill);
     await tester.pumpAndSettle();
-    expect(container.read(canvasZoomToFillNotifierProvider), isTrue);
-    expect(storage.values[StorageKeys.canvasZoomToFill], isTrue);
+    expect(storage.values[StorageKeys.canvasZoomToFill], isFalse);
+    container.invalidate(canvasZoomToFillNotifierProvider);
+    expect(container.read(canvasZoomToFillNotifierProvider), isFalse);
     await tester.tapAt(const Offset(400, 100));
     await tester.pumpAndSettle();
     expect(fill, findsNothing);
@@ -239,18 +241,21 @@ void main() {
         _app(container, GenerationCanvasView(generationState: state)),
       );
       await tester.pumpAndSettle();
-      expect(container.read(generationCanvasCameraProvider).scale, 1);
+      expect(
+        container.read(generationCanvasCameraProvider).scale,
+        greaterThan(1),
+      );
       await tester.tap(find.byTooltip('画布显示'));
       await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('放大填充（允许 >100%）'));
+      await tester.pumpAndSettle();
+      expect(container.read(generationCanvasCameraProvider).scale, 1);
       await tester.tap(find.byTooltip('放大填充（允许 >100%）'));
       await tester.pumpAndSettle();
       expect(
         container.read(generationCanvasCameraProvider).scale,
         greaterThan(1),
       );
-      await tester.tap(find.byTooltip('放大填充（允许 >100%）'));
-      await tester.pumpAndSettle();
-      expect(container.read(generationCanvasCameraProvider).scale, 1);
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pump(const Duration(seconds: 1));

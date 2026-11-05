@@ -7,6 +7,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../core/network/proxy_service.dart';
 import '../../core/enums/warmup_phase.dart';
 import '../../core/services/data_migration_service.dart';
+import '../../core/services/desktop_app_shutdown_service.dart';
 import '../../core/services/warmup_task_scheduler.dart';
 
 import '../../core/utils/app_logger.dart';
@@ -105,6 +106,7 @@ class WarmupNotifier extends _$WarmupNotifier {
   late WarmupTaskScheduler _scheduler;
   var _completer = Completer<void>();
   bool _disposed = false;
+  bool get _stopping => _disposed || DesktopAppShutdownService.isShuttingDown;
 
   @override
   WarmupState build() {
@@ -216,7 +218,7 @@ class WarmupNotifier extends _$WarmupNotifier {
     const timeout = Duration(seconds: 3);
 
     for (var attempt = 1; attempt <= maxAttempts; attempt++) {
-      if (_disposed) return;
+      if (_stopping) return;
       try {
         final result = await ProxyService.testNovelAIConnection(
           timeout: timeout,
@@ -274,7 +276,10 @@ class WarmupNotifier extends _$WarmupNotifier {
         phase: WarmupPhase.critical,
         weight: 2,
         timeout: const Duration(seconds: 60),
-        task: _runDataMigration,
+        task: () => DesktopAppShutdownService.runCriticalStartupTask(
+          'Startup data migration',
+          _runDataMigration,
+        ),
       ),
     );
 
@@ -335,17 +340,17 @@ class WarmupNotifier extends _$WarmupNotifier {
 
     // L8 性能优化：推迟 2.5 秒启动全局扫描，避免与首屏页面加载争夺磁盘 I/O 和数据库连接
     Future.delayed(const Duration(milliseconds: 2500), () async {
-      if (_disposed) return;
+      if (_stopping) return;
       try {
         await ref.read(galleryFileMonitorProvider).start();
-        if (_disposed) return;
+        if (_stopping) return;
         // 【修复】读取 provider 会触发 GalleryService 的创建和初始化
         // 但需要等待真正的初始化完成，扫描才会开始
         var attempts = 0;
         const maxAttempts = 100; // 最多等待10秒
 
         while (attempts < maxAttempts) {
-          if (_disposed) return;
+          if (_stopping) return;
           final service = ref.read(galleryServiceProvider);
 
           if (service.isInitialized) {
@@ -373,7 +378,7 @@ class WarmupNotifier extends _$WarmupNotifier {
   /// 执行，把启动期磁盘 IO 让给首屏渲染；失败不影响主流程。
   void _trimThumbnailCacheInBackground() {
     Future.delayed(const Duration(seconds: 10), () async {
-      if (_disposed) return;
+      if (_stopping) return;
       try {
         final service = ThumbnailService.instance;
         if (service.state != ThumbnailServiceState.running) {
@@ -381,7 +386,7 @@ class WarmupNotifier extends _$WarmupNotifier {
         }
 
         final roots = await GalleryFolderRepository.instance.getAllRootDirs();
-        if (_disposed) return;
+        if (_stopping) return;
         ref.read(thumbnailCacheLimitGbProvider);
         final result = await service.evictThumbnailCaches(
           roots.map((dir) => dir.path),
@@ -405,13 +410,14 @@ class WarmupNotifier extends _$WarmupNotifier {
   /// 开始预热流程
   Future<void> _startWarmup() async {
     try {
+      if (_stopping) return;
       // Auto-login can overlap local service preparation.
       ref.read(authNotifierProvider);
       await ref.read(appStartupReadyProvider);
-      if (_disposed) return;
+      if (_stopping) return;
       // 阶段 1: Critical
       await for (final progress in _scheduler.runPhase(WarmupPhase.critical)) {
-        if (_disposed) return;
+        if (_stopping) return;
         state = state.copyWith(
           progress: WarmupProgress(
             progress: progress.progress,
@@ -421,6 +427,7 @@ class WarmupNotifier extends _$WarmupNotifier {
         );
       }
 
+      if (_stopping) return;
       // 完成，进入主界面
       state = WarmupState.complete();
       _completer.complete();
@@ -431,7 +438,7 @@ class WarmupNotifier extends _$WarmupNotifier {
       // P7：再启动后台缩略图缓存清理（低优先，避免与首屏渲染争抢磁盘 IO）
       _trimThumbnailCacheInBackground();
     } catch (e, stack) {
-      if (_disposed) return;
+      if (_stopping) return;
       AppLogger.e('Warmup failed', e, stack, 'Warmup');
       state = state.copyWith(
         error: e.toString(),
@@ -442,7 +449,7 @@ class WarmupNotifier extends _$WarmupNotifier {
     }
     // Background diagnostics do not change completed splash state.
     await for (final _ in _scheduler.runPhase(WarmupPhase.background)) {
-      if (_disposed) break;
+      if (_stopping) break;
     }
   }
 

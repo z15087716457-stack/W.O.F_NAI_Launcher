@@ -547,13 +547,15 @@ class AppLogger {
 
 /// 文件日志输出
 ///
-/// 【修复】使用同步写入 + 定时刷新，避免日志截断和格式问题
+/// 缓冲日志输出，显式刷新时按写入顺序落盘。
 class FileOutput extends LogOutput {
   final File file;
   final bool overrideExisting;
   final Encoding encoding;
   IOSink? _sink;
   bool _isDestroyed = false;
+  final _pending = StringBuffer();
+  Future<void>? _flushing;
 
   FileOutput({
     required this.file,
@@ -563,8 +565,7 @@ class FileOutput extends LogOutput {
 
   @override
   Future<void> init() async {
-    // 【修复】使用 append 模式，确保不覆盖已有日志
-    _sink = file.openWrite(
+    _sink ??= file.openWrite(
       mode: overrideExisting ? FileMode.writeOnly : FileMode.writeOnlyAppend,
       encoding: encoding,
     );
@@ -573,39 +574,50 @@ class FileOutput extends LogOutput {
 
   @override
   void output(OutputEvent event) {
-    if (_sink == null || _isDestroyed) return;
+    final sink = _sink;
+    if (sink == null || _isDestroyed) return;
 
+    // IOSink rejects writes while flush is in progress.
+    final StringSink target = _flushing == null ? sink : _pending;
     try {
-      // 【修复】逐行写入，避免 join 导致的格式问题
       for (final line in event.lines) {
-        _sink!.writeln(line);
+        target.writeln(line);
       }
-      // 【修复】不再每次 flush，让系统自动缓冲，提高性能
-      // 在 destroy 时会强制 flush
-    } catch (e) {
-      // 忽略写入错误，避免日志系统本身导致崩溃
+    } catch (_) {
+      // Logging errors must not interrupt the app.
     }
   }
 
-  /// 【新增】强制刷新到文件
-  Future<void> flush() async {
-    if (_sink != null && !_isDestroyed) {
+  Future<void> flush() {
+    final sink = _sink;
+    if (sink == null || _isDestroyed) return Future.value();
+
+    return _flushing ??= Future<void>.microtask(() async {
       try {
-        await _sink!.flush();
-      } catch (e) {
-        // 忽略 flush 错误
+        do {
+          if (_pending.isNotEmpty) {
+            sink.write(_pending.toString());
+            _pending.clear();
+          }
+          await sink.flush();
+        } while (_pending.isNotEmpty);
+      } catch (_) {
+        _pending.clear();
+      } finally {
+        _flushing = null;
       }
-    }
+    });
   }
 
   @override
   Future<void> destroy() async {
+    final flushing = flush();
     _isDestroyed = true;
     try {
-      await _sink?.flush();
+      await flushing;
       await _sink?.close();
-    } catch (e) {
-      // 忽略关闭错误
+    } catch (_) {
+      // Logging errors must not interrupt the app.
     }
     _sink = null;
   }

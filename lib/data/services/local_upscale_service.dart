@@ -29,7 +29,8 @@ class LocalUpscaleService {
     this.afterInference,
   }) : _startProcess =
            startProcess ?? ((exe, args) => Process.start(exe, args)),
-       _supportedPlatform = supportedPlatform ?? Platform.isWindows;
+       _supportedPlatform =
+           supportedPlatform ?? (Platform.isWindows || Platform.isMacOS);
 
   final LocalUpscaleModelManager models;
   final AdvancedUpscaleComponentManager? advanced;
@@ -77,13 +78,25 @@ class LocalUpscaleService {
       final optional = advancedUpscaleCatalog
           .where((m) => m.id == modelId)
           .firstOrNull;
+      if (optional != null &&
+          Platform.isMacOS &&
+          models.bundledExecutable != null) {
+        throw const LocalUpscaleException(
+          LocalUpscaleError.unsupportedPlatform,
+        );
+      }
       final (executable, modelPath, model) = optional == null
           ? await models.resolve(modelId)
           : ('', '', optional);
       await models.initialize();
       cancellation.check();
       // The pinned native engine builds model paths into a 256-character buffer.
-      if (modelPath.length + model.engineName.length + 12 > 245) {
+      final enginePath = modelPath + model.engineName;
+      if ((Platform.isWindows
+                  ? enginePath.length
+                  : utf8.encode(enginePath).length) +
+              12 >
+          245) {
         throw const LocalUpscaleException(LocalUpscaleError.modelMissing);
       }
       final nativeScale = model.inferenceScale(scale);

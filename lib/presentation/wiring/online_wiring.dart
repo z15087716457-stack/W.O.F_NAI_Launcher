@@ -547,7 +547,8 @@ class _OnlineWiringState extends ConsumerState<OnlineWiring>
         _accountChanged(GallerySourceId.gelbooru);
       }
     });
-    final state = ref.watch(onlineGalleryNotifierProvider);
+    ref.watch(onlineGalleryNotifierProvider.select((s) => s.contentIdentity));
+    final state = ref.read(onlineGalleryNotifierProvider);
     final saved = ref.watch(onlineFavoritesNotifierProvider);
     final preferences = ref.watch(onlineGalleryPreferencesProvider);
     final blacklist = ref.watch(onlineGalleryBlacklistNotifierProvider);

@@ -1,3 +1,4 @@
+import 'package:nai_launcher/core/utils/primary_activator.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -180,7 +181,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   KeyEventResult _onKey(FocusNode _, KeyEvent e) {
     if (e is! KeyDownEvent) return KeyEventResult.ignored;
-    final ctrl = HardwareKeyboard.instance.isControlPressed;
+    final ctrl = HardwareKeyboard.instance.isPrimaryPressed;
     if (ctrl &&
         (e.logicalKey == LogicalKeyboardKey.keyZ ||
             e.logicalKey == LogicalKeyboardKey.keyY) &&

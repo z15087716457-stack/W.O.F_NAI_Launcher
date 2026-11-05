@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../storage/local_storage_service.dart';
+import 'rag_platform.dart';
 
 enum RagContextMode { before, around }
 
@@ -33,6 +34,18 @@ class RagSettings {
   final String embedding, reranker, python;
   final RagContextMode mode;
   final RagDevice device;
+  RagDevice deviceOn(RagPlatform platform, {int? memoryBytes}) {
+    if (platform.isMacOS) {
+      if (device == RagDevice.cpu || (memoryBytes ?? 0) <= (17 << 30)) {
+        return RagDevice.cpu;
+      }
+      return RagDevice.auto;
+    }
+    return device == RagDevice.cuda && !platform.supportsCuda
+        ? RagDevice.auto
+        : device;
+  }
+
   static const tokenBudget = 120;
   Map<String, Object> toJson() => {
     'version': 1,

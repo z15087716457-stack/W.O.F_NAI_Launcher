@@ -1,3 +1,4 @@
+import 'package:nai_launcher/core/utils/primary_activator.dart';
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -606,7 +607,7 @@ class _StyleExplorePageState extends State<StyleExplorePage>
     }
     final k = e.logicalKey;
     final hw = HardwareKeyboard.instance;
-    final ctrl = hw.isControlPressed || hw.isMetaPressed;
+    final ctrl = hw.isPrimaryOrWindowsMetaPressed;
     final detail = _detailKey != null;
     if (!detail && k == LogicalKeyboardKey.escape) {
       if (_drawer) {

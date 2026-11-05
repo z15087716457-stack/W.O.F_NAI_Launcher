@@ -423,16 +423,22 @@ class UnifiedMetadataParser {
         );
       }
 
-      final textData = extractPngTextData(bytes);
-
-      // PortableLogger.d(
-      //   'PNG decoded successfully, ${fileInfo}textData fields: ${textData.keys.toList()}',
-      //   _tag,
-      // );
-
-      // 使用 textData 解析
-      var result = parseFromTextData(textData);
+      final chunks = _parsePngChunks(bytes, allowPartial: true);
+      var result = parseFromTextData(_readPngText(chunks));
       if (!result.success) {
+        final complete = chunks.last.type == 'IEND';
+        if (!_mayContainStealth(chunks, complete: complete)) {
+          if (complete) _checkPngImageDataCrc(chunks);
+          result = MetadataParseResult.failed(
+            result.triedParsers,
+            result.errorMessage ?? 'No metadata found in PNG',
+            parseTime: stopwatch.elapsed,
+            bytesRead: bytes.length,
+            metadataAbsent: complete,
+          );
+          _updateStatistics(result, stopwatch.elapsed);
+          return result;
+        }
         img.Image? decoded;
         try {
           decoded = img.decodePng(bytes);
@@ -1028,19 +1034,41 @@ class UnifiedMetadataParser {
     Uint8List originalPng,
     String keyword,
     String text,
+  ) => embedPngTextFields(originalPng, {keyword: text});
+
+  /// Replace the supplied PNG text fields without re-encoding pixels.
+  static Uint8List embedPngTextFields(
+    Uint8List originalPng,
+    Map<String, String> fields,
   ) {
+    if (fields.isEmpty) return originalPng;
     final chunks = _parsePngChunks(originalPng);
     final output = BytesBuilder()..add(originalPng.sublist(0, 8));
     var added = false;
     for (final chunk in chunks) {
-      if (_pngTextKeyword(chunk) == keyword) continue;
+      if (fields.containsKey(_pngTextKeyword(chunk))) continue;
       if (chunk.type == 'IDAT' && !added) {
-        _writeTextChunk(output, keyword, text);
+        for (final field in fields.entries) {
+          _writeTextChunk(output, field.key, field.value);
+        }
         added = true;
       }
       _writeChunk(output, chunk.type, chunk.data);
     }
     return output.toBytes();
+  }
+
+  /// Invalidate an inherited stealth header without touching ordinary pixels.
+  static void clearStealthMarker(img.Image image) {
+    if (!image.hasAlpha || image.hasPalette) return;
+    final magic = _magic.codeUnits;
+    final prefix = _readAlphaLsbBytes(image, magic.length);
+    if (prefix == null) return;
+    for (var i = 0; i < magic.length; i++) {
+      if (prefix[i] != magic[i]) return;
+    }
+    final first = image.getPixel(0, 0);
+    first.a = first.a.toInt() ^ 1;
   }
 
   /// 渐进式读取策略
@@ -1173,9 +1201,12 @@ class UnifiedMetadataParser {
   }
 
   /// 按文件顺序读取三种 PNG 文本块，也支持渐进读取中的完整前缀块。
-  static Map<String, String> extractPngTextData(Uint8List bytes) {
+  static Map<String, String> extractPngTextData(Uint8List bytes) =>
+      _readPngText(_parsePngChunks(bytes, allowPartial: true));
+
+  static Map<String, String> _readPngText(List<_PngChunk> chunks) {
     final result = <String, String>{};
-    for (final chunk in _parsePngChunks(bytes, allowPartial: true)) {
+    for (final chunk in chunks) {
       final keyword = _pngTextKeyword(chunk);
       if (keyword == null) continue;
       final data = chunk.data;
@@ -1638,6 +1669,86 @@ class UnifiedMetadataParser {
       PortableLogger.d('Failed to extract stealth_pngcomp metadata: $e', _tag);
       return null;
     }
+  }
+
+  static void _checkPngImageDataCrc(List<_PngChunk> chunks) {
+    for (final chunk in chunks) {
+      if (chunk.type != 'IDAT') continue;
+      final data = chunk.data;
+      final input = Uint8List.view(
+        data.buffer,
+        data.offsetInBytes - 4,
+        data.length + 4,
+      );
+      final expected = ByteData.view(
+        data.buffer,
+        data.offsetInBytes + data.length,
+        4,
+      ).getUint32(0);
+      if (_crc32(input) != expected) {
+        throw const FormatException('Invalid PNG image data checksum');
+      }
+    }
+  }
+
+  /// Check only the alpha bits in the first column. Return to the full decoder
+  /// for matching markers and layouts that need a different pixel traversal.
+  static bool _mayContainStealth(
+    List<_PngChunk> chunks, {
+    required bool complete,
+  }) {
+    final header = ByteData.sublistView(chunks.first.data);
+    final colorType = header.getUint8(9);
+    if (colorType != 4 && colorType != 6) {
+      return chunks.any((chunk) => chunk.type == 'tRNS');
+    }
+
+    const markerBits = _magic.length * 8;
+    if (header.getUint8(8) != 8 ||
+        header.getUint8(12) != 0 ||
+        header.getUint32(4) < markerBits) {
+      return true;
+    }
+
+    final channels = colorType == 6 ? 4 : 2;
+    final stride = header.getUint32(0) * channels + 1;
+    final inflater = RawZLibFilter.inflateFilter();
+    var offset = 0;
+    var row = 0;
+    var filter = 0;
+    var alpha = 0;
+    for (final chunk in chunks) {
+      if (chunk.type != 'IDAT') continue;
+      inflater.process(chunk.data, 0, chunk.data.length);
+      for (
+        var piece = inflater.processed(flush: false);
+        piece != null;
+        piece = inflater.processed(flush: false)
+      ) {
+        final end = offset + piece.length;
+        while (row < markerBits) {
+          final start = row * stride;
+          if (start >= end) break;
+          if (start >= offset) filter = piece[start - offset];
+          final alphaAt = start + channels;
+          if (alphaAt >= end) break;
+          // At x=0 there is no left neighbour. Paeth reduces to Up.
+          final prediction = switch (filter) {
+            0 || 1 => 0,
+            2 || 4 => alpha,
+            3 => alpha >> 1,
+            _ => throw FormatException('Invalid PNG filter $filter'),
+          };
+          alpha = (piece[alphaAt - offset] + prediction) & 255;
+          final expected = (_magic.codeUnitAt(row >> 3) >> (7 - (row & 7))) & 1;
+          if ((alpha & 1) != expected) return false;
+          row++;
+        }
+        if (row == markerBits) return true;
+        offset = end;
+      }
+    }
+    return complete;
   }
 
   static List<int>? _readAlphaLsbBytes(

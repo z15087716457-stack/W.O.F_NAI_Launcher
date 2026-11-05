@@ -1,3 +1,4 @@
+import 'package:nai_launcher/core/utils/primary_activator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -121,7 +122,7 @@ class _OnlineViewerState extends State<OnlineViewer> {
     final a = scope.actions;
     final k = e.logicalKey;
     final shift = HardwareKeyboard.instance.isShiftPressed;
-    final ctrl = HardwareKeyboard.instance.isControlPressed;
+    final ctrl = HardwareKeyboard.instance.isPrimaryPressed;
     if (k == LogicalKeyboardKey.escape) {
       widget.onClose();
     } else if (k == LogicalKeyboardKey.arrowLeft ||

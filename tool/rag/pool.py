@@ -30,17 +30,24 @@ class VectorPool:
             CREATE TABLE IF NOT EXISTS pool_state(key TEXT PRIMARY KEY,value INTEGER);
             CREATE TABLE IF NOT EXISTS pool_migrations(collection TEXT PRIMARY KEY);
             CREATE TABLE IF NOT EXISTS pool_sizes(collection TEXT PRIMARY KEY,bytes INTEGER NOT NULL);
+            CREATE TABLE IF NOT EXISTS pool_changes(
+                generation INTEGER PRIMARY KEY,old_id INTEGER,new_id INTEGER);
             INSERT OR IGNORE INTO pool_state VALUES('generation',0);
-            CREATE TRIGGER IF NOT EXISTS pool_insert AFTER INSERT ON pool_documents BEGIN
-                UPDATE pool_state SET value=value+1 WHERE key='generation'; END;
             BEGIN IMMEDIATE;
+            DROP TRIGGER IF EXISTS pool_insert;
             DROP TRIGGER IF EXISTS pool_update;
+            DROP TRIGGER IF EXISTS pool_delete;
+            CREATE TRIGGER pool_insert AFTER INSERT ON pool_documents BEGIN
+                UPDATE pool_state SET value=value+1 WHERE key='generation';
+                INSERT INTO pool_changes SELECT value,NULL,NEW.id FROM pool_state WHERE key='generation'; END;
             CREATE TRIGGER pool_update AFTER UPDATE ON pool_documents
                 WHEN OLD.id IS NOT NEW.id OR OLD.vector IS NOT NEW.vector
                      OR OLD.collection IS NOT NEW.collection BEGIN
-                UPDATE pool_state SET value=value+1 WHERE key='generation'; END;
-            CREATE TRIGGER IF NOT EXISTS pool_delete AFTER DELETE ON pool_documents BEGIN
-                UPDATE pool_state SET value=value+1 WHERE key='generation'; END;
+                UPDATE pool_state SET value=value+1 WHERE key='generation';
+                INSERT INTO pool_changes SELECT value,OLD.id,NEW.id FROM pool_state WHERE key='generation'; END;
+            CREATE TRIGGER pool_delete AFTER DELETE ON pool_documents BEGIN
+                UPDATE pool_state SET value=value+1 WHERE key='generation';
+                INSERT INTO pool_changes SELECT value,OLD.id,NULL FROM pool_state WHERE key='generation'; END;
             CREATE TRIGGER IF NOT EXISTS pool_size_insert AFTER INSERT ON pool_documents BEGIN
                 UPDATE pool_sizes SET bytes=bytes+COALESCE(length(NEW.vector)+length(NEW.text)+length(NEW.name),0)
                     WHERE collection=NEW.collection; END;
@@ -118,16 +125,26 @@ class VectorPool:
         try:
             try:
                 saved = json.loads((self.folder / 'ann.json').read_text('utf-8'))
-                if saved['generation'] != generation: raise ValueError('stale_ann')
-                try:
-                    ann.view(str(self.folder / 'vectors.usearch'))
-                    mapped = True
-                except (OSError,ValueError,RuntimeError):
-                    # A view failure alone must not rebuild a valid graph or
-                    # alter approximate neighbours: retain the old load path.
-                    ann.reset()
-                    ann = Index(ndim=768, metric='cos', dtype='f32')
+                if not isinstance(saved, dict) or type(saved.get('generation')) is not int:
+                    raise ValueError('invalid_ann')
+                if saved['generation'] == generation:
+                    try:
+                        ann.view(str(self.folder / 'vectors.usearch'))
+                        mapped = True
+                    except (OSError,ValueError,RuntimeError):
+                        # Preserve a valid graph if only mapping fails.
+                        ann.reset()
+                        ann = Index(ndim=768, metric='cos', dtype='f32')
+                        ann.load(str(self.folder / 'vectors.usearch'))
+                else:
+                    changes = self._changes_since(saved, generation)
+                    if changes is None or len(changes) > total:
+                        raise ValueError('stale_ann')
                     ann.load(str(self.folder / 'vectors.usearch'))
+                    if len(ann) != saved['count']:
+                        raise ValueError('invalid_ann')
+                    self._replay(ann, changes, check, progress)
+                    rebuilt = True  # Publish a fresh checkpoint after replay.
                 if len(ann) != total: raise ValueError('invalid_ann')
             except (OSError,ValueError,KeyError,RuntimeError):
                 ann.reset()
@@ -155,27 +172,81 @@ class VectorPool:
         for view in self.views.values(): view.refresh()
         return rebuilt
 
+    def _changes_since(self, saved, generation):
+        before = saved['generation']
+        if saved.get('journal') != 1 or before >= generation:
+            return None
+        rows = self.db.execute(
+            'SELECT old_id,new_id FROM pool_changes WHERE generation>? AND generation<=?',
+            (before, generation)).fetchall()
+        # The journal shares the vector transaction and has one row per generation.
+        # Missing history (including a checkpoint from an older app) needs a rebuild.
+        if len(rows) != generation - before:
+            return None
+        return sorted({key for row in rows for key in row if key is not None})
+
+    def _replay(self, ann, changes, check, progress):
+        import numpy as np
+        if progress:
+            progress('restoring', 0, len(changes))
+        for offset in range(0, len(changes), 256):
+            check()
+            batch = changes[offset:offset+256]
+            for key in batch:
+                if key in ann:
+                    ann.remove(key)
+            rows = self.db.execute(
+                'SELECT id,vector FROM pool_documents WHERE id IN (' +
+                ','.join('?' for _ in batch) + ')', batch).fetchall()
+            if rows:
+                ann.add(np.array([r[0] for r in rows], dtype=np.uint64),
+                        np.stack([np.frombuffer(r[1], dtype=np.float32) for r in rows]))
+            if progress:
+                progress('restoring', offset + len(batch), len(changes))
+
+    def _current_state(self):
+        generation = self.db.execute("SELECT value FROM pool_state WHERE key='generation'").fetchone()[0]
+        return generation, len(self.ann)
+
+    def _has_checkpoint(self, state):
+        return (state == self._checkpoint_state and (self.folder/'vectors.usearch').is_file()
+                and (self.folder/'ann.json').is_file())
+
+    def unsaved(self):
+        return not self._has_checkpoint(self._current_state())
+
+    def pending_changes(self):
+        generation, _ = self._current_state()
+        return generation - (self._checkpoint_state[0] if self._checkpoint_state else 0)
+
     def checkpoint(self, *, cancelled=lambda: False, remap=None):
         if cancelled(): raise ValueError('cancelled')
         remap = not self._builders if remap is None else remap
-        generation = self.db.execute("SELECT value FROM pool_state WHERE key='generation'").fetchone()[0]
-        state = (generation, len(self.ann))
-        if (state == self._checkpoint_state and (self.folder/'vectors.usearch').is_file()
-                and (self.folder/'ann.json').is_file()):
+        state = self._current_state()
+        if self._has_checkpoint(state):
             if remap: self._map_checkpoint()
             return
-        # An unusual metadata-only publication can still arrive while mapped.
-        # Detach before replacing the mapped path; the live ANN remains usable
-        # if saving, cancellation or either atomic publication fails.
+        generation, count = state
+        # Detach the Windows mapping before replacing the file.
         self.writable()
         temporary = self.folder / 'vectors.usearch.tmp'
-        self.ann.save(str(temporary))
-        if cancelled(): raise ValueError('cancelled')
-        os.replace(temporary,self.folder/'vectors.usearch')
-        temp = self.folder/'ann.json.tmp'
-        temp.write_text(json.dumps({'generation':generation,'count':len(self.ann)}),'utf-8')
-        os.replace(temp,self.folder/'ann.json')
+        metadata = self.folder / 'ann.json.tmp'
+        try:
+            self.ann.save(str(temporary))
+            if cancelled(): raise ValueError('cancelled')
+            os.replace(temporary, self.folder/'vectors.usearch')
+            metadata.write_text(json.dumps({'generation': generation, 'count': count, 'journal': 1}), 'utf-8')
+            os.replace(metadata, self.folder/'ann.json')
+        finally:
+            for path in (temporary, metadata):
+                try: path.unlink(missing_ok=True)
+                except OSError: pass
         self._checkpoint_state = state
+        try:
+            with self.db:
+                self.db.execute('DELETE FROM pool_changes WHERE generation<=?', (generation,))
+        except sqlite3.Error:
+            pass  # A later checkpoint can prune the redundant history.
         if remap: self._map_checkpoint()
 
     def collection_bytes(self, name):

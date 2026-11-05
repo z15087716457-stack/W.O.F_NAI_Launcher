@@ -1,3 +1,5 @@
 {
-  "viewer_fullscreen": "全螢幕（F11）"
+  "viewer_fullscreen": "全螢幕（F11）",
+  "updateMacReveal": "在 Finder 中顯示",
+  "updateMacReplaceHint": "結束目前的應用程式後，在 Finder 中將新版拖到原位置完成取代。"
 }

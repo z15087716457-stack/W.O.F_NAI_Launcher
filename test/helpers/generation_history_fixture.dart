@@ -13,10 +13,19 @@ class HistoryCaptureStorage extends InMemoryLocalStorageService {
       HistoryClickBehavior.selectPreview.storageValue;
 }
 
-// Read-only prototype assets; preparation uses their paths without creating
-// generated files, querying galleries, or calling generation services.
-List<GeneratedImage> historyCaptureImages({bool mixed = false}) {
+File generationFixtureFile(String prototypeName, {bool usePrototype = false}) =>
+    File(
+      usePrototype
+          ? '../../mockups/generation/assets/$prototypeName.jpg'
+          : 'test/fixtures/edit_image_sample.png',
+    );
+
+List<GeneratedImage> historyCaptureImages({
+  bool mixed = false,
+  bool usePrototype = false,
+}) {
   final now = DateTime.now();
+  final kind = usePrototype ? 'prototype' : 'fixture';
   final names = mixed
       ? ['canvas', 'g19', 'g07', 'g18']
       : ['canvas', 'h1', 'h2', 'g18'];
@@ -26,13 +35,14 @@ List<GeneratedImage> historyCaptureImages({bool mixed = false}) {
     for (var batch = 0; batch < names.length; batch++)
       for (var index = 0; index < counts[batch]; index++)
         () {
-          final file = File(
-            '../../mockups/generation/assets/${names[batch]}.jpg',
+          final file = generationFixtureFile(
+            names[batch],
+            usePrototype: usePrototype,
           );
           final bytes = file.readAsBytesSync();
           final dimensions = NaiResolutionAdapter.readImageSize(bytes)!;
           return GeneratedImage(
-            id: 'capture-${mixed ? 'mixed' : 'prototype'}-$batch-$index',
+            id: 'capture-$kind-${mixed ? 'mixed' : 'plain'}-$batch-$index',
             bytes: bytes,
             width: dimensions.$1,
             height: dimensions.$2,
@@ -54,7 +64,10 @@ List<GeneratedImage> historyCaptureImages({bool mixed = false}) {
   ];
 }
 
-Future<void> prepareHistoryCaptureImages(List<GeneratedImage> images) async {
+Future<void> prepareHistoryCaptureImages(
+  List<GeneratedImage> images, {
+  bool usePrototype = false,
+}) async {
   final service = ShareImagePreparationService.instance;
   for (final image in images.where((image) => image.canDrag)) {
     final batch = image.generationRunId! - 1;
@@ -62,14 +75,16 @@ Future<void> prepareHistoryCaptureImages(List<GeneratedImage> images) async {
     final names = mixed
         ? ['canvas', 'g19', 'g07', 'g18']
         : ['canvas', 'h1', 'h2', 'g18'];
+    final file = generationFixtureFile(
+      names[batch],
+      usePrototype: usePrototype,
+    );
     service.enqueue(
       imageId: image.id,
       imageBytes: image.bytes,
-      fileName: '${image.id}.jpg',
+      fileName: '${image.id}.${usePrototype ? 'jpg' : 'png'}',
       stripMetadata: false,
-      sourceFilePath: File(
-        '../../mockups/generation/assets/${names[batch]}.jpg',
-      ).absolute.path,
+      sourceFilePath: file.absolute.path,
     );
     await service
         .waitUntilReady(image.id, stripMetadata: false)

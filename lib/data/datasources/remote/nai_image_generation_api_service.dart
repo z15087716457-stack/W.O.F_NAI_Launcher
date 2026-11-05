@@ -11,6 +11,7 @@ import '../../../core/constants/api_constants.dart';
 import '../../../core/constants/model_spec.dart';
 import '../../../core/models/image_generation_artifact.dart';
 import '../../../core/network/dio_client.dart';
+import '../../../core/network/generation_failure.dart';
 import '../../../core/network/nai_api_endpoint_service.dart';
 import '../../../core/network/request_builders/nai_image_request_builder.dart';
 import '../../../core/utils/app_logger.dart';
@@ -671,7 +672,12 @@ class NAIImageGenerationApiService {
                     msg['error'] ??
                     'Stream generation failed';
                 AppLogger.e('Stream error: $errorMessage', 'Stream');
-                yield ImageStreamChunk.error(errorMessage.toString());
+                yield ImageStreamChunk.failed(
+                  GenerationFailure.stream(
+                    errorMessage.toString(),
+                    statusCode: _optionalInt(msg['status_code']),
+                  ),
+                );
                 return;
               }
 
@@ -869,7 +875,7 @@ class NAIImageGenerationApiService {
             }
           }
 
-          yield ImageStreamChunk.error('No final image received from stream');
+          yield ImageStreamChunk.failed(GenerationFailure.missingImages);
         } catch (e) {
           AppLogger.e('Failed to parse final stream data: $e', 'Stream');
           yield ImageStreamChunk.error('Failed to parse response');
@@ -881,7 +887,7 @@ class NAIImageGenerationApiService {
               'previews=${latestPreviews.length}',
           'Stream',
         );
-        yield ImageStreamChunk.error('No final image received from stream');
+        yield ImageStreamChunk.failed(GenerationFailure.missingImages);
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.cancel) {
@@ -914,11 +920,13 @@ class NAIImageGenerationApiService {
           errorMsg = NAIApiUtils.formatDioError(e);
         }
         AppLogger.e('Stream generation failed: $errorMsg', 'ImgGen');
-        yield ImageStreamChunk.error(errorMsg);
+        yield ImageStreamChunk.failed(
+          GenerationFailure.from(e, message: errorMsg),
+        );
       }
     } catch (e) {
       AppLogger.e('Stream generation failed: $e', 'ImgGen');
-      yield ImageStreamChunk.error(e.toString());
+      yield ImageStreamChunk.failed(GenerationFailure.from(e));
     } finally {
       if (identical(_currentCancelToken, cancelToken)) {
         _currentCancelToken = null;

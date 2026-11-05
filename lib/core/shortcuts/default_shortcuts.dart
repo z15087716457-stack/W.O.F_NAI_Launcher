@@ -1,3 +1,5 @@
+import '../utils/desktop_platform.dart';
+
 /// 默认快捷键定义
 /// 包含所有快捷键的ID常量和默认配置
 class ShortcutIds {
@@ -105,7 +107,14 @@ class DefaultShortcuts {
 
   /// 获取所有默认快捷键配置
   /// 格式: Map<快捷键ID, 默认快捷键字符串>
-  static Map<String, String> get all => {
+  static Map<String, String> get all => usesMacOSConventions
+      ? {
+          for (final entry in _defaults.entries)
+            entry.key: entry.value.replaceFirst('ctrl+', 'cmd+'),
+        }
+      : _defaults;
+
+  static const _defaults = <String, String>{
     // 页面导航
     ...navigation,
 

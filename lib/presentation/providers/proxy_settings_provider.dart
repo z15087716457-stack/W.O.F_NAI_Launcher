@@ -104,10 +104,18 @@ String? currentProxyAddress(Ref ref) {
   return settings.effectiveProxyAddress;
 }
 
-/// 检测到的系统代理地址
-///
-/// 用于在 UI 中显示当前系统代理配置
+final systemProxyReaderProvider = Provider<Future<String?> Function()>(
+  (ref) => ProxyService.readSystemProxyAddress,
+);
+
+/// Shares a pending read, including a quick return to the settings page.
 @riverpod
-String? detectedSystemProxy(Ref ref) {
-  return ProxyService.getSystemProxyAddress();
+Future<String?> detectedSystemProxy(Ref ref) async {
+  final reader = ref.watch(systemProxyReaderProvider);
+  final pending = ref.keepAlive();
+  try {
+    return await reader();
+  } finally {
+    pending.close();
+  }
 }

@@ -107,6 +107,32 @@ void main() {
   );
 
   test(
+    'draining waits for a critical startup write already in progress',
+    () async {
+      final release = Completer<void>();
+      final calls = <String>[];
+      final write = DesktopAppShutdownService.runCriticalStartupTask(
+        'Fixture startup write',
+        () async {
+          calls.add('write started');
+          await release.future;
+          calls.add('write finished');
+        },
+      );
+      final drain = DesktopAppShutdownService.prepareBackgroundShutdown().then((
+        _,
+      ) {
+        calls.add('stores can close');
+      });
+      await Future<void>.delayed(Duration.zero);
+      expect(calls, ['write started']);
+      release.complete();
+      await Future.wait([write, drain]);
+      expect(calls, ['write started', 'write finished', 'stores can close']);
+    },
+  );
+
+  test(
     'full quit hides first, keeps stores until drained, then exits once',
     () async {
       final directory = await Directory.systemTemp.createTemp('app_quit_');
@@ -174,6 +200,12 @@ void main() {
 
       // During real exit, neither the tray nor a late window event can reopen it
       // or write to stores that are about to close.
+      var lateWriteStarted = false;
+      await DesktopAppShutdownService.runCriticalStartupTask(
+        'Late write',
+        () async => lateWriteStarted = true,
+      );
+      expect(lateWriteStarted, isFalse);
       await AppTrayListener().onTrayIconMouseDown();
       AppTrayListener().onTrayIconRightMouseDown();
       await AppTrayListener().onTrayMenuItemClick(MenuItem(key: 'show'));

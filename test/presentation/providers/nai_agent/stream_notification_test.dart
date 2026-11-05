@@ -7,6 +7,8 @@ import 'package:nai_launcher/data/services/nai_agent/agent_workspace_store.dart'
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_workspace_controller.dart';
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_workspace_provider.dart';
 
+import '../../../helpers/agent_test_node.dart';
+
 class _DelayedStore extends AgentWorkspaceStore {
   _DelayedStore() : super(Directory.systemTemp);
   final result = Completer<AgentSettings>();
@@ -89,7 +91,7 @@ void main() {
         initialChatName: 'Synthetic chat',
         startClient: (workspace, chat, settings, prompt, resume) =>
             PiHostClient.start(
-              nodeExecutable: 'E:/node/node.exe',
+              nodeExecutable: agentTestNode,
               hostScript: File('tool/nai_agent/host.mjs').absolute.path,
               workspaceId: workspace.id,
               workspaceDirectory: workspace.directory,

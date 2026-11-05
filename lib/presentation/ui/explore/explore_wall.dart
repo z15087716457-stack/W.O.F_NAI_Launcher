@@ -1,3 +1,4 @@
+import 'package:nai_launcher/core/utils/primary_activator.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -315,7 +316,7 @@ class _ExploreCardState extends State<ExploreCard> {
     final x = widget.candidate;
     final hw = HardwareKeyboard.instance;
     if (hw.isShiftPressed && x.done) return ctrl.selectRange(x.key);
-    if ((hw.isControlPressed || hw.isMetaPressed || ctrl.selecting) && x.done) {
+    if ((hw.isPrimaryOrWindowsMetaPressed || ctrl.selecting) && x.done) {
       return ctrl.toggleSelect(x.key);
     }
     final now = DateTime.now();

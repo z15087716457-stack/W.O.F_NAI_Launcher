@@ -4,9 +4,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:win32_registry/win32_registry.dart';
 
+import '../utils/app_bundle_paths.dart';
+
 part 'app_installation_service.g.dart';
 
-enum AppInstallationType { windowsInstaller, windowsPortable, unsupported }
+enum AppInstallationType {
+  windowsInstaller,
+  windowsPortable,
+  macosPortable,
+  unsupported,
+}
 
 /// 判断当前应用是安装版还是便携版。
 class AppInstallationService {
@@ -17,6 +24,9 @@ class AppInstallationService {
   ];
 
   AppInstallationType getInstallationType() {
+    if (AppBundlePaths.macBundle != null) {
+      return AppInstallationType.macosPortable;
+    }
     if (!Platform.isWindows) {
       return AppInstallationType.unsupported;
     }
@@ -29,17 +39,13 @@ class AppInstallationService {
     return switch (getInstallationType()) {
       AppInstallationType.windowsInstaller => 'windows-installer',
       AppInstallationType.windowsPortable => 'windows-portable',
+      AppInstallationType.macosPortable => 'macos-portable',
       AppInstallationType.unsupported => 'unknown',
     };
   }
 
-  /// Windows 安装版与便携版都支持应用内自动更新：
-  /// 安装版运行 NSIS 静默安装，便携版由辅助脚本解压覆盖并重启。
-  bool get supportsInAppInstall {
-    final type = getInstallationType();
-    return type == AppInstallationType.windowsInstaller ||
-        type == AppInstallationType.windowsPortable;
-  }
+  bool get supportsInAppInstall =>
+      getInstallationType() != AppInstallationType.unsupported;
 
   bool _isInstalledWindowsApp() {
     // Both versions may coexist in different directories. Match the running

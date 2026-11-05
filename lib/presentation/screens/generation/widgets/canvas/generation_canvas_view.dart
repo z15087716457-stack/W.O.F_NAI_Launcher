@@ -1,3 +1,4 @@
+import 'package:nai_launcher/core/utils/primary_activator.dart';
 import '../../../../widgets/navigation/window_chrome_layout.dart';
 import '../../../../providers/layout_state_provider.dart';
 import 'dart:async';
@@ -252,6 +253,14 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     final layout = ref.read(canvasFeedLayoutProvider);
     if (layout.groups.isEmpty) return;
     final focus = ref.read(generationCanvasGroupSelectionProvider);
+    // Simple preview and the canvas may use different slots for the same image.
+    final imageId = ref.read(generationPreviewSelectionProvider);
+    if (focus?.subimage != null &&
+        imageId != null &&
+        _resolveSelectedImage(layout, focus)?.id != imageId &&
+        _focusImageById(imageId)) {
+      return;
+    }
     final g =
         layout.groups.where((x) => x.key == focus?.group).firstOrNull ??
         layout.groups.first;
@@ -346,10 +355,13 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     );
   }
 
-  // The welcome layout is in viewport space. Keep the background's quiet
-  // world-x=0 corridor on that same centre, regardless of a retained camera.
-  CanvasCamera _welcomeCamera() =>
-      CanvasCamera(offset: _viewport.center(Offset.zero), scale: 1);
+  CanvasCamera _welcomeCamera({required bool channelActive}) {
+    if (!channelActive) {
+      return CanvasCamera(offset: _viewport.center(Offset.zero), scale: 1);
+    }
+    final view = ChannelCamera.welcome(_viewport);
+    return CanvasCamera(offset: view.offset, scale: view.scale);
+  }
 
   void _setViewport(Size size) {
     final changed = _viewport != size;
@@ -455,22 +467,23 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
       _syncPreviewSelection(image.id);
 
   /// 历史栏点选 → 画布夺焦联动
-  void _focusImageById(String imageId) {
-    _manualOverview = false;
+  bool _focusImageById(String imageId) {
     final layout = ref.read(canvasFeedLayoutProvider);
     final item = layout.items
         .where((it) => it.image?.id == imageId)
         .firstOrNull;
-    if (item == null) return;
+    if (item == null) return false;
+    _manualOverview = false;
     final focus = ref.read(generationCanvasGroupSelectionProvider);
     if (focus?.group == item.group.key &&
         focus?.subimage == item.subimageIndex) {
-      return;
+      return true;
     }
     ref
         .read(generationCanvasGroupSelectionProvider.notifier)
         .selectTile(item.group.key, item.subimageIndex);
     _flyToSubimage(layout, item.group, item.subimageIndex);
+    return true;
   }
 
   @override
@@ -526,7 +539,10 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
         if (widget.visualChannel && prev?.groups.isEmpty == true) {
           // Start the first focus flight from what was actually on screen,
           // rather than a camera left behind by an earlier canvas visit.
-          _camera.jump(_welcomeCamera(), notifyIdle: false);
+          _camera.jump(
+            _welcomeCamera(channelActive: channelActive),
+            notifyIdle: false,
+          );
         }
         _manualOverview = false;
         ref
@@ -692,7 +708,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
                           );
                           final camera =
                               widget.visualChannel && layout.groups.isEmpty
-                              ? _welcomeCamera()
+                              ? _welcomeCamera(channelActive: channelActive)
                               : retainedCamera;
                           final visible = camera
                               .visibleWorldRect(_viewport)
@@ -707,6 +723,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
                                     offset: camera.offset,
                                     scale: camera.scale,
                                   ),
+                                  welcome: layout.groups.isEmpty,
                                   batches: channelFeed.batches,
                                   pinboard: channelFeed.pinboard,
                                   now: channelFeed.now,
@@ -1325,7 +1342,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     if (e is! PointerScrollEvent) return;
     if (_cameraLocked) return;
     final kb = HardwareKeyboard.instance;
-    final ctrl = kb.isControlPressed || kb.isMetaPressed;
+    final ctrl = kb.isPrimaryOrWindowsMetaPressed;
     final shift = kb.isShiftPressed;
     final dy = e.scrollDelta.dy;
     _focusFitActive = false;

@@ -255,7 +255,11 @@ class UpdateCheckDialog extends ConsumerWidget {
           ),
           const SizedBox(height: 14),
           Text(
-            context.l10n.updateDownloadedHint(state.versionInfo?.version ?? ''),
+            state.downloadedUpdate?.asset.requiresManualReplace == true
+                ? context.l10n.updateMacReplaceHint
+                : context.l10n.updateDownloadedHint(
+                    state.versionInfo?.version ?? '',
+                  ),
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -550,7 +554,11 @@ class UpdateCheckDialog extends ConsumerWidget {
           onPressed: ref.watch(updateTaskBusyProvider)
               ? null
               : () => _install(ref),
-          child: Text(context.l10n.updateInstallAndRestart),
+          child: Text(
+            state.downloadedUpdate?.asset.requiresManualReplace == true
+                ? context.l10n.updateMacReveal
+                : context.l10n.updateInstallAndRestart,
+          ),
         ),
       ],
       UpdateStatus.installing => const [],

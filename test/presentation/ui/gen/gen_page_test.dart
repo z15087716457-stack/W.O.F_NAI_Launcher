@@ -946,10 +946,10 @@ void main() {
   });
 
   group('历史', () {
-    testWidgets('单击切批，300ms 内再点开大图', (t) async {
+    testWidgets('单击定位封面图，300ms 内再点开同一张大图', (t) async {
       await pump(t);
       await tapKey(t, 'gen-batch-tile-b2');
-      expect(r.last('onFocusBatch'), 'onFocusBatch(b2)');
+      expect(r.last('onFocusTile'), 'onFocusTile(i2)');
       await t.tap(find.byKey(const Key('gen-batch-tile-b2')));
       await t.pumpAndSettle();
       expect(r.last('onOpenViewer'), 'onOpenViewer(i2)');
@@ -967,6 +967,7 @@ void main() {
       await tapKey(t, 'gen-batch-tile-b1');
       await tapKey(t, 'gen-batch-tile-b2');
       expect(r.called('onFocusBatch'), isFalse);
+      expect(r.called('onFocusTile'), isFalse);
       expect(find.text('已选 3 张'), findsOneWidget);
       await tapKey(t, 'gen-history-save-selected');
       expect(r.last('onSaveImages'), 'onSaveImages([i1, i2, i3])');

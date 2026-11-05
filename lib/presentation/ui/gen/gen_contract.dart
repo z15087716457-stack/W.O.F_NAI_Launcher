@@ -1063,14 +1063,21 @@ abstract final class GenBackdrop {
 /// 生成失败（`image_preview.dart` 按错误码映射好的标题和说明）。
 @immutable
 class GenError with _GenValue {
-  const GenError({required this.title, this.hint, this.detail});
+  const GenError({
+    required this.title,
+    this.hint,
+    this.detail,
+    this.retry = true,
+  });
   final String title;
   final String? hint;
 
   /// 原始错误（可复制）。
   final String? detail;
+  final bool retry;
+
   @override
-  List<Object?> get _values => [title, hint, detail];
+  List<Object?> get _values => [title, hint, detail, retry];
 }
 
 @immutable

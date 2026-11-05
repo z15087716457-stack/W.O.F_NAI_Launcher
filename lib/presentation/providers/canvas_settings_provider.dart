@@ -54,11 +54,8 @@ class CanvasZoomToFillNotifier extends _$CanvasZoomToFillNotifier {
   bool build() =>
       ref
           .read(localStorageServiceProvider)
-          .getSetting<bool>(
-            StorageKeys.canvasZoomToFill,
-            defaultValue: false,
-          ) ??
-      false;
+          .getSetting<bool>(StorageKeys.canvasZoomToFill) ??
+      true;
 
   void toggle() => set(!state);
   void set(bool value) {

@@ -11,6 +11,9 @@ from .discovery import BridgeDiscovery, load_discovery
 from .fallback_websocket import FallbackWebSocketClient
 from .protocol import decode_message, encode_ping, pong_version_error
 
+_FIRST_RETRY_MS = 5000
+_MAX_RETRY_MS = 30000
+
 
 class BridgeClient(QObject):
     connected_changed = pyqtSignal(bool)
@@ -28,9 +31,11 @@ class BridgeClient(QObject):
         self._discovery: Optional[BridgeDiscovery] = None
         self._authenticated = False
         self._connection_revision = 0
+        self._auto_reconnect = False
+        self._retry_delay_ms = _FIRST_RETRY_MS
         self._retry_timer = QTimer(self)
-        self._retry_timer.setInterval(5000)
-        self._retry_timer.timeout.connect(self.connect_to_launcher)
+        self._retry_timer.setSingleShot(True)
+        self._retry_timer.timeout.connect(self._retry_connection)
         self._fallback_connected.connect(self._on_connected)
         self._fallback_disconnected.connect(self._on_disconnected)
         self._fallback_text_message.connect(self._on_text_message)
@@ -41,15 +46,18 @@ class BridgeClient(QObject):
         return self._authenticated
 
     def start(self) -> None:
-        self.connect_to_launcher()
-        self._retry_timer.start()
+        self._auto_reconnect = True
+        self._retry_delay_ms = _FIRST_RETRY_MS
+        self._retry_connection()
 
     def stop(self) -> None:
+        self._auto_reconnect = False
         self._retry_timer.stop()
         self._reset_socket()
         self.connected_changed.emit(False)
 
     def connect_to_launcher(self) -> None:
+        """Try immediately using the current discovery file."""
         if self._authenticated:
             return
         try:
@@ -72,6 +80,16 @@ class BridgeClient(QObject):
             lambda error: self._on_socket_error(revision, error))
         self.status_changed.emit("正在连接 NAI Launcher...")
         self._socket.open(QUrl(self._discovery.url))
+
+    def _retry_connection(self) -> None:
+        if self._auto_reconnect:
+            self.connect_to_launcher()
+            self._schedule_retry()
+
+    def _schedule_retry(self) -> None:
+        if self._auto_reconnect and not self._authenticated:
+            self._retry_timer.start(self._retry_delay_ms)
+            self._retry_delay_ms = min(self._retry_delay_ms * 2, _MAX_RETRY_MS)
 
     def send_text(self, text: str) -> bool:
         if not self._authenticated:
@@ -120,6 +138,7 @@ class BridgeClient(QObject):
         self._authenticated = False
         if was_authenticated:
             self.connected_changed.emit(False)
+            self._schedule_retry()
         self.status_changed.emit("已断开与 NAI Launcher 的连接")
 
     def _on_text_message(self, revision: int, text: str) -> None:
@@ -140,6 +159,8 @@ class BridgeClient(QObject):
                 return
 
             self._authenticated = True
+            self._retry_timer.stop()
+            self._retry_delay_ms = _FIRST_RETRY_MS
             self.connected_changed.emit(True)
             self.status_changed.emit("已连接 NAI Launcher")
             return

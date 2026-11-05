@@ -15,6 +15,37 @@ class PromptInputNormalization {
 
   bool get changed => sdConverted || formatted;
 
+  /// Format the contents without removing separators owned by this fragment.
+  static String normalizeTranslationFragment(
+    String source, {
+    required bool autoFormat,
+    bool preserveLeading = true,
+    bool preserveTrailing = true,
+  }) {
+    if (!autoFormat) return source;
+    final start = preserveLeading
+        ? (RegExp(r'^\s+').stringMatch(source)?.length ?? 0)
+        : 0;
+    var end = source.length;
+    if (preserveTrailing) {
+      for (final token in NaiPromptSyntax.scan(source).reversed) {
+        if (token.kind == NaiPromptTokenKind.comma) {
+          end = token.start;
+        } else if (token.kind == NaiPromptTokenKind.text) {
+          final trailing = RegExp(r'\s+$').firstMatch(token.source(source));
+          if (trailing == null) break;
+          end = token.start + trailing.start;
+          if (trailing.start != 0) break;
+        } else {
+          break;
+        }
+      }
+    }
+    if (start >= end) return source;
+    final body = _formatWithoutSdConversion(source.substring(start, end));
+    return '${source.substring(0, start)}$body${source.substring(end)}';
+  }
+
   static PromptInputNormalization normalize(
     String text, {
     required bool autoFormat,

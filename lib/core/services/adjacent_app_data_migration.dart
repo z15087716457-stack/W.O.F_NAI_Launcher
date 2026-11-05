@@ -288,14 +288,103 @@ class AdjacentAppDataMigration {
     );
   }
 
+  /// Copies a previous Mac profile into an empty directory before stores open.
+  /// Both the source and the staged copy are verified before publication.
+  Future<bool> copyFirstLaunch({
+    required Future<bool> Function() legacyRunning,
+  }) async {
+    final oldPath = p.normalize(legacy.absolute.path);
+    final newPath = p.normalize(destination.absolute.path);
+    if (p.equals(oldPath, newPath) ||
+        p.isWithin(oldPath, newPath) ||
+        p.isWithin(newPath, oldPath)) {
+      throw const FileSystemException('Application data paths overlap');
+    }
+    if (await FileSystemEntity.type(legacy.path, followLinks: false) !=
+        FileSystemEntityType.directory) {
+      return false;
+    }
+    final lock = await File(
+      p.join(
+        destination.parent.path,
+        '.${p.basename(destination.path)}.import.lock',
+      ),
+    ).open(mode: FileMode.append);
+    try {
+      await lock.lock(FileLock.blockingExclusive);
+      if (await destination.exists() &&
+          !await destination.list(followLinks: false).isEmpty) {
+        return false;
+      }
+      if (await FileSystemEntity.type(destination.path, followLinks: false) ==
+          FileSystemEntityType.link) {
+        throw const FileSystemException(
+          'Application data must be a real directory',
+        );
+      }
+      if (await legacyRunning()) {
+        throw FileSystemException(
+          'Close the previous app before importing',
+          legacy.path,
+        );
+      }
+      final snapshot = await _snapshot(legacy, persistentOnly: true);
+      if (snapshot.isEmpty) return false;
+      final staging = await destination.parent.createTemp(
+        '.studio-mac-import-',
+      );
+      try {
+        await _copyVerified(legacy, staging, snapshot);
+        await _verifySnapshot(legacy, snapshot, persistentOnly: true);
+        if (await legacyRunning()) {
+          throw FileSystemException(
+            'Close the previous app before importing',
+            legacy.path,
+          );
+        }
+        if (await destination.exists()) await destination.delete();
+        await staging.rename(destination.path);
+      } finally {
+        if (await staging.exists()) await staging.delete(recursive: true);
+      }
+      return true;
+    } finally {
+      await lock.close();
+    }
+  }
+
+  Stream<FileSystemEntity> _persistentEntries(Directory directory) async* {
+    await for (final entry in directory.list(followLinks: false)) {
+      final name = p.basename(entry.path);
+      if (entry is Link ||
+          name.endsWith('.lock') ||
+          const {
+            '.DS_Store',
+            'temp',
+            'cache',
+            'logs',
+            'runtime',
+            'node_modules',
+          }.contains(name)) {
+        continue;
+      }
+      yield entry;
+      if (entry is Directory) yield* _persistentEntries(entry);
+    }
+  }
+
   Future<Map<String, _DataFile>> _snapshot(
     Directory root, {
     Directory? originalRoot,
+    bool persistentOnly = false,
   }) async {
     final result = <String, _DataFile>{};
     final physicalRoot = await root.resolveSymbolicLinks();
     final physicalOriginal = await originalRoot?.resolveSymbolicLinks();
-    await for (final entry in root.list(recursive: true, followLinks: false)) {
+    final entries = persistentOnly
+        ? _persistentEntries(root)
+        : root.list(recursive: true, followLinks: false);
+    await for (final entry in entries) {
       final type = await FileSystemEntity.type(entry.path, followLinks: false);
       if (type == FileSystemEntityType.link) {
         final resolved = await Directory(entry.path).resolveSymbolicLinks();
@@ -389,8 +478,13 @@ class AdjacentAppDataMigration {
     Directory root,
     Map<String, _DataFile> expected, {
     Directory? originalRoot,
+    bool persistentOnly = false,
   }) async {
-    final current = await _snapshot(root, originalRoot: originalRoot);
+    final current = await _snapshot(
+      root,
+      originalRoot: originalRoot,
+      persistentOnly: persistentOnly,
+    );
     if (current.length != expected.length ||
         expected.entries.any((entry) => current[entry.key] != entry.value)) {
       throw const FileSystemException(

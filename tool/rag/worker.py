@@ -18,6 +18,9 @@ from gallery import GalleryEngine
 
 write_lock = threading.Lock()
 protocol_stdout = sys.stdout
+IDLE_UNLOAD_SECONDS = 120
+CHECKPOINT_QUIET_SECONDS = 120
+CHECKPOINT_MAX_CHANGES = 32768
 
 
 def emit(value):
@@ -32,6 +35,7 @@ class Worker:
         self.sequence = 0; self.tokens = {}; self.jobs = {}
         self.engine = None; self.models = None; self.engines = {}; self.settings = None; self.pool = None
         self.last_use = time.monotonic(); self.running = True; self.suspended = False
+        self.checkpoint_due = None
 
     def enqueue(self, value, priority=0):
         self.sequence += 1
@@ -40,28 +44,72 @@ class Worker:
     def _event(self, **values):
         emit({'event': 'index', **values})
 
-    def _settle_pool(self):
-        if self.pool and (self.suspended or not any(not j['paused'] for j in self.jobs.values())):
-            self.pool.checkpoint(remap=True)
+    def _has_active_builds(self):
+        return not self.suspended and any(not job['paused'] for job in self.jobs.values())
+
+    def _settle_pool(self, *, force=False):
+        active = self._has_active_builds()
+        if self.pool and (force or not active):
+            self.pool.checkpoint(remap=not active)
+            self.checkpoint_due = None
+
+    def _defer_checkpoint(self, job):
+        if self.pool and self.pool.unsaved():
+            self.checkpoint_due = time.monotonic() + CHECKPOINT_QUIET_SECONDS, job['id']
+
+    def _checkpoint_in(self):
+        if self.checkpoint_due is None or self._has_active_builds():
+            return None
+        return max(0, self.checkpoint_due[0] - time.monotonic())
+
+    def _save_due_checkpoint(self):
+        _, job_id = self.checkpoint_due
+        self.checkpoint_due = None
+        try:
+            self._settle_pool()
+        except Exception as error:
+            # SQLite still holds the changes. Retry on the next update or
+            # explicit save, without spinning if disk publication failed.
+            try: status = self.engines['gallery'].status()
+            except Exception: status = {}
+            self._event(source='gallery', job_id=job_id, phase='error',
+                        code=self.error_code(error), **status)
 
     def _step(self, job_id):
         job = self.jobs.get(job_id)
         if job is None or job['paused'] or self.suspended: return
         engine = self.engines[job['source']]
+        gallery = job['source'] == 'gallery'
+        deferred = gallery and not job.get('verify')
         try:
             progress = next(job['generator'])
+            if gallery and self.pool and self.pool.pending_changes() >= CHECKPOINT_MAX_CHANGES:
+                self._settle_pool(force=True)
             self._event(source=job['source'],job_id=job_id, phase='building' if progress.get('building') else 'checking', **progress)
             self.enqueue({'_step':job_id}, 10)
         except StopIteration:
             self.jobs.pop(job_id, None)
-            try: self._settle_pool()
+            try:
+                if deferred and not job['cancel'].is_set():
+                    self._defer_checkpoint(job)
+                else:
+                    self._settle_pool()
             except Exception as error:
                 self._event(source=job['source'],job_id=job_id,phase='error',code=self.error_code(error),**engine.status())
                 return
             self._event(source=job['source'],job_id=job_id, phase='paused' if job['cancel'].is_set() else 'complete', **engine.status())
         except Exception as error:
             self.jobs.pop(job_id, None)
+            job['generator'].close()
+            if gallery:
+                self._defer_checkpoint(job)
             self._event(source=job['source'],job_id=job_id, phase='error', code=self.error_code(error), **engine.status())
+        finally:
+            self.last_use = time.monotonic()
+
+    @staticmethod
+    def _source_signature(engine):
+        return engine.signature() if isinstance(engine, GalleryEngine) else engine.sources.signature()
 
     @staticmethod
     def error_code(error):
@@ -82,6 +130,7 @@ class Worker:
         # only closes its scoped connection; the pool publishes one checkpoint.
         jobs, engines, pool, models = self.jobs, self.engines, self.pool, self.models
         self.jobs = {}; self.engines = {}; self.engine = self.pool = self.models = None
+        self.checkpoint_due = None
         error = None
         def attempt(action):
             nonlocal error
@@ -135,7 +184,10 @@ class Worker:
         if source not in ('tags','wiki','blocks','gallery'): raise ValueError('invalid_source')
         engine = self.engines.get(source)
         if engine is None: raise ValueError('disabled_source')
-        if op == 'preview': return engine.preview()
+        if op == 'preview':
+            if source == 'gallery':
+                return engine.preview(verify=(p['verify'] is True) if 'verify' in p else None)
+            return engine.preview()
         if op == 'start':
             # Validate before clearing, in this same serialized command.
             engine.validate_plan(p['plan_id'])
@@ -153,23 +205,26 @@ class Worker:
             # Validate the plan before acknowledging start; first work is queued.
             if not engine.plan or engine.plan['plan_id'] != p['plan_id']:
                 raise ValueError('invalid_plan')
-            self.jobs[job_id] = {'id':job_id,'source':source,'generator':generator,'cancel':cancellation,'paused':False,'signature':engine.sources.signature()}
+            self.jobs[job_id] = {'id':job_id,'source':source,'generator':generator,'cancel':cancellation,'paused':False,
+                                 'signature':self._source_signature(engine),
+                                 'verify':bool(p.get('rebuild') or engine.plan.get('verify'))}
             self.enqueue({'_step':job_id},10)
             return {'job_id':job_id}
         if op in ('pause','resume'):
             job = self.jobs.get(p['job_id'])
             if job and job['source'] != source: raise ValueError('invalid_source')
             if job and job['source'] == source:
-                if op == 'resume' and job['signature'] != engine.sources.signature():
+                if op == 'resume' and job['signature'] != self._source_signature(engine):
                     job['cancel'].set();job['generator'].close()
-                    plan = engine.preview(); cancellation = threading.Event()
+                    plan = engine.preview(verify=job.get('verify')) if source == 'gallery' else engine.preview()
+                    cancellation = threading.Event()
                     job.update(generator=engine.build(plan['plan_id'],cancellation.is_set,
                         progress=lambda value: self._event(source=source,job_id=p['job_id'],phase='building',**value)),cancel=cancellation,
-                               signature=engine.sources.signature())
+                               signature=self._source_signature(engine))
                 job['paused'] = op == 'pause'
                 if op == 'resume': self.enqueue({'_step':p['job_id']},10)
             engine.set_paused(op == 'pause')
-            if op == 'pause': self._settle_pool()
+            if op == 'pause': self._settle_pool(force=source == 'gallery')
             return {'job_id':p['job_id'],'paused':op == 'pause',**engine.status()}
         if op == 'clear':
             for job_id,job in list(self.jobs.items()):
@@ -222,13 +277,27 @@ class Worker:
         return {**tags,'sources':sources,'suspended':self.suspended,
                 'jobs':[{k:v for k,v in j.items() if k in ('id','paused','source')} for j in self.jobs.values()]}
 
+    def _unload_in(self):
+        if (self.models is None or
+                (self.models.encoder is None and self.models.scorer is None) or
+                self._has_active_builds()):
+            return None
+        return max(0, self.last_use + IDLE_UNLOAD_SECONDS - time.monotonic())
+
     def run(self):
         while self.running:
-            try: _,_,request = self.queue.get(timeout=1)
-            except queue.Empty:
-                if self.models and not any(not j['paused'] for j in self.jobs.values()) and time.monotonic()-self.last_use > 120:
-                    self.models.unload(); self.last_use = time.monotonic()
-                continue
+            checkpoint_in = self._checkpoint_in()
+            if checkpoint_in == 0:
+                self._save_due_checkpoint()
+            unload_in = self._unload_in()
+            if unload_in == 0:
+                self.models.unload()
+                unload_in = None
+            timeout = min((due for due in (unload_in, self._checkpoint_in())
+                           if due is not None), default=None)
+            try: _,_,request = self.queue.get(timeout=timeout)
+            except queue.Empty: continue
+            if request is None: continue
             if '_step' in request:
                 self._step(request['_step']); continue
             request_id = request['id']; token = self.tokens.get(request_id,threading.Event())
@@ -282,6 +351,7 @@ class Worker:
         self.running = False
         for token in self.tokens.values(): token.set()
         for job in list(self.jobs.values()): job['cancel'].set()
+        self.enqueue(None, -2)  # Wake an executor waiting without a deadline.
         # The owning client bounds graceful shutdown and can terminate its Job.
         # Do not abandon a daemon writer halfway through a large checkpoint.
         thread.join()

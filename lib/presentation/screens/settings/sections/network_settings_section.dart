@@ -45,7 +45,7 @@ class NetworkSettingsSectionState
   @override
   Widget build(BuildContext context) {
     final proxySettings = ref.watch(proxySettingsNotifierProvider);
-    final detectedProxy = ref.watch(detectedSystemProxyProvider);
+    final detectedProxy = ref.watch(detectedSystemProxyProvider).valueOrNull;
     final l10n = context.l10n;
 
     // 初始化手动代理输入框

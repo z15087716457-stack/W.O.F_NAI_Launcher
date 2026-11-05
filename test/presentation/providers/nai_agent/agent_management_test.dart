@@ -11,6 +11,8 @@ import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_workspac
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_workspace_provider.dart';
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_skills_provider.dart';
 
+import '../../../helpers/agent_test_node.dart';
+
 class _Secrets extends SecureStorageService {
   final values = <String, String>{};
   @override
@@ -48,10 +50,6 @@ void main() {
     secrets = _Secrets();
     final preferences = NaiAgentUiPreferences()..replace(c.settings);
     c.addListener(() => preferences.replace(c.settings));
-    final node = (await Process.run('node', [
-      '-p',
-      'process.execPath',
-    ])).stdout.toString().trim();
     container = ProviderContainer(
       overrides: [
         naiAgentWorkspaceStoreProvider.overrideWithValue(store),
@@ -59,7 +57,7 @@ void main() {
         naiAgentUiPreferencesProvider.overrideWith((_) => preferences),
         naiAgentRuntimePathsProvider.overrideWithValue(
           NaiAgentRuntimePaths(
-            node: node,
+            node: agentTestNode,
             host: p.absolute('tool/nai_agent/host.mjs'),
           ),
         ),

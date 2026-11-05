@@ -11,6 +11,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../data/models/version/release_asset_info.dart';
 import '../../data/models/version/version_info.dart';
 import '../utils/app_logger.dart';
+import '../utils/app_bundle_paths.dart';
+import '../utils/studio_sandbox.dart';
 import 'app_installation_service.dart';
 import 'desktop_app_shutdown_service.dart';
 import 'windows_update_script.dart';
@@ -39,6 +41,8 @@ class UpdateDownloadCancelledException implements Exception {
 
 typedef AppShutdownHandler = Future<void> Function(int code);
 typedef UpdateSha256Calculator = Future<String> Function(File file);
+typedef UpdateProcessRunner =
+    Future<ProcessResult> Function(String, List<String>);
 typedef UpdateScriptLauncher = Future<void> Function(String scriptPath);
 
 /// 一次下载的实时进度快照。
@@ -97,17 +101,18 @@ class UpdateExecutionResult {
   });
 }
 
-/// Windows 应用内更新服务。
+/// 桌面应用内更新服务。
 ///
 /// 下载使用 `.part` 文件和 HTTP Range 真正续传；完整包必须同时通过
-/// 长度与 SHA256 校验。安装由独立脚本在应用优雅退出后执行，并留下
-/// 可在下次启动读取的结果与日志。
+/// 长度与 SHA256 校验。Windows 使用独立脚本安装，macOS 核验应用后在 Finder 显示。
 class UpdateInstallerService {
   final Dio _dio;
   final AppInstallationService _installationService;
   final AppShutdownHandler _shutdownHandler;
   final UpdateSha256Calculator _sha256Calculator;
   final UpdateScriptLauncher _scriptLauncher;
+  final UpdateProcessRunner _runProcess;
+  ({String archive, String app})? _macStage;
   final Directory? _updateDirectoryOverride;
 
   static const Duration _speedSampleWindow = Duration(milliseconds: 500);
@@ -124,12 +129,14 @@ class UpdateInstallerService {
     AppShutdownHandler shutdownHandler =
         DesktopAppShutdownService.shutdownAndExit,
     UpdateSha256Calculator? sha256Calculator,
+    UpdateProcessRunner? runProcess,
     UpdateScriptLauncher scriptLauncher = WindowsUpdateScript.launch,
     Directory? updateDirectory,
   }) : _dio = dio,
        _installationService = installationService,
        _shutdownHandler = shutdownHandler,
        _sha256Calculator = sha256Calculator ?? calculateSha256,
+       _runProcess = runProcess ?? Process.run,
        _scriptLauncher = scriptLauncher,
        _updateDirectoryOverride = updateDirectory;
 
@@ -481,7 +488,12 @@ class UpdateInstallerService {
 
   /// 启动独立更新脚本，并通过统一退出流程释放应用资源。
   Future<void> installAndRestart(DownloadedUpdate update) async {
-    if (!Platform.isWindows) {
+    if (update.asset.requiresManualReplace &&
+        AppBundlePaths.macBundle != null) {
+      await revealMacUpdate(update);
+      return;
+    }
+    if (!Platform.isWindows || update.asset.requiresManualReplace) {
       throw UpdateInstallException(currentL10n.update_errorPlatformUnsupported);
     }
     if (!await update.file.exists()) {
@@ -508,6 +520,72 @@ class UpdateInstallerService {
     }
 
     await _shutdownHandler(0);
+  }
+
+  Future<void> revealMacUpdate(DownloadedUpdate update) async {
+    if (!update.asset.requiresManualReplace ||
+        !await _isPackageValid(update.file, update.asset)) {
+      throw UpdateInstallException(currentL10n.update_errorPackageCorrupted);
+    }
+    final previous = _macStage;
+    if (previous?.archive == update.file.path &&
+        await Directory(previous!.app).exists()) {
+      await _verifyMacApp(previous.app);
+      await _macCommand('/usr/bin/open', ['-R', previous.app]);
+      return;
+    }
+    final stage = await (await _ensureUpdateDir()).createTemp('macos-');
+    try {
+      await _macCommand('/usr/bin/ditto', [
+        '-x',
+        '-k',
+        update.file.path,
+        stage.path,
+      ]);
+      final apps = await stage
+          .list(followLinks: false)
+          .where((entry) => entry is Directory && entry.path.endsWith('.app'))
+          .toList();
+      if (apps.length != 1) {
+        throw UpdateInstallException(currentL10n.update_errorPackageCorrupted);
+      }
+      final app = apps.single.path;
+      await _verifyMacApp(app);
+      await _macCommand('/usr/bin/open', ['-R', app]);
+      _macStage = (archive: update.file.path, app: app);
+    } catch (_) {
+      // The stage was created in this call and contains only this update.
+      await stage.delete(recursive: true);
+      rethrow;
+    }
+  }
+
+  Future<void> _verifyMacApp(String app) async {
+    final identity = await _macCommand('/usr/libexec/PlistBuddy', [
+      '-c',
+      'Print CFBundleIdentifier',
+      p.join(app, 'Contents', 'Info.plist'),
+    ]);
+    if ((identity.stdout as String).trim() != AppBundlePaths.macBundleId) {
+      throw UpdateInstallException(currentL10n.update_errorPackageCorrupted);
+    }
+    await _macCommand('/usr/bin/codesign', [
+      '--verify',
+      '--deep',
+      '--strict',
+      app,
+    ]);
+  }
+
+  Future<ProcessResult> _macCommand(
+    String executable,
+    List<String> args,
+  ) async {
+    final result = await _runProcess(executable, args);
+    if (result.exitCode != 0) {
+      throw UpdateInstallException(currentL10n.update_errorLaunchFailed);
+    }
+    return result;
   }
 
   Future<File> _writeUpdateScript(DownloadedUpdate update) async {
@@ -610,7 +688,7 @@ class UpdateInstallerService {
   Future<Directory> _ensureUpdateDir() async {
     final updateDir =
         _updateDirectoryOverride ??
-        Directory(p.join(Directory.systemTemp.path, _updateDirectoryName));
+        Directory(p.join(studioTemporaryRoot().path, _updateDirectoryName));
     await updateDir.create(recursive: true);
     return updateDir;
   }

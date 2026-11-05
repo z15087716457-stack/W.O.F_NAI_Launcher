@@ -11,6 +11,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:nai_launcher/core/constants/api_constants.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/core/network/dio_client.dart';
+import 'package:nai_launcher/core/network/generation_failure.dart';
 import 'package:nai_launcher/data/datasources/remote/nai_image_generation_api_service.dart';
 import 'package:nai_launcher/data/models/character/character_prompt.dart'
     as ui_character;
@@ -1141,8 +1142,12 @@ void main() {
     when(() => mockApiService.generateImageStream(any())).thenAnswer((_) {
       streamCall += 1;
       return Stream.value(
-        ImageStreamChunk.error(
-          'API_ERROR_429|A previous request is still being processed',
+        ImageStreamChunk.failed(
+          const GenerationFailure(
+            'API_ERROR_429|A previous request is still being processed',
+            statusCode: 429,
+            retryAfter: Duration(seconds: 30),
+          ),
         ),
       );
     });
@@ -1168,16 +1173,123 @@ void main() {
 
     // 此刻位于 429 等待期内，取消必须终止自动重试
     notifier.cancel();
-    await generation;
+    await generation.timeout(const Duration(seconds: 1));
 
     expect(
       container.read(imageGenerationNotifierProvider).status,
       GenerationStatus.cancelled,
     );
-    final callsAfterCancel = streamCall;
-    await Future<void>.delayed(const Duration(milliseconds: 3500));
-    expect(streamCall, callsAfterCancel);
+    expect(streamCall, 1);
   });
+
+  for (final failureStatus in [401, 402, 403]) {
+    test('HTTP $failureStatus never resends the refused batch', () async {
+      final api = MockNAIImageGenerationApiService();
+      final image = _validImageBytes(width: 16, height: 16);
+      var calls = 0;
+      when(() => api.generateImageStream(any())).thenAnswer((_) {
+        if (++calls == 1) {
+          return Stream.value(
+            ImageStreamChunk.failed(
+              GenerationFailure('Rejected', statusCode: failureStatus),
+            ),
+          );
+        }
+        return Stream.value(ImageStreamChunk.complete(image));
+      });
+      final container = ProviderContainer(
+        overrides: [
+          naiImageGenerationApiServiceProvider.overrideWithValue(api),
+        ],
+      );
+      addTearDown(container.dispose);
+      final notifier = container.read(imageGenerationNotifierProvider.notifier);
+      await notifier.generate(const ImageParams(prompt: '1girl', nSamples: 2));
+
+      final state = container.read(imageGenerationNotifierProvider);
+      expect(state.status, GenerationStatus.error);
+      expect(calls, failureStatus == 403 ? 2 : 1);
+      expect(state.currentImages, hasLength(failureStatus == 403 ? 1 : 0));
+    });
+  }
+
+  test(
+    'retains partial batch in its original slots and retries only unsent batches',
+    () async {
+      final api = MockNAIImageGenerationApiService();
+      final image = _validImageBytes(width: 16, height: 16);
+      when(() => api.generateImageStream(any())).thenAnswer(
+        (_) => Stream.fromIterable([
+          ImageStreamChunk.complete(image, sampleIndex: 1),
+          ImageStreamChunk.failed(
+            const GenerationFailure('Disconnected', network: true),
+          ),
+        ]),
+      );
+      final container = ProviderContainer(
+        overrides: [
+          naiImageGenerationApiServiceProvider.overrideWithValue(api),
+        ],
+      );
+      addTearDown(container.dispose);
+      final notifier = container.read(imageGenerationNotifierProvider.notifier);
+      final events = <GenerationBatchEvent>[];
+      await notifier.generate(
+        const ImageParams(prompt: '1girl', nSamples: 3),
+        imagesPerRequestOverride: 2,
+        onBatchEvent: events.add,
+      );
+
+      final state = container.read(imageGenerationNotifierProvider);
+      expect(state.status, GenerationStatus.error);
+      expect(state.currentImages.single.batchIndex, 1);
+      expect(state.history.single.bytes, orderedEquals(image));
+      expect(state.displayImages.single.bytes, orderedEquals(image));
+      expect(notifier.lastRequest?.params.nSamples, 2);
+      expect(notifier.lastRequest?.count, 2);
+      expect(
+        events.where((e) => e.kind == GenerationBatchEventKind.start),
+        hasLength(1),
+      );
+      final completions = events.where(
+        (e) => e.kind == GenerationBatchEventKind.complete,
+      );
+      expect(completions.map((e) => e.slotStart), [1, 3, 5]);
+      expect(completions.first.images.single.batchIndex, 1);
+      expect(completions.skip(1).every((e) => e.images.isEmpty), isTrue);
+      verify(() => api.generateImageStream(any())).called(1);
+    },
+  );
+
+  test(
+    'a completed stream with a trailing error never sends a second request',
+    () async {
+      final api = MockNAIImageGenerationApiService();
+      final image = _validImageBytes(width: 16, height: 16);
+      when(() => api.generateImageStream(any())).thenAnswer(
+        (_) => Stream.fromIterable([
+          ImageStreamChunk.complete(image),
+          ImageStreamChunk.failed(
+            const GenerationFailure('Disconnected', network: true),
+          ),
+        ]),
+      );
+      final container = ProviderContainer(
+        overrides: [
+          naiImageGenerationApiServiceProvider.overrideWithValue(api),
+        ],
+      );
+      addTearDown(container.dispose);
+      final notifier = container.read(imageGenerationNotifierProvider.notifier);
+      await notifier.generate(const ImageParams(prompt: '1girl'));
+
+      final state = container.read(imageGenerationNotifierProvider);
+      expect(state.status, GenerationStatus.completed);
+      expect(state.currentImages.single.bytes, orderedEquals(image));
+      expect(notifier.lastRequest, isNull);
+      verify(() => api.generateImageStream(any())).called(1);
+    },
+  );
 }
 
 Uint8List _validImageBytes({required int width, required int height}) {

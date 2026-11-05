@@ -1,11 +1,20 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import '../utils/app_bundle_paths.dart';
+
 /// Sandbox credentials are deliberately session-only. No credential-manager
 /// call (including deleteAll) can cross this boundary while sandboxed.
 class SandboxCredentialStore {
   SandboxCredentialStore({required this.sandbox, FlutterSecureStorage? storage})
     : _storage =
-          storage ?? const FlutterSecureStorage(wOptions: WindowsOptions());
+          storage ??
+          const FlutterSecureStorage(
+            wOptions: WindowsOptions(),
+            mOptions: MacOsOptions(
+              accountName: AppBundlePaths.macBundleId,
+              useDataProtectionKeyChain: false,
+            ),
+          );
   final String? sandbox;
   final FlutterSecureStorage _storage;
   static final _sessions = <String, Map<String, String>>{};

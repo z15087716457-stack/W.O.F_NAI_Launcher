@@ -2124,6 +2124,12 @@ abstract class AppLocalizations {
   /// **'ORIGINAL'**
   String get generation_variationOriginal;
 
+  /// No description provided for @generation_requestCostInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'This request exceeds the supported limits. Reduce the image size or steps.'**
+  String get generation_requestCostInvalid;
+
   /// No description provided for @generation_variationSizeUnsupported.
   ///
   /// In en, this message translates to:
@@ -9226,6 +9232,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'v{version} has been downloaded and verified. Installing will close the app and restart it automatically.'**
   String updateDownloadedHint(Object version);
+
+  /// No description provided for @updateMacReveal.
+  ///
+  /// In en, this message translates to:
+  /// **'Show in Finder'**
+  String get updateMacReveal;
+
+  /// No description provided for @updateMacReplaceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Quit this app, then use Finder to replace it with the extracted app.'**
+  String get updateMacReplaceHint;
 
   /// No description provided for @updateInstallAndRestart.
   ///
@@ -29147,12 +29165,6 @@ abstract class AppLocalizations {
   /// **'Add MCP server'**
   String get naiAgent_mcpAdd;
 
-  /// No description provided for @naiAgent_mcpName.
-  ///
-  /// In en, this message translates to:
-  /// **'Server name'**
-  String get naiAgent_mcpName;
-
   /// No description provided for @naiAgent_mcpConfig.
   ///
   /// In en, this message translates to:
@@ -33583,7 +33595,7 @@ abstract class AppLocalizations {
   /// No description provided for @set_rgPythonSub.
   ///
   /// In en, this message translates to:
-  /// **'Uses the standalone runtime by default; you can pick an existing python.exe.'**
+  /// **'You can select an existing local Python interpreter.'**
   String get set_rgPythonSub;
 
   /// No description provided for @set_rgPythonAuto.

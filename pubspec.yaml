@@ -1,5 +1,5 @@
 name: nai_launcher
-description: W.O.F NAI Studio - NovelAI Windows 桌面客户端（Aaalice_NAI_Launcher 分支）
+description: W.O.F NAI Studio - NovelAI Windows 与 macOS 桌面客户端（Aaalice_NAI_Launcher 分支）
 publish_to: "none"
 version: 2.2.6+83
 
@@ -103,6 +103,7 @@ dependencies:
   video_player: ^2.8.0
   video_player_media_kit: ^1.0.5
   media_kit_libs_windows_video: any
+  media_kit_libs_macos_video: 1.1.4
 
   cached_network_image: ^3.4.1
   url_launcher: ^6.3.1

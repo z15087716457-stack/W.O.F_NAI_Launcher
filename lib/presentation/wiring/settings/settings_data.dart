@@ -397,7 +397,9 @@ SettingsViewData settingsViewData(
     ),
     bridges: settingsBridgesData(context, ref),
     network: SettingsNetworkData(
-      systemProxy: ref.watch(detectedSystemProxyProvider),
+      systemProxy: page == SettingsPageId.network
+          ? ref.watch(detectedSystemProxyProvider).valueOrNull
+          : null,
       endpoints: network.endpoints,
       checking: network.checking,
       checkedAt: network.checkedAt,

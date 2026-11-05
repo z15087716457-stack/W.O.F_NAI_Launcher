@@ -8,18 +8,49 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
+import 'package:nai_launcher/core/constants/api_constants.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/providers/character_prompt_provider.dart';
 import 'package:nai_launcher/core/utils/image_save_utils.dart';
+import 'package:nai_launcher/data/models/gallery/nai_image_metadata.dart';
 import 'package:nai_launcher/data/models/image/image_params.dart';
+import 'package:nai_launcher/data/models/user/user_subscription.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
+import 'package:nai_launcher/presentation/providers/auth_provider.dart';
+import 'package:nai_launcher/presentation/providers/generation/image_action_providers.dart';
 import 'package:nai_launcher/presentation/providers/generation/image_workflow_controller.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
 import 'package:nai_launcher/presentation/providers/generation/preview_selection_provider.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/canvas_feed_layout.dart';
 import 'package:nai_launcher/presentation/providers/krita/krita_bridge_notifier.dart';
+import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
 import 'package:nai_launcher/presentation/services/image_workflow_launcher.dart';
+import 'package:nai_launcher/presentation/utils/official_image_variations.dart';
+
+class _Auth extends AuthNotifier {
+  @override
+  AuthState build() =>
+      const AuthState(status: AuthStatus.authenticated, accountId: 'A');
+
+  void switchTo(String id) {
+    state = AuthState(status: AuthStatus.authenticated, accountId: id);
+  }
+}
+
+class _Subscription extends SubscriptionNotifier {
+  @override
+  SubscriptionState build() => const SubscriptionState.loaded(
+    UserSubscription(
+      tier: 1,
+      active: true,
+      trainingStepsLeft: TrainingStepsInfo(fixedTrainingStepsLeft: 1000),
+    ),
+  );
+
+  void useOpus() =>
+      state = SubscriptionState.loaded(state.subscription!.copyWith(tier: 3));
+}
 
 class _Generation extends ImageGenerationNotifier {
   _Generation(this.busy);
@@ -174,6 +205,8 @@ void main() {
           localStorageServiceProvider.overrideWith((ref) => _MemoryStorage()),
           imageGenerationNotifierProvider.overrideWith(_CaptureGeneration.new),
           generationParamsNotifierProvider.overrideWith(_Params.new),
+          authNotifierProvider.overrideWith(_Auth.new),
+          subscriptionNotifierProvider.overrideWith(_Subscription.new),
           kritaBridgeNotifierProvider.overrideWith((ref) => _Bridge(false)),
           generationCooldownProvider.overrideWith(() => _Cooldown(false)),
         ],
@@ -282,6 +315,121 @@ void main() {
       await tester.pumpWidget(const SizedBox());
     },
   );
+  for (final change in ['none', 'account-restored', 'quote']) {
+    testWidgets(
+      'variation quote matches the three submitted images ($change)',
+      (tester) async {
+        const metadata = NaiImageMetadata(
+          model: ImageModels.animeDiffusionV45Full,
+          prompt: 'source prompt',
+          steps: 28,
+        );
+        final source = GeneratedImage.create(
+          Uint8List.fromList(img.encodePng(img.Image(width: 512, height: 768))),
+          width: 1024,
+          height: 1024,
+          metadata: metadata,
+        );
+        final container = ProviderContainer(
+          overrides: [
+            localStorageServiceProvider.overrideWithValue(
+              _MemoryStorage()
+                ..values[StorageKeys.protectionWarnHighAnlasCost] = true
+                ..values[StorageKeys.protectionHighAnlasCostThreshold] = 1,
+            ),
+            imageGenerationNotifierProvider.overrideWith(
+              _CaptureGeneration.new,
+            ),
+            generationParamsNotifierProvider.overrideWith(_Params.new),
+            authNotifierProvider.overrideWith(_Auth.new),
+            subscriptionNotifierProvider.overrideWith(_Subscription.new),
+            kritaBridgeNotifierProvider.overrideWith((ref) => _Bridge(false)),
+            generationCooldownProvider.overrideWith(() => _Cooldown(false)),
+            generatedImageMetadataProvider(
+              source,
+            ).overrideWith((ref) => metadata),
+          ],
+        );
+        addTearDown(container.dispose);
+        final subscription = container
+            .read(subscriptionNotifierProvider)
+            .subscription;
+        final projected = OfficialImageVariations.project(
+          current: container.read(generationParamsNotifierProvider),
+          source: source.bytes,
+          width: 512,
+          height: 768,
+          metadata: metadata,
+        );
+        final total = variationRequestCost(projected, subscription);
+        var backups = 0;
+        late Future<void> Function() invoke;
+        await tester.pumpWidget(
+          UncontrolledProviderScope(
+            container: container,
+            child: MaterialApp(
+              locale: const Locale('en'),
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              home: Scaffold(
+                body: Consumer(
+                  builder: (context, ref, _) {
+                    invoke = () => ImageWorkflowLauncher.generateVariations(
+                      context,
+                      ref,
+                      source.bytes,
+                      sourceImage: source,
+                      beforeSubmit: () async => backups++,
+                    );
+                    return const SizedBox();
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+        final operation = invoke();
+        await tester.pumpAndSettle();
+        expect(find.text('$total Anlas'), findsOneWidget);
+        expect(container.read(imageVariationCostProvider(source)), total);
+        if (change == 'account-restored') {
+          final auth = container.read(authNotifierProvider.notifier) as _Auth;
+          auth.switchTo('B');
+          auth.switchTo('A');
+        } else if (change == 'quote') {
+          (container.read(subscriptionNotifierProvider.notifier)
+                  as _Subscription)
+              .useOpus();
+          expect(
+            variationRequestCost(
+              projected,
+              container.read(subscriptionNotifierProvider).subscription,
+            ),
+            isNot(total),
+          );
+        }
+        await tester.tap(find.text('Continue Generation'));
+        await tester.pumpAndSettle();
+        await operation;
+        final generation =
+            container.read(imageGenerationNotifierProvider.notifier)
+                as _CaptureGeneration;
+        if (change == 'none') {
+          expect(generation.submitted?.prompt, projected.prompt);
+          expect(
+            variationRequestCost(generation.submitted!, subscription),
+            total,
+          );
+          expect(backups, 1);
+        } else {
+          expect(generation.submitted, isNull);
+          expect(backups, 0);
+        }
+        await tester.pumpWidget(const SizedBox());
+      },
+    );
+  }
+
   for (final gate in ['generation', 'bridge', 'cooldown']) {
     testWidgets(
       '$gate blocks variations before changing any draft or workflow',

@@ -1,6 +1,5 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
 import 'package:nai_launcher/presentation/ui/channel/channel_contract.dart';
@@ -251,7 +250,7 @@ void main() {
       expect(after.top, lessThan(before.top));
     });
 
-    testWidgets('空闲微动：开着且没在生成时 ticker 在跑，生成中停', (t) async {
+    testWidgets('空闲微动按节拍推进，生成中停', (t) async {
       Widget host({required bool generating}) => MaterialApp(
         theme: GeistTheme.light,
         home: MediaQuery(
@@ -268,9 +267,19 @@ void main() {
         ),
       );
       await t.pumpWidget(host(generating: false));
-      expect(SchedulerBinding.instance.transientCallbackCount, greaterThan(0));
+      final painter =
+          t
+                  .widget<CustomPaint>(
+                    find.byKey(const Key('channel-backdrop')),
+                  )
+                  .painter!
+              as ChannelBackdropPainter;
+      await t.pump(const Duration(milliseconds: 66));
+      final time = painter.time.value;
+      expect(time, closeTo(.066, .0001));
       await t.pumpWidget(host(generating: true));
-      expect(SchedulerBinding.instance.transientCallbackCount, 0);
+      await t.pump(const Duration(seconds: 1));
+      expect(painter.time.value, time);
     });
 
     testWidgets('所有主题在各种缩放、明暗、钉板下都能画', (t) async {

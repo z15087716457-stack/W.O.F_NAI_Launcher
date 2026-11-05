@@ -7,6 +7,8 @@ import 'package:nai_launcher/core/nai_agent/pi_host_client.dart';
 import 'package:nai_launcher/core/nai_agent/model_request_gate.dart';
 import 'package:nai_launcher/core/nai_agent/agent_tool.dart';
 
+import '../../helpers/agent_test_node.dart';
+
 void main() {
   late Directory root;
   late HttpServer server;
@@ -60,8 +62,7 @@ void main() {
   }) async {
     final workspace = Directory('${root.path}/$id');
     final client = await PiHostClient.start(
-      nodeExecutable:
-          Platform.environment['NAI_AGENT_NODE'] ?? 'E:/node/node.exe',
+      nodeExecutable: agentTestNode,
       hostScript: File('tool/nai_agent/host.mjs').absolute.path,
       workspaceId: id,
       workspaceDirectory: workspace,

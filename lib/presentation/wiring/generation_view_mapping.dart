@@ -236,17 +236,29 @@ MemoryImage? _historyPendingPreview(
   );
 }
 
-GenTile generationTileView(GeneratedImage image) => GenTile(
+GenTile generationTileView(GeneratedImage image, {int? decodeEdge}) => GenTile(
   id: image.id,
   width: image.width,
   height: image.height,
-  image: MemoryImage(image.bytes),
+  image: _tileImage(image.bytes, decodeEdge),
   originalImage: image.canCompareOriginal
-      ? MemoryImage(image.originalBytes!)
+      ? _tileImage(image.originalBytes!, decodeEdge)
       : null,
   inpaintMaskBytes: image.canCompareOriginal ? image.inpaintMaskBytes : null,
   state: image.isFailedStreamSnapshot ? GenTileState.failed : GenTileState.done,
 );
+
+ImageProvider _tileImage(Uint8List bytes, int? decodeEdge) {
+  final image = MemoryImage(bytes);
+  return decodeEdge == null
+      ? image
+      : ResizeImage(
+          image,
+          width: decodeEdge,
+          height: decodeEdge,
+          policy: ResizeImagePolicy.fit,
+        );
+}
 
 GenGroup? generationFocusView(
   ImageGenerationState state, {

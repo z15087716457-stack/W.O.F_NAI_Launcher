@@ -19,6 +19,37 @@ import 'package:nai_launcher/data/models/image/image_params.dart';
 import 'package:nai_launcher/data/models/vibe/vibe_reference.dart';
 
 void main() {
+  test(
+    'stream concurrency error preserves the HTTP Retry-After header',
+    () async {
+      final adapter = _PendingDioAdapter();
+      final dio = Dio()..httpClientAdapter = adapter;
+      final endpoint = NaiApiEndpointService();
+      final service = NAIImageGenerationApiService(
+        dio,
+        NAIImageEnhancementApiService(dio, endpoint),
+        endpoint,
+      );
+      final result = service
+          .generateImageStream(const ImageParams(prompt: 'test'))
+          .toList();
+      await _waitForRequestCount(adapter, 1);
+      adapter.requests.single.response.complete(
+        ResponseBody.fromString(
+          '{"message":"Busy"}',
+          429,
+          headers: {
+            Headers.contentTypeHeader: ['application/json'],
+            'retry-after': ['12'],
+          },
+        ),
+      );
+      final failure = (await result).last.failure;
+      expect(failure?.statusCode, 429);
+      expect(failure?.retryAfter, const Duration(seconds: 12));
+    },
+  );
+
   for (final streamed in [false, true]) {
     for (final action in [
       ImageGenerationAction.img2img,
@@ -200,6 +231,8 @@ void main() {
       );
       final chunks = await result;
       expect(chunks.last.error, 'API_ERROR_HTTP_504|Gateway Time-out');
+      expect(chunks.last.failure?.statusCode, 504);
+      expect(chunks.last.failure?.isTransient, isTrue);
     },
   );
 

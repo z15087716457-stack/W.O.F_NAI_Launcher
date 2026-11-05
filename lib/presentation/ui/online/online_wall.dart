@@ -84,6 +84,8 @@ class OnlineWall extends StatefulWidget {
 class _OnlineWallState extends State<OnlineWall> {
   static _OnlineWallState? _current;
 
+  static const _cardBuffer = 600.0;
+  final _mountedOffset = ValueNotifier<double>(0);
   ScrollController _scroll = ScrollController();
   String? _listKey;
   List<_Slot> _slots = const [];
@@ -141,6 +143,7 @@ class _OnlineWallState extends State<OnlineWall> {
   void dispose() {
     if (_current == this) _current = null;
     _scroll.dispose();
+    _mountedOffset.dispose();
     super.dispose();
   }
 
@@ -148,15 +151,25 @@ class _OnlineWallState extends State<OnlineWall> {
     if (_listKey == list.key) return;
     _listKey = list.key;
     final old = _scroll;
-    _scroll = ScrollController(initialScrollOffset: list.initialOffset)
-      ..addListener(_onScroll);
+    _mountedOffset.value = list.initialOffset;
+    _scroll = ScrollController(
+      initialScrollOffset: list.initialOffset,
+      keepScrollOffset: false,
+    )..addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) => old.dispose());
+  }
+
+  void _updateMountedOffset(double offset) {
+    if ((offset - _mountedOffset.value).abs() >= _cardBuffer / 2) {
+      _mountedOffset.value = offset;
+    }
   }
 
   void _onScroll() {
     final scope = OnlineScope.of(context);
     final list = scope.data.list;
     final p = _scroll.position;
+    _updateMountedOffset(p.pixels);
     if (list.hasMore &&
         !list.loading &&
         !list.loadingMore &&
@@ -283,9 +296,22 @@ class _OnlineWallState extends State<OnlineWall> {
             _EndLine(count: items.length, blocked: list.blocked),
         ];
 
-        return NotificationListener<ScrollEndNotification>(
-          onNotification: (n) {
-            scope.actions.onScrollOffset(n.metrics.pixels);
+        return NotificationListener<Notification>(
+          key: ValueKey(list.key),
+          onNotification: (notification) {
+            if (notification is ScrollEndNotification &&
+                notification.depth == 0) {
+              final metrics = notification.metrics;
+              scope.actions.onScrollOffset(
+                metrics.pixels.clamp(
+                  metrics.minScrollExtent,
+                  metrics.maxScrollExtent,
+                ),
+              );
+            } else if (notification is ScrollMetricsNotification &&
+                notification.depth == 0) {
+              _updateMountedOffset(notification.metrics.pixels);
+            }
             return false;
           },
           child: ScrollConfiguration(
@@ -304,11 +330,11 @@ class _OnlineWallState extends State<OnlineWall> {
                 children: [
                   SizedBox(
                     height: height,
-                    child: AnimatedBuilder(
-                      animation: _scroll,
-                      builder: (context, _) {
-                        final o = _scroll.hasClients ? _scroll.offset : 0.0;
-                        final lo = o - 600, hi = o + viewport + 600;
+                    child: ValueListenableBuilder<double>(
+                      valueListenable: _mountedOffset,
+                      builder: (context, offset, _) {
+                        final lo = offset - _cardBuffer;
+                        final hi = offset + viewport + _cardBuffer;
                         return Stack(
                           clipBehavior: Clip.none,
                           children: [

@@ -36,6 +36,14 @@ function Get-AssetInfo {
       description = '解压即用，支持应用内一键更新，适合放在自定义目录。'
     }
   }
+  if ($name -match '_macOS_.*_Portable\.zip$') {
+    return [ordered]@{
+      platform = 'macos'
+      type = 'macos-portable'
+      label = 'macOS 通用包'
+      description = '支持 Apple 芯片与 Intel Mac，通过 Finder 替换。'
+    }
+  }
   return $null
 }
 
@@ -144,6 +152,9 @@ function Get-DownloadBadge {
     'windows-portable' {
       return "[![Windows Portable x64](https://img.shields.io/badge/Portable-x64-56B4D3?style=flat-square&logo=windows11&logoColor=white)]($url)"
     }
+    'macos-portable' {
+      return "[![macOS Universal](https://img.shields.io/badge/macOS-Universal-555555?style=flat-square&logo=apple)]($url)"
+    }
     default {
       throw "Cannot create download badge for asset type: $type"
     }
@@ -158,6 +169,14 @@ $windowsBadges = @(
 $downloadRows = @()
 if ($windowsBadges.Count -gt 0) {
   $downloadRows += "| **Windows** | $($windowsBadges -join '<br>') |"
+}
+$macBadges = @(
+  $assets |
+    Where-Object { $_['platform'] -eq 'macos' } |
+    ForEach-Object { Get-DownloadBadge -Asset $_ }
+)
+if ($macBadges.Count -gt 0) {
+  $downloadRows += "| **macOS** | $($macBadges -join '<br>') |"
 }
 $changelogSection = Get-ChangelogSection -Version ($Version -replace '\+.*$', '')
 

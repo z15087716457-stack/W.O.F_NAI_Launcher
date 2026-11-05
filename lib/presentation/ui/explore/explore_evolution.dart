@@ -1,3 +1,4 @@
+import 'package:nai_launcher/core/utils/primary_activator.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -492,7 +493,7 @@ class _KidState extends State<_Kid> with ExploreQuickOpen {
         final hw = HardwareKeyboard.instance;
         if (widget.selectable &&
             x.done &&
-            (ctrl.selecting || hw.isControlPressed || hw.isMetaPressed)) {
+            (ctrl.selecting || hw.isPrimaryOrWindowsMetaPressed)) {
           ctrl.toggleSelect(x.key);
         } else if (widget.selectable && x.done && hw.isShiftPressed) {
           ctrl.selectRange(x.key);

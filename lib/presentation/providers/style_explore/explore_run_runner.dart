@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../core/network/generation_failure.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/explore_mutation_engine.dart';
 import '../../../data/models/image/image_params.dart';
@@ -93,7 +94,7 @@ class _ExploreRunSession {
 
   final String ownerId;
   final String runId;
-  final void Function(ImageParams)? beforeGenerate;
+  final FutureOr<void> Function(ImageParams)? beforeGenerate;
   int? activeGenerationId;
   ImageGenerationNotifier? generationOwner;
   String? roundId;
@@ -225,7 +226,7 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
 
   Future<bool> start(
     String runId, {
-    void Function(ImageParams)? beforeGenerate,
+    FutureOr<void> Function(ImageParams)? beforeGenerate,
   }) async {
     final session = _claim(runId, beforeGenerate: beforeGenerate);
     if (session == null) return false;
@@ -239,7 +240,7 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
     required String familyId,
     required String parentSetId,
     required int count,
-    void Function(ImageParams)? beforeGenerate,
+    FutureOr<void> Function(ImageParams)? beforeGenerate,
   }) async {
     final session = _claim(runId, beforeGenerate: beforeGenerate);
     if (session == null) return false;
@@ -272,7 +273,7 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
   /// 失败重试：在同一 session 内把 failed 转 pending，再走公共准备和循环路径。
   Future<bool> retryFailed(
     String runId, {
-    void Function(ImageParams)? beforeGenerate,
+    FutureOr<void> Function(ImageParams)? beforeGenerate,
   }) async {
     final session = _claim(runId, beforeGenerate: beforeGenerate);
     if (session == null) return false;
@@ -284,7 +285,7 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
 
   _ExploreRunSession? _claim(
     String runId, {
-    void Function(ImageParams)? beforeGenerate,
+    FutureOr<void> Function(ImageParams)? beforeGenerate,
   }) {
     if (_session != null ||
         state.isRunning ||
@@ -678,7 +679,11 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
         ),
       );
 
-      session.beforeGenerate?.call(tempParams);
+      final beforeGenerate = session.beforeGenerate;
+      if (beforeGenerate != null) {
+        await beforeGenerate(tempParams);
+        if (_cancelRequested || _pauseRequested) break;
+      }
       final beforeGeneration = ref
           .read(imageGenerationNotifierProvider)
           .generationRunId;
@@ -692,9 +697,17 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
           ? admitted.generationRunId
           : null;
       session.generationOwner = generationOwner;
-      final result = await pendingResult;
-      session.activeGenerationId = null;
-      session.generationOwner = null;
+      ExploreGenerationResult? result;
+      GenerationFailure? failure;
+      try {
+        result = await pendingResult;
+      } on GenerationFailure catch (error) {
+        failure = error;
+        _pauseRequested = true;
+      } finally {
+        session.activeGenerationId = null;
+        session.generationOwner = null;
+      }
       if (result != null) {
         final storedPath = await ref
             .read(exploreRunImageStoreProvider)
@@ -717,8 +730,9 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
       } else {
         final errorText = _cancelRequested
             ? 'cancelled'
-            : (ref.read(imageGenerationNotifierProvider).errorMessage ??
-                  'generation failed');
+            : failure?.message ??
+                  ref.read(imageGenerationNotifierProvider).errorMessage ??
+                  'generation failed';
         await listNotifier.updateGeneration(
           session.runId,
           candidateId,

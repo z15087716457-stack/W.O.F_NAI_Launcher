@@ -1,3 +1,4 @@
+import 'package:nai_launcher/core/utils/primary_activator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -155,14 +156,10 @@ class _ToolsDirectorPageState extends State<ToolsDirectorPage>
             child: CallbackShortcuts(
               bindings: {
                 const SingleActivator(LogicalKeyboardKey.escape): a.onBack,
-                const SingleActivator(
-                  LogicalKeyboardKey.enter,
-                  control: true,
-                ): () {
+                const PrimaryActivator(LogicalKeyboardKey.enter): () {
                   if (widget.data.canRun) a.onRun();
                 },
-                const SingleActivator(LogicalKeyboardKey.keyV, control: true):
-                    a.onPaste,
+                const PrimaryActivator(LogicalKeyboardKey.keyV): a.onPaste,
               },
               child: Focus(
                 autofocus: true,

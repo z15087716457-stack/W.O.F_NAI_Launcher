@@ -1,6 +1,8 @@
+import 'package:nai_launcher/core/utils/primary_activator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../core/rag/rag_platform.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../widgets/common/upscale_brand_logo.dart';
 import '../agent/agent_glyphs.dart';
@@ -1296,8 +1298,7 @@ class _TextAreaState extends State<_TextArea> {
     );
     return CallbackShortcuts(
       bindings: {
-        const SingleActivator(LogicalKeyboardKey.keyS, control: true):
-            widget.onSave,
+        const PrimaryActivator(LogicalKeyboardKey.keyS): widget.onSave,
       },
       child: GestureDetector(
         // 点文本框下方的空白也能聚焦。
@@ -1998,7 +1999,10 @@ class SettingsRagPage extends StatelessWidget {
             SettingKeyRow(
               SettingKey.ragDevice,
               title: l.set_rgDevice,
-              control: const SetSeg(SettingKey.ragDevice),
+              control: SetSeg(
+                SettingKey.ragDevice,
+                values: RagPlatform.host.isMacOS ? const ['auto', 'cpu'] : null,
+              ),
             ),
             SettingKeyRow(
               SettingKey.ragPythonPath,
@@ -2194,6 +2198,15 @@ class _RagRuntimeRowState extends State<_RagRuntimeRow> {
       );
     }
     final locked = rg.busy || rg.checking;
+    final platform = RagPlatform.host;
+    void installRuntime() {
+      if (platform == RagPlatform.macOSArm64) {
+        a.onRagInstallRuntime(cuda: false);
+      } else {
+        setState(() => _choosing = true);
+      }
+    }
+
     return SettingsRow(
       key: const Key('rag-runtime'),
       anchor: 'rag-runtime',
@@ -2268,27 +2281,28 @@ class _RagRuntimeRowState extends State<_RagRuntimeRow> {
         mainAxisSize: MainAxisSize.min,
         spacing: 8,
         children: [
-          if (rg.runtimeReady) ...[
+          if (rg.runtimeReady || platform == RagPlatform.macOSX64)
             SettingsBtn(
               key: const Key('rag-check'),
               label: rg.checking ? l.set_testing : l.set_rgCheck,
               small: true,
               onTap: locked ? null : a.onRagCheckRuntime,
             ),
+          if (rg.runtimeReady && platform != RagPlatform.macOSX64)
             SettingsBtn(
               key: const Key('rag-reinstall'),
               label: l.set_rgReinstall,
               small: true,
               tone: SettingsBtnTone.ghost,
-              onTap: locked ? null : () => setState(() => _choosing = true),
+              onTap: locked ? null : installRuntime,
             ),
-          ] else
+          if (!rg.runtimeReady && platform != RagPlatform.macOSX64)
             SettingsBtn(
               key: const Key('rag-install'),
               label: rg.checking ? l.set_testing : l.set_rgInstall,
               small: true,
               tone: SettingsBtnTone.primary,
-              onTap: locked ? null : () => setState(() => _choosing = true),
+              onTap: locked ? null : installRuntime,
             ),
         ],
       ),

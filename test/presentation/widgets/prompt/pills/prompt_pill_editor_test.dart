@@ -1357,6 +1357,135 @@ void main() {
     },
   );
 
+  group('translation pill right click', () {
+    // The field keeps the right click and its own menu; the pill only adds
+    // the toggle at the end.
+    void mockClipboard(WidgetTester tester) {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (call) async => switch (call.method) {
+          'Clipboard.hasStrings' => {'value': true},
+          'Clipboard.getData' => {'text': 'red hair, '},
+          _ => null,
+        },
+      );
+      addTearDown(() {
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        );
+      });
+    }
+
+    Future<ProviderContainer> pumpPill(WidgetTester tester) async {
+      final container = await _pump(
+        tester,
+        libraryState: PromptBlockLibraryState(blocks: [], folders: []),
+      );
+      container
+          .read(pillWorkspaceNotifierProvider.notifier)
+          .insertTranslationAt(offset: 0, source: 'blue eyes', zh: '蓝眼睛');
+      await tester.pump();
+      return container;
+    }
+
+    bool showsOriginal(ProviderContainer container) => container
+        .read(pillWorkspaceNotifierProvider)
+        .document
+        .instances
+        .values
+        .single
+        .translation!
+        .showOriginal;
+
+    Future<void> rightClickPill(WidgetTester tester) async {
+      await tester.tap(
+        find.byType(TranslationPillView),
+        buttons: kSecondaryMouseButton,
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('without a selection: the field menu, then the toggle', (
+      tester,
+    ) async {
+      mockClipboard(tester);
+      final container = await pumpPill(tester);
+
+      await rightClickPill(tester);
+      expect(find.text('粘贴'), findsOneWidget);
+      expect(find.text('全选'), findsOneWidget);
+      expect(
+        tester.getTopLeft(find.text('全选')).dy,
+        lessThan(tester.getTopLeft(find.text('切换原文与译文')).dy),
+      );
+      await tester.tap(find.text('粘贴'));
+      await tester.pumpAndSettle();
+      expect(
+        container.read(pillWorkspaceNotifierProvider).document.text,
+        contains('red hair, '),
+      );
+      expect(find.text('切换原文与译文'), findsNothing);
+
+      await rightClickPill(tester);
+      await tester.tap(find.text('切换原文与译文'));
+      await tester.pumpAndSettle();
+      expect(showsOriginal(container), isTrue);
+      expect(find.text('切换原文与译文'), findsNothing);
+      expect(find.text('blue eyes'), findsOneWidget);
+
+      await tester.tap(
+        find.byKey(const Key('translation-pill-source-input')),
+        buttons: kSecondaryMouseButton,
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('切换原文与译文'));
+      await tester.pumpAndSettle();
+      expect(showsOriginal(container), isFalse);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.windows));
+
+    testWidgets(
+      'with a selection: Save as block and Copy stay, then the toggle',
+      (tester) async {
+        final container = await pumpPill(tester);
+        final field = find
+            .descendant(
+              of: find.byType(PromptPillEditor),
+              matching: find.byType(EditableText),
+            )
+            .first;
+        await tester.tapAt(tester.getTopRight(field) + const Offset(-10, 10));
+        await tester.pump(const Duration(milliseconds: 400));
+        const selectAll = LogicalKeyboardKey.controlLeft;
+        await tester.sendKeyDownEvent(selectAll);
+        await tester.sendKeyEvent(LogicalKeyboardKey.keyA);
+        await tester.sendKeyUpEvent(selectAll);
+        await tester.pump();
+        expect(
+          tester
+              .state<EditableTextState>(field)
+              .textEditingValue
+              .selection
+              .isCollapsed,
+          isFalse,
+        );
+
+        await rightClickPill(tester);
+        expect(find.byKey(const Key('block-sel-save')), findsOneWidget);
+        expect(find.byKey(const Key('block-sel-copy')), findsOneWidget);
+        expect(
+          tester.getTopLeft(find.byKey(const Key('block-sel-copy'))).dx,
+          lessThan(tester.getTopLeft(find.text('切换原文与译文')).dx),
+        );
+        await tester.tap(find.text('切换原文与译文'));
+        await tester.pumpAndSettle();
+        expect(showsOriginal(container), isTrue);
+        expect(find.byKey(const Key('block-selection-toolbar')), findsNothing);
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.windows),
+    );
+  });
+
   testWidgets(
     'original translation edits at the clicked caret and retains IME composition',
     (tester) async {

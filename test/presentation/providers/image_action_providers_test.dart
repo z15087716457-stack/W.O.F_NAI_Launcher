@@ -68,7 +68,7 @@ void main() {
     int steps = 28,
   }) => ImageSaveUtils.buildPrebuiltMetadataBytes(
     imageBytes: Uint8List.fromList(
-      img.encodePng(img.Image(width: 16, height: 16)),
+      img.encodePng(img.Image(width: 1024, height: 1024, numChannels: 1)),
     ),
     metadata: {
       'Software': 'NovelAI',

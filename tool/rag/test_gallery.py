@@ -5,8 +5,9 @@ import sqlite3
 import tempfile
 import threading
 import unittest
+from unittest.mock import Mock, patch
 from PIL import Image, PngImagePlugin
-from gallery import GalleryEngine, GallerySources, load_image
+from gallery import GalleryEngine, GallerySources, image_stamp, load_image
 from test_rag import FakeModels
 
 
@@ -35,27 +36,38 @@ class GalleryTests(unittest.TestCase):
         self.database=self.root/'gallery.sqlite';self.roots=self.root/'roots.json'
         self.roots.write_text(json.dumps({'version':1,'roots':[str(self.library)]}),encoding='utf-8')
         db=sqlite3.connect(self.database)
-        db.executescript('''CREATE TABLE gallery_images(id INTEGER PRIMARY KEY,file_path TEXT,is_deleted INTEGER);
+        db.executescript('''CREATE TABLE gallery_images(id INTEGER PRIMARY KEY,file_path TEXT,is_deleted INTEGER,file_size INTEGER DEFAULT 0,modified_at INTEGER DEFAULT 0);
           CREATE TABLE gallery_metadata(image_id INTEGER PRIMARY KEY,prompt TEXT,positive_prompt_text TEXT,negative_prompt TEXT,
           model TEXT,sampler TEXT,steps INTEGER,cfg_scale REAL,seed INTEGER,width INTEGER,height INTEGER,
           software TEXT,source TEXT,raw_json TEXT,has_metadata INTEGER);''')
         for i,color in enumerate(('red','blue','green'),1):
             path=self.library/f'{i}.png';info=PngImagePlugin.PngInfo();info.add_text('private-preserve','untouched')
             Image.new('RGB',(32,24),color).save(path,pnginfo=info)
-            db.execute('INSERT INTO gallery_images VALUES(?,?,0)',(i,str(path)))
+            db.execute('INSERT INTO gallery_images(id,file_path,is_deleted) VALUES(?,?,0)',(i,str(path)))
             db.execute('INSERT INTO gallery_metadata VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
               (i,'umbrella' if i==1 else 'beach','umbrella' if i==1 else 'beach','rain','nai-diffusion-4' if i<3 else 'other',
                'k_euler',28,5.0,1,32,24,'NovelAI' if i<3 else 'Other','', 'private_raw_never_export',1))
         self.broken=self.library/'bad.png';self.broken.write_bytes(b'broken')
-        db.execute('INSERT INTO gallery_images VALUES(4,?,0)',(str(self.broken),))
+        db.execute('INSERT INTO gallery_images(id,file_path,is_deleted) VALUES(4,?,0)',(str(self.broken),))
         outside=self.root/'outside.png';Image.new('RGB',(4,4),'red').save(outside)
-        db.execute('INSERT INTO gallery_images VALUES(5,?,0)',(str(outside),))
-        db.execute('INSERT INTO gallery_images VALUES(6,?,1)',(str(self.library/'deleted.png'),))
+        db.execute('INSERT INTO gallery_images(id,file_path,is_deleted) VALUES(5,?,0)',(str(outside),))
+        db.execute('INSERT INTO gallery_images(id,file_path,is_deleted) VALUES(6,?,1)',(str(self.library/'deleted.png'),))
         db.commit();db.close()
         self.models=GalleryModels(self.root)
         self.engine=GalleryEngine(self.root/'index',self.models,self.database,self.roots)
     def tearDown(self):self.engine.close();self.temp.cleanup()
     def build(self):return list(self.engine.build(self.engine.preview()['plan_id'],lambda:False))
+    def change(self, sql, args=()):
+        db = sqlite3.connect(self.database)
+        try:
+            with db:
+                db.execute(sql, args)
+        finally:
+            db.close()
+
+    def update(self, verify=False):
+        return list(self.engine.build(self.engine.preview(verify=verify)['plan_id'], lambda: False))
+
     def search(self,mode='mixed',paths=None,image=''):
         return self.engine.search('umbrella',paths,image,mode,20,lambda:False)['items']
     def test_preview_is_read_only_and_separates_counts(self):
@@ -96,6 +108,60 @@ class GalleryTests(unittest.TestCase):
     def test_incremental_build_reuses_unchanged_image_vectors(self):
         self.build();count=self.models.images;self.models.embedded.clear();self.build()
         self.assertEqual(self.models.images,count);self.assertEqual(self.models.embedded,[])
+    def test_incremental_update_skips_unrelated_rows_and_touches_only_changed_image(self):
+        self.change('UPDATE gallery_images SET is_deleted=1 WHERE id=4')
+        self.build()
+        signature = self.engine.signature()
+        catalogue = self.engine.sources.catalogue()
+        self.change('CREATE TABLE favorites(image_id INTEGER)')
+        self.change('INSERT INTO favorites VALUES(1)')
+        self.change("UPDATE gallery_metadata SET raw_json='different irrelevant content' WHERE image_id=1")
+        self.assertEqual(signature, self.engine.signature())
+        self.assertIs(self.engine.sources.catalogue(), catalogue)
+        self.assertTrue(self.engine.status()['complete'])
+        path = self.library / '2.png'
+        Image.new('RGB', (32, 24), 'yellow').save(path)
+        self.change('UPDATE gallery_images SET file_size=?,modified_at=? WHERE id=2',
+                    (path.stat().st_size, path.stat().st_mtime_ns // 1000000))
+        with patch('gallery.image_stamp', wraps=image_stamp) as stamps:
+            self.update()
+        self.assertEqual({call.args[0] for call in stamps.call_args_list}, {str(path)})
+        self.assertTrue(self.engine.status()['complete'])
+        self.assertEqual(self.models.images, 4)
+
+        self.change("UPDATE gallery_metadata SET positive_prompt_text='new prompt' WHERE image_id=2")
+        self.models.embedded.clear()
+        with patch('gallery.image_stamp', side_effect=AssertionError('Unchanged image was checked')):
+            self.update()
+        self.assertEqual(len(self.models.embedded), 1)
+        self.assertIn('new prompt', self.models.embedded[0])
+
+        self.change('UPDATE gallery_images SET is_deleted=1 WHERE id=2')
+        self.update()
+        self.assertEqual(self.engine.status()['visual_indexed'], 2)
+        self.assertEqual(self.engine.status()['parameters_indexed'], 1)
+
+    def test_manual_and_first_process_update_recheck_file_changes_outside_database(self):
+        self.change('UPDATE gallery_images SET is_deleted=1 WHERE id=4')
+        self.build()
+        path = self.library / '1.png'
+        Image.new('RGB', (45, 37), 'yellow').save(path)
+        self.update()
+        self.assertEqual(self.models.images, 3)
+        self.assertNotIn('1', {hit['id'] for hit in self.search('visual')})
+        self.update(verify=True)
+        self.assertEqual(self.models.images, 4)
+        self.assertIn('1', {hit['id'] for hit in self.search('visual')})
+        self.engine.close()
+        self.engine = GalleryEngine(self.root/'index', self.models, self.database, self.roots)
+        self.update()  # Existing checkpoint is reusable.
+        self.assertEqual(self.models.images, 4)
+        Image.new('RGB', (51, 34), 'blue').save(path)
+        self.engine.close()
+        self.engine = GalleryEngine(self.root/'index', self.models, self.database, self.roots)
+        self.update()
+        self.assertEqual(self.models.images, 5)
+
     def test_removed_root_never_returns_old_images(self):
         self.build();self.roots.write_text(json.dumps({'version':1,'roots':[]}))
         self.assertEqual(self.search(),[])
@@ -125,7 +191,6 @@ class GalleryTests(unittest.TestCase):
         self.assertEqual(processed,sorted(processed))
 
     def test_worker_completes_gallery_build_with_its_progress_callback(self):
-        from unittest.mock import patch
         from worker import Worker
         worker=Worker();worker.models=self.models
         worker.engines={'gallery':self.engine}
@@ -142,6 +207,49 @@ class GalleryTests(unittest.TestCase):
         self.assertEqual(events[-1]['phase'],'complete')
         self.assertTrue(events[-1]['complete'])
         self.assertGreater(events[-1]['parameters_indexed'],0)
+
+    def test_worker_defers_gallery_checkpoint_and_flushes_on_quiet_pause_and_close(self):
+        from pool import VectorPool
+        from worker import Worker
+        pool = VectorPool(self.root/'shared', self.models.fingerprint)
+        self.engine.close()
+        self.engine = GalleryEngine(self.root/'index', self.models, self.database, self.roots, pool=pool)
+        worker = Worker()
+        worker.pool = pool
+        worker.models = Mock()
+        worker.engines = {'gallery': self.engine}
+        token = threading.Event()
+
+        def build():
+            plan = worker.execute('preview', {'source': 'gallery', 'verify': False}, token)
+            job = worker.execute('start', {'source': 'gallery', 'plan_id': plan['plan_id']}, token)['job_id']
+            with patch('worker.emit'):
+                while job in worker.jobs:
+                    worker._step(job)
+            return job
+
+        try:
+            build()
+            self.assertTrue(pool.unsaved())
+            self.assertIsNotNone(worker.checkpoint_due)
+            worker._save_due_checkpoint()
+            self.assertFalse(pool.unsaved())
+            self.change('UPDATE gallery_images SET is_deleted=1 WHERE id=2')
+            job = build()
+            self.assertTrue(pool.unsaved())
+            worker.execute('pause', {'source': 'gallery', 'job_id': job}, token)
+            self.assertFalse(pool.unsaved())
+            self.change('UPDATE gallery_images SET is_deleted=0 WHERE id=2')
+            build()
+            self.assertTrue(pool.unsaved())
+        finally:
+            worker.close()
+        reopened = VectorPool(self.root/'shared', self.models.fingerprint)
+        try:
+            self.assertEqual(len(reopened.ann), 5)
+            self.assertFalse(reopened.unsaved())
+        finally:
+            reopened.close()
 
     def test_cancel_between_visual_and_parameter_batches_keeps_partial_index(self):
         cancelled=False;events=[]

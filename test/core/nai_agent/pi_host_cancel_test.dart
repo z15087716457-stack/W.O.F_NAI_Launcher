@@ -7,6 +7,8 @@ import 'package:nai_launcher/core/krita/bridge_draft_guard.dart';
 import 'package:nai_launcher/core/nai_agent/pi_host_client.dart';
 import 'package:nai_launcher/core/nai_agent/studio_tools.dart';
 
+import '../../helpers/agent_test_node.dart';
+
 void main() {
   test(
     'host abort cancels a pending Studio backup; late completion never commits',
@@ -78,8 +80,7 @@ void main() {
       final events = <Map>[];
       try {
         client = await PiHostClient.start(
-          nodeExecutable:
-              Platform.environment['NAI_AGENT_NODE'] ?? 'E:/node/node.exe',
+          nodeExecutable: agentTestNode,
           hostScript: File('tool/nai_agent/host.mjs').absolute.path,
           workspaceId: 'cancel-test',
           workspaceDirectory: root,

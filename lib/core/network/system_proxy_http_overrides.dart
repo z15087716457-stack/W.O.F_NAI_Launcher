@@ -24,6 +24,11 @@ class SystemProxyHttpOverrides extends HttpOverrides {
     // 设置代理配置
     // findProxy 回调接收请求 URI，返回代理字符串
     client.findProxy = (uri) {
+      if (Platform.isMacOS &&
+          (uri.host.toLowerCase() == 'localhost' ||
+              InternetAddress.tryParse(uri.host)?.isLoopback == true)) {
+        return 'DIRECT';
+      }
       AppLogger.d(
         'Proxy request for: ${uri.host}:${uri.port} -> $_proxyString',
         'PROXY',
