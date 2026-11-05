@@ -317,40 +317,33 @@ class _CardState extends State<_Card> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 spacing: 8,
                 children: [
-                  Row(
+                  Wrap(
                     spacing: 8,
+                    runSpacing: 8,
+                    alignment: WrapAlignment.spaceBetween,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
-                      if (d.evolution != null &&
-                          a.onEvolutionChanged != null) ...[
-                        Expanded(
-                          child: Tooltip(
-                            message: l10n.blocks_drawMode,
-                            child: Text(
-                              l10n.blocks_drawMode,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: UiText.sans(
-                                11.5,
-                                weight: FontWeight.w600,
-                                color: c.muted,
-                                letterSpacing: .23,
-                              ),
+                      BlockLabel(l10n.blocks_drawMode),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        spacing: 8,
+                        children: [
+                          if (d.evolution != null &&
+                              a.onEvolutionChanged != null)
+                            _geneticToggle(context),
+                          Flexible(
+                            child: BlockSeg<BlockMode>(
+                              key: const Key('block-card-modes'),
+                              wrap: true,
+                              values: BlockMode.values,
+                              selected: s.mode,
+                              keyOf: (m) => Key('block-card-mode-${m.name}'),
+                              labelOf: (m) => BlocksFormat.mode(context, m),
+                              glyphOf: BlocksFormat.modeGlyph,
+                              onTap: a.onModeChanged,
                             ),
                           ),
-                        ),
-                        _geneticToggle(context),
-                      ] else ...[
-                        BlockLabel(l10n.blocks_drawMode),
-                        const Spacer(),
-                      ],
-                      BlockSeg<BlockMode>(
-                        key: const Key('block-card-modes'),
-                        values: BlockMode.values,
-                        selected: s.mode,
-                        keyOf: (m) => Key('block-card-mode-${m.name}'),
-                        labelOf: (m) => BlocksFormat.mode(context, m),
-                        glyphOf: BlocksFormat.modeGlyph,
-                        onTap: a.onModeChanged,
+                        ],
                       ),
                     ],
                   ),
@@ -371,82 +364,105 @@ class _CardState extends State<_Card> {
                 color: c.panel,
                 border: Border(top: BorderSide(color: c.line)),
               ),
-              child: Row(
+              child: Wrap(
                 spacing: 6,
+                runSpacing: 6,
+                alignment: d.side == null
+                    ? WrapAlignment.end
+                    : WrapAlignment.spaceBetween,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
-                  if (d.side case final side?) ...[
-                    Text(
-                      l10n.blocks_appliesTo,
-                      style: UiText.sans(12, color: c.muted),
-                    ),
-                    BlockSeg<BlockScopeSide>(
-                      key: const Key('block-card-side'),
-                      mini: true,
-                      values: const [
-                        BlockScopeSide.positive,
-                        BlockScopeSide.negative,
+                  if (d.side case final side?)
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Text(
+                          l10n.blocks_appliesTo,
+                          style: UiText.sans(12, color: c.muted),
+                        ),
+                        BlockSeg<BlockScopeSide>(
+                          key: const Key('block-card-side'),
+                          mini: true,
+                          wrap: true,
+                          values: const [
+                            BlockScopeSide.positive,
+                            BlockScopeSide.negative,
+                          ],
+                          isOn: (v) => side == BlockScopeSide.both || side == v,
+                          enabledOf: (v) =>
+                              v == BlockScopeSide.positive || b.hasNegative,
+                          keyOf: (v) => Key('block-card-side-${v.name}'),
+                          labelOf: (v) => v == BlockScopeSide.positive
+                              ? l10n.blocks_positive
+                              : l10n.blocks_negative,
+                          onTap: (v) {
+                            // 至少留一面：点掉唯一亮着的那面不生效。
+                            final pos = side != BlockScopeSide.negative;
+                            final neg = side != BlockScopeSide.positive;
+                            final p2 = v == BlockScopeSide.positive
+                                ? !pos
+                                : pos;
+                            final n2 = v == BlockScopeSide.negative
+                                ? !neg
+                                : neg;
+                            if (!p2 && !n2) return;
+                            a.onSideChanged(
+                              p2 && n2
+                                  ? BlockScopeSide.both
+                                  : (p2
+                                        ? BlockScopeSide.positive
+                                        : BlockScopeSide.negative),
+                            );
+                          },
+                        ),
                       ],
-                      isOn: (v) => side == BlockScopeSide.both || side == v,
-                      enabledOf: (v) =>
-                          v == BlockScopeSide.positive || b.hasNegative,
-                      keyOf: (v) => Key('block-card-side-${v.name}'),
-                      labelOf: (v) => v == BlockScopeSide.positive
-                          ? l10n.blocks_positive
-                          : l10n.blocks_negative,
-                      onTap: (v) {
-                        // 至少留一面：点掉唯一亮着的那面不生效。
-                        final pos = side != BlockScopeSide.negative;
-                        final neg = side != BlockScopeSide.positive;
-                        final p2 = v == BlockScopeSide.positive ? !pos : pos;
-                        final n2 = v == BlockScopeSide.negative ? !neg : neg;
-                        if (!p2 && !n2) return;
-                        a.onSideChanged(
-                          p2 && n2
-                              ? BlockScopeSide.both
-                              : (p2
-                                    ? BlockScopeSide.positive
-                                    : BlockScopeSide.negative),
-                        );
-                      },
                     ),
-                  ],
-                  const Spacer(),
-                  UiBtn(
-                    key: const Key('block-card-toggle'),
-                    size: UiBtnSize.small,
-                    tone: UiBtnTone.ghost,
-                    padding: const EdgeInsets.symmetric(horizontal: 6),
-                    onTap: () => a.onEnabledChanged(!d.enabled),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
                     children: [
-                      UiGlyph(
-                        d.enabled ? UiGlyphs.eye : UiGlyphs.eyeOff,
-                        size: 14,
+                      UiBtn(
+                        key: const Key('block-card-toggle'),
+                        size: UiBtnSize.small,
+                        tone: UiBtnTone.ghost,
+                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                        onTap: () => a.onEnabledChanged(!d.enabled),
+                        children: [
+                          UiGlyph(
+                            d.enabled ? UiGlyphs.eye : UiGlyphs.eyeOff,
+                            size: 14,
+                          ),
+                          Text(
+                            d.enabled
+                                ? l10n.blocks_disable
+                                : l10n.blocks_enable,
+                          ),
+                        ],
                       ),
-                      Text(
-                        d.enabled ? l10n.blocks_disable : l10n.blocks_enable,
+                      UiBtn(
+                        key: const Key('block-card-edit'),
+                        size: UiBtnSize.small,
+                        tone: UiBtnTone.ghost,
+                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                        onTap: d.missing ? null : a.onEditBlock,
+                        children: [
+                          const UiGlyph(UiGlyphs.pencil, size: 14),
+                          Text(l10n.blocks_editBlock),
+                        ],
+                      ),
+                      UiBtn(
+                        key: const Key('block-card-remove'),
+                        size: UiBtnSize.small,
+                        tone: UiBtnTone.ghost,
+                        color: c.error,
+                        tooltip: l10n.blocks_removeInstanceTip,
+                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                        onTap: a.onRemove,
+                        children: const [UiGlyph(UiGlyphs.trash, size: 14)],
                       ),
                     ],
-                  ),
-                  UiBtn(
-                    key: const Key('block-card-edit'),
-                    size: UiBtnSize.small,
-                    tone: UiBtnTone.ghost,
-                    padding: const EdgeInsets.symmetric(horizontal: 6),
-                    onTap: d.missing ? null : a.onEditBlock,
-                    children: [
-                      const UiGlyph(UiGlyphs.pencil, size: 14),
-                      Text(l10n.blocks_editBlock),
-                    ],
-                  ),
-                  UiBtn(
-                    key: const Key('block-card-remove'),
-                    size: UiBtnSize.small,
-                    tone: UiBtnTone.ghost,
-                    color: c.error,
-                    tooltip: l10n.blocks_removeInstanceTip,
-                    padding: const EdgeInsets.symmetric(horizontal: 6),
-                    onTap: a.onRemove,
-                    children: const [UiGlyph(UiGlyphs.trash, size: 14)],
                   ),
                 ],
               ),

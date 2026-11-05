@@ -335,7 +335,8 @@ class BlockLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    return Row(
+    final label = Row(
+      mainAxisSize: MainAxisSize.min,
       spacing: 6,
       children: [
         Text(
@@ -348,8 +349,15 @@ class BlockLabel extends StatelessWidget {
           ),
         ),
         if (count != null) Text(count!, style: UiText.mono(11, color: c.faint)),
-        if (trailing != null) ...[const Spacer(), trailing!],
       ],
+    );
+    if (trailing == null) return label;
+    return Wrap(
+      spacing: 6,
+      runSpacing: 6,
+      alignment: WrapAlignment.spaceBetween,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [label, trailing!],
     );
   }
 }
@@ -425,8 +433,9 @@ class BlockSeg<T> extends StatelessWidget {
     this.enabledOf,
     this.mini = false,
     this.expand = false,
+    this.wrap = false,
     this.keyOf,
-  });
+  }) : assert(!expand || !wrap);
 
   final List<T> values;
   final T? selected;
@@ -439,6 +448,9 @@ class BlockSeg<T> extends StatelessWidget {
 
   /// 撑满宽度、各项等分。
   final bool expand;
+
+  /// Narrow cards can keep translated options visible on multiple rows.
+  final bool wrap;
   final Key Function(T value)? keyOf;
 
   @override
@@ -456,7 +468,7 @@ class BlockSeg<T> extends StatelessWidget {
           return Container(
             height: mini ? 22 : 26,
             padding: EdgeInsets.symmetric(horizontal: mini ? 8 : 10),
-            alignment: Alignment.center,
+            alignment: wrap ? null : Alignment.center,
             decoration: BoxDecoration(
               color: on ? (c.dark ? c.hover : c.raised) : null,
               borderRadius: BorderRadius.circular(5),
@@ -496,17 +508,20 @@ class BlockSeg<T> extends StatelessWidget {
       return expand ? Expanded(child: w) : w;
     }
 
+    final items = [for (final v in values) item(v)];
     return Container(
       padding: EdgeInsets.all(mini ? 1 : 2),
       decoration: BoxDecoration(
         color: c.control,
         borderRadius: BorderRadius.circular(7),
       ),
-      child: Row(
-        mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
-        spacing: 2,
-        children: [for (final v in values) item(v)],
-      ),
+      child: wrap
+          ? Wrap(spacing: 2, runSpacing: 2, children: items)
+          : Row(
+              mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
+              spacing: 2,
+              children: items,
+            ),
     );
   }
 }
