@@ -1034,14 +1034,12 @@ class GalleryStreamScanner {
     List<Directory> rootDirs, {
     List<String> priorityPaths = const [],
   }) async* {
-    const supportedExtensions = ['.png', '.jpg', '.jpeg', '.webp'];
     final emittedKeys = <String>{};
 
     for (final path in priorityPaths) {
       if (_shouldCancel) break;
 
-      final ext = p.extension(path).toLowerCase();
-      if (!supportedExtensions.contains(ext)) {
+      if (!isGalleryIndexableImage(path)) {
         continue;
       }
 
@@ -1063,20 +1061,10 @@ class GalleryStreamScanner {
       )) {
         if (_shouldCancel) break;
 
-        if (entity is File) {
-          // 跳过缩略图
-          if (entity.path.contains(
-                '${Platform.pathSeparator}.thumbs${Platform.pathSeparator}',
-              ) ||
-              entity.path.contains('.thumb.')) {
-            continue;
-          }
-
-          final ext = p.extension(entity.path).toLowerCase();
-          if (supportedExtensions.contains(ext) &&
-              emittedKeys.add(galleryFilePathKey(entity.path))) {
-            yield entity;
-          }
+        if (entity is File &&
+            isGalleryIndexableImage(entity.path) &&
+            emittedKeys.add(galleryFilePathKey(entity.path))) {
+          yield entity;
         }
       }
     }
@@ -1088,7 +1076,6 @@ class GalleryStreamScanner {
   /// 其长度即总文件数——让用户看到固定的进度（如 0/8751 → 8751/8751）；
   /// 全集同时供一致性检查做孤儿差集（磁盘全集 − DB 路径集）。
   Future<Set<String>> _countTotalFiles(List<Directory> rootDirs) async {
-    const supportedExtensions = ['.png', '.jpg', '.jpeg', '.webp'];
     final countedKeys = <String>{};
 
     for (final rootDir in rootDirs) {
@@ -1100,19 +1087,8 @@ class GalleryStreamScanner {
       )) {
         if (_shouldCancel) break;
 
-        if (entity is File) {
-          // 跳过缩略图
-          if (entity.path.contains(
-                '${Platform.pathSeparator}.thumbs${Platform.pathSeparator}',
-              ) ||
-              entity.path.contains('.thumb.')) {
-            continue;
-          }
-
-          final ext = p.extension(entity.path).toLowerCase();
-          if (supportedExtensions.contains(ext)) {
-            countedKeys.add(galleryFilePathKey(entity.path));
-          }
+        if (entity is File && isGalleryIndexableImage(entity.path)) {
+          countedKeys.add(galleryFilePathKey(entity.path));
         }
       }
     }
