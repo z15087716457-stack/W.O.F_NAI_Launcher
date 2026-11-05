@@ -178,6 +178,8 @@
 
 **历史批次**：同一 `generationRunId` 只显示一条，按 `batchIndex` 选择首图封面，右下角标实际张数；生成中数量含待完成槽位。无 runId 的旧图保持独立，不能仅凭时间/尺寸合并。并行返回晚到的首图在同一行接管占位；取消后按留存图片计数。关闭分组时先按批次新旧排序，再按批内序号拆为单图，与画布排列一致。普通查看保留图片／批次定位，点历史封面发起显式整组对焦；蓝框只表示批量选中。现有 GenHost 共享图片级多选，历史选择整批、主图区选择子图，历史半选显示横线。整批选中的活动批次继续接收后来完成的成员，保存／打包／删除只读取实际选中图片 ID。主画布不叠加批次数量，历史角标保持。[本轮源码与验证](docs/generation-history-polish-2026-11-01.md)。
 
+**画布默认偏好**：历史栏单击默认联动预览，双击可打开详情。新图缩放到填满默认开启。缺省读取与设置的「恢复默认」一致，已保存的偏好继续生效。
+
 历史栏单图右键删除调用共享 GeneratedImageActions.deleteImage(confirm: false)，直接移除该图与固定副本，刷新 current / history / display 列表、批次封面 / 数量并清理该图预览焦点，不弹居中确认；已保存图库文件保留。共享方法默认确认，其余删除入口保持原有流程。
 
 **当前布局常量（参考保存的 chunk 5285）**：组间 `kCanvasGroupSpacing=340`、组内默认 `ceil(sqrt(N))` 列 row-major 近方阵 48px 间隙、N=3 走 `floor(4*FNV(id+':tri'))` 哈希四式三角（上1下2/上2下1/左1右2/左2右1）、gridXLength>0 列紧凑 24px、组水平居中 `x=-width/2`（`0*o` 错动是死代码）、`bounds.height=cursorY-340` 含尾随距。归组 `run:<generationRunId>`；无 runId 兜底按同尺寸+createdAt≤120s 相邻合并（外部登记/桥接漏打 runId 的图不致散组）。生成中 inflight 组置顶 = `totalImages` 槽（尺寸=batchW×H）。

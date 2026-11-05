@@ -5,21 +5,21 @@ import 'package:nai_launcher/presentation/providers/history_click_behavior_provi
 
 void main() {
   group('HistoryClickBehaviorNotifier', () {
-    test('missing storage value defaults to classic open detail', () {
+    test('missing storage value defaults to linked preview', () {
       final storage = LocalStorageService();
       final container = ProviderContainer(
         overrides: [localStorageServiceProvider.overrideWith((ref) => storage)],
       );
       addTearDown(container.dispose);
 
-      expect(storage.getHistoryClickBehavior(), 'open_detail');
+      expect(storage.getHistoryClickBehavior(), 'select_preview');
       expect(
         container.read(historyClickBehaviorNotifierProvider),
-        HistoryClickBehavior.openDetail,
+        HistoryClickBehavior.selectPreview,
       );
     });
 
-    test('unknown storage value never creates a linked state', () {
+    test('unknown storage value falls back to linked preview', () {
       final storage = _FakeStorage()..behavior = 'unknown';
       final container = ProviderContainer(
         overrides: [localStorageServiceProvider.overrideWith((ref) => storage)],
@@ -28,32 +28,38 @@ void main() {
 
       expect(
         container.read(historyClickBehaviorNotifierProvider),
-        HistoryClickBehavior.openDetail,
-      );
-    });
-
-    test('setBehavior persists and updates state', () async {
-      final storage = _FakeStorage();
-      final container = ProviderContainer(
-        overrides: [localStorageServiceProvider.overrideWith((ref) => storage)],
-      );
-      addTearDown(container.dispose);
-
-      await container
-          .read(historyClickBehaviorNotifierProvider.notifier)
-          .setBehavior(HistoryClickBehavior.selectPreview);
-
-      expect(
-        container.read(historyClickBehaviorNotifierProvider),
         HistoryClickBehavior.selectPreview,
       );
-      expect(storage.behavior, 'select_preview');
     });
+
+    test(
+      'an explicit open-detail preference remains after reloading',
+      () async {
+        final storage = _FakeStorage();
+        final container = ProviderContainer(
+          overrides: [
+            localStorageServiceProvider.overrideWith((ref) => storage),
+          ],
+        );
+        addTearDown(container.dispose);
+
+        await container
+            .read(historyClickBehaviorNotifierProvider.notifier)
+            .setBehavior(HistoryClickBehavior.openDetail);
+
+        expect(storage.behavior, 'open_detail');
+        container.invalidate(historyClickBehaviorNotifierProvider);
+        expect(
+          container.read(historyClickBehaviorNotifierProvider),
+          HistoryClickBehavior.openDetail,
+        );
+      },
+    );
   });
 }
 
 class _FakeStorage extends LocalStorageService {
-  String behavior = 'open_detail';
+  String behavior = 'select_preview';
 
   @override
   String getHistoryClickBehavior() => behavior;
