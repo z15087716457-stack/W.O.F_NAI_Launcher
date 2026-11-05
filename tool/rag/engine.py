@@ -33,12 +33,37 @@ def _database_digest(path, stamp):
     finally: db.close()
 
 
+def file_stamp(path):
+    try:
+        stat = Path(path).stat()
+        return stat.st_size, stat.st_mtime_ns, stat.st_dev, stat.st_ino
+    except FileNotFoundError:
+        return None
+
+
+def sqlite_stamp(path):
+    wal = file_stamp(str(path) + '-wal')
+    return file_stamp(path), wal if wal and wal[0] else None
+
+
+def settled_snapshot(cache, stamp, read):
+    # SQLite publishes a WAL commit after writing it. A read racing the commit
+    # can still see old rows at the new stamp. Recheck that stamp once settled.
+    now = time.monotonic()
+    if not cache or cache[0] != stamp:
+        return stamp, read(), now + 5
+    if cache[2] is not None and now >= cache[2]:
+        return stamp, read(), None
+    return cache
+
+
 class Sources:
     representation_version = 'tag-profile-v2'
 
     def __init__(self, catalog, runtime='', wiki='', semantics='', supplements='', *, optional_supplements=False):
         self.paths = [str(Path(p).resolve(strict=True)) if p else '' for p in (catalog, runtime, wiki, semantics, supplements)]
         self._count_cache = None
+        self._runtime_snapshot = None
         self.optional_supplements = optional_supplements
         self.degraded = False
 
@@ -55,8 +80,28 @@ class Sources:
         return hashlib.sha256(json.dumps([self.representation_version, records]).encode()).hexdigest()
 
     def _file_signature(self, paths):
-        records = [(name, _database_digest(name, self._file_stamp([name]))) for name in paths if name]
+        records = [(name, self._runtime_signature() if name == self.paths[1]
+                    else _database_digest(name, self._file_stamp([name])))
+                   for name in paths if name]
         return hashlib.sha256(json.dumps([self.representation_version, records]).encode()).hexdigest()
+
+    def _runtime_signature(self):
+        path = self.paths[1]
+
+        def read():
+            db = readonly(path)
+            try:
+                if not db.execute("SELECT 1 FROM sqlite_master WHERE name='danbooru_tags'").fetchone():
+                    return None
+                digest = hashlib.sha256()
+                for row in db.execute('SELECT tag,category,post_count FROM danbooru_tags ORDER BY tag'):
+                    digest.update(json.dumps(row, separators=(',', ':')).encode())
+                return digest.hexdigest()
+            finally:
+                db.close()
+
+        self._runtime_snapshot = settled_snapshot(self._runtime_snapshot, sqlite_stamp(path), read)
+        return self._runtime_snapshot[1]
 
     def change_state(self):
         revision = 0

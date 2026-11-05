@@ -33,7 +33,7 @@ for line in sys.stdin:
  elif op=='verification':
   sources[source].update(checking=p['active'],building=False)
   emit({'event':'index','source':source,'job_id':'check','phase':'checking' if p['active'] else 'complete',**sources[source]});result={}
- elif op=='preview':result={'plan_id':source,'documents':2,'total':8}
+ elif op=='preview':result={'plan_id':source,'documents':2,'total':8,'verify':p.get('verify')}
  elif op=='start':
   if p.get('rebuild'):
    sources[source]['building']=True;slow=True;result={'job_id':source}
@@ -250,7 +250,13 @@ void main() {
                     .read(ragSettingsProvider)
                     .copyWith(galleryEnabled: true),
               );
-          await controller.preview(source: RagSource.gallery);
+          final manual = await controller.preview(source: RagSource.gallery);
+          expect(manual['verify'], isTrue);
+          final incremental = await controller.preview(
+            source: RagSource.gallery,
+            verify: false,
+          );
+          expect(incremental['verify'], isFalse);
           final result = await controller.searchGallery(
             query: 'private-gallery-query',
             allowed: ['${root.path}/image.png'],

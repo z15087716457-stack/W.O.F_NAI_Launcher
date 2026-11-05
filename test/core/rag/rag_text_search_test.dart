@@ -84,6 +84,24 @@ void main() {
         raw,
       );
       expect(encodeRagBlocks([block.copyWith(content: 'night')]), isNot(raw));
+      expect(
+        sameRagBlocks(
+          [block, block.copyWith(id: 'archived', isArchived: true)],
+          [block.copyWith(useCount: 100, isFavorite: true)],
+        ),
+        isTrue,
+      );
+      expect(
+        sameRagBlocks([block], [block.copyWith(content: 'night')]),
+        isFalse,
+      );
+      expect(
+        sameRagBlocks(
+          [block],
+          [block.copyWith(readingTranslationNeedsReview: true)],
+        ),
+        isFalse,
+      );
       final stale =
           jsonDecode(
                 encodeRagBlocks([

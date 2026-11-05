@@ -1,4 +1,7 @@
 import 'dart:convert';
+
+import 'package:collection/collection.dart';
+
 import '../../data/models/prompt_block/prompt_block.dart';
 
 /// Saved active text only. Never export images, file paths, generation settings,
@@ -15,11 +18,42 @@ String encodeRagBlocks(Iterable<PromptBlock> blocks) {
           'title': block.title,
           'positive': block.content,
           'negative': block.negativeContent,
-          'tags': block.tags.map((t) => t.name).toList()..sort(),
-          if (!block.readingTranslationNeedsReview &&
-              block.readingTranslationZh?.trim().isNotEmpty == true)
-            'reading': block.readingTranslationZh,
+          'tags': _tagNames(block),
+          if (_reading(block) case final reading?) 'reading': reading,
         },
     ],
   });
 }
+
+/// Compare only what the snapshot exports, before sorting or encoding it.
+bool sameRagBlocks(List<PromptBlock> before, List<PromptBlock> after) {
+  if (identical(before, after)) return true;
+  final active = {
+    for (final block in before)
+      if (!block.isArchived) block.id: block,
+  };
+  for (final block in after) {
+    if (block.isArchived) continue;
+    final previous = active.remove(block.id);
+    if (previous == null || !_sameText(previous, block)) return false;
+  }
+  return active.isEmpty;
+}
+
+bool _sameText(PromptBlock a, PromptBlock b) =>
+    identical(a, b) ||
+    (a.title == b.title &&
+        a.content == b.content &&
+        a.negativeContent == b.negativeContent &&
+        _reading(a) == _reading(b) &&
+        (identical(a.tags, b.tags) ||
+            const ListEquality<String>().equals(_tagNames(a), _tagNames(b))));
+
+List<String> _tagNames(PromptBlock block) =>
+    block.tags.map((tag) => tag.name).toList()..sort();
+
+String? _reading(PromptBlock block) =>
+    !block.readingTranslationNeedsReview &&
+        block.readingTranslationZh?.trim().isNotEmpty == true
+    ? block.readingTranslationZh
+    : null;

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 import 'package:nai_launcher/core/utils/app_support_directory.dart';
@@ -234,6 +235,7 @@ class RagController extends Notifier<RagStatus> {
   bool get isGpuBusy => _gpuHolds > 0;
   final _finishedJobs = <String>{};
   Future<void> _snapshotWrites = Future.value();
+  final _snapshots = <String, ({Object value, DateTime modified, int size})>{};
   Future<void> _retiring = Future.value();
   Object? _refreshToken;
   final _plans = <String, ({RagSource source, int epoch, DateTime expires})>{};
@@ -656,7 +658,7 @@ class RagController extends Notifier<RagStatus> {
             !state.suspended &&
             _gpuHolds == 0 &&
             ref.read(ragSettingsProvider).enabledFor(source)) {
-          final plan = await preview(source: source);
+          final plan = await preview(source: source, verify: false);
           await start(plan['plan_id'] as String, source: source);
         }
       }
@@ -681,12 +683,17 @@ class RagController extends Notifier<RagStatus> {
     }
   }
 
-  Future<Map<String, dynamic>> preview({RagSource source = RagSource.tags}) =>
-      _maintain(() => _preview(source));
+  Future<Map<String, dynamic>> preview({
+    RagSource source = RagSource.tags,
+    bool verify = true,
+  }) => _maintain(() => _preview(source, verify: verify));
 
   void discardPlan(String id) => _plans.remove(id);
 
-  Future<Map<String, dynamic>> _preview(RagSource source) async {
+  Future<Map<String, dynamic>> _preview(
+    RagSource source, {
+    bool verify = false,
+  }) async {
     final epoch = _epoch;
     final c = await _connect();
     if (source == RagSource.blocks) {
@@ -695,7 +702,10 @@ class RagController extends Notifier<RagStatus> {
     if (source == RagSource.gallery) {
       await _writeGalleryRoots(await ref.read(ragDirectoryProvider)());
     }
-    final plan = await c.request('preview', {'source': source.name});
+    final plan = await c.request('preview', {
+      'source': source.name,
+      if (source == RagSource.gallery) 'verify': verify,
+    });
     if (_disposed || epoch != _epoch) throw const RagException('cancelled');
     _plans.removeWhere((_, value) => value.source == source);
     _plans[plan['plan_id'] as String] = (
@@ -837,16 +847,50 @@ class RagController extends Notifier<RagStatus> {
   Future<String> _writeBlockSnapshot(Directory root) async {
     final epoch = _epoch;
     final library = await ref.read(promptBlockLibraryNotifierProvider.future);
-    final content = encodeRagBlocks(library.blocks);
-    final file = File(p.join(root.path, 'sources', 'blocks.json'));
+    return _writeSourceSnapshot(
+      File(p.join(root.path, 'sources', 'blocks.json')),
+      library.blocks,
+      epoch,
+      sameRagBlocks,
+      encodeRagBlocks,
+    );
+  }
+
+  Future<String> _writeSourceSnapshot<T extends Object>(
+    File file,
+    T value,
+    int epoch,
+    bool Function(T, T) equals,
+    String Function(T) encode,
+  ) async {
     final write = _snapshotWrites.catchError((Object _) {}).then((_) async {
       if (_disposed || epoch != _epoch) throw const RagException('cancelled');
-      await file.parent.create(recursive: true);
-      if (await file.exists() && await file.readAsString() == content) return;
-      final temporary = File('${file.path}.tmp');
-      await temporary.writeAsString(content, flush: true);
-      if (_disposed || epoch != _epoch) throw const RagException('cancelled');
-      await temporary.rename(file.path);
+      final previous = _snapshots[file.path];
+      var stat = await file.stat();
+      final exists = stat.type == FileSystemEntityType.file;
+      if (exists &&
+          previous != null &&
+          previous.size == stat.size &&
+          previous.modified == stat.modified &&
+          previous.value is T &&
+          equals(previous.value as T, value)) {
+        return;
+      }
+
+      final content = encode(value);
+      if (!exists || await file.readAsString() != content) {
+        await file.parent.create(recursive: true);
+        final temporary = File('${file.path}.tmp');
+        await temporary.writeAsString(content, flush: true);
+        if (_disposed || epoch != _epoch) throw const RagException('cancelled');
+        await temporary.rename(file.path);
+        stat = await file.stat();
+      }
+      _snapshots[file.path] = (
+        value: value,
+        modified: stat.modified,
+        size: stat.size,
+      );
     });
     _snapshotWrites = write;
     await write;
@@ -910,23 +954,16 @@ class RagController extends Notifier<RagStatus> {
   }
 
   Future<String> _writeGalleryRoots(Directory root) async {
+    final epoch = _epoch;
     final roots = (await ref.read(ragGalleryRootsProvider)()).toSet().toList()
       ..sort();
-    final content = jsonEncode({'version': 1, 'roots': roots});
-    final file = File(p.join(root.path, 'sources', 'gallery-roots.json'));
-    final epoch = _epoch;
-    final write = _snapshotWrites.catchError((Object _) {}).then((_) async {
-      if (_disposed || epoch != _epoch) throw const RagException('cancelled');
-      await file.parent.create(recursive: true);
-      if (await file.exists() && await file.readAsString() == content) return;
-      final temporary = File('${file.path}.tmp');
-      await temporary.writeAsString(content, flush: true);
-      if (_disposed || epoch != _epoch) throw const RagException('cancelled');
-      await temporary.rename(file.path);
-    });
-    _snapshotWrites = write;
-    await write;
-    return file.path;
+    return _writeSourceSnapshot(
+      File(p.join(root.path, 'sources', 'gallery-roots.json')),
+      roots,
+      epoch,
+      listEquals,
+      (value) => jsonEncode({'version': 1, 'roots': value}),
+    );
   }
 
   int _scopeId = 0;

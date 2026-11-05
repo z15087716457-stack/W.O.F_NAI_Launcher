@@ -14,6 +14,26 @@ class SourceSignatureTests(unittest.TestCase):
     tearDown = fixtures.IndexTests.tearDown
     build = fixtures.IndexTests.build
 
+    def test_runtime_signature_only_tracks_tag_rows(self):
+        runtime = self.root/'runtime.sqlite'
+        db = sqlite3.connect(runtime)
+        try:
+            db.execute('PRAGMA journal_mode=WAL')
+            db.executescript('CREATE TABLE danbooru_tags(tag TEXT PRIMARY KEY,category INTEGER,post_count INTEGER);'
+                             'CREATE TABLE favorites(image_id INTEGER);'
+                             "INSERT INTO danbooru_tags VALUES('rain',0,1);")
+            sources = Sources(self.source, runtime)
+            signature = sources.signature()
+            db.execute('INSERT INTO favorites VALUES(9)')
+            db.commit()
+            self.assertEqual(sources.signature(), signature)
+            self.assertEqual(Sources(self.source, runtime).signature(), signature)
+            db.execute("UPDATE danbooru_tags SET post_count=2 WHERE tag='rain'")
+            db.commit()
+            self.assertNotEqual(sources.signature(), signature)
+        finally:
+            db.close()
+
     def test_read_only_wal_lifecycle_does_not_trigger_another_scan(self):
         db=sqlite3.connect(self.source)
         self.assertEqual(db.execute('PRAGMA journal_mode=WAL').fetchone()[0],'wal')
