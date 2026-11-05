@@ -58,6 +58,10 @@ jobs:
           flutter pub get --enforce-lockfile
       - name: Validate bundled databases
         run: dart run tool/tag_catalog/verify_bundled_databases.dart
+      - name: Generate application code
+        run: |
+          flutter gen-l10n
+          dart run tool/generate.dart
       - name: Test shared platform boundaries
         run: |
           flutter test --no-pub \
