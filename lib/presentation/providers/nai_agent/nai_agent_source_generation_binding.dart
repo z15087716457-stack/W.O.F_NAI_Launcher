@@ -19,6 +19,7 @@ import '../../../data/services/nai_agent/agent_workspace_files.dart';
 import '../../utils/native_image_enhance.dart';
 import '../../utils/official_image_variations.dart';
 import '../auth_provider.dart';
+import '../subscription_provider.dart';
 import '../generation/image_workflow_controller.dart';
 import '../image_generation_provider.dart';
 import '../krita/bridge_draft_snapshot.dart';
@@ -51,6 +52,7 @@ class NaiAgentSourceGenerationBinding {
     generation = NaiAgentGenerationTools(
       readInput: _read,
       isAlive: isAlive,
+      refreshBalance: () => refreshBalanceBeforeBlocking(ref),
       approve: (quote, token, check) => ref
           .read(naiAgentGenerationApprovalsProvider)
           .request(owner, quote, token, check),

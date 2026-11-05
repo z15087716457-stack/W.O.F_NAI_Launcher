@@ -7,6 +7,8 @@ import 'package:path/path.dart' as p;
 
 import '../providers/cost_estimate_provider.dart';
 import '../providers/share_image_settings_provider.dart';
+import '../providers/subscription_provider.dart';
+import '../widgets/common/app_toast.dart';
 import '../widgets/common/themed_confirm_dialog.dart';
 import '../widgets/common/anlas_cost_dialog.dart';
 import '../../core/utils/localization_extension.dart';
@@ -70,15 +72,31 @@ class AssetProtectionGuard {
     required BuildContext context,
     required WidgetRef ref,
     int? cost,
-  }) {
+  }) async {
+    final estimatedCost = cost ?? ref.read(estimatedCostProvider) ?? 0;
+    final container = ProviderScope.containerOf(context, listen: false);
+    if (container.exists(subscriptionNotifierProvider)) {
+      bool insufficient() {
+        final balance = ref.read(subscriptionNotifierProvider).balance;
+        return balance != null && balance < estimatedCost;
+      }
+
+      if (insufficient()) {
+        await ref.read(subscriptionNotifierProvider.notifier).refreshBalance();
+        if (!context.mounted) return false;
+        if (insufficient()) {
+          AppToast.warning(context, context.l10n.api_error_402_hint);
+          return false;
+        }
+      }
+    }
     final settings = ref.read(shareImageSettingsProvider);
     if (!settings.effectiveWarnHighAnlasCost) {
-      return Future.value(true);
+      return true;
     }
 
-    final estimatedCost = cost ?? ref.read(estimatedCostProvider) ?? 0;
     if (estimatedCost < settings.highAnlasCostThreshold) {
-      return Future.value(true);
+      return true;
     }
 
     unawaited(

@@ -44,6 +44,7 @@ void main() {
   late int approvals, backups, starts, cancels;
   Future<bool> Function()? approval;
   Future<void> Function()? duringBackup;
+  Future<void> Function()? balanceRefresh;
   late Completer<Map<String, dynamic>> completion;
   final reads = <Map<String, dynamic>>[];
   final startedInputs = <NaiAgentGenerationInput>[];
@@ -55,6 +56,7 @@ void main() {
     approvals = backups = starts = cancels = 0;
     approval = null;
     duringBackup = null;
+    balanceRefresh = null;
     completion = Completer<Map<String, dynamic>>();
     reads.clear();
     startedInputs.clear();
@@ -67,6 +69,7 @@ void main() {
       },
       clock: () => now,
       isAlive: () => alive,
+      refreshBalance: () async => await balanceRefresh?.call(),
       approve: (_, __, ___) async {
         approvals++;
         return await approval?.call() ?? true;
@@ -105,6 +108,36 @@ void main() {
         'quote_id': id,
         'authorized': true,
       }, token ?? NaiAgentCancellation());
+
+  test('refreshes a low balance once before quoting an Agent action', () async {
+    input = generationInput(balance: 2, blocked: 'insufficient_balance');
+    var refreshed = 0;
+    balanceRefresh = () async {
+      refreshed++;
+      input = generationInput(balance: 100);
+    };
+    final result = await tools.prepare({}, NaiAgentCancellation());
+    expect(result['details']['quote']['can_generate'], isTrue);
+    expect(refreshed, 1);
+    expect([approvals, backups, starts], [0, 0, 0]);
+  });
+
+  test(
+    'a human card with confirmed low balance refreshes once and stops',
+    () async {
+      input = generationInput(balance: 2, blocked: 'insufficient_balance');
+      var refreshed = 0;
+      balanceRefresh = () async {
+        refreshed++;
+      };
+      await expectLater(
+        tools.requestUserGeneration(NaiAgentCancellation()),
+        throwsA(error('insufficient_balance')),
+      );
+      expect(refreshed, 1);
+      expect([approvals, backups, starts], [0, 0, 0]);
+    },
+  );
 
   test(
     'prepare is read only and model authorization flags do not bypass the button',

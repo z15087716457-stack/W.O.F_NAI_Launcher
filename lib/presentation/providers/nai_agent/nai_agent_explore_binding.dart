@@ -34,6 +34,7 @@ class NaiAgentExploreBinding {
       final base = bindNaiAgentGeneration(ref, workspace, owner!, busy, alive);
       generation = NaiAgentGenerationTools(
         isAlive: alive,
+        refreshBalance: base.refreshBalance,
         readInput: (params) {
           final run = _quotedRun(params);
           final mode = params['mode'] ?? 'basic';
@@ -90,7 +91,7 @@ class NaiAgentExploreBinding {
               if (c.generation.status == ExploreCandidateGenerationStatus.done)
                 c.id,
           };
-          void beforeGenerate(ImageParams params) {
+          NaiAgentGenerationInput checkCandidate() {
             if (!alive()) {
               throw const NaiAgentToolError('closed', 'Explore owner closed');
             }
@@ -126,8 +127,25 @@ class NaiAgentExploreBinding {
               );
             }
             if ((current.billing['per_request_anlas'] as num) >
-                    (input.billing['per_request_anlas'] as num) ||
-                current.balance == null ||
+                (input.billing['per_request_anlas'] as num)) {
+              throw const NaiAgentToolError(
+                'insufficient_balance',
+                'The next candidate exceeds the approved price',
+              );
+            }
+            return current;
+          }
+
+          Future<void> beforeGenerate(ImageParams params) async {
+            var current = checkCandidate();
+            final refresh = base.refreshBalance;
+            if (refresh != null &&
+                current.balance != null &&
+                current.balance! < current.estimate) {
+              await refresh();
+              current = checkCandidate();
+            }
+            if (current.balance == null ||
                 current.balance! < current.estimate) {
               throw const NaiAgentToolError(
                 'insufficient_balance',
