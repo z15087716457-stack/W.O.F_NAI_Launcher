@@ -33,11 +33,23 @@ class FakeTimer:
     def setInterval(self, interval):
         self.interval = interval
 
-    def start(self):
+    def setSingleShot(self, enabled):
+        self.single_shot = enabled
+
+    def start(self, interval=None):
+        if interval is not None:
+            self.setInterval(interval)
         self.started = True
 
     def stop(self):
         self.started = False
+
+    def fire(self):
+        if not self.started:
+            raise AssertionError("Timer was not scheduled")
+        if self.single_shot:
+            self.stop()
+        self.timeout.emit()
 
 
 class FakeFallbackSocket:
@@ -137,6 +149,45 @@ class FakeNativeSocket:
 
     def deleteLater(self):
         pass
+
+
+class BridgeReconnectTests(unittest.TestCase):
+    def test_backoff_manual_retry_and_disconnect(self):
+        module = _load_bridge_client()
+        client = module.BridgeClient()
+        discovery = module.load_discovery()
+        reads = []
+
+        def load():
+            reads.append(True)
+            if len(reads) < 6:
+                raise FileNotFoundError("No discovery yet")
+            return discovery
+
+        module.load_discovery = load
+        client.start()
+        timer = client._retry_timer
+        self.assertEqual(timer.interval, 5000)
+        for delay in (10000, 20000, 30000, 30000):
+            timer.fire()
+            self.assertEqual(timer.interval, delay)
+        self.assertEqual(len(reads), 5)
+
+        client.connect_to_launcher()
+        self.assertEqual(len(reads), 6)
+        socket = FakeFallbackSocket.instances[-1]
+        self.assertEqual(socket.opened_url, discovery.url)
+        self.assertEqual(timer.interval, 30000)
+        socket.on_text_message('{"type":"pong","version":1}')
+        self.assertTrue(client.is_connected)
+        self.assertFalse(timer.started)
+
+        socket.on_disconnected()
+        self.assertFalse(client.is_connected)
+        self.assertTrue(timer.started)
+        self.assertEqual(timer.interval, 5000)
+        client.stop()
+        self.assertFalse(timer.started)
 
 
 class BridgeTransportOwnershipTests(unittest.TestCase):
