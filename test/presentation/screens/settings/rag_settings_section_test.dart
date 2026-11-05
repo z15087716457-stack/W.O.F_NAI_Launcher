@@ -29,6 +29,7 @@ class _FakeRag extends RagController {
   @override
   Future<Map<String, dynamic>> preview({
     RagSource source = RagSource.tags,
+    bool verify = false,
   }) async {
     previews.add(source);
     return {

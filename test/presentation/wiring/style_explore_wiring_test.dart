@@ -244,6 +244,9 @@ class _AgentStore extends AgentWorkspaceStore {
     String chatId,
     AgentComposerState state,
   ) async {}
+
+  @override
+  Future<void> discardDraftChat(String workspaceId, String chatId) async {}
 }
 
 domain.ExploreRun _run(String id) {
@@ -475,7 +478,6 @@ void main() {
     });
     final preferences = NaiAgentUiPreferences()..replace(agent.settings);
     agent.addListener(() => preferences.replace(agent.settings));
-    agent.ready = Future.value();
     agentDirectory = directory;
     agentController = agent;
     addTearDown(route.dispose);
