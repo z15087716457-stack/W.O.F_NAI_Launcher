@@ -2124,6 +2124,12 @@ abstract class AppLocalizations {
   /// **'ORIGINAL'**
   String get generation_variationOriginal;
 
+  /// No description provided for @generation_requestCostInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'This request exceeds the supported limits. Reduce the image size or steps.'**
+  String get generation_requestCostInvalid;
+
   /// No description provided for @generation_variationSizeUnsupported.
   ///
   /// In en, this message translates to:

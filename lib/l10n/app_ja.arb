@@ -500,6 +500,7 @@
   "img2img_inpaintReadyHint": "マスクを読み込みました。次回の生成では、マスクされた領域のみを再描画します。",
   "img2img_inpaintMaskReady": "インペイントマスクの準備ができました",
   "generation_variationOriginal": "元画像",
+  "generation_requestCostInvalid": "このリクエストは対応範囲を超えています。画像サイズかステップ数を減らしてください。",
   "generation_variationSizeUnsupported": "バリエーションは 300 万画素以下の元画像に対応しています。",
   "img2img_generateVariations": "バリエーションの生成",
   "img2img_directorTools": "ディレクターツール",

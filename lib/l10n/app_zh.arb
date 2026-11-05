@@ -456,6 +456,7 @@
   "img2img_inpaintReadyHint": "遮罩已载入。当前会按局部重绘方式提交，只有蒙版区域会被重新生成。",
   "img2img_inpaintMaskReady": "局部重绘遮罩已准备好",
   "generation_variationOriginal": "原图",
+  "generation_requestCostInvalid": "当前请求超出支持的范围，请减小图片尺寸或降低步数。",
   "generation_variationSizeUnsupported": "生成变体支持不超过 3 百万像素的原图。",
   "img2img_generateVariations": "生成变体",
   "img2img_directorTools": "导演工具",

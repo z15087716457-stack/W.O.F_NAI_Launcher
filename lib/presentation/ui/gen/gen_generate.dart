@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/services/anlas_calculator.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_controls.dart';
@@ -143,6 +144,8 @@ class GenGenerateButton extends StatelessWidget {
     );
     final tip = switch (g.state) {
       GenRunState.blocked => g.blocked,
+      GenRunState.ready when g.cost == AnlasCalculator.invalidCost =>
+        l.generation_requestCostInvalid,
       GenRunState.ready when g.insufficient => l.gen_insufficient,
       GenRunState.ready when g.cost == 0 => l.gen_free,
       _ => null,
@@ -182,7 +185,10 @@ class _Cost extends StatelessWidget {
                 width: 22,
                 child: Center(child: UiSpinner(size: 12)),
               )
-            : GenAnlas('$cost', color: ink),
+            : GenAnlas(
+                cost == AnlasCalculator.invalidCost ? '—' : '$cost',
+                color: ink,
+              ),
       ),
     );
   }

@@ -5,6 +5,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../core/services/anlas_calculator.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../core/utils/inpaint_mask_utils.dart';
 import '../../widgets/navigation/window_chrome_layout.dart';
@@ -778,6 +779,8 @@ class _TopBar extends StatelessWidget {
         ? Text(l.tools_free, style: UiTipStyle.number(context))
         : GenAnlas('$v', size: 12, iconSize: 11, color: c.tipInk);
     final ring = up.running && up.progress != null;
+    final invalidVariations =
+        info.variationsCost == AnlasCalculator.invalidCost;
     return GenFloat(
       key: const Key('gen-bar-top'),
       children: [
@@ -802,10 +805,12 @@ class _TopBar extends StatelessWidget {
           key: const Key('gen-variations'),
           richTip: tip(
             l.gen_variations,
-            l.tools_tipVariations,
+            invalidVariations
+                ? l.generation_requestCostInvalid
+                : l.tools_tipVariations,
             info.variationsCostLoading
                 ? Text(l.common_loading, style: UiTipStyle.number(context))
-                : info.variationsCost == null
+                : invalidVariations || info.variationsCost == null
                 ? null
                 : cost(info.variationsCost),
           ),
@@ -982,11 +987,11 @@ class _VariationCost extends StatelessWidget {
                     ? context.l10n.common_loading
                     : null,
                 excludeSemantics: info.variationsCostLoading,
-                child: GenAnlas(
-                  info.variationsCost?.toString() ??
-                      (info.variationsCostLoading ? '…' : '—'),
-                  iconSize: 10,
-                ),
+                child: GenAnlas(switch (info.variationsCost) {
+                  AnlasCalculator.invalidCost => '—',
+                  final cost? => '$cost',
+                  null => info.variationsCostLoading ? '…' : '—',
+                }, iconSize: 10),
               ),
             ),
           ),

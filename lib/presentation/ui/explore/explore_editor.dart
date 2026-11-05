@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/services/anlas_calculator.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../kit/ui_block_pill.dart';
 import '../kit/ui_colors.dart';
@@ -293,7 +294,11 @@ class _Cost extends StatelessWidget {
     final c = context.ui;
     final ink = insufficient ? Colors.white : const Color(0xFF111111);
     return Tooltip(
-      message: insufficient ? context.l10n.explore_insufficient : '',
+      message: cost == AnlasCalculator.invalidCost
+          ? context.l10n.generation_requestCostInvalid
+          : insufficient
+          ? context.l10n.explore_insufficient
+          : '',
       child: Container(
         height: 22,
         padding: const EdgeInsets.symmetric(horizontal: 6),
@@ -306,7 +311,7 @@ class _Cost extends StatelessWidget {
           spacing: 3,
           children: [
             Text(
-              '$cost',
+              cost == AnlasCalculator.invalidCost ? '—' : '$cost',
               style: UiText.sans(
                 12,
                 weight: FontWeight.w700,

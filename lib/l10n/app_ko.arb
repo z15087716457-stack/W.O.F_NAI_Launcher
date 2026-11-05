@@ -500,6 +500,7 @@
   "img2img_inpaintReadyHint": "마스크를 불러왔습니다. 다음 생성에서는 마스크 영역만 다시 그립니다.",
   "img2img_inpaintMaskReady": "인페인트 마스크가 준비되었습니다",
   "generation_variationOriginal": "원본",
+  "generation_requestCostInvalid": "이 요청은 지원 범위를 초과합니다. 이미지 크기나 스텝 수를 줄여 주세요.",
   "generation_variationSizeUnsupported": "변형은 300만 화소 이하의 원본 이미지를 지원합니다.",
   "img2img_generateVariations": "베리에이션 생성",
   "img2img_directorTools": "디렉터 도구",

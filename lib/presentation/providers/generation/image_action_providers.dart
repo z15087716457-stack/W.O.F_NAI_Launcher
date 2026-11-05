@@ -3,10 +3,13 @@ import 'dart:typed_data';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/services/anlas_calculator.dart';
+import '../../../core/utils/nai_resolution_adapter.dart';
 import '../../../data/models/gallery/nai_image_metadata.dart';
 import '../../../data/models/image/image_params.dart';
+import '../../../data/models/user/user_subscription.dart';
 import '../../../data/services/image_metadata_service.dart';
 import '../../utils/official_image_variations.dart';
+import '../cost_estimate_provider.dart';
 import '../image_generation_provider.dart';
 import '../subscription_provider.dart';
 import 'image_workflow_controller.dart';
@@ -65,48 +68,35 @@ final generatedImageMetadataProvider = FutureProvider.autoDispose
       });
     });
 
+int variationRequestCost(ImageParams request, UserSubscription? subscription) =>
+    generationRequestCost(
+      request,
+      const ImageWorkflowState(),
+      subscription,
+      OfficialImageVariations.count,
+    );
+
 /// Only quote a variation when the selected image has sufficient request data.
 final imageVariationCostProvider = Provider.autoDispose
     .family<int?, GeneratedImage>((ref, image) {
       final metadata = ref
           .watch(generatedImageMetadataProvider(image))
           .valueOrNull;
-      if (metadata == null ||
-          !metadata.hasData ||
-          !OfficialImageVariations.supportsSize(image.width, image.height)) {
-        return null;
-      }
+      if (metadata == null || !metadata.hasData) return null;
+      final (width, height) =
+          NaiResolutionAdapter.readImageSize(image.bytes) ??
+          (image.width, image.height);
+      if (!OfficialImageVariations.supportsSize(width, height)) return null;
       final current = ref.watch(generationParamsNotifierProvider);
       final params = OfficialImageVariations.project(
         current: current,
         source: image.bytes,
-        width: image.width,
-        height: image.height,
+        width: width,
+        height: height,
         metadata: metadata,
       );
       final subscription = ref.watch(subscriptionNotifierProvider).subscription;
-      return AnlasCalculator.calculateRequestCost(
-        width: params.width,
-        height: params.height,
-        steps: params.steps,
-        batchCount: 1,
-        batchSize: OfficialImageVariations.count,
-        smea: params.effectiveSmea,
-        smeaDyn: params.effectiveSmeaDyn,
-        model: params.model,
-        subscriptionTier: subscription?.isOpus == true
-            ? AnlasCalculator.opusTier
-            : 0,
-        strength: params.strength,
-        extraPerSampleCost: AnlasCalculator.resolvePreciseReferenceExtraCost(
-          params,
-        ),
-        extraPerRequestCost: AnlasCalculator.resolveVibeReferenceExtraCost(
-          params,
-        ),
-        oneTimeCost: AnlasCalculator.resolveVibeEncodingCost(params),
-        opusUsageExhausted: subscription?.isOpusUsageExhausted ?? false,
-      );
+      return variationRequestCost(params, subscription);
     });
 
 /// Estimate the selected image with the backend that the upscale panel will

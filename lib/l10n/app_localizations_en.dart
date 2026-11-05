@@ -1130,6 +1130,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get generation_variationOriginal => 'ORIGINAL';
 
   @override
+  String get generation_requestCostInvalid =>
+      'This request exceeds the supported limits. Reduce the image size or steps.';
+
+  @override
   String get generation_variationSizeUnsupported =>
       'Variations support source images up to 3 megapixels.';
 

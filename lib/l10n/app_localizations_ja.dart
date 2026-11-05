@@ -1106,6 +1106,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get generation_variationOriginal => '元画像';
 
   @override
+  String get generation_requestCostInvalid =>
+      'このリクエストは対応範囲を超えています。画像サイズかステップ数を減らしてください。';
+
+  @override
   String get generation_variationSizeUnsupported =>
       'バリエーションは 300 万画素以下の元画像に対応しています。';
 

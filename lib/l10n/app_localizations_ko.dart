@@ -1104,6 +1104,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get generation_variationOriginal => '원본';
 
   @override
+  String get generation_requestCostInvalid =>
+      '이 요청은 지원 범위를 초과합니다. 이미지 크기나 스텝 수를 줄여 주세요.';
+
+  @override
   String get generation_variationSizeUnsupported =>
       '변형은 300만 화소 이하의 원본 이미지를 지원합니다.';
 

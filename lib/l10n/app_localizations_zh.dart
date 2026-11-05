@@ -1086,6 +1086,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get generation_variationOriginal => '原图';
 
   @override
+  String get generation_requestCostInvalid => '当前请求超出支持的范围，请减小图片尺寸或降低步数。';
+
+  @override
   String get generation_variationSizeUnsupported => '生成变体支持不超过 3 百万像素的原图。';
 
   @override
@@ -22806,6 +22809,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get generation_variationOriginal => '原圖';
+
+  @override
+  String get generation_requestCostInvalid => '當前請求超出支援的範圍，請減小圖片尺寸或降低步數。';
 
   @override
   String get generation_variationSizeUnsupported => '生成變體支援不超過 3 百萬像素的原圖。';

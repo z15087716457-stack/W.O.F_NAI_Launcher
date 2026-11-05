@@ -11,6 +11,7 @@ import '../providers/subscription_provider.dart';
 import '../widgets/common/app_toast.dart';
 import '../widgets/common/themed_confirm_dialog.dart';
 import '../widgets/common/anlas_cost_dialog.dart';
+import '../../core/services/anlas_calculator.dart';
 import '../../core/utils/localization_extension.dart';
 import '../../data/services/anlas_usage_metrics.dart';
 
@@ -73,7 +74,11 @@ class AssetProtectionGuard {
     required WidgetRef ref,
     int? cost,
   }) async {
-    final estimatedCost = cost ?? ref.read(estimatedCostProvider) ?? 0;
+    final int estimatedCost = cost ?? ref.read(estimatedCostProvider);
+    if (estimatedCost == AnlasCalculator.invalidCost) {
+      AppToast.warning(context, context.l10n.generation_requestCostInvalid);
+      return false;
+    }
     final container = ProviderScope.containerOf(context, listen: false);
     if (container.exists(subscriptionNotifierProvider)) {
       bool insufficient() {

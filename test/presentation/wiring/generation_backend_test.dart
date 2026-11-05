@@ -7,10 +7,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:nai_launcher/core/constants/api_constants.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
+import 'package:nai_launcher/core/services/anlas_calculator.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/data/models/image/image_params.dart';
 import 'package:nai_launcher/data/models/image/image_operation.dart';
+import 'package:nai_launcher/data/models/user/user_subscription.dart';
 import 'package:nai_launcher/data/repositories/character_prompt_repository.dart';
 import 'package:nai_launcher/presentation/providers/auth_provider.dart';
 import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
@@ -113,7 +116,6 @@ void main() {
         authNotifierProvider.overrideWith(SwitchingAuth.new),
         subscriptionNotifierProvider.overrideWith(DataSubscription.new),
         generationPlatformProvider.overrideWithValue(platform),
-        estimatedCostProvider.overrideWith((ref) => 12),
       ],
     );
     await container.read(promptBlockLibraryNotifierProvider.future);
@@ -336,6 +338,47 @@ void main() {
     );
     expect(container.read(generationParamsNotifierProvider).steps, 30);
   });
+  test('invalid request is explained before backup or submission', () async {
+    container.read(generationParamsNotifierProvider.notifier)
+      ..updateModel(ImageModels.animeDiffusionV5Full)
+      ..updateSize(3072, 3072)
+      ..updateSteps(50);
+    final notifier =
+        container.read(imageGenerationNotifierProvider.notifier)
+            as RecordingGeneration;
+    int? quote;
+    await backend.generate(
+      confirm: (cost) async {
+        quote = cost;
+        return true;
+      },
+    );
+    expect(quote, AnlasCalculator.invalidCost);
+    expect(platform.backups, isEmpty);
+    expect(notifier.requests, isEmpty);
+  });
+
+  test('a quote change invalidates ordinary generation confirmation', () async {
+    final confirm = Completer<bool>();
+    final initial = container.read(estimatedCostProvider);
+    final operation = backend.generate(
+      confirm: (cost) {
+        expect(cost, initial);
+        return confirm.future;
+      },
+    );
+    final subscription =
+        container.read(subscriptionNotifierProvider.notifier)
+            as DataSubscription;
+    subscription.publish(
+      const SubscriptionState.loaded(UserSubscription(tier: 1, active: true)),
+    );
+    expect(container.read(estimatedCostProvider), isNot(initial));
+    confirm.complete(true);
+    await operation;
+    expect(platform.backups, isEmpty);
+  });
+
   for (final change in [
     'prompt',
     'count',
@@ -351,7 +394,7 @@ void main() {
       var alive = true;
       final operation = backend.generate(
         confirm: (cost) {
-          expect(cost, 12);
+          expect(cost, container.read(estimatedCostProvider));
           return confirm.future;
         },
         alive: () => alive,
