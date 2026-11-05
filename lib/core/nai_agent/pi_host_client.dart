@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'agent_tool.dart';
+import 'node_runtime_environment.dart';
 import 'model_request_gate.dart';
 import 'vision_access.dart';
 
@@ -91,6 +92,7 @@ class PiHostClient {
       nodeExecutable,
       [hostScript],
       workingDirectory: File(hostScript).parent.path,
+      environment: nodeRuntimeEnvironment(nodeExecutable),
       runInShell: false,
     );
     final client = PiHostClient._(

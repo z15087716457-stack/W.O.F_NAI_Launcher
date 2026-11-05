@@ -1,3 +1,4 @@
+import 'package:nai_launcher/core/utils/primary_activator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -66,7 +67,7 @@ class _GenHistoryPanelState extends State<GenHistoryPanel> {
     _lastTap = null;
     if (scope.controller.selection.tap(
       b.images.map((image) => image.id).toList(),
-      modify: keys.isControlPressed || keys.isMetaPressed,
+      modify: keys.isPrimaryOrWindowsMetaPressed,
       range: keys.isShiftPressed,
       pendingBatch: b.pending > 0 ? b.id : null,
     )) {

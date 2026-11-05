@@ -5,6 +5,7 @@ import 'package:path_provider/path_provider.dart' as system_paths;
 
 import '../services/adjacent_app_data_migration.dart';
 import '../storage/application_storage.dart';
+import 'macos_app_channel.dart';
 import 'studio_sandbox.dart';
 
 export 'package:path_provider/path_provider.dart'
@@ -32,6 +33,33 @@ class ApplicationSupportDirectoryResolver {
 
 bool get _usesAdjacentData =>
     Platform.isWindows && Platform.environment['FLUTTER_TEST'] != 'true';
+
+final _macSupport = ApplicationSupportDirectoryResolver(() async {
+  final destination = await system_paths.getApplicationSupportDirectory();
+  const oldId = 'com.aaalice.naiLauncher';
+  final legacy = Directory(p.join(destination.parent.path, oldId));
+  final copied =
+      await AdjacentAppDataMigration(
+        legacy: legacy,
+        destination: destination,
+      ).copyFirstLaunch(
+        legacyRunning: () async =>
+            await macOSAppChannel.invokeMethod<bool>('isRunning', oldId) ??
+            false,
+      );
+  if (copied) {
+    await macOSAppChannel.invokeMethod<void>('importPreferences', oldId);
+  }
+  return destination;
+});
+
+/// Finish the initial import before Hive or preferences open.
+Future<Directory> prepareApplicationSupportForStartup() =>
+    Platform.isMacOS &&
+        studioSandboxRoot() == null &&
+        Platform.environment['FLUTTER_TEST'] != 'true'
+    ? _macSupport.resolve()
+    : getApplicationSupportDirectory();
 
 /// Windows internal state belongs to the executable, never the current working
 /// directory. Tests retain the injected path_provider implementation.

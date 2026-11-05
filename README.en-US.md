@@ -29,14 +29,15 @@ W.O.F NAI Studio is a third-party NovelAI desktop client for Windows. It does mo
 
 ## Download
 
-Get the latest version from [Releases](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/latest). Choose one:
+Get the package for your operating system from [Releases](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/latest).
 
 | File | Who it's for |
 | --- | --- |
 | `WOF_NAI_Studio_Windows_<version>_Setup.exe` | **The choice for most people.** Installs to your user directory without administrator rights, with Start menu and desktop shortcuts. |
 | `WOF_NAI_Studio_Windows_<version>_Portable.zip` | For keeping the app in a folder of your choice, on a USB drive, or taking it between computers. Extract it and run `nai_launcher.exe`. |
+| `WOF_NAI_Studio_macOS_<version>_Portable.zip` | When listed in the release, extract and use it on Apple silicon or Intel Macs running macOS 13.5 or later. |
 
-Both versions support in-app updates. Your settings, gallery database and Agent data live in `user-data/` and `agent-data/` beside the program. Updates and uninstallation leave them intact.
+Both Windows packages support in-app updates. Settings, the gallery database and Agent data live in `user-data/` and `agent-data/` beside the program. On Mac, data lives in your Application Support directory. The app downloads and verifies updates, then opens Finder for you to replace the app.
 
 > **First upgrade from Portable 2.2.3 or earlier:** Exit the app completely, then extract the new release over the existing program folder, keeping `user-data/` and `agent-data/`. In-app updates work normally from 2.2.4 onward. Setup updates are unaffected by this older script issue.
 

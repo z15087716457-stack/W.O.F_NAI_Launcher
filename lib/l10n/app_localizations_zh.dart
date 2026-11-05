@@ -5007,6 +5007,12 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get updateMacReveal => '在访达中显示';
+
+  @override
+  String get updateMacReplaceHint => '退出当前应用后，在访达中将新版拖到原位置完成替换。';
+
+  @override
   String get updateInstallAndRestart => '安装并重启';
 
   @override
@@ -18463,7 +18469,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_rgPython => 'Python 解释器';
 
   @override
-  String get set_rgPythonSub => '默认用自动安装的独立环境；也可以选一个已有的 python.exe。';
+  String get set_rgPythonSub => '可选择本机已有的 Python 解释器。';
 
   @override
   String get set_rgPythonAuto => '自动';
@@ -26730,6 +26736,12 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String updateDownloadedHint(Object version) {
     return '新版本 v$version 已下載並通過校驗。安裝將關閉應用，完成後會自動重啟。';
   }
+
+  @override
+  String get updateMacReveal => '在 Finder 中顯示';
+
+  @override
+  String get updateMacReplaceHint => '結束目前的應用程式後，在 Finder 中將新版拖到原位置完成取代。';
 
   @override
   String get updateInstallAndRestart => '安裝並重啟';
@@ -40188,7 +40200,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get set_rgPython => 'Python 直譯器';
 
   @override
-  String get set_rgPythonSub => '預設用自動安裝的獨立環境；也可以選一個已有的 python.exe。';
+  String get set_rgPythonSub => '可選擇本機已有的 Python 直譯器。';
 
   @override
   String get set_rgPythonAuto => '自動';

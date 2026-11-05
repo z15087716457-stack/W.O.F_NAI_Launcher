@@ -1,3 +1,4 @@
+import 'package:nai_launcher/core/utils/primary_activator.dart';
 import '../../../../widgets/navigation/window_chrome_layout.dart';
 import '../../../../providers/layout_state_provider.dart';
 import 'dart:async';
@@ -1341,7 +1342,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     if (e is! PointerScrollEvent) return;
     if (_cameraLocked) return;
     final kb = HardwareKeyboard.instance;
-    final ctrl = kb.isControlPressed || kb.isMetaPressed;
+    final ctrl = kb.isPrimaryOrWindowsMetaPressed;
     final shift = kb.isShiftPressed;
     final dy = e.scrollDelta.dy;
     _focusFitActive = false;

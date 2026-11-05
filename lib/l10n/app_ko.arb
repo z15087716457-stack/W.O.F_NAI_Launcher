@@ -2671,6 +2671,8 @@
       "version": {}
     }
   },
+  "updateMacReveal": "Finder에서 보기",
+  "updateMacReplaceHint": "현재 앱을 종료한 뒤 Finder에서 압축을 푼 앱으로 교체하세요.",
   "updateInstallAndRestart": "설치 후 다시 시작",
   "updateInstallLater": "나중에 설치",
   "updateDownloadCancelled": "다운로드를 취소했습니다. 나중에 이어서 받을 수 있습니다",
@@ -10152,7 +10154,7 @@
   "set_rgFind": "찾기",
   "set_rgModelsMissing": "찾지 못했습니다. 다운로드하거나 가중치 폴더를 직접 고르세요.",
   "set_rgPython": "Python 인터프리터",
-  "set_rgPythonSub": "기본은 자동 설치한 독립 환경이며 기존 python.exe도 고를 수 있습니다.",
+  "set_rgPythonSub": "이 컴퓨터에 설치된 Python 인터프리터를 선택할 수 있습니다.",
   "set_rgPythonAuto": "자동",
   "set_rgPythonNone": "설치 안 됨",
   "set_rgPythonPending": "아직 쓰지 않습니다. “이 인터프리터 사용”을 누르면 패키지를 다시 설치합니다.",

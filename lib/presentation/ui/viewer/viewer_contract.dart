@@ -1,3 +1,4 @@
+import 'package:nai_launcher/core/utils/primary_activator.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -307,20 +308,12 @@ abstract final class ViewerKeys {
     ],
     ViewerCommand.zoomFit: [SingleActivator(LogicalKeyboardKey.digit0)],
     ViewerCommand.zoomActual: [SingleActivator(LogicalKeyboardKey.digit1)],
-    ViewerCommand.reuse: [
-      SingleActivator(LogicalKeyboardKey.keyR, control: true),
-    ],
-    ViewerCommand.copyPrompt: [
-      SingleActivator(LogicalKeyboardKey.keyC, control: true),
-    ],
+    ViewerCommand.reuse: [PrimaryActivator(LogicalKeyboardKey.keyR)],
+    ViewerCommand.copyPrompt: [PrimaryActivator(LogicalKeyboardKey.keyC)],
     ViewerCommand.favorite: [SingleActivator(LogicalKeyboardKey.keyF)],
     ViewerCommand.delete: [SingleActivator(LogicalKeyboardKey.delete)],
-    ViewerCommand.undo: [
-      SingleActivator(LogicalKeyboardKey.keyZ, control: true),
-    ],
-    ViewerCommand.save: [
-      SingleActivator(LogicalKeyboardKey.keyS, control: true),
-    ],
+    ViewerCommand.undo: [PrimaryActivator(LogicalKeyboardKey.keyZ)],
+    ViewerCommand.save: [PrimaryActivator(LogicalKeyboardKey.keyS)],
     ViewerCommand.help: [
       SingleActivator(LogicalKeyboardKey.slash, shift: true),
     ],

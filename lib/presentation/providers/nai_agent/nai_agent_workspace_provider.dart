@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
+import '../../../core/utils/app_bundle_paths.dart';
 import '../../../data/services/nai_agent/agent_workspace_store.dart';
 import 'nai_agent_session_provider.dart';
 import 'nai_agent_workspace_controller.dart';
@@ -25,18 +26,12 @@ class NaiAgentRuntimePaths {
 
 /// Installer preserves this adjacent directory. It is outside Flutter data/.
 final naiAgentWorkspaceStoreProvider = Provider<AgentWorkspaceStore>(
-  (ref) => AgentWorkspaceStore(
-    Directory(p.join(p.dirname(Platform.resolvedExecutable), 'agent-data')),
-  ),
+  (ref) => AgentWorkspaceStore(Directory(AppBundlePaths.agentDataDirectory)),
 );
 
 /// Production uses the bundled runtime only; tests explicitly override paths.
 final naiAgentRuntimePathsProvider = Provider<NaiAgentRuntimePaths>((ref) {
-  final root = p.join(
-    p.dirname(Platform.resolvedExecutable),
-    'tools',
-    'nai-agent',
-  );
+  final root = p.join(AppBundlePaths.toolsDirectory, 'nai-agent');
   return NaiAgentRuntimePaths(
     node: p.join(root, Platform.isWindows ? 'node.exe' : 'node'),
     host: p.join(root, 'host.mjs'),

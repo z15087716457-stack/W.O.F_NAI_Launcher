@@ -1,3 +1,4 @@
+import 'package:nai_launcher/core/utils/primary_activator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -233,7 +234,7 @@ class _OnlineGalleryPageState extends State<OnlineGalleryPage>
       return KeyEventResult.ignored;
     }
     final k = e.logicalKey;
-    final ctrl = HardwareKeyboard.instance.isControlPressed;
+    final ctrl = HardwareKeyboard.instance.isPrimaryPressed;
     if (ctrl && k == LogicalKeyboardKey.keyF) {
       _searchFocus.requestFocus();
       return KeyEventResult.handled;

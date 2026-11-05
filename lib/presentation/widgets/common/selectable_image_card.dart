@@ -1,3 +1,4 @@
+import 'package:nai_launcher/core/utils/primary_activator.dart';
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
@@ -1272,7 +1273,7 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
 
   bool get _isMultiSelectModifierPressed {
     final keyboard = HardwareKeyboard.instance;
-    return keyboard.isControlPressed || keyboard.isMetaPressed;
+    return keyboard.isPrimaryOrWindowsMetaPressed;
   }
 
   void _handleLegacyTap() {

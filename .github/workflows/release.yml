@@ -10,6 +10,10 @@ on:
         description: "Release tag to build, for example v1.0.0"
         required: true
         type: string
+      include_macos:
+        description: Include the verified macOS universal package
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -206,12 +210,27 @@ jobs:
             dist/checksums.txt
           if-no-files-found: error
 
+  build-macos:
+    if: github.event_name == 'workflow_dispatch' && inputs.include_macos
+    needs: prepare
+    permissions:
+      contents: read
+    uses: ./.github/workflows/macos-build.yml
+    with:
+      checkout-ref: ${{ inputs.tag }}
+      version: ${{ needs.prepare.outputs.version }}
+
   publish:
     name: Publish GitHub Release
+    if: >-
+      ${{ !cancelled() && needs.prepare.result == 'success' &&
+          needs.build-windows.result == 'success' &&
+          (needs.build-macos.result == 'success' || needs.build-macos.result == 'skipped') }}
     runs-on: ubuntu-latest
     needs:
       - prepare
       - build-windows
+      - build-macos
 
     steps:
       - name: Checkout

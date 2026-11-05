@@ -1,3 +1,4 @@
+import 'package:nai_launcher/core/utils/primary_activator.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -778,10 +779,7 @@ class _UserLineState extends State<_UserLine> {
             CallbackShortcuts(
               bindings: {
                 const SingleActivator(LogicalKeyboardKey.escape): _cancel,
-                const SingleActivator(
-                  LogicalKeyboardKey.enter,
-                  control: true,
-                ): () =>
+                const PrimaryActivator(LogicalKeyboardKey.enter): () =>
                     _send(s),
               },
               child: TextField(

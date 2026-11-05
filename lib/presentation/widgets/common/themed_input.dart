@@ -1,3 +1,4 @@
+import 'package:nai_launcher/core/utils/primary_activator.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter/services.dart';
 
@@ -400,8 +401,9 @@ class _ThemedInputState extends State<ThemedInput> {
     final textField = widget.enableNativeRedoShortcut
         ? Shortcuts(
             shortcuts: const <ShortcutActivator, Intent>{
-              SingleActivator(LogicalKeyboardKey.keyY, control: true):
-                  RedoTextIntent(SelectionChangedCause.keyboard),
+              PrimaryActivator(LogicalKeyboardKey.keyY): RedoTextIntent(
+                SelectionChangedCause.keyboard,
+              ),
             },
             child: field,
           )

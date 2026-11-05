@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:io';
+import 'package:nai_launcher/core/utils/desktop_platform.dart';
 
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -47,7 +47,7 @@ class CanvasUpscaleButton extends ConsumerWidget {
         : ref.watch(localUpscaleModelsProvider).valueOrNull;
     final supported = isCloud
         ? cost >= 0
-        : Platform.isWindows &&
+        : isSupportedDesktop &&
               (models?.any(
                     (model) =>
                         model.installed &&

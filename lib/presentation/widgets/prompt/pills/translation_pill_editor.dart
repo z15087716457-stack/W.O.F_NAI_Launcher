@@ -1,3 +1,4 @@
+import 'package:nai_launcher/core/utils/primary_activator.dart';
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -847,7 +848,7 @@ class _TranslationPillEditPopoverState
     final history = chinese ? _zhHistory : _sourceHistory;
     Widget field = Shortcuts(
       shortcuts: const {
-        SingleActivator(LogicalKeyboardKey.keyY, control: true): RedoTextIntent(
+        PrimaryActivator(LogicalKeyboardKey.keyY): RedoTextIntent(
           SelectionChangedCause.keyboard,
         ),
       },

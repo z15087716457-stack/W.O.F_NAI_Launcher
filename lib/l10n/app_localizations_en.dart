@@ -5209,6 +5209,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get updateMacReveal => 'Show in Finder';
+
+  @override
+  String get updateMacReplaceHint =>
+      'Quit this app, then use Finder to replace it with the extracted app.';
+
+  @override
   String get updateInstallAndRestart => 'Install and Restart';
 
   @override
@@ -19262,7 +19269,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get set_rgPythonSub =>
-      'Uses the standalone runtime by default; you can pick an existing python.exe.';
+      'You can select an existing local Python interpreter.';
 
   @override
   String get set_rgPythonAuto => 'Auto';

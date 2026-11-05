@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'package:path/path.dart' as p;
+import 'rag_platform.dart';
 import 'rag_process.dart';
 
 class RagRuntimeInfo {
@@ -22,8 +22,10 @@ typedef RagProbeRunner =
 class RagRuntimeProbe {
   RagRuntimeProbe({
     RagProbeRunner? runner,
+    RagPlatform? platform,
     this.timeout = const Duration(seconds: 45),
-  }) : _runner =
+  }) : platform = platform ?? RagPlatform.host,
+       _runner =
            runner ??
            ((root, python, code) => startRagProcess(
              directory: root,
@@ -37,7 +39,9 @@ class RagRuntimeProbe {
                'TRANSFORMERS_OFFLINE': '1',
                'HF_HUB_DISABLE_TELEMETRY': '1',
              },
+             platform: platform,
            ));
+  final RagPlatform platform;
   final RagProbeRunner _runner;
   final Duration timeout;
   final _processes = <Process>{};
@@ -51,7 +55,7 @@ ok=sys.version_info[:2]==(3,12) and all(m.version(k).split('+')[0]==v for k,v in
 print(json.dumps({'ready':ok,'cuda':torch.version.cuda is not None}),flush=True)
 ''';
   Future<RagRuntimeInfo> inspect(Directory root, String preferred) async {
-    final managed = p.join(root.path, 'runtime', 'Scripts', 'python.exe');
+    final managed = platform.managedPython(root.path);
     for (final python in {if (preferred.isNotEmpty) preferred, managed}) {
       if (_cancelled || !await File(python).exists()) continue;
       Process? process;

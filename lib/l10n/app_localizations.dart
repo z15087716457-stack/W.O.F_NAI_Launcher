@@ -9233,6 +9233,18 @@ abstract class AppLocalizations {
   /// **'v{version} has been downloaded and verified. Installing will close the app and restart it automatically.'**
   String updateDownloadedHint(Object version);
 
+  /// No description provided for @updateMacReveal.
+  ///
+  /// In en, this message translates to:
+  /// **'Show in Finder'**
+  String get updateMacReveal;
+
+  /// No description provided for @updateMacReplaceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Quit this app, then use Finder to replace it with the extracted app.'**
+  String get updateMacReplaceHint;
+
   /// No description provided for @updateInstallAndRestart.
   ///
   /// In en, this message translates to:
@@ -33589,7 +33601,7 @@ abstract class AppLocalizations {
   /// No description provided for @set_rgPythonSub.
   ///
   /// In en, this message translates to:
-  /// **'Uses the standalone runtime by default; you can pick an existing python.exe.'**
+  /// **'You can select an existing local Python interpreter.'**
   String get set_rgPythonSub;
 
   /// No description provided for @set_rgPythonAuto.

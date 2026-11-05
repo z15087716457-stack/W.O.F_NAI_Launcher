@@ -5088,6 +5088,12 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
+  String get updateMacReveal => 'Finder에서 보기';
+
+  @override
+  String get updateMacReplaceHint => '현재 앱을 종료한 뒤 Finder에서 압축을 푼 앱으로 교체하세요.';
+
+  @override
   String get updateInstallAndRestart => '설치 후 다시 시작';
 
   @override
@@ -18745,7 +18751,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get set_rgPython => 'Python 인터프리터';
 
   @override
-  String get set_rgPythonSub => '기본은 자동 설치한 독립 환경이며 기존 python.exe도 고를 수 있습니다.';
+  String get set_rgPythonSub => '이 컴퓨터에 설치된 Python 인터프리터를 선택할 수 있습니다.';
 
   @override
   String get set_rgPythonAuto => '자동';

@@ -18,6 +18,7 @@ class LocalUpscaleModelManager {
     Future<Directory> Function()? rootDirectory,
     Future<Uint8List> Function(String)? loadAsset,
     Dio? dio,
+    this.bundledExecutable,
   }) : _rootDirectory = rootDirectory ?? _defaultDirectory,
        _loadAsset = loadAsset ?? _bundleBytes,
        _dio =
@@ -34,6 +35,7 @@ class LocalUpscaleModelManager {
   final Future<Directory> Function() _rootDirectory;
   final Future<Uint8List> Function(String) _loadAsset;
   final Dio _dio;
+  final String? bundledExecutable;
   Future<void>? _initializing;
   late Directory directory;
   late Map<String, dynamic> _manifest;
@@ -95,14 +97,15 @@ class LocalUpscaleModelManager {
     _manifest = jsonDecode(utf8.decode(manifest)) as Map<String, dynamic>;
     directory = await _rootDirectory();
     await directory.create(recursive: true);
-    for (final item
-        in (_manifest['engine_files'] as List).cast<Map<String, dynamic>>()) {
-      final relative = item['path'] as String;
-      await _installBundled(
-        relative,
-        File(p.join(directory.path, relative)),
-        item['sha256'] as String,
-      );
+    if (bundledExecutable == null) {
+      for (final item in _windowsEngineFiles) {
+        final relative = item['path'] as String;
+        await _installBundled(
+          relative,
+          File(p.join(directory.path, relative)),
+          item['sha256'] as String,
+        );
+      }
     }
     for (final item in _filesFor(localUpscaleCatalog.first)) {
       final relative = item['name'] as String;
@@ -223,17 +226,24 @@ class LocalUpscaleModelManager {
     return models;
   }
 
+  List<Map<String, dynamic>> get _windowsEngineFiles =>
+      (_manifest['engine_files'] as List).cast<Map<String, dynamic>>();
+
   Future<(String, String, LocalUpscaleModel)> resolve(String id) async {
     await initialize();
-    for (final item
-        in (_manifest['engine_files'] as List).cast<Map<String, dynamic>>()) {
-      final file = File(p.join(directory.path, item['path'] as String));
-      if (!await file.exists()) {
-        throw const LocalUpscaleException(LocalUpscaleError.engineMissing);
+    final executable = bundledExecutable;
+    if (executable == null) {
+      for (final item in _windowsEngineFiles) {
+        final file = File(p.join(directory.path, item['path'] as String));
+        if (!await file.exists()) {
+          throw const LocalUpscaleException(LocalUpscaleError.engineMissing);
+        }
+        if (await _hash(file) != item['sha256']) {
+          throw const LocalUpscaleException(LocalUpscaleError.integrity);
+        }
       }
-      if (await _hash(file) != item['sha256']) {
-        throw const LocalUpscaleException(LocalUpscaleError.integrity);
-      }
+    } else if (!await File(executable).exists()) {
+      throw const LocalUpscaleException(LocalUpscaleError.engineMissing);
     }
     final available = await models();
     final matches = available.where(
@@ -269,7 +279,8 @@ class LocalUpscaleModelManager {
       }
     }
     return (
-      p.join(directory.path, 'windows', 'realesrgan-ncnn-vulkan.exe'),
+      executable ??
+          p.join(directory.path, 'windows', 'realesrgan-ncnn-vulkan.exe'),
       folder.path,
       model,
     );

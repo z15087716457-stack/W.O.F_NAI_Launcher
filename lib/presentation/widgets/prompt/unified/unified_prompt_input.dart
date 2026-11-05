@@ -1,3 +1,4 @@
+import 'package:nai_launcher/core/utils/primary_activator.dart';
 import 'package:flutter/foundation.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter/services.dart';
@@ -159,7 +160,7 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
 
     final logicalKey = event.logicalKey;
 
-    final isCtrl = HardwareKeyboard.instance.isControlPressed;
+    final isCtrl = HardwareKeyboard.instance.isPrimaryPressed;
     final isShift = HardwareKeyboard.instance.isShiftPressed;
     final isMeta = HardwareKeyboard.instance.isMetaPressed;
 

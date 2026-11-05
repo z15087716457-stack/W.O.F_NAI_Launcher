@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'core/services/desktop_app_shutdown_service.dart';
 import 'core/utils/studio_sandbox.dart';
+import 'core/utils/macos_app_channel.dart';
 import 'presentation/widgets/navigation/integrated_title_bar.dart';
 import 'presentation/widgets/branding/entry_language_button.dart';
 import 'package:nai_launcher/core/constants/brand.dart';
@@ -85,6 +87,14 @@ class _AppBootstrapEffectsState extends ConsumerState<AppBootstrapEffects> {
   void initState() {
     super.initState();
     _clipboardHistoryPaste.register();
+    if (Platform.isMacOS) {
+      macOSAppChannel.setMethodCallHandler((call) async {
+        if (call.method == 'openSettings' &&
+            !DesktopAppShutdownService.isShuttingDown) {
+          ref.read(appRouterProvider).go(AppRoutes.settings);
+        }
+      });
+    }
     _anlasWatcherSubscription = ref.listenManual(
       widget.anlasWatcher ?? anlasBalanceWatcherProvider,
       (_, __) {},
@@ -112,6 +122,7 @@ class _AppBootstrapEffectsState extends ConsumerState<AppBootstrapEffects> {
   @override
   void dispose() {
     _clipboardHistoryPaste.dispose();
+    if (Platform.isMacOS) macOSAppChannel.setMethodCallHandler(null);
     _anlasWatcherSubscription?.close();
     _backgroundRefreshSubscription?.close();
     _kritaBridgeSubscription?.close();
@@ -343,6 +354,7 @@ class _RouteAwareTitleBarState extends State<_RouteAwareTitleBar> {
 
   @override
   Widget build(BuildContext context) {
+    if (Platform.isMacOS) return widget.child;
     return IntegratedTitleBarShell(
       deferToRoute: true,
       immersive: _immersive,

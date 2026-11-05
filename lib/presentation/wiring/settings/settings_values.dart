@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/storage_keys.dart';
 import '../../../core/autocomplete/autocomplete_settings.dart' as autocomplete;
+import '../../../core/rag/rag_platform.dart';
 import '../../../core/rag/rag_settings.dart';
 import '../../../core/storage/local_storage_service.dart';
 import '../../../core/services/update_check_service.dart';
@@ -142,7 +143,10 @@ final settingsValuesProvider = Provider<SettingsValues>((ref) {
     SettingKey.ragContext: rag.mode == RagContextMode.before
         ? 'beforeCursor'
         : 'around',
-    SettingKey.ragDevice: rag.device.name,
+    SettingKey.ragDevice:
+        RagPlatform.host.isMacOS && rag.device == RagDevice.cuda
+        ? RagDevice.auto.name
+        : rag.device.name,
     SettingKey.ragEmbedPath: path(rag.embedding),
     SettingKey.ragRerankPath: path(rag.reranker),
     SettingKey.ragPythonPath: path(rag.python),

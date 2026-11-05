@@ -1,3 +1,4 @@
+import 'package:nai_launcher/core/utils/primary_activator.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter/services.dart';
 import '../../widgets/auth/add_account_dialog.dart';
@@ -415,7 +416,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
     return CallbackShortcuts(
       bindings: {
-        const SingleActivator(LogicalKeyboardKey.keyF, control: true): () =>
+        const PrimaryActivator(LogicalKeyboardKey.keyF): () =>
             _search(context, sections),
         const SingleActivator(LogicalKeyboardKey.keyF, meta: true): () =>
             _search(context, sections),

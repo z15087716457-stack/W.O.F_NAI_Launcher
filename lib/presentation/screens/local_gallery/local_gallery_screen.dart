@@ -1,3 +1,4 @@
+import 'package:nai_launcher/core/utils/primary_activator.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -991,7 +992,7 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
   void _handleKeyEvent(KeyEvent event, BulkOperationState bulkOpState) {
     if (event is! KeyDownEvent || hasEditableTextFocus) return;
 
-    final isCtrlPressed = HardwareKeyboard.instance.isControlPressed;
+    final isCtrlPressed = HardwareKeyboard.instance.isPrimaryPressed;
     if (!isCtrlPressed) return;
 
     if (event.logicalKey == LogicalKeyboardKey.keyZ) {

@@ -2638,6 +2638,8 @@
       "version": {}
     }
   },
+  "updateMacReveal": "Show in Finder",
+  "updateMacReplaceHint": "Quit this app, then use Finder to replace it with the extracted app.",
   "updateInstallAndRestart": "Install and Restart",
   "updateInstallNow": "Install Now",
   "updateInstallLater": "Install Later",
@@ -10182,7 +10184,7 @@
   "set_rgFind": "Find",
   "set_rgModelsMissing": "Not found. Use Download, or choose a folder with the weights.",
   "set_rgPython": "Python interpreter",
-  "set_rgPythonSub": "Uses the standalone runtime by default; you can pick an existing python.exe.",
+  "set_rgPythonSub": "You can select an existing local Python interpreter.",
   "set_rgPythonAuto": "Auto",
   "set_rgPythonNone": "Not installed",
   "set_rgPythonPending": "Not in use yet. “Use this interpreter” reinstalls the packages with it.",

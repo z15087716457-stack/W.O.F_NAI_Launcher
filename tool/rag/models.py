@@ -9,6 +9,9 @@ os.environ['HF_HUB_OFFLINE'] = '1'
 os.environ['TRANSFORMERS_OFFLINE'] = '1'
 os.environ['HF_HUB_DISABLE_TELEMETRY'] = '1'
 os.environ['TOKENIZERS_PARALLELISM'] = 'false'
+# Apple GPU (MPS): an operator without a Metal kernel runs on the CPU instead
+# of failing the request. Read when torch loads; no effect elsewhere.
+os.environ.setdefault('PYTORCH_ENABLE_MPS_FALLBACK', '1')
 
 
 def model_fingerprint(folder):
@@ -43,7 +46,16 @@ class Models:
         import torch
         if self.requested_device == 'cuda' and not torch.cuda.is_available():
             raise RuntimeError('cuda_unavailable')
-        return 'cuda' if self.requested_device != 'cpu' and torch.cuda.is_available() else 'cpu'
+        if self.requested_device == 'cpu': return 'cpu'
+        if torch.cuda.is_available(): return 'cuda'
+        # Apple silicon: PyPI's macOS PyTorch runs on the GPU through Metal.
+        return 'mps' if torch.backends.mps.is_available() else 'cpu'
+
+    def _empty_cache(self):
+        import torch
+        if torch.cuda.is_available(): torch.cuda.empty_cache()
+        elif self.requested_device != 'cpu' and torch.backends.mps.is_available():
+            torch.mps.empty_cache()
 
     def _dtype(self):
         import torch
@@ -68,8 +80,7 @@ class Models:
         if vision and not self.vision and self.encoder is not None:
             self.encoder = None
             gc.collect()
-            import torch
-            if torch.cuda.is_available(): torch.cuda.empty_cache()
+            self._empty_cache()
         if self.encoder is None:
             from sentence_transformers import SentenceTransformer
             self.encoder = SentenceTransformer(self.embedding_path,
@@ -126,9 +137,7 @@ class Models:
         self.encoder = self.scorer = None
         self.vision = False
         gc.collect()
-        import torch
-        if torch.cuda.is_available():
-            torch.cuda.empty_cache()
+        self._empty_cache()
 
     def status(self):
         import torch

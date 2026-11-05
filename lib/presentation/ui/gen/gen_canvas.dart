@@ -1,3 +1,4 @@
+import 'package:nai_launcher/core/utils/primary_activator.dart';
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
@@ -436,7 +437,7 @@ class _GenCanvasTileState extends State<GenCanvasTile> {
     if ((t.state == GenTileState.done || interaction?.failedPreview != null) &&
         scope.controller.selection.tap(
           [t.id],
-          modify: keys.isControlPressed || keys.isMetaPressed,
+          modify: keys.isPrimaryOrWindowsMetaPressed,
           range: keys.isShiftPressed,
         )) {
       _last = null;

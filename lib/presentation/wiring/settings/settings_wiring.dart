@@ -157,9 +157,11 @@ class _SettingsWiringState extends ConsumerState<SettingsWiring> {
     final path =
         key == SettingKey.ragPythonPath || key == SettingKey.completionSoundFile
         ? (await FilePicker.platform.pickFiles(
-            type: FileType.custom,
+            type: key == SettingKey.ragPythonPath && Platform.isMacOS
+                ? FileType.any
+                : FileType.custom,
             allowedExtensions: key == SettingKey.ragPythonPath
-                ? ['exe']
+                ? (Platform.isMacOS ? null : ['exe'])
                 : ['mp3', 'wav', 'ogg', 'flac'],
           ))?.files.single.path
         : await FilePicker.platform.getDirectoryPath();

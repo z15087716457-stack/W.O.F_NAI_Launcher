@@ -15,6 +15,7 @@ import '../../core/rag/rag_runtime.dart';
 import '../../core/rag/rag_runtime_probe.dart';
 import '../../core/rag/rag_text_search.dart';
 import '../../core/rag/rag_block_snapshot.dart';
+import '../../core/rag/rag_platform.dart';
 import '../../core/rag/rag_gallery_search.dart';
 import '../../data/repositories/gallery_folder_repository.dart';
 import 'prompt_block_library_provider.dart';
@@ -360,7 +361,7 @@ class RagController extends Notifier<RagStatus> {
     try {
       final root = await ref.read(ragDirectoryProvider)();
       final python = settings.python.isEmpty
-          ? p.join(root.path, 'runtime', 'Scripts', 'python.exe')
+          ? RagPlatform.host.managedPython(root.path)
           : settings.python;
       if (!await File(python).exists()) {
         throw const RagException('runtime_missing');
@@ -400,7 +401,12 @@ class RagController extends Notifier<RagStatus> {
           {
             'embedding': settings.embedding,
             'reranker': settings.reranker,
-            'device': settings.device.name,
+            'device': settings
+                .deviceOn(
+                  RagPlatform.host,
+                  memoryBytes: readMacPhysicalMemory(),
+                )
+                .name,
             'directory': p.join(root.path, 'indices'),
             'catalog': paths.catalog,
             'runtime': paths.runtime,

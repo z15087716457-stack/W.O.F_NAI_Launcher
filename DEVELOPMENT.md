@@ -39,6 +39,18 @@ Pi 本地回归在 `tool/nai_agent/` 执行 `npm test`，使用本地合成服�
 
 Agent 依赖变化还须覆盖分发入口：`python -m unittest discover -s test/scripts -p windows_release_payload_test.py` 验证版本预检和包信息；Pi 组件版本从锁文件核对，发布元数据读取实际包内版本，不另留版本常量。
 
+### macOS 通用包
+
+通用包在配有 Rosetta 的 Apple 芯片 Mac 上构建，需要登记的 Flutter SDK、Xcode、CocoaPods、Git LFS 和 Rust 的 `aarch64-apple-darwin`、`x86_64-apple-darwin` 目标。产物最低支持 macOS 13.5。
+
+```bash
+flutter pub get --enforce-lockfile
+bash scripts/build_macos.sh --release
+bash scripts/package_macos_release.sh
+```
+
+`macos-build.yml` 可以单独构建并校验通用包。发布工作流通过手动 `include_macos` 纳入 Mac 资产，Windows 标签发布可独立运行。当前构建使用临时签名。对外分发前需完成 Mac 启动、更新、首次迁移与工具运行验证，并确认 Developer ID 签名与公证方案。
+
 ## 当前 Glass 包交付
 
 本机桌面实际使用 `E:/A.I/NovelAI/nai-launcher-src/build/windows-glass-preview/runner/Release/`，不是标准 Release 或 Debug 目录。完整交付状态以该源码根 `.dart_tool/glass-rollout-delivery.json` 与安装文件为准；当前有效源码位置从工作区接手说明读取。

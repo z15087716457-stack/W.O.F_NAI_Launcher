@@ -1,3 +1,4 @@
+import 'package:nai_launcher/core/utils/primary_activator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -163,7 +164,7 @@ class _ToolsEditorPageState extends State<ToolsEditorPage>
     final d = scope.data;
     final a = scope.actions;
     final k = e.logicalKey;
-    final ctrl = HardwareKeyboard.instance.isControlPressed;
+    final ctrl = HardwareKeyboard.instance.isPrimaryPressed;
     if (k == LogicalKeyboardKey.escape) {
       if (d.expanding) {
         a.onExpanding(false);

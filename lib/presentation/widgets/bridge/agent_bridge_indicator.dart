@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/krita/bridge_session.dart';
+import '../../../core/utils/app_bundle_paths.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../providers/krita/krita_bridge_notifier.dart';
@@ -25,7 +26,7 @@ final bridgeClientBundleProvider = FutureProvider<BridgeClientBundle>((
   ref,
 ) async {
   final path =
-      '${File(Platform.resolvedExecutable).parent.path}/tools/studio-bridge.exe';
+      '${AppBundlePaths.toolsDirectory}/studio-bridge${Platform.isWindows ? '.exe' : ''}';
   return BridgeClientBundle(path, available: await File(path).exists());
 });
 

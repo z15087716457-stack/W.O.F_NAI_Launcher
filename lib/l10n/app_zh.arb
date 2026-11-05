@@ -2553,6 +2553,8 @@
       "version": {}
     }
   },
+  "updateMacReveal": "在访达中显示",
+  "updateMacReplaceHint": "退出当前应用后，在访达中将新版拖到原位置完成替换。",
   "updateInstallAndRestart": "安装并重启",
   "updateInstallNow": "立即安装",
   "updateInstallLater": "稍后安装",
@@ -10152,7 +10154,7 @@
   "set_rgFind": "查找",
   "set_rgModelsMissing": "没找到。可以点“下载”，或手动选择已下载的权重目录。",
   "set_rgPython": "Python 解释器",
-  "set_rgPythonSub": "默认用自动安装的独立环境；也可以选一个已有的 python.exe。",
+  "set_rgPythonSub": "可选择本机已有的 Python 解释器。",
   "set_rgPythonAuto": "自动",
   "set_rgPythonNone": "未安装",
   "set_rgPythonPending": "选的解释器还没启用，点“使用此解释器”会按它重新安装依赖。",

@@ -1,3 +1,4 @@
+import 'package:nai_launcher/core/utils/primary_activator.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
@@ -232,9 +233,8 @@ class _BlockEditDialogState extends State<BlockEditDialog> {
 
     return CallbackShortcuts(
       bindings: {
-        const SingleActivator(LogicalKeyboardKey.enter, control: true): _save,
-        const SingleActivator(LogicalKeyboardKey.numpadEnter, control: true):
-            _save,
+        const PrimaryActivator(LogicalKeyboardKey.enter): _save,
+        const PrimaryActivator(LogicalKeyboardKey.numpadEnter): _save,
       },
       child: UiPopover(
         anchor: _pop,

@@ -5091,6 +5091,12 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String get updateMacReveal => 'Finder に表示';
+
+  @override
+  String get updateMacReplaceHint => 'このアプリを終了してから、Finder で展開したアプリに置き換えてください。';
+
+  @override
   String get updateInstallAndRestart => 'インストールして再起動';
 
   @override
@@ -18686,7 +18692,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get set_rgPython => 'Python インタープリター';
 
   @override
-  String get set_rgPythonSub => '既定は自動インストールの独立環境。既存の python.exe も選べます。';
+  String get set_rgPythonSub => 'このコンピューターにある Python インタープリターを選べます。';
 
   @override
   String get set_rgPythonAuto => '自動';

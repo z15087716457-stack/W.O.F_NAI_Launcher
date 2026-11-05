@@ -1,3 +1,4 @@
+import 'package:nai_launcher/core/utils/primary_activator.dart';
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -238,7 +239,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     _textAtDown = widget.controller.text;
     _dragged = false;
     final keyboard = HardwareKeyboard.instance;
-    _controlAtDown = keyboard.isControlPressed || keyboard.isMetaPressed;
+    _controlAtDown = keyboard.isPrimaryOrWindowsMetaPressed;
   }
 
   void _onPointerMove(PointerMoveEvent event) {

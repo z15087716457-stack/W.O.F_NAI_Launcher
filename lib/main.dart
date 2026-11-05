@@ -1,6 +1,7 @@
 import 'package:nai_launcher/core/constants/brand.dart';
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui' show AppExitResponse;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -41,6 +42,10 @@ import 'core/utils/app_logger.dart';
 import 'core/utils/hive_startup_box_opener.dart';
 import 'core/utils/hive_storage_helper.dart';
 import 'core/utils/app_support_directory.dart';
+import 'core/utils/app_bundle_paths.dart';
+import 'core/utils/desktop_platform.dart';
+import 'core/utils/file_explorer_utils.dart';
+import 'presentation/utils/control_click.dart';
 import 'core/utils/studio_sandbox.dart';
 import 'core/utils/window_focus_tracker.dart';
 import 'core/utils/window_state_coercion.dart';
@@ -135,7 +140,7 @@ class WindowStateObserver extends WidgetsBindingObserver {
   @override
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
     // 仅桌面端保存窗口状态
-    if (!Platform.isWindows || DesktopAppShutdownService.isShuttingDown) {
+    if (!isSupportedDesktop || DesktopAppShutdownService.isShuttingDown) {
       return;
     }
 
@@ -211,7 +216,7 @@ class AppWindowListener extends WindowListener {
       // 阻止窗口关闭
       await windowManager.setPreventClose(true);
       await windowManager.hide();
-      await ResourceWindowService.instance.closeAll();
+      if (Platform.isWindows) await ResourceWindowService.instance.closeAll();
       AppLogger.d('Window hidden to tray', 'WindowListener');
     } catch (e) {
       AppLogger.e('Failed to hide window to tray: $e', 'WindowListener');
@@ -340,7 +345,17 @@ void main() {
 }
 
 Future<void> _bootstrapApplication() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  if (Platform.isMacOS) {
+    AppWidgetsBinding.ensureInitialized();
+    AppLifecycleListener(
+      onExitRequested: () async {
+        await DesktopAppShutdownService.prepareForExit();
+        return AppExitResponse.exit;
+      },
+    );
+  } else {
+    WidgetsFlutterBinding.ensureInitialized();
+  }
   if (Platform.isWindows) {
     final controller = await waitForResourceWindowPlugins();
     await dispatchResourceWindow(
@@ -383,7 +398,7 @@ void _runMainApp(Widget child) => runApp(
 );
 
 Future<void> _prepareDataAndStart() => startWithPreparedAppData(
-  prepare: getApplicationSupportDirectory,
+  prepare: prepareApplicationSupportForStartup,
   start: _bootstrapPreparedApplication,
   onFailure: (error, stackTrace) async {
     AppErrorReporter.reportError(
@@ -396,21 +411,23 @@ Future<void> _prepareDataAndStart() => startWithPreparedAppData(
       StartupDataRecoveryApp(
         error: error,
         onRetry: () async {
-          await getApplicationSupportDirectory();
+          await prepareApplicationSupportForStartup();
           _runMainApp(const StartupDataLoadingApp());
           unawaited(_bootstrapPreparedApplication());
         },
         onCopy: (text) => Clipboard.setData(ClipboardData(text: text)),
         onOpenDirectory: (path) async {
           final directory = Directory(path);
-          await Process.run('explorer.exe', [
+          await FileExplorerUtils.openDirectory(
             await directory.exists() ? directory.path : directory.parent.path,
-          ]);
+          );
         },
-        onClose: () => windowManager.close(),
+        onClose: () => Platform.isMacOS
+            ? DesktopAppShutdownService.shutdownAndExit(0)
+            : windowManager.close(),
       ),
     );
-    if (Platform.isWindows) {
+    if (isSupportedDesktop) {
       await windowManager.ensureInitialized();
       await windowManager.waitUntilReadyToShow(
         WindowOptions(
@@ -498,6 +515,7 @@ Future<void> _initializeMainServices() async {
 }
 
 Future<void> _bootstrapPreparedApplication() async {
+  await AppBundlePaths.prepare();
   // Finish storage migration before Hive, SQLite or background services open.
   // _prepareDataAndStart has completed it; retry never repeats opened services.
 
@@ -517,7 +535,10 @@ Future<void> _bootstrapPreparedApplication() async {
 
   try {
     // 初始化桌面端视频播放支持 (media_kit)
-    VideoPlayerMediaKit.ensureInitialized(windows: true);
+    VideoPlayerMediaKit.ensureInitialized(
+      windows: Platform.isWindows,
+      macOS: Platform.isMacOS,
+    );
   } catch (e, stackTrace) {
     AppLogger.e(
       'Video player initialization failed; continuing startup',
@@ -604,7 +625,7 @@ Future<void> _bootstrapPreparedApplication() async {
   timeago.setLocaleMessages('ko', timeago.KoMessages());
 
   // 桌面端窗口配置
-  if (Platform.isWindows) {
+  if (isSupportedDesktop) {
     try {
       await windowManager.ensureInitialized();
 
@@ -652,7 +673,9 @@ Future<void> _bootstrapPreparedApplication() async {
         skipTaskbar: false,
         // FEAT-23 内置一体标题栏：隐藏原生栏，由 Flutter 自绘
         // （拖拽/双击/Aero Snap 经 runner WM_NCHITTEST 返回 HTCAPTION）。
-        titleBarStyle: TitleBarStyle.hidden,
+        titleBarStyle: Platform.isMacOS
+            ? TitleBarStyle.normal
+            : TitleBarStyle.hidden,
         title: studioWindowTitle(Brand.name),
       );
 
@@ -679,7 +702,12 @@ Future<void> _bootstrapPreparedApplication() async {
       try {
         // 设置托盘图标和提示
         // tray_manager 使用 Flutter 资源路径格式（相对于 data/flutter_assets/）
-        await trayManager.setIcon('assets/icons/window_icon.ico');
+        await trayManager.setIcon(
+          Platform.isMacOS
+              ? 'assets/icons/tray_icon_macos.png'
+              : 'assets/icons/window_icon.ico',
+          isTemplate: Platform.isMacOS,
+        );
         await trayManager.setToolTip(Brand.name);
 
         // 获取本地化字符串
@@ -718,7 +746,7 @@ Future<void> _bootstrapPreparedApplication() async {
   }
 
   // 系统代理配置（根据用户设置）
-  if (Platform.isWindows) {
+  if (isSupportedDesktop) {
     final settingsBox = Hive.box(StorageKeys.settingsBox);
     final proxyEnabled =
         settingsBox.get(StorageKeys.proxyEnabled, defaultValue: true) as bool;
@@ -760,7 +788,7 @@ Future<void> _bootstrapPreparedApplication() async {
   }
 
   // 注册窗口状态观察者
-  if (Platform.isWindows) {
+  if (isSupportedDesktop) {
     WidgetsBinding.instance.addObserver(WindowStateObserver());
     AppLogger.d('Window state observer registered', 'Main');
   }

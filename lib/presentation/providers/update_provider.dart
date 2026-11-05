@@ -383,6 +383,9 @@ class UpdateStateNotifier extends _$UpdateStateNotifier {
       await ref
           .read(updateInstallerServiceProvider)
           .installAndRestart(downloaded);
+      if (downloaded.asset.requiresManualReplace) {
+        state = state.copyWith(status: UpdateStatus.downloaded);
+      }
     } catch (error) {
       state = state.copyWith(
         status: UpdateStatus.error,

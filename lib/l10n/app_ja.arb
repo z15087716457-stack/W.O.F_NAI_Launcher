@@ -2671,6 +2671,8 @@
       "version": {}
     }
   },
+  "updateMacReveal": "Finder に表示",
+  "updateMacReplaceHint": "このアプリを終了してから、Finder で展開したアプリに置き換えてください。",
   "updateInstallAndRestart": "インストールして再起動",
   "updateInstallLater": "後でインストール",
   "updateDownloadCancelled": "ダウンロードをキャンセルしました。後で再開できます",
@@ -10152,7 +10154,7 @@
   "set_rgFind": "探す",
   "set_rgModelsMissing": "見つかりません。「ダウンロード」するか、重みのフォルダーを選んでください。",
   "set_rgPython": "Python インタープリター",
-  "set_rgPythonSub": "既定は自動インストールの独立環境。既存の python.exe も選べます。",
+  "set_rgPythonSub": "このコンピューターにある Python インタープリターを選べます。",
   "set_rgPythonAuto": "自動",
   "set_rgPythonNone": "未インストール",
   "set_rgPythonPending": "まだ使われていません。「このインタープリターを使う」で依存を入れ直します。",

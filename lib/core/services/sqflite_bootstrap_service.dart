@@ -1,8 +1,7 @@
-import 'dart:io';
-
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import '../utils/app_logger.dart';
+import '../utils/desktop_platform.dart';
 
 /// Sqflite 启动初始化服务
 ///
@@ -25,7 +24,7 @@ class SqfliteBootstrapService {
   }
 
   Future<void> _doInitialize() async {
-    if (!Platform.isWindows) {
+    if (!isSupportedDesktop) {
       _initialized = true;
       return;
     }

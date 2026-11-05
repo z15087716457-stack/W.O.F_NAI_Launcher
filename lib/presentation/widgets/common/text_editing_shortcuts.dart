@@ -1,3 +1,4 @@
+import 'package:nai_launcher/core/utils/primary_activator.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -56,7 +57,7 @@ class TextEditingShortcutsState extends State<TextEditingShortcuts> {
 
   KeyEventResult _onKey(FocusNode node, KeyEvent event) {
     if (event is! KeyDownEvent ||
-        !HardwareKeyboard.instance.isControlPressed ||
+        !HardwareKeyboard.instance.isPrimaryPressed ||
         HardwareKeyboard.instance.isAltPressed ||
         hasEditableTextFocus) {
       return KeyEventResult.ignored;
@@ -91,7 +92,7 @@ class TextEditingShortcutsState extends State<TextEditingShortcuts> {
     onKeyEvent: _onKey,
     child: Shortcuts(
       shortcuts: const {
-        SingleActivator(LogicalKeyboardKey.keyY, control: true): RedoTextIntent(
+        PrimaryActivator(LogicalKeyboardKey.keyY): RedoTextIntent(
           SelectionChangedCause.keyboard,
         ),
       },

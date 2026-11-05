@@ -1,3 +1,4 @@
+import 'package:nai_launcher/core/utils/primary_activator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -208,7 +209,7 @@ class BlocksLibraryPageState extends State<BlocksLibraryPage> {
     }
     final k = e.logicalKey;
     final hw = HardwareKeyboard.instance;
-    final ctrl = hw.isControlPressed || hw.isMetaPressed;
+    final ctrl = hw.isPrimaryOrWindowsMetaPressed;
     if (ctrl && k == LogicalKeyboardKey.keyF) {
       searchFocus.requestFocus();
       return KeyEventResult.handled;

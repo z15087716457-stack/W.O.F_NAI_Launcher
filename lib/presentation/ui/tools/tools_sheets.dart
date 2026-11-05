@@ -1,3 +1,4 @@
+import 'package:nai_launcher/core/utils/primary_activator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -71,8 +72,7 @@ class _ToolsSheetFrameState extends State<ToolsSheetFrame> {
           bindings: {
             const SingleActivator(LogicalKeyboardKey.escape): widget.onClose,
             if (widget.onRun != null)
-              const SingleActivator(LogicalKeyboardKey.enter, control: true):
-                  widget.onRun!,
+              const PrimaryActivator(LogicalKeyboardKey.enter): widget.onRun!,
           },
           child: Focus(
             autofocus: true,

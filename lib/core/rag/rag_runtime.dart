@@ -7,27 +7,73 @@ import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart' as p;
 import 'rag_client.dart';
+import 'rag_platform.dart';
 import 'rag_process.dart';
 import 'rag_runtime_probe.dart';
 
+/// One pinned official uv 0.13.1 build; the hash is the release's `.sha256`.
+class RagUvRelease {
+  const RagUvRelease({
+    required this.url,
+    required this.sha256,
+    required this.entry,
+    required this.file,
+  });
+  final String url, sha256;
+
+  /// The executable inside the archive, and the name it is saved under.
+  final String entry, file;
+}
+
 /// Explicit optional installation. Merely opening settings never downloads.
 class RagRuntimeInstaller {
-  RagRuntimeInstaller(this.root, {Dio? dio, RagRuntimeProbe? probe})
-    : _dio = dio ?? Dio(),
-      _probe = probe ?? RagRuntimeProbe();
+  /// [uv] and [start] replace the pinned download and process launch in tests.
+  RagRuntimeInstaller(
+    this.root, {
+    Dio? dio,
+    RagRuntimeProbe? probe,
+    RagPlatform? platform,
+    RagUvRelease? uv,
+    RagProcessStarter start = Process.start,
+  }) : platform = platform ?? RagPlatform.host,
+       _dio = dio ?? Dio(),
+       _probe = probe ?? RagRuntimeProbe(platform: platform),
+       _uv = uv,
+       _start = start;
   final Directory root;
+  final RagPlatform platform;
   final Dio _dio;
   final RagRuntimeProbe _probe;
+  final RagUvRelease? _uv;
+  final RagProcessStarter _start;
   String _detail = '';
   String get diagnostic => _detail;
   final _cancel = CancelToken();
   Process? _process;
   bool _cancelled = false;
-  static const uvUrl =
-      'https://github.com/astral-sh/uv/releases/download/0.13.1/uv-x86_64-pc-windows-msvc.zip';
-  static const uvSha256 =
-      '3b2661a463a5baea7f5076ea2b25ab71d77f36a6c0d809e5350651792f80a672';
-  String get python => p.join(root.path, 'runtime', 'Scripts', 'python.exe');
+  static const windowsUv = RagUvRelease(
+    url:
+        'https://github.com/astral-sh/uv/releases/download/0.13.1/uv-x86_64-pc-windows-msvc.zip',
+    sha256: '3b2661a463a5baea7f5076ea2b25ab71d77f36a6c0d809e5350651792f80a672',
+    entry: 'uv.exe',
+    file: 'uv-0.13.1.exe',
+  );
+  static const macOSArm64Uv = RagUvRelease(
+    url:
+        'https://github.com/astral-sh/uv/releases/download/0.13.1/uv-aarch64-apple-darwin.tar.gz',
+    sha256: 'cfe454573412ff7380d15fc7dae5997ab53ffce72fce0a78e91ddbc84001acd2',
+    entry: 'uv',
+    file: 'uv-0.13.1',
+  );
+
+  /// No build is pinned for Intel Macs: PyTorch 2.10 has no wheels for them.
+  static RagUvRelease? uvFor(RagPlatform platform) => switch (platform) {
+    RagPlatform.windows => windowsUv,
+    RagPlatform.macOSArm64 => macOSArm64Uv,
+    RagPlatform.macOSX64 || RagPlatform.other => null,
+  };
+
+  String get python => platform.managedPython(root.path);
   void cancel() {
     _cancelled = true;
     _cancel.cancel();
@@ -51,6 +97,8 @@ class RagRuntimeInstaller {
         'NO_COLOR': '1',
         'PYTHONUTF8': '1',
       },
+      platform: platform,
+      start: _start,
     );
     String safeLine(String line) => line
         .replaceAll(RegExp(r'\[[0-9;]*[a-zA-Z]'), '')
@@ -87,7 +135,8 @@ class RagRuntimeInstaller {
     String preferredPython = '',
     void Function(int elapsedSeconds, String detail)? onProgress,
   }) async {
-    if (!Platform.isWindows) throw const RagException('unsupported_platform');
+    // Macs have no CUDA build; the worker picks the GPU (MPS) at run time.
+    final useCuda = cuda && platform.supportsCuda;
     await root.create(recursive: true);
     final elapsed = Stopwatch()..start();
     void phase(String value) {
@@ -104,10 +153,14 @@ class RagRuntimeInstaller {
       phase('existing');
       final existing = await _probe.inspect(root, preferredPython);
       _check();
-      if (existing.ready && (!cuda || existing.cuda)) return existing.python;
+      if (existing.ready && (!useCuda || existing.cuda)) {
+        return existing.python;
+      }
+      final release = _uv ?? uvFor(platform);
+      if (release == null) throw const RagException('unsupported_platform');
       phase('download');
       final response = await _dio.get<List<int>>(
-        uvUrl,
+        release.url,
         options: Options(
           responseType: ResponseType.bytes,
           receiveTimeout: const Duration(minutes: 5),
@@ -119,15 +172,27 @@ class RagRuntimeInstaller {
       );
       _check();
       final bytes = response.data!;
-      if (sha256.convert(bytes).toString() != uvSha256) {
+      if (sha256.convert(bytes).toString() != release.sha256) {
         throw const RagException('runtime_integrity');
       }
-      final archive = ZipDecoder().decodeBytes(bytes, verify: true);
+      final archive = release.url.endsWith('.zip')
+          ? ZipDecoder().decodeBytes(bytes, verify: true)
+          : TarDecoder().decodeBytes(
+              GZipDecoder().decodeBytes(bytes, verify: true),
+            );
       final entry = archive.files
-          .where((f) => p.basename(f.name) == 'uv.exe' && f.isFile)
+          .where(
+            (f) =>
+                p.basename(f.name) == release.entry &&
+                f.isFile &&
+                !f.isSymbolicLink,
+          )
           .single;
-      final uv = File(p.join(root.path, 'uv-0.13.1.exe'));
+      final uv = File(p.join(root.path, release.file));
       await uv.writeAsBytes(entry.content, flush: true);
+      if (platform != RagPlatform.windows) {
+        await _run('/bin/chmod', ['755', uv.path]);
+      }
       phase('create');
       if (!await File(python).exists()) {
         await _run(uv.path, [
@@ -137,7 +202,7 @@ class RagRuntimeInstaller {
           p.join(root.path, 'runtime'),
         ]);
       }
-      phase(cuda ? 'cuda' : 'packages');
+      phase(useCuda ? 'cuda' : 'packages');
       await _run(uv.path, [
         '-v',
         'pip',
@@ -145,11 +210,18 @@ class RagRuntimeInstaller {
         '--python',
         python,
         '--index-url',
-        cuda
-            ? 'https://download.pytorch.org/whl/cu128'
-            : 'https://download.pytorch.org/whl/cpu',
-        cuda ? 'torch==2.10.0+cu128' : 'torch==2.10.0+cpu',
-        cuda ? 'torchvision==0.25.0+cu128' : 'torchvision==0.25.0+cpu',
+        if (platform == RagPlatform.windows) ...[
+          useCuda
+              ? 'https://download.pytorch.org/whl/cu128'
+              : 'https://download.pytorch.org/whl/cpu',
+          useCuda ? 'torch==2.10.0+cu128' : 'torch==2.10.0+cpu',
+          useCuda ? 'torchvision==0.25.0+cu128' : 'torchvision==0.25.0+cpu',
+        ] else ...[
+          // PyPI's macOS build is the one with MPS (Apple GPU) support.
+          'https://pypi.org/simple',
+          'torch==2.10.0',
+          'torchvision==0.25.0',
+        ],
       ]);
       final requirements = File(p.join(root.path, 'requirements-v1.txt'));
       await requirements.writeAsString(
@@ -174,8 +246,8 @@ class RagRuntimeInstaller {
       await File(p.join(root.path, 'runtime-receipt.json')).writeAsString(
         jsonEncode({
           'version': 1,
-          'uvArchiveSha256': uvSha256,
-          'cuda': cuda,
+          'uvArchiveSha256': release.sha256,
+          'cuda': useCuda,
           'python': '3.12.11',
           'torch': '2.10.0',
           'torchvision': '0.25.0',
