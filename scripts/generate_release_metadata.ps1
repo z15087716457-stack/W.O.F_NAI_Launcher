@@ -193,7 +193,7 @@ $releaseLines = @(
 $releaseLines += $downloadRows
 $releaseLines += @(
   "",
-  "> **应用内更新：** Windows 安装版用户无需手动下载。应用会自动选择 Setup x64，完成下载与 SHA256 校验后退出旧版本、静默安装并重新启动。Portable 版也支持应用内自动更新和失败回滚。更新源为本仓库 Releases。",
+  "> **应用内更新：** Windows 安装版会自动选择 Setup x64，下载并校验后退出旧版本、安装并重新启动。由 2.3.0 或更新版本发起的更新会显示安装进度。2.2.4 及以后的 Portable 版支持应用内更新和失败回滚。2.2.3 及更早的 Portable 版请完全退出后解压覆盖，保留用户数据。更新源为本仓库 Releases。",
   "",
   "> **安装提示：** Windows Setup 为普通用户的推荐版本，Portable 适合放在自定义目录。",
   "",
