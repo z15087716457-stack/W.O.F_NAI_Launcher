@@ -17,7 +17,13 @@ Windows 发布三个作业通过，7 个资产齐全。Portable 共 15,554 个�
 | WOF_NAI_Studio_Windows_2.3.0_Portable.zip | 323,921,605 | 14a456a548e065db577346a6c46436ad6bf70d4cc2991cac6250cca9a3aaa711 |
 | WOF_NAI_Studio_Windows_2.3.0_Setup.exe | 200,763,389 | 0db2f1e1e6f2c0be2acb322596c09478846c663a6c8ce8e31d20d3a161f5803a |
 
-macOS 通用测试包首次因 GitHub ARM runner 容量不足而未启动，已重试。[macOS 构建记录](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/actions/runs/42206145375)
+## macOS 通用测试包
+
+macos-26 runner 从 v2.3.0 标签对应的源码构建了 **2.3.0+85**。支持 macOS 13.5 及以上的 Apple 芯片和 Intel Mac。平台测试、41 个 Mach-O 文件和解包后的签名在 CI 通过核验。下载后再次核对了 SHA-256、版本、源码和主程序及随包工具的双架构。
+
+测试包使用临时签名，未经 Apple 公证，界面启动待实机验收。登录 GitHub 下载 Actions 产物，再解压其中的 Portable ZIP。[下载测试包](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/actions/runs/42223282567/artifacts/13504907724) · [构建记录](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/actions/runs/42223282567)
+
+Portable ZIP 的 SHA-256 为 `4ca8346972e04ed4afe329d0d61552ac4488d57635596214bb82541d5979c798`。
 
 ## 桌面交付
 
