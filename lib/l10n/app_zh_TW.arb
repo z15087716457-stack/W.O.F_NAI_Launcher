@@ -11209,6 +11209,7 @@
   "ag_copy": "複製",
   "ag_copied": "已複製",
   "ag_regenerate": "重新回答",
+  "ag_compacting": "壓縮中…",
   "ag_starting": "正在開啟聊天",
   "ag_waitingSlot": "等服務商額度",
   "ag_waitingYou": "等你處理",

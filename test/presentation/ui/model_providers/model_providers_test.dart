@@ -8,6 +8,7 @@ import 'package:nai_launcher/presentation/ui/model_providers/model_providers_con
 import 'package:nai_launcher/presentation/ui/model_providers/model_providers_fixture.dart';
 
 import '../../../helpers/studio_capture_fonts.dart';
+import '../settings/settings_test_harness.dart' show settingsRail;
 import 'model_providers_harness.dart';
 
 Finder _field(String key) =>
@@ -307,6 +308,53 @@ void main() {
       t.widget<Text>(find.byKey(const Key('mp-insp-id'))).data,
       'anthropic/claude-opus-5',
     );
+  });
+
+  testWidgets('缩窄窗口后，目录勾选保留且可在列表下批量添加', (t) async {
+    final rec = await pumpProviders(t, height: 850, locale: 'en');
+    await t.tap(find.text('Catalog 4'));
+    await t.pumpAndSettle();
+
+    final first = find.byKey(const Key('mp-cat-deepseek-chat'));
+    await t.ensureVisible(first);
+    await t.tap(first);
+    await t.pumpAndSettle();
+    expect(find.text('1 selected'), findsOneWidget);
+
+    t.view.physicalSize = const Size(1000 - settingsRail, 700);
+    await t.pumpAndSettle();
+    final tray = find.byKey(const Key('mp-tray'));
+    final catalog = find.byKey(const Key('mp-catalog'));
+    expect(t.getTopLeft(tray).dy, greaterThan(t.getBottomLeft(catalog).dy));
+    expect(find.text('1 selected'), findsOneWidget);
+
+    t.view.physicalSize = const Size(800 - settingsRail, 600);
+    await t.pumpAndSettle();
+    expect(
+      t.getTopLeft(find.byKey(const Key('mp-middle'))).dy,
+      greaterThanOrEqualTo(
+        t.getBottomLeft(find.byKey(const Key('mp-list'))).dy,
+      ),
+    );
+    expect(find.text('1 selected'), findsOneWidget);
+
+    final second = find.byKey(const Key('mp-cat-deepseek-reasoner'));
+    await t.ensureVisible(second);
+    await t.tap(second);
+    await t.pumpAndSettle();
+    final add = find.byKey(const Key('mp-add-picked'));
+    await t.ensureVisible(add);
+    await t.pumpAndSettle();
+    expect(find.text('Add 2 models').hitTestable(), findsOneWidget);
+    await t.tap(add);
+    await t.pumpAndSettle();
+
+    expect(rec.calls, ['add:ds:deepseek-chat,deepseek-reasoner:false']);
+    expect(
+      t.widget<Text>(find.byKey(const Key('mp-insp-id'))).data,
+      'deepseek-chat',
+    );
+    expect(t.takeException(), isNull);
   });
 
   testWidgets('目录：从没读取过时自动读取一次', (t) async {

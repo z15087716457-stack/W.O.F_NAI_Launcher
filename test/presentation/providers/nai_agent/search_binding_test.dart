@@ -261,7 +261,7 @@ void main() {
       workspaceDirectory: root,
       allowsImages: false,
       readDraft: () => BridgeDraftSnapshot(fields: {}, documents: {}),
-      readSummary: () => {},
+      readSummary: (_) => {},
       isGenerating: () => false,
       backupDraft: (_) async => '',
       writeDraft: (_) => [],

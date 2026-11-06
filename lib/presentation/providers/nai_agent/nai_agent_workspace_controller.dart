@@ -43,6 +43,15 @@ class AgentChatRuntime {
     _composer = value;
   }
 
+  void _setComposerText(String text) {
+    composer = AgentComposerState(
+      text: text,
+      attachments: composer.attachments,
+      pending: composer.pending,
+      interrupted: composer.interrupted,
+    );
+  }
+
   PiHostClient? client;
   StreamSubscription<Map<String, dynamic>>? subscription;
   List<Map<String, dynamic>> messages = [], queue = [];
@@ -76,6 +85,7 @@ class AgentChatRuntime {
   int _suggestionRevision = 0;
   int _suggestionCancels = 0;
   String? compactionReason;
+  bool compacting = false;
   static String compactionKey(Map message) =>
       jsonEncode([message['summary'], message['tokensBefore']]);
   String? visionNotice;
@@ -460,6 +470,7 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
   }
 
   static bool _busy(AgentChatRuntime runtime) =>
+      runtime.compacting ||
       runtime.running ||
       runtime.starting ||
       runtime.waitingForSlot ||
@@ -908,12 +919,7 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
     final cancelling = text != runtime.composer.text
         ? _clearSuggestion(runtime)
         : Future<void>.value();
-    runtime.composer = AgentComposerState(
-      text: text,
-      attachments: runtime.composer.attachments,
-      pending: runtime.composer.pending,
-      interrupted: runtime.composer.interrupted,
-    );
+    runtime._setComposerText(text);
     _notify();
     await _persist(runtime);
     await cancelling;
@@ -1129,17 +1135,17 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
   }) async {
     final runtime = selected;
     final revision = runtime?._composerRevision;
-    final result = await executeSlashCommand(text, onAction: onAction);
+    final result = await executeSlashCommand(
+      text,
+      onAction: onAction,
+      fromComposer: true,
+    );
     if (result == true &&
         runtime != null &&
         runtime._composerRevision == revision &&
         identical(_runtimes[runtime.chat.id], runtime) &&
         (clearComposer || runtime.composer.text == text)) {
-      runtime.composer = AgentComposerState(
-        attachments: runtime.composer.attachments,
-        pending: runtime.composer.pending,
-        interrupted: runtime.composer.interrupted,
-      );
+      runtime._setComposerText('');
       await _persist(runtime);
       _notify();
     }
@@ -1164,6 +1170,7 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
   Future<bool?> executeSlashCommand(
     String text, {
     Future<bool> Function(String)? onAction,
+    bool fromComposer = false,
   }) async {
     final match = RegExp(
       r'^/([a-z]+)(?:\s+([\s\S]*))?$',
@@ -1189,9 +1196,10 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
         await createChat();
         return true;
       case 'compact':
-        if (selected!.running) return false;
-        await compact(args.isEmpty ? null : args);
-        return selected?.error == null;
+        return _compact(
+          args.isEmpty ? null : args,
+          commandText: fromComposer ? text : null,
+        );
       case 'model':
       case 'thinking':
       case 'history':
@@ -1316,6 +1324,7 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
         ? runtime.composer
         : AgentComposerState(text: text);
     if (runtime._resending ||
+        runtime.compacting ||
         (!fromComposer && runtime.running) ||
         _deletingChats.contains(runtime.chat.id) ||
         _deletingWorkspaces.contains(runtime.workspace.id) ||
@@ -1514,6 +1523,7 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
   Future<void> stop() => _stopRuntime(selected!);
 
   Future<void> _stopRuntime(AgentChatRuntime runtime) async {
+    if (runtime.compacting) return;
     final recovered = [
       for (final item in runtime.composer.pending) {...item, 'recovered': true},
     ];
@@ -1630,21 +1640,43 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
   }
 
   Future<void> compact([String? instructions]) async {
-    final runtime = selected!;
-    if (runtime.running) return;
-    final client = await _ensureClient(runtime);
-    runtime.runLimitHit = null;
-    runtime.running = true;
+    await _compact(instructions);
+  }
+
+  Future<bool> _compact(String? instructions, {String? commandText}) async {
+    final runtime = selected;
+    if (runtime == null || _busy(runtime)) return false;
+    runtime.compacting = true;
+    runtime.error = null;
+    final submitted = runtime.composer.text == commandText ? commandText : null;
+    if (submitted != null) runtime._setComposerText('');
+    final revision = runtime._composerRevision;
     _notify();
+
+    var completed = false;
     try {
+      final client = await _ensureClient(runtime);
+      if (submitted != null) await _persist(runtime);
+      runtime.runLimitHit = null;
+      runtime.running = true;
       _applyState(runtime, await client.compact(instructions));
       runtime.runLimitHit = null;
+      runtime.error = null;
+      completed = true;
+      return true;
     } catch (error) {
       runtime.error = _error(error, runtime);
+      return false;
     } finally {
+      if (!completed &&
+          submitted != null &&
+          runtime._composerRevision == revision) {
+        runtime._setComposerText(submitted);
+      }
       runtime.running = false;
-      await _persist(runtime);
+      runtime.compacting = false;
       _notify();
+      await _persist(runtime);
     }
   }
 

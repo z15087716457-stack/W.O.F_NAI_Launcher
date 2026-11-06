@@ -20286,6 +20286,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get ag_regenerate => '回答を再生成';
 
   @override
+  String get ag_compacting => '圧縮中…';
+
+  @override
   String get ag_starting => 'チャットを開いています';
 
   @override

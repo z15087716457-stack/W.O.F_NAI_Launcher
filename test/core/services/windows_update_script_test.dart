@@ -12,7 +12,7 @@ void main() {
           appPid: 4321,
           version: '1.6.0',
           installerPath: r'C:\Temp\setup.exe',
-          executablePath: r'C:\Apps\NAI\nai_launcher.exe',
+          executablePath: r'C:\Apps\W.O.F NAI Studio\nai_launcher.exe',
           resultPath: r'C:\Temp\result.json',
           pendingMetadataPath: r'C:\Temp\pending.json',
           logPath: r'C:\Temp\update.log',
@@ -21,7 +21,16 @@ void main() {
         expect(script, contains('\$AppPid = 4321'));
         expect(script, contains('Get-Process -Id \$AppPid'));
         expect(script, contains(r"'C:\Temp\setup.exe'"));
-        expect(script, contains("-ArgumentList '/S'"));
+        expect(
+          script,
+          contains(r'$InstallDir = Split-Path -LiteralPath $ExePath'),
+        );
+        expect(
+          script,
+          contains(
+            r'-ArgumentList "/UPDATE /D=$InstallDir" -WindowStyle Normal',
+          ),
+        );
         expect(script, contains('\$Installer.ExitCode -ne 0'));
         expect(script, contains('Write-UpdateResult -Success \$true'));
         expect(script, contains('Write-UpdateResult -Success \$false'));

@@ -34,7 +34,7 @@ class NaiAgentStudioTools {
   });
   final Directory workspaceDirectory;
   final BridgeDraftSnapshot Function() readDraft;
-  final Map<String, dynamic> Function() readSummary;
+  final Map<String, dynamic> Function(BridgeDraftSnapshot) readSummary;
   final bool Function() isGenerating, isAlive;
   final Future<String> Function(BridgeDraftSnapshot) backupDraft;
   final List<String> Function(Map<String, dynamic>) writeDraft;
@@ -69,12 +69,13 @@ class NaiAgentStudioTools {
             'Expected summary or draft',
           );
         }
+        final draft = readDraft();
         return naiAgentTextResult({
-          ...readSummary(),
+          ...readSummary(draft),
           if (scope == 'draft')
             'draft': {
-              ...readDraft().toJson(),
-              'draft_version': readDraft().acknowledgementVersion,
+              ...draft.toJson(),
+              'draft_version': draft.acknowledgementVersion,
             },
         });
       case 'prompt_update':

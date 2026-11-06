@@ -10853,6 +10853,7 @@
   "ag_copy": "コピー",
   "ag_copied": "コピーしました",
   "ag_regenerate": "回答を再生成",
+  "ag_compacting": "圧縮中…",
   "ag_starting": "チャットを開いています",
   "ag_waitingSlot": "リクエスト枠を待機中",
   "ag_waitingYou": "対応待ち",

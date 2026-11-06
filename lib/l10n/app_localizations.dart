@@ -36454,6 +36454,12 @@ abstract class AppLocalizations {
   /// **'Regenerate'**
   String get ag_regenerate;
 
+  /// No description provided for @ag_compacting.
+  ///
+  /// In en, this message translates to:
+  /// **'Compacting…'**
+  String get ag_compacting;
+
   /// No description provided for @ag_starting.
   ///
   /// In en, this message translates to:

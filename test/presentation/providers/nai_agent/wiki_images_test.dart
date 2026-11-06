@@ -104,7 +104,7 @@ void main() {
     studio = NaiAgentStudioTools(
       workspaceDirectory: dir,
       allowsImages: true,
-      readSummary: () => {},
+      readSummary: (_) => {},
       readDraft: () => throw UnimplementedError(),
       isGenerating: () => false,
       backupDraft: (_) async => '',

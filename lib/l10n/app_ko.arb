@@ -10853,6 +10853,7 @@
   "ag_copy": "복사",
   "ag_copied": "복사했습니다",
   "ag_regenerate": "답변 다시 생성",
+  "ag_compacting": "압축 중…",
   "ag_starting": "채팅 여는 중",
   "ag_waitingSlot": "서비스 요청 슬롯 대기 중",
   "ag_waitingYou": "처리 대기",

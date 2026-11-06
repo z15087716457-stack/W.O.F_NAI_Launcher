@@ -104,14 +104,39 @@ void main() {
 
       expect(
         children.map((span) => span.text).toList(),
-        equals(['{', '{tag', '}', '} plain']),
+        equals(['{', '{tag', '}}', ' plain']),
       );
-      expect(_highlightedTexts(children), equals(['{', '{tag', '}']));
+      expect(_highlightedTexts(children), equals(['{', '{tag', '}}']));
       final outerColor = children[0].style!.backgroundColor!;
       final nestedColor = children[1].style!.backgroundColor!;
       expect(children[2].style!.backgroundColor, outerColor);
       // 同一档（>1 且 ≤2）同色：分档表达强弱，不再靠透明度。
       expect(nestedColor, outerColor);
+    });
+
+    testWidgets('includes the last weakening bracket in the highlight', (
+      tester,
+    ) async {
+      final controller = NaiSyntaxController(text: '[[[[[[tag]]]]]] plain');
+      addTearDown(controller.dispose);
+
+      final children = await _buildTextSpanChildren(tester, controller);
+      expect(_highlightedTexts(children).join(), '[[[[[[tag]]]]]]');
+      expect(_plainText(children), ' plain');
+    });
+
+    testWidgets('uses the official near-neutral highlight cutoff', (
+      tester,
+    ) async {
+      const prompt = '1.005::rain::, 0.995::coat::, 1.02::sky';
+      final controller = NaiSyntaxController(text: prompt);
+      addTearDown(controller.dispose);
+
+      final children = await _buildTextSpanChildren(tester, controller);
+
+      expect(_highlightedTexts(children), ['::', '::', '1.02::sky']);
+      expect(_plainText(children), '1.005::rain, 0.995::coat, ');
+      expect(children.map((span) => span.text).join(), prompt);
     });
 
     testWidgets('does not treat unmatched brackets as syntax errors', (
@@ -161,8 +186,8 @@ void main() {
 
       final children = await _buildTextSpanChildren(tester, controller);
 
-      expect(_highlightedTexts(children), equals(['{strong']));
-      expect(_plainText(children), equals('2::plain, }'));
+      expect(_highlightedTexts(children), equals(['{strong}']));
+      expect(_plainText(children), equals('2::plain, '));
     });
 
     testWidgets('highlights every pipe independently of emphasis setting', (

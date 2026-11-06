@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import 'package:path/path.dart' as p;
@@ -33,7 +34,7 @@ class VibeLibraryStorageService
   static const String _displayEntriesBoxName =
       'vibe_library_display_entries_v2';
   static const String _thumbnailCacheBoxName =
-      'vibe_library_thumbnail_cache_v1';
+      'vibe_library_thumbnail_cache_v2';
   static const String _categoriesBoxName = 'vibe_library_categories';
   static const String _displayCacheReadyKey =
       'vibe_library_display_cache_ready_v2';
@@ -69,11 +70,22 @@ class VibeLibraryStorageService
 
   Uint8List? _pickDisplayThumbnailSource(VibeLibraryEntry entry) {
     final thumbnail = entry.thumbnail;
+    final vibeThumbnail = entry.vibeThumbnail;
+    final rawImageData = entry.rawImageData;
+    // Imports can store the same embedded preview in both thumbnail fields.
+    // A distinct cover or a bundle cover takes precedence over the source.
+    if (!entry.isBundle &&
+        rawImageData != null &&
+        rawImageData.isNotEmpty &&
+        (thumbnail == null ||
+            thumbnail.isEmpty ||
+            listEquals(thumbnail, vibeThumbnail))) {
+      return rawImageData;
+    }
     if (thumbnail != null && thumbnail.isNotEmpty) {
       return thumbnail;
     }
 
-    final vibeThumbnail = entry.vibeThumbnail;
     if (vibeThumbnail != null && vibeThumbnail.isNotEmpty) {
       return vibeThumbnail;
     }
@@ -83,7 +95,6 @@ class VibeLibraryStorageService
       return previews.first;
     }
 
-    final rawImageData = entry.rawImageData;
     if (rawImageData != null && rawImageData.isNotEmpty) {
       return rawImageData;
     }

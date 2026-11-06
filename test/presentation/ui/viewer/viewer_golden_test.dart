@@ -229,9 +229,15 @@ void main() {
         }
         // Keep the original prototype PNGs. F05/F06 explicitly change only
         // translation controls and the info-body flow below character headers.
-        // Geometry/hover tests verify those regions; the image, frame, metadata,
-        // fixed footer and all other pixels still match the old prototype.
+        // Geometry/hover tests verify those regions. Other pixels still
+        // match the old prototype except where small images now fit the stage.
         final approved = <Rect>[];
+        if (name == 'fullscreen' || name == 'info-closed') {
+          for (final key in ['viewer-image', 'viewer-zoom-menu']) {
+            final widget = find.byKey(Key(key));
+            if (widget.evaluate().isNotEmpty) approved.add(t.getRect(widget));
+          }
+        }
         for (final element
             in find
                 .byWidgetPredicate(

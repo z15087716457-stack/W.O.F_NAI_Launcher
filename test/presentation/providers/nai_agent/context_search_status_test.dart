@@ -124,6 +124,15 @@ void main() {
       final draft = await context('draft');
       expect(summary['search'], all('unknown'));
       expect(draft['search'], summary['search']);
+      expect(
+        summary['search_hint'],
+        allOf(
+          contains('tag_query for tag names or aliases'),
+          contains('tag_related for co-occurrence with known tags'),
+          isNot(contains('studio_search')),
+        ),
+      );
+      expect(draft['search_hint'], summary['search_hint']);
       expect(summary, isNot(contains('draft')));
       expect(draft['draft'], contains('field_versions'));
       expect(container.exists(ragSettingsProvider), false);
@@ -177,6 +186,7 @@ void main() {
       rag.publish(allReady);
       final after = await context('draft');
       expect(after['search'], all('ready'));
+      expect(after['search_hint'], contains('studio_search'));
       expect(after['draft'], before['draft']);
       expect(after['draft_summary'], before['draft_summary']);
       expect(after['generation'], before['generation']);
@@ -239,12 +249,20 @@ void main() {
           },
         ),
       );
-      expect((await context())['search'], {
+      final summary = await context();
+      expect(summary['search'], {
         'gallery': 'partial',
         'tags': 'busy',
         'wiki': 'partial',
         'blocks': 'partial',
       });
+      expect(
+        summary['search_hint'],
+        allOf(
+          contains('studio_search'),
+          contains('Partial covers indexed items only'),
+        ),
+      );
     },
   );
 

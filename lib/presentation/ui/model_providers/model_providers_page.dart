@@ -24,7 +24,8 @@ import 'model_providers_picker.dart';
 /// 服务商工作台（方案 B · 三栏检查器）：服务商列表 | 连接 + 请求 + 模型列表 | 模型检查器。
 ///
 /// 放在设置页“模型与接口 → 服务商”标签里（外面已有卡片和标签栏）。
-/// 宽度 ≥ 1040 时三栏；更窄时检查器移到中栏模型列表下方。
+/// 宽度 ≥ 1040 时三栏；更窄时检查器移到模型列表下方。
+/// 宽度 < 600 时服务商列表也移到上方，为详情和目录留出完整宽度。
 class ModelProvidersPanel extends StatefulWidget {
   const ModelProvidersPanel({
     super.key,
@@ -58,6 +59,8 @@ class ModelProvidersPanel extends StatefulWidget {
 
   /// 初始选中的服务商（搜索跳转 `provider-<id>`）。
   final String? selectedId;
+
+  static const twoColumn = 600.0;
 
   /// 三栏的最小宽度。
   static const threeColumn = 1040.0;
@@ -135,6 +138,7 @@ class ModelProvidersPanelState extends State<ModelProvidersPanel> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final wide = constraints.maxWidth >= ModelProvidersPanel.threeColumn;
+        final stacked = constraints.maxWidth < ModelProvidersPanel.twoColumn;
         final listW = wide ? 212.0 : 196.0;
         return CallbackShortcuts(
           bindings: {
@@ -150,16 +154,17 @@ class ModelProvidersPanelState extends State<ModelProvidersPanel> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Container(
-                        width: listW,
-                        decoration: BoxDecoration(
-                          color: c.sunk,
-                          border: Border(right: BorderSide(color: c.rowLine)),
-                          borderRadius: const BorderRadius.only(
-                            bottomLeft: Radius.circular(10),
+                      if (!stacked)
+                        Container(
+                          width: listW,
+                          decoration: BoxDecoration(
+                            color: c.sunk,
+                            border: Border(right: BorderSide(color: c.rowLine)),
+                            borderRadius: const BorderRadius.only(
+                              bottomLeft: Radius.circular(10),
+                            ),
                           ),
                         ),
-                      ),
                       const Spacer(),
                       if (wide)
                         Container(
@@ -175,14 +180,27 @@ class ModelProvidersPanelState extends State<ModelProvidersPanel> {
                     ],
                   ),
                 ),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                Flex(
+                  direction: stacked ? Axis.vertical : Axis.horizontal,
+                  crossAxisAlignment: stacked
+                      ? CrossAxisAlignment.stretch
+                      : CrossAxisAlignment.start,
                   children: [
-                    SizedBox(
-                      width: listW,
+                    Container(
+                      width: stacked ? null : listW,
+                      decoration: stacked
+                          ? BoxDecoration(
+                              color: c.sunk,
+                              border: Border(
+                                bottom: BorderSide(color: c.rowLine),
+                              ),
+                            )
+                          : null,
                       child: _ProviderList(data: d, ctrl: ctrl, selected: p.id),
                     ),
-                    Expanded(
+                    Flexible(
+                      flex: stacked ? 0 : 1,
+                      fit: FlexFit.tight,
                       child: _Middle(
                         key: ValueKey('mid-${p.id}'),
                         panel: this,
@@ -757,7 +775,7 @@ class _MiddleState extends State<_Middle> {
           ],
           const SizedBox(height: 10),
           models,
-          if (widget.inlineInspector && mode == ProvidersListMode.added) ...[
+          if (widget.inlineInspector) ...[
             const SizedBox(height: 16),
             Container(
               clipBehavior: Clip.antiAlias,
@@ -765,7 +783,11 @@ class _MiddleState extends State<_Middle> {
                 border: Border.all(color: c.border),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: _InspectorColumn(panel: widget.panel, item: p),
+              child: _InspectorColumn(
+                panel: widget.panel,
+                item: p,
+                inline: true,
+              ),
             ),
           ],
           const SizedBox(height: 20),
@@ -1318,9 +1340,14 @@ class _ModelList extends StatelessWidget {
 // ───────────────────────────── 右栏 ─────────────────────────────
 
 class _InspectorColumn extends StatelessWidget {
-  const _InspectorColumn({required this.panel, required this.item});
+  const _InspectorColumn({
+    required this.panel,
+    required this.item,
+    this.inline = false,
+  });
   final ModelProvidersPanelState panel;
   final ProviderItem item;
+  final bool inline;
 
   @override
   Widget build(BuildContext context) {
@@ -1334,6 +1361,7 @@ class _InspectorColumn extends StatelessWidget {
             item: item,
             settings: s,
             ctrl: ctrl,
+            inline: inline,
             onAdd: (ids) {
               panel.widget.actions.onAddModels(item.id, ids);
               ctrl

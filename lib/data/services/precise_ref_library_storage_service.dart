@@ -57,6 +57,8 @@ class PreciseRefLibraryStorageService {
 
   static const String _entriesBoxName = 'precise_ref_library_entries';
   static const String _thumbnailCacheBoxName =
+      'precise_ref_library_thumbnails_v2';
+  static const String _legacyThumbnailCacheBoxName =
       'precise_ref_library_thumbnails_v1';
   static const String _importingMarker = '.importing-';
   static const String _deletingMarker = '.deleting-';
@@ -70,6 +72,7 @@ class PreciseRefLibraryStorageService {
   final PreciseRefLibraryFileSystem _fileSystem;
   Box<PreciseRefLibraryEntry>? _entriesBox;
   LazyBox<Uint8List>? _thumbnailCacheBox;
+  LazyBox<Uint8List>? _legacyThumbnailCacheBox;
   Future<void>? _initFuture;
   final Map<String, Future<Uint8List?>> _thumbnailLoadsById = {};
   final Set<String> _deletingIds = {};
@@ -351,11 +354,21 @@ class PreciseRefLibraryStorageService {
   Future<Uint8List?> _loadAndCacheDisplayThumbnail(String id) async {
     if (_deletingIds.contains(id)) return null;
     final bytes = await readImageBytes(id);
-    if (bytes == null) return null;
-    final thumbnail = await DisplayThumbnailUtils.normalize(bytes);
-    if (thumbnail == null || thumbnail.isEmpty) return null;
+    final thumbnail = bytes == null
+        ? null
+        : await DisplayThumbnailUtils.normalize(bytes);
     if (_deletingIds.contains(id) || _entriesBox!.get(id) == null) {
       return null;
+    }
+    if (thumbnail == null) {
+      // Keep a legacy preview available when its original cannot be read.
+      if (_legacyThumbnailCacheBox == null) {
+        if (!await Hive.boxExists(_legacyThumbnailCacheBoxName)) return null;
+        _legacyThumbnailCacheBox = await Hive.openLazyBox<Uint8List>(
+          _legacyThumbnailCacheBoxName,
+        );
+      }
+      return _legacyThumbnailCacheBox!.get(id);
     }
     await _thumbnailCacheBox!.put(id, thumbnail);
     return thumbnail;
@@ -472,8 +485,10 @@ class PreciseRefLibraryStorageService {
   Future<void> close() async {
     await _entriesBox?.close();
     await _thumbnailCacheBox?.close();
+    await _legacyThumbnailCacheBox?.close();
     _entriesBox = null;
     _thumbnailCacheBox = null;
+    _legacyThumbnailCacheBox = null;
     _initFuture = null;
     _thumbnailLoadsById.clear();
     _deletingIds.clear();

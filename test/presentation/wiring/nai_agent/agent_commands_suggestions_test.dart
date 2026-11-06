@@ -1,23 +1,21 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:nai_launcher/core/nai_agent/pi_host_client.dart';
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_skills_provider.dart';
 import 'package:nai_launcher/presentation/ui/agent/agent_contract.dart' as view;
 import 'agent_wiring_harness.dart';
 
-class _Controller extends AgentTestController {
-  _Controller(super.store);
-  @override
-  Future<void> compact([String? instructions]) async {
-    calls.add('compact:$instructions');
-  }
-}
+class _Client extends Mock implements PiHostClient {}
 
 void main() {
   late AgentWiringHarness h;
-  late _Controller c;
+  late AgentTestController c;
   setUp(() async {
     h = AgentWiringHarness();
     await h.init(
-      controller: (store) => c = _Controller(store),
       skills: const NaiAgentSkillInventory(
         [
           NaiAgentSkill(
@@ -32,21 +30,74 @@ void main() {
         {},
       ),
     );
+    c = h.c;
   });
   tearDown(() async => h.dispose());
 
-  testWidgets('/compact intercepts instructions and never sends a prompt', (
+  testWidgets('/compact clears the input and shows its own busy state', (
     tester,
   ) async {
-    await c.updateSettings({'providerId': '', 'modelId': ''});
-    await tester.runAsync(() => c.saveComposer('/compact 保留角色设定'));
-    await h.pump(tester);
-    expect(
-      await tester.runAsync(() => h.panel(tester).actions.onSend(steer: false)),
-      true,
+    const instructions = '保留角色设定';
+    final client = _Client();
+    late Completer<void> started;
+    late Completer<Map<String, dynamic>> result;
+    await tester.runAsync(() async {
+      await c.updateSettings({'panelExpanded': true});
+      started = Completer<void>();
+      result = Completer<Map<String, dynamic>>();
+      when(() => client.isClosed).thenReturn(false);
+      when(() => client.initialState).thenReturn({});
+      when(client.cancelSuggestion).thenAnswer((_) async => {});
+      when(client.close).thenAnswer((_) async {});
+      when(() => client.compact(instructions)).thenAnswer((_) {
+        started.complete();
+        return result.future;
+      });
+      c.selected!
+        ..client = client
+        ..providerId = c.settings.providerId
+        ..modelId = c.settings.modelId
+        ..reasoningEffort = c.settings.reasoningEffort
+        ..modelRevision = c.readModelRevision()
+        ..maxRequestsPerRun = c.settings.maxRequestsPerRun
+        ..extensionSignature = c.settings.extensionSignature
+        ..messages = [
+          {'role': 'user', 'content': '之前的问题', 'timestamp': 1000},
+          {'role': 'assistant', 'content': '已经完成的回复', 'timestamp': 1100},
+        ];
+      await c.saveComposer('/compact $instructions');
+    });
+    await h.pump(tester, width: 320);
+
+    await tester.tap(find.byKey(const Key('agent-send')));
+    await tester.runAsync(
+      () => started.future.timeout(const Duration(seconds: 3)),
     );
-    expect(c.calls, ['compact:保留角色设定']);
-    expect(c.selected!.composer.text, isEmpty);
+    await tester.pump();
+    final input = find.byKey(const Key('agent-input'));
+    expect(tester.widget<TextField>(input).controller!.text, isEmpty);
+    expect(h.panel(tester).data.status, view.AgentRunStatus.compacting);
+    expect(h.panel(tester).data.thread.last.reply!.live, isFalse);
+    expect(find.text('压缩中…'), findsOneWidget);
+    expect(find.byKey(const Key('agent-stop')), findsNothing);
+    expect(find.byKey(const Key('agent-send-queue')), findsNothing);
+    expect(c.calls, isEmpty, reason: 'a builtin is never sent as a prompt');
+
+    await tester.enterText(input, '下一条消息');
+    await tester.pump();
+    expect(h.panel(tester).data.composer.canSend, isFalse);
+    expect(tester.takeException(), isNull);
+
+    await tester.runAsync(() async {
+      result.complete({'messages': c.selected!.messages});
+      await result.future;
+    });
+    await tester.pumpAndSettle();
+    expect(h.panel(tester).data.status, view.AgentRunStatus.idle);
+    expect(find.text('压缩中…'), findsNothing);
+    expect(tester.widget<TextField>(input).controller!.text, '下一条消息');
+    expect(find.byKey(const Key('agent-send')), findsOneWidget);
+    verify(() => client.compact(instructions)).called(1);
   });
 
   testWidgets(

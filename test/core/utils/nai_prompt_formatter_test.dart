@@ -19,6 +19,10 @@ void main() {
     '1::1.3::blue eyes::::, 0.8::red dress::':
         '1.3::blue eyes::, 0.8::red dress::',
     '1::blue eyes::, 1.2::red dress::': 'blue eyes, 1.2::red dress::',
+    '2::rain, 1::coat::, sky': '2::rain, 1::coat::, sky',
+    '{2::rain}, 1::coat::, sky': '{2::rain}, 1::coat::, sky',
+    '||2::rain|0.5::coat||, 1::sky::': '||2::rain|0.5::coat||, 1::sky::',
+    '1::coat::blue': '1::coat::blue',
     '1::unclosed, blue eyes': '1::unclosed, blue eyes',
     '"1::quoted::", <alias:1::literal::>, 1::real::':
         '"1::quoted::", <alias:1::literal::>, real',

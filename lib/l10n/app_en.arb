@@ -10865,6 +10865,7 @@
   "ag_copy": "Copy",
   "ag_copied": "Copied",
   "ag_regenerate": "Regenerate",
+  "ag_compacting": "Compacting…",
   "ag_starting": "Opening chat",
   "ag_waitingSlot": "Waiting for provider",
   "ag_waitingYou": "Waiting for you",

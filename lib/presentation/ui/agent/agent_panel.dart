@@ -317,6 +317,7 @@ class _AgentPanelState extends State<AgentPanel> {
           ),
           if (d.status == AgentRunStatus.starting ||
               d.status == AgentRunStatus.working ||
+              d.status == AgentRunStatus.compacting ||
               d.status == AgentRunStatus.waitingSlot)
             LinearProgressIndicator(
               key: const Key('agent-progress'),

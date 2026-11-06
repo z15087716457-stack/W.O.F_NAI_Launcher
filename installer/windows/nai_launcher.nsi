@@ -1,5 +1,6 @@
 !include "MUI2.nsh"
 !include "LogicLib.nsh"
+!include "FileFunc.nsh"
 
 !ifndef VERSION
   !define VERSION "0.0.0"
@@ -72,10 +73,14 @@ VIAddVersionKey /LANG=1033 "LegalCopyright" "Copyright (C) W.O.F and NAI Launche
 !define MUI_UNICON "..\..\windows\runner\resources\app_icon.ico"
 !define MUI_ABORTWARNING
 !define MUI_FINISHPAGE_RUN "$INSTDIR\${APP_EXE}"
+!define MUI_PAGE_CUSTOMFUNCTION_PRE SkipPageForUpdate
 !insertmacro MUI_PAGE_WELCOME
+!define MUI_PAGE_CUSTOMFUNCTION_PRE SkipPageForUpdate
 !insertmacro MUI_PAGE_DIRECTORY
+!define MUI_PAGE_CUSTOMFUNCTION_PRE SkipPageForUpdate
 !insertmacro MUI_PAGE_COMPONENTS
 !insertmacro MUI_PAGE_INSTFILES
+!define MUI_PAGE_CUSTOMFUNCTION_PRE SkipPageForUpdate
 !insertmacro MUI_PAGE_FINISH
 !insertmacro MUI_UNPAGE_CONFIRM
 !insertmacro MUI_UNPAGE_INSTFILES
@@ -91,6 +96,10 @@ LangString AppWriteFailed ${LANG_ENGLISH} "Unable to write application files to 
 LangString AppInspectionFailed ${LANG_SIMPCHINESE} "无法确认正在运行的 ${APP_NAME} 是否来自当前安装目录，且安装目录内的 ${APP_EXE} 当前被占用。请从系统托盘退出应用后重试；若仍失败，可右键「开始」按钮以管理员身份运行终端，执行 taskkill /IM ${APP_EXE} /T /F 后重试。详情见安装目录下 install_diagnostics.log。"
 LangString AppInspectionFailed ${LANG_ENGLISH} "Setup could not verify whether a running ${APP_NAME} belongs to this installation, and ${APP_EXE} in the installation folder is currently locked. Exit the app from the system tray and try again; if it still fails, run $\"taskkill /IM ${APP_EXE} /T /F$\" in a terminal opened as administrator and retry. See install_diagnostics.log in the installation folder for details."
 
+LangString UpdateTargetMissing ${LANG_SIMPCHINESE} "找不到要更新的 ${APP_NAME}：$INSTDIR。请从当前应用重新发起更新。"
+LangString UpdateTargetMissing ${LANG_ENGLISH} "${APP_NAME} was not found in $INSTDIR. Start the update again from the app."
+
+Var InAppUpdate
 Var TargetProcessId
 Var ProcessInspectionFailed
 Var ProcessInspectionStage
@@ -347,11 +356,27 @@ FunctionEnd
 !insertmacro DefineProcessFunctions "" "install"
 !insertmacro DefineProcessFunctions "un." "uninstall"
 
-; 1.x in-app updates run this installer silently and then restart the old
-; executable path, so upgrade a legacy installation in place instead of
-; installing a second copy into the new default directory.
+Function SkipPageForUpdate
+  StrCmp $InAppUpdate "1" 0 +2
+  Abort
+FunctionEnd
+
 Function .onInit
-  ; An explicit /D= target always wins.
+  ; NSIS consumes the final /D= argument before exposing the command line.
+  ${GetParameters} $0
+  StrCmp $0 "/UPDATE" 0 normal_location
+  IfFileExists "$INSTDIR\${APP_EXE}" 0 update_target_missing
+  StrCpy $InAppUpdate "1"
+  Return
+
+update_target_missing:
+  MessageBox MB_ICONSTOP|MB_OK "$(UpdateTargetMissing)"
+  SetErrorLevel 5
+  Quit
+
+normal_location:
+  ; Legacy updaters restart the old executable path after a silent install.
+  ; Reuse its registered directory when no new location was selected.
   StrCmp $INSTDIR "${INSTALL_DIR}" 0 legacy_location_done
   ReadRegStr $0 HKCU "${UNINSTALL_KEY}" "InstallLocation"
   StrCmp $0 "" 0 legacy_location_done
@@ -418,6 +443,8 @@ payload_write_exit:
   Quit
 
 install_done:
+  StrCmp $InAppUpdate "1" 0 +2
+  SetAutoClose true
 SectionEnd
 
 !ifndef NO_SHORTCUTS

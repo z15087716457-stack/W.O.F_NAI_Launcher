@@ -265,11 +265,13 @@ class ProvidersPickTray extends StatelessWidget {
     required this.settings,
     required this.ctrl,
     required this.onAdd,
+    this.inline = false,
   });
   final ProviderItem item;
   final ProviderSettings settings;
   final ProvidersController ctrl;
   final ValueChanged<List<String>> onAdd;
+  final bool inline;
 
   @override
   Widget build(BuildContext context) {
@@ -297,7 +299,7 @@ class ProvidersPickTray extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             spacing: 8,
             children: [
-              if (picks.isEmpty)
+              if (picks.isEmpty && !inline)
                 Text(l.mp_pickEmpty, style: UiText.sans(12, color: c.faint)),
               for (final id in picks)
                 Row(
@@ -318,9 +320,11 @@ class ProvidersPickTray extends StatelessWidget {
                     UiMini(l.mp_new, tone: UiMiniTone.accent),
                   ],
                 ),
-              const SizedBox(height: 4),
-              SettingsHint.text(context, l.mp_pickHint),
-              const SizedBox(height: 4),
+              if (!inline) ...[
+                const SizedBox(height: 4),
+                SettingsHint.text(context, l.mp_pickHint),
+                const SizedBox(height: 4),
+              ],
               Row(
                 spacing: 8,
                 children: [

@@ -534,6 +534,7 @@ void main() {
           'wiki': 'unknown',
           'blocks': 'unknown',
         });
+        expect(modelContext['search_hint'], contains('tag_related'));
         expect(
           container.read(generationParamsNotifierProvider).prompt,
           'synthetic agent update',

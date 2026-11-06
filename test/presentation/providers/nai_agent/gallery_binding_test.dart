@@ -212,7 +212,7 @@ void main() {
     final tools = NaiAgentStudioTools(
       workspaceDirectory: temp,
       readDraft: () => BridgeDraftSnapshot(fields: {}),
-      readSummary: () => {},
+      readSummary: (_) => {},
       isGenerating: () => false,
       backupDraft: (_) async => '',
       writeDraft: (_) => [],
@@ -324,7 +324,7 @@ void main() {
       final tools = NaiAgentStudioTools(
         workspaceDirectory: temp,
         readDraft: () => BridgeDraftSnapshot(fields: {}),
-        readSummary: () => {},
+        readSummary: (_) => {},
         isGenerating: () => false,
         backupDraft: (_) async => '',
         writeDraft: (_) => [],

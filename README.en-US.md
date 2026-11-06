@@ -53,9 +53,9 @@ Both Windows packages support in-app updates. Settings, the gallery database and
 
 **2.2.1 additions**: Let the Agent split prompts into temporary blocks, with whole-module or multiple translations inside. This update also fixes single-click history details, caret visibility over weighted text and update-manifest parsing, and adds individual-image browsing to the infinite canvas.
 
-**2.2.6 update**: Fixes intermittent gallery refresh failures, failed-thumbnail recovery and blocking folder opens. Gallery categories remember their browsing positions; image imports show reference-use records, seed pinning can be toggled repeatedly, and the simple viewer follows new batches correctly. The Agent can manage block preview images.
+**2.3.0** brings automatic fit in the image viewer, canvas decoding at display size, incremental gallery RAG indexing, idle Agent host cleanup, and fixes to generation quotes and retries. Windows in-app updates show installation progress, and GitHub Actions builds the macOS universal test package.
 
-See the [complete 2.2.6 changelog](CHANGELOG.md#226---2026-11-04) and [release downloads](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/tag/v2.2.6). Agent suggestions, cache warming and translation adjustments use your own model service; their settings are configurable.
+See the [complete 2.3.0 changelog](CHANGELOG.md#230---2026-11-06) and [release downloads](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/tag/v2.3.0). Agent suggestions, cache warming and translation adjustments use your own model service. Their settings are configurable.
 
 ## Get started in three steps
 

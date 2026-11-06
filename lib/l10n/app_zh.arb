@@ -10853,6 +10853,7 @@
   "ag_copy": "复制",
   "ag_copied": "已复制",
   "ag_regenerate": "重新回答",
+  "ag_compacting": "压缩中…",
   "ag_starting": "正在打开聊天",
   "ag_waitingSlot": "等服务商额度",
   "ag_waitingYou": "等你处理",

@@ -34,7 +34,7 @@ export function studioTools(execute, extraToolNames = []) {
     execute: (id, params, signal) => execute(name, id, params, signal),
   });
   return [
-    tool('studio_context', 'Read current Studio state on demand. scope=draft returns RAW editable fields, pill documents and field_versions. Never write effective preset text back.',
+    tool('studio_context', 'Read current Studio state, including local search status and tool guidance. scope=draft returns RAW editable fields, pill documents and field_versions. Never write effective preset text back.',
       Type.Object({ scope: Type.Optional(Type.Unsafe({ type: 'string', enum: ['summary', 'draft'] })) })),
     tool('image_read', 'Read one actual canvas/history or library image by image_id (selected means current canvas selection; gallery:<ID> comes from gallery_query), or any image file using its workspace-relative path (including .W.O.F/attachments/ and .W.O.F/outputs/). metadata_only=true reads original dimensions and metadata locally without returning pixels or requiring vision. Default returns a separate visual copy and original metadata, without altering the original file or draft.',
       Type.Object({ image_id: Type.Optional(Type.String()), path: Type.Optional(Type.String()), metadata_only: Type.Optional(Type.Boolean()) })),

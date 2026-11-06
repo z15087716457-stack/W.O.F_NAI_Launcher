@@ -68,8 +68,10 @@ ${_commonFunctions()}
 try {
   Write-UpdateLog "Waiting for application process \$AppPid to exit."
   Wait-ApplicationExit
-  Write-UpdateLog "Starting silent installer: \$InstallerPath"
-  \$Installer = Start-Process -FilePath \$InstallerPath -ArgumentList '/S' -PassThru -Wait
+  \$InstallDir = Split-Path -LiteralPath \$ExePath
+  Write-UpdateLog "Starting installer for \$InstallDir"
+  # NSIS requires an unquoted /D= at the end, including paths with spaces.
+  \$Installer = Start-Process -FilePath \$InstallerPath -ArgumentList "/UPDATE /D=\$InstallDir" -WindowStyle Normal -PassThru -Wait
   if (\$Installer.ExitCode -ne 0) {
     throw "Installer exited with code \$(\$Installer.ExitCode)."
   }

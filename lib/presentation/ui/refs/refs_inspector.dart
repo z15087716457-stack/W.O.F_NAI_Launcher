@@ -1067,7 +1067,7 @@ class _MultiBody extends StatelessWidget {
     final show = picked.take(4).toList();
     final stack = SizedBox(
       key: const Key('refs-multi-stack'),
-      height: 170,
+      height: 190,
       child: Stack(
         children: [
           for (final (j, e) in show.indexed)

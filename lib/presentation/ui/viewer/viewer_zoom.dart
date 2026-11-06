@@ -75,15 +75,16 @@ class ViewerZoom extends ChangeNotifier {
           Offset(d.dx / (_image.width * next), d.dy / (_image.height * next));
     }
     if (_scale == null && next > _fit) zoomedOnce = true;
-    _scale = next <= _fit + 1e-6 && next >= _fit - 1e-6 ? null : next;
+    _scale = next;
     _center = _clamp(c, next);
     notifyListeners();
   }
 
-  /// 放大 / 缩小一档；缩到不大于适应时回到适应。
+  /// 从更高倍率缩回适应档时复位，小图在放大的适应档也可以继续缩小。
   void zoomBy(double factor, {Offset? focal}) {
+    if (fitted && _fit <= 1 && factor < 1) return;
     final next = scale * factor;
-    if (factor < 1 && next <= _fit) {
+    if (scale > _fit && next <= _fit) {
       reset();
       return;
     }

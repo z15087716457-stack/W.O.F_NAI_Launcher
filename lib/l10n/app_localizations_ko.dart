@@ -20354,6 +20354,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get ag_regenerate => '답변 다시 생성';
 
   @override
+  String get ag_compacting => '압축 중…';
+
+  @override
   String get ag_starting => '채팅 여는 중';
 
   @override

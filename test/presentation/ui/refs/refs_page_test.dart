@@ -3,6 +3,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nai_launcher/presentation/ui/kit/ui_glyph.dart';
 import 'package:nai_launcher/presentation/ui/kit/ui_slider.dart';
 import 'package:nai_launcher/presentation/ui/refs/refs_contract.dart';
 import 'package:nai_launcher/presentation/ui/refs/refs_fixture.dart';
@@ -53,9 +54,16 @@ void main() {
       await pump(t);
       await tapKey(t, 'refs-quick-needsEncoding');
       expect(rec.filters.last.quick, RefsQuick.needsEncoding);
-      await t.tap(
-        find.descendant(of: key('refs-card-size'), matching: find.text('大')),
+      final size = key('refs-card-size');
+      expect(
+        t
+            .widgetList<UiGlyph>(
+              find.descendant(of: size, matching: find.byType(UiGlyph)),
+            )
+            .map((glyph) => glyph.path),
+        [UiGlyphs.masonrySmall, UiGlyphs.masonryMedium, UiGlyphs.masonryLarge],
       );
+      await t.tap(find.descendant(of: size, matching: find.byTooltip('大')));
       await t.pumpAndSettle();
       expect(rec.calls, contains('size:large'));
     });

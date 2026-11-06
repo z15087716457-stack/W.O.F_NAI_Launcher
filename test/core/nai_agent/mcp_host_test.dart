@@ -20,7 +20,7 @@ void main() {
         workspaceDirectory: root,
         allowsImages: false,
         readDraft: () => draft,
-        readSummary: () => {},
+        readSummary: (_) => {},
         isGenerating: () => false,
         readImage: (_) => null,
         backupDraft: (before) async {

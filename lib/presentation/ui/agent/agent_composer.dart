@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 
 import '../../../core/utils/localization_extension.dart';
 import '../kit/ui_colors.dart';
+import '../kit/ui_controls.dart' show UiSpinner;
 import '../kit/ui_lib_controls.dart';
 import '../kit/ui_popover.dart';
 import '../kit/ui_text.dart';
@@ -599,6 +600,7 @@ class AgentComposerState extends State<AgentComposer> {
     final c = context.ui;
     final l = context.l10n;
     final running = d.status != AgentRunStatus.idle;
+    final compacting = d.status == AgentRunStatus.compacting;
     final model = d.models.where((m) => m.selected).firstOrNull;
     final thinking = d.thinking.followsModel
         ? null
@@ -750,7 +752,32 @@ class AgentComposerState extends State<AgentComposer> {
                 ),
               ),
               const SizedBox(width: 2),
-              if (running &&
+              if (compacting)
+                Container(
+                  height: 28,
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  decoration: BoxDecoration(
+                    color: c.control,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    spacing: 5,
+                    children: [
+                      const UiSpinner(size: 10),
+                      Text(
+                        l.ag_compacting,
+                        style: UiText.sans(
+                          11.5,
+                          color: c.ink,
+                          weight: FontWeight.w500,
+                          height: 1.2,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              else if (running &&
                   _text.text.trim().isEmpty &&
                   comp.attachments.isEmpty)
                 AgentButton(

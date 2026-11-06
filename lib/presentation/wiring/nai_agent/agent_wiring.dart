@@ -815,6 +815,7 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
         canSend:
             blocked == null &&
             r != null &&
+            !r.compacting &&
             (r.composer.text.trim().isNotEmpty ||
                 r.composer.attachments.isNotEmpty),
         importing: r?.pendingImageCount ?? 0,
@@ -944,7 +945,9 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
         ),
       ],
       draft: draft,
-      status: r?.starting == true
+      status: r?.compacting == true
+          ? AgentRunStatus.compacting
+          : r?.starting == true
           ? AgentRunStatus.starting
           : pending.isNotEmpty
           ? AgentRunStatus.waitingUser

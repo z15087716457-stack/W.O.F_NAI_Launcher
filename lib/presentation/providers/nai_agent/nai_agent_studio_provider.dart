@@ -198,7 +198,7 @@ final naiAgentStudioFactoryProvider = Provider<NaiAgentStudioFactory>((ref) {
               entry.value(entry.key, params, cancellation),
       },
       readDraft: () => readBridgeDraft(ref),
-      readSummary: () {
+      readSummary: (draft) {
         // Context reads must not create the controller: its build starts RAG.
         final settings = ref.exists(ragSettingsProvider)
             ? ref.read(ragSettingsProvider)
@@ -243,9 +243,16 @@ final naiAgentStudioFactoryProvider = Provider<NaiAgentStudioFactory>((ref) {
         final state = ref.read(imageGenerationNotifierProvider);
         final imageParams = ref.read(generationParamsNotifierProvider);
         final selected = image('selected');
-        final draft = readBridgeDraft(ref);
         return {
           'search': searchStatus,
+          'search_hint': [
+            'When Studio tools are available, use tag_query for tag names or aliases and '
+                'tag_related for co-occurrence with known tags.',
+            if (searchStatus.containsValue('ready') ||
+                searchStatus.containsValue('partial'))
+              'Use studio_search for natural-language or similarity lookup '
+                  'in the relevant ready/partial source. Partial covers indexed items only.',
+          ].join(' '),
           'page': ref.exists(appRouterProvider)
               ? ref
                     .read(appRouterProvider)

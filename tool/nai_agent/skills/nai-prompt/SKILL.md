@@ -15,5 +15,5 @@ description: Write or revise NovelAI prompts in the Studio draft - main/negative
 
 - Write raw draft fields; translations, presets and expanded blocks are generation projections. Preserve existing blocks, translation originals, enabled states and character positions unless asked to change them.
 - Lanes containing blocks accept only unchanged text through `prompt_update` (`pill_conflict` otherwise). Edit their blocks with `block_manage` instance actions; see nai-studio references/blocks.md.
-- Use `tag_query` / `wiki_query` for tag meanings and `image_read` for the user's images; see nai-studio references/lookup.md.
+- Follow `search_hint` from `studio_context` for tag lookup. Use `wiki_query` for meanings and `image_read` for the user's images.
 - Read image/mask/reference support from `reference_manage`, price and eligibility from `generation_prepare`. For model-specific rules beyond tool results, use workspace material or official documentation and identify unverified limits.

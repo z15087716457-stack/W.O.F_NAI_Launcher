@@ -21,7 +21,7 @@ void main() {
         workspaceDirectory: root,
         allowsImages: false,
         readDraft: () => draft,
-        readSummary: () => {},
+        readSummary: (_) => {},
         isGenerating: () => false,
         backupDraft: (_) async {
           entered.complete();

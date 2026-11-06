@@ -342,8 +342,7 @@ abstract final class _G {
   static const trash = 'M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13';
 }
 
-/// 大图区：适应时居中画在留白区里（左右各 72 给箭头，窄窗口 56，全屏 20），小图按原尺寸不放大；
-/// 放大后铺满整块、可拖动。
+/// 适应时等比例缩放到留白区内居中，小图最多放大到 120%。
 class _View extends StatefulWidget {
   const _View({this.fullscreen = false});
   final bool fullscreen;
@@ -385,14 +384,12 @@ class _ViewState extends State<_View> {
         final view = box.biggest;
         final area = pad.deflateSize(view);
         final img = Size(item.width.toDouble(), item.height.toDouble());
-        // 适应：缩小到放得下，但不放大小图（放大会糊；要看细节自己缩放）。
-        final fit = math.max(
-          .01,
-          math.min(
-            1.0,
-            math.min(area.width / img.width, area.height / img.height),
-          ),
-        );
+        final fit = area.isEmpty || img.isEmpty
+            ? 1.0
+            : math.min(
+                1.2,
+                math.min(area.width / img.width, area.height / img.height),
+              );
         final z = ctrl.zoom..layout(image: img, view: view, fit: fit);
         return ListenableBuilder(
           listenable: z,

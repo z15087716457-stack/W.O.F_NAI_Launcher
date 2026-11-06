@@ -717,6 +717,38 @@ void main() {
     },
   );
 
+  test('compact ignores stop and restores its command on failure', () async {
+    await load();
+    const command = '/compact';
+    await c.saveComposer(command);
+    final started = Completer<void>();
+    final response = Completer<Map<String, dynamic>>();
+    when(() => client.compact()).thenAnswer((_) {
+      started.complete();
+      return response.future;
+    });
+    when(client.abort).thenAnswer((_) async {});
+
+    final compact = c.sendSlashCommand(command);
+    expect(c.selected!.composer.text, isEmpty);
+    expect(c.selected!.compacting, isTrue);
+    await c.stop();
+    await started.future;
+    await c.stop();
+    verifyNever(client.abort);
+    expect(c.selected!.compacting, isTrue);
+    expect(await c.sendText('do not enqueue'), isFalse);
+
+    response.completeError(
+      const NaiAgentToolError('host_error', 'test failure'),
+    );
+    expect(await compact, isFalse);
+    expect(c.selected!.compacting, isFalse);
+    expect(c.selected!.composer.text, command);
+    expect(c.selected!.error, 'test failure');
+    expect(sent, isEmpty);
+  });
+
   test(
     'compact clears limit even when the projection retains that error',
     () async {

@@ -15,8 +15,8 @@ import 'package:nai_launcher/data/services/vibe_file_storage_service.dart';
 import 'package:nai_launcher/data/services/vibe_library_storage_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-Uint8List _validPngBytes() {
-  final image = img.Image(width: 2, height: 2);
+Uint8List _validPngBytes({int width = 2, int height = 2}) {
+  final image = img.Image(width: width, height: height);
   img.fill(image, color: img.ColorRgb8(12, 34, 56));
   return Uint8List.fromList(img.encodePng(image));
 }
@@ -77,6 +77,35 @@ void main() {
     expect(await old, [1]);
     expect(await fresh, [2]);
     expect(await storage.getDisplayThumbnail(entry.id), [2]);
+  });
+
+  test('旧 Vibe 缩略图用原图重建，自定义封面优先', () async {
+    final preview = _validPngBytes(width: 205, height: 256);
+    final raw = _validPngBytes(width: 640, height: 800);
+    final entry = VibeLibraryEntry.fromVibeReference(
+      name: 'old vibe',
+      vibeData: VibeReference(
+        displayName: 'old vibe',
+        vibeEncoding: '',
+        thumbnail: preview,
+        rawImageData: raw,
+      ),
+      thumbnail: preview,
+      filePath: '${hiveTempDir.path}/old-vibe.naiv4vibe',
+    );
+    await storage.saveEntry(entry);
+    final legacy = await Hive.openLazyBox<Uint8List>(
+      'vibe_library_thumbnail_cache_v1',
+    );
+    await legacy.put(entry.id, preview);
+    await legacy.close();
+
+    final rebuilt = await storage.getDisplayThumbnail(entry.id);
+    expect(img.decodeImage(rebuilt!)!.height, 512);
+    final cover = _validPngBytes(width: 80, height: 100);
+    await storage.updateEntryThumbnail(entry.id, cover);
+    expect(await storage.getDisplayThumbnail(entry.id), cover);
+    expect((await storage.getEntrySnapshot(entry.id))!.rawImageData, raw);
   });
 
   test('setFavorite 按目标值保存且读取摘要不解析文件', () async {

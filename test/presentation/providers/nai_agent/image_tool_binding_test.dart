@@ -186,7 +186,7 @@ void main() {
     studio = NaiAgentStudioTools(
       workspaceDirectory: workspace,
       readDraft: () => throw UnimplementedError(),
-      readSummary: () => {},
+      readSummary: (_) => {},
       isGenerating: () => blocked,
       backupDraft: (_) async => 'unused',
       writeDraft: (_) => [],

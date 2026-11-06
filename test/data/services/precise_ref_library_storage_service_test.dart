@@ -142,7 +142,7 @@ void main() {
 
   test('init 使用 LazyBox 保存缩略图字节', () async {
     await storage.init();
-    final cache = Hive.lazyBox<Uint8List>('precise_ref_library_thumbnails_v1');
+    final cache = Hive.lazyBox<Uint8List>('precise_ref_library_thumbnails_v2');
     expect(cache, isA<LazyBox<Uint8List>>());
   });
 
@@ -296,7 +296,7 @@ void main() {
     final delayed = _DelayedReadStorage(overrideDirectory: imageDir.path);
     storage = delayed;
     final entry = await storage.importFromBytes(_pngBytes(), name: 'race');
-    final cache = Hive.lazyBox<Uint8List>('precise_ref_library_thumbnails_v1');
+    final cache = Hive.lazyBox<Uint8List>('precise_ref_library_thumbnails_v2');
     await cache.delete(entry.id);
 
     final thumbnailLoad = storage.getDisplayThumbnail(entry.id);
@@ -312,7 +312,7 @@ void main() {
 
   test('启动对账恢复被中断的删除并清理孤立原图与缓存', () async {
     final entry = await storage.importFromBytes(_pngBytes(), name: 'recover');
-    final cache = Hive.lazyBox<Uint8List>('precise_ref_library_thumbnails_v1');
+    final cache = Hive.lazyBox<Uint8List>('precise_ref_library_thumbnails_v2');
     await cache.put('orphan-cache', _pngBytes());
 
     final tombstone = '${entry.imagePath}.deleting-crash';
@@ -331,7 +331,7 @@ void main() {
     expect(orphanFile.existsSync(), isFalse);
     expect(
       await Hive.lazyBox<Uint8List>(
-        'precise_ref_library_thumbnails_v1',
+        'precise_ref_library_thumbnails_v2',
       ).get('orphan-cache'),
       isNull,
     );
@@ -361,20 +361,50 @@ void main() {
     expect(thumbnail, bytes);
   });
 
+  test('旧缩略图按需从原图重建，原图丢失时保留旧预览', () async {
+    final original = _pngBytes(width: 640, height: 800);
+    final available = await storage.importFromBytes(
+      original,
+      name: 'available',
+    );
+    final missing = await storage.importFromBytes(original, name: 'missing');
+    final oldPreview = _pngBytes(width: 205, height: 256);
+    final legacy = await Hive.openLazyBox<Uint8List>(
+      'precise_ref_library_thumbnails_v1',
+    );
+    await legacy.putAll({available.id: oldPreview, missing.id: oldPreview});
+    await legacy.close();
+    final cache = Hive.lazyBox<Uint8List>('precise_ref_library_thumbnails_v2');
+    await cache.deleteAll([available.id, missing.id]);
+    await File(missing.imagePath).delete();
+
+    final thumbnail = await storage.getDisplayThumbnail(available.id);
+    expect(img.decodeImage(thumbnail!)!.height, 512);
+    expect(await cache.get(available.id), thumbnail);
+    expect(await storage.readImageBytes(available.id), original);
+    expect(await storage.getDisplayThumbnail(missing.id), oldPreview);
+    expect(await cache.get(missing.id), isNull);
+  });
+
   test('readImageBytes 在原图文件被删除后返回 null', () async {
     final entry = await storage.importFromBytes(_pngBytes(), name: 'a');
     File(entry.imagePath).deleteSync();
     expect(await storage.readImageBytes(entry.id), isNull);
   });
 
-  test('DisplayThumbnailUtils.resizeSync 把大图压到最长边 256', () {
-    final large = _pngBytes(width: 512, height: 384);
+  test('DisplayThumbnailUtils.resizeSync 把大图压到最长边 512', () {
+    final large = _pngBytes(width: 1024, height: 768);
     final resized = DisplayThumbnailUtils.resizeSync(large);
     final decoded = img.decodeImage(resized!);
-    expect(decoded!.width, DisplayThumbnailUtils.maxDimension);
-    expect(
-      decoded.height,
-      lessThanOrEqualTo(DisplayThumbnailUtils.maxDimension),
-    );
+    expect(decoded!.width, 512);
+    expect(decoded.height, 384);
+  });
+
+  test('小尺寸大文件重新压缩时保持原尺寸', () {
+    final source = img.encodeBmp(img.Image(width: 180, height: 160));
+    expect(source.length, greaterThan(DisplayThumbnailUtils.inlineLimitBytes));
+    final resized = img.decodeImage(DisplayThumbnailUtils.resizeSync(source)!)!;
+    expect(resized.width, 180);
+    expect(resized.height, 160);
   });
 }

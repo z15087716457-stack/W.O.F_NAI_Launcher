@@ -5,6 +5,7 @@ class NaiPromptFormatter {
   static final RegExp _horizontalWhitespace = RegExp(r'[ \t\u3000]+');
   static final RegExp _leadingSpaces = RegExp(r'^ +');
   static final RegExp _trailingSpaces = RegExp(r' +$');
+  static final RegExp _unitWeightEnd = RegExp(r'\s*(?:[,，]|::|$)');
 
   static String formatTag(String tag) => format(tag);
 
@@ -55,25 +56,36 @@ class NaiPromptFormatter {
     return NaiWeightSyntax.guardClosures(buffer.toString());
   }
 
-  /// A complete 1x NAI weight has the same effect as its contents. Work from
-  /// syntax tokens so quoted text, aliases, escapes, and unfinished weights
-  /// keep their original spelling.
+  /// Remove 1x delimiters only when they leave emphasis and text boundaries
+  /// intact. A 1x prefix inside an active weight is an explicit reset.
   static String _removeUnitWeights(String prompt) {
     final tokens = NaiPromptSyntax.scan(prompt);
-    final prefixes = <int>[];
+    final prefixes = <int?>[];
     final remove = <int>{};
+    var neutral = true;
     for (var i = 0; i < tokens.length; i++) {
       final token = tokens[i];
       if (token.kind == NaiPromptTokenKind.prefix) {
-        prefixes.add(i);
-      } else if (token.kind == NaiPromptTokenKind.closure &&
-          prefixes.isNotEmpty) {
-        final prefix = prefixes.removeLast();
-        final source = tokens[prefix].source(prompt);
-        if (double.tryParse(source.substring(0, source.length - 2)) == 1) {
+        final weight = double.tryParse(
+          prompt.substring(token.start, token.end - 2),
+        );
+        prefixes.add(neutral && weight == 1 ? i : null);
+        neutral = weight == 1;
+      } else if (token.kind == NaiPromptTokenKind.closure) {
+        neutral = true;
+        final prefix = prefixes.isEmpty ? null : prefixes.removeLast();
+        if (prefix != null &&
+            _unitWeightEnd.matchAsPrefix(prompt, token.end) != null) {
           remove.add(prefix);
           remove.add(i);
         }
+      } else if ((token.kind == NaiPromptTokenKind.group ||
+              token.kind == NaiPromptTokenKind.literal &&
+                  prompt.startsWith('||', token.start)) &&
+          token.source(prompt).contains('::')) {
+        // These tokens can hide a numeric action that changes the active weight.
+        prefixes.clear();
+        neutral = false;
       }
     }
     if (remove.isEmpty) return prompt;

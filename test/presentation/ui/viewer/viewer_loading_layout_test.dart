@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/ui/viewer/viewer_contract.dart';
+import 'package:nai_launcher/presentation/ui/viewer/viewer_page.dart'
+    show ViewerPageScope;
 
 import '../../../helpers/studio_capture_fonts.dart';
 import '../../../helpers/uiux_frontend_capture.dart';
@@ -28,10 +30,13 @@ void main() {
             ],
           );
           await pumpViewer(t, data: data, locale: locale, dark: dark);
+          // Exercise the compact loading layout at fixed display dimensions.
+          final stage = find.byKey(const Key('viewer-view'));
+          ViewerPageScope.of(t.element(stage)).controller.zoom.setScale(1);
+          await t.pumpAndSettle();
           expect(t.takeException(), isNull);
           final loading = find.byKey(const Key('viewer-loading'));
           expect(loading, findsOneWidget);
-          // Fit retains original pixels for small images.
           expect(
             t.getSize(loading),
             Size(pixels.toDouble(), pixels.toDouble()),

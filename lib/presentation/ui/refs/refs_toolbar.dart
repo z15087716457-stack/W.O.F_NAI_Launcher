@@ -194,17 +194,15 @@ class RefsToolbar extends StatelessWidget {
                               padding: const EdgeInsets.only(left: 2),
                               child: UiSeg<RefsCardSize>(
                                 key: const Key('refs-card-size'),
+                                glyphSize: 16,
                                 values: RefsCardSize.values,
                                 selected: data.cardSize,
                                 onChanged: a.onCardSizeChanged,
-                                labelOf: (s) => switch (s) {
-                                  RefsCardSize.small => '',
-                                  RefsCardSize.medium => l10n.refs_sizeMedium,
-                                  RefsCardSize.large => l10n.refs_sizeLarge,
+                                glyphOf: (s) => switch (s) {
+                                  RefsCardSize.small => UiGlyphs.masonrySmall,
+                                  RefsCardSize.medium => UiGlyphs.masonryMedium,
+                                  RefsCardSize.large => UiGlyphs.masonryLarge,
                                 },
-                                glyphOf: (s) => s == RefsCardSize.small
-                                    ? UiGlyphs.sizes
-                                    : null,
                                 tooltipOf: (s) => switch (s) {
                                   RefsCardSize.small => l10n.refs_sizeSmall,
                                   RefsCardSize.medium => l10n.refs_sizeMedium,

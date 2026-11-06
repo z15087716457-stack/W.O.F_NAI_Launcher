@@ -303,7 +303,7 @@ void main() {
         workspaceDirectory: root,
         allowsImages: false,
         readDraft: () => throw StateError('No draft access'),
-        readSummary: () => {},
+        readSummary: (_) => {},
         isGenerating: () => false,
         backupDraft: (_) async => throw StateError('No write'),
         writeDraft: (_) => throw StateError('No write'),

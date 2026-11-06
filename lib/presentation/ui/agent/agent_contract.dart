@@ -203,6 +203,9 @@ enum AgentRunStatus {
   /// 模型正在思考或输出、工具正在执行。
   working,
 
+  /// 正在压缩当前对话的上下文。
+  compacting,
+
   /// 在等用户：有提问、权限审批或付费确认没处理。
   waitingUser,
 }

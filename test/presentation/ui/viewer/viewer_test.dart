@@ -12,6 +12,7 @@ import 'package:nai_launcher/presentation/ui/viewer/viewer_page.dart'
     show ViewerPageScope;
 
 import 'package:nai_launcher/presentation/ui/viewer/viewer_prompt.dart';
+import 'package:nai_launcher/presentation/ui/viewer/viewer_zoom.dart';
 import '../../../helpers/studio_capture_fonts.dart';
 import 'viewer_test_harness.dart';
 
@@ -294,6 +295,75 @@ void main() {
     expect(zoomLabel(t), isNot(startsWith('适应')));
     expect(find.byKey(const Key('viewer-zoom-hint')), findsNothing);
     await done(t);
+  });
+
+  testWidgets('默认适应最多放大到 120%，固定 100% 可离开适应', (t) async {
+    final item = ViewerItem(
+      key: 'small',
+      width: 400,
+      height: 280,
+      image: ViewerFixture.item('08').image,
+    );
+    await pump(
+      t,
+      ViewerViewData(
+        mode: ViewerMode.generation,
+        items: [item],
+        currentKey: item.key,
+        now: DateTime(2026),
+        zoomHintSeen: true,
+      ),
+    );
+
+    final stage = find.byKey(const Key('viewer-view'));
+    final image = find.byKey(const Key('viewer-image'));
+    final zoom = ViewerPageScope.of(t.element(stage)).controller.zoom;
+    final fit = zoom.scale;
+    final fitted = t.getSize(image);
+    expect(zoom.fitted, isTrue);
+    expect(fit, 1.2);
+    expect(zoomLabel(t), '适应 · 120%');
+    expect(fitted.width / item.width, closeTo(fit, 1e-6));
+    expect(fitted.height / item.height, closeTo(fit, 1e-6));
+    expect(fitted.width, lessThan(t.getSize(stage).width));
+    expect(fitted.height, lessThan(t.getSize(stage).height));
+
+    await tapKey(t, 'viewer-zoom-out');
+    expect(zoom.fitted, isFalse);
+    expect(zoom.scale, closeTo(fit / ViewerZoom.step, 1e-6));
+    await tapKey(t, 'viewer-zoom-out');
+    expect(zoom.scale, closeTo(fit / ViewerZoom.step / ViewerZoom.step, 1e-6));
+
+    await tapKey(t, 'viewer-zoom-menu');
+    await tapKey(t, 'viewer-zoom-100');
+    expect(zoomLabel(t), '100%');
+    t.view.physicalSize = const Size(1400, 420);
+    await t.pumpAndSettle();
+    expect(t.getSize(image), const Size(400, 280));
+    expect(zoomLabel(t), '100%');
+
+    await key(t, LogicalKeyboardKey.digit0);
+    expect(zoom.fitted, isTrue);
+    expect(zoom.scale, lessThan(fit));
+    expect(t.getSize(image).height, lessThan(t.getSize(stage).height));
+
+    await key(t, LogicalKeyboardKey.digit1);
+    await pump(t, ViewerFixture.gallery(zoomHintSeen: true));
+    expect(zoom.fitted, isTrue);
+    expect(zoom.scale, lessThan(1));
+    await done(t);
+  });
+
+  testWidgets('固定 100% 与适应同倍率时仍保留固定档', (t) async {
+    final zoom = ViewerZoom();
+    addTearDown(zoom.dispose);
+    const image = Size(400, 280);
+    zoom.layout(image: image, view: image, fit: 1);
+    zoom.setScale(1);
+    expect(zoom.fitted, isFalse);
+    zoom.layout(image: image, view: image * 1.2, fit: 1.2);
+    expect(zoom.scale, 1);
+    await t.pump();
   });
 
   testWidgets('触控板双指缩放和平移复用查看器相机', (t) async {

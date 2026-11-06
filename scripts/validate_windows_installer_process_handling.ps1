@@ -302,7 +302,25 @@ try {
     throw "Retry uninstall exited with code $retryUninstallExit."
   }
 
-  Write-Host 'Windows installer process isolation, lock-probe, payload-write failure and retry checks passed.'
+  # The non-silent update mode must complete without wizard interaction and
+  # install into the explicit directory, even when the path contains spaces.
+  $updateDir = Join-Path $tempRoot 'update install'
+  [void](New-Item -ItemType Directory -Path $updateDir)
+  $updateExe = Join-Path $updateDir $appName
+  Copy-Item -LiteralPath (Join-Path $env:SystemRoot 'System32\whoami.exe') -Destination $updateExe
+  $updateProcess = Start-Process -FilePath $normalInstaller `
+    -ArgumentList "/UPDATE /D=$updateDir" -WindowStyle Hidden -PassThru
+  [void]$script:StartedProcesses.Add($updateProcess)
+  if (-not $updateProcess.WaitForExit(20000)) {
+    throw 'The visible update did not complete automatically.'
+  }
+  if ($updateProcess.ExitCode -ne 0 -or
+      (Get-FileHash -LiteralPath $updateExe -Algorithm SHA256).Hash -ne $newHash -or
+      (Get-ItemProperty -LiteralPath $registryPath).InstallLocation -ne $updateDir) {
+    throw 'The visible update did not replace the program in its original directory.'
+  }
+
+  Write-Host 'Windows installer process isolation, lock-probe, payload-write failure, retry and visible update checks passed.'
 } finally {
   foreach ($process in $script:StartedProcesses) {
     try {

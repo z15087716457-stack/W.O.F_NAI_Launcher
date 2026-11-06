@@ -13,6 +13,7 @@ void main() {
   late NaiAgentStudioTools tools;
   late List<BridgeDraftSnapshot> backups;
   late bool busy;
+  late int draftReads;
   Future<void> Function()? onBackup;
   setUp(() async {
     root = await Directory.systemTemp.createTemp('nai-studio-tools-');
@@ -21,12 +22,21 @@ void main() {
     );
     backups = [];
     busy = false;
+    draftReads = 0;
     onBackup = null;
     tools = NaiAgentStudioTools(
       workspaceDirectory: root,
       allowsImages: true,
-      readDraft: () => draft,
-      readSummary: () => {'page': '/generation'},
+      readDraft: () {
+        draftReads++;
+        return draft;
+      },
+      readSummary: (snapshot) => {
+        'page': '/generation',
+        'draft_summary': {
+          'prompt_length': (snapshot.fields['prompt'] as String).length,
+        },
+      },
       isGenerating: () => busy,
       backupDraft: (value) async {
         backups.add(value);
@@ -54,11 +64,22 @@ void main() {
         NaiAgentCancellation(),
       );
       expect(summary['details']['draft'], isNull);
+      expect(summary['details']['draft_summary']['prompt_length'], 9);
+      expect(draftReads, 1);
       final actual = await tools.execute('studio_context', {
         'scope': 'draft',
       }, NaiAgentCancellation());
       expect(actual['details']['draft']['fields']['prompt'], 'raw draft');
       expect(actual['details']['draft']['field_versions'], draft.fieldVersions);
+      expect(
+        actual['details']['draft']['draft_version'],
+        draft.acknowledgementVersion,
+      );
+      expect(
+        actual['details']['draft_summary'],
+        summary['details']['draft_summary'],
+      );
+      expect(draftReads, 2);
     },
   );
   test(
@@ -252,7 +273,7 @@ void main() {
         workspaceDirectory: root,
         allowsImages: true,
         readDraft: () => draft,
-        readSummary: () => {},
+        readSummary: (_) => {},
         isGenerating: () => false,
         backupDraft: (_) async => 'unused',
         writeDraft: (_) => [],

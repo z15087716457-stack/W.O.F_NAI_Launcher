@@ -349,7 +349,7 @@ Agent 面板关闭且所有会话空闲满 30 分钟后，先保存草稿与待�
 
 - **压缩历史与按需回查（已随本机 +67 安装）**：主对话／导航只映射一次完整当前分支，role／timestamp 合并实时消息；模型上下文仍按 Pi 压缩。重复摘要保留各自边界，无用户发言不画空气泡。`session_history` 是原生 deferred 工具，只读 getBranch，脱敏后有界分页，省略思考与二进制；默认七入口与系统提示不变，不注入摘要索引。[实现与验证](docs/rag-related-history-2026-10-31.md)。
 
-- **上下文检索状态（已随本机 +67 安装）**：`studio_context` 的 summary/draft 共用 `search`，只返回 gallery/tags/wiki/blocks 的短状态。设置和控制器未创建时保持 unknown；用 `ref.exists` 防止上下文读取启动 RAG。状态不含数量或进度，不改工具声明、系统提示词、MCP 摘要或 Skill。[契约与验证](docs/agent-context-search-status-2026-10-30.md)。
+- **上下文检索状态**。`studio_context` 的 summary/draft 共用 `search`，返回 gallery/tags/wiki/blocks 的短状态。设置或控制器尚未创建时以 `ref.exists` 保护只读路径，状态未知时返回 unknown。`search_hint` 区分标签名查询、已知标签的共现搭配和语义检索。至少一个来源为 ready 或 partial 时提示按语义查找，partial 只覆盖已索引内容。[契约与验证](docs/agent-context-search-status-2026-10-30.md)。
 
 - 聊天列表按持久化的最后对话活动倒序；发送和本轮成功结束更新，单纯打开、改名和流式增量不更新。旧 JSONL 在 isolate 中恢复最后用户／助手消息时间，缺失时用创建时间。相对时间按分钟／小时／天／周展示，悬停可看完整时间；不对流式每个 delta 写盘。
 

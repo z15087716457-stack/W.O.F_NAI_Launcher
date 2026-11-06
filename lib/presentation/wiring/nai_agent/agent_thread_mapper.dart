@@ -229,6 +229,8 @@ class AgentThreadMapper {
     promptSetView,
   }) {
     final messages = historyMessages ?? runtime.displayMessages;
+    final responding = runtime.running && !runtime.compacting;
+    final opening = runtime.starting && !runtime.compacting;
     final renderContext = Object.hash(
       runtime,
       resources.revision,
@@ -242,8 +244,9 @@ class AgentThreadMapper {
       Object.hashAll(runtime.entries),
       Object.hashAll(runtime.userEntries),
       Object.hashAll(runtime.autoCompactions),
-      runtime.running,
-      runtime.starting,
+      responding,
+      opening,
+      runtime.compacting,
     );
     var sourceStart = 0, mi = 0;
     final turns = <AgentTurn>[];
@@ -325,7 +328,7 @@ class AgentThreadMapper {
           )
           .length;
       final summary =
-          !(last && (runtime.running || runtime.starting)) &&
+          !(last && (responding || opening)) &&
               (took != null || anlas > 0 || changes > 0)
           ? AgentTurnSummary(
               took: took,
@@ -442,7 +445,7 @@ class AgentThreadMapper {
                 {'type': 'text', 'text': message['content']},
               ]
             : agentMaps(message['content']);
-        final streaming = runtime.running && mi == messages.length - 1;
+        final streaming = responding && mi == messages.length - 1;
         for (final (pi, part) in parts.indexed) {
           if (part['type'] == 'thinking') {
             final text = (part['thinking'] as String? ?? '').trim();
@@ -1015,10 +1018,11 @@ class AgentThreadMapper {
           reply: AgentReply(
             blocks: last.reply?.blocks ?? const [],
             summary: last.reply?.summary,
-            live: runtime.running,
+            live: responding,
             canRegenerate:
-                !runtime.running &&
-                !runtime.starting &&
+                !runtime.compacting &&
+                !responding &&
+                !opening &&
                 runtime.pendingSends == 0 &&
                 last.user.entryId != null,
           ),
