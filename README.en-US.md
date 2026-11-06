@@ -35,7 +35,7 @@ Get the package for your operating system from [Releases](https://github.com/z15
 | --- | --- |
 | `WOF_NAI_Studio_Windows_<version>_Setup.exe` | **The choice for most people.** Installs to your user directory without administrator rights, with Start menu and desktop shortcuts. |
 | `WOF_NAI_Studio_Windows_<version>_Portable.zip` | For keeping the app in a folder of your choice, on a USB drive, or taking it between computers. Extract it and run `nai_launcher.exe`. |
-| `WOF_NAI_Studio_macOS_<version>_Portable.zip` | For Apple silicon and Intel Macs on macOS 13.5 or later. [Download the 2.3.0 universal test build](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/actions/runs/42223282567/artifacts/13504907724) (GitHub sign-in required). |
+| `WOF_NAI_Studio_macOS_<version>_Portable_Test.zip` | For Apple silicon and Intel Macs on macOS 13.5 or later. [Download the 2.3.0 universal test build](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/download/v2.3.0/WOF_NAI_Studio_macOS_2.3.0_Portable_Test.zip). |
 
 Both Windows packages support in-app updates. Settings, the gallery database and Agent data live in `user-data/` and `agent-data/` beside the program. On Mac, data lives in your Application Support directory. The app downloads and verifies updates, then opens Finder for you to replace the app.
 

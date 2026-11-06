@@ -21,7 +21,7 @@ Windows 发布三个作业通过，7 个资产齐全。Portable 共 15,554 个�
 
 macos-26 runner 从 v2.3.0 标签对应的源码构建了 **2.3.0+85**。支持 macOS 13.5 及以上的 Apple 芯片和 Intel Mac。平台测试、41 个 Mach-O 文件和解包后的签名在 CI 通过核验。下载后再次核对了 SHA-256、版本、源码和主程序及随包工具的双架构。
 
-测试包使用临时签名，未经 Apple 公证，界面启动待实机验收。登录 GitHub 下载 Actions 产物，再解压其中的 Portable ZIP。[下载测试包](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/actions/runs/42223282567/artifacts/13504907724) · [构建记录](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/actions/runs/42223282567)
+测试包使用临时签名，未经 Apple 公证，界面启动待实机验收。从 Release 下载并解压 Portable ZIP，再通过 Finder 打开应用。[下载测试包](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/download/v2.3.0/WOF_NAI_Studio_macOS_2.3.0_Portable_Test.zip) · [SHA-256](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/download/v2.3.0/WOF_NAI_Studio_macOS_2.3.0_Portable_Test.zip.sha256) · [构建记录](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/actions/runs/42223282567)
 
 Portable ZIP 的 SHA-256 为 `4ca8346972e04ed4afe329d0d61552ac4488d57635596214bb82541d5979c798`。
 
