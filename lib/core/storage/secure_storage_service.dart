@@ -12,6 +12,17 @@ part 'secure_storage_service.g.dart';
 /// 安全存储服务 - 存储敏感数据（Token、密码等）
 /// 使用内存缓存 + 持久化存储双重保障
 class SecureStorageService {
+  Future<String?> readChatGptConnection(String id) async {
+    final key = 'studio_chatgpt_$id';
+    return _memoryCache[key] ?? await _storage.read(key: key);
+  }
+
+  Future<void> saveChatGptConnection(String id, String value) async {
+    final key = 'studio_chatgpt_$id';
+    await _storage.write(key: key, value: value);
+    _memoryCache[key] = value;
+  }
+
   Future<void> saveAgentMcpConfig(String id, String json) async {
     final key = 'nai_agent_mcp_$id';
     await _storage.write(key: key, value: json);

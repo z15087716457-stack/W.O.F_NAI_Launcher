@@ -41,6 +41,7 @@ dependencies:
   # 加密库 (Blake2b + Argon2id)
   cryptography: ^2.7.0
   crypto: ^3.0.3
+  jose: ^0.3.5+2
 
   # SHA 哈希（用于生成唯一ID）
 

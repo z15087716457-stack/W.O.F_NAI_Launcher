@@ -11,7 +11,7 @@ void main() {
     'expanded presets round-trip without changing saved connection choices',
     () {
       const menu = ProviderPresetDefaults.selectable;
-      expect(menu.length, 40);
+      expect(menu.length, 41);
       expect(menu.first, ProviderPreset.openaiCompatibleChat);
       expect(menu.map((p) => p.defaultId).toSet().length, menu.length);
       for (final preset in ProviderPreset.values) {
@@ -26,7 +26,10 @@ void main() {
         expect(restored.toJson(), saved.toJson());
       }
       for (final preset in menu.skip(1)) {
-        expect(preset.isLocal, !preset.requiresApiKey);
+        expect(
+          preset.isLocal,
+          preset != ProviderPreset.chatgpt && !preset.requiresApiKey,
+        );
         if (preset.index > ProviderPreset.openrouter.index) {
           expect(preset.defaultModelNames, isEmpty);
         }

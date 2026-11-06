@@ -22757,4 +22757,65 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ag_tool_agent_manage => 'Manage Agent';
+
+  @override
+  String get chatGpt_continue => 'Continue with ChatGPT';
+
+  @override
+  String get chatGpt_addService => 'Add and go to sign in';
+
+  @override
+  String get chatGpt_connectionHint =>
+      'Use your eligible ChatGPT plan. No API key is needed. Add another ChatGPT service to connect another account or workspace.';
+
+  @override
+  String get chatGpt_saveFirst =>
+      'Save this service first, then continue with ChatGPT.';
+
+  @override
+  String get chatGpt_usingPlan => 'Using ChatGPT plan';
+
+  @override
+  String get chatGpt_planDisabled =>
+      'Signed in, but ChatGPT plan usage is not enabled. Manage usage to review access.';
+
+  @override
+  String get chatGpt_signedOut => 'Signed out';
+
+  @override
+  String get chatGpt_manageUsage => 'Manage usage';
+
+  @override
+  String get chatGpt_signOut => 'Sign out';
+
+  @override
+  String get chatGpt_cancel => 'Cancel';
+
+  @override
+  String get chatGpt_waiting => 'Complete authorization in your browser.';
+
+  @override
+  String get chatGpt_returnToStudio =>
+      'Return to W.O.F NAI Studio to check the connection.';
+
+  @override
+  String chatGpt_authFailed(String code) {
+    return 'ChatGPT connection failed ($code). Please try signing in again.';
+  }
+
+  @override
+  String get chatGpt_revokeUnconfirmed =>
+      'Signed out locally. Remote revocation was not confirmed; disconnect the app in ChatGPT settings.';
+
+  @override
+  String get chatGpt_invalidRoute =>
+      'ChatGPT plan connections require the official Responses endpoint without custom headers.';
+
+  @override
+  String get chatGpt_inferenceFailed =>
+      'The ChatGPT request failed. Check plan usage and access in Manage usage.';
+
+  @override
+  String get chatGpt_incomplete =>
+      'The ChatGPT response did not complete. Try again.';
 }

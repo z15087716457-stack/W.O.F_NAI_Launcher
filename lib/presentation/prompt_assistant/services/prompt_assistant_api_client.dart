@@ -22,40 +22,55 @@ class PromptAssistantApiClient {
     this.history,
     this.connectionHealth,
   }) : _dio = dio {
-    if (history != null) {
-      _dio.interceptors.add(
-        InterceptorsWrapper(
-          onRequest: (options, handler) {
-            final capture = _diagnostics[options.cancelToken];
-            if (capture != null) {
-              options.extra[_exchangeKey] = history!.sent(
-                capture.id,
-                ModelRequestExchange(
-                  time: DateTime.now(),
-                  method: options.method,
-                  url: capture.redactor.url(options.uri),
-                  requestHeaders: capture.redactor.headers(options.headers),
-                  requestBody: capture.redactor.value(options.data),
-                ),
-              );
-            }
-            handler.next(options);
-          },
-          onResponse: (response, handler) {
-            _captureResponse(response.requestOptions, response);
-            handler.next(response);
-          },
-          onError: (error, handler) {
-            _captureResponse(
-              error.requestOptions,
-              error.response,
-              error: error.message ?? error.type.name,
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          final capture = _diagnostics[options.cancelToken];
+          if (capture != null) {
+            options.extra[_exchangeKey] = history!.sent(
+              capture.id,
+              ModelRequestExchange(
+                time: DateTime.now(),
+                method: options.method,
+                url: capture.redactor.url(options.uri),
+                requestHeaders: capture.redactor.headers(options.headers),
+                requestBody: capture.redactor.value(options.data),
+              ),
             );
-            handler.next(error);
-          },
-        ),
-      );
-    }
+          }
+          handler.next(options);
+        },
+        onResponse: (response, handler) {
+          _captureResponse(response.requestOptions, response);
+          handler.next(response);
+        },
+        onError: (error, handler) async {
+          // Error responses on an SSE request are often ordinary JSON.
+          // Decode them before recording/formatting, rather than showing
+          // "Instance of ResponseBody" and hiding the server's explanation.
+          final response = error.response;
+          if (error.type == DioExceptionType.badResponse &&
+              response?.data is ResponseBody) {
+            final body = response!.data as ResponseBody;
+            error = error.copyWith(
+              response: Response<dynamic>(
+                requestOptions: response.requestOptions,
+                statusCode: response.statusCode,
+                statusMessage: response.statusMessage,
+                headers: response.headers,
+                data: await utf8.decoder.bind(body.stream).join(),
+              ),
+            );
+          }
+          _captureResponse(
+            error.requestOptions,
+            error.response,
+            error: error.message ?? error.type.name,
+          );
+          handler.next(error);
+        },
+      ),
+    );
   }
 
   final Dio _dio;
@@ -231,7 +246,7 @@ class PromptAssistantApiClient {
               : 'HTTP ${error.response!.statusCode}',
         );
       }
-      throw StateError(_formatDioException(error, request));
+      throw StateError(redactor.text(_formatDioException(error, request)));
     } catch (error) {
       if (requested && !cancelToken.isCancelled) {
         connectionHealth?.failed(probe, error);

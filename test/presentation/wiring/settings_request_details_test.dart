@@ -139,10 +139,12 @@ void main() {
       final old = seed('older request', task: LauncherInterface.tagTranslate);
       final fullBody = 'full body ${'long content ' * 1000}';
       final id = seed(fullBody, task: LauncherInterface.tagTranslate);
-      seed('connection probe');
+      final probe = seed('connection probe');
       await mount(t);
-      expect(view.requests.map((r) => r.id), [id, old]);
-      expect(view.requestTotal, 2);
+      expect(view.requests.map((r) => r.id), [probe, id, old]);
+      expect(view.requests.first.task, isNull);
+      expect(view.requests.first.taskLabel, contains('测试'));
+      expect(view.requestTotal, 3);
       await t.tap(find.byKey(const Key('models-tab-requests')));
       await t.pumpAndSettle();
       final button = find.byKey(Key('request-details-$id'));

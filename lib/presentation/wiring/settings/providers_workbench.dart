@@ -4,7 +4,9 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/auth/chatgpt_auth_service.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../l10n/app_localizations.dart';
@@ -14,6 +16,7 @@ import '../../prompt_assistant/providers/provider_connection_health_provider.dar
 import '../../prompt_assistant/services/model_catalog_repository.dart';
 import '../../prompt_assistant/services/prompt_assistant_service.dart';
 import '../../prompt_assistant/services/provider_model_list_cache.dart';
+import '../../prompt_assistant/services/provider_adapters/openai_responses_adapter.dart';
 import '../../providers/nai_agent/nai_agent_workspace_provider.dart';
 import '../../ui/model_providers/model_providers_contract.dart';
 import '../../ui/settings/settings_contract.dart';
@@ -44,12 +47,14 @@ class ProvidersWorkbenchState {
     this.connections = const {},
     this.models = const {},
     this.catalogs = const {},
+    this.accounts = const {},
   });
   final Map<String, ProviderSettings> settings;
   final Map<String, String> masked;
   final Map<String, WorkbenchConnectionTest> connections;
   final Map<(String, String), WorkbenchModelTest> models;
   final Map<String, ProviderCatalog> catalogs;
+  final Map<String, ProviderAccount> accounts;
 }
 
 final providersWorkbenchProvider =
@@ -71,6 +76,92 @@ class ProvidersWorkbench extends StateNotifier<ProvidersWorkbenchState> {
   Future<void> _pendingRefresh = Future.value();
   final _testSequence = <(String, String?), int>{};
   final _catalogSequence = <String, int>{};
+  final _signIns = <String, CancelToken>{};
+
+  @override
+  void dispose() {
+    for (final cancellation in _signIns.values) {
+      cancellation.cancel();
+    }
+    super.dispose();
+  }
+
+  void _accountOperation(
+    String id, {
+    bool busy = false,
+    bool canCancel = false,
+    String error = '',
+  }) {
+    if (!mounted || !state.accounts.containsKey(id)) return;
+    final previous = state.accounts[id]!;
+    state = ProvidersWorkbenchState(
+      settings: state.settings,
+      masked: state.masked,
+      connections: state.connections,
+      models: state.models,
+      catalogs: state.catalogs,
+      accounts: {
+        ...state.accounts,
+        id: ProviderAccount(
+          email: previous.email,
+          signedIn: previous.signedIn,
+          planEnabled: previous.planEnabled,
+          busy: busy,
+          canCancel: canCancel,
+          error: error,
+        ),
+      },
+    );
+  }
+
+  Future<void> signIn(String id) async {
+    if (!provider(id).usesChatGptPlan || state.accounts[id]?.busy == true) {
+      return;
+    }
+    final cancellation = CancelToken();
+    _signIns[id] = cancellation;
+    _accountOperation(id, busy: true, canCancel: true);
+    var authorized = false;
+    var error = '';
+    try {
+      await ref.read(chatGptAuthServiceProvider).signIn(id, cancellation);
+      await refresh();
+      authorized = state.accounts[id]?.planEnabled == true;
+    } catch (failure) {
+      error = failure is ChatGptAuthException
+          ? failure.toString()
+          : currentL10n.chatGpt_authFailed('sign_in_failed');
+    } finally {
+      _signIns.remove(id);
+      _accountOperation(id, error: error);
+    }
+    if (authorized && mounted) await fetchCatalog(id);
+  }
+
+  void cancelSignIn(String id) => _signIns[id]?.cancel();
+
+  Future<void> signOut(String id) async {
+    if (!provider(id).usesChatGptPlan || state.accounts[id]?.busy == true) {
+      return;
+    }
+    _accountOperation(id, busy: true);
+    var error = '';
+    try {
+      final revoked = await ref.read(chatGptAuthServiceProvider).signOut(id);
+      await refresh();
+      if (!revoked) error = currentL10n.chatGpt_revokeUnconfirmed;
+    } catch (_) {
+      error = currentL10n.chatGpt_authFailed('sign_out_failed');
+    } finally {
+      _accountOperation(id, error: error);
+    }
+  }
+
+  Future<String?> _catalogIdentity(ProviderConfig p) async {
+    if (!p.usesChatGptPlan) return controller.getProviderApiKey(p.id);
+    final account = await ref.read(chatGptAuthServiceProvider).account(p.id);
+    return account?.signedIn == true ? account!.clientId : null;
+  }
 
   PromptAssistantConfigNotifier get controller =>
       ref.read(promptAssistantConfigProvider.notifier);
@@ -104,9 +195,27 @@ class ProvidersWorkbench extends StateNotifier<ProvidersWorkbenchState> {
     final settings = <String, ProviderSettings>{}, masked = <String, String>{};
     final fingerprints = <String, String>{};
     final cached = <String, ProviderCatalog>{};
+    final accounts = <String, ProviderAccount>{};
     final catalog = ModelCatalogRepository.cached;
     for (final p in config.providers) {
-      final key = await controller.getProviderApiKey(p.id);
+      String? key;
+      if (p.usesChatGptPlan) {
+        final account = await ref
+            .read(chatGptAuthServiceProvider)
+            .account(p.id);
+        key = account?.signedIn == true ? account!.clientId : null;
+        final previous = state.accounts[p.id];
+        accounts[p.id] = ProviderAccount(
+          email: account?.email,
+          signedIn: account?.signedIn ?? false,
+          planEnabled: account?.planEnabled ?? false,
+          busy: previous?.busy ?? false,
+          canCancel: previous?.canCancel ?? false,
+          error: previous?.error ?? '',
+        );
+      } else {
+        key = await controller.getProviderApiKey(p.id);
+      }
       final headers = await controller.getProviderHeaders(p.id);
       final models = <ModelConfig>[];
       for (final m in config.modelsForProvider(providerId: p.id)) {
@@ -117,7 +226,7 @@ class ProvidersWorkbench extends StateNotifier<ProvidersWorkbenchState> {
         );
       }
       settings[p.id] = projectProviderSettings(p, models, headers);
-      masked[p.id] = maskProviderKey(key);
+      masked[p.id] = p.usesChatGptPlan ? '' : maskProviderKey(key);
       final fingerprint = ProviderModelListCache.fingerprint(p, key, headers);
       fingerprints[p.id] = fingerprint;
       final names = ref
@@ -149,6 +258,7 @@ class ProvidersWorkbench extends StateNotifier<ProvidersWorkbenchState> {
       }
     }
     state = ProvidersWorkbenchState(
+      accounts: accounts,
       settings: settings,
       masked: masked,
       connections: {
@@ -276,7 +386,17 @@ class ProvidersWorkbench extends StateNotifier<ProvidersWorkbenchState> {
     List<String> ids, {
     bool manual = false,
   }) async {
-    await controller.addProviderModels(id, ids, manual: manual);
+    await controller.addProviderModels(
+      id,
+      ids,
+      manual: manual,
+      displayNames: {
+        if (!manual)
+          for (final entry
+              in state.catalogs[id]?.entries ?? <ProviderCatalogEntry>[])
+            if (entry.displayName != null) entry.id: entry.displayName!,
+      },
+    );
     await refresh();
   }
 
@@ -346,6 +466,7 @@ class ProvidersWorkbench extends StateNotifier<ProvidersWorkbenchState> {
         return;
       }
       state = ProvidersWorkbenchState(
+        accounts: state.accounts,
         settings: state.settings,
         masked: state.masked,
         catalogs: state.catalogs,
@@ -439,7 +560,7 @@ class ProvidersWorkbench extends StateNotifier<ProvidersWorkbenchState> {
     final p = provider(id);
     return ProviderModelListCache.fingerprint(
       p,
-      await controller.getProviderApiKey(id),
+      await _catalogIdentity(p),
       await controller.getProviderHeaders(id),
     );
   }
@@ -458,6 +579,7 @@ class ProvidersWorkbench extends StateNotifier<ProvidersWorkbenchState> {
         return;
       }
       state = ProvidersWorkbenchState(
+        accounts: state.accounts,
         settings: state.settings,
         masked: state.masked,
         connections: state.connections,
@@ -477,10 +599,28 @@ class ProvidersWorkbench extends StateNotifier<ProvidersWorkbenchState> {
       final p = provider(id);
       final key = await controller.getProviderApiKey(id);
       final headers = await controller.getProviderHeaders(id);
-      final fingerprint = ProviderModelListCache.fingerprint(p, key, headers);
-      final names = await ref
-          .read(promptAssistantServiceProvider)
-          .fetchModelsForDraft(p, key, headers);
+      final fingerprint = ProviderModelListCache.fingerprint(
+        p,
+        await _catalogIdentity(p),
+        headers,
+      );
+      Map<String, String>? labels;
+      final List<String> names;
+      if (p.usesChatGptPlan) {
+        p.copyWith(requestHeaders: headers).validateChatGptRoute();
+        final response = await ref
+            .read(promptAssistantDioProvider)
+            .get<dynamic>(
+              'https://api.openai.com/v1/models',
+              options: Options(headers: {'Authorization': 'Bearer $key'}),
+            );
+        labels = chatGptModels(response.data);
+        names = labels.keys.toList();
+      } else {
+        names = await ref
+            .read(promptAssistantServiceProvider)
+            .fetchModelsForDraft(p, key, headers);
+      }
       if (fingerprint != await _savedFingerprint(id)) {
         throw StateError(currentL10n.modelConfig_changedSaveAgain);
       }
@@ -495,7 +635,15 @@ class ProvidersWorkbench extends StateNotifier<ProvidersWorkbenchState> {
       publish(
         ProviderCatalog(
           state: ProviderCatalogState.ready,
-          entries: catalogEntries(p, names, catalog),
+          entries: labels == null
+              ? catalogEntries(p, names, catalog)
+              : [
+                  for (final entry in labels.entries)
+                    ProviderCatalogEntry(
+                      id: entry.key,
+                      displayName: entry.value,
+                    ),
+                ],
           fetchedAt: DateTime.now(),
         ),
       );
@@ -605,6 +753,9 @@ ProvidersViewData providersViewData(
     for (final p in config.providers)
       ProviderItem(
         id: p.id,
+        account: p.usesChatGptPlan
+            ? state.accounts[p.id] ?? const ProviderAccount()
+            : null,
         settings:
             state.settings[p.id] ??
             projectProviderSettings(
@@ -671,6 +822,7 @@ ProvidersViewData providersViewData(
     for (final p in ProviderPresetDefaults.selectable)
       ProviderPresetItem(
         id: p.name,
+        usesAccount: p == ProviderPreset.chatgpt,
         name: p.labelIn(l),
         group: providerGroup(p),
         host: p == ProviderPreset.openaiCompatibleChat
@@ -701,6 +853,7 @@ ProvidersActions workbenchActions(
       run(() => backend.test(id, edited, key, modelId: model)),
   onSave: backend.save,
   onRevealApiKey: (id) async {
+    if (backend.provider(id).usesChatGptPlan) return null;
     try {
       return await backend.controller.getProviderApiKey(id);
     } catch (_) {
@@ -709,6 +862,15 @@ ProvidersActions workbenchActions(
     }
   },
   onFetchCatalog: (id) => run(() => backend.fetchCatalog(id)),
+  onSignIn: (id) => run(() => backend.signIn(id)),
+  onCancelSignIn: backend.cancelSignIn,
+  onSignOut: (id) => run(() => backend.signOut(id)),
+  onManageUsage: (_) => run(() async {
+    await launchUrl(
+      Uri.parse('https://chatgpt.com/settings/usage'),
+      mode: LaunchMode.externalApplication,
+    );
+  }),
   onAddModels: (id, ids, {manual = false}) =>
       run(() => backend.addModels(id, ids, manual: manual)),
   onRemoveModel: (id, model) => run(() => backend.removeModel(id, model)),

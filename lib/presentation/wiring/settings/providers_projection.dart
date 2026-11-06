@@ -251,6 +251,7 @@ ProviderGroup providerGroup(ProviderPreset? preset) {
     return ProviderGroup.local;
   }
   if ({
+    ProviderPreset.chatgpt,
     ProviderPreset.openaiChat,
     ProviderPreset.openaiResponses,
     ProviderPreset.anthropic,

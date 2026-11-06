@@ -112,7 +112,12 @@ class ProvidersCatalogList extends StatelessWidget {
     final picks = ctrl.picks(item.id);
     final hits = q.isEmpty
         ? catalog.entries
-        : catalog.entries.where((e) => e.id.toLowerCase().contains(q)).toList();
+        : catalog.entries
+              .where(
+                (e) =>
+                    '${e.id} ${e.displayName ?? ''}'.toLowerCase().contains(q),
+              )
+              .toList();
     if (hits.isEmpty) return message(l.mp_noMatch);
     final shown = hits.take(limit).toList();
     final head = UiText.sans(11, weight: FontWeight.w500, color: c.faint);
@@ -204,7 +209,20 @@ class ProvidersCatalogList extends StatelessWidget {
                         opacity: had ? .45 : 1,
                         child: UiCheckBox(value: on),
                       ),
-                      Expanded(child: id(e.id)),
+                      Expanded(
+                        child: e.displayName == null
+                            ? id(e.id)
+                            : Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    e.displayName!,
+                                    style: UiText.sans(12, color: c.ink),
+                                  ),
+                                  id(e.id),
+                                ],
+                              ),
+                      ),
                       if (had) UiMini(l.mp_added),
                       if (e.retired)
                         UiMini(l.set_mdRetired, tone: UiMiniTone.warn),

@@ -14,9 +14,10 @@ extension _ServiceModelPanels on _AiServiceEditorState {
     final query = _catalogSearch.text.trim().toLowerCase();
     final filtered = _catalog
         .where(
-          (id) => '$id ${_catalogDetails(id)?.name ?? ''}'
-              .toLowerCase()
-              .contains(query),
+          (id) =>
+              '$id ${_chatGptModelNames[id] ?? _catalogDetails(id)?.name ?? ''}'
+                  .toLowerCase()
+                  .contains(query),
         )
         .toList();
     final selectedCount = filtered.where(_selected.containsKey).length;
@@ -164,7 +165,8 @@ extension _ServiceModelPanels on _AiServiceEditorState {
                         final id = filtered[index],
                             selected = _selected.containsKey(id),
                             metadata = _catalogDetails(id);
-                        final alias = metadata?.name ?? id;
+                        final alias =
+                            _chatGptModelNames[id] ?? metadata?.name ?? id;
                         final capacity =
                             metadata?.contextLimit != null ||
                             metadata?.outputLimit != null;

@@ -21986,4 +21986,62 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get ag_tool_agent_manage => 'Agent を管理';
+
+  @override
+  String get chatGpt_continue => 'Continue with ChatGPT';
+
+  @override
+  String get chatGpt_addService => '追加してログインへ';
+
+  @override
+  String get chatGpt_connectionHint =>
+      '対象の ChatGPT プランを使用します。API キーは不要です。別のアカウントやワークスペースには ChatGPT サービスを追加してください。';
+
+  @override
+  String get chatGpt_saveFirst => '先にサービスを保存してから ChatGPT に接続してください。';
+
+  @override
+  String get chatGpt_usingPlan => 'ChatGPT プランを使用中';
+
+  @override
+  String get chatGpt_planDisabled =>
+      'ログイン済みですが、プラン利用は許可されていません。使用量管理で確認してください。';
+
+  @override
+  String get chatGpt_signedOut => 'ログアウト済み';
+
+  @override
+  String get chatGpt_manageUsage => '使用量を管理';
+
+  @override
+  String get chatGpt_signOut => 'ログアウト';
+
+  @override
+  String get chatGpt_cancel => 'キャンセル';
+
+  @override
+  String get chatGpt_waiting => 'ブラウザーで認証を完了してください。';
+
+  @override
+  String get chatGpt_returnToStudio => 'W.O.F NAI Studio に戻り、接続状態を確認してください。';
+
+  @override
+  String chatGpt_authFailed(String code) {
+    return 'ChatGPT の接続に失敗しました（$code）。再度ログインしてください。';
+  }
+
+  @override
+  String get chatGpt_revokeUnconfirmed =>
+      'ローカルでログアウトしました。サーバーでの失効を確認できませんでした。ChatGPT の設定で接続を解除してください。';
+
+  @override
+  String get chatGpt_invalidRoute =>
+      'ChatGPT プランは公式 Responses エンドポイントを使用し、カスタムヘッダーには対応しません。';
+
+  @override
+  String get chatGpt_inferenceFailed =>
+      'ChatGPT リクエストに失敗しました。使用量とアクセス権を確認してください。';
+
+  @override
+  String get chatGpt_incomplete => 'ChatGPT の応答が完了しませんでした。再試行してください。';
 }

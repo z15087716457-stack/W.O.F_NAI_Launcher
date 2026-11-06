@@ -39531,6 +39531,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Manage Agent'**
   String get ag_tool_agent_manage;
+
+  /// No description provided for @chatGpt_continue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with ChatGPT'**
+  String get chatGpt_continue;
+
+  /// No description provided for @chatGpt_addService.
+  ///
+  /// In en, this message translates to:
+  /// **'Add and go to sign in'**
+  String get chatGpt_addService;
+
+  /// No description provided for @chatGpt_connectionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Use your eligible ChatGPT plan. No API key is needed. Add another ChatGPT service to connect another account or workspace.'**
+  String get chatGpt_connectionHint;
+
+  /// No description provided for @chatGpt_saveFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Save this service first, then continue with ChatGPT.'**
+  String get chatGpt_saveFirst;
+
+  /// No description provided for @chatGpt_usingPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Using ChatGPT plan'**
+  String get chatGpt_usingPlan;
+
+  /// No description provided for @chatGpt_planDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in, but ChatGPT plan usage is not enabled. Manage usage to review access.'**
+  String get chatGpt_planDisabled;
+
+  /// No description provided for @chatGpt_signedOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed out'**
+  String get chatGpt_signedOut;
+
+  /// No description provided for @chatGpt_manageUsage.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage usage'**
+  String get chatGpt_manageUsage;
+
+  /// No description provided for @chatGpt_signOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out'**
+  String get chatGpt_signOut;
+
+  /// No description provided for @chatGpt_cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get chatGpt_cancel;
+
+  /// No description provided for @chatGpt_waiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete authorization in your browser.'**
+  String get chatGpt_waiting;
+
+  /// No description provided for @chatGpt_returnToStudio.
+  ///
+  /// In en, this message translates to:
+  /// **'Return to W.O.F NAI Studio to check the connection.'**
+  String get chatGpt_returnToStudio;
+
+  /// No description provided for @chatGpt_authFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'ChatGPT connection failed ({code}). Please try signing in again.'**
+  String chatGpt_authFailed(String code);
+
+  /// No description provided for @chatGpt_revokeUnconfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed out locally. Remote revocation was not confirmed; disconnect the app in ChatGPT settings.'**
+  String get chatGpt_revokeUnconfirmed;
+
+  /// No description provided for @chatGpt_invalidRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'ChatGPT plan connections require the official Responses endpoint without custom headers.'**
+  String get chatGpt_invalidRoute;
+
+  /// No description provided for @chatGpt_inferenceFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The ChatGPT request failed. Check plan usage and access in Manage usage.'**
+  String get chatGpt_inferenceFailed;
+
+  /// No description provided for @chatGpt_incomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'The ChatGPT response did not complete. Try again.'**
+  String get chatGpt_incomplete;
 }
 
 class _AppLocalizationsDelegate

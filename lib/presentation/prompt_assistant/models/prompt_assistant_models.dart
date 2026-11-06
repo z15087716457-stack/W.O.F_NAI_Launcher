@@ -79,6 +79,7 @@ extension ProviderProtocolLabel on ProviderProtocol {
 }
 
 enum ProviderPreset {
+  chatgpt,
   openaiChat,
   openaiResponses,
   openaiCompatibleChat,
@@ -143,6 +144,14 @@ class _VendorDefaults {
 }
 
 const _vendorDefaults = <ProviderPreset, _VendorDefaults>{
+  ProviderPreset.chatgpt: _VendorDefaults(
+    'ChatGPT',
+    'https://api.openai.com/v1',
+    ProviderProtocol.openaiResponses,
+    [],
+    '国际厂商',
+    logoAsset: 'openai',
+  ),
   ProviderPreset.openaiChat: _VendorDefaults(
     'OpenAI',
     'https://api.openai.com/v1',
@@ -534,6 +543,7 @@ extension ProviderPresetDefaults on ProviderPreset {
   // Display order is shared by the picker and future service consumers.
   static const selectable = [
     ProviderPreset.openaiCompatibleChat,
+    ProviderPreset.chatgpt,
     ProviderPreset.openaiResponses,
     ProviderPreset.anthropic,
     ProviderPreset.gemini,
@@ -618,18 +628,20 @@ extension ProviderPresetDefaults on ProviderPreset {
   String get defaultName => label;
   String? get catalogProviderKey => _vendorDefaults[vendor]!.catalogKey;
   String? get logoAsset => _vendorDefaults[this]!.logoAsset;
-  bool get isLocal => !requiresApiKey;
+  bool get isLocal => this != ProviderPreset.chatgpt && !requiresApiKey;
   String get searchText =>
       '$label ${_vendorDefaults[this]!.label} $name $defaultBaseUrl ${catalogProviderKey ?? ""}';
   String get defaultBaseUrl => _vendorDefaults[this]!.url;
   ProviderProtocol get defaultProtocol => _vendorDefaults[this]!.protocol;
   List<String> get defaultModelNames => _vendorDefaults[this]!.models;
   bool get requiresApiKey => ![
+    ProviderPreset.chatgpt,
     ProviderPreset.lmStudioChat,
     ProviderPreset.lmStudioResponses,
     ProviderPreset.ollama,
   ].contains(this);
   bool get defaultAllowImageInput => [
+    ProviderPreset.chatgpt,
     ProviderPreset.openaiChat,
     ProviderPreset.openaiResponses,
     ProviderPreset.anthropic,
@@ -642,6 +654,7 @@ extension ProviderPresetDefaults on ProviderPreset {
   String get connectionHint => connectionHintIn(currentL10n);
   String connectionHintIn(AppLocalizations l10n) {
     return switch (vendor) {
+      ProviderPreset.chatgpt => l10n.chatGpt_connectionHint,
       ProviderPreset.huggingFace => l10n.modelProvider_hintHuggingFace,
       ProviderPreset.zaiCodingPlan ||
       ProviderPreset.zhipuCodingPlan ||
@@ -691,6 +704,18 @@ bool providerUsesMark(ProviderConfig provider) =>
     provider.preset == ProviderPreset.openaiCompatibleResponses;
 
 class ProviderConfig {
+  bool get usesChatGptPlan => preset == ProviderPreset.chatgpt;
+
+  void validateChatGptRoute() {
+    if (usesChatGptPlan &&
+        (baseUrl.replaceAll(RegExp(r'/+$'), '') !=
+                'https://api.openai.com/v1' ||
+            protocol != ProviderProtocol.openaiResponses ||
+            requestHeaders.isNotEmpty)) {
+      throw StateError(currentL10n.chatGpt_invalidRoute);
+    }
+  }
+
   static const defaultRetryAttempts = 1;
 
   final String id;

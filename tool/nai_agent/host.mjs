@@ -33,7 +33,7 @@ async function acquireRequest(signal) {
   signal?.throwIfAborted();
   if (++requestCount > requestLimit) throw new Error('Run request limit reached; progress is saved. Continue explicitly.');
   const requestId = String(++permitSequence);
-  await new Promise((resolve, reject) => {
+  const credential = await new Promise((resolve, reject) => {
     const abort = () => {
       permits.delete(requestId);
       send({ type: 'request_cancel', requestId });
@@ -44,9 +44,11 @@ async function acquireRequest(signal) {
     send({ type: 'request_permit', requestId });
   });
   let released = false;
-  return () => {
+  const release = () => {
     if (!released) { released = true; send({ type: 'request_release', requestId }); }
   };
+  release.apiKey = credential;
+  return release;
 }
 function queueState() {
   // Pi owns the queues. This sidecar only retains attachment bytes and UI IDs.
@@ -156,7 +158,7 @@ async function handle(message) {
     permits.delete(message.requestId);
     permit.signal?.removeEventListener('abort', permit.abort);
     if (message.error) permit.reject(new Error('Model request permit cancelled'));
-    else permit.resolve();
+    else permit.resolve(message.apiKey);
     return;
   }
   if (type === 'tool_result') {

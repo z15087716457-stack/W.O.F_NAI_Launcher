@@ -143,29 +143,23 @@ SettingsModelsData settingsModelsData(BuildContext context, WidgetRef ref) {
           task: settingsTaskKind(preset.task),
         ),
     ],
-    // This contract lists functional requests. Connection-test transcripts
-    // remain in the existing editor, rather than mislabelling them as a task.
     requests: [
       for (final record in history)
-        for (final task in LauncherInterface.values)
-          if (settingsHistoryTask(record.task) == task)
-            SettingsRequestLog(
-              id: record.id,
-              at: record.time,
-              task: settingsTaskKind(task),
-              provider: record.provider,
-              model: record.model,
-              ok: record.status == ModelRequestStatus.success,
-              latencyMs: record.elapsedMs,
-            ),
+        SettingsRequestLog(
+          id: record.id,
+          at: record.time,
+          task: switch (settingsHistoryTask(record.task)) {
+            final task? => settingsTaskKind(task),
+            null => null,
+          },
+          taskLabel: record.task,
+          provider: record.provider,
+          model: record.model,
+          ok: record.status == ModelRequestStatus.success,
+          latencyMs: record.elapsedMs,
+        ),
     ],
-    requestTotal: history
-        .where(
-          (record) => LauncherInterface.values.any(
-            (task) => settingsHistoryTask(record.task) == task,
-          ),
-        )
-        .length,
+    requestTotal: history.length,
   );
 }
 

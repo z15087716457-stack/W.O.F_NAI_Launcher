@@ -11664,5 +11664,29 @@
   "set_agMcpTest": "Test connection",
   "set_agMcpJsonOne": "Import one MCP server at a time.",
   "set_agMcpPending": "Applies next turn",
-  "ag_tool_agent_manage": "Manage Agent"
+  "ag_tool_agent_manage": "Manage Agent",
+  "chatGpt_continue": "Continue with ChatGPT",
+  "chatGpt_addService": "Add and go to sign in",
+  "chatGpt_connectionHint": "Use your eligible ChatGPT plan. No API key is needed. Add another ChatGPT service to connect another account or workspace.",
+  "chatGpt_saveFirst": "Save this service first, then continue with ChatGPT.",
+  "chatGpt_usingPlan": "Using ChatGPT plan",
+  "chatGpt_planDisabled": "Signed in, but ChatGPT plan usage is not enabled. Manage usage to review access.",
+  "chatGpt_signedOut": "Signed out",
+  "chatGpt_manageUsage": "Manage usage",
+  "chatGpt_signOut": "Sign out",
+  "chatGpt_cancel": "Cancel",
+  "chatGpt_waiting": "Complete authorization in your browser.",
+  "chatGpt_returnToStudio": "Return to W.O.F NAI Studio to check the connection.",
+  "chatGpt_authFailed": "ChatGPT connection failed ({code}). Please try signing in again.",
+  "chatGpt_revokeUnconfirmed": "Signed out locally. Remote revocation was not confirmed; disconnect the app in ChatGPT settings.",
+  "chatGpt_invalidRoute": "ChatGPT plan connections require the official Responses endpoint without custom headers.",
+  "chatGpt_inferenceFailed": "The ChatGPT request failed. Check plan usage and access in Manage usage.",
+  "chatGpt_incomplete": "The ChatGPT response did not complete. Try again.",
+  "@chatGpt_authFailed": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  }
 }

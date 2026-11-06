@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+- 修正 ChatGPT 流式响应的字节解码类型错误，移除套餐接口不接受的输出上限和采样字段，并采用受支持的本地工具声明。Agent 进程遵循 Studio 的代理设置；新版请求记录显示连接测试，并保留脱敏的 HTTP 错误正文。
+
+- 修正 ChatGPT 在新版服务商工作台仍显示 Key 表单的问题。选择 ChatGPT 后可直接前往登录；未登录时打开或新增服务不再因读取令牌报错。
+
+- 模型与接口新增 ChatGPT 登录：符合条件的账号可通过浏览器授权使用 ChatGPT 套餐，无需填写 API Key。支持账号状态、退出登录、管理用量和按账号获取模型；Agent 与提示词服务共用登录凭据并自动续期。配置导出不含登录凭据。详见 [ChatGPT 登录说明](docs/chatgpt-sign-in.md)。
+
 ## [2.3.0] - 2026-11-06
 
 本版更新了画布和查看器、图库检索、Agent 与生图流程，并接入 macOS 通用构建。感谢 [Miint-Sunny](https://github.com/Miint-Sunny) 提交 18 个 PR 和测试结果，采纳范围见 [整合记录](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/pull/19)。

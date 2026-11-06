@@ -417,6 +417,21 @@ class ProvidersProtocol {
 
 /// 一个已配置的服务商。
 @immutable
+class ProviderAccount {
+  const ProviderAccount({
+    this.email,
+    this.signedIn = false,
+    this.planEnabled = false,
+    this.busy = false,
+    this.canCancel = false,
+    this.error = '',
+  });
+  final String? email;
+  final bool signedIn, planEnabled, busy, canCancel;
+  final String error;
+}
+
+@immutable
 class ProviderItem {
   const ProviderItem({
     required this.id,
@@ -436,9 +451,13 @@ class ProviderItem {
     this.testing = false,
     this.hint = '',
     this.models = const {},
+    this.account,
   });
 
   final String id;
+
+  /// Non-null for browser sign-in services; their tokens are never exposed as API keys.
+  final ProviderAccount? account;
 
   /// 已保存的配置（草稿的起点）。
   final ProviderSettings settings;
@@ -491,11 +510,13 @@ class ProviderItem {
 class ProviderCatalogEntry {
   const ProviderCatalogEntry({
     required this.id,
+    this.displayName,
     this.contextWindow,
     this.price,
     this.retired = false,
   });
   final String id;
+  final String? displayName;
   final int? contextWindow;
 
   /// 已格式化的价格，例如 `$3 / $15`（输入 / 输出，每百万 token）；null = 未知。
@@ -531,6 +552,7 @@ class ProviderPresetItem {
     this.host = '',
     this.logoAsset,
     this.custom = false,
+    this.usesAccount = false,
   });
 
   /// `ProviderPreset.name`。
@@ -544,6 +566,7 @@ class ProviderPresetItem {
 
   /// 自定义端点（OpenAI 兼容）：卡片画虚线加号。
   final bool custom;
+  final bool usesAccount;
 }
 
 @immutable
@@ -598,6 +621,10 @@ class ProvidersActions {
     this.onRemoveModel = _noIdId,
     this.onReorderModels = _noOrder,
     this.onDelete = _noId,
+    this.onSignIn = _noId,
+    this.onCancelSignIn = _noId,
+    this.onSignOut = _noId,
+    this.onManageUsage = _noId,
   });
 
   /// 用预设新建一个服务商（地址、协议按预设预填，Key 为空）。返回新服务商 ID，界面选中它并聚焦 Key；null = 取消 / 失败。
@@ -654,6 +681,7 @@ class ProvidersActions {
 
   /// 删除服务商（即时，界面已确认）。
   final ValueChanged<String> onDelete;
+  final ValueChanged<String> onSignIn, onCancelSignIn, onSignOut, onManageUsage;
 
   static Future<String?> _noCreate(String _) async => null;
   static void _noBool(String _, bool _) {}

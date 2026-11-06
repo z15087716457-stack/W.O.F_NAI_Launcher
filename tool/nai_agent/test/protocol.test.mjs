@@ -82,6 +82,7 @@ export async function sessionFixture(protocol, server, options = {}) {
   return createStudioSession({
     cwd: join(root, 'workspace'), agentDir: join(root, 'agent'),
     systemPrompt: '你是 NAI Agent。按需读取 Studio 状态。',
+    acquireRequest: options.acquireRequest,
     config: { providerId: 'test', modelId: 'test-model', protocol, baseUrl: server.baseUrl,
       apiKey: 'synthetic-key', headers: { 'x-studio-test': 'synthetic-header' },
       temperature: 0.2, tools: true, vision: true, maxTokens: 4096,
@@ -233,3 +234,54 @@ test('SDK sees Studio conflicts as tool errors, rather than success text', async
     assert.ok(JSON.stringify(server.requests[1].body).includes('draft_conflict'), JSON.stringify(session.messages));
   } finally { session.dispose(); await server.close(); }
 });
+
+for (const terminal of ['completed', 'tool_round_trip', 'incomplete', 'failed', 'EOF']) {
+  test('ChatGPT plan: refreshed authorization and ' + terminal, async t => {
+    const server = await httpFixture('openaiResponses', (_, res) => {
+      if (terminal === 'completed') return respond('openaiResponses', res, false);
+      if (terminal === 'tool_round_trip') return respond('openaiResponses', res, server.requests.length === 1);
+      sse(res, { type: 'response.created', response: { id: 'resp_test', status: 'in_progress', output: [] } });
+      if (terminal !== 'EOF') sse(res, { type: 'response.' + terminal,
+        response: { id: 'resp_test', status: terminal, output: [],
+          incomplete_details: { reason: 'max_output_tokens' },
+          error: { code: 'usage_limit_reached', message: 'synthetic-rotated synthetic-key' } } });
+    });
+    const originalFetch = globalThis.fetch;
+    t.mock.method(globalThis, 'fetch', (input, init) => {
+      const url = new URL(input instanceof Request ? input.url : input);
+      assert.equal(url.origin, 'https://api.openai.com');
+      assert.equal(url.pathname, '/v1/responses');
+      return originalFetch(server.baseUrl + url.pathname, init);
+    });
+    let released = 0;
+    const created = await sessionFixture('openaiResponses', server, {
+      config: { chatGptPlan: true, baseUrl: 'https://api.openai.com/v1/',
+        headers: {}, body: { store: true, stream: false } },
+      acquireRequest: async () => Object.assign(() => { released++; }, { apiKey: 'synthetic-rotated' }),
+    });
+    try {
+      await created.session.prompt('synthetic request');
+      const last = created.session.messages.at(-1);
+      const successful = ['completed', 'tool_round_trip'].includes(terminal);
+      assert.equal(last.stopReason, successful ? 'stop' : 'error', last.errorMessage);
+      assert.equal(server.requests.length, terminal === 'tool_round_trip' ? 2 : 1);
+      assert.equal(server.requests[0].headers.authorization, 'Bearer synthetic-rotated');
+      assert.equal(server.requests[0].body.store, false);
+      assert.equal(server.requests[0].body.stream, true);
+      const body = server.requests[0].body;
+      for (const field of ['max_output_tokens', 'temperature', 'top_p', 'prompt_cache_retention'])
+        assert.equal(field in body, false, field);
+      assert.ok(body.input.every(item => item.role !== 'system'));
+      assert.ok(body.input.some(item => item.type === 'additional_tools' && item.tools.length > 0));
+      assert.ok(!body.tools?.some(tool => tool.type === 'function' || tool.type === 'tool_search'));
+      assert.equal(released, server.requests.length);
+      if (terminal === 'tool_round_trip') {
+        assert.ok(server.requests[1].body.input.some(item => item.type === 'function_call_output'));
+        assert.ok(server.requests[1].body.input.some(item => item.type === 'additional_tools'));
+      }
+      const history = await readFile(created.session.sessionFile, 'utf8');
+      assert.ok(!history.includes('synthetic-rotated'));
+      assert.ok(!history.includes('synthetic-key'));
+    } finally { await created.close(); await server.close(); }
+  });
+}

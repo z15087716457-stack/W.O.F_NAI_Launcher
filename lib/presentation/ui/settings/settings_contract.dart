@@ -1174,6 +1174,7 @@ class SettingsRequestLog {
     this.id,
     required this.at,
     required this.task,
+    this.taskLabel = '',
     required this.provider,
     required this.model,
     required this.ok,
@@ -1184,7 +1185,8 @@ class SettingsRequestLog {
   /// Stable history identity; null for summaries without an inspectable record.
   final String? id;
   final DateTime at;
-  final SettingsModelTask task;
+  final SettingsModelTask? task;
+  final String taskLabel;
   final String provider;
   final String model;
   final bool ok;

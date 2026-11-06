@@ -293,6 +293,26 @@ extension _ServiceOverview on _AiServiceEditorState {
   }
 
   Widget _connectionOverview(BuildContext context) {
+    if (_preset == ProviderPreset.chatgpt) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          TextField(
+            controller: _name,
+            enabled: !_busy,
+            decoration: InputDecoration(
+              labelText: context.l10n.modelConnection_name,
+            ),
+          ),
+          const SizedBox(height: 12),
+          ChatGptConnectionCard(
+            key: ValueKey(_providerId),
+            providerId: _vendorChanged ? null : _providerId,
+            onConnected: _fetchCatalog,
+          ),
+        ],
+      );
+    }
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
     final hasKey =

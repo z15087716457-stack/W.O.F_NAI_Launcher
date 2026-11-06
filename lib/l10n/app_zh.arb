@@ -11652,5 +11652,29 @@
   "set_agMcpTest": "测试连接",
   "set_agMcpJsonOne": "请一次导入一个 MCP 服务器。",
   "set_agMcpPending": "下轮生效",
-  "ag_tool_agent_manage": "管理 Agent"
+  "ag_tool_agent_manage": "管理 Agent",
+  "chatGpt_continue": "Continue with ChatGPT",
+  "chatGpt_addService": "添加并前往登录",
+  "chatGpt_connectionHint": "使用符合条件的 ChatGPT 套餐，无需 API Key。连接其他账号或工作区时，请再添加一个 ChatGPT 服务。",
+  "chatGpt_saveFirst": "请先保存此服务，再点击 Continue with ChatGPT。",
+  "chatGpt_usingPlan": "正在使用 ChatGPT 套餐",
+  "chatGpt_planDisabled": "已登录，但尚未启用套餐使用权限。请在用量管理中检查授权。",
+  "chatGpt_signedOut": "已退出登录",
+  "chatGpt_manageUsage": "管理用量",
+  "chatGpt_signOut": "退出登录",
+  "chatGpt_cancel": "取消",
+  "chatGpt_waiting": "请在浏览器中完成授权。",
+  "chatGpt_returnToStudio": "请返回 W.O.F NAI Studio 查看连接状态。",
+  "chatGpt_authFailed": "ChatGPT 连接失败（{code}），请尝试重新登录。",
+  "chatGpt_revokeUnconfirmed": "已在本机退出，未确认远端撤销成功；请在 ChatGPT 设置中断开此应用。",
+  "chatGpt_invalidRoute": "ChatGPT 套餐连接必须使用官方 Responses 地址，且不能附加自定义请求头。",
+  "chatGpt_inferenceFailed": "ChatGPT 请求失败，请在用量管理中检查套餐用量和授权。",
+  "chatGpt_incomplete": "ChatGPT 响应未完整结束，请重试。",
+  "@chatGpt_authFailed": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  }
 }

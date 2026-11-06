@@ -16,6 +16,10 @@ const adapters = {
 };
 const protectedFields = new Set(['messages', 'input', 'system', 'tools', 'tool_choice',
   'contents', 'systemInstruction', 'toolConfig', 'instructions', 'previous_response_id']);
+const chatGptUnsupportedFields = ['background', 'conversation', 'max_output_tokens',
+  'max_tool_calls', 'metadata', 'moderation', 'multi_agent', 'prompt',
+  'prompt_cache_retention', 'prompt_cache_options', 'safety_identifier', 'temperature',
+  'top_logprobs', 'top_p', 'truncation', 'user', 'previous_response_id'];
 
 export function endpointRoot(baseUrl, protocol) {
   const url = new URL(baseUrl);
@@ -90,10 +94,10 @@ export function publicModel(config) {
 }
 
 export function redactor(config) {
-  const secrets = [config.apiKey, ...(config.extraSecrets ?? []), ...Object.entries(config.headers ?? {})
+  return value => {
+    const secrets = [config.apiKey, ...(config.extraSecrets ?? []), ...Object.entries(config.headers ?? {})
     .filter(([key]) => /authorization|api.?key|token|cookie|secret/i.test(key))
     .map(([, value]) => value)].filter(value => typeof value === 'string' && value.length);
-  return value => {
     let json = JSON.stringify(value);
     for (const secret of secrets) json = json.split(JSON.stringify(secret).slice(1, -1)).join('[redacted]');
     return JSON.parse(json);
@@ -101,6 +105,8 @@ export function redactor(config) {
 }
 
 export async function createStudioModelRuntime(config, { acquireRequest, transformContext } = {}) {
+  if (config.chatGptPlan && (config.protocol !== 'openaiResponses' || config.baseUrl.replace(/\/+$/, '') !== 'https://api.openai.com/v1'))
+    throw new Error('Invalid ChatGPT plan endpoint');
   const spec = adapters[config.protocol];
   if (!spec || !config.modelId?.trim() || !config.providerId?.trim())
     throw new Error('Missing model or unsupported protocol');
@@ -113,6 +119,11 @@ export async function createStudioModelRuntime(config, { acquireRequest, transfo
     api: spec[0], baseUrl: endpointRoot(config.baseUrl, config.protocol),
     input: config.vision === true ? ['text', 'image'] : ['text'],
     reasoning: config.reasoning === true,
+    ...(config.chatGptPlan ? { compat: {
+      supportsMaxOutputTokens: false, supportsLongCacheRetention: false,
+      supportsMidConvoSystemMessages: true, supportsAdditionalTools: true,
+      supportsToolSearch: false,
+    } } : {}),
     // Explicit, visible fallbacks when the saved model/catalog has no limits.
     contextWindow: config.contextWindow ?? 32768, maxTokens: config.maxTokens ?? 4096,
     // CPA/custom-provider billing is not established by the upstream model catalog.
@@ -133,6 +144,10 @@ export async function createStudioModelRuntime(config, { acquireRequest, transfo
     // The host shares Studio's provider gate. Waiting for a slot is cancellable
     // and does not consume the HTTP timeout or start a provider request.
     const release = await acquireRequest?.(options.signal);
+    if (config.chatGptPlan && release?.apiKey && release.apiKey !== config.apiKey) {
+      config.extraSecrets = [...(config.extraSecrets ?? []), config.apiKey];
+      config.apiKey = release.apiKey;
+    }
     const timeout = new AbortController();
     const timer = setTimeout(() => timeout.abort(new Error('Provider request timed out')),
       (config.timeoutSeconds ?? 120) * 1000);
@@ -144,9 +159,23 @@ export async function createStudioModelRuntime(config, { acquireRequest, transfo
         ...(config.allowsSampling === false ? { temperature: undefined }
           : config.temperature == null ? {} : { temperature: config.temperature }),
         headers: { ...options.headers, ...config.headers },
+        onProviderStreamEvent: event => {
+          if (config.chatGptPlan && event.type === 'response.incomplete')
+            throw new Error('ChatGPT response incomplete. Check usage at https://chatgpt.com/settings/usage');
+          options.onProviderStreamEvent?.(event);
+        },
         onPayload: async payload => {
           const previous = await options.onPayload?.(payload, current) ?? payload;
           const result = mergeObjects(previous, patch);
+          if (config.chatGptPlan) {
+            for (const field of chatGptUnsupportedFields) delete result[field];
+            result.store = false;
+            result.stream = true;
+            // Pi uses system for non-reasoning models. Plan usage requires
+            // developer messages, including when reasoning is switched off.
+            result.input = result.input.map(item => item.role === 'system'
+              ? { ...item, role: 'developer' } : item);
+          }
           if (spec[0].startsWith('openai') || spec[0] === 'anthropic-messages') result.stream = true;
           // Explicit compaction budgets must survive saved general output overrides.
           if (options.maxTokens != null) {

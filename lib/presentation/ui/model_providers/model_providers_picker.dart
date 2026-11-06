@@ -53,6 +53,9 @@ class _ProvidersPickerState extends State<ProvidersPicker> {
           p,
     ];
     final sel = _sel ?? shown.firstOrNull?.id;
+    final usesAccount =
+        widget.presets.where((p) => p.id == sel).firstOrNull?.usesAccount ??
+        false;
     String groupName(ProviderGroup g) => switch (g) {
       ProviderGroup.domestic => l.mp_groupDomesticFull,
       ProviderGroup.international => l.mp_groupInternationalFull,
@@ -290,7 +293,9 @@ class _ProvidersPickerState extends State<ProvidersPicker> {
                         children: [
                           Expanded(
                             child: Text(
-                              l.mp_pickerFoot,
+                              usesAccount
+                                  ? l.chatGpt_connectionHint
+                                  : l.mp_pickerFoot,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                               style: UiText.sans(12, color: c.muted),
@@ -304,7 +309,9 @@ class _ProvidersPickerState extends State<ProvidersPicker> {
                           ),
                           SettingsBtn(
                             key: const Key('mp-picker-next'),
-                            label: l.mp_pickerNext,
+                            label: usesAccount
+                                ? l.chatGpt_addService
+                                : l.mp_pickerNext,
                             small: true,
                             tone: SettingsBtnTone.primary,
                             onTap: sel == null

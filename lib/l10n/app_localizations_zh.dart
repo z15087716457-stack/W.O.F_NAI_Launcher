@@ -21733,6 +21733,62 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ag_tool_agent_manage => '管理 Agent';
+
+  @override
+  String get chatGpt_continue => 'Continue with ChatGPT';
+
+  @override
+  String get chatGpt_addService => '添加并前往登录';
+
+  @override
+  String get chatGpt_connectionHint =>
+      '使用符合条件的 ChatGPT 套餐，无需 API Key。连接其他账号或工作区时，请再添加一个 ChatGPT 服务。';
+
+  @override
+  String get chatGpt_saveFirst => '请先保存此服务，再点击 Continue with ChatGPT。';
+
+  @override
+  String get chatGpt_usingPlan => '正在使用 ChatGPT 套餐';
+
+  @override
+  String get chatGpt_planDisabled => '已登录，但尚未启用套餐使用权限。请在用量管理中检查授权。';
+
+  @override
+  String get chatGpt_signedOut => '已退出登录';
+
+  @override
+  String get chatGpt_manageUsage => '管理用量';
+
+  @override
+  String get chatGpt_signOut => '退出登录';
+
+  @override
+  String get chatGpt_cancel => '取消';
+
+  @override
+  String get chatGpt_waiting => '请在浏览器中完成授权。';
+
+  @override
+  String get chatGpt_returnToStudio => '请返回 W.O.F NAI Studio 查看连接状态。';
+
+  @override
+  String chatGpt_authFailed(String code) {
+    return 'ChatGPT 连接失败（$code），请尝试重新登录。';
+  }
+
+  @override
+  String get chatGpt_revokeUnconfirmed =>
+      '已在本机退出，未确认远端撤销成功；请在 ChatGPT 设置中断开此应用。';
+
+  @override
+  String get chatGpt_invalidRoute =>
+      'ChatGPT 套餐连接必须使用官方 Responses 地址，且不能附加自定义请求头。';
+
+  @override
+  String get chatGpt_inferenceFailed => 'ChatGPT 请求失败，请在用量管理中检查套餐用量和授权。';
+
+  @override
+  String get chatGpt_incomplete => 'ChatGPT 响应未完整结束，请重试。';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -43464,4 +43520,60 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get ag_tool_agent_manage => '管理 Agent';
+
+  @override
+  String get chatGpt_continue => 'Continue with ChatGPT';
+
+  @override
+  String get chatGpt_addService => '新增並前往登入';
+
+  @override
+  String get chatGpt_connectionHint =>
+      '使用符合條件的 ChatGPT 套餐，無需 API Key。連線其他帳號或工作區時，請再新增一個 ChatGPT 服務。';
+
+  @override
+  String get chatGpt_saveFirst => '請先儲存此服務，再點選 Continue with ChatGPT。';
+
+  @override
+  String get chatGpt_usingPlan => '正在使用 ChatGPT 套餐';
+
+  @override
+  String get chatGpt_planDisabled => '已登入，但尚未啟用套餐使用權限。請在用量管理中檢查授權。';
+
+  @override
+  String get chatGpt_signedOut => '已登出';
+
+  @override
+  String get chatGpt_manageUsage => '管理用量';
+
+  @override
+  String get chatGpt_signOut => '登出';
+
+  @override
+  String get chatGpt_cancel => '取消';
+
+  @override
+  String get chatGpt_waiting => '請在瀏覽器中完成授權。';
+
+  @override
+  String get chatGpt_returnToStudio => '請返回 W.O.F NAI Studio 檢視連線狀態。';
+
+  @override
+  String chatGpt_authFailed(String code) {
+    return 'ChatGPT 連線失敗（$code），請嘗試重新登入。';
+  }
+
+  @override
+  String get chatGpt_revokeUnconfirmed =>
+      '已在本機退出，未確認遠端復原成功；請在 ChatGPT 設定中斷開此應用。';
+
+  @override
+  String get chatGpt_invalidRoute =>
+      'ChatGPT 套餐連線必須使用官方 Responses 地址，且不能附加自訂請求標頭。';
+
+  @override
+  String get chatGpt_inferenceFailed => 'ChatGPT 請求失敗，請在用量管理中檢查套餐用量和授權。';
+
+  @override
+  String get chatGpt_incomplete => 'ChatGPT 回應未完整結束，請重試。';
 }

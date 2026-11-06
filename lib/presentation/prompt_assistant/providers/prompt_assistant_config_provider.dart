@@ -6,6 +6,7 @@ import '../../../core/constants/storage_keys.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/storage/local_storage_service.dart';
 import '../../../core/storage/secure_storage_service.dart';
+import '../../../core/auth/chatgpt_auth_service.dart';
 import '../models/prompt_assistant_models.dart';
 import '../models/model_request_overrides.dart';
 import '../models/prompt_task_definitions.dart';
@@ -127,6 +128,13 @@ class PromptAssistantConfigNotifier
   }
 
   Future<String?> getProviderApiKey(String providerId) async {
+    final provider = state.providers
+        .where((p) => p.id == providerId)
+        .firstOrNull;
+    if (provider?.usesChatGptPlan == true) {
+      provider!.validateChatGptRoute();
+      return _ref.read(chatGptAuthServiceProvider).accessToken(providerId);
+    }
     return _secure.getPromptAssistantApiKey(providerId);
   }
 
@@ -453,6 +461,7 @@ class PromptAssistantConfigNotifier
     String providerId,
     List<String> ids, {
     bool manual = false,
+    Map<String, String> displayNames = const {},
   }) async {
     _catalog ??=
         ModelCatalogRepository.cached ?? await ModelCatalogRepository.load();
@@ -473,7 +482,7 @@ class PromptAssistantConfigNotifier
           ModelConfig(
             providerId: providerId,
             name: id,
-            displayName: id,
+            displayName: displayNames[id] ?? id,
             source: manual ? ModelSource.manual : ModelSource.api,
           ),
         ),

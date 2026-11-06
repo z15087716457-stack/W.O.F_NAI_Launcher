@@ -22056,4 +22056,62 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get ag_tool_agent_manage => 'Agent 관리';
+
+  @override
+  String get chatGpt_continue => 'Continue with ChatGPT';
+
+  @override
+  String get chatGpt_addService => '추가 후 로그인';
+
+  @override
+  String get chatGpt_connectionHint =>
+      '이용 가능한 ChatGPT 요금제를 사용합니다. API 키는 필요 없습니다. 다른 계정이나 워크스페이스를 연결하려면 ChatGPT 서비스를 추가하세요.';
+
+  @override
+  String get chatGpt_saveFirst => '먼저 서비스를 저장한 후 ChatGPT에 연결하세요.';
+
+  @override
+  String get chatGpt_usingPlan => 'ChatGPT 요금제 사용 중';
+
+  @override
+  String get chatGpt_planDisabled =>
+      '로그인했지만 요금제 사용이 허용되지 않았습니다. 사용량 관리에서 확인하세요.';
+
+  @override
+  String get chatGpt_signedOut => '로그아웃됨';
+
+  @override
+  String get chatGpt_manageUsage => '사용량 관리';
+
+  @override
+  String get chatGpt_signOut => '로그아웃';
+
+  @override
+  String get chatGpt_cancel => '취소';
+
+  @override
+  String get chatGpt_waiting => '브라우저에서 인증을 완료하세요.';
+
+  @override
+  String get chatGpt_returnToStudio => 'W.O.F NAI Studio로 돌아가 연결 상태를 확인하세요.';
+
+  @override
+  String chatGpt_authFailed(String code) {
+    return 'ChatGPT 연결 실패 ($code). 다시 로그인하세요.';
+  }
+
+  @override
+  String get chatGpt_revokeUnconfirmed =>
+      '로컬에서 로그아웃했습니다. 원격 인증 해제는 확인하지 못했습니다. ChatGPT 설정에서 앱 연결을 해제하세요.';
+
+  @override
+  String get chatGpt_invalidRoute =>
+      'ChatGPT 요금제 연결은 공식 Responses 주소를 사용하며 사용자 지정 헤더를 지원하지 않습니다.';
+
+  @override
+  String get chatGpt_inferenceFailed =>
+      'ChatGPT 요청이 실패했습니다. 요금제 사용량과 권한을 확인하세요.';
+
+  @override
+  String get chatGpt_incomplete => 'ChatGPT 응답이 완료되지 않았습니다. 다시 시도하세요.';
 }

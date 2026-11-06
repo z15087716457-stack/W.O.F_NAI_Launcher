@@ -17,6 +17,7 @@ class NaiAgentModelConnection {
   NaiAgentModelConnection(
     this._private, {
     this.providerName,
+    this.refreshApiKey,
     NaiAgentModelConnection Function(String)? reasoningOverride,
     List<String> reasoningEfforts = const [],
   }) : _reasoningOverride = reasoningOverride,
@@ -26,6 +27,7 @@ class NaiAgentModelConnection {
   final List<String> _reasoningEfforts;
   bool get allowsImages => _private['vision'] == true;
   final String? providerName;
+  final Future<String?> Function()? refreshApiKey;
   NaiAgentVisionAccess get visionAccess =>
       NaiAgentVisionAccess(providerName: providerName);
   bool supportsReasoningEffort(String effort) =>
@@ -96,7 +98,9 @@ NaiAgentModelConnection mapNaiAgentModel(
   ProviderConfig provider,
   ModelConfig model, {
   String? apiKey,
+  Future<String?> Function()? refreshApiKey,
 }) {
+  provider.validateChatGptRoute();
   if (!provider.enabled ||
       model.providerId != provider.id ||
       model.isPlaceholder) {
@@ -112,6 +116,9 @@ NaiAgentModelConnection mapNaiAgentModel(
   if (error != null) throw FormatException(error);
   final overrides = model.requestOverrides;
   if (overrides != null) {
+    if (provider.usesChatGptPlan && overrides.headers.isNotEmpty) {
+      throw StateError('ChatGPT plan connections do not accept custom headers');
+    }
     final error = overrides.validate(model.name);
     if (error != null) throw FormatException(error);
   }
@@ -142,6 +149,7 @@ NaiAgentModelConnection mapNaiAgentModel(
           ? 'https://gen.pollinations.ai/v1'
           : provider.baseUrl,
       'apiKey': apiKey,
+      'chatGptPlan': provider.usesChatGptPlan,
       'headers': promptAssistantHeaders(provider, {}, model: model),
       'body': overrides?.body ?? const {},
       'payloadParameters': payload,
@@ -165,6 +173,7 @@ NaiAgentModelConnection mapNaiAgentModel(
       'maxConcurrentRequests': provider.maxConcurrentRequests.clamp(1, 20),
     },
     providerName: provider.name,
+    refreshApiKey: refreshApiKey,
     reasoningEfforts: naiAgentReasoningEfforts(provider, model),
     reasoningOverride: (effort) {
       if (!naiAgentReasoningEfforts(provider, model).contains(effort)) {
@@ -179,6 +188,7 @@ NaiAgentModelConnection mapNaiAgentModel(
           requestOverrides: _reasoningRequestOverrides(model),
         ),
         apiKey: apiKey,
+        refreshApiKey: refreshApiKey,
       );
     },
   );
@@ -223,6 +233,20 @@ final naiAgentModelResolverProvider = Provider<NaiAgentModelResolver>((ref) {
       provider.copyWith(requestHeaders: headers),
       loaded,
       apiKey: apiKey,
+      refreshApiKey: provider.usesChatGptPlan
+          ? () async {
+              final current = ref
+                  .read(promptAssistantConfigProvider)
+                  .providers
+                  .where((p) => p.id == providerId)
+                  .firstOrNull;
+              if (current?.usesChatGptPlan != true ||
+                  current?.enabled != true) {
+                throw StateError('ChatGPT connection is no longer enabled');
+              }
+              return notifier.getProviderApiKey(providerId);
+            }
+          : null,
     );
   };
 });

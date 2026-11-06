@@ -7,6 +7,7 @@ import '../../../core/nai_agent/generation_tools.dart';
 import '../../../core/utils/localization_extension.dart';
 import 'nai_agent_model_provider.dart';
 import 'nai_agent_studio_provider.dart';
+import '../proxy_settings_provider.dart';
 
 typedef NaiAgentSessionStarter =
     Future<PiHostClient> Function({
@@ -90,6 +91,8 @@ final naiAgentSessionStarterProvider = Provider<NaiAgentSessionStarter>((ref) {
       owner: NaiAgentConversationOwner(workspaceId, chatId ?? workspaceId),
     );
     final client = await PiHostClient.start(
+      proxyAddress: ref.read(currentProxyAddressProvider),
+      refreshApiKey: model.refreshApiKey,
       nodeExecutable: nodeExecutable,
       hostScript: hostScript,
       workspaceId: workspaceId,

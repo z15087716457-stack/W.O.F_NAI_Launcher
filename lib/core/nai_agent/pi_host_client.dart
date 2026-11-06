@@ -16,6 +16,7 @@ class PiHostClient {
     this._providerId,
     this._requestLimit,
     this.visionAccess,
+    this.refreshApiKey,
   ) {
     _stdout = _process.stdout
         .transform(utf8.decoder)
@@ -31,6 +32,7 @@ class PiHostClient {
   final String _providerId;
   final int _requestLimit;
   final NaiAgentVisionAccess visionAccess;
+  final Future<String?> Function()? refreshApiKey;
   final _extensionEvents = <Map<String, dynamic>>[];
   late final StreamController<Map<String, dynamic>> _events =
       StreamController<Map<String, dynamic>>.broadcast(
@@ -71,6 +73,8 @@ class PiHostClient {
     required Map<String, dynamic> privateModelConfig,
     required NaiAgentToolExecutor executeTool,
     NaiAgentVisionAccess visionAccess = const NaiAgentVisionAccess(),
+    Future<String?> Function()? refreshApiKey,
+    String? proxyAddress,
     Directory? sessionDirectory,
     File? sessionFile,
     String? sessionName,
@@ -92,7 +96,10 @@ class PiHostClient {
       nodeExecutable,
       [hostScript],
       workingDirectory: File(hostScript).parent.path,
-      environment: nodeRuntimeEnvironment(nodeExecutable),
+      environment: piHostEnvironment(
+        nodeExecutable,
+        proxyAddress: proxyAddress,
+      ),
       runInShell: false,
     );
     final client = PiHostClient._(
@@ -102,6 +109,7 @@ class PiHostClient {
       providerId,
       (privateModelConfig['maxConcurrentRequests'] as int? ?? 1).clamp(1, 20),
       visionAccess,
+      refreshApiKey,
     );
     try {
       final ready = await client
@@ -323,9 +331,19 @@ class PiHostClient {
         return;
       }
       _releases[id] = release;
-      _send({'type': 'permit_result', 'requestId': id});
+      final key = await refreshApiKey?.call();
+      if (_closed || token.isCancelled) {
+        _releases.remove(id)?.call();
+        return;
+      }
+      _send({
+        'type': 'permit_result',
+        'requestId': id,
+        if (key != null) 'apiKey': key,
+      });
       _events.add({'type': 'request_started', 'requestId': id});
-    } on ModelRequestCancelled {
+    } catch (_) {
+      _releases.remove(id)?.call();
       if (!_closed) {
         _send({'type': 'permit_result', 'requestId': id, 'error': true});
       }

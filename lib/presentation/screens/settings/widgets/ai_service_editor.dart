@@ -14,6 +14,9 @@ import '../../../prompt_assistant/services/model_catalog_repository.dart';
 import '../../../prompt_assistant/services/provider_model_list_cache.dart';
 import '../../../prompt_assistant/services/prompt_assistant_service.dart';
 import 'compact_service_connection.dart';
+import 'chatgpt_connection_card.dart';
+import 'package:dio/dio.dart';
+import '../../../prompt_assistant/services/provider_adapters/openai_responses_adapter.dart';
 import 'model_configuration_card.dart';
 import 'model_draft_save_controller.dart';
 import 'model_management_widgets.dart' show interfaceIcon;
@@ -71,6 +74,7 @@ class _AiServiceEditorState extends ConsumerState<AiServiceEditor> {
   final _requestDrafts = <String, ModelRequestDraft>{};
   final _requestInputErrors = <String, String?>{};
   List<String> _catalog = [];
+  Map<String, String> _chatGptModelNames = {};
   ModelCatalogRepository _localCatalog =
       ModelCatalogRepository.cached ?? ModelCatalogRepository.empty;
   ModelCatalogEntry? _catalogDetails(String id) =>
@@ -81,7 +85,7 @@ class _AiServiceEditorState extends ConsumerState<AiServiceEditor> {
     ModelConfig(
       providerId: _providerId ?? 'draft',
       name: name,
-      displayName: name,
+      displayName: _chatGptModelNames[name] ?? name,
       source: source,
       customFields: const {},
     ),
@@ -380,9 +384,22 @@ class _AiServiceEditorState extends ConsumerState<AiServiceEditor> {
       final headers = Map<String, String>.from(_headers);
       final key = await _effectiveKey();
       if (!mounted || connection != _catalogConnection) return;
-      final names = await ref
-          .read(promptAssistantServiceProvider)
-          .fetchModelsForDraft(provider, key, headers);
+      final List<String> names;
+      if (provider.usesChatGptPlan) {
+        provider.validateChatGptRoute();
+        final response = await ref
+            .read(promptAssistantDioProvider)
+            .get<dynamic>(
+              'https://api.openai.com/v1/models',
+              options: Options(headers: {'Authorization': 'Bearer $key'}),
+            );
+        _chatGptModelNames = chatGptModels(response.data);
+        names = _chatGptModelNames.keys.toList();
+      } else {
+        names = await ref
+            .read(promptAssistantServiceProvider)
+            .fetchModelsForDraft(provider, key, headers);
+      }
       if (!mounted || connection != _catalogConnection) return;
       setState(() {
         _catalog = names;

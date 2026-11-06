@@ -519,7 +519,9 @@ class _SettingsModelsPageState extends State<SettingsModelsPage> {
                 style: UiText.mono(12, color: c.muted),
               ),
               Text(
-                SettingsFormat.task(context, r.task),
+                r.task == null
+                    ? r.taskLabel
+                    : SettingsFormat.task(context, r.task!),
                 style: UiText.sans(12.5, color: c.ink),
               ),
               Text(

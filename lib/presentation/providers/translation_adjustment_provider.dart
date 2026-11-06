@@ -13,6 +13,7 @@ import 'nai_agent/nai_agent_model_provider.dart';
 import 'nai_agent/nai_agent_workspace_provider.dart';
 import 'pill_workspace_provider.dart';
 import 'prompt_translation_provider.dart';
+import 'proxy_settings_provider.dart';
 
 /// Cheap editor decoration state. Reading this never creates the Agent controller.
 class TranslationReferences {
@@ -92,6 +93,8 @@ final translationAdjustmentFactoryProvider = Provider<TranslationAdjustmentFacto
     final directory = await Directory.systemTemp.createTemp('wof-translation-');
     try {
       final host = await PiHostClient.start(
+        proxyAddress: ref.read(currentProxyAddressProvider),
+        refreshApiKey: model.refreshApiKey,
         nodeExecutable: paths.node,
         hostScript: paths.host,
         workspaceId:

@@ -510,7 +510,11 @@ class _MiddleState extends State<_Middle> {
           label: p.testing ? l.mp_testing : l.mp_test,
           glyph: UiGlyphs.bolt,
           small: true,
-          onTap: p.testing || !p.enabled
+          onTap:
+              p.testing ||
+                  !p.enabled ||
+                  (p.account != null &&
+                      (!p.account!.planEnabled || p.account!.busy))
               ? null
               : () => actions.onTest(p.id, s, draft?.apiKey),
         ),
@@ -754,7 +758,10 @@ class _MiddleState extends State<_Middle> {
             ),
           ],
           const SizedBox(height: 16),
-          connection,
+          if (p.account case final account?)
+            _AccountConnection(id: p.id, account: account, actions: actions)
+          else
+            connection,
           const SizedBox(height: 18),
           _SectionTitle(title: l.mp_request, sub: l.mp_requestSub),
           const SizedBox(height: 12),
@@ -823,6 +830,80 @@ class _MiddleState extends State<_Middle> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _AccountConnection extends StatelessWidget {
+  const _AccountConnection({
+    required this.id,
+    required this.account,
+    required this.actions,
+  });
+  final String id;
+  final ProviderAccount account;
+  final ProvidersActions actions;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final c = context.ui;
+    return Column(
+      key: const Key('mp-chatgpt-connection'),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: 10,
+      children: [
+        Text(l.chatGpt_connectionHint, style: UiText.sans(12, color: c.muted)),
+        if (account.email != null)
+          Text(account.email!, style: UiText.sans(13, color: c.ink)),
+        Text(
+          account.signedIn
+              ? account.planEnabled
+                    ? l.chatGpt_usingPlan
+                    : l.chatGpt_planDisabled
+              : l.chatGpt_signedOut,
+          style: UiText.sans(12, color: c.muted),
+        ),
+        if (account.error.isNotEmpty)
+          Text(account.error, style: UiText.sans(12, color: c.error)),
+        if (account.busy) const LinearProgressIndicator(minHeight: 2),
+        if (account.canCancel)
+          Text(l.chatGpt_waiting, style: UiText.sans(12, color: c.muted)),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            SettingsBtn(
+              key: const Key('mp-chatgpt-sign-in'),
+              label: l.chatGpt_continue,
+              tone: SettingsBtnTone.primary,
+              small: true,
+              onTap: account.busy ? null : () => actions.onSignIn(id),
+            ),
+            if (account.canCancel)
+              SettingsBtn(
+                key: const Key('mp-chatgpt-cancel'),
+                label: l.chatGpt_cancel,
+                small: true,
+                onTap: () => actions.onCancelSignIn(id),
+              ),
+            if (account.signedIn)
+              SettingsBtn(
+                key: const Key('mp-chatgpt-sign-out'),
+                label: l.chatGpt_signOut,
+                small: true,
+                onTap: account.busy ? null : () => actions.onSignOut(id),
+              ),
+            SettingsBtn(
+              key: const Key('mp-chatgpt-usage'),
+              label: l.chatGpt_manageUsage,
+              small: true,
+              tone: SettingsBtnTone.ghost,
+              onTap: () => actions.onManageUsage(id),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
@@ -1026,43 +1107,45 @@ class _RequestStrip extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 14),
-        const ProviderDashLine(),
-        const SizedBox(height: 10),
-        Row(
-          spacing: 8,
-          children: [
-            Text(l.mp_headers, style: UiText.sans(12, color: c.muted)),
-            if (s.headers.isEmpty)
-              Text(l.mp_none, style: UiText.sans(12, color: c.faint))
-            else
-              UiMini('${s.headers.length}'),
-            const Spacer(),
-            SettingsBtn(
-              key: const Key('mp-add-header'),
-              label: l.mp_addHeader,
-              glyph: UiGlyphs.plus,
-              small: true,
-              tone: SettingsBtnTone.ghost,
-              onTap: () => edit(
-                (x) => x.copyWith(
-                  headers: [...x.headers, const ProviderKeyValue('', '')],
+        if (item.account == null) ...[
+          const ProviderDashLine(),
+          const SizedBox(height: 10),
+          Row(
+            spacing: 8,
+            children: [
+              Text(l.mp_headers, style: UiText.sans(12, color: c.muted)),
+              if (s.headers.isEmpty)
+                Text(l.mp_none, style: UiText.sans(12, color: c.faint))
+              else
+                UiMini('${s.headers.length}'),
+              const Spacer(),
+              SettingsBtn(
+                key: const Key('mp-add-header'),
+                label: l.mp_addHeader,
+                glyph: UiGlyphs.plus,
+                small: true,
+                tone: SettingsBtnTone.ghost,
+                onTap: () => edit(
+                  (x) => x.copyWith(
+                    headers: [...x.headers, const ProviderKeyValue('', '')],
+                  ),
                 ),
               ),
+            ],
+          ),
+          if (s.headers.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            ProviderKeyValues(
+              key: const Key('mp-headers'),
+              keyPrefix: 'mp-header',
+              items: s.headers,
+              errors: {
+                for (final (i, _) in s.headers.indexed)
+                  if (errs.contains('header:$i')) i,
+              },
+              onChanged: (v) => edit((x) => x.copyWith(headers: v)),
             ),
           ],
-        ),
-        if (s.headers.isNotEmpty) ...[
-          const SizedBox(height: 8),
-          ProviderKeyValues(
-            key: const Key('mp-headers'),
-            keyPrefix: 'mp-header',
-            items: s.headers,
-            errors: {
-              for (final (i, _) in s.headers.indexed)
-                if (errs.contains('header:$i')) i,
-            },
-            onChanged: (v) => edit((x) => x.copyWith(headers: v)),
-          ),
         ],
       ],
     );

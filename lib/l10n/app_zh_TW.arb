@@ -12247,5 +12247,29 @@
   "set_agMcpTest": "測試連線",
   "set_agMcpJsonOne": "請一次匯入一個 MCP 伺服器。",
   "set_agMcpPending": "下輪生效",
-  "ag_tool_agent_manage": "管理 Agent"
+  "ag_tool_agent_manage": "管理 Agent",
+  "chatGpt_continue": "Continue with ChatGPT",
+  "chatGpt_addService": "新增並前往登入",
+  "chatGpt_connectionHint": "使用符合條件的 ChatGPT 套餐，無需 API Key。連線其他帳號或工作區時，請再新增一個 ChatGPT 服務。",
+  "chatGpt_saveFirst": "請先儲存此服務，再點選 Continue with ChatGPT。",
+  "chatGpt_usingPlan": "正在使用 ChatGPT 套餐",
+  "chatGpt_planDisabled": "已登入，但尚未啟用套餐使用權限。請在用量管理中檢查授權。",
+  "chatGpt_signedOut": "已登出",
+  "chatGpt_manageUsage": "管理用量",
+  "chatGpt_signOut": "登出",
+  "chatGpt_cancel": "取消",
+  "chatGpt_waiting": "請在瀏覽器中完成授權。",
+  "chatGpt_returnToStudio": "請返回 W.O.F NAI Studio 檢視連線狀態。",
+  "chatGpt_authFailed": "ChatGPT 連線失敗（{code}），請嘗試重新登入。",
+  "chatGpt_revokeUnconfirmed": "已在本機退出，未確認遠端復原成功；請在 ChatGPT 設定中斷開此應用。",
+  "chatGpt_invalidRoute": "ChatGPT 套餐連線必須使用官方 Responses 地址，且不能附加自訂請求標頭。",
+  "chatGpt_inferenceFailed": "ChatGPT 請求失敗，請在用量管理中檢查套餐用量和授權。",
+  "chatGpt_incomplete": "ChatGPT 回應未完整結束，請重試。",
+  "@chatGpt_authFailed": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  }
 }

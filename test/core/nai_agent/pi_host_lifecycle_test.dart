@@ -59,6 +59,7 @@ void main() {
     File? resume,
     String provider = 'lifecycle-test',
     bool translation = false,
+    Future<String?> Function()? refreshApiKey,
   }) async {
     final workspace = Directory('${root.path}/$id');
     final client = await PiHostClient.start(
@@ -91,6 +92,7 @@ void main() {
         'nextSuggestion': false,
       },
       executeTool: (_, __, ___) async => {'content': []},
+      refreshApiKey: refreshApiKey,
     );
     clients.add(client);
     return client;
@@ -174,6 +176,35 @@ void main() {
       expect(bodies, hasLength(1));
       expect(gate.active, 0);
       await subscription.cancel();
+    },
+  );
+
+  test(
+    'failed credential refresh releases the permit and dispatches no HTTP request',
+    () async {
+      var failRefresh = true;
+      var refreshes = 0;
+      final client = await start(
+        'refresh',
+        provider: 'refresh-test',
+        refreshApiKey: () async {
+          refreshes++;
+          if (failRefresh) throw StateError('synthetic-secret-must-not-escape');
+          return 'synthetic';
+        },
+      );
+      final failed = await client.prompt('first');
+      expect(bodies, isEmpty);
+      expect(ModelRequestGates.shared.forProvider('refresh-test').active, 0);
+      expect(
+        jsonEncode(failed),
+        isNot(contains('synthetic-secret-must-not-escape')),
+      );
+      failRefresh = false;
+      await client.prompt('retry');
+      expect(refreshes, 2);
+      expect(bodies, hasLength(1));
+      expect(ModelRequestGates.shared.forProvider('refresh-test').active, 0);
     },
   );
 
