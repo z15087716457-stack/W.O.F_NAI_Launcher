@@ -188,7 +188,7 @@ See [FAQ](docs/guide/en/faq.md) for more answers.
 | Guide | Contents |
 | --- | --- |
 | [Quick start](docs/guide/en/quick-start.md) | Installation, sign-in, first generation, data locations |
-| [Blocks](docs/guide/en/blocks.md) | Fixed / Sequential / Random, locking, weight rules, common uses |
+| [Blocks](docs/guide/en/blocks.md) | Temporary blocks, Fixed / Sequential / Random, locking, weight rules, common uses |
 | [Style evolution](docs/guide/en/style-explore.md) | Drawing candidates, starting evolution, pairwise comparison, saving as blocks |
 | [Translation blocks](docs/guide/en/translation.md) | Translation model setup, bilingual reading, switching and restoring |
 | [Tag expansion and Tag Wiki](docs/guide/en/tags-wiki.md) | Local tag search, related tags, offline wiki |

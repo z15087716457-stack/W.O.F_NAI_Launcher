@@ -19,6 +19,8 @@ The middle of the generation page is an infinitely pannable canvas, with results
 - Choose a display background for transparent images (checkerboard, solid color and more). It affects only the display, not the image file.
 - “Canvas display” lets you toggle filling the view, reduced motion and locking the canvas camera.
 
+Generation history uses **Linked preview** by default. Click a thumbnail to select that image on the canvas, or double-click to open its details. **Zoom to fill** is on by default and can enlarge small images when you focus on one image. Saved preferences for both settings still apply. The image viewer has a separate [Fit mode](gallery.md#local-gallery).
+
 ## Visual channel
 
 <img src="../../images/readme/en/channel.webp" alt="Visual channel" width="100%">

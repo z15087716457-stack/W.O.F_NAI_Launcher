@@ -28,9 +28,11 @@ Open “Settings → Semantic search” and complete these steps in order:
    - EmbeddingGemma 2 (about 1.5 GB), for understanding text and images.
    - Qwen3-Reranker-0.6B (about 1.2 GB), for reranking text results.
    Downloaded files are verified individually.
-3. **Enable RAG**, choose the content to index under “Sources,” then click “Build index.” You will see a preview of how much content will be included before confirming.
+3. **Enable RAG**, choose what to include under **Sources**, and select **Build index**. For the first index, review the preview and select **Start**.
 
-You can pause indexing at any time; completed parts are usable immediately. New content is updated incrementally afterward. Clearing a source’s index removes only derived data; original content and models stay.
+You can pause indexing at any time, and completed parts are usable immediately. After the first build, sources update incrementally, including changes to gallery images or NAI parameters. Clearing a source’s index removes the derived data and keeps the originals and models.
+
+In the Local Gallery’s RAG menu, choose **Visual content only** and try searching for “neon reflections on a rainy street at night.” If you have a sample image, use **Choose an image to find similar**.
 
 ## Settings
 

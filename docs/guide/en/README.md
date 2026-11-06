@@ -5,7 +5,7 @@
 | Guide | Contents |
 | --- | --- |
 | [Quick start](quick-start.md) | Installation, sign-in, first generation, where your data lives |
-| [Blocks](blocks.md) | Fixed / Sequential / Random, locking, weight rules, common uses |
+| [Blocks](blocks.md) | Temporary blocks, Fixed / Sequential / Random, locking, weight rules, common uses |
 | [Style evolution](style-explore.md) | Drawing candidates, starting evolution, pairwise comparison, saving as blocks |
 | [Translation blocks](translation.md) | Translation model setup, bilingual reading, switching and restoring |
 | [Tag expansion and Tag Wiki](tags-wiki.md) | Local tag search, related tags, offline wiki |

@@ -28,6 +28,12 @@ A few examples:
 
 Available Studio tools include: Read current draft, View image, Edit prompt, Prompt set, Draft snapshot, Search wiki, Look up tags, Find blocks, Edit blocks, Read settings / Change settings, Style explore, Prepare generation, Generate images, Cancel generation, Search gallery, Organize gallery, Semantic search, Set references, Reference library, Image tool, and Variations / enhance. It can also read and write workspace files, run commands and ask you questions when needed.
 
+### Organize a prompt with temporary blocks
+
+> Split the current main prompt into temporary blocks for the character, outfit and scene. Preserve the original text, separators and weights.
+
+Then ask the Agent to edit just one block, or open it and edit it yourself. See [Temporary blocks](blocks.md#temporary-blocks) for saving and restoring.
+
 ## Cards in the conversation
 
 Agent does not make changes behind your back. Here are the kinds of cards you will see in the conversation.
@@ -128,7 +134,7 @@ Skills are “instruction manuals” for Agent, read only when needed:
 - Write your own skills in `agent-data/skills/` (global) or a workspace’s `skills/` folder. For matching names, workspace skills take priority, followed by global, then built-in.
 - Enable or disable each skill, or set it to “Manual only” and invoke it with `/skill:name` in the input field.
 
-Use `@` in the input field to reference files or images, and `/` to invoke skills.
+Use `@` in the input field to reference files or images, and `/` to open the list of commands and skills. In a long chat, send `/compact` to summarize earlier turns and make room for the conversation to continue. You can draft your next message while **Compacting…** is shown.
 
 ## MCP and CodeMode
 

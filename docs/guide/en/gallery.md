@@ -38,6 +38,8 @@ Open “Local Gallery” in the left navigation (`Ctrl+2`).
 
 Common controls: click to select, double-click / Space / Enter to view large, arrow keys to switch, `Delete` to delete, `Ctrl+A` to select all, `Esc` to leave multi-select.
 
+The image viewer defaults to **Fit** when you open it or switch images. Large images scale down proportionally, and small images scale up to at most 120%. Select **100%** in the zoom menu to view at actual pixel size.
+
 ## Online Gallery
 
 <img src="../../images/readme/en/online.webp" alt="Online Gallery" width="100%">

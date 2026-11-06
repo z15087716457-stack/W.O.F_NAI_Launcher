@@ -30,6 +30,8 @@ Click “Translate” on the prompt toolbar. When translation finishes, each Eng
 | “Translate new text” in the translation menu | Translate only text added later |
 | “Restore all translation blocks to original text” | Remove all translation blocks and return to plain text |
 
+A [temporary block](blocks.md#temporary-blocks) can hold a translation of the whole block or several translated passages. Open the block and left-click or middle-click a passage to switch between the original and the translation. Generation uses the original text.
+
 ## Translation block editor
 
 Left-click a translation to open the editor, which shows the original and the content under “Generation”:

@@ -23,6 +23,15 @@ A block can contain multiple items (for example, an artist pool with 30 artists)
 
 Pressing Enter or a comma while entering content creates an item; pasted text is automatically split at commas and line breaks. To keep a passage containing commas as **one item**, wrap it in `1::…::`, for example `1::sunrise, on a hill, wind::` (a weight of 1 leaves the strength unchanged). Write one item per line, then paste them all at once.
 
+## Temporary blocks
+
+A temporary block lives in the current prompt. Splitting existing text into temporary blocks preserves the original text sent for generation. A temporary block made from a library block affects only that spot in the prompt.
+
+1. Ask [NAI Agent](nai-agent.md#organize-a-prompt-with-temporary-blocks) to split your main prompt into Character, Outfit and Scene. Open Outfit, edit it and select **Apply**.
+2. Select **Save as new block** to keep it in the library and use the new block in this spot. To turn it back into plain text, select **A** (**Restore original text**) at the bottom of the card. This keeps the block’s current text.
+
+For a block made from a library entry, **Compare with original** shows the differences and **Restore original** links this spot back to that entry. The trash button removes the block and its contents from the prompt.
+
 ## Three modes: Fixed, Sequential and Random
 
 An inserted block appears as a “pill” in your prompt. Click it to open its settings and choose how to get its content this time:

@@ -188,7 +188,7 @@ Windows 两个版本都支持应用内更新，设置、图库数据库和 Agent
 | 教程 | 内容 |
 | --- | --- |
 | [快速上手](docs/guide/zh-CN/quick-start.md) | 安装、登录、第一次生成、数据位置 |
-| [积木](docs/guide/zh-CN/blocks.md) | 固定 / 顺序 / 随机、锁定、权重规则、典型用法 |
+| [积木](docs/guide/zh-CN/blocks.md) | 临时块、固定 / 顺序 / 随机、锁定、权重规则、典型用法 |
 | [画风遗传](docs/guide/zh-CN/style-explore.md) | 抽候选、开始进化、两两比较、存为积木 |
 | [翻译块](docs/guide/zh-CN/translation.md) | 配置翻译模型、双语阅读、切换与还原 |
 | [标签扩展与标签百科](docs/guide/zh-CN/tags-wiki.md) | 本地标签搜索、关联标签、离线百科 |
