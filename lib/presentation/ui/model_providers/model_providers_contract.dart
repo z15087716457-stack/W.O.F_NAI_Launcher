@@ -428,6 +428,7 @@ class ProviderItem {
     this.color = 0xFF7C5CFF,
     this.enabled = true,
     this.local = false,
+    this.managedAccount = false,
     this.apiKeyMasked = '',
     this.status = SettingsTone.idle,
     this.latencyMs,
@@ -461,6 +462,9 @@ class ProviderItem {
 
   /// 本机服务（Ollama / LM Studio）：Key 可留空。
   final bool local;
+
+  /// The signed-in account supplies the connection and its models.
+  final bool managedAccount;
 
   /// 例如 `sk-••••3f9a`；空 = 未填。
   final String apiKeyMasked;
@@ -531,6 +535,7 @@ class ProviderPresetItem {
     this.host = '',
     this.logoAsset,
     this.custom = false,
+    this.browserSignIn = false,
   });
 
   /// `ProviderPreset.name`。
@@ -544,6 +549,7 @@ class ProviderPresetItem {
 
   /// 自定义端点（OpenAI 兼容）：卡片画虚线加号。
   final bool custom;
+  final bool browserSignIn;
 }
 
 @immutable
@@ -588,6 +594,8 @@ enum ProvidersSaveResult {
 class ProvidersActions {
   const ProvidersActions({
     this.onCreate = _noCreate,
+    this.onCancelAccountSignIn = _noop,
+    this.onOpenAccountUsage = _noop,
     this.onEnabled = _noBool,
     this.onTest = _noTest,
     this.onTestModel = _noTestModel,
@@ -600,8 +608,10 @@ class ProvidersActions {
     this.onDelete = _noId,
   });
 
-  /// 用预设新建一个服务商（地址、协议按预设预填，Key 为空）。返回新服务商 ID，界面选中它并聚焦 Key；null = 取消 / 失败。
+  /// 添加服务商或连接套餐账号。返回要选中的服务商 ID；null = 取消或失败。
   final Future<String?> Function(String presetId) onCreate;
+  final VoidCallback onCancelAccountSignIn;
+  final VoidCallback onOpenAccountUsage;
 
   /// 启用 / 停用（即时）。
   final void Function(String providerId, bool enabled) onEnabled;
@@ -655,6 +665,7 @@ class ProvidersActions {
   /// 删除服务商（即时，界面已确认）。
   final ValueChanged<String> onDelete;
 
+  static void _noop() {}
   static Future<String?> _noCreate(String _) async => null;
   static void _noBool(String _, bool _) {}
   static void _noTest(String _, ProviderSettings _, String? _) {}

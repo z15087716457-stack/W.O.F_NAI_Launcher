@@ -2,6 +2,7 @@
 import 'package:irondash_message_channel/irondash_message_channel.dart';
 // ignore: implementation_imports, depend_on_referenced_packages
 import 'package:super_native_extensions/src/native/context.dart';
+import 'dart:async';
 import 'dart:convert';
 import 'package:nai_launcher/presentation/services/image_clipboard_service.dart';
 import 'dart:io';
@@ -355,6 +356,37 @@ void main() {
     ),
     (const Locale('zh', 'TW'), true, const Size(1600, 1000), 'zh-TW-dark-wide'),
   ];
+
+  testWidgets('sidebar refresh shows disk results before the index is synced', (
+    tester,
+  ) async {
+    final service = _PausedRefreshGallery([records.first], records[1].path);
+    final container = await _pumpScreen(
+      tester,
+      records: records,
+      dimensions: dimensions,
+      locale: const Locale('zh'),
+      dark: false,
+      size: const Size(1600, 1000),
+      serviceOverride: service,
+    );
+    final button = find.byKey(const Key('gallery-sidebar-refresh'));
+
+    expect(find.text('索引已同步 · 1'), findsOneWidget);
+    await tester.tap(button);
+    await _settle(tester);
+    expect(find.text('索引本地图片中...'), findsOneWidget);
+    expect(tester.widget<IconButton>(button).onPressed, isNull);
+    expect(container.read(localGalleryNotifierProvider).timeline.length, 2);
+
+    service.finishIndex.complete();
+    await _settle(tester);
+    expect(find.text('索引已同步 · 2'), findsOneWidget);
+    expect(tester.widget<IconButton>(button).onPressed, isNotNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+    container.dispose();
+    await tester.pump(const Duration(minutes: 1));
+  });
 
   testWidgets('repeated app focus changes do not reload the gallery', (
     tester,
@@ -913,6 +945,23 @@ Finder _cardFor(LocalImageRecord record) => find.byWidgetPredicate(
   (widget) => widget is LocalImageCard && widget.record.path == record.path,
 );
 
+class _PausedRefreshGallery extends FakeLocalGalleryService {
+  _PausedRefreshGallery(super.records, this.newPath);
+
+  final String newPath;
+  final finishIndex = Completer<void>();
+
+  @override
+  Future<void> refresh({
+    bool scan = true,
+    Future<void> Function()? onFilesRefreshed,
+  }) async {
+    await addNewImageImmediately(newPath);
+    await super.refresh(scan: scan, onFilesRefreshed: onFilesRefreshed);
+    await finishIndex.future;
+  }
+}
+
 class _RecordingBulkOperations extends BulkOperationNotifier {
   final calls = <String>[];
   @override
@@ -940,12 +989,15 @@ Future<ProviderContainer> _pumpScreen(
   ValueNotifier<GalleryNavigationRequest?>? navigation,
   GoRouter? router,
   List<Override> extraOverrides = const [],
+  FakeLocalGalleryService? serviceOverride,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.reset);
 
-  final service = FakeLocalGalleryService(records, dimensions: dimensions);
+  final service =
+      serviceOverride ??
+      FakeLocalGalleryService(records, dimensions: dimensions);
   final container = ProviderContainer(
     overrides: [
       ...extraOverrides,

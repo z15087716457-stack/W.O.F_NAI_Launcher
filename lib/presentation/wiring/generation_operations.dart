@@ -41,13 +41,13 @@ import '../utils/asset_protection_guard.dart';
 import '../widgets/common/selectable_image_card.dart'
     show imageClipboardWriterProvider;
 import '../utils/precise_ref_library_import_helper.dart';
-import '../widgets/character/add_to_library_dialog.dart';
 import '../widgets/common/app_toast.dart';
 import '../widgets/common/draggable_memory_image.dart';
 import '../widgets/common/image_detail/image_detail_data.dart';
 import '../widgets/common/themed_confirm_dialog.dart';
 import '../widgets/image_editor/image_editor_screen.dart';
 import '../widgets/prompt/blocks/prompt_block_palette.dart';
+import 'blocks_edit_wiring.dart';
 import 'generation_backend.dart';
 import 'generation_blocks_dock.dart';
 import 'generation_drop_wiring.dart';
@@ -124,10 +124,12 @@ class GenerationOperations {
         .read(characterPromptNotifierProvider)
         .findCharacterById(id);
     if (character == null) throw StateError(context.l10n.bridge_conflict);
-    await AddToLibraryDialog.show(
+    await BlocksEditWiring.createWithDialog(
       context,
-      name: character.customName,
-      content: character.prompt,
+      ref,
+      initialTitle: character.customName,
+      initialContent: character.prompt,
+      isFavorite: true,
     );
   }
 

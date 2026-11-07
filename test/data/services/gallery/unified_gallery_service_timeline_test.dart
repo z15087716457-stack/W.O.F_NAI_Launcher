@@ -1,7 +1,10 @@
+import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
+import 'package:image/image.dart' as img;
 import 'package:path/path.dart' as p;
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -10,6 +13,8 @@ import 'package:nai_launcher/core/database/connection_pool_holder.dart';
 import 'package:nai_launcher/core/database/datasources/gallery_data_source.dart';
 import 'package:nai_launcher/core/utils/app_logger.dart';
 import 'package:nai_launcher/data/services/gallery/gallery_filter_service.dart';
+import 'package:nai_launcher/data/services/gallery/gallery_stream_scanner.dart';
+import 'package:nai_launcher/data/services/image_metadata_service.dart';
 import 'package:nai_launcher/data/services/gallery/unified_gallery_service.dart';
 import 'package:nai_launcher/data/services/gallery/gallery_sort.dart';
 
@@ -56,12 +61,113 @@ void main() {
       // initialize() starts a tiny background scan; let it release sqlite locks.
       await Future<void>.delayed(const Duration(milliseconds: 500));
       await service.dispose();
+      GalleryStreamScanner.resetInstance();
       await dataSource.dispose();
       await ConnectionPoolHolder.dispose();
       await Hive.close();
 
       if (await tempDir.exists()) {
         await _deleteDirectoryWithRetry(tempDir);
+      }
+    });
+
+    test('手动刷新先发布磁盘路径，再排队同步新增、移动和修改', () async {
+      await ImageMetadataService().initialize();
+      final source = File(p.join(galleryRoot.path, 'source.png'));
+      final edited = File(p.join(galleryRoot.path, 'edited.png'));
+      final removed = File(p.join(galleryRoot.path, 'removed.png'));
+      final png = img.encodePng(img.Image(width: 12, height: 16));
+      for (final (file, day) in [(source, 1), (edited, 2), (removed, 3)]) {
+        await file.writeAsBytes(png);
+        await file.setLastModified(DateTime(2026, 7, day));
+        final stat = await file.stat();
+        await dataSource.upsertImage(
+          filePath: file.path,
+          fileName: p.basename(file.path),
+          fileSize: stat.size,
+          width: 12,
+          height: 16,
+          createdAt: stat.modified,
+          modifiedAt: stat.modified,
+        );
+      }
+      final sourceId = (await dataSource.getImageIdByPath(source.path))!;
+      final editedId = (await dataSource.getImageIdByPath(edited.path))!;
+      await service.initialize();
+      await service.applyFilter(
+        FilterCriteria(categoryFolderPath: galleryRoot.path),
+      );
+      expect((await service.getTimelineEntries()).length, 3);
+
+      final lockHeld = Completer<void>();
+      final release = Completer<void>();
+      final lock = GalleryStreamScanner(dataSource: dataSource)
+          .withFilesystemMutation(() async {
+            lockHeld.complete();
+            await release.future;
+          });
+
+      Future<void>? refresh;
+      try {
+        await lockHeld.future;
+        await removed.delete();
+        final moved = await source.rename(
+          p.join(galleryRoot.path, 'moved.png'),
+        );
+        final added = await File(
+          p.join(galleryRoot.path, 'added.png'),
+        ).writeAsBytes(png);
+        await edited.writeAsBytes(
+          img.encodePng(
+            img.Image(
+              width: 32,
+              height: 24,
+              textData: {
+                'Comment': jsonEncode({
+                  'prompt': 'updated',
+                  'seed': 1,
+                  'width': 32,
+                  'height': 24,
+                }),
+              },
+            ),
+          ),
+        );
+        await edited.setLastModified(DateTime(2026, 8, 1));
+
+        final published = Completer<List<GalleryTimelineEntry>>();
+        refresh = service.refresh(
+          onFilesRefreshed: () async {
+            published.complete(await service.getTimelineEntries());
+          },
+        );
+        final entries = await published.future.timeout(
+          const Duration(seconds: 5),
+        );
+        expect(
+          entries.map((e) => e.path),
+          unorderedEquals([moved.path, added.path, edited.path]),
+        );
+        expect(await dataSource.getImageIdByPath(source.path), sourceId);
+        expect(await dataSource.getImageIdByPath(added.path), isNull);
+
+        release.complete();
+        await refresh;
+        expect(await dataSource.getImageIdByPath(source.path), isNull);
+        expect(await dataSource.getImageIdByPath(removed.path), isNull);
+        expect(await dataSource.getImageIdByPath(moved.path), sourceId);
+        expect(await dataSource.getImageIdByPath(added.path), isNotNull);
+        expect((await dataSource.getImageById(editedId))?.width, 32);
+        expect(
+          (await service.getTimelineEntries())
+              .singleWhere((e) => e.path == edited.path)
+              .width,
+          32,
+        );
+      } finally {
+        if (!release.isCompleted) release.complete();
+        await lock;
+        await refresh;
       }
     });
 

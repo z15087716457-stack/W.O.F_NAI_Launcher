@@ -19,12 +19,21 @@ for await (const line of input) {
       process.once('SIGTERM', cancel);
       process.once('SIGINT', cancel);
     }
+    if (request.resource === 'chatgpt') {
+      const { studioChatGpt } = await import('./lib/model.mjs');
+      send({ result: await studioChatGpt(request, send, cancellation.signal) });
+      break;
+    }
     const result = request.resource === 'mcp'
       ? await inspectStudioMcp({ ...request, emit: send, signal: cancellation.signal })
       : request.action === 'resolve' ? await resolveStudioPackages(request)
       : await manageStudioPackage(request);
     send({ result });
   } catch (error) {
+    if (request?.resource === 'chatgpt') {
+      send({ error: 'ChatGPT connection failed' });
+      break;
+    }
     const clean = mcpRedactor({}, { mcpServers: request?.config ? { server: request.config } : {} });
     send(clean({ error: error.message }));
   } finally {

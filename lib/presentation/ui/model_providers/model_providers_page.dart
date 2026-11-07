@@ -166,7 +166,7 @@ class ModelProvidersPanelState extends State<ModelProvidersPanel> {
                           ),
                         ),
                       const Spacer(),
-                      if (wide)
+                      if (wide && !p.managedAccount)
                         Container(
                           width: 336,
                           decoration: BoxDecoration(
@@ -201,14 +201,16 @@ class ModelProvidersPanelState extends State<ModelProvidersPanel> {
                     Flexible(
                       flex: stacked ? 0 : 1,
                       fit: FlexFit.tight,
-                      child: _Middle(
-                        key: ValueKey('mid-${p.id}'),
-                        panel: this,
-                        item: p,
-                        inlineInspector: !wide,
-                      ),
+                      child: p.managedAccount
+                          ? _AccountDetails(item: p, actions: widget.actions)
+                          : _Middle(
+                              key: ValueKey('mid-${p.id}'),
+                              panel: this,
+                              item: p,
+                              inlineInspector: !wide,
+                            ),
                     ),
-                    if (wide)
+                    if (wide && !p.managedAccount)
                       SizedBox(
                         width: 336,
                         child: _InspectorColumn(panel: this, item: p),
@@ -269,10 +271,18 @@ class ModelProvidersOverlays extends StatelessWidget {
                     if (x.presetId != null) x.presetId!,
                 },
                 onClose: () => ctrl.pickerOpen = false,
-                onPick: (id) async {
-                  ctrl.pickerOpen = false;
+                onCancelSignIn: actions.onCancelAccountSignIn,
+                onPick: (id, {required waitForSignIn}) async {
+                  if (!waitForSignIn) ctrl.pickerOpen = false;
                   final created = await actions.onCreate(id);
-                  if (created != null) ctrl.select(created);
+                  if (created == null ||
+                      !context.mounted ||
+                      (waitForSignIn && !ctrl.pickerOpen)) {
+                    return false;
+                  }
+                  if (waitForSignIn) ctrl.pickerOpen = false;
+                  ctrl.select(created);
+                  return true;
                 },
               ),
             ),
@@ -404,6 +414,99 @@ class _ProviderList extends StatelessWidget {
 }
 
 // ───────────────────────────── 中栏 ─────────────────────────────
+
+class _AccountDetails extends StatelessWidget {
+  const _AccountDetails({required this.item, required this.actions});
+
+  final ProviderItem item;
+  final ProvidersActions actions;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final c = context.ui;
+    return Padding(
+      key: const Key('mp-account-details'),
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 14,
+        children: [
+          Row(
+            spacing: 10,
+            children: [
+              ProviderLogo.of(item, size: 36),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.settings.name,
+                      style: UiText.sans(
+                        15,
+                        weight: FontWeight.w600,
+                        color: c.ink,
+                      ),
+                    ),
+                    Text(
+                      l.mp_chatGptAgentOnly,
+                      style: UiText.sans(12, color: c.muted),
+                    ),
+                  ],
+                ),
+              ),
+              SettingsDot(item.status),
+            ],
+          ),
+          Text(
+            item.testing
+                ? l.common_loading
+                : item.error.isEmpty
+                ? item.hint
+                : item.error,
+            style: UiText.sans(12, color: c.muted),
+          ),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              SettingsBtn(
+                label: l.common_refresh,
+                small: true,
+                onTap: item.testing
+                    ? null
+                    : () => actions.onFetchCatalog(item.id),
+              ),
+              SettingsBtn(
+                label: l.naiAgent_chatGptManageUsage,
+                small: true,
+                onTap: actions.onOpenAccountUsage,
+              ),
+              SettingsBtn(
+                label: l.auth_logout,
+                small: true,
+                tone: SettingsBtnTone.ghost,
+                onTap: item.testing ? null : () => actions.onDelete(item.id),
+              ),
+            ],
+          ),
+          if (item.settings.models.isNotEmpty) ...[
+            const ProviderDashLine(),
+            Text(
+              l.set_mdModelCount('${item.settings.models.length}'),
+              style: UiText.sans(12, color: c.muted),
+            ),
+            for (final model in item.settings.models)
+              Text(
+                model.alias.isEmpty ? model.id : model.alias,
+                style: UiText.sans(13, color: c.ink),
+              ),
+          ],
+        ],
+      ),
+    );
+  }
+}
 
 class _Middle extends StatefulWidget {
   const _Middle({

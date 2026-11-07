@@ -33,7 +33,7 @@ async function acquireRequest(signal) {
   signal?.throwIfAborted();
   if (++requestCount > requestLimit) throw new Error('Run request limit reached; progress is saved. Continue explicitly.');
   const requestId = String(++permitSequence);
-  await new Promise((resolve, reject) => {
+  const accessToken = await new Promise((resolve, reject) => {
     const abort = () => {
       permits.delete(requestId);
       send({ type: 'request_cancel', requestId });
@@ -44,9 +44,9 @@ async function acquireRequest(signal) {
     send({ type: 'request_permit', requestId });
   });
   let released = false;
-  return () => {
+  return { accessToken, release: () => {
     if (!released) { released = true; send({ type: 'request_release', requestId }); }
-  };
+  } };
 }
 function queueState() {
   // Pi owns the queues. This sidecar only retains attachment bytes and UI IDs.
@@ -155,8 +155,10 @@ async function handle(message) {
     if (!permit) { if (!message.error) send({ type: 'request_release', requestId: message.requestId }); return; }
     permits.delete(message.requestId);
     permit.signal?.removeEventListener('abort', permit.abort);
-    if (message.error) permit.reject(new Error('Model request permit cancelled'));
-    else permit.resolve();
+    if (message.error) permit.reject(new Error(message.error === 'chatgpt'
+      ? 'ChatGPT connection unavailable. Check Agent settings.'
+      : 'Model request permit cancelled'));
+    else permit.resolve(message.accessToken);
     return;
   }
   if (type === 'tool_result') {

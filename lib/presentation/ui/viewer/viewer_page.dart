@@ -30,7 +30,7 @@ abstract class ViewerController {
   /// 删除当前张：受保护的先确认。
   void requestDelete();
 
-  void openMore(UiPopoverAnchor anchor);
+  void openMore(UiPopoverAnchor anchor, {bool fromImage = false});
 
   /// “更多”菜单（含收藏集子菜单）开着：按钮显示按下态。
   bool get moreOpen;
@@ -68,7 +68,7 @@ class ViewerPageScope extends InheritedWidget {
   bool updateShouldNotify(ViewerPageScope old) => true;
 }
 
-enum _Pop { none, more, collections, zoom }
+enum _Pop { none, more, imageMenu, collections, zoom }
 
 enum _Dialog { none, help, delete }
 
@@ -243,10 +243,11 @@ class _ImageViewerPageState extends State<ImageViewerPage>
   void closeDrawer() => setState(() => _drawer = false);
 
   @override
-  void openMore(UiPopoverAnchor anchor) => setState(() {
-    _pop = _Pop.more;
-    _anchor = anchor;
-  });
+  void openMore(UiPopoverAnchor anchor, {bool fromImage = false}) =>
+      setState(() {
+        _pop = fromImage ? _Pop.imageMenu : _Pop.more;
+        _anchor = anchor;
+      });
 
   @override
   bool get moreOpen => _pop == _Pop.more;
@@ -361,6 +362,10 @@ class _ImageViewerPageState extends State<ImageViewerPage>
   KeyEventResult _onKey(FocusNode _, KeyEvent e) {
     if (e is! KeyDownEvent && e is! KeyRepeatEvent) {
       return KeyEventResult.ignored;
+    }
+    if (_pop != _Pop.none && e.logicalKey == LogicalKeyboardKey.escape) {
+      closePopover();
+      return KeyEventResult.handled;
     }
     final repeatable = {
       ViewerCommand.previous,
@@ -483,7 +488,7 @@ class _ImageViewerPageState extends State<ImageViewerPage>
             actions: _actions,
             controller: this,
             child: switch (_pop) {
-              _Pop.more => const ViewerMoreMenu(),
+              _Pop.more || _Pop.imageMenu => const ViewerMoreMenu(),
               _Pop.collections => const ViewerCollectionsMenu(),
               _Pop.zoom => const ViewerZoomMenu(),
               _Pop.none => const SizedBox.shrink(),

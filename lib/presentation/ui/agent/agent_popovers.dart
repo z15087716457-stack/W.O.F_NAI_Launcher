@@ -952,6 +952,10 @@ class AgentModelPopover extends StatelessWidget {
       groups.putIfAbsent(m.provider, () => []).add(m);
     }
     final t = d.thinking;
+    final usageUrl = d.models
+        .where((m) => m.selected)
+        .firstOrNull
+        ?.chatGptUsageUrl;
     return UiPopoverSurface(
       key: const Key('agent-model-popover'),
       width: 260,
@@ -1005,6 +1009,16 @@ class AgentModelPopover extends StatelessWidget {
                       ],
                     ),
                   ),
+              ],
+              if (usageUrl != null) ...[
+                _GroupLabel(l.naiAgent_chatGptUsingPlan),
+                AgentPopRow(
+                  onTap: () {
+                    onClose();
+                    a.onOpenLink(usageUrl);
+                  },
+                  child: Text(l.naiAgent_chatGptManageUsage),
+                ),
               ],
               AgentPopRow(
                 onTap: () {

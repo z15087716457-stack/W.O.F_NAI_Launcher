@@ -97,6 +97,16 @@ void main() {
       );
       expect(find.byKey(const Key('viewer-info-delete')), findsNothing);
       expect(find.byKey(const Key('viewer-info-favorite')), findsNothing);
+      await t.tapAt(
+        t.getCenter(find.byKey(const Key('viewer-image'))),
+        buttons: kSecondaryMouseButton,
+        kind: PointerDeviceKind.mouse,
+      );
+      await t.pumpAndSettle();
+      expect(find.byKey(const Key('viewer-more-copyImage')), findsOneWidget);
+      expect(find.byKey(const Key('viewer-more-collections')), findsNothing);
+      expect(find.byKey(const Key('viewer-more-delete')), findsNothing);
+      await key(t, LogicalKeyboardKey.escape);
       await key(t, LogicalKeyboardKey.keyF);
       await key(t, LogicalKeyboardKey.delete);
       expect(
@@ -608,6 +618,47 @@ void main() {
     expect(rec.calls.last, 'delete:08');
     await tapKey(t, 'viewer-info-folder');
     expect(rec.calls.last, 'action:08:showInFolder');
+    await done(t);
+  });
+
+  testWidgets('图片右键复用更多菜单，重复打开后 Esc 只关菜单', (t) async {
+    await pump(t, ViewerFixture.gallery());
+    final image = find.byKey(const Key('viewer-image'));
+    final menu = find.byKey(const Key('viewer-more'));
+    final picture = t.getRect(image);
+    final mouse = await t.createGesture(
+      kind: PointerDeviceKind.mouse,
+      buttons: kSecondaryMouseButton,
+    );
+    await mouse.addPointer(location: picture.center);
+    addTearDown(mouse.removePointer);
+
+    Future<void> rightClick(Offset point) async {
+      await mouse.moveTo(point);
+      await mouse.down(point);
+      await mouse.up();
+      await t.pumpAndSettle();
+    }
+
+    final stage = t.getRect(find.byKey(const Key('viewer-view')));
+    await rightClick(stage.topLeft + const Offset(16, 16));
+    expect(menu, findsNothing);
+
+    await rightClick(picture.center);
+    expect(t.getTopLeft(menu), picture.center);
+    expect(ViewerPageScope.of(t.element(image)).controller.moreOpen, isFalse);
+    await tapKey(t, 'viewer-more-copyImage');
+    expect(rec.calls.last, 'action:08:copyImage');
+    expect(menu, findsNothing);
+
+    await rightClick(picture.bottomRight - const Offset(3, 3));
+    expect(
+      t.getRect(menu).bottom,
+      lessThanOrEqualTo(t.view.physicalSize.height - 4),
+    );
+    await key(t, LogicalKeyboardKey.escape);
+    expect(menu, findsNothing);
+    expect(rec.calls, isNot(contains('close:true')));
     await done(t);
   });
 

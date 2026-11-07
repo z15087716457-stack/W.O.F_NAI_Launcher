@@ -37,6 +37,8 @@ import 'package:nai_launcher/presentation/providers/character_prompt_provider.da
 import 'package:nai_launcher/presentation/providers/tips_provider.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
+import 'package:nai_launcher/presentation/ui/blocks/blocks_edit.dart';
+import 'package:nai_launcher/presentation/wiring/blocks_library_backend.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_page.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_header.dart';
 import 'package:nai_launcher/presentation/providers/floating_resource_windows_provider.dart';
@@ -52,6 +54,7 @@ import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
 import 'package:nai_launcher/presentation/providers/generation/preview_selection_provider.dart';
 import '../providers/krita/agent_bridge_draft_test.dart'
     show MemoryCharacters, MemoryDraftSettings, EmptyBlocks, OfflineAuth;
+import 'blocks_wiring_test.dart' show MemoryBlockStorage;
 import 'generation_backend_test.dart' show MemoryGenerationPlatform;
 import 'generation_data_wiring_test.dart'
     show DataGeneration, DataSubscription, DataShortcuts;
@@ -83,6 +86,7 @@ void main() {
       overrides: [
         localStorageServiceProvider.overrideWithValue(MemoryDraftSettings()),
         characterPromptRepositoryProvider.overrideWithValue(MemoryCharacters()),
+        promptBlockStorageProvider.overrideWithValue(MemoryBlockStorage()),
         promptBlockLibraryNotifierProvider.overrideWith(EmptyBlocks.new),
         authNotifierProvider.overrideWith(OfflineAuth.new),
         nativeResourceWindowsProvider.overrideWithValue(false),
@@ -179,6 +183,72 @@ void main() {
     final params = container.read(generationParamsNotifierProvider);
     return target.negative ? params.negativePrompt : params.prompt;
   }
+
+  testWidgets('character save opens the block editor and keeps the draft', (
+    tester,
+  ) async {
+    final characters = container.read(characterPromptNotifierProvider.notifier);
+    const content = 'blue eyes, 1.2::one, two::,\n  black hair';
+    final character = container
+        .read(characterPromptNotifierProvider)
+        .characters
+        .single
+        .copyWith(prompt: content);
+    characters.updateCharacter(character);
+    final library = container.read(promptBlockLibraryNotifierProvider.notifier);
+    final folder = await tester.runAsync(
+      () => library.createFolder(name: '角色'),
+    );
+    await pump(tester);
+
+    Future<void> tap(String key) async {
+      await tester.runAsync(() => tester.tap(find.byKey(Key(key))));
+      await tester.pumpAndSettle();
+    }
+
+    await tap('gen-character-more-0');
+    await tap('gen-character-library-0');
+    final editor = tester.widget<BlockEditDialog>(find.byType(BlockEditDialog));
+    expect(editor.data.blockId, isNull);
+    expect(editor.data.draft.title, character.customName);
+    final text = tester.widget<TextField>(
+      find.byKey(const Key('block-edit-text')),
+    );
+    expect(text.controller!.text, content);
+    await tap('block-edit-cancel');
+    expect(
+      container.read(promptBlockLibraryNotifierProvider).value!.blocks,
+      isEmpty,
+    );
+
+    await tap('gen-character-more-0');
+    await tap('gen-character-library-0');
+    await tap('block-edit-folder');
+    await tester.tap(find.text('角色').last);
+    await tester.pumpAndSettle();
+    await tap('block-edit-save');
+    await tester.runAsync(
+      () => container.read(blocksLibraryBackendProvider).serialize(() async {}),
+    );
+    await tester.pumpAndSettle();
+
+    final block = container
+        .read(promptBlockLibraryNotifierProvider)
+        .value!
+        .blocks
+        .single;
+    expect(block.title, character.customName);
+    expect(block.content, content);
+    expect(block.folderId, folder!.id);
+    expect(block.isFavorite, isTrue);
+    expect(
+      container.read(characterPromptNotifierProvider).characters.single,
+      character,
+    );
+    expect(find.byType(BlockEditDialog), findsNothing);
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pumpAndSettle();
+  });
 
   testWidgets('prompt tools menu opens each resource window kind', (
     tester,

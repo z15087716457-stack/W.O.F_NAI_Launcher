@@ -994,8 +994,6 @@
     }
   },
   "characterTooltip_viewFullConfig": "Click for full configuration",
-  "addGroup_displayNameLabel": "Display Name (Optional)",
-  "addGroup_targetCategoryLabel": "Target Category",
   "globalSettings_saveFailed": "Save failed: {error}",
   "@globalSettings_saveFailed": {
     "placeholders": {
@@ -1647,9 +1645,6 @@
     }
   },
   "settings_proxyRestartHint": "Proxy settings changed, restart recommended",
-  "tagLibrary_addToLibrary": "Add to Library",
-  "tagLibrary_uncategorized": "Uncategorized",
-  "tagLibrary_contentPreview": "Content Preview",
   "settings_enablePromptWeightScroll": "Adjust prompt weight with mouse wheel",
   "settings_enablePromptWeightScrollSubtitle": "When prompt text is selected, hold the chosen modifier + wheel to adjust weight; a bare wheel scrolls the page as usual.",
   "settings_weightScrollModifierAlt": "Alt",
@@ -2470,25 +2465,6 @@
   "toast_sentToKrita": "Image sent to Krita",
   "toast_kritaUnsupportedImageFormat": "This image format cannot be sent to Krita. Use a common image format.",
   "toast_dropNoReadableImageOrVibe": "The drop source did not provide a readable image or Vibe file",
-  "toast_contentCannotBeEmpty": "Content cannot be empty",
-  "toast_addedToLibrary": "Added to library",
-  "toast_addFailed": "Add failed: {error}",
-  "@toast_addFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "toast_libraryNotLoaded": "Library is not loaded",
-  "toast_noValidTagContent": "No valid tag content",
-  "toast_allTagsAlreadyExist": "All tags already exist in the library",
-  "toast_noAddableTags": "No tags can be added",
-  "toast_addedTagsSkippedDuplicates": "Added {added} tags, skipped {skipped} duplicate tags",
-  "@toast_addedTagsSkippedDuplicates": {
-    "placeholders": {
-      "added": {},
-      "skipped": {}
-    }
-  },
   "toast_saveDirNotSet": "Save directory is not set",
   "toast_savedTo": "Saved to {path}",
   "@toast_savedTo": {
@@ -2556,7 +2532,6 @@
       "hours": {}
     }
   },
-  "common_saving": "Saving...",
   "common_expand": "Expand",
   "common_collapse": "Collapse",
   "detail_parsingMetadata": "Parsing metadata...",
@@ -2565,12 +2540,6 @@
   "detail_modifiedTime": "Modified",
   "detail_fileSize": "File Size",
   "detail_noContent": "(No content)",
-  "saveBlock_title": "Save as Block",
-  "saveBlock_nameLabel": "Block title",
-  "saveBlock_nameHint": "Enter block title",
-  "saveBlock_nameRequired": "Please enter a block title",
-  "saveBlock_selectContent": "Select content to save",
-  "saveBlock_negativeSuffix": "Negative",
   "saveBlock_saved": "Saved to block library",
   "detail_copyLabel": "Copy {label}",
   "@detail_copyLabel": {
@@ -2841,13 +2810,9 @@
       }
     }
   },
-  "common_optional": "Optional",
-  "common_emptyValue": "(Empty)",
   "common_clickToRetry": "Click to retry",
   "common_opening": "Opening...",
   "common_swap": "Swap",
-  "addToLibrary_displayNameHint": "Enter a name to identify this entry",
-  "addToLibrary_tagHint": "Enter a tag and press Enter to add it",
   "drop_saveVibeBundle": "Save Vibe Bundle",
   "vibe_import_overwriteOriginalParams": "Replace Original Vibe Parameters",
   "vibe_import_overwriteOriginalParamsHint": "Only replace the library parameters for {name}; disabled by default",
@@ -2964,7 +2929,6 @@
     }
   },
   "promptBlockLibrary_allBlocks": "All blocks",
-  "promptBlockLibrary_rootFolder": "Root / Unfiled",
   "promptBlockLibrary_unnamedBlock": "Untitled block",
   "promptBlockLibrary_useCount": "Used {count} times",
   "@promptBlockLibrary_useCount": {
@@ -2993,9 +2957,6 @@
       }
     }
   },
-  "promptBlockLibrary_blockTitle": "Title",
-  "promptBlockLibrary_titleHint": "Block title",
-  "promptBlockLibrary_folder": "Folder",
   "promptBlockLibrary_settingsApplied": "Block settings imported to the current image",
   "promptBlockLibrary_settingsIncompatible": "Block settings are incompatible with the target model. No parameters were imported.",
   "promptBlockLibrary_deleted": "Deleted",
@@ -3133,12 +3094,8 @@
   "styleExplore_adoptBlockEmpty": "The selected candidates have no artist strings or positive prompts to save",
   "promptBlockEditor_library": "Block library",
   "promptBlockPicker_title": "Select Block",
-  "promptBlockLibrary_selectImage": "Select Image",
   "promptBlockLibrary_adjustThumbnailTitle": "Adjust Thumbnail Display Range",
   "promptBlockLibrary_dragToMove": "Drag to move, scroll or pinch to zoom",
-  "promptBlockLibrary_addToLibrary": "Add to Block Library",
-  "promptBlockLibrary_contentPreview": "Content Preview",
-  "promptBlockLibrary_confirmAdd": "Confirm",
   "promptBlockLibrary_saveToLibrary": "Save to Block Library",
   "promptBlockLibrary_droppedImage": "Dropped Image",
   "promptBlockLibrary_createBlockFromImage": "Create New Block",
@@ -8794,6 +8751,14 @@
   "naiAgent_permissionDeny": "Deny",
   "naiAgent_defaultWorkspace": "Workspace 1",
   "naiAgent_newChat": "New chat",
+  "naiAgent_chatGptSignIn": "Continue with ChatGPT",
+  "naiAgent_chatGptHint": "Use your ChatGPT plan for eligible Agent requests.",
+  "naiAgent_chatGptBrowser": "Complete sign-in in your browser.",
+  "naiAgent_chatGptConnected": "Connected. Choose a model in the Agent model picker.",
+  "naiAgent_chatGptNoModels": "No compatible models are available for this account.",
+  "naiAgent_chatGptError": "Could not connect to ChatGPT. Try again or sign in again.",
+  "naiAgent_chatGptUsingPlan": "Using ChatGPT plan",
+  "naiAgent_chatGptManageUsage": "Manage usage",
   "naiAgent_settings": "Agent settings",
   "naiAgent_chooseModel": "Choose model",
   "naiAgent_interrupted": "The previous run was interrupted and was not resent.",
@@ -11225,6 +11190,9 @@
   "mp_hide": "Hide",
   "mp_keyHintLocal": "Optional for local services",
   "mp_keyHint": "Enter this provider’s key",
+  "mp_chatGptPlan": "ChatGPT plan",
+  "mp_chatGptAgentOnly": "For NAI Agent",
+  "mp_manageAccount": "Manage account",
   "mp_pickerTitle": "Add provider",
   "mp_pickerSearch": "Search vendors, platforms or local services",
   "mp_groupAll": "All",

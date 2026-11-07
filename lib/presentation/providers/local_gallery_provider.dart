@@ -964,7 +964,11 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
   /// 刷新画廊
   ///
   /// 执行增量扫描，更新文件列表和索引
-  Future<void> refresh({bool scan = true}) async {
+  Future<void> refresh({bool scan = true}) => _refresh(scan: scan);
+
+  Future<void> refreshFromDisk() => _refresh(scan: true, publishEarly: true);
+
+  Future<void> _refresh({required bool scan, bool publishEarly = false}) async {
     if (!state.isInitialized) {
       await initialize();
       return;
@@ -974,20 +978,14 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
 
     try {
       final service = await getService();
-      await service.refresh(scan: scan);
-
-      // 重新应用当前过滤
-      await service.applyFilter(state.filterCriteria);
-      _markRecordsStale();
-
-      _setState(
-        state.copyWith(
-          totalCount: service.totalCount,
-          filteredCount: service.filteredCount,
-        ),
+      await service.refresh(
+        scan: scan,
+        onFilesRefreshed: publishEarly ? _publishRefreshedFiles : null,
       );
 
-      await _reloadTimeline(newDataset: false);
+      // 索引写入后重新应用依赖数据库的筛选（如收藏、模型和标签）。
+      await service.applyFilter(state.filterCriteria);
+      await _publishRefreshedFiles();
     } on GalleryScanException catch (e) {
       _setState(
         state.copyWith(
@@ -1009,6 +1007,11 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
         ),
       );
     }
+  }
+
+  Future<void> _publishRefreshedFiles() async {
+    _markRecordsStale();
+    await _reloadTimeline(newDataset: false);
   }
 
   /// Update event paths while keeping the dataset and unrelated record caches.

@@ -12,10 +12,10 @@ import '../../providers/character_prompt_provider.dart';
 import '../../providers/tips_provider.dart';
 import '../../screens/generation/widgets/generation_sidebar_style.dart';
 import '../../themes/studio_typography.dart';
+import '../../wiring/blocks_edit_wiring.dart';
 import '../common/decoded_memory_image.dart';
 import '../common/uiux_prototype_icon.dart';
 import 'character_module_scope.dart';
-import 'add_to_library_dialog.dart';
 import 'inline_character_editor.dart';
 
 /// 内联角色卡
@@ -391,16 +391,18 @@ class _InlineCharacterCardState extends ConsumerState<InlineCharacterCard> {
       _HeaderOverflowMenu(
         color: onHeader,
         canvasOpen: canvasOpen,
-        addToLibraryLabel: l10n.promptBlockLibrary_addToLibrary,
+        addToLibraryLabel: l10n.gen_saveAsBlock,
         canvasLabel: l10n.characterCanvas_title,
         onSelected: (action) {
           switch (action) {
             case _CharacterHeaderMenuAction.addToLibrary:
               _openModal(
-                () => AddToLibraryDialog.show(
+                () => BlocksEditWiring.createWithDialog(
                   context,
-                  name: widget.character.customName,
-                  content: widget.character.prompt,
+                  ref,
+                  initialTitle: character.customName,
+                  initialContent: character.prompt,
+                  isFavorite: true,
                 ),
               );
             case _CharacterHeaderMenuAction.positionCanvas:

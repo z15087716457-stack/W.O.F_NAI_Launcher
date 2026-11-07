@@ -14,6 +14,54 @@ import 'model_providers_harness.dart';
 Finder _field(String key) =>
     find.descendant(of: find.byKey(Key(key)), matching: find.byType(TextField));
 
+const _chatGptId = 'openai-chatgpt';
+
+class _AccountRecorder extends ProvidersRecorder {
+  Completer<String?>? signIn;
+
+  void connected(bool value) {
+    replace(
+      ProvidersViewData(
+        providers: [
+          ...data.providers.where((p) => p.id != _chatGptId),
+          if (value)
+            const ProviderItem(
+              id: _chatGptId,
+              presetId: _chatGptId,
+              managedAccount: true,
+              settings: ProviderSettings(
+                name: 'ChatGPT 套餐',
+                baseUrl: '',
+                protocolId: 'openaiResponses',
+                models: [
+                  ProviderModelSettings(
+                    id: 'gpt-6.1-sol',
+                    alias: 'GPT-6.1 Sol',
+                  ),
+                ],
+              ),
+            ),
+        ],
+        protocols: data.protocols,
+        presets: data.presets,
+      ),
+    );
+  }
+
+  @override
+  ProvidersActions get actions => ProvidersActions(
+    onCreate: (id) async {
+      calls.add('create:$id');
+      if (data.providers.any((p) => p.id == id)) return id;
+      return (signIn = Completer<String?>()).future;
+    },
+    onCancelAccountSignIn: () => signIn!.complete(null),
+    onOpenAccountUsage: () => calls.add('usage'),
+    onFetchCatalog: (id) => calls.add('refresh:$id'),
+    onDelete: (_) => connected(false),
+  );
+}
+
 void main() {
   setUpAll(loadStudioCaptureFonts);
 
@@ -434,19 +482,102 @@ void main() {
     expect(rec.calls.where((c) => !c.startsWith('reorder')), isEmpty);
   });
 
-  testWidgets('添加服务商：顶栏按钮开弹窗，选预设回调 onCreate', (t) async {
+  testWidgets('添加服务商：弹窗垂直居中，选预设回调 onCreate', (t) async {
     final rec = await pumpProviders(t);
     await t.tap(find.text('添加服务商').first);
     await t.pumpAndSettle();
-    expect(find.byKey(const Key('mp-picker')), findsOneWidget);
+    final picker = find.byKey(const Key('mp-picker'));
+    final scrim = find.byKey(const Key('mp-picker-scrim'));
+    expect(t.getCenter(picker).dy, t.getCenter(scrim).dy);
+
+    t.view.physicalSize = Size(t.view.physicalSize.width, 600);
+    await t.pumpAndSettle();
+    expect(t.getCenter(picker).dy, t.getCenter(scrim).dy);
+
     await t.enterText(_field('mp-picker-search'), 'kimi');
     await t.pump(const Duration(milliseconds: 400));
+    expect(t.getCenter(picker).dy, t.getCenter(scrim).dy);
     expect(find.byKey(const Key('mp-preset-moonshot')), findsOneWidget);
     expect(find.byKey(const Key('mp-preset-deepseek')), findsNothing);
     await t.tap(find.byKey(const Key('mp-picker-next')));
     await t.pumpAndSettle();
     expect(rec.calls, ['create:moonshot']);
-    expect(find.byKey(const Key('mp-picker')), findsNothing);
+    expect(picker, findsNothing);
+  });
+
+  testWidgets('ChatGPT 套餐从添加服务商登录，并在服务商页管理', (t) async {
+    final rec = _AccountRecorder();
+    final fixture = ProvidersFixture.view;
+    await pumpProviders(
+      t,
+      recorder: rec,
+      data: ProvidersViewData(
+        providers: fixture.providers,
+        protocols: fixture.protocols,
+        presets: [
+          ...fixture.presets,
+          const ProviderPresetItem(
+            id: _chatGptId,
+            name: 'ChatGPT 套餐',
+            group: ProviderGroup.international,
+            browserSignIn: true,
+          ),
+        ],
+      ),
+    );
+
+    final picker = find.byKey(const Key('mp-picker'));
+    final next = find.byKey(const Key('mp-picker-next'));
+    final detail = find.byKey(const Key('mp-account-details'));
+    final keyField = find.byKey(const Key('mp-key'));
+    Future<void> pickChatGpt() async {
+      await t.tap(find.byKey(const Key('mp-add')));
+      await t.pumpAndSettle();
+      await t.enterText(_field('mp-picker-search'), 'ChatGPT');
+      await t.pumpAndSettle();
+      expect(find.byKey(const Key('mp-preset-openai-chatgpt')), findsOneWidget);
+    }
+
+    await pickChatGpt();
+    expect(find.text('使用 ChatGPT 登录'), findsOneWidget);
+    await t.tap(next);
+    await t.pumpAndSettle();
+    expect(find.text('请在浏览器中完成登录。'), findsOneWidget);
+
+    rec.signIn!.complete(null);
+    await t.pumpAndSettle();
+    expect(find.text('无法连接 ChatGPT，请重试或重新登录。'), findsOneWidget);
+    await t.tap(next);
+    await t.pumpAndSettle();
+    await t.tap(find.byKey(const Key('mp-picker-close')));
+    await t.pumpAndSettle();
+    expect(rec.signIn!.isCompleted, isTrue);
+    expect(picker, findsNothing);
+    expect(keyField, findsOneWidget);
+
+    await pickChatGpt();
+    await t.tap(next);
+    await t.pumpAndSettle();
+    rec.connected(true);
+    rec.signIn!.complete(_chatGptId);
+    await t.pumpAndSettle();
+    expect(picker, findsNothing);
+    expect(detail, findsOneWidget);
+    expect(keyField, findsNothing);
+    expect(find.text('GPT-6.1 Sol'), findsOneWidget);
+    await t.tap(find.descendant(of: detail, matching: find.text('管理用量')));
+    await t.tap(find.descendant(of: detail, matching: find.text('刷新')));
+    expect(rec.calls, containsAll(['usage', 'refresh:$_chatGptId']));
+
+    await pickChatGpt();
+    expect(find.text('管理账号'), findsOneWidget);
+    await t.tap(next);
+    await t.pumpAndSettle();
+    expect(detail, findsOneWidget);
+    await t.tap(find.descendant(of: detail, matching: find.text('退出登录')));
+    await t.pumpAndSettle();
+    expect(detail, findsNothing);
+    expect(keyField, findsOneWidget);
   });
 
   testWidgets('空态', (t) async {

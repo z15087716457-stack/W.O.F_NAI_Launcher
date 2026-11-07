@@ -15,6 +15,7 @@ import '../../../core/nai_agent/agent_tool.dart';
 import '../../../core/nai_agent/attachment_manifest.dart';
 
 import '../../../data/services/nai_agent/agent_workspace_store.dart' as store;
+import '../../../core/utils/file_explorer_utils.dart';
 import '../../../core/utils/file_name_sanitizer.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../prompt_assistant/models/prompt_assistant_models.dart';
@@ -31,6 +32,7 @@ import '../../providers/krita/bridge_draft_snapshot.dart';
 import '../../providers/nai_agent/nai_agent_generation_approvals.dart';
 import '../../providers/nai_agent/nai_agent_image_approvals.dart';
 import '../../providers/nai_agent/nai_agent_model_provider.dart';
+import '../../providers/nai_agent/nai_agent_chatgpt_provider.dart';
 import '../../providers/nai_agent/nai_agent_questions.dart';
 import '../../providers/nai_agent/nai_agent_quick_messages.dart';
 import '../../providers/nai_agent/nai_agent_skills_provider.dart';
@@ -573,6 +575,7 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
     ref.listen(naiAgentGenerationApprovalsProvider, (_, _) => _revision++);
     ref.listen(naiAgentImageApprovalsProvider, (_, _) => _revision++);
     final config = ref.watch(promptAssistantConfigProvider);
+    final chatGpt = ref.watch(naiAgentChatGptProvider);
     _watchQuoteInputs();
     final pending = <AgentPending>[
       if (r != null) ...[
@@ -594,13 +597,18 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
               m.supportsTools != false,
         )
         .firstOrNull;
-    final efforts = provider == null || model == null
-        ? <String>[]
-        : naiAgentReasoningEfforts(provider, model);
+    final chatGptModel = c.settings.providerId == chatGptAgentProviderId
+        ? chatGpt.models.where((m) => m.id == c.settings.modelId).firstOrNull
+        : null;
+    final efforts =
+        chatGptModel?.efforts ??
+        (provider == null || model == null
+            ? <String>[]
+            : naiAgentReasoningEfforts(provider, model));
     final localCommand = NaiAgentWorkspaceController.isBuiltinSlashCommand(
       r?.composer.text ?? '',
     );
-    final blocked = model == null && !localCommand
+    final blocked = model == null && chatGptModel == null && !localCommand
         ? AgentSendBlock.noModel
         : r?.starting == true
         ? AgentSendBlock.starting
@@ -867,6 +875,16 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
                   ? p.name.characters.take(2).toString().toUpperCase()
                   : null,
             ),
+        for (final m in chatGpt.models)
+          AgentModelOption(
+            providerId: chatGptAgentProviderId,
+            modelId: m.id,
+            label: m.name,
+            provider: chatGptAgentProviderName,
+            selected: m == chatGptModel,
+            logoAsset: 'openai',
+            chatGptUsageUrl: chatGptAgentUsageUrl,
+          ),
       ],
       thinking: AgentThinkingData(
         options: [for (final e in efforts) (e, reasoningEffortLabel(l, e))],
@@ -1045,9 +1063,9 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
       onRenameWorkspace: (id, name) => _run(() => c.renameWorkspace(id, name)),
       onOpenWorkspaceFolder: () {
         if (r != null) {
-          _background(() async {
-            await launchUrl(Uri.directory(r.workspace.directory.path));
-          });
+          _background(
+            () => FileExplorerUtils.openDirectory(r.workspace.directory.path),
+          );
         }
       },
       onCompact: () => _run(() => c.compact()),

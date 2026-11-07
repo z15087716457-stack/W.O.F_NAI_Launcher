@@ -2247,12 +2247,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get characterTooltip_viewFullConfig => '点击查看完整配置';
 
   @override
-  String get addGroup_displayNameLabel => '显示名称（可选）';
-
-  @override
-  String get addGroup_targetCategoryLabel => '目标分类';
-
-  @override
   String globalSettings_saveFailed(Object error) {
     return '保存失败: $error';
   }
@@ -3262,15 +3256,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settings_proxyRestartHint => '代理设置已更改，建议重启应用';
-
-  @override
-  String get tagLibrary_addToLibrary => '收藏到词库';
-
-  @override
-  String get tagLibrary_uncategorized => '未分类';
-
-  @override
-  String get tagLibrary_contentPreview => '内容预览';
 
   @override
   String get settings_enablePromptWeightScroll => '滚轮调整提示词权重';
@@ -4746,34 +4731,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get toast_dropNoReadableImageOrVibe => '拖入源未提供可读取的图片或 Vibe 文件';
 
   @override
-  String get toast_contentCannotBeEmpty => '内容不能为空';
-
-  @override
-  String get toast_addedToLibrary => '已添加到词库';
-
-  @override
-  String toast_addFailed(Object error) {
-    return '添加失败: $error';
-  }
-
-  @override
-  String get toast_libraryNotLoaded => '词库未加载';
-
-  @override
-  String get toast_noValidTagContent => '没有有效的标签内容';
-
-  @override
-  String get toast_allTagsAlreadyExist => '所有标签已存在于词库中';
-
-  @override
-  String get toast_noAddableTags => '没有可添加的标签';
-
-  @override
-  String toast_addedTagsSkippedDuplicates(Object added, Object skipped) {
-    return '已添加 $added 个标签，跳过 $skipped 个重复标签';
-  }
-
-  @override
   String get toast_saveDirNotSet => '未设置保存目录';
 
   @override
@@ -4858,9 +4815,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get common_saving => '保存中...';
-
-  @override
   String get common_expand => '展开';
 
   @override
@@ -4883,24 +4837,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get detail_noContent => '(无内容)';
-
-  @override
-  String get saveBlock_title => '保存为块';
-
-  @override
-  String get saveBlock_nameLabel => '块标题';
-
-  @override
-  String get saveBlock_nameHint => '输入块标题';
-
-  @override
-  String get saveBlock_nameRequired => '请输入块标题';
-
-  @override
-  String get saveBlock_selectContent => '请选择要保存的内容';
-
-  @override
-  String get saveBlock_negativeSuffix => '负向';
 
   @override
   String get saveBlock_saved => '已保存到块库';
@@ -5260,12 +5196,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get common_optional => '可选';
-
-  @override
-  String get common_emptyValue => '（空）';
-
-  @override
   String get common_clickToRetry => '点击重试';
 
   @override
@@ -5273,12 +5203,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get common_swap => '交换';
-
-  @override
-  String get addToLibrary_displayNameHint => '输入便于识别此条目的名称';
-
-  @override
-  String get addToLibrary_tagHint => '输入标签并按 Enter 添加';
 
   @override
   String get drop_saveVibeBundle => '保存 Vibe Bundle';
@@ -5430,9 +5354,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get promptBlockLibrary_allBlocks => '全部块';
 
   @override
-  String get promptBlockLibrary_rootFolder => '根目录 / 未分类';
-
-  @override
   String get promptBlockLibrary_unnamedBlock => '未命名块';
 
   @override
@@ -5458,15 +5379,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String promptBlockLibrary_deleteCollectionFolderConfirm(String name) {
     return '确定要删除收藏文件夹「$name」吗？其中的收藏集与子文件夹会一并删除，块本体不受影响。';
   }
-
-  @override
-  String get promptBlockLibrary_blockTitle => '标题';
-
-  @override
-  String get promptBlockLibrary_titleHint => '块标题';
-
-  @override
-  String get promptBlockLibrary_folder => '文件夹';
 
   @override
   String get promptBlockLibrary_settingsApplied => '块设置已导入当前画面';
@@ -5653,22 +5565,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get promptBlockPicker_title => '选择块';
 
   @override
-  String get promptBlockLibrary_selectImage => '选择图片';
-
-  @override
   String get promptBlockLibrary_adjustThumbnailTitle => '调整预览图显示范围';
 
   @override
   String get promptBlockLibrary_dragToMove => '拖拽移动，滚轮或双指缩放';
-
-  @override
-  String get promptBlockLibrary_addToLibrary => '收藏到块库';
-
-  @override
-  String get promptBlockLibrary_contentPreview => '内容预览';
-
-  @override
-  String get promptBlockLibrary_confirmAdd => '确认收藏';
 
   @override
   String get promptBlockLibrary_saveToLibrary => '保存到块库';
@@ -15851,6 +15751,30 @@ class AppLocalizationsZh extends AppLocalizations {
   String get naiAgent_newChat => '新聊天';
 
   @override
+  String get naiAgent_chatGptSignIn => '使用 ChatGPT 登录';
+
+  @override
+  String get naiAgent_chatGptHint => 'Agent 可使用你的 ChatGPT 套餐额度。';
+
+  @override
+  String get naiAgent_chatGptBrowser => '请在浏览器中完成登录。';
+
+  @override
+  String get naiAgent_chatGptConnected => '已连接，可在 Agent 的模型选择器中选用。';
+
+  @override
+  String get naiAgent_chatGptNoModels => '当前账号没有可用的兼容模型。';
+
+  @override
+  String get naiAgent_chatGptError => '无法连接 ChatGPT，请重试或重新登录。';
+
+  @override
+  String get naiAgent_chatGptUsingPlan => '使用 ChatGPT 套餐额度';
+
+  @override
+  String get naiAgent_chatGptManageUsage => '管理用量';
+
+  @override
   String get naiAgent_settings => 'Agent 设置';
 
   @override
@@ -20928,6 +20852,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get mp_keyHint => '输入此服务商的 Key';
 
   @override
+  String get mp_chatGptPlan => 'ChatGPT 套餐';
+
+  @override
+  String get mp_chatGptAgentOnly => '仅供 NAI Agent 使用';
+
+  @override
+  String get mp_manageAccount => '管理账号';
+
+  @override
   String get mp_pickerTitle => '添加服务商';
 
   @override
@@ -23978,12 +23911,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get characterTooltip_viewFullConfig => '點選檢視完整配置';
 
   @override
-  String get addGroup_displayNameLabel => '顯示名稱（可選）';
-
-  @override
-  String get addGroup_targetCategoryLabel => '目標分類';
-
-  @override
   String globalSettings_saveFailed(Object error) {
     return '儲存失敗: $error';
   }
@@ -24993,15 +24920,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get settings_proxyRestartHint => '代理設定已更改，建議重啟應用';
-
-  @override
-  String get tagLibrary_addToLibrary => '收藏到詞庫';
-
-  @override
-  String get tagLibrary_uncategorized => '未分類';
-
-  @override
-  String get tagLibrary_contentPreview => '內容預覽';
 
   @override
   String get settings_enablePromptWeightScroll => '滾輪調整提示詞權重';
@@ -26477,34 +26395,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get toast_dropNoReadableImageOrVibe => '拖入源未提供可讀取的圖片或 Vibe 檔案';
 
   @override
-  String get toast_contentCannotBeEmpty => '內容不能為空';
-
-  @override
-  String get toast_addedToLibrary => '已新增到詞庫';
-
-  @override
-  String toast_addFailed(Object error) {
-    return '新增失敗: $error';
-  }
-
-  @override
-  String get toast_libraryNotLoaded => '詞庫未載入';
-
-  @override
-  String get toast_noValidTagContent => '沒有有效的標籤內容';
-
-  @override
-  String get toast_allTagsAlreadyExist => '所有標籤已存在於詞庫中';
-
-  @override
-  String get toast_noAddableTags => '沒有可新增的標籤';
-
-  @override
-  String toast_addedTagsSkippedDuplicates(Object added, Object skipped) {
-    return '已新增 $added 個標籤，跳過 $skipped 個重複標籤';
-  }
-
-  @override
   String get toast_saveDirNotSet => '未設定儲存目錄';
 
   @override
@@ -26589,9 +26479,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
-  String get common_saving => '儲存中...';
-
-  @override
   String get common_expand => '展開';
 
   @override
@@ -26614,24 +26501,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get detail_noContent => '(無內容)';
-
-  @override
-  String get saveBlock_title => '儲存為塊';
-
-  @override
-  String get saveBlock_nameLabel => '塊標題';
-
-  @override
-  String get saveBlock_nameHint => '輸入塊標題';
-
-  @override
-  String get saveBlock_nameRequired => '請輸入塊標題';
-
-  @override
-  String get saveBlock_selectContent => '請選擇要儲存的內容';
-
-  @override
-  String get saveBlock_negativeSuffix => '負向';
 
   @override
   String get saveBlock_saved => '已儲存到塊庫';
@@ -26991,12 +26860,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
-  String get common_optional => '可選';
-
-  @override
-  String get common_emptyValue => '（空）';
-
-  @override
   String get common_clickToRetry => '點選重試';
 
   @override
@@ -27004,12 +26867,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get common_swap => '交換';
-
-  @override
-  String get addToLibrary_displayNameHint => '輸入便於識別此條目的名稱';
-
-  @override
-  String get addToLibrary_tagHint => '輸入標籤並按 Enter 新增';
 
   @override
   String get drop_saveVibeBundle => '儲存 Vibe Bundle';
@@ -27161,9 +27018,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get promptBlockLibrary_allBlocks => '全部塊';
 
   @override
-  String get promptBlockLibrary_rootFolder => '根目錄 / 未分類';
-
-  @override
   String get promptBlockLibrary_unnamedBlock => '未命名塊';
 
   @override
@@ -27189,15 +27043,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String promptBlockLibrary_deleteCollectionFolderConfirm(String name) {
     return '確定要刪除收藏資料夾「$name」嗎？其中的收藏集與子資料夾會一併刪除，塊本體不受影響。';
   }
-
-  @override
-  String get promptBlockLibrary_blockTitle => '標題';
-
-  @override
-  String get promptBlockLibrary_titleHint => '塊標題';
-
-  @override
-  String get promptBlockLibrary_folder => '資料夾';
 
   @override
   String get promptBlockLibrary_settingsApplied => '塊設定已匯入當前畫面';
@@ -27384,22 +27229,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get promptBlockPicker_title => '選擇塊';
 
   @override
-  String get promptBlockLibrary_selectImage => '選擇圖片';
-
-  @override
   String get promptBlockLibrary_adjustThumbnailTitle => '調整預覽圖顯示範圍';
 
   @override
   String get promptBlockLibrary_dragToMove => '拖曳移動，滾輪或雙指縮放';
-
-  @override
-  String get promptBlockLibrary_addToLibrary => '收藏到塊庫';
-
-  @override
-  String get promptBlockLibrary_contentPreview => '內容預覽';
-
-  @override
-  String get promptBlockLibrary_confirmAdd => '確認收藏';
 
   @override
   String get promptBlockLibrary_saveToLibrary => '儲存到塊庫';
@@ -37582,6 +37415,30 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get naiAgent_newChat => '新聊天';
 
   @override
+  String get naiAgent_chatGptSignIn => '使用 ChatGPT 登入';
+
+  @override
+  String get naiAgent_chatGptHint => 'Agent 可使用你的 ChatGPT 套餐額度。';
+
+  @override
+  String get naiAgent_chatGptBrowser => '請在瀏覽器中完成登入。';
+
+  @override
+  String get naiAgent_chatGptConnected => '已連線，可在 Agent 的模型選擇器中選用。';
+
+  @override
+  String get naiAgent_chatGptNoModels => '當前帳號沒有可用的相容模型。';
+
+  @override
+  String get naiAgent_chatGptError => '無法連線 ChatGPT，請重試或重新登入。';
+
+  @override
+  String get naiAgent_chatGptUsingPlan => '使用 ChatGPT 套餐額度';
+
+  @override
+  String get naiAgent_chatGptManageUsage => '管理用量';
+
+  @override
   String get naiAgent_settings => 'Agent 設定';
 
   @override
@@ -42657,6 +42514,15 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get mp_keyHint => '輸入此服務商的 Key';
+
+  @override
+  String get mp_chatGptPlan => 'ChatGPT 套餐';
+
+  @override
+  String get mp_chatGptAgentOnly => '僅供 NAI Agent 使用';
+
+  @override
+  String get mp_manageAccount => '管理帳號';
 
   @override
   String get mp_pickerTitle => '新增服務商';

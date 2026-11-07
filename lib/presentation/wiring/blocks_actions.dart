@@ -9,6 +9,7 @@ import '../../core/constants/model_spec.dart';
 import '../../core/utils/localization_extension.dart';
 import '../../core/utils/prompt_block_exchange.dart';
 import '../../data/models/prompt_block/prompt_block.dart';
+import '../../data/models/prompt_block/pill_document.dart';
 import '../../data/models/prompt_block/prompt_block_folder.dart';
 import '../../data/repositories/prompt_block_repository.dart';
 import '../providers/character_prompt_provider.dart';
@@ -116,6 +117,7 @@ class BlocksActions {
 
   Future<void> insert(
     List<String> ids, {
+    PillTempContent? temporary,
     String fallbackScope = PillScopes.main,
     String? targetScope,
     bool propagateErrors = false,
@@ -134,7 +136,7 @@ class BlocksActions {
         for (final id in ids.toSet())
           if (library.blockById(id) case final block?) block,
       ];
-      if (blocks.isEmpty) return;
+      if (blocks.isEmpty && temporary == null) return;
       final committed = await guard.commit(
         () {
           final target =
@@ -172,6 +174,15 @@ class BlocksActions {
                     0,
                     ref.read(pillWorkspaceProvider(scope)).document.text.length,
                   );
+          if (temporary != null) {
+            caret += insertPromptBlockBundle(
+              ref,
+              scope: scope,
+              offset: caret,
+              blockId: '',
+              temp: temporary,
+            );
+          }
           for (final b in blocks) {
             caret += insertPromptBlockBundle(
               ref,
@@ -243,6 +254,7 @@ class BlocksActions {
     String? initialContent,
     String? folderId,
     BlockDraft? initialDraft,
+    bool isFavorite = false,
   }) async {
     final service = backend;
     final library = service.library;
@@ -313,7 +325,14 @@ class BlocksActions {
       return null;
     }
     if (draft == null) return null;
-    return run(() => service.save(draft, id: id, expected: existing));
+    return run(
+      () => service.save(
+        draft,
+        id: id,
+        expected: existing,
+        isFavorite: isFavorite,
+      ),
+    );
   }
 
   Future<void> delete(List<String> ids) async {

@@ -6,6 +6,7 @@ import '../../../core/nai_agent/agent_tool.dart';
 import '../../../core/nai_agent/generation_tools.dart';
 import '../../../core/utils/localization_extension.dart';
 import 'nai_agent_model_provider.dart';
+import 'nai_agent_chatgpt_provider.dart';
 import 'nai_agent_studio_provider.dart';
 
 typedef NaiAgentSessionStarter =
@@ -72,13 +73,37 @@ final naiAgentSessionStarterProvider = Provider<NaiAgentSessionStarter>((ref) {
     prompts = const {},
     packages = const {},
   }) async {
-    var model = await ref.read(naiAgentModelResolverProvider)(
-      providerId,
-      modelId,
-    );
-    if (reasoningEffort != null &&
-        model.supportsReasoningEffort(reasoningEffort)) {
-      model = model.withReasoningEffort(reasoningEffort);
+    Future<String> Function()? requestAccessToken;
+    NaiAgentModelConnection model;
+    if (providerId == chatGptAgentProviderId) {
+      final account = ref.read(naiAgentChatGptProvider);
+      await account.ready;
+      final selected = account.models.where((m) => m.id == modelId).firstOrNull;
+      if (selected == null) throw StateError('Unavailable ChatGPT model');
+      model = NaiAgentModelConnection({
+        'providerId': providerId,
+        'modelId': modelId,
+        'displayName': selected.name,
+        'protocol': 'openaiResponses',
+        'chatGptSubscription': true,
+        'vision': selected.vision,
+        'tools': true,
+        'contextWindow': selected.contextWindow,
+        'maxTokens': selected.maxTokens,
+        'thinkingLevel': selected.efforts.contains(reasoningEffort)
+            ? reasoningEffort
+            : 'off',
+      }, providerName: chatGptAgentProviderName);
+      requestAccessToken = account.accessToken;
+    } else {
+      model = await ref.read(naiAgentModelResolverProvider)(
+        providerId,
+        modelId,
+      );
+      if (reasoningEffort != null &&
+          model.supportsReasoningEffort(reasoningEffort)) {
+        model = model.withReasoningEffort(reasoningEffort);
+      }
     }
     final extraNames = extraToolNames ?? const <String>[];
     if (!alive) throw StateError('NAI Agent owner closed');
@@ -97,6 +122,7 @@ final naiAgentSessionStarterProvider = Provider<NaiAgentSessionStarter>((ref) {
       agentDirectory: data,
       systemPrompt: systemPrompt,
       visionAccess: model.visionAccess,
+      requestAccessToken: requestAccessToken,
       privateModelConfig: {
         ...model.toPrivateJson(),
         'permissionMode': permissionMode ?? 'auto',

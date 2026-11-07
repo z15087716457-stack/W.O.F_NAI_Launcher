@@ -223,8 +223,12 @@ class FakeLocalGalleryService implements LocalGalleryService {
   }
 
   @override
-  Future<void> refresh({bool scan = true}) async {
+  Future<void> refresh({
+    bool scan = true,
+    Future<void> Function()? onFilesRefreshed,
+  }) async {
     refreshCount++;
+    await onFilesRefreshed?.call();
   }
 
   @override

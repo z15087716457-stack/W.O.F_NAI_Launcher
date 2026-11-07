@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../data/models/prompt_block/pill_document.dart';
 import '../providers/pill_workspace_provider.dart';
 import '../providers/prompt_block_library_provider.dart';
 
@@ -11,11 +12,13 @@ int insertPromptBlockBundle(
   required String scope,
   required int offset,
   required String blockId,
+  PillTempContent? temp,
 }) => insertPromptBlockBundleWithReader(
   ref.read,
   scope: scope,
   offset: offset,
   blockId: blockId,
+  temp: temp,
 );
 
 /// Shared insertion semantics for both widgets and the Agent provider binding.
@@ -24,15 +27,18 @@ int insertPromptBlockBundleWithReader(
   required String scope,
   required int offset,
   required String blockId,
+  PillTempContent? temp,
 }) {
   final block = read(
     promptBlockLibraryNotifierProvider,
   ).valueOrNull?.blockById(blockId);
-  final negative = block?.negativeContent.isNotEmpty == true;
+  final negative = temp != null
+      ? temp.negativeContent?.isNotEmpty == true
+      : block?.negativeContent.isNotEmpty == true;
   if (!negative) {
     read(
       pillWorkspaceProvider(scope).notifier,
-    ).insertBlockAt(offset: offset, blockId: blockId);
+    ).insertBlockAt(offset: offset, blockId: blockId, temp: temp);
     return 1;
   }
 
@@ -52,11 +58,11 @@ int insertPromptBlockBundleWithReader(
   if (positiveScope == null || negativeScope == null) {
     read(
       pillWorkspaceProvider(scope).notifier,
-    ).insertBlockAt(offset: offset, blockId: blockId);
+    ).insertBlockAt(offset: offset, blockId: blockId, temp: temp);
     return 1;
   }
 
-  final hasPositive = block!.content.isNotEmpty;
+  final hasPositive = (temp?.content ?? block!.content).isNotEmpty;
   final bundleId = const Uuid().v4();
   final rollScopeMask = hasPositive ? 1 : 2;
   final activePositive = scope == positiveScope;
@@ -67,6 +73,7 @@ int insertPromptBlockBundleWithReader(
     read(lane.notifier).insertBlockAt(
       offset: activePositive ? offset : document.text.length,
       blockId: blockId,
+      temp: temp,
       bundleId: bundleId,
       rollScopeMask: rollScopeMask,
     );
@@ -77,6 +84,7 @@ int insertPromptBlockBundleWithReader(
   read(lane.notifier).insertBlockAt(
     offset: activePositive ? document.text.length : offset,
     blockId: blockId,
+    temp: temp,
     useNegativeContent: true,
     countUse: !counted,
     bundleId: bundleId,

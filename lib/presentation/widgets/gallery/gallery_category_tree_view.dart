@@ -89,6 +89,8 @@ class GalleryCategoryTreeView extends StatefulWidget {
 
   /// 已索引图片总数（底部状态显示）
   final int indexedCount;
+  final bool isRefreshing;
+  final String? indexError;
 
   const GalleryCategoryTreeView({
     super.key,
@@ -114,6 +116,8 @@ class GalleryCategoryTreeView extends StatefulWidget {
     this.onOpenTrash,
     this.onRefresh,
     this.indexedCount = 0,
+    this.isRefreshing = false,
+    this.indexError,
   });
 
   @override
@@ -278,6 +282,8 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
             if (scanning) return const GalleryScanProgressPanel();
             return _SidebarFooter(
               indexedCount: widget.indexedCount,
+              isRefreshing: widget.isRefreshing,
+              indexError: widget.indexError,
               onRefresh: widget.onRefresh,
             );
           },
@@ -1496,9 +1502,16 @@ class _SidebarSectionHeaderState extends State<_SidebarSectionHeader> {
 
 /// 侧栏底部：索引状态与刷新
 class _SidebarFooter extends StatelessWidget {
-  const _SidebarFooter({required this.indexedCount, this.onRefresh});
+  const _SidebarFooter({
+    required this.indexedCount,
+    required this.isRefreshing,
+    required this.indexError,
+    this.onRefresh,
+  });
 
   final int indexedCount;
+  final bool isRefreshing;
+  final String? indexError;
   final VoidCallback? onRefresh;
 
   @override
@@ -1507,6 +1520,12 @@ class _SidebarFooter extends StatelessWidget {
     final colors = theme.colorScheme;
     final l10n = context.l10n;
     final locale = Localizations.localeOf(context).toLanguageTag();
+    final status = isRefreshing
+        ? l10n.localGallery_indexingLocalImages
+        : indexError ??
+              l10n.localGallery_indexSynced(
+                NumberFormat.decimalPattern(locale).format(indexedCount),
+              );
     return Container(
       key: const Key('gallery-sidebar-footer'),
       height: 40,
@@ -1516,22 +1535,28 @@ class _SidebarFooter extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Container(
-            width: 6,
-            height: 6,
-            decoration: BoxDecoration(
-              color: theme.brightness == Brightness.dark
-                  ? const Color(0xFF3FCF7E)
-                  : const Color(0xFF2FB26A),
-              shape: BoxShape.circle,
+          if (isRefreshing)
+            const SizedBox.square(
+              dimension: 8,
+              child: CircularProgressIndicator(strokeWidth: 1),
+            )
+          else
+            Container(
+              width: 6,
+              height: 6,
+              decoration: BoxDecoration(
+                color: indexError != null
+                    ? colors.error
+                    : theme.brightness == Brightness.dark
+                    ? const Color(0xFF3FCF7E)
+                    : const Color(0xFF2FB26A),
+                shape: BoxShape.circle,
+              ),
             ),
-          ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              l10n.localGallery_indexSynced(
-                NumberFormat.decimalPattern(locale).format(indexedCount),
-              ),
+              status,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.bodySmall?.copyWith(
@@ -1542,7 +1567,7 @@ class _SidebarFooter extends StatelessWidget {
           if (onRefresh != null)
             IconButton(
               key: const Key('gallery-sidebar-refresh'),
-              onPressed: onRefresh,
+              onPressed: isRefreshing ? null : onRefresh,
               tooltip: l10n.localGallery_refreshTooltip,
               icon: const Icon(StudioIcons.galleryRefresh, size: 16),
               color: colors.onSurfaceVariant,

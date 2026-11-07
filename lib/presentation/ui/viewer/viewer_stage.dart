@@ -378,6 +378,8 @@ class _ViewState extends State<_View> {
         ? index < data.items.length - 1
         : data.position < data.total - 1;
     final showChrome = !widget.fullscreen || ctrl.chromeVisible;
+    final canOpenImageMenu =
+        !item.missing && data.actions.contains(ViewerAction.copyImage);
 
     return LayoutBuilder(
       builder: (context, box) {
@@ -440,6 +442,16 @@ class _ViewState extends State<_View> {
                         child: GestureDetector(
                           key: const Key('viewer-view'),
                           behavior: HitTestBehavior.opaque,
+                          onSecondaryTapUp: canOpenImageMenu
+                              ? (details) {
+                                  if (rect.contains(details.localPosition)) {
+                                    ctrl.openMore(
+                                      UiPopoverAnchor(details.globalPosition),
+                                      fromImage: true,
+                                    );
+                                  }
+                                }
+                              : null,
                           onDoubleTapDown: (d) => _tapAt = d.localPosition,
                           onDoubleTap: item.missing
                               ? null

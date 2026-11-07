@@ -7,6 +7,7 @@ class PromptBlockDragData {
   const PromptBlockDragData({
     required this.blockId,
     this.translation,
+    this.temp,
     this.instanceMarker,
     this.paletteIndex,
     this.blockIds,
@@ -19,6 +20,7 @@ class PromptBlockDragData {
   /// Dragging an inline translation into the palette creates a new library
   /// block on drop. The source inline pill is never moved.
   final TranslationPill? translation;
+  final PillTempContent? temp;
 
   /// 管理页批量拖动使用；生成提示词的落点仍只取 blockId。
   final List<String>? blockIds;

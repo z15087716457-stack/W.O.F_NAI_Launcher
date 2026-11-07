@@ -114,6 +114,7 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
   bool _inspectorVisible = true;
   AppLifecycleListener? _lifecycleListener;
   bool _galleryReady = false;
+  bool _refreshingFromDisk = false;
   GalleryNavigationRequest? _handledNavigationRequest;
 
   late final _fileMonitor = ref.read(galleryFileMonitorProvider);
@@ -217,15 +218,19 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
     super.dispose();
   }
 
-  void _refreshGallery() async {
-    await ref.read(localGalleryNotifierProvider.notifier).refresh();
-    if (mounted) {
+  Future<void> _refreshGallery() async {
+    if (_refreshingFromDisk) return;
+    setState(() => _refreshingFromDisk = true);
+    try {
+      await ref.read(localGalleryNotifierProvider.notifier).refreshFromDisk();
+      if (!mounted) return;
       await _fileMonitor.updateRoots();
-    }
-    if (mounted) {
+      if (!mounted) return;
       await ref
           .read(galleryCategoryNotifierProvider.notifier)
           .syncWithFileSystem();
+    } finally {
+      if (mounted) setState(() => _refreshingFromDisk = false);
     }
   }
 
@@ -306,7 +311,8 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
               final showInspector = _inspectorVisible && inspectorAvailable;
               return Row(
                 children: [
-                  if (showSidebar) _buildSidebar(theme, categoryState),
+                  if (showSidebar)
+                    _buildSidebar(theme, categoryState, state.error),
                   Expanded(
                     child: Column(
                       children: [
@@ -385,7 +391,11 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
     );
   }
 
-  Widget _buildSidebar(ThemeData theme, GalleryCategoryState categoryState) {
+  Widget _buildSidebar(
+    ThemeData theme,
+    GalleryCategoryState categoryState,
+    LocalGalleryError? error,
+  ) {
     final collectionState = ref.watch(collectionNotifierProvider);
     final totalCount = ref.watch(
       localGalleryNotifierProvider.select((s) => s.totalCount),
@@ -470,6 +480,10 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
                 onOpenTrash: () => _handleCategorySelected('trash'),
                 onRefresh: _refreshGallery,
                 indexedCount: totalCount,
+                isRefreshing: _refreshingFromDisk,
+                indexError: error?.code == LocalGalleryErrorCode.refreshFailed
+                    ? error?.localized(context.l10n)
+                    : null,
               ),
             ),
           ),
@@ -482,8 +496,7 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
     if (error != null) {
       return GalleryErrorView(
         error: error.localized(context.l10n),
-        onRetry: () =>
-            ref.read(localGalleryNotifierProvider.notifier).refresh(),
+        onRetry: _refreshGallery,
       );
     }
 

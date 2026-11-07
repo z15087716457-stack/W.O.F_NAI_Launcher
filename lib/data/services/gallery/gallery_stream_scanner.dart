@@ -328,23 +328,22 @@ class GalleryStreamScanner {
   /// [retryMissingMetadata] - 是否重新尝试历史上标记为无元数据的文件
   /// [retryFailedMetadata] - 是否重新尝试历史上提取失败的文件
   ///
-  /// 使用互斥锁保证同一时间只有一个扫描任务在运行
-  Future<void> startScanning(
+  /// 使用互斥锁保证同一时间只有一个扫描任务在运行，完成时返回 true。
+  Future<bool> startScanning(
     List<Directory> rootDirs, {
     void Function(FileProcessingResult result, StreamScanStats stats)?
     onFileProcessed,
     bool checkConsistency = true,
     bool retryMissingMetadata = false,
     bool retryFailedMetadata = false,
-  }) async {
-    // 使用互斥锁防止并发扫描
-    await _scanLock.synchronized(() async {
+  }) {
+    return _scanLock.synchronized(() async {
       if (_isRunning) {
         AppLogger.w(
           '[StreamScan] Scanner already running',
           'GalleryStreamScanner',
         );
-        return;
+        return false;
       }
 
       if (rootDirs.isEmpty) {
@@ -352,7 +351,7 @@ class GalleryStreamScanner {
           '[StreamScan] No root directories to scan',
           'GalleryStreamScanner',
         );
-        return;
+        return false;
       }
 
       // 【导入先行保护】标签索引导入进行中时拒绝扫描：
@@ -363,7 +362,7 @@ class GalleryStreamScanner {
           '[StreamScan] 标签索引导入进行中，跳过本次扫描（导入完成后刷新即可）',
           'GalleryStreamScanner',
         );
-        return;
+        return false;
       }
 
       _isRunning = true;
@@ -425,7 +424,7 @@ class GalleryStreamScanner {
             '[StreamScan] Scan start was rejected by ScanStateManager',
             'GalleryStreamScanner',
           );
-          return;
+          return false;
         }
 
         // 5. 流式处理：发现文件 → 立即处理
@@ -504,8 +503,13 @@ class GalleryStreamScanner {
           }
         }
 
-        // 扫描完成：收尾批次 + 强制最后一次进度通知
         await _flushBatch();
+        if (_shouldCancel) {
+          _stateManager.cancelScan();
+          return false;
+        }
+
+        // 扫描完成：强制最后一次进度通知
         _emitProgress(stats, force: true);
         _updateScanState(
           processed: processedCount,
@@ -521,6 +525,7 @@ class GalleryStreamScanner {
               '${stats.skipped} skipped (${(stats.skipped / stats.totalDiscovered * 100).toStringAsFixed(1)}%)',
           'GalleryStreamScanner',
         );
+        return true;
       } catch (e, stack) {
         AppLogger.e(
           '[StreamScan] Scan failed',
@@ -529,6 +534,7 @@ class GalleryStreamScanner {
           'GalleryStreamScanner',
         );
         _stateManager.errorScan(e.toString());
+        return false;
       } finally {
         _isRunning = false;
         // 批处理缓冲在异常/取消时丢弃（最多一帧的未落库记录，下次扫描补齐）

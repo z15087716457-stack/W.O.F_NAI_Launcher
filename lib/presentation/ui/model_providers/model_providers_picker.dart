@@ -19,6 +19,7 @@ class ProvidersPicker extends StatefulWidget {
     required this.presets,
     required this.existing,
     required this.onPick,
+    required this.onCancelSignIn,
     required this.onClose,
   });
 
@@ -26,7 +27,8 @@ class ProvidersPicker extends StatefulWidget {
 
   /// 已添加过的预设 id（卡片标“已添加”，仍可再加）。
   final Set<String> existing;
-  final ValueChanged<String> onPick;
+  final Future<bool> Function(String id, {required bool waitForSignIn}) onPick;
+  final VoidCallback onCancelSignIn;
   final VoidCallback onClose;
 
   @override
@@ -36,7 +38,31 @@ class ProvidersPicker extends StatefulWidget {
 class _ProvidersPickerState extends State<ProvidersPicker> {
   var _q = '';
   ProviderGroup? _group;
-  String? _sel;
+  String? _sel, _failedPreset;
+  bool _signingIn = false;
+
+  Future<void> _pick(ProviderPresetItem preset) async {
+    if (_signingIn) return;
+    final signIn = preset.browserSignIn && !widget.existing.contains(preset.id);
+    if (signIn) {
+      setState(() {
+        _signingIn = true;
+        _failedPreset = null;
+      });
+    }
+    final added = await widget.onPick(preset.id, waitForSignIn: signIn);
+    if (signIn && mounted) {
+      setState(() {
+        _signingIn = false;
+        if (!added) _failedPreset = preset.id;
+      });
+    }
+  }
+
+  void _close() {
+    if (_signingIn) widget.onCancelSignIn();
+    widget.onClose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +78,10 @@ class _ProvidersPickerState extends State<ProvidersPicker> {
                 p.id.toLowerCase().contains(q)))
           p,
     ];
-    final sel = _sel ?? shown.firstOrNull?.id;
+    final sel =
+        shown.where((p) => p.id == _sel).firstOrNull ?? shown.firstOrNull;
+    final account = sel?.browserSignIn == true;
+    final alreadyAdded = widget.existing.contains(sel?.id);
     String groupName(ProviderGroup g) => switch (g) {
       ProviderGroup.domestic => l.mp_groupDomesticFull,
       ProviderGroup.international => l.mp_groupInternationalFull,
@@ -63,9 +92,9 @@ class _ProvidersPickerState extends State<ProvidersPicker> {
       key: Key('mp-preset-${p.id}'),
       onTap: () => setState(() => _sel = p.id),
       builder: (context, hover) {
-        final on = p.id == sel;
+        final on = p.id == sel?.id;
         return GestureDetector(
-          onDoubleTap: () => widget.onPick(p.id),
+          onDoubleTap: () => _pick(p),
           child: Container(
             padding: const EdgeInsets.fromLTRB(10, 9, 10, 9),
             decoration: BoxDecoration(
@@ -109,7 +138,7 @@ class _ProvidersPickerState extends State<ProvidersPicker> {
                         p.host,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: p.custom
+                        style: p.custom || p.browserSignIn
                             ? UiText.sans(11, color: c.faint)
                             : UiText.mono(11, color: c.faint),
                       ),
@@ -168,9 +197,9 @@ class _ProvidersPickerState extends State<ProvidersPicker> {
 
     return CallbackShortcuts(
       bindings: {
-        const SingleActivator(LogicalKeyboardKey.escape): widget.onClose,
+        const SingleActivator(LogicalKeyboardKey.escape): _close,
         const SingleActivator(LogicalKeyboardKey.enter): () {
-          if (sel != null) widget.onPick(sel);
+          if (sel != null) _pick(sel);
         },
       },
       child: Stack(
@@ -178,7 +207,7 @@ class _ProvidersPickerState extends State<ProvidersPicker> {
           Positioned.fill(
             child: GestureDetector(
               key: const Key('mp-picker-scrim'),
-              onTap: widget.onClose,
+              onTap: _close,
               child: ColoredBox(
                 color: c.dark
                     ? const Color(0x80000000)
@@ -186,10 +215,9 @@ class _ProvidersPickerState extends State<ProvidersPicker> {
               ),
             ),
           ),
-          Align(
-            alignment: Alignment.topCenter,
+          Center(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 28, 16, 16),
+              padding: const EdgeInsets.all(16),
               child: Container(
                 key: const Key('mp-picker'),
                 width: 820,
@@ -229,7 +257,7 @@ class _ProvidersPickerState extends State<ProvidersPicker> {
                             glyph: UiGlyphs.close,
                             tooltip: l.set_cancel,
                             glyphSize: 16,
-                            onTap: widget.onClose,
+                            onTap: _close,
                           ),
                         ],
                       ),
@@ -290,7 +318,14 @@ class _ProvidersPickerState extends State<ProvidersPicker> {
                         children: [
                           Expanded(
                             child: Text(
-                              l.mp_pickerFoot,
+                              _signingIn
+                                  ? l.naiAgent_chatGptBrowser
+                                  : _failedPreset != null &&
+                                        _failedPreset == sel?.id
+                                  ? l.naiAgent_chatGptError
+                                  : account
+                                  ? l.naiAgent_chatGptHint
+                                  : l.mp_pickerFoot,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                               style: UiText.sans(12, color: c.muted),
@@ -300,16 +335,20 @@ class _ProvidersPickerState extends State<ProvidersPicker> {
                             label: l.set_cancel,
                             small: true,
                             tone: SettingsBtnTone.ghost,
-                            onTap: widget.onClose,
+                            onTap: _close,
                           ),
                           SettingsBtn(
                             key: const Key('mp-picker-next'),
-                            label: l.mp_pickerNext,
+                            label: !account
+                                ? l.mp_pickerNext
+                                : alreadyAdded
+                                ? l.mp_manageAccount
+                                : l.naiAgent_chatGptSignIn,
                             small: true,
                             tone: SettingsBtnTone.primary,
-                            onTap: sel == null
+                            onTap: sel == null || _signingIn
                                 ? null
-                                : () => widget.onPick(sel),
+                                : () => _pick(sel),
                           ),
                         ],
                       ),

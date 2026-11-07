@@ -14,6 +14,8 @@ import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/core/storage/prompt_block_storage.dart';
 import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
+import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
+import 'package:nai_launcher/data/models/prompt_block/prompt_block_palette_entry.dart';
 import 'package:nai_launcher/data/models/image/image_params.dart';
 import 'package:nai_launcher/data/repositories/prompt_block_repository.dart';
 import 'package:nai_launcher/data/services/fixed_tag_migration_service.dart';
@@ -96,27 +98,146 @@ void main() {
     return notifier;
   }
 
-  group('PromptBlockStorage palette ids', () {
+  group('PromptBlockStorage palette entries', () {
+    test(
+      'legacy order and temporary contents survive storage reopen',
+      () async {
+        await Hive.box<String>(PromptBlockStorage.boxName).put(
+          'palette:order',
+          jsonEncode({
+            'blockIds': ['old-b', 'old-a'],
+          }),
+        );
+        final legacy = await storage.getPaletteEntries();
+        expect(legacy.map((entry) => entry.id), ['old-b', 'old-a']);
+        final temp = PillTempContent(
+          content: 'blue eyes,\n black hair',
+          negativeContent: 'blur',
+          originalContent: '',
+          editedAt: DateTime.utc(2026),
+          editedBy: 'agent',
+          title: 'Portrait',
+          color: '#FF248C65',
+          iconName: 'user',
+          translations: const [TranslationPill(source: 'blue eyes', zh: '蓝眼睛')],
+          negativeTranslations: const [
+            TranslationPill(source: 'blur', zh: '模糊'),
+          ],
+        );
+        await storage.putPaletteEntries([
+          legacy.first,
+          PromptBlockPaletteEntry.temporary(id: 'temp:portrait', temp: temp),
+          legacy.last,
+        ]);
+        await storage.close();
+        await storage.init();
+        final saved =
+            jsonDecode(
+                  Hive.box<String>(
+                    PromptBlockStorage.boxName,
+                  ).get('palette:order')!,
+                )
+                as Map<String, dynamic>;
+        expect(saved['blockIds'], ['old-b', 'old-a']);
+        final reopened = await storage.getPaletteEntries();
+        expect(reopened.map((entry) => entry.id), [
+          'old-b',
+          'temp:portrait',
+          'old-a',
+        ]);
+        expect(reopened[1].temp, temp);
+      },
+    );
+
     test('palette id list round-trips and survives empty write', () async {
-      expect(await storage.getPaletteBlockIds(), isEmpty);
+      expect(
+        (await storage.getPaletteEntries()).map((entry) => entry.id).toList(),
+        isEmpty,
+      );
 
-      await storage.putPaletteBlockIds(['b-2', 'b-1', 'b-3']);
-      expect(await storage.getPaletteBlockIds(), ['b-2', 'b-1', 'b-3']);
+      await storage.putPaletteEntries(
+        ['b-2', 'b-1', 'b-3'].map(PromptBlockPaletteEntry.library).toList(),
+      );
+      expect(
+        (await storage.getPaletteEntries()).map((entry) => entry.id).toList(),
+        ['b-2', 'b-1', 'b-3'],
+      );
 
-      await storage.putPaletteBlockIds(const []);
-      expect(await storage.getPaletteBlockIds(), isEmpty);
+      await storage.putPaletteEntries(const []);
+      expect(
+        (await storage.getPaletteEntries()).map((entry) => entry.id).toList(),
+        isEmpty,
+      );
     });
 
     test('meta flag round-trips independently of palette ids', () async {
       expect(await storage.getMeta('flagX'), isNull);
       await storage.putMeta('flagX', '1');
-      await storage.putPaletteBlockIds(['b-1']);
+      await storage.putPaletteEntries(
+        ['b-1'].map(PromptBlockPaletteEntry.library).toList(),
+      );
       expect(await storage.getMeta('flagX'), '1');
-      expect(await storage.getPaletteBlockIds(), ['b-1']);
+      expect(
+        (await storage.getPaletteEntries()).map((entry) => entry.id).toList(),
+        ['b-1'],
+      );
     });
   });
 
   group('PromptBlockPaletteNotifier', () {
+    test(
+      'temporary entries remain independent through library deletion and reopen',
+      () async {
+        final container = makeContainer();
+        final library = await seedLibrary(container, [
+          (title: 'Original', content: 'original'),
+        ]);
+        final block = library.state.value!.blocks.single;
+        final notifier = container.read(
+          promptBlockPaletteNotifierProvider.notifier,
+        );
+        final temp = PillTempContent(
+          content: 'edited content',
+          originalContent: block.content,
+          editedAt: DateTime.utc(2026),
+          editedBy: 'user',
+          title: 'Kept copy',
+        );
+        await notifier.addBlock(block.id);
+        await notifier.addTemporary(temp, index: 0);
+        var palette = await container.read(
+          promptBlockPaletteNotifierProvider.future,
+        );
+        final tempId = palette.blocks.first.id;
+        await notifier.move(0, 1);
+        palette = await container.read(
+          promptBlockPaletteNotifierProvider.future,
+        );
+        expect(palette.blocks.map((block) => block.id), [block.id, tempId]);
+        await library.deleteBlock(block.id);
+        palette = await container.read(
+          promptBlockPaletteNotifierProvider.future,
+        );
+        expect(palette.blocks.single.id, tempId);
+        expect(palette.temporary[tempId], temp);
+        final reopened = makeContainer();
+        palette = await reopened.read(
+          promptBlockPaletteNotifierProvider.future,
+        );
+        expect(palette.blocks.single.content, 'edited content');
+        expect(palette.temporary[tempId], temp);
+        await reopened
+            .read(promptBlockPaletteNotifierProvider.notifier)
+            .removeBlocks({tempId});
+        expect(
+          (await reopened.read(
+            promptBlockPaletteNotifierProvider.future,
+          )).blocks,
+          isEmpty,
+        );
+      },
+    );
+
     test('add/insert/remove/move update state and persist order', () async {
       final container = makeContainer();
       final library = await seedLibrary(container, [
@@ -155,7 +276,10 @@ void main() {
       expect(palette.blocks.map((b) => b.id), [ids[2], ids[0]]);
 
       // 顺序已落盘：冷启动按持久化 id 表重建。
-      expect(await storage.getPaletteBlockIds(), [ids[2], ids[0]]);
+      expect(
+        (await storage.getPaletteEntries()).map((entry) => entry.id).toList(),
+        [ids[2], ids[0]],
+      );
     });
 
     test('removeBlocks and clear update state and persist', () async {
@@ -179,7 +303,10 @@ void main() {
         promptBlockPaletteNotifierProvider.future,
       );
       expect(palette.blocks.map((b) => b.id), [ids[1]]);
-      expect(await storage.getPaletteBlockIds(), [ids[1]]);
+      expect(
+        (await storage.getPaletteEntries()).map((entry) => entry.id).toList(),
+        [ids[1]],
+      );
 
       // 不存在的 id 批量移除 = 空操作。
       await notifier.removeBlocks({'ghost'});
@@ -190,7 +317,10 @@ void main() {
       await notifier.clear();
       palette = await container.read(promptBlockPaletteNotifierProvider.future);
       expect(palette.blocks, isEmpty);
-      expect(await storage.getPaletteBlockIds(), isEmpty);
+      expect(
+        (await storage.getPaletteEntries()).map((entry) => entry.id).toList(),
+        isEmpty,
+      );
 
       // 空板上 clear = 空操作，不炸。
       await notifier.clear();
@@ -225,7 +355,10 @@ void main() {
           promptBlockPaletteNotifierProvider.future,
         );
         expect(palette.blocks.map((b) => b.id), [ids[0]]);
-        expect(await storage.getPaletteBlockIds(), [ids[0]]);
+        expect(
+          (await storage.getPaletteEntries()).map((entry) => entry.id).toList(),
+          [ids[0]],
+        );
       },
     );
   });
@@ -296,7 +429,9 @@ void main() {
         );
 
         // 仅启用的两条按 sortOrder 上板。
-        final paletteIds = await storage.getPaletteBlockIds();
+        final paletteIds = (await storage.getPaletteEntries())
+            .map((entry) => entry.id)
+            .toList();
         expect(paletteIds, hasLength(2));
         final byId = {for (final b in data.blocks) b.id: b};
         expect(byId[paletteIds[0]]?.title, '质量前缀');
@@ -342,7 +477,10 @@ void main() {
         await PromptBlockRepository(storage).load().then((d) => d.blocks),
         isEmpty,
       );
-      expect(await storage.getPaletteBlockIds(), isEmpty);
+      expect(
+        (await storage.getPaletteEntries()).map((entry) => entry.id).toList(),
+        isEmpty,
+      );
       expect(
         Hive.box(StorageKeys.settingsBox).get('fixed_tags_sidebar_width'),
         isNull,

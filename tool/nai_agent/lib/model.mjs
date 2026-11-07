@@ -1,4 +1,5 @@
-import { createProvider, createModels, lazyStream } from '@earendil-works/pi-ai';
+import { createProvider, createModels, getSupportedThinkingLevels, lazyStream } from '@earendil-works/pi-ai';
+import { openaiProvider } from '@earendil-works/pi-ai/providers/openai';
 import { ModelRuntime } from '@earendil-works/pi-coding-agent';
 import { createAssistantMessageEventStream } from '@earendil-works/pi-ai/utils/event-stream';
 
@@ -100,15 +101,66 @@ export function redactor(config) {
   };
 }
 
+// Keep authorization and model capabilities on the shipped Pi provider.
+export async function studioChatGpt(request, emit, signal) {
+  const provider = openaiProvider();
+  const oauth = provider.auth.oauth;
+  switch (request.action) {
+    case 'login':
+      return oauth.login({
+        signal,
+        notify: event => { if (event.type === 'auth_url') emit({ url: event.url }); },
+        // Studio completes the login through Pi's local browser callback.
+        prompt: ({ signal }) => new Promise((_, reject) => {
+          if (signal.aborted) reject(signal.reason);
+          else signal.addEventListener('abort', () => reject(signal.reason), { once: true });
+        }),
+      }, { getDeviceId: () => request.deviceId, agentName: 'W.O.F NAI Studio' });
+    case 'refresh':
+      return oauth.refresh(request.credential, signal);
+    case 'models': {
+      const response = await fetch(provider.baseUrl + '/models', {
+        headers: { Authorization: 'Bearer ' + request.accessToken }, redirect: 'error', signal,
+      });
+      if (!response.ok) throw new Error('ChatGPT model catalog unavailable');
+      const { models } = await response.json();
+      const native = new Map(provider.getModels().map(model => [model.id, model]));
+      return {
+        models: models.flatMap(({ slug, display_name, visibility }) => {
+          const model = native.get(slug);
+          return visibility !== 'list' || !model ? [] : [{
+            id: slug, name: display_name || model.name,
+            vision: model.input.includes('image'),
+            contextWindow: model.contextWindow, maxTokens: model.maxTokens,
+            efforts: model.reasoning ? getSupportedThinkingLevels(model) : [],
+          }];
+        }),
+      };
+    }
+    default:
+      throw new Error('Unsupported ChatGPT action');
+  }
+}
+
 export async function createStudioModelRuntime(config, { acquireRequest, transformContext } = {}) {
   const spec = adapters[config.protocol];
   if (!spec || !config.modelId?.trim() || !config.providerId?.trim())
     throw new Error('Missing model or unsupported protocol');
   if (config.tools === false) throw new Error('Selected model does not support tools');
-  const patch = requestPatch(config);
-  const sanitize = redactor(config);
-  const id = 'studio/' + config.providerId;
-  const model = {
+  const subscription = config.chatGptSubscription === true ? openaiProvider() : null;
+  const nativeModel = subscription?.getModels().find(model => model.id === config.modelId);
+  if (subscription && !nativeModel) throw new Error('Unavailable ChatGPT model');
+  const patch = subscription ? {} : requestPatch(config);
+  const id = subscription?.id ?? 'studio/' + config.providerId;
+  const cost = { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 };
+  const promptCache = { short: Number.isInteger(config.promptCacheSeconds) && config.promptCacheSeconds > 0
+    ? config.promptCacheSeconds : 300 };
+  const model = nativeModel ? {
+    ...nativeModel, cost, promptCache: nativeModel.promptCache ?? promptCache,
+    // Subscription requests declare Studio tools as additional_tools, without tool_search.
+    compat: { ...nativeModel.compat, supportsMidConvoSystemMessages: true,
+      supportsAdditionalTools: true, supportsToolSearch: false },
+  } : {
     id: config.modelId, name: config.displayName ?? config.modelId, provider: id,
     api: spec[0], baseUrl: endpointRoot(config.baseUrl, config.protocol),
     input: config.vision === true ? ['text', 'image'] : ['text'],
@@ -116,9 +168,8 @@ export async function createStudioModelRuntime(config, { acquireRequest, transfo
     // Explicit, visible fallbacks when the saved model/catalog has no limits.
     contextWindow: config.contextWindow ?? 32768, maxTokens: config.maxTokens ?? 4096,
     // CPA/custom-provider billing is not established by the upstream model catalog.
-    cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-    promptCache: { short: Number.isInteger(config.promptCacheSeconds) && config.promptCacheSeconds > 0
-      ? config.promptCacheSeconds : 300 },
+    cost,
+    promptCache,
     headers: config.headers ?? {},
   };
   const wrap = method => (current, context, options = {}) => lazyStream(current, async () => {
@@ -126,24 +177,29 @@ export async function createStudioModelRuntime(config, { acquireRequest, transfo
       Array.isArray(message.content) && message.content.some(part => part.type === 'image'))) {
       throw new Error('Image input is not enabled for this model');
     }
-    const adapter = await spec[1]();
+    const adapter = subscription ?? await spec[1]();
     const { studioSuggestion = false, ...providerOptions } = options;
     options = providerOptions;
     options.signal?.throwIfAborted();
     // The host shares Studio's provider gate. Waiting for a slot is cancellable
     // and does not consume the HTTP timeout or start a provider request.
-    const release = await acquireRequest?.(options.signal);
+    const { release, accessToken } = await acquireRequest?.(options.signal) ?? {};
+    const sanitize = redactor(subscription ? { apiKey: accessToken } : config);
     const timeout = new AbortController();
     const timer = setTimeout(() => timeout.abort(new Error('Provider request timed out')),
       (config.timeoutSeconds ?? 120) * 1000);
     const signal = options.signal ? AbortSignal.any([options.signal, timeout.signal]) : timeout.signal;
     try {
+      if (subscription && !accessToken) throw new Error('Reconnect ChatGPT in Agent settings');
       const stream = adapter[method](current, transformContext ? transformContext(context) : context, {
-        ...options, apiKey: config.apiKey || 'studio-header-auth', signal,
+        ...options, apiKey: subscription ? accessToken : config.apiKey || 'studio-header-auth', signal,
         maxTokens: Math.min(options.maxTokens ?? model.maxTokens, model.maxTokens),
         ...(config.allowsSampling === false ? { temperature: undefined }
           : config.temperature == null ? {} : { temperature: config.temperature }),
-        headers: { ...options.headers, ...config.headers },
+        ...(subscription ? {
+          headers: undefined,
+          fetch: (url, init) => fetch(url, { ...init, redirect: 'error' }),
+        } : { headers: { ...options.headers, ...config.headers } }),
         onPayload: async payload => {
           const previous = await options.onPayload?.(payload, current) ?? payload;
           const result = mergeObjects(previous, patch);

@@ -15,6 +15,7 @@ class PiHostClient {
     this.executeTool,
     this._providerId,
     this._requestLimit,
+    this._requestAccessToken,
     this.visionAccess,
   ) {
     _stdout = _process.stdout
@@ -30,6 +31,7 @@ class PiHostClient {
   final NaiAgentToolExecutor executeTool;
   final String _providerId;
   final int _requestLimit;
+  final Future<String> Function()? _requestAccessToken;
   final NaiAgentVisionAccess visionAccess;
   final _extensionEvents = <Map<String, dynamic>>[];
   late final StreamController<Map<String, dynamic>> _events =
@@ -70,6 +72,7 @@ class PiHostClient {
     required String systemPrompt,
     required Map<String, dynamic> privateModelConfig,
     required NaiAgentToolExecutor executeTool,
+    Future<String> Function()? requestAccessToken,
     NaiAgentVisionAccess visionAccess = const NaiAgentVisionAccess(),
     Directory? sessionDirectory,
     File? sessionFile,
@@ -101,6 +104,7 @@ class PiHostClient {
       executeTool,
       providerId,
       (privateModelConfig['maxConcurrentRequests'] as int? ?? 1).clamp(1, 20),
+      requestAccessToken,
       visionAccess,
     );
     try {
@@ -323,7 +327,27 @@ class PiHostClient {
         return;
       }
       _releases[id] = release;
-      _send({'type': 'permit_result', 'requestId': id});
+      String? accessToken;
+      if (_requestAccessToken case final request?) {
+        try {
+          accessToken = await request();
+        } catch (_) {
+          _releases.remove(id)?.call();
+          if (!_closed && !token.isCancelled) {
+            _send({'type': 'permit_result', 'requestId': id, 'error': 'chatgpt'});
+          }
+          return;
+        }
+        if (_closed || token.isCancelled) {
+          _releases.remove(id)?.call();
+          return;
+        }
+      }
+      _send({
+        'type': 'permit_result',
+        'requestId': id,
+        if (accessToken != null) 'accessToken': accessToken,
+      });
       _events.add({'type': 'request_started', 'requestId': id});
     } on ModelRequestCancelled {
       if (!_closed) {

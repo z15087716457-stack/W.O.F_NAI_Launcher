@@ -11,6 +11,7 @@ import '../../prompt_assistant/models/prompt_task_definitions.dart';
 import '../../prompt_assistant/providers/model_request_history_provider.dart';
 import '../../prompt_assistant/providers/prompt_assistant_config_provider.dart';
 import '../../prompt_assistant/providers/provider_connection_health_provider.dart';
+import '../../providers/nai_agent/nai_agent_chatgpt_provider.dart';
 import 'providers_workbench.dart';
 import '../../screens/settings/widgets/model_preset_editor.dart';
 import '../../screens/settings/widgets/model_request_details_dialog.dart';
@@ -55,7 +56,13 @@ SettingsModelsData settingsModelsData(BuildContext context, WidgetRef ref) {
       ),
   ];
   return SettingsModelsData(
-    workbench: providersViewData(config, workbench, health, context.l10n),
+    workbench: providersViewData(
+      config,
+      workbench,
+      health,
+      context.l10n,
+      chatGpt: ref.watch(naiAgentChatGptProvider),
+    ),
     providers: [
       for (final provider in config.providers)
         SettingsProvider(
@@ -173,6 +180,25 @@ class SettingsModelActions {
   SettingsModelActions(this.context, this.ref);
   final BuildContext context;
   final WidgetRef ref;
+
+  Future<void> showChatGptPlanNotice() async {
+    final account = ref.read(naiAgentChatGptProvider);
+    if (!await account.claimPlanNotice() || !context.mounted) return;
+    final l = context.l10n;
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l.naiAgent_chatGptUsingPlan),
+        content: Text(l.naiAgent_chatGptHint),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(l.common_gotIt),
+          ),
+        ],
+      ),
+    );
+  }
 
   Future<void> requestDetails(String id) => showDialog<void>(
     context: context,

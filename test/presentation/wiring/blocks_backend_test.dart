@@ -6,7 +6,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 import 'package:nai_launcher/core/storage/prompt_block_storage.dart';
+import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
+import 'package:nai_launcher/data/models/prompt_block/prompt_block_palette_entry.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
+import 'package:nai_launcher/presentation/providers/prompt_block_palette_provider.dart';
 import 'package:nai_launcher/presentation/ui/blocks/blocks_contract.dart';
 import 'package:nai_launcher/presentation/wiring/blocks_library_backend.dart';
 import 'package:nai_launcher/presentation/wiring/blocks_platform.dart';
@@ -241,8 +244,19 @@ void main() {
       final b = await backend.save(const BlockDraft(title: 'B', atoms: ['b']));
       final c = await backend.notifier.createCollection(name: 'Collection');
       await backend.notifier.toggleBlockInCollection(c.id, a.id);
-      await storage.putPaletteBlockIds([a.id, b.id]);
+      final temp = PillTempContent(
+        content: 'separate temp',
+        originalContent: '',
+        editedAt: DateTime.utc(2026),
+        editedBy: 'user',
+      );
+      await storage.putPaletteEntries([
+        PromptBlockPaletteEntry.library(a.id),
+        PromptBlockPaletteEntry.temporary(id: 'temp:kept', temp: temp),
+        PromptBlockPaletteEntry.library(b.id),
+      ]);
       final deleted = await backend.delete([a.id]);
+      await container.read(promptBlockPaletteNotifierProvider.future);
       await backend.patch(
         b.id,
         const BlockPatch(title: 'Edited after deletion'),
@@ -251,7 +265,9 @@ void main() {
       expect(backend.requireBlock(a.id).content, 'a');
       expect(backend.requireBlock(b.id).title, 'Edited after deletion');
       expect(backend.library.collectionById(c.id)!.blockIds, contains(a.id));
-      expect(await storage.getPaletteBlockIds(), containsAll([a.id, b.id]));
+      final palette = await storage.getPaletteEntries();
+      expect(palette.map((entry) => entry.id), ['temp:kept', b.id, a.id]);
+      expect(palette.first.temp, temp);
       await backend.patch(a.id, const BlockPatch(title: 'Later edit'));
       await backend.undo(deleted);
       expect(backend.requireBlock(a.id).title, 'Later edit');

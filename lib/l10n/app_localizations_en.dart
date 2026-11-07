@@ -2348,12 +2348,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get characterTooltip_viewFullConfig => 'Click for full configuration';
 
   @override
-  String get addGroup_displayNameLabel => 'Display Name (Optional)';
-
-  @override
-  String get addGroup_targetCategoryLabel => 'Target Category';
-
-  @override
   String globalSettings_saveFailed(Object error) {
     return 'Save failed: $error';
   }
@@ -3410,15 +3404,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settings_proxyRestartHint =>
       'Proxy settings changed, restart recommended';
-
-  @override
-  String get tagLibrary_addToLibrary => 'Add to Library';
-
-  @override
-  String get tagLibrary_uncategorized => 'Uncategorized';
-
-  @override
-  String get tagLibrary_contentPreview => 'Content Preview';
 
   @override
   String get settings_enablePromptWeightScroll =>
@@ -4940,35 +4925,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'The drop source did not provide a readable image or Vibe file';
 
   @override
-  String get toast_contentCannotBeEmpty => 'Content cannot be empty';
-
-  @override
-  String get toast_addedToLibrary => 'Added to library';
-
-  @override
-  String toast_addFailed(Object error) {
-    return 'Add failed: $error';
-  }
-
-  @override
-  String get toast_libraryNotLoaded => 'Library is not loaded';
-
-  @override
-  String get toast_noValidTagContent => 'No valid tag content';
-
-  @override
-  String get toast_allTagsAlreadyExist =>
-      'All tags already exist in the library';
-
-  @override
-  String get toast_noAddableTags => 'No tags can be added';
-
-  @override
-  String toast_addedTagsSkippedDuplicates(Object added, Object skipped) {
-    return 'Added $added tags, skipped $skipped duplicate tags';
-  }
-
-  @override
   String get toast_saveDirNotSet => 'Save directory is not set';
 
   @override
@@ -5057,9 +5013,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get common_saving => 'Saving...';
-
-  @override
   String get common_expand => 'Expand';
 
   @override
@@ -5082,24 +5035,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get detail_noContent => '(No content)';
-
-  @override
-  String get saveBlock_title => 'Save as Block';
-
-  @override
-  String get saveBlock_nameLabel => 'Block title';
-
-  @override
-  String get saveBlock_nameHint => 'Enter block title';
-
-  @override
-  String get saveBlock_nameRequired => 'Please enter a block title';
-
-  @override
-  String get saveBlock_selectContent => 'Select content to save';
-
-  @override
-  String get saveBlock_negativeSuffix => 'Negative';
 
   @override
   String get saveBlock_saved => 'Saved to block library';
@@ -5479,12 +5414,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get common_optional => 'Optional';
-
-  @override
-  String get common_emptyValue => '(Empty)';
-
-  @override
   String get common_clickToRetry => 'Click to retry';
 
   @override
@@ -5492,13 +5421,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get common_swap => 'Swap';
-
-  @override
-  String get addToLibrary_displayNameHint =>
-      'Enter a name to identify this entry';
-
-  @override
-  String get addToLibrary_tagHint => 'Enter a tag and press Enter to add it';
 
   @override
   String get drop_saveVibeBundle => 'Save Vibe Bundle';
@@ -5655,9 +5577,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get promptBlockLibrary_allBlocks => 'All blocks';
 
   @override
-  String get promptBlockLibrary_rootFolder => 'Root / Unfiled';
-
-  @override
   String get promptBlockLibrary_unnamedBlock => 'Untitled block';
 
   @override
@@ -5683,15 +5602,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String promptBlockLibrary_deleteCollectionFolderConfirm(String name) {
     return 'Delete collection folder \"$name\"? Its collections and sub-folders are deleted too; the blocks themselves are unaffected.';
   }
-
-  @override
-  String get promptBlockLibrary_blockTitle => 'Title';
-
-  @override
-  String get promptBlockLibrary_titleHint => 'Block title';
-
-  @override
-  String get promptBlockLibrary_folder => 'Folder';
 
   @override
   String get promptBlockLibrary_settingsApplied =>
@@ -5886,24 +5796,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get promptBlockPicker_title => 'Select Block';
 
   @override
-  String get promptBlockLibrary_selectImage => 'Select Image';
-
-  @override
   String get promptBlockLibrary_adjustThumbnailTitle =>
       'Adjust Thumbnail Display Range';
 
   @override
   String get promptBlockLibrary_dragToMove =>
       'Drag to move, scroll or pinch to zoom';
-
-  @override
-  String get promptBlockLibrary_addToLibrary => 'Add to Block Library';
-
-  @override
-  String get promptBlockLibrary_contentPreview => 'Content Preview';
-
-  @override
-  String get promptBlockLibrary_confirmAdd => 'Confirm';
 
   @override
   String get promptBlockLibrary_saveToLibrary => 'Save to Block Library';
@@ -16537,6 +16435,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get naiAgent_newChat => 'New chat';
 
   @override
+  String get naiAgent_chatGptSignIn => 'Continue with ChatGPT';
+
+  @override
+  String get naiAgent_chatGptHint =>
+      'Use your ChatGPT plan for eligible Agent requests.';
+
+  @override
+  String get naiAgent_chatGptBrowser => 'Complete sign-in in your browser.';
+
+  @override
+  String get naiAgent_chatGptConnected =>
+      'Connected. Choose a model in the Agent model picker.';
+
+  @override
+  String get naiAgent_chatGptNoModels =>
+      'No compatible models are available for this account.';
+
+  @override
+  String get naiAgent_chatGptError =>
+      'Could not connect to ChatGPT. Try again or sign in again.';
+
+  @override
+  String get naiAgent_chatGptUsingPlan => 'Using ChatGPT plan';
+
+  @override
+  String get naiAgent_chatGptManageUsage => 'Manage usage';
+
+  @override
   String get naiAgent_settings => 'Agent settings';
 
   @override
@@ -21919,6 +21845,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mp_keyHint => 'Enter this provider’s key';
+
+  @override
+  String get mp_chatGptPlan => 'ChatGPT plan';
+
+  @override
+  String get mp_chatGptAgentOnly => 'For NAI Agent';
+
+  @override
+  String get mp_manageAccount => 'Manage account';
 
   @override
   String get mp_pickerTitle => 'Add provider';

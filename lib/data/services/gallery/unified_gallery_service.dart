@@ -229,11 +229,15 @@ abstract class LocalGalleryService {
 
   /// 刷新画廊数据
   ///
-  /// 执行增量扫描，更新文件列表和索引
+  /// 扫描前可通过 [onFilesRefreshed] 发布磁盘上的文件列表。
+  /// 提供该回调的手动刷新会等待现有扫描结束，再同步本次索引。
   ///
   /// 可能抛出：
   /// - [GalleryScanException] 扫描失败
-  Future<void> refresh({bool scan = true});
+  Future<void> refresh({
+    bool scan = true,
+    Future<void> Function()? onFilesRefreshed,
+  });
 
   /// Reconcile native filesystem events without enumerating other directories.
   Future<Set<String>> applyFileChanges(GalleryFileChanges changes);
@@ -691,6 +695,7 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
         files.map((file) async {
           try {
             final stat = await file.stat();
+            if (stat.type != FileSystemEntityType.file) return null;
             _fileStats[file.path] = (
               modified: stat.modified,
               created: stat.modified,
@@ -791,7 +796,7 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
             'Performing startup file index scan (${_allFiles.length} files)',
             'LocalGalleryService',
           );
-          await _performFullScan();
+          await _scanIndex();
       }
 
       AppLogger.i(
@@ -824,100 +829,17 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
     }
   }
 
-  /// 执行增量扫描（使用流式逐张处理，多图库源）
-  Future<void> _performIncrementalScan({
-    bool retryMissingMetadata = false,
-    bool retryFailedMetadata = false,
-  }) async {
+  Future<bool> _scanIndex({bool waitForTurn = false}) async {
     final rootDirs = await GalleryFolderRepository.instance.getAllRootDirs();
-    if (rootDirs.isEmpty) {
-      AppLogger.w(
-        '[UGS] _performIncrementalScan: no root directories',
-        'LocalGalleryService',
-      );
-      return;
+    if (rootDirs.isEmpty) return false;
+
+    if (!waitForTurn && ScanStateManager.instance.isScanning) {
+      AppLogger.w('[UGS] 已有扫描在进行中，跳过后台索引请求', 'LocalGalleryService');
+      return false;
     }
 
-    // 检查是否已有扫描在进行中
-    final scanManager = ScanStateManager.instance;
-    AppLogger.i(
-      '[UGS] _performIncrementalScan: isScanning=${scanManager.isScanning}, '
-          'roots=${rootDirs.map((d) => d.path).join(' | ')}',
-      'LocalGalleryService',
-    );
-
-    if (scanManager.isScanning) {
-      AppLogger.w('[UGS] 增量扫描请求被忽略：已有扫描在进行中', 'LocalGalleryService');
-      return;
-    }
-
-    AppLogger.i('[UGS] 开始执行流式扫描', 'LocalGalleryService');
-
-    // 使用新的流式扫描器：真正的单文件流水线
     final scanner = GalleryStreamScanner(dataSource: _dataSource);
-
-    await scanner.startScanning(
-      rootDirs,
-      retryMissingMetadata: retryMissingMetadata,
-      retryFailedMetadata: retryFailedMetadata,
-      // 【扫描时日志太频繁，禁用】
-      // onFileProcessed: (result, stats) {
-      //   // 每处理一个文件就更新状态
-      //   AppLogger.d(
-      //     '[UGS] File processed: ${result.path.split(Platform.pathSeparator).last}, '
-      //     'stage: ${result.stage}, total: ${stats.totalDiscovered}',
-      //     'LocalGalleryService',
-      //   );
-      // },
-    );
-
-    AppLogger.i('[UGS] 流式扫描完成', 'LocalGalleryService');
-  }
-
-  /// 执行完整扫描
-  ///
-  /// 使用统一的 GalleryStreamScanner，与增量扫描使用同一套逻辑
-  Future<void> _performFullScan({
-    bool retryMissingMetadata = false,
-    bool retryFailedMetadata = false,
-  }) async {
-    final rootDirs = await GalleryFolderRepository.instance.getAllRootDirs();
-    if (rootDirs.isEmpty) {
-      AppLogger.w(
-        '[UGS] _performFullScan: no root directories',
-        'LocalGalleryService',
-      );
-      return;
-    }
-
-    // 检查是否已有扫描在进行中
-    final scanManager = ScanStateManager.instance;
-    if (scanManager.isScanning) {
-      AppLogger.w('[UGS] 全量扫描请求被忽略：已有扫描在进行中', 'LocalGalleryService');
-      return;
-    }
-
-    AppLogger.i('[UGS] 开始执行全量流式扫描', 'LocalGalleryService');
-
-    // 使用新的流式扫描器：真正的单文件流水线
-    final scanner = GalleryStreamScanner(dataSource: _dataSource);
-
-    await scanner.startScanning(
-      rootDirs,
-      retryMissingMetadata: retryMissingMetadata,
-      retryFailedMetadata: retryFailedMetadata,
-      // 【扫描时日志太频繁，禁用】
-      // onFileProcessed: (result, stats) {
-      //   // 每处理一个文件就更新状态
-      //   AppLogger.d(
-      //     '[UGS] File processed: ${result.path.split(Platform.pathSeparator).last}, '
-      //     'stage: ${result.stage}, total: ${stats.totalDiscovered}',
-      //     'LocalGalleryService',
-      //   );
-      // },
-    );
-
-    AppLogger.i('[UGS] 全量流式扫描完成', 'LocalGalleryService');
+    return scanner.startScanning(rootDirs);
   }
 
   // ============================================================
@@ -1838,47 +1760,41 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
   }
 
   @override
-  Future<void> refresh({bool scan = true}) async {
+  Future<void> refresh({
+    bool scan = true,
+    Future<void> Function()? onFilesRefreshed,
+  }) async {
     _ensureInitialized();
 
     try {
       final files = await _getAllImageFiles();
 
-      final previousCount = _allFiles.length;
-      final countChanged = files.length != previousCount;
       _allFiles = files;
       _dimensions.clear();
       _dimensionsChecked.clear();
       // refresh 重建的列表只按「修改时间/大小/文件名」有序：与当前排序可能
-      // 不一致时，沿用旧的「下次收藏变更触发全量重排」可观察序列
-      // （见 _allFilesNeedsResort 注释）。
+      // 不一致时，沿用旧的「下次收藏变更触发全量重排」可观察序列。
       _allFilesNeedsResort = true;
-
-      // 重新应用当前过滤
+      _filterService.clearCache();
       await applyFilter(_currentFilter);
 
-      if (!shouldRunRefreshIndexScan(
+      if (onFilesRefreshed != null) {
+        await onFilesRefreshed();
+        if (scan) {
+          if (!await _scanIndex(waitForTurn: true)) {
+            throw const GalleryScanException(
+              message: 'Gallery index scan did not complete',
+            );
+          }
+          // 提前发布列表时读到的宽高在索引完成后重新读取。
+          _dimensions.clear();
+          _dimensionsChecked.clear();
+        }
+      } else if (shouldRunRefreshIndexScan(
         scanRequested: scan,
         isBackgroundScanning: _isBackgroundScanning,
       )) {
-        AppLogger.d(
-          'Refresh updated file list without starting index scan: '
-              'scanRequested=$scan, backgroundScanning=$_isBackgroundScanning',
-          'LocalGalleryService',
-        );
-        return;
-      }
-
-      // ✅ 如果文件数量变化很大，执行完整扫描而非增量扫描
-      if (countChanged && (files.length - previousCount).abs() > 100) {
-        AppLogger.i(
-          'File count changed significantly ($previousCount -> ${files.length}), performing full scan',
-          'LocalGalleryService',
-        );
-        await _performFullScan();
-      } else {
-        // 后台扫描新文件（使用 await 确保扫描完成）
-        await _performIncrementalScan();
+        await _scanIndex();
       }
     } catch (e) {
       if (e is GalleryException) rethrow;
@@ -2080,7 +1996,10 @@ class ErrorGalleryService implements LocalGalleryService {
   Future<NaiImageMetadata?> getMetadata(String filePath) => _throwError();
 
   @override
-  Future<void> refresh({bool scan = true}) => _throwError();
+  Future<void> refresh({
+    bool scan = true,
+    Future<void> Function()? onFilesRefreshed,
+  }) => _throwError();
 
   @override
   Future<Set<String>> applyFileChanges(GalleryFileChanges changes) =>
@@ -2197,7 +2116,10 @@ class _PlaceholderGalleryService implements LocalGalleryService {
       _throwNotInitialized();
 
   @override
-  Future<void> refresh({bool scan = true}) => _throwNotInitialized();
+  Future<void> refresh({
+    bool scan = true,
+    Future<void> Function()? onFilesRefreshed,
+  }) => _throwNotInitialized();
 
   @override
   Future<Set<String>> applyFileChanges(GalleryFileChanges changes) =>

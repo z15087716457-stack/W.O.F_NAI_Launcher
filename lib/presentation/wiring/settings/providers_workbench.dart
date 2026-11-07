@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/localization_extension.dart';
@@ -14,6 +15,7 @@ import '../../prompt_assistant/providers/provider_connection_health_provider.dar
 import '../../prompt_assistant/services/model_catalog_repository.dart';
 import '../../prompt_assistant/services/prompt_assistant_service.dart';
 import '../../prompt_assistant/services/provider_model_list_cache.dart';
+import '../../providers/nai_agent/nai_agent_chatgpt_provider.dart';
 import '../../providers/nai_agent/nai_agent_workspace_provider.dart';
 import '../../ui/model_providers/model_providers_contract.dart';
 import '../../ui/settings/settings_contract.dart';
@@ -599,8 +601,9 @@ ProvidersViewData providersViewData(
   PromptAssistantConfigState config,
   ProvidersWorkbenchState state,
   ProviderConnectionHealth health,
-  AppLocalizations l,
-) => ProvidersViewData(
+  AppLocalizations l, {
+  NaiAgentChatGpt? chatGpt,
+}) => ProvidersViewData(
   providers: [
     for (final p in config.providers)
       ProviderItem(
@@ -658,6 +661,29 @@ ProvidersViewData providersViewData(
               ),
         },
       ),
+    if (chatGpt case final account? when account.connected)
+      ProviderItem(
+        id: chatGptAgentProviderId,
+        presetId: chatGptAgentProviderId,
+        group: ProviderGroup.international,
+        logoAsset: 'openai',
+        managedAccount: true,
+        testing: account.busy,
+        status: account.failed ? SettingsTone.warn : SettingsTone.ok,
+        error: account.failed ? l.naiAgent_chatGptError : '',
+        hint: account.models.isEmpty && !account.busy
+            ? l.naiAgent_chatGptNoModels
+            : l.naiAgent_chatGptConnected,
+        settings: ProviderSettings(
+          name: l.mp_chatGptPlan,
+          baseUrl: '',
+          protocolId: ProviderProtocol.openaiResponses.name,
+          models: [
+            for (final m in account.models)
+              ProviderModelSettings(id: m.id, alias: m.name),
+          ],
+        ),
+      ),
   ],
   protocols: [
     for (final p in ProviderProtocol.values)
@@ -668,7 +694,7 @@ ProvidersViewData providersViewData(
       ),
   ],
   presets: [
-    for (final p in ProviderPresetDefaults.selectable)
+    for (final p in ProviderPresetDefaults.selectable) ...[
       ProviderPresetItem(
         id: p.name,
         name: p.labelIn(l),
@@ -679,39 +705,76 @@ ProvidersViewData providersViewData(
         logoAsset: p.logoAsset,
         custom: p == ProviderPreset.openaiCompatibleChat,
       ),
+      if (chatGpt != null && p == ProviderPreset.openaiResponses)
+        ProviderPresetItem(
+          id: chatGptAgentProviderId,
+          name: l.mp_chatGptPlan,
+          group: ProviderGroup.international,
+          host: l.mp_chatGptAgentOnly,
+          logoAsset: 'openai',
+          browserSignIn: true,
+        ),
+    ],
   ],
   catalogs: state.catalogs,
 );
 
 ProvidersActions workbenchActions(
   ProvidersWorkbench backend,
-  void Function(FutureOr<void> Function()) run,
-) => ProvidersActions(
-  onCreate: (preset) async {
-    try {
-      return await backend.create(preset);
-    } catch (_) {
-      run(() => throw StateError(currentL10n.styleExplore_operationFailed));
-      return null;
-    }
-  },
-  onEnabled: (id, value) => run(() => backend.enabled(id, value)),
-  onTest: (id, edited, key) => run(() => backend.test(id, edited, key)),
-  onTestModel: (id, model, edited, key) =>
-      run(() => backend.test(id, edited, key, modelId: model)),
-  onSave: backend.save,
-  onRevealApiKey: (id) async {
-    try {
-      return await backend.controller.getProviderApiKey(id);
-    } catch (_) {
-      run(() => throw StateError(currentL10n.styleExplore_operationFailed));
-      return null;
-    }
-  },
-  onFetchCatalog: (id) => run(() => backend.fetchCatalog(id)),
-  onAddModels: (id, ids, {manual = false}) =>
-      run(() => backend.addModels(id, ids, manual: manual)),
-  onRemoveModel: (id, model) => run(() => backend.removeModel(id, model)),
-  onReorderModels: (id, ids) => run(() => backend.reorder(id, ids)),
-  onDelete: (id) => run(() => backend.delete(id)),
-);
+  void Function(FutureOr<void> Function()) run, {
+  Future<void> Function()? onAccountConnected,
+}) {
+  NaiAgentChatGpt account() => backend.ref.read(naiAgentChatGptProvider);
+  return ProvidersActions(
+    onCreate: (preset) async {
+      try {
+        if (preset == chatGptAgentProviderId) {
+          final chatGpt = account();
+          if (chatGpt.connected) return preset;
+          await chatGpt.signIn();
+          if (!chatGpt.connected) return null;
+          if (onAccountConnected != null) run(onAccountConnected);
+          return preset;
+        }
+        return await backend.create(preset);
+      } catch (_) {
+        run(() => throw StateError(currentL10n.styleExplore_operationFailed));
+        return null;
+      }
+    },
+    onCancelAccountSignIn: () => account().cancelSignIn(),
+    onOpenAccountUsage: () => run(() async {
+      await launchUrl(
+        Uri.parse(chatGptAgentUsageUrl),
+        mode: LaunchMode.externalApplication,
+      );
+    }),
+    onEnabled: (id, value) => run(() => backend.enabled(id, value)),
+    onTest: (id, edited, key) => run(() => backend.test(id, edited, key)),
+    onTestModel: (id, model, edited, key) =>
+        run(() => backend.test(id, edited, key, modelId: model)),
+    onSave: backend.save,
+    onRevealApiKey: (id) async {
+      try {
+        return await backend.controller.getProviderApiKey(id);
+      } catch (_) {
+        run(() => throw StateError(currentL10n.styleExplore_operationFailed));
+        return null;
+      }
+    },
+    onFetchCatalog: (id) => run(
+      () => id == chatGptAgentProviderId
+          ? account().refreshModels()
+          : backend.fetchCatalog(id),
+    ),
+    onAddModels: (id, ids, {manual = false}) =>
+        run(() => backend.addModels(id, ids, manual: manual)),
+    onRemoveModel: (id, model) => run(() => backend.removeModel(id, model)),
+    onReorderModels: (id, ids) => run(() => backend.reorder(id, ids)),
+    onDelete: (id) => run(
+      () => id == chatGptAgentProviderId
+          ? account().signOut()
+          : backend.delete(id),
+    ),
+  );
+}

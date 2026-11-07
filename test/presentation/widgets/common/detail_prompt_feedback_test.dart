@@ -144,7 +144,10 @@ void main() {
         expect(blocks.single.readingTranslationZh, pill.zh);
         expect(blocks.single.appearance, 'translation');
         expect(blocks.single.readingTranslationLanguageCode, 'zh');
-        expect(await storage.getPaletteBlockIds(), isEmpty);
+        expect(
+          (await storage.getPaletteEntries()).map((entry) => entry.id).toList(),
+          isEmpty,
+        );
       });
       await tester.pumpWidget(const SizedBox());
       await tester.runAsync(() async {

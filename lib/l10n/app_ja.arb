@@ -994,8 +994,6 @@
     }
   },
   "characterTooltip_viewFullConfig": "クリックすると完全な構成が表示されます",
-  "addGroup_displayNameLabel": "表示名 (オプション)",
-  "addGroup_targetCategoryLabel": "対象カテゴリ",
   "globalSettings_saveFailed": "保存に失敗しました: {error}",
   "@globalSettings_saveFailed": {
     "placeholders": {
@@ -1647,9 +1645,6 @@
     }
   },
   "settings_proxyRestartHint": "プロキシ設定が変更されました。再起動をお勧めします",
-  "tagLibrary_addToLibrary": "ライブラリに追加",
-  "tagLibrary_uncategorized": "未分類",
-  "tagLibrary_contentPreview": "コンテンツのプレビュー",
   "unit_seconds": "秒",
   "settings_notificationSound": "完了音",
   "settings_notificationSoundSubtitle": "ウィンドウが非アクティブのときだけ生成完了音を再生する",
@@ -2470,25 +2465,6 @@
   "toast_sentToKrita": "画像が Krita に送信されました",
   "toast_kritaUnsupportedImageFormat": "この画像形式は Krita に送信できません。一般的な画像形式を使用します。",
   "toast_dropNoReadableImageOrVibe": "ドロップ ソースは読み取り可能な画像または Vibe ファイルを提供しませんでした",
-  "toast_contentCannotBeEmpty": "コンテンツを空にすることはできません",
-  "toast_addedToLibrary": "ライブラリに追加されました",
-  "toast_addFailed": "追加に失敗しました: {error}",
-  "@toast_addFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "toast_libraryNotLoaded": "ライブラリがロードされていません",
-  "toast_noValidTagContent": "有効なタグの内容がありません",
-  "toast_allTagsAlreadyExist": "すべてのタグはすでにライブラリに存在します",
-  "toast_noAddableTags": "タグは追加できません",
-  "toast_addedTagsSkippedDuplicates": "{added} タグを追加し、{skipped} 重複タグをスキップしました",
-  "@toast_addedTagsSkippedDuplicates": {
-    "placeholders": {
-      "added": {},
-      "skipped": {}
-    }
-  },
   "toast_saveDirNotSet": "保存ディレクトリが設定されていません",
   "toast_savedTo": "{path} に保存されました",
   "@toast_savedTo": {
@@ -2556,7 +2532,6 @@
       "hours": {}
     }
   },
-  "common_saving": "保存中...",
   "common_expand": "展開する",
   "common_collapse": "折りたたむ",
   "detail_parsingMetadata": "メタデータを解析しています...",
@@ -2565,12 +2540,6 @@
   "detail_modifiedTime": "更新日時",
   "detail_fileSize": "ファイルサイズ",
   "detail_noContent": "(コンテンツなし)",
-  "saveBlock_title": "ブロックとして保存",
-  "saveBlock_nameLabel": "ブロック名",
-  "saveBlock_nameHint": "ブロック名を入力",
-  "saveBlock_nameRequired": "ブロック名を入力してください",
-  "saveBlock_selectContent": "保存する内容を選択してください",
-  "saveBlock_negativeSuffix": "ネガティブ",
   "saveBlock_saved": "ブロックライブラリに保存しました",
   "detail_copyLabel": "{label} をコピーします",
   "@detail_copyLabel": {
@@ -2841,13 +2810,9 @@
       }
     }
   },
-  "common_optional": "任意",
-  "common_emptyValue": "（空）",
   "common_clickToRetry": "クリックして再試行",
   "common_opening": "開いています...",
   "common_swap": "入れ替え",
-  "addToLibrary_displayNameHint": "この項目を識別する名前を入力",
-  "addToLibrary_tagHint": "タグを入力して Enter キーで追加",
   "drop_saveVibeBundle": "Vibe Bundleを保存",
   "vibe_import_overwriteOriginalParams": "元のVibeパラメータを置換",
   "vibe_import_overwriteOriginalParamsHint": "{name} のライブラリ内パラメータのみ置換します。初期状態では無効です",
@@ -2964,7 +2929,6 @@
     }
   },
   "promptBlockLibrary_allBlocks": "すべてのブロック",
-  "promptBlockLibrary_rootFolder": "ルート / 未分類",
   "promptBlockLibrary_unnamedBlock": "無題のブロック",
   "promptBlockLibrary_useCount": "{count} 回使用されました",
   "@promptBlockLibrary_useCount": {
@@ -2993,9 +2957,6 @@
       }
     }
   },
-  "promptBlockLibrary_blockTitle": "タイトル",
-  "promptBlockLibrary_titleHint": "ブロックのタイトル",
-  "promptBlockLibrary_folder": "フォルダー",
   "promptBlockLibrary_settingsApplied": "ブロック設定を現在の画像に読み込みました",
   "promptBlockLibrary_settingsIncompatible": "ブロック設定は対象モデルに対応していません。パラメータは変更されませんでした。",
   "promptBlockLibrary_deleted": "削除しました",
@@ -3133,12 +3094,8 @@
   "styleExplore_adoptBlockEmpty": "保存できる絵師の組み合わせや正のプロンプトがありません",
   "promptBlockEditor_library": "ブロックライブラリ",
   "promptBlockPicker_title": "ブロックを選択",
-  "promptBlockLibrary_selectImage": "画像を選択",
   "promptBlockLibrary_adjustThumbnailTitle": "サムネイル表示範囲の調整",
   "promptBlockLibrary_dragToMove": "ドラッグして移動、スクロールまたはピンチしてズームします",
-  "promptBlockLibrary_addToLibrary": "ブロックライブラリに追加",
-  "promptBlockLibrary_contentPreview": "内容プレビュー",
-  "promptBlockLibrary_confirmAdd": "確認",
   "promptBlockLibrary_saveToLibrary": "ブロックライブラリに保存",
   "promptBlockLibrary_droppedImage": "ドロップされた画像",
   "promptBlockLibrary_createBlockFromImage": "新しいブロックを作成",
@@ -8794,6 +8751,14 @@
   "naiAgent_permissionDeny": "拒否",
   "naiAgent_defaultWorkspace": "ワークスペース 1",
   "naiAgent_newChat": "新しいチャット",
+  "naiAgent_chatGptSignIn": "ChatGPT で続行",
+  "naiAgent_chatGptHint": "対象となるエージェントのリクエストに ChatGPT プランを使用できます。",
+  "naiAgent_chatGptBrowser": "ブラウザーでサインインを完了してください。",
+  "naiAgent_chatGptConnected": "接続済み。エージェントのモデル一覧から選択できます。",
+  "naiAgent_chatGptNoModels": "このアカウントで使える対応モデルがありません。",
+  "naiAgent_chatGptError": "ChatGPT に接続できません。再試行するか、サインインし直してください。",
+  "naiAgent_chatGptUsingPlan": "ChatGPT プランを使用中",
+  "naiAgent_chatGptManageUsage": "使用量を管理",
   "naiAgent_settings": "Agent 設定",
   "naiAgent_chooseModel": "モデルを選択",
   "naiAgent_interrupted": "前回の処理は中断され、自動再送はされません。",
@@ -11213,6 +11178,9 @@
   "mp_hide": "隠す",
   "mp_keyHintLocal": "ローカルサービスは空欄可",
   "mp_keyHint": "このサービスのキーを入力",
+  "mp_chatGptPlan": "ChatGPT プラン",
+  "mp_chatGptAgentOnly": "NAI Agent 専用",
+  "mp_manageAccount": "アカウントを管理",
   "mp_pickerTitle": "サービスを追加",
   "mp_pickerSearch": "ベンダー・プラットフォーム・ローカルを検索",
   "mp_groupAll": "すべて",

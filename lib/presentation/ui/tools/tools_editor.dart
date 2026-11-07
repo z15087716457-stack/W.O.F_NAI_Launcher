@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/utils/localization_extension.dart';
+import '../../widgets/common/text_editing_shortcuts.dart';
 import '../../widgets/navigation/window_chrome_layout.dart';
 import '../gen/gen_parts.dart';
 import '../kit/ui_colors.dart';
@@ -164,7 +165,8 @@ class _ToolsEditorPageState extends State<ToolsEditorPage>
     final d = scope.data;
     final a = scope.actions;
     final k = e.logicalKey;
-    final ctrl = HardwareKeyboard.instance.isPrimaryPressed;
+    final keyboard = HardwareKeyboard.instance;
+    final ctrl = keyboard.isPrimaryPressed;
     if (k == LogicalKeyboardKey.escape) {
       if (d.expanding) {
         a.onExpanding(false);
@@ -180,6 +182,20 @@ class _ToolsEditorPageState extends State<ToolsEditorPage>
     if (ctrl && k == LogicalKeyboardKey.enter) {
       a.onApply();
       return KeyEventResult.handled;
+    }
+    if (d.inpainting &&
+        ctrl &&
+        !keyboard.isAltPressed &&
+        !hasEditableTextFocus) {
+      switch (k) {
+        case LogicalKeyboardKey.keyZ when !keyboard.isShiftPressed:
+          if (d.canUndo) a.onUndo();
+          return KeyEventResult.handled;
+        case LogicalKeyboardKey.keyZ:
+        case LogicalKeyboardKey.keyY when !keyboard.isShiftPressed:
+          if (d.canRedo) a.onRedo();
+          return KeyEventResult.handled;
+      }
     }
     if (!d.shellShortcuts || ctrl) return KeyEventResult.ignored;
     final label = k.keyLabel.toUpperCase();
@@ -240,7 +256,7 @@ class _ToolsEditorPageState extends State<ToolsEditorPage>
                     focusNode: _focus,
                     autofocus: true,
                     onKeyEvent: (_, e) => _key(scope, e),
-                    child: ColoredBox(
+                    child: Material(
                       key: const Key('tools-editor'),
                       color: c.bg,
                       child: Column(

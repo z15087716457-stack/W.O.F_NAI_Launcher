@@ -17,6 +17,7 @@ abstract final class BlocksEditWiring {
     String? initialContent,
     Uint8List? initialImageBytes,
     String? initialFolderId,
+    bool isFavorite = false,
   }) async {
     final platform = ref.read(blocksPlatformProvider);
     await ref.read(promptBlockLibraryNotifierProvider.future);
@@ -26,6 +27,7 @@ abstract final class BlocksEditWiring {
         : platform.prepareThumbnail(initialImageBytes);
     try {
       return await BlocksActions(ref, context, () => context.mounted).edit(
+        isFavorite: isFavorite,
         initialDraft: BlockDraft(
           title: initialTitle ?? '',
           atoms: initialContent == null ? const [] : null,

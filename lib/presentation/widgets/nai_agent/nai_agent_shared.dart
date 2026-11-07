@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../prompt_assistant/providers/prompt_assistant_config_provider.dart';
 import '../../providers/nai_agent/nai_agent_workspace_provider.dart';
+import '../../providers/nai_agent/nai_agent_chatgpt_provider.dart';
 import '../../router/app_router.dart';
 import '../common/app_toast.dart';
 
@@ -27,6 +28,7 @@ class NaiAgentModelPicker extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final c = ref.watch(naiAgentControllerProvider);
     final config = ref.watch(promptAssistantConfigProvider);
+    final chatGpt = ref.watch(naiAgentChatGptProvider);
     final model = config.models
         .where(
           (m) =>
@@ -34,6 +36,9 @@ class NaiAgentModelPicker extends ConsumerWidget {
               m.name == c.settings.modelId,
         )
         .firstOrNull;
+    final chatGptModel = c.settings.providerId == chatGptAgentProviderId
+        ? chatGpt.models.where((m) => m.id == c.settings.modelId).firstOrNull
+        : null;
     return PopupMenuButton<(String, String)>(
       tooltip: context.l10n.naiAgent_chooseModel,
       constraints: const BoxConstraints(maxWidth: 410, maxHeight: 480),
@@ -56,6 +61,11 @@ class NaiAgentModelPicker extends ConsumerWidget {
               value: (p.id, m.name),
               child: Text('${p.name} · ${m.displayName}'),
             ),
+        for (final m in chatGpt.models)
+          PopupMenuItem(
+            value: (chatGptAgentProviderId, m.id),
+            child: Text('$chatGptAgentProviderName · ${m.name}'),
+          ),
         const PopupMenuDivider(),
         PopupMenuItem(
           value: ('__settings__', ''),
@@ -69,7 +79,9 @@ class NaiAgentModelPicker extends ConsumerWidget {
           children: [
             Flexible(
               child: Text(
-                model?.displayName ?? context.l10n.naiAgent_chooseModel,
+                chatGptModel?.name ??
+                    model?.displayName ??
+                    context.l10n.naiAgent_chooseModel,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(fontSize: 12),
               ),

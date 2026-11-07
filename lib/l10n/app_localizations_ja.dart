@@ -2296,12 +2296,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get characterTooltip_viewFullConfig => 'クリックすると完全な構成が表示されます';
 
   @override
-  String get addGroup_displayNameLabel => '表示名 (オプション)';
-
-  @override
-  String get addGroup_targetCategoryLabel => '対象カテゴリ';
-
-  @override
   String globalSettings_saveFailed(Object error) {
     return '保存に失敗しました: $error';
   }
@@ -3319,15 +3313,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get settings_proxyRestartHint => 'プロキシ設定が変更されました。再起動をお勧めします';
-
-  @override
-  String get tagLibrary_addToLibrary => 'ライブラリに追加';
-
-  @override
-  String get tagLibrary_uncategorized => '未分類';
-
-  @override
-  String get tagLibrary_contentPreview => 'コンテンツのプレビュー';
 
   @override
   String get settings_enablePromptWeightScroll => 'マウスホイールでプロンプトの重みを調整';
@@ -4826,34 +4811,6 @@ class AppLocalizationsJa extends AppLocalizations {
       'ドロップ ソースは読み取り可能な画像または Vibe ファイルを提供しませんでした';
 
   @override
-  String get toast_contentCannotBeEmpty => 'コンテンツを空にすることはできません';
-
-  @override
-  String get toast_addedToLibrary => 'ライブラリに追加されました';
-
-  @override
-  String toast_addFailed(Object error) {
-    return '追加に失敗しました: $error';
-  }
-
-  @override
-  String get toast_libraryNotLoaded => 'ライブラリがロードされていません';
-
-  @override
-  String get toast_noValidTagContent => '有効なタグの内容がありません';
-
-  @override
-  String get toast_allTagsAlreadyExist => 'すべてのタグはすでにライブラリに存在します';
-
-  @override
-  String get toast_noAddableTags => 'タグは追加できません';
-
-  @override
-  String toast_addedTagsSkippedDuplicates(Object added, Object skipped) {
-    return '$added タグを追加し、$skipped 重複タグをスキップしました';
-  }
-
-  @override
   String get toast_saveDirNotSet => '保存ディレクトリが設定されていません';
 
   @override
@@ -4940,9 +4897,6 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get common_saving => '保存中...';
-
-  @override
   String get common_expand => '展開する';
 
   @override
@@ -4965,24 +4919,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get detail_noContent => '(コンテンツなし)';
-
-  @override
-  String get saveBlock_title => 'ブロックとして保存';
-
-  @override
-  String get saveBlock_nameLabel => 'ブロック名';
-
-  @override
-  String get saveBlock_nameHint => 'ブロック名を入力';
-
-  @override
-  String get saveBlock_nameRequired => 'ブロック名を入力してください';
-
-  @override
-  String get saveBlock_selectContent => '保存する内容を選択してください';
-
-  @override
-  String get saveBlock_negativeSuffix => 'ネガティブ';
 
   @override
   String get saveBlock_saved => 'ブロックライブラリに保存しました';
@@ -5347,12 +5283,6 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get common_optional => '任意';
-
-  @override
-  String get common_emptyValue => '（空）';
-
-  @override
   String get common_clickToRetry => 'クリックして再試行';
 
   @override
@@ -5360,12 +5290,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get common_swap => '入れ替え';
-
-  @override
-  String get addToLibrary_displayNameHint => 'この項目を識別する名前を入力';
-
-  @override
-  String get addToLibrary_tagHint => 'タグを入力して Enter キーで追加';
 
   @override
   String get drop_saveVibeBundle => 'Vibe Bundleを保存';
@@ -5519,9 +5443,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get promptBlockLibrary_allBlocks => 'すべてのブロック';
 
   @override
-  String get promptBlockLibrary_rootFolder => 'ルート / 未分類';
-
-  @override
   String get promptBlockLibrary_unnamedBlock => '無題のブロック';
 
   @override
@@ -5547,15 +5468,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String promptBlockLibrary_deleteCollectionFolderConfirm(String name) {
     return 'コレクションフォルダー「$name」を削除しますか？中のコレクションとサブフォルダーも削除されますが、ブロック本体には影響しません。';
   }
-
-  @override
-  String get promptBlockLibrary_blockTitle => 'タイトル';
-
-  @override
-  String get promptBlockLibrary_titleHint => 'ブロックのタイトル';
-
-  @override
-  String get promptBlockLibrary_folder => 'フォルダー';
 
   @override
   String get promptBlockLibrary_settingsApplied => 'ブロック設定を現在の画像に読み込みました';
@@ -5745,22 +5657,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get promptBlockPicker_title => 'ブロックを選択';
 
   @override
-  String get promptBlockLibrary_selectImage => '画像を選択';
-
-  @override
   String get promptBlockLibrary_adjustThumbnailTitle => 'サムネイル表示範囲の調整';
 
   @override
   String get promptBlockLibrary_dragToMove => 'ドラッグして移動、スクロールまたはピンチしてズームします';
-
-  @override
-  String get promptBlockLibrary_addToLibrary => 'ブロックライブラリに追加';
-
-  @override
-  String get promptBlockLibrary_contentPreview => '内容プレビュー';
-
-  @override
-  String get promptBlockLibrary_confirmAdd => '確認';
 
   @override
   String get promptBlockLibrary_saveToLibrary => 'ブロックライブラリに保存';
@@ -16061,6 +15961,30 @@ class AppLocalizationsJa extends AppLocalizations {
   String get naiAgent_newChat => '新しいチャット';
 
   @override
+  String get naiAgent_chatGptSignIn => 'ChatGPT で続行';
+
+  @override
+  String get naiAgent_chatGptHint => '対象となるエージェントのリクエストに ChatGPT プランを使用できます。';
+
+  @override
+  String get naiAgent_chatGptBrowser => 'ブラウザーでサインインを完了してください。';
+
+  @override
+  String get naiAgent_chatGptConnected => '接続済み。エージェントのモデル一覧から選択できます。';
+
+  @override
+  String get naiAgent_chatGptNoModels => 'このアカウントで使える対応モデルがありません。';
+
+  @override
+  String get naiAgent_chatGptError => 'ChatGPT に接続できません。再試行するか、サインインし直してください。';
+
+  @override
+  String get naiAgent_chatGptUsingPlan => 'ChatGPT プランを使用中';
+
+  @override
+  String get naiAgent_chatGptManageUsage => '使用量を管理';
+
+  @override
   String get naiAgent_settings => 'Agent 設定';
 
   @override
@@ -21167,6 +21091,15 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get mp_keyHint => 'このサービスのキーを入力';
+
+  @override
+  String get mp_chatGptPlan => 'ChatGPT プラン';
+
+  @override
+  String get mp_chatGptAgentOnly => 'NAI Agent 専用';
+
+  @override
+  String get mp_manageAccount => 'アカウントを管理';
 
   @override
   String get mp_pickerTitle => 'サービスを追加';

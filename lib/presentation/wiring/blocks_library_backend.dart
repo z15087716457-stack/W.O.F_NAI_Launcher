@@ -7,6 +7,7 @@ import 'package:collection/collection.dart';
 import '../../core/utils/localization_extension.dart';
 import '../../core/utils/prompt_block_thumbnails.dart';
 import '../../data/models/prompt_block/prompt_block.dart';
+import '../../data/models/prompt_block/prompt_block_palette_entry.dart';
 import '../../data/models/prompt_block/prompt_block_collection.dart';
 import '../providers/prompt_block_library_provider.dart';
 import '../ui/blocks/blocks_contract.dart';
@@ -77,6 +78,7 @@ class BlocksLibraryBackend {
     BlockDraft draft, {
     String? id,
     PromptBlock? expected,
+    bool isFavorite = false,
   }) => serialize(() async {
     final before = id == null ? null : requireBlock(id);
     if (expected != null && before != expected) {
@@ -125,6 +127,7 @@ class BlocksLibraryBackend {
               negativeContent: negative,
               negativeAtoms: negativeAtoms,
               folderId: draft.folderId,
+              isFavorite: isFavorite,
               color: blockColorString(draft.color),
               appearance: draft.look.name,
               iconName: draft.icon,
@@ -336,12 +339,11 @@ class BlocksLibraryBackend {
         thumbnails[b.id] = await File(b.thumbnail!).readAsBytes();
       }
     }
-    final snapshot = BlocksDeletion(
-      blocks,
-      library.collections,
-      thumbnails,
-      await ref.read(promptBlockStorageProvider).getPaletteBlockIds(),
-    );
+    final snapshot = BlocksDeletion(blocks, library.collections, thumbnails, [
+      for (final entry
+          in await ref.read(promptBlockStorageProvider).getPaletteEntries())
+        if (entry.temp == null) entry.id,
+    ]);
     for (final b in blocks) {
       if (library.blockById(b.id) != b) {
         throw StateError(currentL10n.bridge_conflict);
@@ -386,10 +388,15 @@ class BlocksLibraryBackend {
         ),
       );
     }
-    final palette = await storage.getPaletteBlockIds();
-    await storage.putPaletteBlockIds(
-      {...palette, ...deletion.paletteIds.where(restoredIds.contains)}.toList(),
-    );
+    await storage.updatePaletteEntries((palette) {
+      final ids = palette.map((entry) => entry.id).toSet();
+      return [
+        ...palette,
+        for (final id in deletion.paletteIds)
+          if (restoredIds.contains(id) && !ids.contains(id))
+            PromptBlockPaletteEntry.library(id),
+      ];
+    });
     deletion.restored = true;
     await notifier.refresh();
   });

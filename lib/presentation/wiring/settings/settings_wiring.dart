@@ -317,6 +317,7 @@ class _SettingsWiringState extends ConsumerState<SettingsWiring> {
       providers: workbenchActions(
         ref.read(providersWorkbenchProvider.notifier),
         _run,
+        onAccountConnected: models.showChatGptPlanNotice,
       ),
       onImportModelConfig: () => _run(models.importConfig),
       onCopyModelConfig: () => _run(models.copy),

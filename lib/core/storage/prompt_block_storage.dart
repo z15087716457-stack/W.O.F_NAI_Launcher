@@ -10,6 +10,7 @@ import '../utils/hive_startup_box_opener.dart';
 import '../../data/models/prompt_block/prompt_block.dart';
 import '../../data/models/prompt_block/prompt_block_collection.dart';
 import '../../data/models/prompt_block/prompt_block_folder.dart';
+import '../../data/models/prompt_block/prompt_block_palette_entry.dart';
 
 /// 全局 Prompt 块库的 Hive 存储层。
 ///
@@ -424,15 +425,27 @@ class PromptBlockStorage {
     await _writeSchema(box);
   }
 
-  /// 读取颜料版块 ID 列表（用户排序序）。
-  Future<List<String>> getPaletteBlockIds() async {
+  /// Read ordered palette entries, including older ID-only boards.
+  Future<List<PromptBlockPaletteEntry>> getPaletteEntries() async {
     final box = await _getBox();
     final raw = box.get(_paletteKey);
     if (raw is! String || raw.isEmpty) return const [];
     try {
       final decoded = jsonDecode(raw);
-      if (decoded is Map && decoded['blockIds'] is List) {
-        return (decoded['blockIds'] as List).whereType<String>().toList();
+      if (decoded is! Map) return const [];
+      final entries = decoded['entries'];
+      if (entries is List) {
+        return [
+          for (final entry in entries)
+            PromptBlockPaletteEntry.fromJson(entry as Map<String, dynamic>),
+        ];
+      }
+      final ids = decoded['blockIds'];
+      if (ids is List) {
+        return [
+          for (final id in ids.whereType<String>())
+            PromptBlockPaletteEntry.library(id),
+        ];
       }
     } catch (_) {
       // 损坏记录按空板处理，下次写入自愈。
@@ -440,13 +453,18 @@ class PromptBlockStorage {
     return const [];
   }
 
-  /// 覆盖写入颜料版块 ID 列表。
-  Future<void> putPaletteBlockIds(List<String> ids) async {
+  /// Store order and temporary content together in one record.
+  Future<void> putPaletteEntries(List<PromptBlockPaletteEntry> entries) async {
     final box = await _getBox();
     await box.put(
       _paletteKey,
       jsonEncode({
-        'blockIds': ids,
+        'entries': entries.map((entry) => entry.toJson()).toList(),
+        // Older builds can still read the library blocks after a rollback.
+        'blockIds': [
+          for (final entry in entries)
+            if (entry.temp == null) entry.id,
+        ],
         'updatedAt': DateTime.now().toIso8601String(),
       }),
     );
@@ -454,17 +472,20 @@ class PromptBlockStorage {
 
   /// 颜料版的读取、变换和写入按调用顺序完成，避免并发操作覆盖彼此。
   /// [transform] 返回 null 表示无变更；写入错误由当前调用者处理。
-  Future<bool> updatePaletteBlockIds(
-    List<String>? Function(List<String> ids) transform,
+  Future<bool> updatePaletteEntries(
+    List<PromptBlockPaletteEntry>? Function(
+      List<PromptBlockPaletteEntry> entries,
+    )
+    transform,
   ) async {
     final previous = _paletteMutation;
     final finished = Completer<void>();
     _paletteMutation = finished.future;
     try {
       await previous;
-      final next = transform(await getPaletteBlockIds());
+      final next = transform(await getPaletteEntries());
       if (next == null) return false;
-      await putPaletteBlockIds(next);
+      await putPaletteEntries(next);
       return true;
     } finally {
       finished.complete();

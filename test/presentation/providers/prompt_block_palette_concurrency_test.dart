@@ -1,3 +1,4 @@
+import 'package:nai_launcher/data/models/prompt_block/prompt_block_palette_entry.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -34,7 +35,7 @@ class _ControlledStorage extends PromptBlockStorage {
   bool failNextWrite = false;
 
   @override
-  Future<void> putPaletteBlockIds(List<String> ids) async {
+  Future<void> putPaletteEntries(List<PromptBlockPaletteEntry> entries) async {
     if (failNextWrite) {
       failNextWrite = false;
       throw StateError('write failed');
@@ -45,7 +46,7 @@ class _ControlledStorage extends PromptBlockStorage {
       started.complete();
       await releaseWrite!.future;
     }
-    await super.putPaletteBlockIds(ids);
+    await super.putPaletteEntries(entries);
   }
 }
 
@@ -81,7 +82,10 @@ void main() {
       container.read(promptBlockPaletteNotifierProvider.notifier);
 
   Future<void> expectOrder(List<String> expected) async {
-    expect(await storage.getPaletteBlockIds(), expected);
+    expect(
+      (await storage.getPaletteEntries()).map((entry) => entry.id).toList(),
+      expected,
+    );
     final palette = await container.read(
       promptBlockPaletteNotifierProvider.future,
     );
@@ -95,21 +99,27 @@ void main() {
   });
 
   test('remove and add both apply to the latest order', () async {
-    await storage.putPaletteBlockIds(['A', 'B']);
+    await storage.putPaletteEntries(
+      ['A', 'B'].map(PromptBlockPaletteEntry.library).toList(),
+    );
     await container.read(promptBlockPaletteNotifierProvider.future);
     await Future.wait([palette().removeBlock('A'), palette().addBlock('C')]);
     await expectOrder(['B', 'C']);
   });
 
   test('move and insert both apply to the latest order', () async {
-    await storage.putPaletteBlockIds(['A', 'B']);
+    await storage.putPaletteEntries(
+      ['A', 'B'].map(PromptBlockPaletteEntry.library).toList(),
+    );
     await container.read(promptBlockPaletteNotifierProvider.future);
     await Future.wait([palette().move(0, 1), palette().insertBlock('C', 0)]);
     await expectOrder(['C', 'B', 'A']);
   });
 
   test('startup pruning cannot overwrite an addition', () async {
-    await storage.putPaletteBlockIds(['A', 'missing']);
+    await storage.putPaletteEntries(
+      ['A', 'missing'].map(PromptBlockPaletteEntry.library).toList(),
+    );
     final started = Completer<void>();
     final release = Completer<void>();
     storage

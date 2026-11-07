@@ -982,8 +982,6 @@
     }
   },
   "characterTooltip_viewFullConfig": "點選檢視完整配置",
-  "addGroup_displayNameLabel": "顯示名稱（可選）",
-  "addGroup_targetCategoryLabel": "目標分類",
   "globalSettings_saveFailed": "儲存失敗: {error}",
   "@globalSettings_saveFailed": {
     "placeholders": {
@@ -1643,9 +1641,6 @@
     }
   },
   "settings_proxyRestartHint": "代理設定已更改，建議重啟應用",
-  "tagLibrary_addToLibrary": "收藏到詞庫",
-  "tagLibrary_uncategorized": "未分類",
-  "tagLibrary_contentPreview": "內容預覽",
   "settings_enablePromptWeightScroll": "滾輪調整提示詞權重",
   "settings_enablePromptWeightScrollSubtitle": "選中提示詞時，按住所選修飾鍵 + 滾輪調整權重；裸滾輪照常翻頁",
   "settings_weightScrollModifierAlt": "Alt",
@@ -2385,25 +2380,6 @@
   "toast_sentToKrita": "圖片已傳送到 Krita",
   "toast_kritaUnsupportedImageFormat": "圖片格式無法傳送到 Krita，請換用常見圖片格式",
   "toast_dropNoReadableImageOrVibe": "拖入源未提供可讀取的圖片或 Vibe 檔案",
-  "toast_contentCannotBeEmpty": "內容不能為空",
-  "toast_addedToLibrary": "已新增到詞庫",
-  "toast_addFailed": "新增失敗: {error}",
-  "@toast_addFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "toast_libraryNotLoaded": "詞庫未載入",
-  "toast_noValidTagContent": "沒有有效的標籤內容",
-  "toast_allTagsAlreadyExist": "所有標籤已存在於詞庫中",
-  "toast_noAddableTags": "沒有可新增的標籤",
-  "toast_addedTagsSkippedDuplicates": "已新增 {added} 個標籤，跳過 {skipped} 個重複標籤",
-  "@toast_addedTagsSkippedDuplicates": {
-    "placeholders": {
-      "added": {},
-      "skipped": {}
-    }
-  },
   "toast_saveDirNotSet": "未設定儲存目錄",
   "toast_savedTo": "已儲存到 {path}",
   "@toast_savedTo": {
@@ -2471,7 +2447,6 @@
       "hours": {}
     }
   },
-  "common_saving": "儲存中...",
   "common_expand": "展開",
   "common_collapse": "收起",
   "detail_parsingMetadata": "正在解析後設資料...",
@@ -2480,12 +2455,6 @@
   "detail_modifiedTime": "修改時間",
   "detail_fileSize": "檔案大小",
   "detail_noContent": "(無內容)",
-  "saveBlock_title": "儲存為塊",
-  "saveBlock_nameLabel": "塊標題",
-  "saveBlock_nameHint": "輸入塊標題",
-  "saveBlock_nameRequired": "請輸入塊標題",
-  "saveBlock_selectContent": "請選擇要儲存的內容",
-  "saveBlock_negativeSuffix": "負向",
   "saveBlock_saved": "已儲存到塊庫",
   "detail_copyLabel": "複製{label}",
   "@detail_copyLabel": {
@@ -2841,13 +2810,9 @@
       }
     }
   },
-  "common_optional": "可選",
-  "common_emptyValue": "（空）",
   "common_clickToRetry": "點選重試",
   "common_opening": "正在開啟...",
   "common_swap": "交換",
-  "addToLibrary_displayNameHint": "輸入便於識別此條目的名稱",
-  "addToLibrary_tagHint": "輸入標籤並按 Enter 新增",
   "drop_saveVibeBundle": "儲存 Vibe Bundle",
   "vibe_import_overwriteOriginalParams": "直接替換原 Vibe 參數",
   "vibe_import_overwriteOriginalParamsHint": "僅覆蓋 {name} 的庫內參數，預設不勾選",
@@ -2964,7 +2929,6 @@
     }
   },
   "promptBlockLibrary_allBlocks": "全部塊",
-  "promptBlockLibrary_rootFolder": "根目錄 / 未分類",
   "promptBlockLibrary_unnamedBlock": "未命名塊",
   "promptBlockLibrary_useCount": "使用 {count} 次",
   "@promptBlockLibrary_useCount": {
@@ -2993,9 +2957,6 @@
       }
     }
   },
-  "promptBlockLibrary_blockTitle": "標題",
-  "promptBlockLibrary_titleHint": "塊標題",
-  "promptBlockLibrary_folder": "資料夾",
   "promptBlockLibrary_settingsApplied": "塊設定已匯入當前畫面",
   "promptBlockLibrary_settingsIncompatible": "塊設定與目標模型不相容，未匯入任何參數。",
   "promptBlockLibrary_deleted": "已刪除",
@@ -3133,12 +3094,8 @@
   "styleExplore_adoptBlockEmpty": "所選候選沒有可儲存的畫師串或正向提示詞",
   "promptBlockEditor_library": "塊庫",
   "promptBlockPicker_title": "選擇塊",
-  "promptBlockLibrary_selectImage": "選擇圖片",
   "promptBlockLibrary_adjustThumbnailTitle": "調整預覽圖顯示範圍",
   "promptBlockLibrary_dragToMove": "拖曳移動，滾輪或雙指縮放",
-  "promptBlockLibrary_addToLibrary": "收藏到塊庫",
-  "promptBlockLibrary_contentPreview": "內容預覽",
-  "promptBlockLibrary_confirmAdd": "確認收藏",
   "promptBlockLibrary_saveToLibrary": "儲存到塊庫",
   "promptBlockLibrary_droppedImage": "拖入圖片",
   "promptBlockLibrary_createBlockFromImage": "建立新塊",
@@ -8804,6 +8761,14 @@
   "naiAgent_permissionDeny": "拒絕",
   "naiAgent_defaultWorkspace": "工作區 1",
   "naiAgent_newChat": "新聊天",
+  "naiAgent_chatGptSignIn": "使用 ChatGPT 登入",
+  "naiAgent_chatGptHint": "Agent 可使用你的 ChatGPT 套餐額度。",
+  "naiAgent_chatGptBrowser": "請在瀏覽器中完成登入。",
+  "naiAgent_chatGptConnected": "已連線，可在 Agent 的模型選擇器中選用。",
+  "naiAgent_chatGptNoModels": "當前帳號沒有可用的相容模型。",
+  "naiAgent_chatGptError": "無法連線 ChatGPT，請重試或重新登入。",
+  "naiAgent_chatGptUsingPlan": "使用 ChatGPT 套餐額度",
+  "naiAgent_chatGptManageUsage": "管理用量",
   "naiAgent_settings": "Agent 設定",
   "naiAgent_chooseModel": "選擇模型",
   "naiAgent_interrupted": "上次任務已中斷，未自動重發。",
@@ -11718,6 +11683,9 @@
   "mp_hide": "隱藏",
   "mp_keyHintLocal": "本機服務可留空",
   "mp_keyHint": "輸入此服務商的 Key",
+  "mp_chatGptPlan": "ChatGPT 套餐",
+  "mp_chatGptAgentOnly": "僅供 NAI Agent 使用",
+  "mp_manageAccount": "管理帳號",
   "mp_pickerTitle": "新增服務商",
   "mp_pickerSearch": "搜尋廠商、平臺或本地服務",
   "mp_groupAll": "全部",

@@ -685,6 +685,9 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
         Draggable<PromptBlockDragData>(
           data: PromptBlockDragData(
             blockId: block.id,
+            temp: instance.temp == null
+                ? null
+                : temporaryBlockSnapshot(instance.temp!, block),
             instanceMarker: PillInstanceDragRef(
               marker: marker,
               occurrence: occurrence,
@@ -857,7 +860,8 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
         context,
         () => mounted && widget.pillScope == scope,
       ).insert(
-        [data.blockId],
+        data.temp == null ? [data.blockId] : const [],
+        temporary: data.temp,
         at: (scope: scope, caret: offset),
         onInserted: _placeCaretAfter,
       );

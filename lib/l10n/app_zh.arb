@@ -982,8 +982,6 @@
     }
   },
   "characterTooltip_viewFullConfig": "点击查看完整配置",
-  "addGroup_displayNameLabel": "显示名称（可选）",
-  "addGroup_targetCategoryLabel": "目标分类",
   "globalSettings_saveFailed": "保存失败: {error}",
   "@globalSettings_saveFailed": {
     "placeholders": {
@@ -1643,9 +1641,6 @@
     }
   },
   "settings_proxyRestartHint": "代理设置已更改，建议重启应用",
-  "tagLibrary_addToLibrary": "收藏到词库",
-  "tagLibrary_uncategorized": "未分类",
-  "tagLibrary_contentPreview": "内容预览",
   "settings_enablePromptWeightScroll": "滚轮调整提示词权重",
   "settings_enablePromptWeightScrollSubtitle": "选中提示词时，按住所选修饰键 + 滚轮调整权重；裸滚轮照常翻页",
   "settings_weightScrollModifierAlt": "Alt",
@@ -2385,25 +2380,6 @@
   "toast_sentToKrita": "图片已发送到 Krita",
   "toast_kritaUnsupportedImageFormat": "图片格式无法发送到 Krita，请换用常见图片格式",
   "toast_dropNoReadableImageOrVibe": "拖入源未提供可读取的图片或 Vibe 文件",
-  "toast_contentCannotBeEmpty": "内容不能为空",
-  "toast_addedToLibrary": "已添加到词库",
-  "toast_addFailed": "添加失败: {error}",
-  "@toast_addFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "toast_libraryNotLoaded": "词库未加载",
-  "toast_noValidTagContent": "没有有效的标签内容",
-  "toast_allTagsAlreadyExist": "所有标签已存在于词库中",
-  "toast_noAddableTags": "没有可添加的标签",
-  "toast_addedTagsSkippedDuplicates": "已添加 {added} 个标签，跳过 {skipped} 个重复标签",
-  "@toast_addedTagsSkippedDuplicates": {
-    "placeholders": {
-      "added": {},
-      "skipped": {}
-    }
-  },
   "toast_saveDirNotSet": "未设置保存目录",
   "toast_savedTo": "已保存到 {path}",
   "@toast_savedTo": {
@@ -2471,7 +2447,6 @@
       "hours": {}
     }
   },
-  "common_saving": "保存中...",
   "common_expand": "展开",
   "common_collapse": "收起",
   "detail_parsingMetadata": "正在解析元数据...",
@@ -2480,12 +2455,6 @@
   "detail_modifiedTime": "修改时间",
   "detail_fileSize": "文件大小",
   "detail_noContent": "(无内容)",
-  "saveBlock_title": "保存为块",
-  "saveBlock_nameLabel": "块标题",
-  "saveBlock_nameHint": "输入块标题",
-  "saveBlock_nameRequired": "请输入块标题",
-  "saveBlock_selectContent": "请选择要保存的内容",
-  "saveBlock_negativeSuffix": "负向",
   "saveBlock_saved": "已保存到块库",
   "detail_copyLabel": "复制{label}",
   "@detail_copyLabel": {
@@ -2841,13 +2810,9 @@
       }
     }
   },
-  "common_optional": "可选",
-  "common_emptyValue": "（空）",
   "common_clickToRetry": "点击重试",
   "common_opening": "正在打开...",
   "common_swap": "交换",
-  "addToLibrary_displayNameHint": "输入便于识别此条目的名称",
-  "addToLibrary_tagHint": "输入标签并按 Enter 添加",
   "drop_saveVibeBundle": "保存 Vibe Bundle",
   "vibe_import_overwriteOriginalParams": "直接替换原 Vibe 参数",
   "vibe_import_overwriteOriginalParamsHint": "仅覆盖 {name} 的库内参数，默认不勾选",
@@ -2964,7 +2929,6 @@
     }
   },
   "promptBlockLibrary_allBlocks": "全部块",
-  "promptBlockLibrary_rootFolder": "根目录 / 未分类",
   "promptBlockLibrary_unnamedBlock": "未命名块",
   "promptBlockLibrary_useCount": "使用 {count} 次",
   "@promptBlockLibrary_useCount": {
@@ -2993,9 +2957,6 @@
       }
     }
   },
-  "promptBlockLibrary_blockTitle": "标题",
-  "promptBlockLibrary_titleHint": "块标题",
-  "promptBlockLibrary_folder": "文件夹",
   "promptBlockLibrary_settingsApplied": "块设置已导入当前画面",
   "promptBlockLibrary_settingsIncompatible": "块设置与目标模型不兼容，未导入任何参数。",
   "promptBlockLibrary_deleted": "已删除",
@@ -3133,12 +3094,8 @@
   "styleExplore_adoptBlockEmpty": "所选候选没有可保存的画师串或正向提示词",
   "promptBlockEditor_library": "块库",
   "promptBlockPicker_title": "选择块",
-  "promptBlockLibrary_selectImage": "选择图片",
   "promptBlockLibrary_adjustThumbnailTitle": "调整预览图显示范围",
   "promptBlockLibrary_dragToMove": "拖拽移动，滚轮或双指缩放",
-  "promptBlockLibrary_addToLibrary": "收藏到块库",
-  "promptBlockLibrary_contentPreview": "内容预览",
-  "promptBlockLibrary_confirmAdd": "确认收藏",
   "promptBlockLibrary_saveToLibrary": "保存到块库",
   "promptBlockLibrary_droppedImage": "拖入图片",
   "promptBlockLibrary_createBlockFromImage": "创建新块",
@@ -8794,6 +8751,14 @@
   "naiAgent_permissionDeny": "拒绝",
   "naiAgent_defaultWorkspace": "工作区 1",
   "naiAgent_newChat": "新聊天",
+  "naiAgent_chatGptSignIn": "使用 ChatGPT 登录",
+  "naiAgent_chatGptHint": "Agent 可使用你的 ChatGPT 套餐额度。",
+  "naiAgent_chatGptBrowser": "请在浏览器中完成登录。",
+  "naiAgent_chatGptConnected": "已连接，可在 Agent 的模型选择器中选用。",
+  "naiAgent_chatGptNoModels": "当前账号没有可用的兼容模型。",
+  "naiAgent_chatGptError": "无法连接 ChatGPT，请重试或重新登录。",
+  "naiAgent_chatGptUsingPlan": "使用 ChatGPT 套餐额度",
+  "naiAgent_chatGptManageUsage": "管理用量",
   "naiAgent_settings": "Agent 设置",
   "naiAgent_chooseModel": "选择模型",
   "naiAgent_interrupted": "上次任务已中断，未自动重发。",
@@ -11213,6 +11178,9 @@
   "mp_hide": "隐藏",
   "mp_keyHintLocal": "本机服务可留空",
   "mp_keyHint": "输入此服务商的 Key",
+  "mp_chatGptPlan": "ChatGPT 套餐",
+  "mp_chatGptAgentOnly": "仅供 NAI Agent 使用",
+  "mp_manageAccount": "管理账号",
   "mp_pickerTitle": "添加服务商",
   "mp_pickerSearch": "搜索厂商、平台或本地服务",
   "mp_groupAll": "全部",

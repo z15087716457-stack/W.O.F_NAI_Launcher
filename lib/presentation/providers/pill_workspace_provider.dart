@@ -222,6 +222,7 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
   void insertBlockAt({
     required int offset,
     required String blockId,
+    PillTempContent? temp,
     bool useNegativeContent = false,
     bool countUse = true,
     String? bundleId,
@@ -232,7 +233,7 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
         .valueOrNull
         ?.blockById(blockId);
     final translationZh = block?.readingTranslationZh;
-    if (!useNegativeContent && translationZh != null) {
+    if (temp == null && !useNegativeContent && translationZh != null) {
       insertTranslationAt(
         offset: offset,
         source: block!.content,
@@ -263,12 +264,13 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
         state.document,
         offset: offset,
         blockId: blockId,
+        temp: temp,
         useNegativeContent: useNegativeContent,
         bundleId: bundleId,
         rollScopeMask: rollScopeMask,
       ),
     );
-    if (countUse) {
+    if (countUse && temp == null) {
       unawaited(
         ref
             .read(promptBlockLibraryNotifierProvider.notifier)

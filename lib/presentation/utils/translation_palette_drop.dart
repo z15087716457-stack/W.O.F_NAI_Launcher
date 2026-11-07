@@ -38,6 +38,11 @@ Future<void> acceptPaletteDrag(
   int? index,
 }) async {
   final palette = ref.read(promptBlockPaletteNotifierProvider.notifier);
+  if (data.paletteIndex != null) return;
+  if (data.temp case final temp?) {
+    await palette.addTemporary(temp, index: index);
+    return;
+  }
   var blockId = data.blockId;
   if (data.translation case final translation?) {
     final block = await saveTranslationToBlockLibrary(ref, translation);

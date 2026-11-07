@@ -5,6 +5,7 @@ import '../../core/storage/local_storage_service.dart';
 import '../../core/storage/prompt_block_storage.dart';
 import '../../core/utils/app_logger.dart';
 import '../models/prompt_block/prompt_block.dart';
+import '../models/prompt_block/prompt_block_palette_entry.dart';
 import '../repositories/prompt_block_repository.dart';
 
 /// 旧「固定词」系统 → 块库 + 颜料版的一次性迁移（FEAT-5 / EVAL-1）。
@@ -110,13 +111,15 @@ class FixedTagMigrationService {
     final enabledIds = migrated.where((entry) => entry.enabled).toList()
       ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
     if (enabledIds.isNotEmpty) {
-      final palette = await _blockStorage.getPaletteBlockIds();
-      final merged = <String>[
-        ...palette,
-        for (final entry in enabledIds)
-          if (!palette.contains(entry.blockId)) entry.blockId,
-      ];
-      await _blockStorage.putPaletteBlockIds(merged);
+      await _blockStorage.updatePaletteEntries((palette) {
+        final ids = palette.map((entry) => entry.id).toSet();
+        return [
+          ...palette,
+          for (final entry in enabledIds)
+            if (!ids.contains(entry.blockId))
+              PromptBlockPaletteEntry.library(entry.blockId),
+        ];
+      });
     }
 
     await _cleanLegacyKeys();

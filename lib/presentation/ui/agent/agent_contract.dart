@@ -1204,8 +1204,10 @@ class AgentModelOption {
     this.selected = false,
     this.logoAsset,
     this.mark,
+    this.chatGptUsageUrl,
   });
   final String providerId, modelId, label, provider;
+  final String? chatGptUsageUrl;
   final bool selected;
 
   /// 服务商图标：预设用 `assets/icons/providers/<logoAsset>.svg`；

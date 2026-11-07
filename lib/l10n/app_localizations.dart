@@ -4338,18 +4338,6 @@ abstract class AppLocalizations {
   /// **'Click for full configuration'**
   String get characterTooltip_viewFullConfig;
 
-  /// No description provided for @addGroup_displayNameLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Display Name (Optional)'**
-  String get addGroup_displayNameLabel;
-
-  /// No description provided for @addGroup_targetCategoryLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Target Category'**
-  String get addGroup_targetCategoryLabel;
-
   /// No description provided for @globalSettings_saveFailed.
   ///
   /// In en, this message translates to:
@@ -6107,24 +6095,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Proxy settings changed, restart recommended'**
   String get settings_proxyRestartHint;
-
-  /// No description provided for @tagLibrary_addToLibrary.
-  ///
-  /// In en, this message translates to:
-  /// **'Add to Library'**
-  String get tagLibrary_addToLibrary;
-
-  /// No description provided for @tagLibrary_uncategorized.
-  ///
-  /// In en, this message translates to:
-  /// **'Uncategorized'**
-  String get tagLibrary_uncategorized;
-
-  /// No description provided for @tagLibrary_contentPreview.
-  ///
-  /// In en, this message translates to:
-  /// **'Content Preview'**
-  String get tagLibrary_contentPreview;
 
   /// No description provided for @settings_enablePromptWeightScroll.
   ///
@@ -8783,54 +8753,6 @@ abstract class AppLocalizations {
   /// **'The drop source did not provide a readable image or Vibe file'**
   String get toast_dropNoReadableImageOrVibe;
 
-  /// No description provided for @toast_contentCannotBeEmpty.
-  ///
-  /// In en, this message translates to:
-  /// **'Content cannot be empty'**
-  String get toast_contentCannotBeEmpty;
-
-  /// No description provided for @toast_addedToLibrary.
-  ///
-  /// In en, this message translates to:
-  /// **'Added to library'**
-  String get toast_addedToLibrary;
-
-  /// No description provided for @toast_addFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Add failed: {error}'**
-  String toast_addFailed(Object error);
-
-  /// No description provided for @toast_libraryNotLoaded.
-  ///
-  /// In en, this message translates to:
-  /// **'Library is not loaded'**
-  String get toast_libraryNotLoaded;
-
-  /// No description provided for @toast_noValidTagContent.
-  ///
-  /// In en, this message translates to:
-  /// **'No valid tag content'**
-  String get toast_noValidTagContent;
-
-  /// No description provided for @toast_allTagsAlreadyExist.
-  ///
-  /// In en, this message translates to:
-  /// **'All tags already exist in the library'**
-  String get toast_allTagsAlreadyExist;
-
-  /// No description provided for @toast_noAddableTags.
-  ///
-  /// In en, this message translates to:
-  /// **'No tags can be added'**
-  String get toast_noAddableTags;
-
-  /// No description provided for @toast_addedTagsSkippedDuplicates.
-  ///
-  /// In en, this message translates to:
-  /// **'Added {added} tags, skipped {skipped} duplicate tags'**
-  String toast_addedTagsSkippedDuplicates(Object added, Object skipped);
-
   /// No description provided for @toast_saveDirNotSet.
   ///
   /// In en, this message translates to:
@@ -8963,12 +8885,6 @@ abstract class AppLocalizations {
   /// **'{hours} hours ago'**
   String common_hoursAgo(Object hours);
 
-  /// No description provided for @common_saving.
-  ///
-  /// In en, this message translates to:
-  /// **'Saving...'**
-  String get common_saving;
-
   /// No description provided for @common_expand.
   ///
   /// In en, this message translates to:
@@ -9016,42 +8932,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'(No content)'**
   String get detail_noContent;
-
-  /// No description provided for @saveBlock_title.
-  ///
-  /// In en, this message translates to:
-  /// **'Save as Block'**
-  String get saveBlock_title;
-
-  /// No description provided for @saveBlock_nameLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Block title'**
-  String get saveBlock_nameLabel;
-
-  /// No description provided for @saveBlock_nameHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter block title'**
-  String get saveBlock_nameHint;
-
-  /// No description provided for @saveBlock_nameRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Please enter a block title'**
-  String get saveBlock_nameRequired;
-
-  /// No description provided for @saveBlock_selectContent.
-  ///
-  /// In en, this message translates to:
-  /// **'Select content to save'**
-  String get saveBlock_selectContent;
-
-  /// No description provided for @saveBlock_negativeSuffix.
-  ///
-  /// In en, this message translates to:
-  /// **'Negative'**
-  String get saveBlock_negativeSuffix;
 
   /// No description provided for @saveBlock_saved.
   ///
@@ -9659,18 +9539,6 @@ abstract class AppLocalizations {
   /// **'Failed to rebuild the gallery index: {error}'**
   String localGallery_errorRebuildFailed(String error);
 
-  /// No description provided for @common_optional.
-  ///
-  /// In en, this message translates to:
-  /// **'Optional'**
-  String get common_optional;
-
-  /// No description provided for @common_emptyValue.
-  ///
-  /// In en, this message translates to:
-  /// **'(Empty)'**
-  String get common_emptyValue;
-
   /// No description provided for @common_clickToRetry.
   ///
   /// In en, this message translates to:
@@ -9688,18 +9556,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Swap'**
   String get common_swap;
-
-  /// No description provided for @addToLibrary_displayNameHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter a name to identify this entry'**
-  String get addToLibrary_displayNameHint;
-
-  /// No description provided for @addToLibrary_tagHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter a tag and press Enter to add it'**
-  String get addToLibrary_tagHint;
 
   /// No description provided for @drop_saveVibeBundle.
   ///
@@ -9959,12 +9815,6 @@ abstract class AppLocalizations {
   /// **'All blocks'**
   String get promptBlockLibrary_allBlocks;
 
-  /// No description provided for @promptBlockLibrary_rootFolder.
-  ///
-  /// In en, this message translates to:
-  /// **'Root / Unfiled'**
-  String get promptBlockLibrary_rootFolder;
-
   /// No description provided for @promptBlockLibrary_unnamedBlock.
   ///
   /// In en, this message translates to:
@@ -10006,24 +9856,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete collection folder \"{name}\"? Its collections and sub-folders are deleted too; the blocks themselves are unaffected.'**
   String promptBlockLibrary_deleteCollectionFolderConfirm(String name);
-
-  /// No description provided for @promptBlockLibrary_blockTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Title'**
-  String get promptBlockLibrary_blockTitle;
-
-  /// No description provided for @promptBlockLibrary_titleHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Block title'**
-  String get promptBlockLibrary_titleHint;
-
-  /// No description provided for @promptBlockLibrary_folder.
-  ///
-  /// In en, this message translates to:
-  /// **'Folder'**
-  String get promptBlockLibrary_folder;
 
   /// No description provided for @promptBlockLibrary_settingsApplied.
   ///
@@ -10336,12 +10168,6 @@ abstract class AppLocalizations {
   /// **'Select Block'**
   String get promptBlockPicker_title;
 
-  /// No description provided for @promptBlockLibrary_selectImage.
-  ///
-  /// In en, this message translates to:
-  /// **'Select Image'**
-  String get promptBlockLibrary_selectImage;
-
   /// No description provided for @promptBlockLibrary_adjustThumbnailTitle.
   ///
   /// In en, this message translates to:
@@ -10353,24 +10179,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Drag to move, scroll or pinch to zoom'**
   String get promptBlockLibrary_dragToMove;
-
-  /// No description provided for @promptBlockLibrary_addToLibrary.
-  ///
-  /// In en, this message translates to:
-  /// **'Add to Block Library'**
-  String get promptBlockLibrary_addToLibrary;
-
-  /// No description provided for @promptBlockLibrary_contentPreview.
-  ///
-  /// In en, this message translates to:
-  /// **'Content Preview'**
-  String get promptBlockLibrary_contentPreview;
-
-  /// No description provided for @promptBlockLibrary_confirmAdd.
-  ///
-  /// In en, this message translates to:
-  /// **'Confirm'**
-  String get promptBlockLibrary_confirmAdd;
 
   /// No description provided for @promptBlockLibrary_saveToLibrary.
   ///
@@ -28865,6 +28673,54 @@ abstract class AppLocalizations {
   /// **'New chat'**
   String get naiAgent_newChat;
 
+  /// No description provided for @naiAgent_chatGptSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with ChatGPT'**
+  String get naiAgent_chatGptSignIn;
+
+  /// No description provided for @naiAgent_chatGptHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Use your ChatGPT plan for eligible Agent requests.'**
+  String get naiAgent_chatGptHint;
+
+  /// No description provided for @naiAgent_chatGptBrowser.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete sign-in in your browser.'**
+  String get naiAgent_chatGptBrowser;
+
+  /// No description provided for @naiAgent_chatGptConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected. Choose a model in the Agent model picker.'**
+  String get naiAgent_chatGptConnected;
+
+  /// No description provided for @naiAgent_chatGptNoModels.
+  ///
+  /// In en, this message translates to:
+  /// **'No compatible models are available for this account.'**
+  String get naiAgent_chatGptNoModels;
+
+  /// No description provided for @naiAgent_chatGptError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not connect to ChatGPT. Try again or sign in again.'**
+  String get naiAgent_chatGptError;
+
+  /// No description provided for @naiAgent_chatGptUsingPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Using ChatGPT plan'**
+  String get naiAgent_chatGptUsingPlan;
+
+  /// No description provided for @naiAgent_chatGptManageUsage.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage usage'**
+  String get naiAgent_chatGptManageUsage;
+
   /// No description provided for @naiAgent_settings.
   ///
   /// In en, this message translates to:
@@ -38079,6 +37935,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter this provider’s key'**
   String get mp_keyHint;
+
+  /// No description provided for @mp_chatGptPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'ChatGPT plan'**
+  String get mp_chatGptPlan;
+
+  /// No description provided for @mp_chatGptAgentOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'For NAI Agent'**
+  String get mp_chatGptAgentOnly;
+
+  /// No description provided for @mp_manageAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage account'**
+  String get mp_manageAccount;
 
   /// No description provided for @mp_pickerTitle.
   ///

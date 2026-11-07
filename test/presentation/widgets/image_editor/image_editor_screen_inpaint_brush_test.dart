@@ -1,18 +1,18 @@
-import 'dart:typed_data';
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
 import 'package:nai_launcher/core/utils/inpaint_outpaint_utils.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
+import 'package:nai_launcher/presentation/widgets/common/text_editing_shortcuts.dart';
 import 'package:nai_launcher/presentation/widgets/image_editor/canvas/editor_canvas.dart';
 import 'package:nai_launcher/presentation/widgets/image_editor/image_editor_screen.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('inpaint brush commits mask strokes on the image', (
+  testWidgets('inpaint undo and redo preserve focused text editing', (
     tester,
   ) async {
     await tester.binding.setSurfaceSize(const Size(1200, 800));
@@ -23,23 +23,30 @@ void main() {
         locale: const Locale('zh'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: ImageEditorScreen(
-          initialImage: _buildSolidPng(128, 96, const Color(0xFF224466)),
-          mode: ImageEditorMode.inpaint,
-          title: 'Inpaint brush test',
-          initialShowLayerPanel: false,
+        builder: (_, child) => TextEditingShortcuts(child: child!),
+        home: Builder(
+          builder: (context) => TextButton(
+            onPressed: () => ImageEditorScreen.show(
+              context,
+              initialImage: _buildSolidPng(128, 96, const Color(0xFF224466)),
+              mode: ImageEditorMode.inpaint,
+            ),
+            child: const Text('Open inpaint'),
+          ),
         ),
       ),
     );
+    await tester.tap(find.text('Open inpaint'));
     await _pumpForAsyncEditorWork(tester);
+    final screen = find.byType(ToolsEditorWiring);
     await _pumpUntil(tester, () {
-      final state = tester.state(find.byType(ImageEditorScreen)) as dynamic;
+      final state = tester.state(screen) as dynamic;
       return state.debugActiveLayerName == '图层 1' &&
           state.debugCurrentToolId == 'brush' &&
           find.byType(EditorCanvas).evaluate().isNotEmpty;
     });
 
-    final state = tester.state(find.byType(ImageEditorScreen)) as dynamic;
+    final state = tester.state(screen) as dynamic;
     expect(state.debugActiveLayerStrokeCount, 0);
     expect(state.debugHasMaskContent, isFalse);
 
@@ -68,6 +75,54 @@ void main() {
     expect(state.debugActiveLayerName, '图层 1');
     expect(state.debugActiveLayerStrokeCount, 1);
     expect(state.debugHasMaskContent, isTrue);
+
+    Future<void> ctrl(LogicalKeyboardKey key, {bool shift = false}) async {
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      if (shift) await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.sendKeyEvent(key);
+      if (shift) await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.pump();
+    }
+
+    await ctrl(LogicalKeyboardKey.keyZ);
+    expect(state.debugHasMaskContent, isFalse);
+    await ctrl(LogicalKeyboardKey.keyY);
+    expect(state.debugActiveLayerStrokeCount, 1);
+
+    final canvasFocus = tester.widget<Focus>(
+      find.descendant(of: editorCanvas, matching: find.byType(Focus)).first,
+    );
+    canvasFocus.focusNode!.requestFocus();
+    await tester.pump();
+    await ctrl(LogicalKeyboardKey.keyZ);
+    expect(state.debugHasMaskContent, isFalse);
+    await ctrl(LogicalKeyboardKey.keyZ, shift: true);
+    expect(state.debugActiveLayerStrokeCount, 1);
+
+    await tester.tap(find.byKey(const Key('tools-tool-expand')));
+    await tester.pump();
+    final edge = find.byKey(const Key('tools-expand-top'));
+    await tester.tap(edge);
+    await tester.pump();
+    final field = tester.widget<TextField>(
+      find.descendant(of: edge, matching: find.byType(TextField)),
+    );
+    expect(field.focusNode!.hasFocus, isTrue);
+    for (final text in ['64', '128']) {
+      tester.testTextInput.updateEditingValue(
+        TextEditingValue(
+          text: text,
+          selection: TextSelection.collapsed(offset: text.length),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 550));
+    }
+    await ctrl(LogicalKeyboardKey.keyZ);
+    expect(field.controller!.text, '64');
+    await ctrl(LogicalKeyboardKey.keyY);
+    expect(field.controller!.text, '128');
+    expect(state.debugActiveLayerStrokeCount, 1);
 
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();

@@ -1,3 +1,4 @@
+import 'package:nai_launcher/data/models/prompt_block/prompt_block_palette_entry.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -105,7 +106,7 @@ class MemoryBlockStorage extends PromptBlockStorage {
   final folders = <String, PromptBlockFolder>{};
   final collections = <String, PromptBlockCollection>{};
   final meta = <String, String>{};
-  List<String> palette = [];
+  List<PromptBlockPaletteEntry> palette = [];
   @override
   Future<void> init() async {}
   @override
@@ -234,10 +235,11 @@ class MemoryBlockStorage extends PromptBlockStorage {
   }
 
   @override
-  Future<List<String>> getPaletteBlockIds() async => List.of(palette);
+  Future<List<PromptBlockPaletteEntry>> getPaletteEntries() async =>
+      List.of(palette);
   @override
-  Future<void> putPaletteBlockIds(List<String> ids) async {
-    palette = List.of(ids);
+  Future<void> putPaletteEntries(List<PromptBlockPaletteEntry> entries) async {
+    palette = List.of(entries);
   }
 
   @override
@@ -421,7 +423,9 @@ void main() {
       await flush(tester);
       expect(backend.requireBlock(blockId).tags, isEmpty);
       expect(
-        await tester.runAsync(storage.getPaletteBlockIds),
+        (await tester.runAsync(
+          storage.getPaletteEntries,
+        ))!.map((entry) => entry.id).toList(),
         contains(blockId),
       );
       expect(backend.library.blocks, hasLength(3));

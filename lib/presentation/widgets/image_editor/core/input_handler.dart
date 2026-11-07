@@ -159,14 +159,15 @@ class InputHandler {
     if (isDown && keyboard.isCtrlPressed) {
       switch (event.logicalKey) {
         case LogicalKeyboardKey.keyZ:
-          if (keyboard.isShiftPressed) {
+        case LogicalKeyboardKey.keyY:
+          // 局部重绘交给编辑器顶栏共用的历史回调。
+          if (state.inpaint) return KeyEventResult.ignored;
+          if (keyboard.isShiftPressed ||
+              event.logicalKey == LogicalKeyboardKey.keyY) {
             state.redo();
           } else {
             state.undo();
           }
-          return KeyEventResult.handled;
-        case LogicalKeyboardKey.keyY:
-          state.redo();
           return KeyEventResult.handled;
         case LogicalKeyboardKey.digit0:
           state.canvasController.fitToViewport(

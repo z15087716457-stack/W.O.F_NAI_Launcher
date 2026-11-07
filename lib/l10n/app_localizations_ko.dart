@@ -2290,12 +2290,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get characterTooltip_viewFullConfig => '클릭하여 전체 설정 보기';
 
   @override
-  String get addGroup_displayNameLabel => '표시 이름(선택)';
-
-  @override
-  String get addGroup_targetCategoryLabel => '대상 분류';
-
-  @override
   String globalSettings_saveFailed(Object error) {
     return '저장하지 못했습니다: $error';
   }
@@ -3317,15 +3311,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get settings_proxyRestartHint => '프록시 설정이 바뀌었습니다. 다시 시작하는 것이 좋습니다';
-
-  @override
-  String get tagLibrary_addToLibrary => '라이브러리에 추가';
-
-  @override
-  String get tagLibrary_uncategorized => '분류 안 됨';
-
-  @override
-  String get tagLibrary_contentPreview => '내용 미리 보기';
 
   @override
   String get settings_enablePromptWeightScroll => '마우스 휠로 프롬프트 가중치 조정';
@@ -4822,34 +4807,6 @@ class AppLocalizationsKo extends AppLocalizations {
       '놓은 항목에서 읽을 수 있는 이미지나 Vibe 파일을 찾지 못했습니다';
 
   @override
-  String get toast_contentCannotBeEmpty => '내용은 비워 둘 수 없습니다';
-
-  @override
-  String get toast_addedToLibrary => '라이브러리에 추가했습니다';
-
-  @override
-  String toast_addFailed(Object error) {
-    return '추가하지 못했습니다: $error';
-  }
-
-  @override
-  String get toast_libraryNotLoaded => '라이브러리를 불러오지 않았습니다';
-
-  @override
-  String get toast_noValidTagContent => '유효한 태그 내용이 없습니다';
-
-  @override
-  String get toast_allTagsAlreadyExist => '모든 태그가 이미 라이브러리에 있습니다';
-
-  @override
-  String get toast_noAddableTags => '추가할 수 있는 태그가 없습니다';
-
-  @override
-  String toast_addedTagsSkippedDuplicates(Object added, Object skipped) {
-    return '태그 $added개를 추가하고 중복 태그 $skipped개를 건너뛰었습니다';
-  }
-
-  @override
   String get toast_saveDirNotSet => '저장 폴더가 설정되지 않았습니다';
 
   @override
@@ -4937,9 +4894,6 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get common_saving => '저장하는 중...';
-
-  @override
   String get common_expand => '펼치기';
 
   @override
@@ -4962,24 +4916,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get detail_noContent => '(내용 없음)';
-
-  @override
-  String get saveBlock_title => '블록으로 저장';
-
-  @override
-  String get saveBlock_nameLabel => '블록 제목';
-
-  @override
-  String get saveBlock_nameHint => '블록 제목 입력';
-
-  @override
-  String get saveBlock_nameRequired => '블록 제목을 입력하세요';
-
-  @override
-  String get saveBlock_selectContent => '저장할 내용을 선택하세요';
-
-  @override
-  String get saveBlock_negativeSuffix => '네거티브';
 
   @override
   String get saveBlock_saved => '블록 라이브러리에 저장했습니다';
@@ -5344,12 +5280,6 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get common_optional => '선택 사항';
-
-  @override
-  String get common_emptyValue => '(비어 있음)';
-
-  @override
   String get common_clickToRetry => '클릭하여 다시 시도';
 
   @override
@@ -5357,12 +5287,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get common_swap => '바꾸기';
-
-  @override
-  String get addToLibrary_displayNameHint => '이 항목을 알아보기 쉬운 이름을 입력하세요';
-
-  @override
-  String get addToLibrary_tagHint => '태그를 입력하고 Enter를 눌러 추가하세요';
 
   @override
   String get drop_saveVibeBundle => 'Vibe 번들 저장';
@@ -5516,9 +5440,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get promptBlockLibrary_allBlocks => '모든 블록';
 
   @override
-  String get promptBlockLibrary_rootFolder => '루트 / 미분류';
-
-  @override
   String get promptBlockLibrary_unnamedBlock => '제목 없는 블록';
 
   @override
@@ -5544,15 +5465,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String promptBlockLibrary_deleteCollectionFolderConfirm(String name) {
     return '\"$name\" 컬렉션 폴더를 삭제하시겠습니까? 안의 컬렉션과 하위 폴더도 함께 삭제되지만 블록 자체는 영향을 받지 않습니다.';
   }
-
-  @override
-  String get promptBlockLibrary_blockTitle => '제목';
-
-  @override
-  String get promptBlockLibrary_titleHint => '블록 제목';
-
-  @override
-  String get promptBlockLibrary_folder => '폴더';
 
   @override
   String get promptBlockLibrary_settingsApplied => '블록 설정을 현재 이미지로 가져왔습니다';
@@ -5743,22 +5655,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get promptBlockPicker_title => '블록 선택';
 
   @override
-  String get promptBlockLibrary_selectImage => '이미지 선택';
-
-  @override
   String get promptBlockLibrary_adjustThumbnailTitle => '썸네일 표시 범위 조정';
 
   @override
   String get promptBlockLibrary_dragToMove => '끌어서 이동, 스크롤하거나 손가락을 오므려 확대/축소';
-
-  @override
-  String get promptBlockLibrary_addToLibrary => '블록 라이브러리에 추가';
-
-  @override
-  String get promptBlockLibrary_contentPreview => '내용 미리 보기';
-
-  @override
-  String get promptBlockLibrary_confirmAdd => '확인';
 
   @override
   String get promptBlockLibrary_saveToLibrary => '블록 라이브러리에 저장';
@@ -16098,6 +15998,30 @@ class AppLocalizationsKo extends AppLocalizations {
   String get naiAgent_newChat => '새 채팅';
 
   @override
+  String get naiAgent_chatGptSignIn => 'ChatGPT로 계속';
+
+  @override
+  String get naiAgent_chatGptHint => '지원되는 에이전트 요청에 ChatGPT 플랜을 사용할 수 있습니다.';
+
+  @override
+  String get naiAgent_chatGptBrowser => '브라우저에서 로그인을 완료하세요.';
+
+  @override
+  String get naiAgent_chatGptConnected => '연결되었습니다. 에이전트 모델 목록에서 모델을 선택하세요.';
+
+  @override
+  String get naiAgent_chatGptNoModels => '이 계정에서 사용할 수 있는 호환 모델이 없습니다.';
+
+  @override
+  String get naiAgent_chatGptError => 'ChatGPT에 연결할 수 없습니다. 다시 시도하거나 로그인하세요.';
+
+  @override
+  String get naiAgent_chatGptUsingPlan => 'ChatGPT 플랜 사용 중';
+
+  @override
+  String get naiAgent_chatGptManageUsage => '사용량 관리';
+
+  @override
   String get naiAgent_settings => 'Agent 설정';
 
   @override
@@ -21236,6 +21160,15 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get mp_keyHint => '이 서비스의 키 입력';
+
+  @override
+  String get mp_chatGptPlan => 'ChatGPT 플랜';
+
+  @override
+  String get mp_chatGptAgentOnly => 'NAI Agent 전용';
+
+  @override
+  String get mp_manageAccount => '계정 관리';
 
   @override
   String get mp_pickerTitle => '서비스 추가';

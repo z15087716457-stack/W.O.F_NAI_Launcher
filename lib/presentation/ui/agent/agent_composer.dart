@@ -703,7 +703,9 @@ class AgentComposerState extends State<AgentComposer> {
                       builder: (context) => _Pill(
                         key: const Key('agent-model'),
                         open: _model != null,
-                        tooltip: l.ag_modelPicker,
+                        tooltip: model?.chatGptUsageUrl == null
+                            ? l.ag_modelPicker
+                            : l.naiAgent_chatGptUsingPlan,
                         onTap: () => setState(
                           () => _model = _above(context, right: true),
                         ),

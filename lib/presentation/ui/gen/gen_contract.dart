@@ -1842,7 +1842,7 @@ class GenActions {
   final void Function(int index, String name) onRenameCharacter;
   final void Function(int index, GenGender gender) onCharacterGender;
 
-  /// 把这个角色存成块（`AddToLibraryDialog`）。
+  /// 用这个角色的提示词打开新建块编辑器。
   final ValueChanged<int> onCharacterToLibrary;
   final ValueChanged<bool> onAiPositionChanged;
 
