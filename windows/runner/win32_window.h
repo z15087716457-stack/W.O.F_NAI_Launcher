@@ -101,6 +101,7 @@ class Win32Window {
 
   // Window/taskbar icons are separate from the executable's Explorer icon.
   void UpdateWindowIcons(HWND window, UINT dpi);
+  void LayoutChildContent(bool skip_unchanged);
 
   HICON large_icon_ = nullptr;
   HICON small_icon_ = nullptr;

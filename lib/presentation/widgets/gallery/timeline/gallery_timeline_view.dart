@@ -310,7 +310,7 @@ class _GalleryTimelineViewState extends ConsumerState<GalleryTimelineView> {
     }
     if (key == LogicalKeyboardKey.delete) {
       if (widget.onDeleteRequested == null) return KeyEventResult.ignored;
-      widget.onDeleteRequested!();
+      if (event is KeyDownEvent) widget.onDeleteRequested!();
       return KeyEventResult.handled;
     }
     if (key == LogicalKeyboardKey.home) {

@@ -244,7 +244,6 @@ class _PreviewAppState extends State<_PreviewApp> {
         canvas: _channelOn
             ? (context, tile) => ChannelFixtureCanvas(
                 settings: _channel,
-                onSettingsChanged: set,
                 generating: data.generate.state == GenRunState.generating,
                 images: genPreviewImage,
               )

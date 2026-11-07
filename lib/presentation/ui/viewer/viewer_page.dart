@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../gallery/gallery_delete_dialog.dart';
 import '../kit/ui_dialog.dart';
 import '../kit/ui_popover.dart';
 import 'viewer_contract.dart';
@@ -27,7 +28,7 @@ abstract class ViewerController {
   /// 执行一个快捷键命令（按钮也走这里，行为和按键一致）。
   void run(ViewerCommand command);
 
-  /// 删除当前张：受保护的先确认。
+  /// 确认将当前图片移入删除池。
   void requestDelete();
 
   void openMore(UiPopoverAnchor anchor, {bool fromImage = false});
@@ -106,7 +107,7 @@ class _ImageViewerPageState extends State<ImageViewerPage>
   var _pop = _Pop.none;
   UiPopoverAnchor? _anchor;
   var _dialog = _Dialog.none;
-  String? _deleteKey;
+  ({String key, String? fileName})? _deleteTarget;
   Timer? _undoTimer;
   Timer? _hintTimer;
   Timer? _idleTimer;
@@ -272,7 +273,10 @@ class _ImageViewerPageState extends State<ImageViewerPage>
   }
 
   void _closeDialog() {
-    setState(() => _dialog = _Dialog.none);
+    setState(() {
+      _dialog = _Dialog.none;
+      _deleteTarget = null;
+    });
     _focus.requestFocus();
   }
 
@@ -346,17 +350,12 @@ class _ImageViewerPageState extends State<ImageViewerPage>
 
   @override
   void requestDelete() {
-    if (_data.libraryReadOnly) return;
     final item = _current;
-    if (item == null) return;
-    if (item.protected) {
-      setState(() {
-        _dialog = _Dialog.delete;
-        _deleteKey = item.key;
-      });
-    } else {
-      _actions.onDelete(item.key);
-    }
+    if (!_gallery || item == null || _dialog == _Dialog.delete) return;
+    setState(() {
+      _dialog = _Dialog.delete;
+      _deleteTarget = (key: item.key, fileName: _data.detail?.fileName);
+    });
   }
 
   KeyEventResult _onKey(FocusNode _, KeyEvent e) {
@@ -470,12 +469,14 @@ class _ImageViewerPageState extends State<ImageViewerPage>
         dialog: switch (_dialog) {
           _Dialog.none => null,
           _Dialog.help => (_) => ViewerHelpDialog(onClose: _closeDialog),
-          _Dialog.delete => (_) => ViewerDeleteDialog(
+          _Dialog.delete => (_) => GalleryDeleteDialog(
+            count: 1,
+            fileName: _deleteTarget?.fileName,
             onCancel: _closeDialog,
             onConfirm: () {
-              final k = _deleteKey;
+              final target = _deleteTarget;
               _closeDialog();
-              if (k != null) _actions.onDelete(k);
+              if (target != null) _actions.onDelete(target.key);
             },
           ),
         },

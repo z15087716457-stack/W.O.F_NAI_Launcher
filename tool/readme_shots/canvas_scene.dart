@@ -3,11 +3,10 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:nai_launcher/presentation/ui/channel/channel_contract.dart';
 import 'package:nai_launcher/presentation/ui/channel/channel_layer.dart';
-import 'package:nai_launcher/presentation/ui/channel/channel_overlay.dart';
 
 import 'images.dart';
 
-/// README-only layout; the decoration and ruler are production widgets.
+/// README-only layout; the channel backdrop is the production widget.
 /// Keep artwork unique and preserve each source image's actual aspect ratio.
 class ReadmeCanvas extends StatelessWidget {
   const ReadmeCanvas({super.key, required this.images, required this.settings});
@@ -68,13 +67,6 @@ class ReadmeCanvas extends StatelessWidget {
                   ),
                 ),
               ),
-            ChannelOverlay(
-              data: data,
-              actions: ChannelActions(
-                onSettingsChanged: (_) {},
-                onJumpTo: (_) {},
-              ),
-            ),
           ],
         ),
       );

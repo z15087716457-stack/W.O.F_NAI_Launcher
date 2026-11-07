@@ -232,6 +232,12 @@ void main() {
         // Geometry/hover tests verify those regions. Other pixels still
         // match the old prototype except where small images now fit the stage.
         final approved = <Rect>[];
+        // 图库文案使用删除池的实际名称。
+        for (final label in ['移入删除池', '已移入删除池']) {
+          for (final element in find.text(label).evaluate()) {
+            approved.add(t.getRect(find.byWidget(element.widget)));
+          }
+        }
         if (name == 'fullscreen' || name == 'info-closed') {
           for (final key in ['viewer-image', 'viewer-zoom-menu']) {
             final widget = find.byKey(Key(key));

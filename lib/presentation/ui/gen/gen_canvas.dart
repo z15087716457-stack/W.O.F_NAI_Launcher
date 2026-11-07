@@ -29,11 +29,32 @@ import 'gen_parts.dart';
 class GenCanvas extends StatefulWidget {
   const GenCanvas({super.key});
 
-  /// 舞台留白（原型：图距顶 50、距底 70，左右至少 40）。
-  static const pad = EdgeInsets.fromLTRB(40, 50, 40, 70);
+  static const _topBarOffset = 10.0;
+  static const _defaultBarHeight = 38.0;
+  static const _focusGap = 8.0;
+  static const _sideFocusPadding = 40.0;
 
-  static EdgeInsets focusPadding(double width, bool hasOriginal) =>
-      hasOriginal && width < 500 ? pad.copyWith(bottom: 118) : pad;
+  /// 实际悬浮条内侧边界到画布边缘的距离，再加上对称留白。
+  static EdgeInsets focusPaddingOf(
+    BuildContext context,
+    double width,
+    bool hasOriginal,
+  ) {
+    final measured = context
+        .dependOnInheritedWidgetOfExactType<_CanvasFocusPadding>()
+        ?.notifier
+        ?.value;
+    if (measured != null) return measured;
+    // 生成占位可能先于工具条出现，先用常规条高预留同一片区域。
+    return EdgeInsets.fromLTRB(
+      _sideFocusPadding,
+      _topBarOffset + _defaultBarHeight + _focusGap,
+      _sideFocusPadding,
+      _BottomBars.infoOffset(width, hasOriginal) +
+          _defaultBarHeight +
+          _focusGap,
+    );
+  }
 
   /// 落下面板 / 放大进度条的顶边：工具条（顶 10、高 38）下面再空 12。
   static const sheetTop = 60.0;
@@ -54,8 +75,47 @@ class GenCanvas extends StatefulWidget {
 class _GenCanvasState extends State<GenCanvas> {
   final _enhanceLink = LayerLink();
   final _upscaleLink = LayerLink();
+  final _topBarKey = GlobalKey();
+  final _infoBarKey = GlobalKey();
+  final _actionBarKey = GlobalKey();
+  final _focusPadding = ValueNotifier<EdgeInsets?>(null);
+  bool _measurePending = false;
   String? _comparedId;
   String? _focusId;
+
+  void _scheduleFocusMeasurement() {
+    if (_measurePending) return;
+    _measurePending = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _measurePending = false;
+      if (!mounted) return;
+      final top = _topBarKey.currentContext?.findRenderObject() as RenderBox?;
+      final info = _infoBarKey.currentContext?.findRenderObject() as RenderBox?;
+      final actions =
+          _actionBarKey.currentContext?.findRenderObject() as RenderBox?;
+      if (top == null || info == null || actions == null) {
+        _focusPadding.value = null;
+        return;
+      }
+      final canvas = context.findRenderObject()! as RenderBox;
+      double topOf(RenderBox bar) =>
+          bar.localToGlobal(Offset.zero, ancestor: canvas).dy;
+      _focusPadding.value = EdgeInsets.fromLTRB(
+        GenCanvas._sideFocusPadding,
+        topOf(top) + top.size.height + GenCanvas._focusGap,
+        GenCanvas._sideFocusPadding,
+        canvas.size.height -
+            math.min(topOf(info), topOf(actions)) +
+            GenCanvas._focusGap,
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    _focusPadding.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +135,8 @@ class _GenCanvasState extends State<GenCanvas> {
       _comparedId = null;
     }
     _focusId = info?.tileId;
-    return _OriginalScope(
+    _scheduleFocusMeasurement();
+    final canvas = _OriginalScope(
       tileId: _comparedId,
       onChanged: (id, active) {
         if (!mounted) return;
@@ -119,17 +180,25 @@ class _GenCanvasState extends State<GenCanvas> {
                 Positioned(top: 10, right: 10, child: controls),
               if (bar) ...[
                 Positioned(
-                  top: 10,
+                  top: GenCanvas._topBarOffset,
                   left: 0,
                   right: 0,
                   child: _CanvasBarViewport(
-                    child: _TopBar(
-                      enhanceLink: _enhanceLink,
-                      upscaleLink: _upscaleLink,
+                    child: SizeChangedLayoutNotifier(
+                      key: _topBarKey,
+                      child: _TopBar(
+                        enhanceLink: _enhanceLink,
+                        upscaleLink: _upscaleLink,
+                      ),
                     ),
                   ),
                 ),
-                const Positioned.fill(child: _BottomBars()),
+                Positioned.fill(
+                  child: _BottomBars(
+                    infoKey: _infoBarKey,
+                    actionKey: _actionBarKey,
+                  ),
+                ),
               ],
               if (strip && sheet == null)
                 const Positioned(
@@ -178,7 +247,22 @@ class _GenCanvasState extends State<GenCanvas> {
         ),
       ),
     );
+    return _CanvasFocusPadding(
+      notifier: _focusPadding,
+      child: NotificationListener<SizeChangedLayoutNotification>(
+        onNotification: (_) {
+          _scheduleFocusMeasurement();
+          return false;
+        },
+        child: SizeChangedLayoutNotifier(child: canvas),
+      ),
+    );
   }
+}
+
+class _CanvasFocusPadding
+    extends InheritedNotifier<ValueNotifier<EdgeInsets?>> {
+  const _CanvasFocusPadding({required super.notifier, required super.child});
 }
 
 /// Display-only comparison. The result identity and all image actions stay intact.
@@ -281,7 +365,7 @@ class GenBackdropPainter extends CustomPainter {
       old.value != value || old.c != c;
 }
 
-/// 自带舞台：把焦点组摆在画布中间。一张按原型留白缩放（不放大小图，除非“放大填满”）；
+/// 简洁查看器：把焦点组放在浮动工具条之间。一张不放大小图，除非“放大填满”；
 /// 多张试 1–N 列，取每张最大的排法，间距 16。
 class GenSimpleStage extends StatelessWidget {
   const GenSimpleStage({super.key});
@@ -294,11 +378,17 @@ class GenSimpleStage extends StatelessWidget {
     if (tiles == null || tiles.isEmpty) return const SizedBox.expand();
     return LayoutBuilder(
       builder: (context, box) {
-        final padding = GenCanvas.focusPadding(
-          box.maxWidth,
-          cv.info?.canCompareOriginal == true,
-        );
-        final area = padding.deflateSize(box.biggest);
+        final hasOriginal = cv.info?.canCompareOriginal == true;
+        // 无接线的原型舞台保留设计稿构图。
+        final insets = scope.slots.canvas == null
+            ? EdgeInsets.fromLTRB(
+                40,
+                50,
+                40,
+                hasOriginal && box.maxWidth < 500 ? 118 : 70,
+              )
+            : GenCanvas.focusPaddingOf(context, box.maxWidth, hasOriginal);
+        final area = insets.deflateSize(box.biggest);
         const gap = 16.0;
         var best = (cols: 1, scale: 0.0);
         for (var cols = 1; cols <= tiles.length; cols++) {
@@ -319,7 +409,7 @@ class GenSimpleStage extends StatelessWidget {
           rows.add(tiles.sublist(i, math.min(i + best.cols, tiles.length)));
         }
         return Padding(
-          padding: padding,
+          padding: insets,
           child: Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -1248,27 +1338,50 @@ class _CanvasBarViewport extends StatelessWidget {
 }
 
 class _BottomBars extends StatelessWidget {
-  const _BottomBars();
+  const _BottomBars({required this.infoKey, required this.actionKey});
+
+  static const _bottom = 14.0;
+  static const _gap = 8.0;
+  static const _stackWidth = 360.0;
+
+  static double infoOffset(double width, bool hasOriginal) {
+    if (width < _stackWidth) {
+      return _bottom + GenCanvas._defaultBarHeight + _gap;
+    }
+    return hasOriginal && width < 500 ? 62 : _bottom;
+  }
+
+  final Key infoKey;
+  final Key actionKey;
+
   @override
   Widget build(BuildContext context) {
     final hasOriginal = GenScope.of(
       context,
       GenAspect.canvas,
     ).data.canvas.info!.canCompareOriginal;
+    final info = SizeChangedLayoutNotifier(
+      key: infoKey,
+      child: const _InfoBar(),
+    );
+    final actions = SizeChangedLayoutNotifier(
+      key: actionKey,
+      child: const _ActionBar(),
+    );
     return LayoutBuilder(
-      builder: (context, box) => box.maxWidth < 360
-          ? const Stack(
+      builder: (context, box) => box.maxWidth < _stackWidth
+          ? Stack(
               children: [
                 Positioned(
                   left: 8,
                   right: 8,
-                  bottom: 14,
+                  bottom: _bottom,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
-                    spacing: 8,
+                    spacing: _gap,
                     children: [
-                      _CanvasBarViewport(child: _InfoBar()),
-                      _CanvasBarViewport(child: _ActionBar()),
+                      _CanvasBarViewport(child: info),
+                      _CanvasBarViewport(child: actions),
                     ],
                   ),
                 ),
@@ -1278,10 +1391,10 @@ class _BottomBars extends StatelessWidget {
               children: [
                 Positioned(
                   left: 16,
-                  bottom: hasOriginal && box.maxWidth < 500 ? 62 : 14,
-                  child: const _InfoBar(),
+                  bottom: infoOffset(box.maxWidth, hasOriginal),
+                  child: info,
                 ),
-                const Positioned(right: 16, bottom: 14, child: _ActionBar()),
+                Positioned(right: 16, bottom: _bottom, child: actions),
               ],
             ),
     );

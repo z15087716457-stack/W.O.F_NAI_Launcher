@@ -1157,12 +1157,6 @@
   },
   "localGallery_unfavorite": "즐겨찾기 해제",
   "localGallery_favoriteMenuEmptyCollections": "아직 컬렉션이 없습니다. 왼쪽의 +로 만드세요",
-  "localGallery_confirmDeleteImageContent": "\"{name}\" 이미지를 삭제하시겠습니까?\n\n이미지는 갤러리에서 즉시 사라지고, 파일은 다음 실행 때 완전히 삭제됩니다(이번 세션에서는 되돌릴 수 있습니다).",
-  "@localGallery_confirmDeleteImageContent": {
-    "placeholders": {
-      "name": {}
-    }
-  },
   "localGallery_moveTo": "이동…",
   "localGallery_copyTo": "복사…",
   "localGallery_externalSourceMoveConfirmTitle": "외부 갤러리 파일 이동",
@@ -1214,13 +1208,6 @@
       "error": {}
     }
   },
-  "localGallery_protectedDeleteTitle": "보호 모드: 삭제 재확인",
-  "localGallery_protectedDeleteImagesContent": "로컬 이미지 파일 {count}개를 영구 삭제합니다. 이 작업은 되돌릴 수 없습니다.",
-  "@localGallery_protectedDeleteImagesContent": {
-    "placeholders": {
-      "count": {}
-    }
-  },
   "localGallery_protectedBulkMoveTitle": "보호 모드: 일괄 이동 확인",
   "localGallery_protectedBulkMoveContent": "로컬 이미지 파일 {count}개를 대상 폴더로 이동합니다. 실수가 아닌지 확인하세요.",
   "@localGallery_protectedBulkMoveContent": {
@@ -1232,12 +1219,6 @@
   "@localGallery_importParamsFailed": {
     "placeholders": {
       "error": {}
-    }
-  },
-  "localGallery_protectedDeleteImageContent": "\"{name}\" 이미지를 영구 삭제합니다. 이 작업은 되돌릴 수 없습니다.",
-  "@localGallery_protectedDeleteImageContent": {
-    "placeholders": {
-      "name": {}
     }
   },
   "localGallery_saveZipArchive": "ZIP 압축 파일 저장",
@@ -1392,13 +1373,6 @@
   "localGallery_gotIt": "확인했습니다",
   "localGallery_undone": "실행 취소했습니다",
   "localGallery_redone": "다시 실행했습니다",
-  "localGallery_confirmBulkDelete": "일괄 삭제 확인",
-  "localGallery_confirmBulkDeleteContent": "선택한 이미지 {count}장을 삭제하시겠습니까?\n\n이미지는 갤러리에서 즉시 사라지고, 파일은 다음 실행 때 완전히 삭제됩니다(이번 세션에서는 되돌릴 수 있습니다).",
-  "@localGallery_confirmBulkDeleteContent": {
-    "placeholders": {
-      "count": {}
-    }
-  },
   "localGallery_deletedToPool": "이미지 {count}장을 삭제했습니다. 다음 실행 때 완전히 삭제됩니다.",
   "@localGallery_deletedToPool": {
     "placeholders": {
@@ -1406,6 +1380,25 @@
     }
   },
   "localGallery_trashTitle": "휴지통",
+  "localGallery_moveToDeletePool": "휴지통으로 이동",
+  "localGallery_moveToDeletePoolTitle": "{count, plural, =1{이 이미지를 휴지통으로 이동할까요?} other{이미지 {count}장을 휴지통으로 이동할까요?}}",
+  "@localGallery_moveToDeletePoolTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "localGallery_moveToDeletePoolDescription": "Studio를 다시 시작하기 전까지 휴지통에서 복원할 수 있습니다. 다음 시작 시 휴지통의 파일은 영구 삭제됩니다.",
+  "localGallery_deleteForeverTitle": "{count, plural, =1{이 이미지를 영구 삭제할까요?} other{이 이미지 {count}장을 영구 삭제할까요?}}",
+  "@localGallery_deleteForeverTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "localGallery_deleteForeverDescription": "파일이 디스크에서 즉시 삭제되며 복구할 수 없습니다.",
   "localGallery_trashEmpty": "휴지통이 비어 있습니다",
   "localGallery_trashHint": "휴지통의 파일은 아직 디스크에 있으며 다음 실행 때 완전히 삭제됩니다. 복원한 파일은 즉시 갤러리로 돌아갑니다.",
   "localGallery_trashRestore": "복원",
@@ -7348,7 +7341,7 @@
   "imageViewer_hintFit": "맞춤으로",
   "imageViewer_hintActual": "원본 크기",
   "imageViewer_dragFrame": "틀을 드래그",
-  "imageViewer_movedToTrash": "휴지통으로 이동함",
+  "imageViewer_movedToTrash": "휴지통으로 이동했어요",
   "imageViewer_undo": "실행 취소",
   "imageViewer_details": "정보",
   "imageViewer_generationResult": "생성 결과",
@@ -7466,7 +7459,6 @@
   "imageViewer_addToCollection": "컬렉션에 추가",
   "imageViewer_moveTo": "이동…",
   "imageViewer_copyTo": "복사…",
-  "imageViewer_moveToTrash": "휴지통으로 이동",
   "imageViewer_collections": "컬렉션",
   "imageViewer_newCollection": "새 컬렉션…",
   "imageViewer_helpTitle": "뷰어 단축키",
@@ -7487,9 +7479,6 @@
   "imageViewer_keyDouble": "더블클릭",
   "imageViewer_helpCopyPrompt": "프롬프트 복사",
   "imageViewer_helpUndo": "삭제 취소",
-  "imageViewer_protectedTitle": "보호된 이미지입니다. 휴지통으로 이동할까요?",
-  "imageViewer_protectedBody": "휴지통에서 복원할 수 있습니다.",
-  "imageViewer_cancel": "취소",
   "imageViewer_justNow": "방금",
   "imageViewer_minutesAgo": "{count}분 전",
   "@imageViewer_minutesAgo": {
@@ -8916,10 +8905,9 @@
   "channel_levelStandard": "보통",
   "channel_levelStrong": "진하게",
   "channel_ruler": "시간 눈금",
-  "channel_rulerSub": "배치 시간, 날짜 구분선과 오른쪽 스크러버",
+  "channel_rulerSub": "배치 시간과 날짜 구분선",
   "channel_motion": "대기 중 움직임",
   "channel_motionSub": "아주 가벼운 움직임. 생성 중에는 자동으로 멈춥니다",
-  "channel_toastTitle": "이번 채널",
   "channel_batch": "{time} · {count}장",
   "@channel_batch": {"placeholders": {"time": {"type": "String"}, "count": {"type": "int"}}},
   "channel_batchNewest": "{time} · {count}장 · 최신",
@@ -8939,8 +8927,6 @@
   "channel_weekday5": "금",
   "channel_weekday6": "토",
   "channel_weekday7": "일",
-  "channel_scrubWhen": "{day} {time}",
-  "@channel_scrubWhen": {"placeholders": {"day": {"type": "String"}, "time": {"type": "String"}}},
   "rag_title": "RAG 벡터 시스템",
   "rag_description": "로컬 검색, 모델 및 문맥 태그 추천 관리",
   "rag_enabled": "RAG 사용",
@@ -9556,7 +9542,7 @@
   },
   "set_cvLevel": "농도",
   "set_cvRuler": "시간 눈금",
-  "set_cvRulerSub": "배치 시간, 날짜 구분선, 오른쪽 눈금",
+  "set_cvRulerSub": "배치 시간과 날짜 구분선",
   "set_cvMotion": "대기 중 움직임",
   "set_cvMotionSub": "생성 중이거나 동작 줄이기를 켜면 멈춥니다",
   "set_cvOps": "캔버스 조작",
@@ -9654,6 +9640,33 @@
   "@set_scHelpTip": {
     "placeholders": {
       "key": {}
+    }
+  },
+  "set_scFixed": "고정 단축키",
+  "set_scFixedConflictSub": "{context}의 {a}에는 고정 단축키가 있습니다. {b}에는 다른 키를 선택하세요.",
+  "shortcut_fixedUndoPrompt": "프롬프트 편집 실행 취소",
+  "shortcut_fixedRedoPrompt": "프롬프트 편집 다시 실행",
+  "shortcut_fixedUndoGallery": "갤러리 작업 실행 취소",
+  "shortcut_fixedRedoGallery": "갤러리 작업 다시 실행",
+  "shortcut_fixedUndoText": "텍스트 편집 실행 취소",
+  "shortcut_fixedRedoText": "텍스트 편집 다시 실행",
+  "shortcut_fixedUndoMask": "마스크 편집 실행 취소",
+  "shortcut_fixedRedoMask": "마스크 편집 다시 실행",
+  "shortcut_fixedPanCanvas": "생성 캔버스 이동",
+  "shortcut_fixedNextBatch": "다음 이미지 묶음에 초점",
+  "shortcut_fixedPreviousBatch": "이전 이미지 묶음에 초점",
+  "shortcut_fixedFirstBatch": "첫 이미지 묶음에 초점",
+  "shortcut_fixedLastBatch": "마지막 이미지 묶음에 초점",
+  "shortcut_fixedFocusCanvas": "초점을 맞춘 이미지로 돌아가기",
+  "shortcut_fixedResetCanvas": "캔버스 보기 초기화",
+  "shortcut_fixedFirstImage": "첫 이미지로 이동",
+  "shortcut_fixedLastImage": "마지막 이미지로 이동",
+  "shortcut_fixedUndoSetting": "방금 저장한 설정 변경 실행 취소",
+  "@set_scFixedConflictSub": {
+    "placeholders": {
+      "context": {},
+      "a": {},
+      "b": {}
     }
   },
   "set_scEmpty": "일치하는 단축키가 없습니다",
@@ -11564,14 +11577,6 @@
   "localGallery_recentViews": "최근 본 이미지",
   "localGallery_recentViewsEmpty": "최근 본 이미지가 없습니다",
   "localGallery_deleteForever": "영구 삭제",
-  "localGallery_deleteForeverConfirm": "선택한 파일 {count}개를 영구 삭제합니다. 되돌릴 수 없습니다.",
-  "@localGallery_deleteForeverConfirm": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "ag_chatAgeMinutes": "{count}m",
   "@ag_chatAgeMinutes": {
     "placeholders": {

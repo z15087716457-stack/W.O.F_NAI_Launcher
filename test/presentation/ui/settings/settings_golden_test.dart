@@ -104,6 +104,8 @@ Future<void> _expectCenteredGolden(WidgetTester t, String name) async {
     toastPadding?.padding = const EdgeInsets.fromLTRB(16, 8, 8, 8);
     await t.pump();
     final masks = <Rect>[];
+    // 保存提示条改为同主题配色，原 PNG 仍校验提示条外的像素。
+    if (toastPadding != null) masks.add(t.getRect(toast));
     // F36：字号示例在原占位内下移 8px，外侧行高及其余文字设置保持。
     // 只排除示例内框的原／新位置，居中与上下留白直接按几何核验。
     final sample = find.byKey(const Key('font-sample'));

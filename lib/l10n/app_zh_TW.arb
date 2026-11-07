@@ -1145,12 +1145,6 @@
   },
   "localGallery_unfavorite": "取消收藏",
   "localGallery_favoriteMenuEmptyCollections": "暫無收藏集，左側 + 建立",
-  "localGallery_confirmDeleteImageContent": "確定要刪除圖片「{name}」嗎？\n\n圖片會立即從畫廊消失，檔案將在下次啟動時徹底清理（本次會話內可復原）。",
-  "@localGallery_confirmDeleteImageContent": {
-    "placeholders": {
-      "name": {}
-    }
-  },
   "localGallery_moveTo": "移動到…",
   "localGallery_copyTo": "複製到…",
   "localGallery_externalSourceMoveConfirmTitle": "移動外部圖庫來源檔案",
@@ -1202,13 +1196,6 @@
       "error": {}
     }
   },
-  "localGallery_protectedDeleteTitle": "保護模式：再次確認刪除",
-  "localGallery_protectedDeleteImagesContent": "將永久刪除 {count} 張本地圖片檔案。此操作無法復原。",
-  "@localGallery_protectedDeleteImagesContent": {
-    "placeholders": {
-      "count": {}
-    }
-  },
   "localGallery_protectedBulkMoveTitle": "保護模式：確認批次移動",
   "localGallery_protectedBulkMoveContent": "將移動 {count} 張本地圖片檔案到目標資料夾。請確認不是誤操作。",
   "@localGallery_protectedBulkMoveContent": {
@@ -1220,12 +1207,6 @@
   "@localGallery_importParamsFailed": {
     "placeholders": {
       "error": {}
-    }
-  },
-  "localGallery_protectedDeleteImageContent": "將永久刪除圖片「{name}」。此操作無法復原。",
-  "@localGallery_protectedDeleteImageContent": {
-    "placeholders": {
-      "name": {}
     }
   },
   "localGallery_saveZipArchive": "儲存壓縮檔",
@@ -1388,13 +1369,6 @@
   "localGallery_gotIt": "知道了",
   "localGallery_undone": "已復原",
   "localGallery_redone": "已重做",
-  "localGallery_confirmBulkDelete": "確認批次刪除",
-  "localGallery_confirmBulkDeleteContent": "確定要刪除選中的 {count} 張圖片嗎？\n\n圖片會立即從畫廊消失，檔案將在下次啟動時徹底清理（本次會話內可復原）。",
-  "@localGallery_confirmBulkDeleteContent": {
-    "placeholders": {
-      "count": {}
-    }
-  },
   "localGallery_deletedToPool": "已刪除 {count} 張圖片，下次啟動時徹底清理。",
   "@localGallery_deletedToPool": {
     "placeholders": {
@@ -1402,6 +1376,25 @@
     }
   },
   "localGallery_trashTitle": "刪除池",
+  "localGallery_moveToDeletePool": "移入刪除池",
+  "localGallery_moveToDeletePoolTitle": "{count, plural, =1{將這張圖片移入刪除池？} other{將 {count} 張圖片移入刪除池？}}",
+  "@localGallery_moveToDeletePoolTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "localGallery_moveToDeletePoolDescription": "重啟前可在刪除池恢復。下次啟動 Studio 時，池內檔案會被徹底刪除。",
+  "localGallery_deleteForeverTitle": "{count, plural, =1{徹底刪除這張圖片？} other{徹底刪除這 {count} 張圖片？}}",
+  "@localGallery_deleteForeverTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "localGallery_deleteForeverDescription": "檔案會立即從磁碟刪除，無法恢復。",
   "localGallery_trashEmpty": "刪除池是空的",
   "localGallery_trashHint": "池內檔案仍在磁碟上，下次啟動時徹底刪除；恢復後立即回到圖庫。",
   "localGallery_trashRestore": "恢復",
@@ -7358,7 +7351,7 @@
   "imageViewer_hintFit": "回到適應",
   "imageViewer_hintActual": "原始大小",
   "imageViewer_dragFrame": "拖框移動",
-  "imageViewer_movedToTrash": "已移到回收站",
+  "imageViewer_movedToTrash": "已移入刪除池",
   "imageViewer_undo": "復原",
   "imageViewer_details": "詳情",
   "imageViewer_generationResult": "生成結果",
@@ -7476,7 +7469,6 @@
   "imageViewer_addToCollection": "加入收藏集",
   "imageViewer_moveTo": "移動到…",
   "imageViewer_copyTo": "複製到…",
-  "imageViewer_moveToTrash": "移到回收站",
   "imageViewer_collections": "收藏集",
   "imageViewer_newCollection": "新增收藏集…",
   "imageViewer_helpTitle": "大圖快速鍵",
@@ -7497,9 +7489,6 @@
   "imageViewer_keyDouble": "雙擊",
   "imageViewer_helpCopyPrompt": "複製提示詞",
   "imageViewer_helpUndo": "復原刪除",
-  "imageViewer_protectedTitle": "這張圖受保護，移到回收站？",
-  "imageViewer_protectedBody": "移到回收站後可以在回收站裡還原。",
-  "imageViewer_cancel": "取消",
   "imageViewer_justNow": "剛剛",
   "imageViewer_minutesAgo": "{count} 分鐘前",
   "@imageViewer_minutesAgo": {
@@ -8926,10 +8915,9 @@
   "channel_levelStandard": "標準",
   "channel_levelStrong": "濃",
   "channel_ruler": "時間刻度",
-  "channel_rulerSub": "批次時間、日期分隔和右側刻度條",
+  "channel_rulerSub": "批次時間和日期分隔",
   "channel_motion": "空閒微動",
   "channel_motionSub": "很輕的動效，生成時自動暫停",
-  "channel_toastTitle": "本次通道",
   "channel_batch": "{time} · {count} 張",
   "@channel_batch": {
     "placeholders": {
@@ -8997,17 +8985,6 @@
   "channel_weekday5": "週五",
   "channel_weekday6": "週六",
   "channel_weekday7": "週日",
-  "channel_scrubWhen": "{day} {time}",
-  "@channel_scrubWhen": {
-    "placeholders": {
-      "day": {
-        "type": "String"
-      },
-      "time": {
-        "type": "String"
-      }
-    }
-  },
   "rag_title": "RAG 向量系統",
   "rag_description": "管理本地語義檢索、模型與標籤上下文推薦",
   "rag_enabled": "啟用 RAG",
@@ -9638,7 +9615,7 @@
   },
   "set_cvLevel": "濃淡",
   "set_cvRuler": "時間刻度",
-  "set_cvRulerSub": "批次時間、日期分隔和右側刻度條",
+  "set_cvRulerSub": "批次時間和日期分隔",
   "set_cvMotion": "空閒微動",
   "set_cvMotionSub": "生成中和開啟“減少動態效果”時自動暫停",
   "set_cvOps": "畫布操作",
@@ -9736,6 +9713,33 @@
   "@set_scHelpTip": {
     "placeholders": {
       "key": {}
+    }
+  },
+  "set_scFixed": "固定快速鍵",
+  "set_scFixedConflictSub": "在{context}中，{a}是固定快速鍵。請為{b}選擇其他按鍵。",
+  "shortcut_fixedUndoPrompt": "復原提示詞編輯",
+  "shortcut_fixedRedoPrompt": "重做提示詞編輯",
+  "shortcut_fixedUndoGallery": "復原圖庫操作",
+  "shortcut_fixedRedoGallery": "重做圖庫操作",
+  "shortcut_fixedUndoText": "復原文字編輯",
+  "shortcut_fixedRedoText": "重做文字編輯",
+  "shortcut_fixedUndoMask": "復原遮罩操作",
+  "shortcut_fixedRedoMask": "重做遮罩操作",
+  "shortcut_fixedPanCanvas": "平移生圖畫布",
+  "shortcut_fixedNextBatch": "聚焦下一批圖片",
+  "shortcut_fixedPreviousBatch": "聚焦上一批圖片",
+  "shortcut_fixedFirstBatch": "聚焦首批圖片",
+  "shortcut_fixedLastBatch": "聚焦末批圖片",
+  "shortcut_fixedFocusCanvas": "回到畫布焦點圖片",
+  "shortcut_fixedResetCanvas": "重設畫布檢視",
+  "shortcut_fixedFirstImage": "跳到第一張圖片",
+  "shortcut_fixedLastImage": "跳到最後一張圖片",
+  "shortcut_fixedUndoSetting": "復原剛儲存的設定更改",
+  "@set_scFixedConflictSub": {
+    "placeholders": {
+      "context": {},
+      "a": {},
+      "b": {}
     }
   },
   "set_scEmpty": "沒有匹配的快速鍵",
@@ -12159,14 +12163,6 @@
   "localGallery_recentViews": "最近瀏覽",
   "localGallery_recentViewsEmpty": "還沒有瀏覽記錄",
   "localGallery_deleteForever": "徹底刪除",
-  "localGallery_deleteForeverConfirm": "將立即物理刪除選中的 {count} 個檔案，不可恢復。",
-  "@localGallery_deleteForeverConfirm": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "ag_chatAgeMinutes": "{count}m",
   "@ag_chatAgeMinutes": {
     "placeholders": {

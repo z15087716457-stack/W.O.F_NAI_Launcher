@@ -1074,17 +1074,17 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
               child: SettingsDockBar(
                 key: const Key('agent-unsaved'),
                 children: [
-                  UiGlyph(UiGlyphs.infoCircle, size: 15, color: c.tipInk),
+                  UiGlyph(UiGlyphs.infoCircle, size: 15, color: c.muted),
                   Text(
                     _baseDirty ? l.set_unsavedAgent : l.set_unsavedInstructions,
-                    style: UiText.sans(12.5, color: c.tipInk),
+                    style: UiText.sans(12.5, color: c.ink),
                   ),
                   Text(
                     'Ctrl+S',
                     style: UiText.mono(
                       10.5,
                       weight: FontWeight.w500,
-                      color: c.tipInk.withValues(alpha: .55),
+                      color: c.muted,
                     ),
                   ),
                   SettingsDockButton(

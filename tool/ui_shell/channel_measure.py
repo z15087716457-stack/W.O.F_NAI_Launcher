@@ -36,13 +36,11 @@ def proto(v):
 
 def flutter_frame(f):
     out = {}
-    sec, cv = f.get('sec'), f.get('canvas')
+    sec = f.get('sec')
     for k, r in f.items():
         if k in ('pop', 'canvas', 'noteText'):
             continue
-        if k == 'scrub' and cv:
-            out[k] = [r[0] - (cv[0] + cv[2]), r[1] - cv[1], r[2], (cv[1] + cv[3]) - (r[1] + r[3])]
-        elif sec:
+        if sec:
             out[k] = [r[0] - sec[0], r[1] - sec[1], r[2], 0 if k == 'sec' else r[3]]
     return out
 
@@ -73,6 +71,7 @@ for v in views:
     p, f = P.get(v, {}), flut.get(v, {})
     if not p:
         print(v, '| 原型没量到'); continue
+    p.pop('scrub', None)  # Retired canvas ruler in the original prototype.
     pt, ft = p.pop('noteText', None), f.get('noteText')
     if pt and ft is None and v in ('pop', 'pop-dark'):
         print(f'{v} | Flutter 没导出“本次”文字'); n += 1

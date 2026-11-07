@@ -266,16 +266,9 @@ Win32Window::MessageHandler(HWND hwnd,
 
       return 0;
     }
-    case WM_SIZE: {
-      RECT rect = GetClientArea();
-      if (child_content_ != nullptr) {
-        // Size and position the child window.
-        MoveWindow(child_content_, rect.left, rect.top,
-                   content_width_override_ > 0 ? content_width_override_ : rect.right - rect.left,
-                   rect.bottom - rect.top, TRUE);
-      }
+    case WM_SIZE:
+      LayoutChildContent(content_width_override_ > 0);
       return 0;
-    }
 
     case WM_ACTIVATE:
       if (child_content_ != nullptr) {
@@ -303,12 +296,29 @@ Win32Window::MessageHandler(HWND hwnd,
 
 void Win32Window::SetContentWidthOverride(int width) {
   content_width_override_ = width;
-  if (child_content_ != nullptr) {
-    const RECT rect = GetClientArea();
-    MoveWindow(child_content_, rect.left, rect.top,
-               width > 0 ? width : rect.right - rect.left,
-               rect.bottom - rect.top, TRUE);
+  LayoutChildContent(true);
+}
+
+void Win32Window::LayoutChildContent(bool skip_unchanged) {
+  if (child_content_ == nullptr) return;
+  const RECT client = GetClientArea();
+  const int width = content_width_override_ > 0
+                        ? content_width_override_
+                        : client.right - client.left;
+  const int height = client.bottom - client.top;
+  if (skip_unchanged) {
+    // During a reveal the parent clips a prepainted child at its final width.
+    RECT current{};
+    POINT origin{client.left, client.top};
+    if (GetWindowRect(child_content_, &current) &&
+        ClientToScreen(window_handle_, &origin) &&
+        current.left == origin.x && current.top == origin.y &&
+        current.right - current.left == width &&
+        current.bottom - current.top == height) {
+      return;
+    }
   }
+  MoveWindow(child_content_, client.left, client.top, width, height, TRUE);
 }
 
 void Win32Window::Destroy() {

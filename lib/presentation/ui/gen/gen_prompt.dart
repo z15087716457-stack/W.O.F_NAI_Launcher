@@ -778,7 +778,7 @@ class _ToolsMenu extends StatelessWidget {
           if (scope.slots.agentToggle != null)
             pinRow(
               const Key('gen-pin-agent'),
-              AgentMark(size: 15, color: c.muted),
+              const AgentMark(),
               l.naiAgent_title,
               GenPromptTool.agentPinned,
               t.agentPinned,

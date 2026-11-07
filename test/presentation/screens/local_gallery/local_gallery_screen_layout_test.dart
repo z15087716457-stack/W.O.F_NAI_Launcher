@@ -30,7 +30,9 @@ import 'package:nai_launcher/data/models/gallery/image_collection.dart';
 import 'package:nai_launcher/data/models/gallery/local_image_record.dart';
 import 'package:nai_launcher/data/models/gallery/nai_image_metadata.dart';
 import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
+import 'package:nai_launcher/data/services/bulk_operation_service.dart';
 import 'package:nai_launcher/data/services/gallery/gallery_column_width_store.dart';
+import 'package:nai_launcher/data/services/gallery/gallery_delete_pool_store.dart';
 import 'package:nai_launcher/data/services/gallery/unified_gallery_service.dart';
 import 'package:nai_launcher/data/services/thumbnail_service.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
@@ -165,6 +167,10 @@ void main() {
   testWidgets(
     'recent and trash reuse the gallery without a dialog or sidebar shift',
     (tester) async {
+      const pool = GalleryDeletePoolStore();
+      final trashRow = find.byKey(const Key('gallery-sidebar-trash'));
+      Finder trashCount(String count) =>
+          find.descendant(of: trashRow, matching: find.text(count));
       final container = await _pumpScreen(
         tester,
         records: records,
@@ -187,6 +193,11 @@ void main() {
         ],
       );
       final gallery = container.read(localGalleryNotifierProvider.notifier);
+      expect(trashCount('0'), findsOneWidget);
+      final pendingPaths = records.take(2).map((r) => r.path).toList();
+      await pool.addAll(pendingPaths);
+      await _settle(tester);
+      expect(trashCount('2'), findsOneWidget);
       final beforeTitle = tester.getTopLeft(
         find.byKey(const Key('gallery-toolbar-sort')),
       );
@@ -209,12 +220,22 @@ void main() {
         records.first.path,
       );
       await _capture(tester, 'recent-gallery');
-      await tester.tap(find.byKey(const Key('gallery-sidebar-trash')));
+      await tester.tap(trashRow);
       await _settle(tester);
+      expect(trashCount('2'), findsOneWidget);
       expect(
         container.read(localGalleryNotifierProvider).browseScope,
         GalleryBrowseScope.trash,
       );
+      for (final key in [
+        'gallery-trash-restore-all',
+        'gallery-trash-purge-all',
+      ]) {
+        expect(
+          tester.widget<OutlinedButton>(find.byKey(Key(key))).onPressed,
+          isNotNull,
+        );
+      }
       expect(find.byType(AlertDialog), findsNothing);
       expect(
         tester.getTopLeft(find.byKey(const Key('gallery-toolbar-sort'))).dy,
@@ -242,7 +263,7 @@ void main() {
       expect(find.text('彻底删除'), findsOneWidget);
       await tester.tap(find.text('彻底删除'));
       await _settle(tester);
-      expect(find.textContaining('不可恢复'), findsOneWidget);
+      expect(find.text('文件会立即从磁盘删除，无法恢复。'), findsOneWidget);
       await tester.tap(find.text('取消'));
       await _settle(tester);
       expect(
@@ -261,12 +282,76 @@ void main() {
         isEmpty,
       );
       expect(container.read(localGalleryFocusNotifierProvider), isNull);
+      await pool.restore([pendingPaths.first], () async {});
+      await _settle(tester);
+      expect(trashCount('1'), findsOneWidget);
+      await pool.removeAll([pendingPaths.last]);
+      await _settle(tester);
+      expect(trashCount('0'), findsOneWidget);
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox.shrink());
       container.dispose();
       await tester.pump(const Duration(seconds: 1));
     },
   );
+
+  testWidgets('单张和批量移入删除池只确认一次', (tester) async {
+    final operations = _RecordingBulkOperations();
+    final container = await _pumpScreen(
+      tester,
+      records: records,
+      dimensions: dimensions,
+      locale: const Locale('zh'),
+      dark: true,
+      size: const Size(1600, 1000),
+      extraOverrides: [
+        bulkOperationNotifierProvider.overrideWith(() => operations),
+      ],
+    );
+    final dialog = find.byKey(const Key('gallery-delete-dialog'));
+    final confirm = find.byKey(const Key('gallery-delete-confirm'));
+    final first = records.first;
+    await tester.tap(_cardFor(first), buttons: kSecondaryMouseButton);
+    await _settle(tester);
+    await tester.tap(find.text('删除'));
+    await _settle(tester);
+    expect(find.text('将这张图片移入删除池？'), findsOneWidget);
+    expect(operations.deleted, isEmpty);
+    await tester.tap(confirm);
+    await _settle(tester);
+    expect(dialog, findsNothing);
+    expect(operations.deleted, [
+      [first.path],
+    ]);
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    final paths = records.take(2).map((record) => record.path).toList();
+    container.read(localGallerySelectionNotifierProvider.notifier)
+      ..enter()
+      ..selectAll(paths);
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('gallery-bulk-delete')));
+    await _settle(tester);
+    expect(find.text('将 2 张图片移入删除池？'), findsOneWidget);
+    expect(operations.deleted, hasLength(1));
+    await _capture(tester, 'gallery-delete-confirm');
+    await tester.tap(confirm);
+    await _settle(tester);
+    expect(dialog, findsNothing);
+    expect(operations.deleted, [
+      [first.path],
+      paths,
+    ]);
+    expect(
+      container.read(localGallerySelectionNotifierProvider).isActive,
+      false,
+    );
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+    container.dispose();
+    await tester.pump(const Duration(seconds: 1));
+  });
 
   testWidgets(
     'R2 gallery bulk undo/redo never runs while search text is focused',
@@ -964,9 +1049,16 @@ class _PausedRefreshGallery extends FakeLocalGalleryService {
 
 class _RecordingBulkOperations extends BulkOperationNotifier {
   final calls = <String>[];
+  final deleted = <List<String>>[];
   @override
   BulkOperationState build() =>
       const BulkOperationState(canUndo: true, canRedo: true);
+  @override
+  Future<BulkOperationResult> bulkDelete(List<String> imagePaths) async {
+    deleted.add(imagePaths);
+    return (success: imagePaths.length, failed: 0, errors: <String>[]);
+  }
+
   @override
   Future<void> undo() async {
     calls.add('undo');
@@ -1187,6 +1279,9 @@ class _FakeCollectionNotifier extends CollectionNotifier {
 }
 
 class _FakeCategoryNotifier extends GalleryCategoryNotifier {
+  @override
+  Future<void> applyDeletedPaths(List<String> paths) async {}
+
   @override
   GalleryCategoryState build() {
     final now = DateTime(2026, 9, 1);

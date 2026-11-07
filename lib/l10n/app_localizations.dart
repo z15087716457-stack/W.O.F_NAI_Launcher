@@ -4830,12 +4830,6 @@ abstract class AppLocalizations {
   /// **'No collections yet — create one with + on the left'**
   String get localGallery_favoriteMenuEmptyCollections;
 
-  /// No description provided for @localGallery_confirmDeleteImageContent.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete image \"{name}\"?\n\nThe image will disappear from the gallery immediately; the file will be removed permanently on the next launch (can be undone in this session).'**
-  String localGallery_confirmDeleteImageContent(Object name);
-
   /// No description provided for @localGallery_moveTo.
   ///
   /// In en, this message translates to:
@@ -4986,18 +4980,6 @@ abstract class AppLocalizations {
   /// **'Failed to open folder: {error}'**
   String localGallery_openFolderFailed(Object error);
 
-  /// No description provided for @localGallery_protectedDeleteTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Protected Mode: Confirm Delete Again'**
-  String get localGallery_protectedDeleteTitle;
-
-  /// No description provided for @localGallery_protectedDeleteImagesContent.
-  ///
-  /// In en, this message translates to:
-  /// **'This will permanently delete {count} local image files. This cannot be undone.'**
-  String localGallery_protectedDeleteImagesContent(Object count);
-
   /// No description provided for @localGallery_protectedBulkMoveTitle.
   ///
   /// In en, this message translates to:
@@ -5015,12 +4997,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to import parameters: {error}'**
   String localGallery_importParamsFailed(Object error);
-
-  /// No description provided for @localGallery_protectedDeleteImageContent.
-  ///
-  /// In en, this message translates to:
-  /// **'This will permanently delete image \"{name}\". This cannot be undone.'**
-  String localGallery_protectedDeleteImageContent(Object name);
 
   /// No description provided for @localGallery_saveZipArchive.
   ///
@@ -5478,18 +5454,6 @@ abstract class AppLocalizations {
   /// **'Redone'**
   String get localGallery_redone;
 
-  /// No description provided for @localGallery_confirmBulkDelete.
-  ///
-  /// In en, this message translates to:
-  /// **'Confirm Bulk Delete'**
-  String get localGallery_confirmBulkDelete;
-
-  /// No description provided for @localGallery_confirmBulkDeleteContent.
-  ///
-  /// In en, this message translates to:
-  /// **'Are you sure you want to delete {count} selected images?\n\nThey will disappear from the gallery immediately; the files will be removed permanently on the next launch (can be undone in this session).'**
-  String localGallery_confirmBulkDeleteContent(Object count);
-
   /// No description provided for @localGallery_deletedToPool.
   ///
   /// In en, this message translates to:
@@ -5501,6 +5465,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Trash'**
   String get localGallery_trashTitle;
+
+  /// No description provided for @localGallery_moveToDeletePool.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to Trash'**
+  String get localGallery_moveToDeletePool;
+
+  /// No description provided for @localGallery_moveToDeletePoolTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Move this image to Trash?} other{Move {count} images to Trash?}}'**
+  String localGallery_moveToDeletePoolTitle(int count);
+
+  /// No description provided for @localGallery_moveToDeletePoolDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'You can restore the images from Trash until Studio restarts. Studio permanently deletes them the next time it starts.'**
+  String get localGallery_moveToDeletePoolDescription;
+
+  /// No description provided for @localGallery_deleteForeverTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Permanently delete this image?} other{Permanently delete these {count} images?}}'**
+  String localGallery_deleteForeverTitle(int count);
+
+  /// No description provided for @localGallery_deleteForeverDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'The files will be deleted from disk immediately and cannot be recovered.'**
+  String get localGallery_deleteForeverDescription;
 
   /// No description provided for @localGallery_trashEmpty.
   ///
@@ -23578,7 +23572,7 @@ abstract class AppLocalizations {
   /// No description provided for @imageViewer_movedToTrash.
   ///
   /// In en, this message translates to:
-  /// **'Moved to Recycle Bin'**
+  /// **'Moved to Trash'**
   String get imageViewer_movedToTrash;
 
   /// No description provided for @imageViewer_undo.
@@ -23953,12 +23947,6 @@ abstract class AppLocalizations {
   /// **'Copy to…'**
   String get imageViewer_copyTo;
 
-  /// No description provided for @imageViewer_moveToTrash.
-  ///
-  /// In en, this message translates to:
-  /// **'Move to Recycle Bin'**
-  String get imageViewer_moveToTrash;
-
   /// No description provided for @imageViewer_collections.
   ///
   /// In en, this message translates to:
@@ -24078,24 +24066,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Undo delete'**
   String get imageViewer_helpUndo;
-
-  /// No description provided for @imageViewer_protectedTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'This image is protected. Move to Recycle Bin?'**
-  String get imageViewer_protectedTitle;
-
-  /// No description provided for @imageViewer_protectedBody.
-  ///
-  /// In en, this message translates to:
-  /// **'You can restore it from the Recycle Bin.'**
-  String get imageViewer_protectedBody;
-
-  /// No description provided for @imageViewer_cancel.
-  ///
-  /// In en, this message translates to:
-  /// **'Cancel'**
-  String get imageViewer_cancel;
 
   /// No description provided for @imageViewer_justNow.
   ///
@@ -29324,7 +29294,7 @@ abstract class AppLocalizations {
   /// No description provided for @channel_rulerSub.
   ///
   /// In en, this message translates to:
-  /// **'Batch times, day dividers and the scrubber'**
+  /// **'Batch times and date dividers'**
   String get channel_rulerSub;
 
   /// No description provided for @channel_motion.
@@ -29338,12 +29308,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Subtle animation, paused while generating'**
   String get channel_motionSub;
-
-  /// No description provided for @channel_toastTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'This session'**
-  String get channel_toastTitle;
 
   /// No description provided for @channel_batch.
   ///
@@ -29422,12 +29386,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sun'**
   String get channel_weekday7;
-
-  /// No description provided for @channel_scrubWhen.
-  ///
-  /// In en, this message translates to:
-  /// **'{day} {time}'**
-  String channel_scrubWhen(String day, String time);
 
   /// No description provided for @rag_title.
   ///
@@ -31291,7 +31249,7 @@ abstract class AppLocalizations {
   /// No description provided for @set_cvRulerSub.
   ///
   /// In en, this message translates to:
-  /// **'Batch times, date dividers and the side ruler'**
+  /// **'Batch times and date dividers'**
   String get set_cvRulerSub;
 
   /// No description provided for @set_cvMotion.
@@ -31563,6 +31521,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Press {key} on any page to see its shortcuts.'**
   String set_scHelpTip(Object key);
+
+  /// No description provided for @set_scFixed.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed shortcut'**
+  String get set_scFixed;
+
+  /// No description provided for @set_scFixedConflictSub.
+  ///
+  /// In en, this message translates to:
+  /// **'In {context}, {a} has a fixed shortcut. Choose a different key for {b}.'**
+  String set_scFixedConflictSub(Object context, Object a, Object b);
+
+  /// No description provided for @shortcut_fixedUndoPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo prompt edit'**
+  String get shortcut_fixedUndoPrompt;
+
+  /// No description provided for @shortcut_fixedRedoPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Redo prompt edit'**
+  String get shortcut_fixedRedoPrompt;
+
+  /// No description provided for @shortcut_fixedUndoGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo gallery action'**
+  String get shortcut_fixedUndoGallery;
+
+  /// No description provided for @shortcut_fixedRedoGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Redo gallery action'**
+  String get shortcut_fixedRedoGallery;
+
+  /// No description provided for @shortcut_fixedUndoText.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo text edit'**
+  String get shortcut_fixedUndoText;
+
+  /// No description provided for @shortcut_fixedRedoText.
+  ///
+  /// In en, this message translates to:
+  /// **'Redo text edit'**
+  String get shortcut_fixedRedoText;
+
+  /// No description provided for @shortcut_fixedUndoMask.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo mask edit'**
+  String get shortcut_fixedUndoMask;
+
+  /// No description provided for @shortcut_fixedRedoMask.
+  ///
+  /// In en, this message translates to:
+  /// **'Redo mask edit'**
+  String get shortcut_fixedRedoMask;
+
+  /// No description provided for @shortcut_fixedPanCanvas.
+  ///
+  /// In en, this message translates to:
+  /// **'Pan generation canvas'**
+  String get shortcut_fixedPanCanvas;
+
+  /// No description provided for @shortcut_fixedNextBatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus next image batch'**
+  String get shortcut_fixedNextBatch;
+
+  /// No description provided for @shortcut_fixedPreviousBatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus previous image batch'**
+  String get shortcut_fixedPreviousBatch;
+
+  /// No description provided for @shortcut_fixedFirstBatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus first image batch'**
+  String get shortcut_fixedFirstBatch;
+
+  /// No description provided for @shortcut_fixedLastBatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus last image batch'**
+  String get shortcut_fixedLastBatch;
+
+  /// No description provided for @shortcut_fixedFocusCanvas.
+  ///
+  /// In en, this message translates to:
+  /// **'Return to focused image'**
+  String get shortcut_fixedFocusCanvas;
+
+  /// No description provided for @shortcut_fixedResetCanvas.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset canvas view'**
+  String get shortcut_fixedResetCanvas;
+
+  /// No description provided for @shortcut_fixedFirstImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to first image'**
+  String get shortcut_fixedFirstImage;
+
+  /// No description provided for @shortcut_fixedLastImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to last image'**
+  String get shortcut_fixedLastImage;
+
+  /// No description provided for @shortcut_fixedUndoSetting.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo the setting just saved'**
+  String get shortcut_fixedUndoSetting;
 
   /// No description provided for @set_scEmpty.
   ///
@@ -39273,12 +39351,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete permanently'**
   String get localGallery_deleteForever;
-
-  /// No description provided for @localGallery_deleteForeverConfirm.
-  ///
-  /// In en, this message translates to:
-  /// **'Permanently delete the selected {count} files? This cannot be undone.'**
-  String localGallery_deleteForeverConfirm(int count);
 
   /// No description provided for @ag_chatAgeMinutes.
   ///

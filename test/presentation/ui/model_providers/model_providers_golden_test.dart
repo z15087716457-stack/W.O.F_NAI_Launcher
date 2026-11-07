@@ -88,6 +88,8 @@ void main() {
       // 2026-10-19：设置导航的 Agent 图标换成侧栏同款标志，只排除这个
       // 18px 图标格；原 PNG 不变，其余像素逐个锁定。
       final masks = [
+        for (final e in find.byKey(const Key('mp-dock')).evaluate())
+          t.getRect(find.byWidget(e.widget)),
         for (final e
             in find.byKey(const Key('settings-nav-agent-mark')).evaluate())
           Rect.fromCenter(

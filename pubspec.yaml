@@ -1,7 +1,7 @@
 name: nai_launcher
 description: W.O.F NAI Studio - NovelAI Windows 与 macOS 桌面客户端（Aaalice_NAI_Launcher 分支）
 publish_to: "none"
-version: 2.3.1+89
+version: 2.3.2+94
 
 environment:
   sdk: ">=3.10.7 <4.0.0"

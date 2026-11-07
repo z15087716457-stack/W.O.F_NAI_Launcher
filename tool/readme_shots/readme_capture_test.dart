@@ -583,7 +583,6 @@ void main() {
                           ruler: false,
                           seed: 7,
                         ),
-                        onSettingsChanged: (_) {},
                         images: (key) => key == 'canvas'
                             ? images.fileImage(switch (theme) {
                                 ChannelTheme.circuit => 's09.jpg',

@@ -2633,11 +2633,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'No collections yet — create one with + on the left';
 
   @override
-  String localGallery_confirmDeleteImageContent(Object name) {
-    return 'Delete image \"$name\"?\n\nThe image will disappear from the gallery immediately; the file will be removed permanently on the next launch (can be undone in this session).';
-  }
-
-  @override
   String get localGallery_moveTo => 'Move to…';
 
   @override
@@ -2733,15 +2728,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get localGallery_protectedDeleteTitle =>
-      'Protected Mode: Confirm Delete Again';
-
-  @override
-  String localGallery_protectedDeleteImagesContent(Object count) {
-    return 'This will permanently delete $count local image files. This cannot be undone.';
-  }
-
-  @override
   String get localGallery_protectedBulkMoveTitle =>
       'Protected Mode: Confirm Bulk Move';
 
@@ -2753,11 +2739,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String localGallery_importParamsFailed(Object error) {
     return 'Failed to import parameters: $error';
-  }
-
-  @override
-  String localGallery_protectedDeleteImageContent(Object name) {
-    return 'This will permanently delete image \"$name\". This cannot be undone.';
   }
 
   @override
@@ -3033,20 +3014,45 @@ class AppLocalizationsEn extends AppLocalizations {
   String get localGallery_redone => 'Redone';
 
   @override
-  String get localGallery_confirmBulkDelete => 'Confirm Bulk Delete';
-
-  @override
-  String localGallery_confirmBulkDeleteContent(Object count) {
-    return 'Are you sure you want to delete $count selected images?\n\nThey will disappear from the gallery immediately; the files will be removed permanently on the next launch (can be undone in this session).';
-  }
-
-  @override
   String localGallery_deletedToPool(Object count) {
     return 'Deleted $count images. They will be removed permanently on the next launch.';
   }
 
   @override
   String get localGallery_trashTitle => 'Trash';
+
+  @override
+  String get localGallery_moveToDeletePool => 'Move to Trash';
+
+  @override
+  String localGallery_moveToDeletePoolTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Move $count images to Trash?',
+      one: 'Move this image to Trash?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get localGallery_moveToDeletePoolDescription =>
+      'You can restore the images from Trash until Studio restarts. Studio permanently deletes them the next time it starts.';
+
+  @override
+  String localGallery_deleteForeverTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Permanently delete these $count images?',
+      one: 'Permanently delete this image?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get localGallery_deleteForeverDescription =>
+      'The files will be deleted from disk immediately and cannot be recovered.';
 
   @override
   String get localGallery_trashEmpty => 'Trash is empty';
@@ -13581,7 +13587,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get imageViewer_dragFrame => 'Drag the frame';
 
   @override
-  String get imageViewer_movedToTrash => 'Moved to Recycle Bin';
+  String get imageViewer_movedToTrash => 'Moved to Trash';
 
   @override
   String get imageViewer_undo => 'Undo';
@@ -13793,9 +13799,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get imageViewer_copyTo => 'Copy to…';
 
   @override
-  String get imageViewer_moveToTrash => 'Move to Recycle Bin';
-
-  @override
   String get imageViewer_collections => 'Collections';
 
   @override
@@ -13854,17 +13857,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get imageViewer_helpUndo => 'Undo delete';
-
-  @override
-  String get imageViewer_protectedTitle =>
-      'This image is protected. Move to Recycle Bin?';
-
-  @override
-  String get imageViewer_protectedBody =>
-      'You can restore it from the Recycle Bin.';
-
-  @override
-  String get imageViewer_cancel => 'Cancel';
 
   @override
   String get imageViewer_justNow => 'just now';
@@ -16809,16 +16801,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get channel_ruler => 'Time marks';
 
   @override
-  String get channel_rulerSub => 'Batch times, day dividers and the scrubber';
+  String get channel_rulerSub => 'Batch times and date dividers';
 
   @override
   String get channel_motion => 'Idle motion';
 
   @override
   String get channel_motionSub => 'Subtle animation, paused while generating';
-
-  @override
-  String get channel_toastTitle => 'This session';
 
   @override
   String channel_batch(String time, int count) {
@@ -16870,11 +16859,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get channel_weekday7 => 'Sun';
-
-  @override
-  String channel_scrubWhen(String day, String time) {
-    return '$day $time';
-  }
 
   @override
   String get rag_title => 'RAG vector system';
@@ -17953,7 +17937,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get set_cvRuler => 'Time ruler';
 
   @override
-  String get set_cvRulerSub => 'Batch times, date dividers and the side ruler';
+  String get set_cvRulerSub => 'Batch times and date dividers';
 
   @override
   String get set_cvMotion => 'Idle motion';
@@ -18113,6 +18097,68 @@ class AppLocalizationsEn extends AppLocalizations {
   String set_scHelpTip(Object key) {
     return 'Press $key on any page to see its shortcuts.';
   }
+
+  @override
+  String get set_scFixed => 'Fixed shortcut';
+
+  @override
+  String set_scFixedConflictSub(Object context, Object a, Object b) {
+    return 'In $context, $a has a fixed shortcut. Choose a different key for $b.';
+  }
+
+  @override
+  String get shortcut_fixedUndoPrompt => 'Undo prompt edit';
+
+  @override
+  String get shortcut_fixedRedoPrompt => 'Redo prompt edit';
+
+  @override
+  String get shortcut_fixedUndoGallery => 'Undo gallery action';
+
+  @override
+  String get shortcut_fixedRedoGallery => 'Redo gallery action';
+
+  @override
+  String get shortcut_fixedUndoText => 'Undo text edit';
+
+  @override
+  String get shortcut_fixedRedoText => 'Redo text edit';
+
+  @override
+  String get shortcut_fixedUndoMask => 'Undo mask edit';
+
+  @override
+  String get shortcut_fixedRedoMask => 'Redo mask edit';
+
+  @override
+  String get shortcut_fixedPanCanvas => 'Pan generation canvas';
+
+  @override
+  String get shortcut_fixedNextBatch => 'Focus next image batch';
+
+  @override
+  String get shortcut_fixedPreviousBatch => 'Focus previous image batch';
+
+  @override
+  String get shortcut_fixedFirstBatch => 'Focus first image batch';
+
+  @override
+  String get shortcut_fixedLastBatch => 'Focus last image batch';
+
+  @override
+  String get shortcut_fixedFocusCanvas => 'Return to focused image';
+
+  @override
+  String get shortcut_fixedResetCanvas => 'Reset canvas view';
+
+  @override
+  String get shortcut_fixedFirstImage => 'Go to first image';
+
+  @override
+  String get shortcut_fixedLastImage => 'Go to last image';
+
+  @override
+  String get shortcut_fixedUndoSetting => 'Undo the setting just saved';
 
   @override
   String get set_scEmpty => 'No matching shortcuts';
@@ -22615,11 +22661,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get localGallery_deleteForever => 'Delete permanently';
-
-  @override
-  String localGallery_deleteForeverConfirm(int count) {
-    return 'Permanently delete the selected $count files? This cannot be undone.';
-  }
 
   @override
   String ag_chatAgeMinutes(int count) {

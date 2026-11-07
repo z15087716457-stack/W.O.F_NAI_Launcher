@@ -233,7 +233,9 @@ void main() {
         expect(tester.widget<LocalImageCard>(card(0)).isFocused, isFalse);
         expect(tester.widget<LocalImageCard>(card(3)).isSelected, isTrue);
 
-        await tester.sendKeyEvent(LogicalKeyboardKey.delete);
+        await tester.sendKeyDownEvent(LogicalKeyboardKey.delete);
+        await tester.sendKeyRepeatEvent(LogicalKeyboardKey.delete);
+        await tester.sendKeyUpEvent(LogicalKeyboardKey.delete);
         expect(deleteRequests.single, [records[3].path]);
         final candidates = await service.getRecordsByPaths(
           deleteRequests.single,

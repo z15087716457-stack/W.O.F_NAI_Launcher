@@ -69,6 +69,7 @@ import 'agent_quick.dart';
 import 'agent_pending_mapper.dart';
 import 'agent_resources.dart';
 import 'agent_thread_mapper.dart';
+import 'agent_toggle_wiring.dart';
 import 'agent_history_mapper.dart';
 import '../../../core/nai_agent/prompt_set_tools.dart';
 import 'agent_prompt_set_actions.dart';
@@ -1330,6 +1331,7 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
         data: data,
         actions: actions,
         slots: AgentSlots(
+          headerMark: const AgentStatusMarkWiring(),
           dropTarget: (_, hover, child) => r == null
               ? child
               : NaiAgentDropTarget(

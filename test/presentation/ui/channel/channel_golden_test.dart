@@ -1,6 +1,5 @@
 // 画布视觉通道基准截图（中文浅色 / 深色）：固定种子 + 假历史，锁定视觉。界面变了这里会失败。
-// 原基准（goldens/*.png）保留不重录，只排除获准区域；--update-goldens 只会写 v2 目录：
-//   flutter test --update-goldens test/presentation/ui/channel/channel_golden_test.dart
+// 原基准 PNG 保留，只排除已经确认的界面变更区域。
 // 基准在 Windows + 内置真实字体下生成，其他系统跳过。
 import 'dart:io';
 
@@ -15,6 +14,24 @@ import '../../../helpers/studio_capture_fonts.dart';
 import 'channel_test_harness.dart';
 
 typedef _Pump = Future<void> Function(WidgetTester t, bool dark);
+
+// 原导航尺位于画布右边缘内 6px，上下各留 64px。
+List<Rect> _formerRulerRegions(WidgetTester t) {
+  final canvas = t.getRect(find.byKey(const Key('channel-fixture-canvas')));
+  final rail = Rect.fromLTRB(
+    canvas.right - 30,
+    canvas.top + 64,
+    canvas.right - 6,
+    canvas.bottom - 64,
+  );
+  final actions = find.byKey(const Key('gen-bar-actions'));
+  return [
+    rail,
+    // The clipped toolbar blur samples the old ruler within 3 × sigma 10.
+    if (actions.evaluate().isNotEmpty)
+      t.getRect(actions).intersect(rail.inflate(30)),
+  ];
+}
 
 void main() {
   setUpAll(loadStudioCaptureFonts);
@@ -70,7 +87,7 @@ void main() {
       final name = dark ? '$file-dark' : file;
       testWidgets('golden $name', skip: skip, (t) async {
         await pump(t, dark);
-        final masks = <Rect>[];
+        final masks = _formerRulerRegions(t);
         // 同生图页基准：既有变体价签占位已获准调整，保留原图并排除该工具条。
         final toolbar = find.byKey(const Key('gen-bar-top'));
         if (toolbar.evaluate().isNotEmpty) {
@@ -113,7 +130,7 @@ void main() {
     }
   }
 
-  // v2：后加的主题与 11 张卡的弹层。新文件，整图锁定（录制见文件头命令）。
+  // v2：后加的主题和 11 张卡的弹层。
   final all = channelSettings(pool: ChannelSettings.allThemes);
   final v2 = <(String, _Pump, bool)>[
     for (final th in ChannelTheme.values)
@@ -133,9 +150,21 @@ void main() {
       final name = dark ? '$file-dark' : file;
       testWidgets('golden v2/$name', skip: skip, (t) async {
         await pump(t, dark);
-        await expectLater(
+        final masks = _formerRulerRegions(t);
+        final ruler = find.byKey(const Key('channel-ruler'));
+        if (ruler.evaluate().isNotEmpty) {
+          final l = AppLocalizations.of(t.element(ruler))!;
+          final row = t.getRect(ruler);
+          final sub = t.getRect(find.text(l.channel_rulerSub));
+          masks.add(
+            Rect.fromLTRB(row.left, sub.top, row.right - 40, sub.bottom),
+          );
+        }
+        await expectOutsideApprovedRegions(
+          t,
           find.byKey(const Key('gen-capture')),
-          matchesGoldenFile('goldens/v2/$name.png'),
+          'test/presentation/ui/channel/goldens/v2/$name.png',
+          masks,
         );
       });
     }

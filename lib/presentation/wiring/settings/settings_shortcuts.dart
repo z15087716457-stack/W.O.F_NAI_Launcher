@@ -9,26 +9,16 @@ import 'settings_backups.dart';
 import 'settings_dialogs.dart';
 import 'settings_edits.dart';
 
-import '../../../core/shortcuts/default_shortcuts.dart';
 import '../../../core/shortcuts/shortcut_config.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../providers/shortcuts_provider.dart';
 import '../../ui/settings/settings_contract.dart';
-import '../../utils/shortcut_labels.dart';
+import '../../utils/shortcut_guide.dart';
 import '../../widgets/shortcuts/shortcut_help_dialog.dart';
 
 final settingsShortcutOrderProvider = StateProvider<Map<String, int>>(
   (ref) => {},
 );
-
-List<String> settingsShortcutKeys(String? shortcut) =>
-    shortcut == null || shortcut.isEmpty
-    ? []
-    : shortcut
-          .split('+')
-          .map((key) => key.trim())
-          .where((key) => key.isNotEmpty)
-          .toList();
 
 SettingsShortcutsData settingsShortcutsData(
   BuildContext context,
@@ -37,41 +27,10 @@ SettingsShortcutsData settingsShortcutsData(
   final config =
       ref.watch(shortcutConfigNotifierProvider).valueOrNull ??
       ShortcutConfig.createDefault();
-  final defaults = ShortcutConfig.createDefault();
-  final order = ref.watch(settingsShortcutOrderProvider);
-  final bindings = config.bindings.values.toList()
-    ..sort((a, b) => (order[b.id] ?? 0).compareTo(order[a.id] ?? 0));
-  return SettingsShortcutsData(
-    contexts: [
-      for (final scope in ShortcutContext.values)
-        SettingsShortcutContext(
-          id: scope.name,
-          label: settingsShortcutContextLabel(context.l10n, scope),
-        ),
-    ],
-    shortcuts: [
-      for (final binding in bindings)
-        SettingsShortcut(
-          id: binding.id,
-          context: binding.context.name,
-          label: settingsShortcutLabel(context.l10n, binding.actionKey),
-          keys: settingsShortcutKeys(binding.effectiveShortcut),
-          defaultKeys: settingsShortcutKeys(
-            defaults.bindings[binding.id]?.effectiveShortcut,
-          ),
-          conflictWith:
-              binding.effectiveShortcut == null ||
-                  binding.effectiveShortcut!.isEmpty
-              ? null
-              : config
-                    .findConflicts(
-                      binding.effectiveShortcut!,
-                      context: binding.context,
-                      excludeId: binding.id,
-                    )
-                    .firstOrNull,
-        ),
-    ],
+  return shortcutGuide(
+    context.l10n,
+    config,
+    order: ref.watch(settingsShortcutOrderProvider),
   );
 }
 

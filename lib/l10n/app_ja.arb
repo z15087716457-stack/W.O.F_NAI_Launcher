@@ -1157,12 +1157,6 @@
   },
   "localGallery_unfavorite": "お気に入り解除",
   "localGallery_favoriteMenuEmptyCollections": "コレクションがありません。左の + で作成",
-  "localGallery_confirmDeleteImageContent": "画像「{name}」を削除しますか?\n\n画像はすぐにギャラリーから消え、ファイルは次回起動時に完全に削除されます（このセッション内では元に戻せます）。",
-  "@localGallery_confirmDeleteImageContent": {
-    "placeholders": {
-      "name": {}
-    }
-  },
   "localGallery_moveTo": "移動先…",
   "localGallery_copyTo": "コピー先…",
   "localGallery_externalSourceMoveConfirmTitle": "外部ギャラリーソースファイルの移動",
@@ -1214,13 +1208,6 @@
       "error": {}
     }
   },
-  "localGallery_protectedDeleteTitle": "保護モード: 削除を再度確認してください",
-  "localGallery_protectedDeleteImagesContent": "これにより、{count} 個のローカル イメージ ファイルが完全に削除されます。これを元に戻すことはできません。",
-  "@localGallery_protectedDeleteImagesContent": {
-    "placeholders": {
-      "count": {}
-    }
-  },
   "localGallery_protectedBulkMoveTitle": "保護モード: 一括移動の確認",
   "localGallery_protectedBulkMoveContent": "これにより、{count} ローカル画像ファイルがターゲット フォルダに移動されます。これが間違いではないことを確認してください。",
   "@localGallery_protectedBulkMoveContent": {
@@ -1232,12 +1219,6 @@
   "@localGallery_importParamsFailed": {
     "placeholders": {
       "error": {}
-    }
-  },
-  "localGallery_protectedDeleteImageContent": "これにより、イメージ「{name}」が完全に削除されます。これを元に戻すことはできません。",
-  "@localGallery_protectedDeleteImageContent": {
-    "placeholders": {
-      "name": {}
     }
   },
   "localGallery_saveZipArchive": "ZIP アーカイブを保存",
@@ -1392,13 +1373,6 @@
   "localGallery_gotIt": "わかりました",
   "localGallery_undone": "元に戻しました",
   "localGallery_redone": "やり直し",
-  "localGallery_confirmBulkDelete": "一括削除の確認",
-  "localGallery_confirmBulkDeleteContent": "{count} 個の選択した画像を削除してもよろしいですか?\n\n画像はすぐにギャラリーから消え、ファイルは次回起動時に完全に削除されます（このセッション内では元に戻せます）。",
-  "@localGallery_confirmBulkDeleteContent": {
-    "placeholders": {
-      "count": {}
-    }
-  },
   "localGallery_deletedToPool": "{count} 個の画像を削除しました。次回起動時に完全に削除されます。",
   "@localGallery_deletedToPool": {
     "placeholders": {
@@ -1406,6 +1380,25 @@
     }
   },
   "localGallery_trashTitle": "ゴミ箱",
+  "localGallery_moveToDeletePool": "ゴミ箱に移動",
+  "localGallery_moveToDeletePoolTitle": "{count, plural, =1{この画像をゴミ箱に移動しますか？} other{{count} 枚の画像をゴミ箱に移動しますか？}}",
+  "@localGallery_moveToDeletePoolTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "localGallery_moveToDeletePoolDescription": "Studio を再起動するまでは、ゴミ箱から復元できます。次回の起動時にゴミ箱のファイルは完全に削除されます。",
+  "localGallery_deleteForeverTitle": "{count, plural, =1{この画像を完全に削除しますか？} other{この {count} 枚の画像を完全に削除しますか？}}",
+  "@localGallery_deleteForeverTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "localGallery_deleteForeverDescription": "ファイルはディスクから直ちに削除され、復元できません。",
   "localGallery_trashEmpty": "ゴミ箱は空です",
   "localGallery_trashHint": "ゴミ箱内のファイルはディスクに残っており、次回起動時に完全に削除されます。復元するとすぐにギャラリーへ戻ります。",
   "localGallery_trashRestore": "復元",
@@ -7348,7 +7341,7 @@
   "imageViewer_hintFit": "フィットに戻す",
   "imageViewer_hintActual": "原寸",
   "imageViewer_dragFrame": "枠をドラッグ",
-  "imageViewer_movedToTrash": "ごみ箱に移動しました",
+  "imageViewer_movedToTrash": "ゴミ箱に移動しました",
   "imageViewer_undo": "元に戻す",
   "imageViewer_details": "詳細",
   "imageViewer_generationResult": "生成結果",
@@ -7466,7 +7459,6 @@
   "imageViewer_addToCollection": "コレクションに追加",
   "imageViewer_moveTo": "移動…",
   "imageViewer_copyTo": "コピー先…",
-  "imageViewer_moveToTrash": "ごみ箱に移動",
   "imageViewer_collections": "コレクション",
   "imageViewer_newCollection": "新しいコレクション…",
   "imageViewer_helpTitle": "ビューアーのショートカット",
@@ -7487,9 +7479,6 @@
   "imageViewer_keyDouble": "ダブルクリック",
   "imageViewer_helpCopyPrompt": "プロンプトをコピー",
   "imageViewer_helpUndo": "削除を元に戻す",
-  "imageViewer_protectedTitle": "この画像は保護されています。ごみ箱に移動しますか？",
-  "imageViewer_protectedBody": "ごみ箱から元に戻せます。",
-  "imageViewer_cancel": "キャンセル",
   "imageViewer_justNow": "たった今",
   "imageViewer_minutesAgo": "{count} 分前",
   "@imageViewer_minutesAgo": {
@@ -8916,10 +8905,9 @@
   "channel_levelStandard": "標準",
   "channel_levelStrong": "濃",
   "channel_ruler": "時刻目盛り",
-  "channel_rulerSub": "バッチ時刻、日付の区切り、右端のスクラバー",
+  "channel_rulerSub": "バッチ時刻と日付の区切り",
   "channel_motion": "アイドル時の動き",
   "channel_motionSub": "ごく軽い動き。生成中は自動で止まります",
-  "channel_toastTitle": "今回のチャンネル",
   "channel_batch": "{time} · {count} 枚",
   "@channel_batch": {"placeholders": {"time": {"type": "String"}, "count": {"type": "int"}}},
   "channel_batchNewest": "{time} · {count} 枚 · 最新",
@@ -8939,8 +8927,6 @@
   "channel_weekday5": "金",
   "channel_weekday6": "土",
   "channel_weekday7": "日",
-  "channel_scrubWhen": "{day} {time}",
-  "@channel_scrubWhen": {"placeholders": {"day": {"type": "String"}, "time": {"type": "String"}}},
   "rag_title": "RAG ベクトルシステム",
   "rag_description": "ローカル検索、モデル、文脈に沿ったタグ候補を管理",
   "rag_enabled": "RAG を有効にする",
@@ -9556,7 +9542,7 @@
   },
   "set_cvLevel": "濃さ",
   "set_cvRuler": "タイムスケール",
-  "set_cvRulerSub": "バッチ時刻、日付区切り、右側の目盛り",
+  "set_cvRulerSub": "バッチ時刻と日付の区切り",
   "set_cvMotion": "アイドル時の動き",
   "set_cvMotionSub": "生成中と「動きを減らす」オンのときは停止",
   "set_cvOps": "キャンバス操作",
@@ -9654,6 +9640,33 @@
   "@set_scHelpTip": {
     "placeholders": {
       "key": {}
+    }
+  },
+  "set_scFixed": "固定ショートカット",
+  "set_scFixedConflictSub": "{context}の「{a}」は固定ショートカットです。「{b}」には別のキーを選んでください。",
+  "shortcut_fixedUndoPrompt": "プロンプト編集を元に戻す",
+  "shortcut_fixedRedoPrompt": "プロンプト編集をやり直す",
+  "shortcut_fixedUndoGallery": "ギャラリーの操作を元に戻す",
+  "shortcut_fixedRedoGallery": "ギャラリーの操作をやり直す",
+  "shortcut_fixedUndoText": "テキスト編集を元に戻す",
+  "shortcut_fixedRedoText": "テキスト編集をやり直す",
+  "shortcut_fixedUndoMask": "マスク編集を元に戻す",
+  "shortcut_fixedRedoMask": "マスク編集をやり直す",
+  "shortcut_fixedPanCanvas": "生成キャンバスを移動",
+  "shortcut_fixedNextBatch": "次の画像バッチにフォーカス",
+  "shortcut_fixedPreviousBatch": "前の画像バッチにフォーカス",
+  "shortcut_fixedFirstBatch": "最初の画像バッチにフォーカス",
+  "shortcut_fixedLastBatch": "最後の画像バッチにフォーカス",
+  "shortcut_fixedFocusCanvas": "フォーカス中の画像に戻る",
+  "shortcut_fixedResetCanvas": "キャンバス表示をリセット",
+  "shortcut_fixedFirstImage": "最初の画像に移動",
+  "shortcut_fixedLastImage": "最後の画像に移動",
+  "shortcut_fixedUndoSetting": "直前に保存した設定を元に戻す",
+  "@set_scFixedConflictSub": {
+    "placeholders": {
+      "context": {},
+      "a": {},
+      "b": {}
     }
   },
   "set_scEmpty": "一致するショートカットはありません",
@@ -11564,14 +11577,6 @@
   "localGallery_recentViews": "最近見た画像",
   "localGallery_recentViewsEmpty": "閲覧履歴はありません",
   "localGallery_deleteForever": "完全に削除",
-  "localGallery_deleteForeverConfirm": "選択した {count} 個のファイルを完全に削除します。元に戻せません。",
-  "@localGallery_deleteForeverConfirm": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "ag_chatAgeMinutes": "{count}m",
   "@ag_chatAgeMinutes": {
     "placeholders": {

@@ -557,11 +557,7 @@ class _NavItem extends StatelessWidget {
                 child: Center(
                   // Agent uses the same mark as its sidebar and toggles.
                   child: page == SettingsPageId.agent
-                      ? AgentMark(
-                          key: const Key('settings-nav-agent-mark'),
-                          size: 17,
-                          color: ink,
-                        )
+                      ? const AgentMark(key: Key('settings-nav-agent-mark'))
                       : icon.icon != null
                       ? Icon(icon.icon, size: 17, color: ink)
                       : UiGlyph(icon.glyph!, size: 16, color: ink),
@@ -892,18 +888,14 @@ class _ToastDock extends StatelessWidget {
               l.set_savedChange(change.title, change.from, change.to),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: UiText.sans(12.5, color: c.tipInk),
+              style: UiText.sans(12.5, color: c.ink),
             ),
           ),
           if (change.undoable) ...[
             SettingsDockButton(label: l.set_undo, onTap: onUndo),
             Text(
               'Ctrl+Z',
-              style: UiText.mono(
-                10.5,
-                weight: FontWeight.w500,
-                color: c.tipInk.withValues(alpha: .55),
-              ),
+              style: UiText.mono(10.5, weight: FontWeight.w500, color: c.muted),
             ),
           ],
         ],
@@ -925,11 +917,16 @@ class SettingsDockBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
+    const radius = BorderRadius.all(Radius.circular(12));
     return Container(
       padding: padding,
+      foregroundDecoration: BoxDecoration(
+        border: Border.all(color: c.line),
+        borderRadius: radius,
+      ),
       decoration: BoxDecoration(
-        color: c.tipBg,
-        borderRadius: BorderRadius.circular(12),
+        color: c.raised,
+        borderRadius: radius,
         boxShadow: const [
           BoxShadow(
             color: Color(0x47000000),
@@ -969,20 +966,16 @@ class SettingsDockButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 9),
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: primary
-              ? c.brand
-              : (hover ? c.tipInk.withValues(alpha: .08) : null),
+          color: primary ? c.brand : (hover ? c.hover : null),
           borderRadius: BorderRadius.circular(6),
-          border: Border.all(
-            color: primary ? c.brand : c.tipInk.withValues(alpha: .22),
-          ),
+          border: Border.all(color: primary ? c.brand : c.line),
         ),
         child: Text(
           label,
           style: UiText.sans(
             12,
             weight: FontWeight.w500,
-            color: primary ? c.onBrand : c.tipInk,
+            color: primary ? c.onBrand : c.ink,
             height: 1.2,
           ),
         ),

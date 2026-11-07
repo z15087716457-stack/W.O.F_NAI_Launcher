@@ -87,20 +87,7 @@ class _AgentHeaderState extends State<AgentHeader> {
                       children: [
                         Semantics(
                           label: l.ag_toggle,
-                          child: Container(
-                            width: 26,
-                            height: 26,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: c.ink,
-                              borderRadius: BorderRadius.circular(7),
-                            ),
-                            child: AgentMark(
-                              size: 16,
-                              color: c.bg,
-                              stroke: 1.8,
-                            ),
-                          ),
+                          child: s.slots.headerMark ?? const AgentStatusMark(),
                         ),
                         const SizedBox(width: 6),
                         Expanded(

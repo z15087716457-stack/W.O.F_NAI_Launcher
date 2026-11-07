@@ -4,12 +4,13 @@ import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
-import '../../../core/shortcuts/default_shortcuts.dart';
 import '../../../core/shortcuts/shortcut_config.dart';
 import '../../../core/shortcuts/shortcut_manager.dart';
 import '../../../presentation/router/app_router.dart';
 import '../../../presentation/screens/settings/widgets/shortcut_settings_panel.dart';
 import '../../providers/shortcuts_provider.dart';
+import '../../ui/settings/settings_contract.dart';
+import '../../utils/shortcut_guide.dart';
 
 /// 快捷键帮助对话框
 /// 显示所有可用的快捷键
@@ -30,7 +31,7 @@ class ShortcutHelpDialog extends ConsumerStatefulWidget {
 class _ShortcutHelpDialogState extends ConsumerState<ShortcutHelpDialog> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
-  ShortcutContext? _selectedContext;
+  String? _selectedContext;
 
   @override
   void dispose() {
@@ -40,7 +41,11 @@ class _ShortcutHelpDialogState extends ConsumerState<ShortcutHelpDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final bindingsByContext = ref.watch(shortcutsByContextProvider);
+    final data = shortcutGuide(
+      context.l10n,
+      ref.watch(shortcutConfigNotifierProvider).valueOrNull ??
+          const ShortcutConfig(),
+    );
     return Dialog(
       insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
       clipBehavior: Clip.antiAlias,
@@ -51,14 +56,14 @@ class _ShortcutHelpDialogState extends ConsumerState<ShortcutHelpDialog> {
         child: Column(
           children: [
             _buildHeader(),
-            _buildContextFilters(),
+            _buildContextFilters(data.contexts),
             Divider(
               height: 1,
               indent: 20,
               endIndent: 20,
               color: Theme.of(context).colorScheme.outlineVariant,
             ),
-            Expanded(child: _buildShortcutsList(bindingsByContext)),
+            Expanded(child: _buildShortcutsList(data)),
           ],
         ),
       ),
@@ -166,14 +171,14 @@ class _ShortcutHelpDialogState extends ConsumerState<ShortcutHelpDialog> {
         setState(() => _searchQuery = value.trim().toLowerCase()),
   );
 
-  Widget _buildContextFilters() {
+  Widget _buildContextFilters(List<SettingsShortcutContext> contexts) {
     final theme = Theme.of(context);
-    Widget filter(ShortcutContext? value, String label) {
+    Widget filter(String? value, String label) {
       final selected = _selectedContext == value;
       return Padding(
         padding: const EdgeInsets.only(right: 4),
         child: ChoiceChip(
-          key: Key('shortcut-context-${value?.name ?? 'all'}'),
+          key: Key('shortcut-context-${value ?? 'all'}'),
           label: Text(label),
           selected: selected,
           showCheckmark: false,
@@ -206,8 +211,7 @@ class _ShortcutHelpDialogState extends ConsumerState<ShortcutHelpDialog> {
           child: Row(
             children: [
               filter(null, context.l10n.shortcut_help_all),
-              for (final value in ShortcutContext.values)
-                filter(value, _getContextDisplayName(value)),
+              for (final value in contexts) filter(value.id, value.label),
             ],
           ),
         ),
@@ -225,31 +229,27 @@ class _ShortcutHelpDialogState extends ConsumerState<ShortcutHelpDialog> {
     });
   }
 
-  Widget _buildShortcutsList(
-    Map<ShortcutContext, List<ShortcutBinding>> bindingsByContext,
-  ) {
-    final contexts = _selectedContext == null
-        ? ShortcutContext.values
-        : [_selectedContext!];
-    final groups = <ShortcutContext, List<ShortcutBinding>>{
-      for (final value in contexts)
-        value: (bindingsByContext[value] ?? [])
-            .where(
-              (binding) =>
-                  binding.enabled &&
-                  (binding.effectiveShortcut?.isNotEmpty ?? false),
-            )
-            .toList(),
+  Widget _buildShortcutsList(SettingsShortcutsData data) {
+    final groups = {
+      for (final value in data.contexts)
+        if (_selectedContext == null || value.id == _selectedContext)
+          value:
+              data.shortcuts
+                  .where(
+                    (row) => row.context == value.id && row.keys.isNotEmpty,
+                  )
+                  .toList()
+                ..sort((a, b) => a.id.compareTo(b.id)),
     };
     if (_searchQuery.isNotEmpty) {
-      final results = groups.values.expand((bindings) => bindings).where((
-        binding,
-      ) {
-        final haystack =
-            '${_getActionDisplayName(binding)} ${_getContextDisplayName(binding.context)} ${binding.id} ${AppShortcutManager.getDisplayLabel(binding.effectiveShortcut)}'
-                .toLowerCase();
-        return haystack.contains(_searchQuery);
-      }).toList();
+      final results = [
+        for (final group in groups.entries)
+          for (final row in group.value)
+            if ('${row.label} ${group.key.label} ${row.id} ${row.keys.join('+')} ${_keyLabel(row)}'
+                .toLowerCase()
+                .contains(_searchQuery))
+              row,
+      ];
       return _buildSearchResults(results);
     }
     final visible = groups.entries
@@ -260,13 +260,13 @@ class _ShortcutHelpDialogState extends ConsumerState<ShortcutHelpDialog> {
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
       itemCount: visible.length,
       itemBuilder: (context, index) =>
-          _buildContextSection(visible[index].key, visible[index].value),
+          _buildContextSection(visible[index].key.label, visible[index].value),
     );
   }
 
   Widget _buildContextSection(
-    ShortcutContext value,
-    List<ShortcutBinding> bindings,
+    String contextLabel,
+    List<SettingsShortcut> bindings,
   ) {
     final theme = Theme.of(context);
     return Column(
@@ -277,7 +277,7 @@ class _ShortcutHelpDialogState extends ConsumerState<ShortcutHelpDialog> {
           child: Row(
             children: [
               Text(
-                _getContextDisplayName(value),
+                contextLabel,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
@@ -298,19 +298,34 @@ class _ShortcutHelpDialogState extends ConsumerState<ShortcutHelpDialog> {
     );
   }
 
-  Widget _buildShortcutItem(ShortcutBinding binding) {
+  String _keyLabel(SettingsShortcut row) =>
+      AppShortcutManager.getDisplayLabel(row.keys.join('+'));
+
+  Widget _buildShortcutItem(SettingsShortcut row) {
     final theme = Theme.of(context);
-    final label = AppShortcutManager.getDisplayLabel(binding.effectiveShortcut);
+    final label = _keyLabel(row);
     return Padding(
-      key: Key('shortcut-help-item-${binding.id}'),
+      key: Key('shortcut-help-item-${row.id}'),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       child: LayoutBuilder(
         builder: (context, constraints) => Row(
           children: [
             Expanded(
-              child: Text(
-                _getActionDisplayName(binding),
-                style: theme.textTheme.bodyMedium?.copyWith(fontSize: 13),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    row.label,
+                    style: theme.textTheme.bodyMedium?.copyWith(fontSize: 13),
+                  ),
+                  if (row.fixed)
+                    Text(
+                      context.l10n.set_scFixed,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                ],
               ),
             ),
             const SizedBox(width: 16),
@@ -344,7 +359,7 @@ class _ShortcutHelpDialogState extends ConsumerState<ShortcutHelpDialog> {
     );
   }
 
-  Widget _buildSearchResults(List<ShortcutBinding> results) {
+  Widget _buildSearchResults(List<SettingsShortcut> results) {
     if (results.isEmpty) {
       return Center(
         child: Column(
@@ -370,151 +385,6 @@ class _ShortcutHelpDialogState extends ConsumerState<ShortcutHelpDialog> {
       itemCount: results.length,
       itemBuilder: (context, index) => _buildShortcutItem(results[index]),
     );
-  }
-
-  String _getActionDisplayName(ShortcutBinding binding) {
-    final l10n = context.l10n;
-    final key = binding.actionKey;
-
-    // 使用 switch 从 ARB 文件获取本地化文本
-    switch (key) {
-      case 'shortcut_action_navigate_to_generation':
-        return l10n.shortcut_action_navigate_to_generation;
-      case 'shortcut_action_navigate_to_local_gallery':
-        return l10n.shortcut_action_navigate_to_local_gallery;
-      case 'shortcut_action_navigate_to_online_gallery':
-        return l10n.shortcut_action_navigate_to_online_gallery;
-      case 'shortcut_action_navigate_to_tag_library':
-        return l10n.shortcut_action_navigate_to_tag_library;
-      case 'shortcut_action_navigate_to_statistics':
-        return l10n.shortcut_action_navigate_to_statistics;
-      case 'shortcut_action_navigate_to_settings':
-        return l10n.shortcut_action_navigate_to_settings;
-      case 'shortcut_action_navigate_to_vibe_library':
-        return l10n.vibeLibrary_title;
-      case 'shortcut_action_navigate_to_style_explore':
-        return l10n.nav_styleExplore;
-      case 'shortcut_action_navigate_to_precise_ref_library':
-        return l10n.nav_preciseRefLibrary;
-      case 'shortcut_action_navigate_to_tag_wiki':
-        return l10n.nav_tagWiki;
-      case 'shortcut_action_vibe_import':
-        return l10n.common_import;
-      case 'shortcut_action_vibe_export':
-      case 'shortcut_action_vibe_detail_export':
-        return l10n.common_export;
-      case 'shortcut_action_vibe_detail_rename':
-        return l10n.shortcut_action_vibe_detail_rename;
-      case 'shortcut_action_vibe_detail_delete':
-        return l10n.common_delete;
-      case 'shortcut_action_vibe_detail_toggle_favorite':
-        return l10n.shortcut_action_toggle_favorite;
-      case 'shortcut_action_vibe_detail_send_to_generation':
-        return l10n.vibeLibrary_sendToGeneration;
-      case 'shortcut_action_vibe_detail_prev_sub_vibe':
-        return l10n.shortcut_action_vibe_detail_prev_sub_vibe;
-      case 'shortcut_action_vibe_detail_next_sub_vibe':
-        return l10n.shortcut_action_vibe_detail_next_sub_vibe;
-      case 'shortcut_action_generate_image':
-        return l10n.shortcut_action_generate_image;
-      case 'shortcut_action_cancel_generation':
-        return l10n.shortcut_action_cancel_generation;
-      case 'shortcut_action_clear_prompt':
-        return l10n.shortcut_action_clear_prompt;
-      case 'shortcut_action_toggle_prompt_mode':
-        return l10n.shortcut_action_toggle_prompt_mode;
-      case 'shortcut_action_open_tag_library':
-        return l10n.shortcut_action_open_tag_library;
-      case 'shortcut_action_save_image':
-        return l10n.shortcut_action_save_image;
-      case 'shortcut_action_upscale_image':
-        return l10n.shortcut_action_upscale_image;
-      case 'shortcut_action_copy_image':
-        return l10n.shortcut_action_copy_image;
-      case 'shortcut_action_fullscreen_preview':
-        return l10n.shortcut_action_fullscreen_preview;
-      case 'shortcut_action_open_params_panel':
-        return l10n.shortcut_action_open_params_panel;
-      case 'shortcut_action_open_history_panel':
-        return l10n.shortcut_action_open_history_panel;
-      case 'shortcut_action_reuse_params':
-        return l10n.shortcut_action_reuse_params;
-      case 'shortcut_action_previous_image':
-        return l10n.shortcut_action_previous_image;
-      case 'shortcut_action_next_image':
-        return l10n.shortcut_action_next_image;
-      case 'shortcut_action_zoom_in':
-        return l10n.shortcut_action_zoom_in;
-      case 'shortcut_action_zoom_out':
-        return l10n.shortcut_action_zoom_out;
-      case 'shortcut_action_reset_zoom':
-        return l10n.shortcut_action_reset_zoom;
-      case 'shortcut_action_toggle_fullscreen':
-        return l10n.shortcut_action_toggle_fullscreen;
-      case 'shortcut_action_close_viewer':
-        return l10n.shortcut_action_close_viewer;
-      case 'shortcut_action_toggle_info_panel':
-        return l10n.shortcut_action_toggle_info_panel;
-      case 'shortcut_action_toggle_favorite':
-        return l10n.shortcut_action_toggle_favorite;
-      case 'shortcut_action_copy_prompt':
-        return l10n.shortcut_action_copy_prompt;
-      case 'shortcut_action_reuse_gallery_params':
-        return l10n.shortcut_action_reuse_gallery_params;
-      case 'shortcut_action_delete_image':
-        return l10n.shortcut_action_delete_image;
-      case 'shortcut_action_previous_page':
-        return l10n.shortcut_action_previous_page;
-      case 'shortcut_action_next_page':
-        return l10n.shortcut_action_next_page;
-      case 'shortcut_action_refresh_gallery':
-        return l10n.shortcut_action_refresh_gallery;
-      case 'shortcut_action_focus_search':
-        return l10n.shortcut_action_focus_search;
-      case 'shortcut_action_enter_selection_mode':
-        return l10n.shortcut_action_enter_selection_mode;
-      case 'shortcut_action_clear_filter':
-        return l10n.shortcut_action_clear_filter;
-      case 'shortcut_action_toggle_category_panel':
-        return l10n.shortcut_action_toggle_category_panel;
-      case 'shortcut_action_jump_to_date':
-        return l10n.shortcut_action_jump_to_date;
-      case 'shortcut_action_open_folder':
-        return l10n.shortcut_action_open_folder;
-      case 'shortcut_action_minimize_to_tray':
-        return l10n.shortcut_action_minimize_to_tray;
-      case 'shortcut_action_quit_app':
-        return l10n.shortcut_action_quit_app;
-      case 'shortcut_action_show_shortcut_help':
-        return l10n.shortcut_action_show_shortcut_help;
-      case 'shortcut_action_open_resource_window':
-        return l10n.shortcut_action_open_resource_window;
-      case 'shortcut_action_toggle_theme':
-        return l10n.shortcut_action_toggle_theme;
-      default:
-        return key.replaceAll('shortcut_action_', '');
-    }
-  }
-
-  String _getContextDisplayName(ShortcutContext shortcutContext) {
-    final l10n = context.l10n;
-
-    switch (shortcutContext) {
-      case ShortcutContext.global:
-        return l10n.shortcut_context_global;
-      case ShortcutContext.generation:
-        return l10n.shortcut_context_generation;
-      case ShortcutContext.gallery:
-        return l10n.shortcut_context_gallery;
-      case ShortcutContext.viewer:
-        return l10n.shortcut_context_viewer;
-      case ShortcutContext.settings:
-        return l10n.shortcut_context_settings;
-      case ShortcutContext.input:
-        return l10n.shortcut_context_input;
-      case ShortcutContext.vibeDetail:
-        return l10n.shortcut_context_vibe_detail;
-    }
   }
 }
 

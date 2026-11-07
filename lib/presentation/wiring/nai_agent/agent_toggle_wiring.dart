@@ -10,6 +10,14 @@ import '../../ui/agent/agent_glyphs.dart';
 import '../../widgets/common/app_toast.dart';
 import 'agent_toggle_badge.dart';
 
+class AgentStatusMarkWiring extends ConsumerWidget {
+  const AgentStatusMarkWiring({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) =>
+      AgentStatusMark(badge: ref.watch(agentToggleBadgeProvider));
+}
+
 class AgentToggleWiring extends ConsumerWidget {
   const AgentToggleWiring({super.key});
   @override

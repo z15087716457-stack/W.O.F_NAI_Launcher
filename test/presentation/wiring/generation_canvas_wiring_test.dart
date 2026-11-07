@@ -1,6 +1,7 @@
 import '../../helpers/grouped_canvas_batches.dart';
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/gestures.dart';
@@ -26,7 +27,6 @@ import 'package:nai_launcher/presentation/providers/canvas_channel_provider.dart
 import 'package:nai_launcher/presentation/providers/canvas_channel_feed_provider.dart';
 import 'package:nai_launcher/presentation/ui/channel/channel_contract.dart';
 import 'package:nai_launcher/presentation/ui/channel/channel_layer.dart';
-import 'package:nai_launcher/presentation/ui/channel/channel_overlay.dart';
 import 'package:nai_launcher/presentation/ui/channel/channel_settings.dart';
 import 'package:nai_launcher/presentation/providers/generation/local_upscale_provider.dart';
 import 'package:nai_launcher/presentation/providers/generation/image_action_providers.dart';
@@ -275,10 +275,17 @@ void main() {
     expect(find.byKey(const ValueKey('canvas-pixel-background')), findsNothing);
   }
 
+  void expectVerticallyCentered(WidgetTester tester, Rect image) {
+    final top = tester.getRect(find.byKey(const Key('gen-bar-top'))).bottom;
+    final bottom = math.min(
+      tester.getRect(find.byKey(const Key('gen-bar-info'))).top,
+      tester.getRect(find.byKey(const Key('gen-bar-actions'))).top,
+    );
+    expect(image.top - top, greaterThanOrEqualTo(7.99));
+    expect(image.top - top, closeTo(bottom - image.bottom, .01));
+  }
+
   Future<void> capture(WidgetTester tester, String name) async {
-    final notice =
-        Platform.environment['CAPTURE_CHANNEL_NOTICE'] == '1' &&
-        name.startsWith('notice-');
     final welcome =
         (Platform.environment['CAPTURE_WELCOME_ALIGNMENT'] == '1' ||
             Platform.environment['SIDE_GLASS_CAPTURE_DIR'] != null) &&
@@ -299,8 +306,7 @@ void main() {
     final sideGlass =
         Platform.environment['SIDE_GLASS_CAPTURE_DIR'] != null &&
         (name.startsWith('r6-') || name.endsWith('-narrow'));
-    if (!notice &&
-        !welcome &&
+    if (!welcome &&
         !feedback &&
         !channel &&
         !oldCompare &&
@@ -317,9 +323,7 @@ void main() {
           boundary.currentContext!.findRenderObject() as RenderRepaintBoundary;
       final snapshot = await target.toImage(pixelRatio: 1);
       final data = await snapshot.toByteData(format: ui.ImageByteFormat.png);
-      final area = notice
-          ? 'channel-entry-notice-20261015'
-          : welcome
+      final area = welcome
           ? 'canvas-welcome-alignment-20261015'
           : feedback
           ? 'feedback-r6-20261015'
@@ -465,6 +469,7 @@ void main() {
       (widget) => widget is Image && widget.semanticLabel == 'W.O.F NAI Studio',
     );
     expect(logo, findsOneWidget);
+    expect(find.text('本次通道'), findsNothing);
     await tester.runAsync(
       () => precacheImage(
         tester.widget<Image>(logo).image,
@@ -495,76 +500,6 @@ void main() {
   Finder welcomeLogo() => find.byWidgetPredicate(
     (widget) => widget is Image && widget.semanticLabel == 'W.O.F NAI Studio',
   );
-
-  testWidgets('本次通道提示每轮启动一次，重进和切模式不重弹', (tester) async {
-    publish(const ImageGenerationState());
-    await pump(tester, fullPage: true);
-    final toast = find.byKey(const Key('channel-toast'));
-    expect(toast, findsOneWidget);
-    await capture(tester, 'notice-first-entry');
-    await tester.pumpWidget(const SizedBox());
-    await pump(tester, fullPage: true);
-    expect(toast, findsNothing);
-    await capture(tester, 'notice-return-within-four-seconds');
-    final settings = container.read(canvasChannelNotifierProvider.notifier);
-    for (final mode in [
-      ChannelMode.fixed,
-      ChannelMode.random,
-      ChannelMode.off,
-      ChannelMode.random,
-    ]) {
-      await settings.set(
-        container.read(canvasChannelNotifierProvider).copyWith(mode: mode),
-      );
-      await tester.pumpAndSettle();
-      expect(toast, findsNothing);
-    }
-    await settings.set(
-      container
-          .read(canvasChannelNotifierProvider)
-          .copyWith(seed: 91, pool: {ChannelTheme.stars, ChannelTheme.wave}),
-    );
-    await tester.pumpAndSettle();
-    expect(toast, findsNothing);
-    publish(ImageGenerationState(history: [image(81)]));
-    await tester.pumpAndSettle();
-    expect(toast, findsNothing);
-    await capture(tester, 'notice-after-mode-and-seed-changes');
-  });
-
-  for (final initial in [ChannelMode.fixed, ChannelMode.off]) {
-    testWidgets('通道提示不被 $initial 提前消耗，首次随机后不重弹', (tester) async {
-      publish(const ImageGenerationState());
-      final settings = container.read(canvasChannelNotifierProvider.notifier);
-      await settings.set(
-        container.read(canvasChannelNotifierProvider).copyWith(mode: initial),
-      );
-      await pump(tester, fullPage: true);
-      final toast = find.byKey(const Key('channel-toast'));
-      expect(toast, findsNothing);
-      await settings.set(
-        container
-            .read(canvasChannelNotifierProvider)
-            .copyWith(mode: ChannelMode.random),
-      );
-      await tester.pumpAndSettle();
-      expect(toast, findsOneWidget);
-      await settings.set(
-        container
-            .read(canvasChannelNotifierProvider)
-            .copyWith(mode: ChannelMode.fixed),
-      );
-      await tester.pumpAndSettle();
-      expect(toast, findsNothing);
-      await settings.set(
-        container
-            .read(canvasChannelNotifierProvider)
-            .copyWith(mode: ChannelMode.random),
-      );
-      await tester.pumpAndSettle();
-      expect(toast, findsNothing);
-    });
-  }
 
   void expectWelcomeCentered(WidgetTester tester) {
     expectPanelBackdropAligned(tester);
@@ -694,13 +629,9 @@ void main() {
     expectPanelBackdropAligned(tester);
     publish(ImageGenerationState(history: [image(71)]));
     await tester.pumpAndSettle();
-    final viewport = tester.getRect(find.byKey(const Key('gen-canvas')));
-    final item = container.read(canvasFeedLayoutProvider).items.single;
-    expect(
-      (camera().worldToScreen(item.worldRect.center) -
-              Offset(viewport.width / 2, viewport.height / 2 - 10))
-          .distance,
-      lessThan(1),
+    expectVerticallyCentered(
+      tester,
+      tester.getRect(find.byKey(const Key('gen-tile-71-0'))),
     );
     final settled = camera();
     await wheel(tester, const Offset(0, 80));
@@ -714,7 +645,6 @@ void main() {
     publish(ImageGenerationState(history: [image(1), image(1, 1)]));
     await pump(tester);
     expect(find.byType(ChannelBackdrop), findsOneWidget);
-    expect(find.byType(ChannelOverlay), findsOneWidget);
     final backdrop = tester.widget<ChannelBackdrop>(canvasBackdrop()).data;
     final feed = container.read(canvasChannelFeedProvider);
     expect(backdrop.batches, same(feed.batches));
@@ -734,7 +664,6 @@ void main() {
     section.onChanged(section.settings.copyWith(mode: ChannelMode.off));
     await tester.pumpAndSettle();
     expect(find.byType(ChannelBackdrop), findsNothing);
-    expect(find.byType(ChannelOverlay), findsNothing);
     expect(tester.element(tile), same(element));
     expect(
       storage.values.containsKey(StorageKeys.canvasChannelPreferences),
@@ -743,47 +672,32 @@ void main() {
     expect(container.read(canvasChannelNotifierProvider).mode, ChannelMode.off);
   });
 
-  for (final kind in [PointerDeviceKind.mouse, PointerDeviceKind.touch]) {
-    testWidgets('导航尺点击与拖动保持缩放及选中，锁相机时忽略 $kind', (tester) async {
-      publish(ImageGenerationState(history: [image(1), image(2)]));
-      await pump(tester);
-      final before = camera();
-      final focus = container.read(generationCanvasGroupSelectionProvider);
-      final selection = container.read(generationPreviewSelectionProvider);
-      final rect = tester.getRect(find.byKey(const Key('channel-scrubber')));
-      final gesture = await tester.startGesture(
-        rect.topLeft + Offset(12, rect.height * .6),
-        kind: kind,
-      );
-      await tester.pump();
-      await gesture.moveTo(rect.topLeft + Offset(12, rect.height * .8));
-      await tester.pump();
-      await gesture.up();
-      await tester.pump(const Duration(milliseconds: 20));
-      final feed = container.read(canvasChannelFeedProvider);
-      final top = feed.batches.first.rect.top - 1600;
-      final bottom = feed.batches.last.rect.bottom + 1600;
-      final view = tester.getSize(find.byKey(const Key('gen-canvas')));
-      final center = camera().screenToWorld(view.center(Offset.zero));
-      expect(center.dx, closeTo(0, .001));
-      expect(center.dy, closeTo(top + (bottom - top) * .8, .001));
-      expect(camera().scale, before.scale);
-      final jumped = camera();
-      await tester.pump(const Duration(seconds: 3));
-      expect(camera().offset, jumped.offset);
-      expect(container.read(generationCanvasGroupSelectionProvider), focus);
-      expect(container.read(generationPreviewSelectionProvider), selection);
-      await container
-          .read(canvasLockCameraNotifierProvider.notifier)
-          .setLocked(true);
-      await tester.tap(find.byKey(const Key('channel-scrubber')));
-      await tester.pump(const Duration(milliseconds: 200));
-      expect(camera().offset, jumped.offset);
-      expect(camera().scale, jumped.scale);
-    });
-  }
+  testWidgets('画布右缘可平移，右侧历史缩略图可定位', (tester) async {
+    publish(ImageGenerationState(history: [image(2), image(1)]));
+    await pump(tester, fullPage: true);
+    final canvas = tester.getRect(find.byKey(const Key('gen-canvas')));
+    final edge = Offset(canvas.right - 16, canvas.center.dy);
+    final before = camera();
+    final drag = await tester.startGesture(
+      edge,
+      kind: PointerDeviceKind.mouse,
+      buttons: kMiddleMouseButton,
+    );
+    const delta = Offset(-36, -45);
+    await drag.moveBy(delta);
+    await tester.pump();
+    expect(camera().offset, before.offset + delta);
+    await drag.cancel();
+    await tester.pumpAndSettle();
 
-  testWidgets('通道叠层透传图块点击、滚轮、Ctrl 缩放与 WASD', (tester) async {
+    final moved = camera();
+    await tester.tap(find.byKey(const Key('gen-batch-tile-run:1')));
+    await tester.pumpAndSettle();
+    expect(container.read(generationPreviewSelectionProvider), image(1).id);
+    expect(camera().offset, isNot(moved.offset));
+  });
+
+  testWidgets('通道启用时可点击图块、滚轮、Ctrl 缩放与 WASD', (tester) async {
     publish(ImageGenerationState(history: [image(1), image(1, 1)]));
     await pump(tester);
     await tester.tap(find.byKey(const Key('gen-tile-1-1')));
@@ -824,7 +738,6 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.byType(ChannelBackdrop), findsNothing);
-    expect(find.byType(ChannelOverlay), findsNothing);
   });
 
   testWidgets('生成占位与首张结果映射到真实批次数量和时间', (tester) async {
@@ -856,10 +769,9 @@ void main() {
 
   for (final language in ['zh', 'zh_TW', 'en', 'ja', 'ko']) {
     for (final dark in [false, true]) {
-      testWidgets('真实通道设置、导航提示与本次顺序 $language dark=$dark', (tester) async {
+      testWidgets('真实通道设置与本次顺序 $language dark=$dark', (tester) async {
         publish(ImageGenerationState(history: [image(1), image(2)]));
         await pump(tester, fullPage: true, language: language, dark: dark);
-        expect(find.byKey(const Key('channel-toast')), findsOneWidget);
         expect(tester.takeException(), isNull);
         await capture(tester, 'channel-$language-$dark-canvas');
         await tester.tap(find.byKey(const Key('gen-display')));
@@ -869,24 +781,9 @@ void main() {
           316,
         );
         expect(find.byType(ChannelSettingsSection), findsOneWidget);
+        expect(find.byKey(const Key('channel-sequence')), findsOneWidget);
         expect(tester.takeException(), isNull);
         await capture(tester, 'channel-$language-$dark-settings');
-        GenScope.of(
-          tester.element(find.byType(GenCanvas)),
-        ).controller.closePopover();
-        await tester.pumpAndSettle();
-        final pointer = await tester.createGesture(
-          kind: PointerDeviceKind.mouse,
-        );
-        await pointer.addPointer(location: Offset.zero);
-        await pointer.moveTo(
-          tester.getCenter(find.byKey(const Key('channel-scrubber'))),
-        );
-        await tester.pumpAndSettle();
-        expect(find.byKey(const Key('channel-scrub-tip')), findsOneWidget);
-        expect(tester.takeException(), isNull);
-        await capture(tester, 'channel-$language-$dark-tip');
-        await pointer.removePointer();
       });
     }
   }
@@ -1125,7 +1022,7 @@ void main() {
     expect(find.byKey(const Key('gen-old')), findsNothing);
   });
 
-  testWidgets('OLD 360px 窄画布保留完整种子，底部两条不重叠、不遮住图片', (tester) async {
+  testWidgets('OLD 窄画布保留完整种子，图片在分行工具条之间居中', (tester) async {
     final source = comparisonImage('narrow-old', masked: false);
     final result = GeneratedImage(
       id: source.id,
@@ -1137,14 +1034,17 @@ void main() {
     );
     publish(ImageGenerationState(history: [result]));
     await pump(tester);
-    tester.view.physicalSize = const Size(360, 600);
-    await tester.pumpAndSettle();
-    final info = tester.getRect(find.byKey(const Key('gen-bar-info')));
-    final actions = tester.getRect(find.byKey(const Key('gen-bar-actions')));
-    final tile = tester.getRect(find.byKey(Key('gen-tile-${result.id}')));
-    expect(info.overlaps(actions), isFalse);
-    expect(tile.overlaps(info), isFalse);
-    expect(tile.overlaps(actions), isFalse);
+    for (final width in [320.0, 360.0]) {
+      tester.view.physicalSize = Size(width, 600);
+      await tester.pumpAndSettle();
+      final info = tester.getRect(find.byKey(const Key('gen-bar-info')));
+      final actions = tester.getRect(find.byKey(const Key('gen-bar-actions')));
+      expect(info.bottom, lessThan(actions.top));
+      expectVerticallyCentered(
+        tester,
+        tester.getRect(find.byKey(Key('gen-tile-${result.id}'))),
+      );
+    }
     expect(find.text('4294967295'), findsOneWidget);
     final gesture = await tester.startGesture(
       tester.getCenter(find.byKey(const Key('gen-old'))),
@@ -1855,13 +1755,30 @@ void main() {
     await tester.pumpAndSettle();
     final viewport = tester.getRect(find.byKey(const Key('gen-canvas')));
     final tile = tester.getRect(find.byKey(const Key('gen-tile-1-0')));
-    expect(tile.left, greaterThanOrEqualTo(viewport.left + GenCanvas.pad.left));
-    expect(tile.right, lessThanOrEqualTo(viewport.right - GenCanvas.pad.right));
-    expect(tile.top, greaterThanOrEqualTo(viewport.top + GenCanvas.pad.top));
-    expect(
-      tile.bottom,
-      lessThanOrEqualTo(viewport.bottom - GenCanvas.pad.bottom),
+    expect(tile.left, greaterThanOrEqualTo(viewport.left + 40));
+    expect(tile.right, lessThanOrEqualTo(viewport.right - 40));
+    expectVerticallyCentered(tester, tile);
+    await capture(tester, 'canvas-centered');
+    await container
+        .read(simpleOutputViewerNotifierProvider.notifier)
+        .setSimple(true);
+    await tester.pumpAndSettle();
+    expectVerticallyCentered(
+      tester,
+      tester.getRect(find.byKey(const Key('gen-tile-1-0'))),
     );
+  });
+  testWidgets('画布文字放大后按工具条实际高度重新居中', (tester) async {
+    publish(ImageGenerationState(history: [image(1)]));
+    await pump(tester);
+    final info = find.byKey(const Key('gen-bar-info'));
+    final tile = find.byKey(const Key('gen-tile-1-0'));
+    final infoHeight = tester.getSize(info).height;
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    tester.platformDispatcher.textScaleFactorTestValue = 3;
+    await tester.pumpAndSettle();
+    expect(tester.getSize(info).height, greaterThan(infoHeight));
+    expectVerticallyCentered(tester, tester.getRect(tile));
   });
   testWidgets('局部重绘流式预览继续使用源图与裁片位置合成', (tester) async {
     publish(

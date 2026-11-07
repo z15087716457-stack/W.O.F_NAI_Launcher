@@ -32,7 +32,7 @@ To enable it: gear at the bottom left of the canvas → “Canvas display” →
 - **Themes**: Circuit, Star atlas, Herbarium, Arcade, Abyss, Seigaiha, Caliber, Strata, Metro, Score and Luna—11 in total.
 - **Mode**: Off, One theme or Shuffle (keep at least two themes for Shuffle; use “Reshuffle” to change the selection).
 - **Strength**: Soft, Normal or Bold.
-- **Time marks**: Show batch times, day dividers and the scrubber on the right.
+- **Time marks**: Show batch times and date dividers.
 - **Idle motion**: Subtle movement when not generating; pauses automatically during generation.
 
 <img src="../../images/readme/en/channel-themes.webp" alt="Visual channel themes" width="100%">

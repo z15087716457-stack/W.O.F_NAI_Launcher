@@ -50,6 +50,7 @@ import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_workspac
 import 'package:nai_launcher/presentation/providers/shortcuts_provider.dart';
 import 'package:nai_launcher/presentation/providers/tips_provider.dart';
 import 'package:nai_launcher/presentation/ui/agent/agent_panel.dart';
+import 'package:nai_launcher/presentation/ui/agent/agent_glyphs.dart';
 import 'package:nai_launcher/presentation/widgets/nai_agent/nai_agent_image_input.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/integrated_title_bar.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
@@ -517,9 +518,10 @@ void main() {
       final bitmap = await boundary.toImage(pixelRatio: 1);
       final bytes = await bitmap.toByteData(format: ui.ImageByteFormat.png);
       bitmap.dispose();
-      final file = File(
-        '.dart_tool/explore-agent-entry-20261015/captures/$name.png',
-      );
+      final out =
+          Platform.environment['CAPTURE_EXPLORE_AGENT_OUT'] ??
+          '.dart_tool/explore-agent-entry-20261015/captures';
+      final file = File('$out/$name.png');
       await file.parent.create(recursive: true);
       await file.writeAsBytes(bytes!.buffer.asUint8List());
     });
@@ -537,7 +539,13 @@ void main() {
     expect(toggle, findsOneWidget);
     await tester.tap(find.byKey(const Key('gen-tool-menu')));
     await tester.pumpAndSettle();
-    expect(find.byKey(const Key('gen-pin-agent')), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('gen-pin-agent')),
+        matching: find.byType(AgentMark),
+      ),
+      findsOneWidget,
+    );
     await captureAgent(tester, 'shared-menu');
     await tester.tap(find.byKey(const Key('gen-pin-agent')));
     await tester.pumpAndSettle();
@@ -566,6 +574,13 @@ void main() {
       isTrue,
     );
     expect(find.byType(AgentPanel), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(AgentPanel),
+        matching: find.byType(AgentStatusMark),
+      ),
+      findsOneWidget,
+    );
     expect(
       container.read(naiAgentUiPreferencesProvider).settings.panelExpanded,
       isTrue,

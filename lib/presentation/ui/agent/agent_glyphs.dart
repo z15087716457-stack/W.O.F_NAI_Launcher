@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 export '../../../core/nai_agent/prompt_set_icons.dart';
+export 'agent_mark.dart';
 
 import '../kit/ui_colors.dart';
 import '../kit/ui_extra_icons.dart';
@@ -192,32 +193,6 @@ class AgentIcon extends StatelessWidget {
   }
 }
 
-/// NAI Agent 标志：对话气泡里一颗星火（「会动手的助手」）。
-class AgentMark extends StatelessWidget {
-  const AgentMark({super.key, this.size = 16, this.color, this.stroke = 1.6});
-  final double size;
-  final Color? color;
-  final double stroke;
-
-  static const _bubble =
-      'M4 6a2.5 2.5 0 012.5-2.5h11A2.5 2.5 0 0120 6v9a2.5 2.5 0 01-2.5 2.5H11l-4.5 3.5v-3.5A2.5 2.5 0 014 15z';
-  static const _spark =
-      'M12 6.8l1.2 2.6 2.6 1.2-2.6 1.2L12 14.4l-1.2-2.6-2.6-1.2 2.6-1.2z';
-
-  @override
-  Widget build(BuildContext context) {
-    final ink = color ?? IconTheme.of(context).color ?? context.ui.ink;
-    return UiSvgIcon.string(
-      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">'
-      '<path d="$_bubble" fill="none" stroke="#000" stroke-width="$stroke" stroke-linejoin="round"/>'
-      '<path d="$_spark" fill="#000"/></svg>',
-      size: size,
-      colorFilter: ColorFilter.mode(ink, BlendMode.srcIn),
-      excludeFromSemantics: true,
-    );
-  }
-}
-
 /// Anlas 水滴币。
 class AgentAnlas extends StatelessWidget {
   const AgentAnlas({super.key, this.size = 14, this.color});
@@ -232,108 +207,6 @@ class AgentAnlas extends StatelessWidget {
     colorFilter: ColorFilter.mode(color ?? context.ui.ink, BlendMode.srcIn),
     excludeFromSemantics: true,
   );
-}
-
-/// 侧栏收起时开关右上角的小圆点。
-enum AgentToggleBadge {
-  none,
-
-  /// 有聊天在跑（蓝）。
-  running,
-
-  /// 有提问 / 审批 / 付费确认在等你（橙）。
-  waiting,
-
-  /// 收起期间有任务跑完了，还没看（绿）。
-  done,
-}
-
-/// 工具栏里的 Agent 开关（生图页提示词工具区、窗口标题栏）。
-/// 开着时浅蓝底 + 蓝描边，和工具栏其他按钮同一套外观。
-class AgentToggleButton extends StatefulWidget {
-  const AgentToggleButton({
-    super.key,
-    required this.expanded,
-    required this.onPressed,
-    required this.tooltip,
-    this.size = 28,
-    this.badge = AgentToggleBadge.none,
-  });
-  final bool expanded;
-  final VoidCallback onPressed;
-  final String tooltip;
-  final double size;
-
-  /// 只在收起（[expanded] 为 false）时画。
-  final AgentToggleBadge badge;
-
-  @override
-  State<AgentToggleButton> createState() => _AgentToggleButtonState();
-}
-
-class _AgentToggleButtonState extends State<AgentToggleButton> {
-  var _hover = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.ui;
-    final on = widget.expanded;
-    return Tooltip(
-      message: widget.tooltip,
-      waitDuration: const Duration(milliseconds: 500),
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        onEnter: (_) => setState(() => _hover = true),
-        onExit: (_) => setState(() => _hover = false),
-        child: GestureDetector(
-          onTap: widget.onPressed,
-          child: Container(
-            key: const Key('agent-toggle'),
-            width: widget.size,
-            height: widget.size,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: on
-                  ? Color.lerp(c.bg, c.accent, .12)
-                  : _hover
-                  ? c.hover
-                  : null,
-              borderRadius: BorderRadius.circular(7),
-              border: on
-                  ? Border.all(color: c.accent.withValues(alpha: .3))
-                  : null,
-            ),
-            child: Stack(
-              clipBehavior: Clip.none,
-              alignment: Alignment.center,
-              children: [
-                AgentMark(size: 17, color: on ? c.accent : c.muted),
-                if (!on && widget.badge != AgentToggleBadge.none)
-                  Positioned(
-                    right: -5,
-                    top: -5,
-                    child: Container(
-                      key: Key('agent-toggle-badge-${widget.badge.name}'),
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: switch (widget.badge) {
-                          AgentToggleBadge.running => c.accent,
-                          AgentToggleBadge.waiting => c.warn,
-                          _ => c.ok,
-                        },
-                        border: Border.all(color: c.bg, width: 1.5),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 /// 快捷信息图标键 → 侧栏图标路径（设置页的图标选择用同一组键）。

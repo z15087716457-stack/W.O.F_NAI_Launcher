@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -17,6 +18,10 @@ import '../../../core/utils/gallery_path_utils.dart';
 /// 独立小类以便单元测试（测试用 `SharedPreferences.setMockInitialValues`）。
 class GalleryDeletePoolStore {
   const GalleryDeletePoolStore();
+
+  static final _changes = StreamController<void>.broadcast();
+
+  Stream<void> get changes => _changes.stream;
 
   /// Pending deletions follow a native directory move; otherwise a later
   /// scan can resurrect the deleted image at its new path.
@@ -51,6 +56,7 @@ class GalleryDeletePoolStore {
     )) {
       throw StateError('Failed to relocate gallery delete pool');
     }
+    _changes.add(null);
   }
 
   /// 读取删除池路径列表；无记录或解析失败时返回空表。
@@ -85,6 +91,7 @@ class GalleryDeletePoolStore {
     )) {
       throw StateError('Failed to persist gallery delete pool');
     }
+    _changes.add(null);
   }
 
   /// 移除路径（幂等；路径不在池中时无操作）。
@@ -103,6 +110,7 @@ class GalleryDeletePoolStore {
     )) {
       throw StateError('Failed to persist gallery delete pool removal');
     }
+    _changes.add(null);
   }
 
   /// Restore must stop durable startup cleanup before exposing an index row.
@@ -117,7 +125,7 @@ class GalleryDeletePoolStore {
   /// 清空删除池（物理文件不受影响）。
   Future<void> clear() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(StorageKeys.galleryDeletePool);
+    if (await prefs.remove(StorageKeys.galleryDeletePool)) _changes.add(null);
   }
 
   /// 启动清理：逐条物理删除池内文件。
@@ -146,14 +154,13 @@ class GalleryDeletePoolStore {
     }
 
     final prefs = await SharedPreferences.getInstance();
-    if (remaining.isEmpty) {
-      await prefs.remove(StorageKeys.galleryDeletePool);
-    } else {
-      await prefs.setString(
-        StorageKeys.galleryDeletePool,
-        jsonEncode(remaining),
-      );
-    }
+    final saved = remaining.isEmpty
+        ? await prefs.remove(StorageKeys.galleryDeletePool)
+        : await prefs.setString(
+            StorageKeys.galleryDeletePool,
+            jsonEncode(remaining),
+          );
+    if (saved) _changes.add(null);
     return deletedCount;
   }
 }

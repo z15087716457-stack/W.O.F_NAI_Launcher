@@ -8,7 +8,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 import '../../../core/utils/justified_layout.dart';
 import '../../../core/utils/localization_extension.dart';
-import '../../widgets/common/themed_confirm_dialog.dart';
+import '../gallery/gallery_delete_dialog.dart';
 import '../kit/ui_block_pill.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_controls.dart';
@@ -164,15 +164,10 @@ class _ResourceWindowPageState extends State<ResourceWindowPage> {
     setState(() => _trashBusy = true);
     try {
       if (action == 'purge') {
-        final l = context.l10n;
-        final confirmed = await ThemedConfirmDialog.show(
-          context: context,
-          title: l.localGallery_deleteForever,
-          content: l.localGallery_deleteForeverConfirm(paths.length),
-          confirmText: l.localGallery_deleteForever,
-          cancelText: l.common_cancel,
-          type: ThemedConfirmDialogType.danger,
-          icon: Icons.delete_forever_outlined,
+        final confirmed = await GalleryDeleteDialog.show(
+          context,
+          count: paths.length,
+          permanent: true,
         );
         if (!confirmed || !mounted) return;
       }

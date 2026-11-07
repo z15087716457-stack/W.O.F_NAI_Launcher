@@ -1132,7 +1132,7 @@ class GenCanvasData with _GenValue {
   final ChannelSettings? channel;
 
   /// 画布最新一批顶边的世界 y（`canvasFeedLayout.groups.first` 的组矩形顶边），
-  /// 设置里“本次”从这里所在的段开始列，和画布进入提示一致。
+  /// 设置里“本次”从这里所在的段开始列。
   final double channelTop;
 
   /// 只换视觉通道两项（其余照旧）。
@@ -1942,7 +1942,7 @@ class GenActions {
   final ValueChanged<String> onBackdropChanged;
   final ValueChanged<bool> onZoomToFillChanged;
 
-  /// 显示设置里改了视觉通道（含“换一组”换种子），同 `ChannelActions.onSettingsChanged`。
+  /// 显示设置里改了视觉通道（含“换一组”换种子）。
   /// null = 不出“视觉通道”一节。
   final ValueChanged<ChannelSettings>? onChannelChanged;
   final VoidCallback onRetry;

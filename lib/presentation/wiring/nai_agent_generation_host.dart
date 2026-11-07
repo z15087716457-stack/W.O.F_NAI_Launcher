@@ -44,6 +44,8 @@ class _GenerationHostState extends ConsumerState<NaiAgentGenerationHost>
   bool _expanded = false, _opened = false, _wasNative = false;
   bool _waitingNativeSurface = false;
   double _closedWidth = 0;
+  ({double viewport, double width})? _openDock;
+  ({double target, double shrink, double width})? _closingDock;
   double? _dragWidth;
   final _preview = DragPreviewController();
   int _dragRevision = 0;
@@ -63,6 +65,7 @@ class _GenerationHostState extends ConsumerState<NaiAgentGenerationHost>
     final expanded = window.presentationExpanded ?? settings.panelExpanded;
     final chrome = context
         .dependOnInheritedWidgetOfExactType<WindowChromeScope>();
+    final viewport = MediaQuery.sizeOf(context).width;
     final reduced = MediaQuery.disableAnimationsOf(context);
     if (_wasNative &&
         !window.nativeReveal &&
@@ -74,7 +77,15 @@ class _GenerationHostState extends ConsumerState<NaiAgentGenerationHost>
     if (expanded != _expanded) {
       _expanded = expanded;
       _opened |= expanded;
-      if (reduced || window.nativeReveal) {
+      final open = _openDock;
+      _openDock = null;
+      final shrink = window.closingShrink;
+      _closingDock = !expanded && open != null && shrink != null
+          ? (target: open.viewport - shrink, shrink: shrink, width: open.width)
+          : null;
+      if (_closingDock != null) {
+        _reveal.value = 1;
+      } else if (reduced || window.nativeReveal) {
         _reveal.value = expanded ? 1 : 0;
       } else if (expanded) {
         _reveal.forward();
@@ -85,11 +96,32 @@ class _GenerationHostState extends ConsumerState<NaiAgentGenerationHost>
       _reveal.value = expanded ? 1 : 0;
     }
     _wasNative = window.nativeReveal;
+    double? closingFraction;
+    if (_closingDock case final closing?) {
+      // Keep the dock's space until the Flutter viewport actually shrinks.
+      if (viewport <= closing.target + 1) {
+        _closingDock = null;
+        _reveal.value = 0;
+      } else if (window.closingShrink == null) {
+        _closingDock = null;
+        if (reduced) {
+          _reveal.value = 0;
+        } else {
+          _reveal.reverse();
+        }
+      } else {
+        closingFraction = ((viewport - closing.target) / closing.shrink).clamp(
+          0.0,
+          1.0,
+        );
+      }
+    }
+    final closingWidth = _closingDock?.width;
     return ColoredBox(
       color: Theme.of(context).colorScheme.surface,
       child: LayoutBuilder(
         builder: (context, constraints) {
-          if (!expanded && !_reveal.isAnimating) {
+          if (!expanded && closingFraction == null && !_reveal.isAnimating) {
             _closedWidth = constraints.maxWidth;
           }
           final width = AgentPanelLayout.resolve(
@@ -104,6 +136,10 @@ class _GenerationHostState extends ConsumerState<NaiAgentGenerationHost>
               _closedWidth > 0 &&
               constraints.maxWidth < _closedWidth + window.openingGrowth - 2;
           _waitingNativeSurface = waitingForSurface;
+          if (expanded && !waitingForSurface) {
+            _openDock = (viewport: viewport, width: width);
+          }
+          final dockWidth = closingWidth ?? width;
           return AnimatedBuilder(
             animation: _reveal,
             // The Agent owns the rightmost caption area while docked. Keep
@@ -111,7 +147,8 @@ class _GenerationHostState extends ConsumerState<NaiAgentGenerationHost>
             child: chrome == null
                 ? widget.child
                 : WindowChromeScope(
-                    enabled: chrome.enabled && !expanded,
+                    enabled:
+                        chrome.enabled && !expanded && closingFraction == null,
                     draggable: chrome.draggable,
                     extraWidth: chrome.extraWidth,
                     captionHeight: chrome.captionHeight,
@@ -120,7 +157,8 @@ class _GenerationHostState extends ConsumerState<NaiAgentGenerationHost>
             builder: (context, child) {
               final fraction = waitingForSurface
                   ? 0.0
-                  : Curves.easeOutCubic.transform(_reveal.value);
+                  : closingFraction ??
+                        Curves.easeOutCubic.transform(_reveal.value);
               return Stack(
                 fit: StackFit.expand,
                 children: [
@@ -131,12 +169,12 @@ class _GenerationHostState extends ConsumerState<NaiAgentGenerationHost>
                       Expanded(child: child!),
                       SizedBox(
                         key: const Key('nai-agent-reveal'),
-                        width: (width + AgentPanelLayout.handle) * fraction,
+                        width: (dockWidth + AgentPanelLayout.handle) * fraction,
                         child: ClipRect(
                           child: OverflowBox(
                             alignment: Alignment.centerLeft,
-                            minWidth: width + AgentPanelLayout.handle,
-                            maxWidth: width + AgentPanelLayout.handle,
+                            minWidth: dockWidth + AgentPanelLayout.handle,
+                            maxWidth: dockWidth + AgentPanelLayout.handle,
                             child: Offstage(
                               offstage: fraction == 0,
                               child: TickerMode(
@@ -147,7 +185,7 @@ class _GenerationHostState extends ConsumerState<NaiAgentGenerationHost>
                                     ignoring: !expanded,
                                     child: _opened
                                         ? NaiAgentDock(
-                                            width: width,
+                                            width: dockWidth,
                                             onDragStart: () {
                                               _dragRevision++;
                                               _preview.start(

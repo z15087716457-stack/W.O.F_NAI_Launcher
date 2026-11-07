@@ -35,6 +35,22 @@ void main() {
           onHost: (value) => host = value,
         );
         final toast = find.byKey(const Key('settings-toast'));
+        final surface = t.widget<Container>(
+          find.descendant(of: toast, matching: find.byType(Container)).first,
+        );
+        final fill = (surface.decoration! as BoxDecoration).color!;
+        expect(
+          fill.computeLuminance(),
+          window == 900 ? lessThan(.1) : greaterThan(.8),
+        );
+        final message = find
+            .descendant(of: toast, matching: find.byType(Text))
+            .first;
+        final ink = t.widget<Text>(message).style!.color!;
+        expect(
+          ink.computeLuminance(),
+          window == 900 ? greaterThan(.8) : lessThan(.1),
+        );
         final icon = find.descendant(of: toast, matching: find.byType(UiGlyph));
         final shortcut = find.descendant(
           of: toast,
@@ -94,9 +110,6 @@ void main() {
           constrained.right - t.getRect(shortcut).right,
           closeTo(left, .01),
         );
-        final message = find
-            .descendant(of: toast, matching: find.byType(Text))
-            .first;
         expect(
           t.renderObject<RenderParagraph>(message).didExceedMaxLines,
           isTrue,

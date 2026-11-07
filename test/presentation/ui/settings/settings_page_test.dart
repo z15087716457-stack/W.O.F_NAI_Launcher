@@ -2,12 +2,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nai_launcher/core/shortcuts/default_shortcuts.dart';
+import 'package:nai_launcher/core/shortcuts/shortcut_config.dart';
+import 'package:nai_launcher/l10n/app_localizations.dart';
+import 'package:nai_launcher/presentation/ui/agent/agent_glyphs.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_contract.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_fixture.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_kit.dart';
 import 'package:nai_launcher/presentation/ui/kit/ui_colors.dart';
+import 'package:nai_launcher/presentation/utils/shortcut_guide.dart';
 
 import '../../../helpers/studio_capture_fonts.dart';
+import '../../../helpers/uiux_frontend_capture.dart';
 import 'settings_test_harness.dart';
 
 void main() {
@@ -250,6 +256,15 @@ void main() {
       page: SettingsPageId.agent,
       agentTab: 'instructions',
     );
+    final mark = find.byKey(const Key('settings-nav-agent-mark'));
+    expect(t.widget(mark), isA<AgentMark>());
+    final position = t.getTopLeft(mark);
+    await captureUiuxRegion(
+      t,
+      find.byKey(const Key('settings-capture')),
+      'settings-agent-mark',
+      Rect.fromLTWH(position.dx - 12, position.dy - 8, 178, 34),
+    );
     expect(find.byKey(const Key('agent-unsaved')), findsNothing);
     await t.enterText(find.byKey(const Key('agent-global')), '新指令');
     await t.pumpAndSettle();
@@ -283,6 +298,65 @@ void main() {
   testWidgets('快捷键冲突列出并可一键修复', (t) async {
     await pumpSettings(t, page: SettingsPageId.shortcuts);
     expect(find.byKey(const Key('shortcut-conflicts')), findsOneWidget);
+  });
+
+  testWidgets('固定键可用键盘图筛选，冲突只重置可编辑的绑定', (t) async {
+    final l = lookupAppLocalizations(const Locale('zh'));
+    final config = ShortcutConfig.createDefault().setCustomShortcut(
+      ShortcutIds.generateImage,
+      'ctrl+z',
+    );
+    final shortcuts = shortcutGuide(l, config);
+    expect(
+      shortcuts.shortcuts
+          .singleWhere((x) => x.id == 'fixed-viewer-undo')
+          .conflictWith,
+      isNull,
+    );
+    final rec = await pumpSettings(
+      t,
+      window: 1100,
+      data: SettingsFixture.view(
+        page: SettingsPageId.shortcuts,
+      ).copyWith(shortcuts: shortcuts),
+    );
+    await tap(t, 'key-Z');
+    final undo = find.byKey(const Key('shortcut-fixed-generation-undo'));
+    expect(undo, findsOneWidget);
+    expect(
+      find.descendant(of: undo, matching: find.text(l.set_scFixed)),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('shortcut-keys-fixed-generation-undo')),
+      findsNothing,
+    );
+    expect(
+      find.byKey(const Key('shortcut-fix-fixed-generation-undo')),
+      findsNothing,
+    );
+    expect(
+      find.byKey(const Key('shortcut-fix-${ShortcutIds.generateImage}')),
+      findsOneWidget,
+    );
+
+    final shiftLayer = find.descendant(
+      of: find.byKey(const Key('shortcut-layer')),
+      matching: find.text('Ctrl+Shift'),
+    );
+    await t.ensureVisible(shiftLayer);
+    await t.tap(shiftLayer);
+    await t.pumpAndSettle();
+    await tap(t, 'key-Z');
+    expect(undo, findsNothing);
+    expect(
+      find.byKey(const Key('shortcut-fixed-generation-redo-shift')),
+      findsOneWidget,
+    );
+    expect(rec.calls.where((call) => call.startsWith('record:')), isEmpty);
+    await tap(t, 'shortcut-fix-${ShortcutIds.generateImage}');
+    expect(rec.calls, ['resetShortcut:${ShortcutIds.generateImage}']);
+    expect(t.takeException(), isNull);
   });
 
   testWidgets('全部视图允许互斥页面复用同一按键，不误标红', (t) async {

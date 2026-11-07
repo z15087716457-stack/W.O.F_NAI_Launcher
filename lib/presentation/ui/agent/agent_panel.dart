@@ -427,16 +427,7 @@ class _InitError extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           spacing: 10,
           children: [
-            Container(
-              width: 40,
-              height: 40,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: c.ink,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: AgentMark(size: 22, color: c.bg, stroke: 1.8),
-            ),
+            const AgentMark(size: 27, tileSize: 40),
             Text(
               l.ag_initFailed,
               style: UiText.sans(14, weight: FontWeight.w600, color: c.ink),

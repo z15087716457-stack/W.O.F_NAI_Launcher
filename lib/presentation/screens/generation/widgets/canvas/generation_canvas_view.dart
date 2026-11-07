@@ -15,7 +15,6 @@ import '../../../../providers/canvas_channel_provider.dart';
 import '../../../../providers/canvas_channel_feed_provider.dart';
 import '../../../../ui/channel/channel_contract.dart';
 import '../../../../ui/channel/channel_layer.dart';
-import '../../../../ui/channel/channel_overlay.dart';
 import '../../../../providers/generation/generation_models.dart';
 import '../../../../providers/generation/preview_selection_provider.dart';
 import '../../../../providers/image_generation_provider.dart';
@@ -140,6 +139,12 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
       _camera.setViewport(_viewport);
       _syncSelectionToCamera();
     });
+  }
+
+  @override
+  void didUpdateWidget(GenerationCanvasView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.focusInsets != widget.focusInsets) _scheduleFocusRefit();
   }
 
   @override
@@ -367,11 +372,16 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     final changed = _viewport != size;
     _viewport = size;
     _camera.setViewport(size);
-    if (changed && widget.embedded && _focusFitActive && !_manualOverview) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _refitCurrentFocus(immediate: true);
-      });
-    }
+    if (changed && widget.embedded) _scheduleFocusRefit();
+  }
+
+  void _scheduleFocusRefit() {
+    if (!_focusFitActive || _manualOverview) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _focusFitActive && !_manualOverview) {
+        _refitCurrentFocus(immediate: true);
+      }
+    });
   }
 
   void _measureFocusViewport() {
@@ -764,39 +774,6 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
                                       .toList(),
                                 ),
                               ),
-                              if (channel != null)
-                                Positioned.fill(
-                                  key: const ValueKey('canvas-channel-overlay'),
-                                  child: Listener(
-                                    onPointerDown: (event) =>
-                                        _uiPointers.add(event.pointer),
-                                    onPointerUp: (event) {
-                                      _uiPointers.remove(event.pointer);
-                                      _consumedUiPointers.add(event.pointer);
-                                    },
-                                    onPointerCancel: (event) {
-                                      _uiPointers.remove(event.pointer);
-                                      _consumedUiPointers.remove(event.pointer);
-                                    },
-                                    child: ChannelOverlay(
-                                      data: channel,
-                                      claimEntryToast: () => ref
-                                          .read(
-                                            canvasChannelEntryNoticeProvider,
-                                          )
-                                          .claim(),
-                                      actions: ChannelActions(
-                                        onSettingsChanged: (value) => ref
-                                            .read(
-                                              canvasChannelNotifierProvider
-                                                  .notifier,
-                                            )
-                                            .set(value),
-                                        onJumpTo: _jumpChannel,
-                                      ),
-                                    ),
-                                  ),
-                                ),
                             ],
                           );
                         },
@@ -814,26 +791,6 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
           ),
         ),
       ),
-    );
-  }
-
-  void _jumpChannel(double worldY) {
-    if (_cameraLocked || _viewport.isEmpty || !worldY.isFinite) return;
-    _stopWasd();
-    _lostTimer?.cancel();
-    _panActive = false;
-    _panAccum = Offset.zero;
-    _inertiaVelocity = Offset.zero;
-    _manualOverview = true;
-    _focusFitActive = false;
-    final camera = _cameraState();
-    _camera.jump(
-      CanvasCamera(
-        offset:
-            _viewport.center(Offset.zero) - Offset(0, worldY) * camera.scale,
-        scale: camera.scale,
-      ),
-      notifyIdle: false,
     );
   }
 

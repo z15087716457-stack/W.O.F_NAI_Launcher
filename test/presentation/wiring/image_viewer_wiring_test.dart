@@ -21,7 +21,6 @@ import 'package:nai_launcher/presentation/providers/prompt_block_library_provide
 import 'package:nai_launcher/presentation/providers/krita/krita_bridge_notifier.dart';
 import 'package:nai_launcher/presentation/providers/local_gallery_focus_provider.dart';
 import 'package:nai_launcher/presentation/providers/local_gallery_provider.dart';
-import 'package:nai_launcher/presentation/providers/share_image_settings_provider.dart';
 import 'package:nai_launcher/presentation/services/image_clipboard_service.dart';
 import 'package:nai_launcher/presentation/providers/shortcuts_provider.dart';
 import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
@@ -49,12 +48,6 @@ class _Blocks extends PromptBlockLibraryNotifier {
 class _Highlight extends HighlightEmphasisSettings {
   @override
   bool build() => true;
-}
-
-class _Share extends ShareImageSettingsNotifier {
-  @override
-  ShareImageSettings build() =>
-      const ShareImageSettings(confirmDangerousActions: true);
 }
 
 class _GalleryNotifier extends LocalGalleryNotifier {
@@ -177,7 +170,6 @@ void main() {
         localGalleryNotifierProvider.overrideWith(_GalleryNotifier.new),
         highlightEmphasisSettingsProvider.overrideWith(_Highlight.new),
         promptBlockLibraryNotifierProvider.overrideWith(_Blocks.new),
-        shareImageSettingsProvider.overrideWith(_Share.new),
         shortcutConfigNotifierProvider.overrideWith(TestLibraryShortcuts.new),
         kritaBridgeNotifierProvider.overrideWith(
           (ref) => KritaBridgeNotifier(),
@@ -398,7 +390,6 @@ void main() {
       await pump(tester, viewer: session());
       expect(page(tester).data.items.length, 3);
       expect(page(tester).data.detail!.prompt, 'prompt-0');
-      expect(page(tester).data.current!.protected, isTrue);
       expect(find.text('underlying page'), findsNothing);
       expect(find.text('underlying page', skipOffstage: false), findsOneWidget);
       expect(router.routerDelegate.currentConfiguration.uri.path, '/');

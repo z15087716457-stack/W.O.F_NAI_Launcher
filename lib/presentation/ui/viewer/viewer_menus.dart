@@ -4,9 +4,7 @@ import 'package:flutter/services.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_controls.dart';
-import '../kit/ui_dialog.dart';
 import '../kit/ui_glyph.dart';
-import '../kit/ui_lib_controls.dart';
 import '../kit/ui_menu.dart';
 import '../kit/ui_popover.dart';
 import '../kit/ui_text.dart';
@@ -270,7 +268,7 @@ class _ViewerMoreMenuState extends State<ViewerMoreMenu> {
           key: const Key('viewer-more-delete'),
           icon: _icon(ViewerGlyphs.trash),
           danger: true,
-          label: l10n.imageViewer_moveToTrash,
+          label: l10n.localGallery_moveToDeletePool,
           trailing: _kb(context, _keyOf(data, ViewerCommand.delete)),
           onTap: () {
             scope.controller.closePopover();
@@ -532,7 +530,10 @@ class ViewerHelpDialog extends StatelessWidget {
                 ),
                 if (gallery) ...[
                   row(k(ViewerCommand.favorite), l10n.imageViewer_favorite),
-                  row(k(ViewerCommand.delete), l10n.imageViewer_moveToTrash),
+                  row(
+                    k(ViewerCommand.delete),
+                    l10n.localGallery_moveToDeletePool,
+                  ),
                   row(k(ViewerCommand.undo), l10n.imageViewer_helpUndo),
                 ],
                 if (data.actions.contains(ViewerAction.save))
@@ -541,100 +542,6 @@ class ViewerHelpDialog extends StatelessWidget {
             ],
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// 受保护的图删除前确认。
-class ViewerDeleteDialog extends StatelessWidget {
-  const ViewerDeleteDialog({
-    super.key,
-    required this.onCancel,
-    required this.onConfirm,
-  });
-  final VoidCallback onCancel;
-  final VoidCallback onConfirm;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.ui;
-    final l10n = context.l10n;
-    final name = ViewerPageScope.of(context).data.detail?.fileName;
-    return SizedBox(
-      key: const Key('viewer-delete'),
-      width: 420,
-      child: UiPopoverSurface(
-        radius: 14,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: 12,
-                children: [
-                  Container(
-                    width: 32,
-                    height: 32,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: c.error.withValues(alpha: .1),
-                      borderRadius: BorderRadius.circular(9),
-                    ),
-                    child: UiGlyph(
-                      ViewerGlyphs.trash,
-                      size: 16,
-                      color: c.error,
-                    ),
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      spacing: 6,
-                      children: [
-                        Text(
-                          l10n.imageViewer_protectedTitle,
-                          style: UiText.sans(
-                            15,
-                            weight: FontWeight.w700,
-                            color: c.ink,
-                          ),
-                        ),
-                        Text(
-                          [?name, l10n.imageViewer_protectedBody].join('\n'),
-                          style: UiText.sans(
-                            12.5,
-                            color: c.muted,
-                            height: 1.55,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            UiDialogFooter(
-              children: [
-                const Spacer(),
-                UiBtn(
-                  onTap: onCancel,
-                  children: [Text(l10n.imageViewer_cancel)],
-                ),
-                UiBtn(
-                  key: const Key('viewer-delete-confirm'),
-                  tone: UiBtnTone.primary,
-                  color: c.onBrand,
-                  onTap: onConfirm,
-                  children: [Text(l10n.imageViewer_moveToTrash)],
-                ),
-              ],
-            ),
-          ],
-        ),
       ),
     );
   }

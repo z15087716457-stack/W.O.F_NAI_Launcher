@@ -4,7 +4,6 @@ import 'package:flutter/widgets.dart';
 ///
 /// 界面只吃这份契约：
 /// - [ChannelBackdrop]（`channel_layer.dart`）画在图块**下面**：底色、主题装饰、过渡层、图片光台、时间刻度；
-/// - [ChannelOverlay]（`channel_overlay.dart`）画在图块**上面**：右侧刻度条、进入时的“本次通道”提示；
 /// - [ChannelSettingsSection]（`channel_settings.dart`）是显示设置弹层里的一节（生图页已接好，见
 ///   `GenCanvasData.channel` / `GenActions.onChannelChanged`）。
 ///
@@ -75,7 +74,7 @@ class ChannelSettings {
   final Set<ChannelTheme> pool;
   final ChannelLevel level;
 
-  /// 时间刻度：每批左上角的“时间 · 张数”、换日分隔线、右侧刻度条。
+  /// 时间刻度：每批左上角的“时间 · 张数”和换日分隔线。
   final bool ruler;
 
   /// 空闲微动（光点、闪烁、摆动……）。生成中、系统“减少动态效果”时界面自己停，不用接线方管。
@@ -83,7 +82,7 @@ class ChannelSettings {
 
   /// 本次会话的随机种子：决定主题顺序和每个元素的位置。**不持久化**——每次启动换一个
   /// （例如启动时 `Random().nextInt(1 << 31)`），这就是“每次进来都不一样”。
-  /// 设置里点“换一组”时界面会带着新种子回调 [ChannelActions.onSettingsChanged]。
+  /// 设置里点“换一组”时会带着新种子提交设置。
   final int seed;
 
   ChannelSettings copyWith({
@@ -228,22 +227,4 @@ class ChannelViewData {
 
   /// 空态插画整体缩放，含文字和细线。
   final bool welcome;
-}
-
-class ChannelActions {
-  const ChannelActions({
-    required this.onSettingsChanged,
-    required this.onJumpTo,
-  });
-
-  factory ChannelActions.logging(ValueChanged<String> log) => ChannelActions(
-    onSettingsChanged: (v) => log('onSettingsChanged($v)'),
-    onJumpTo: (y) => log('onJumpTo(${y.round()})'),
-  );
-
-  /// 设置变了（含“换一组”换种子）。
-  final ValueChanged<ChannelSettings> onSettingsChanged;
-
-  /// 刻度条上点 / 拖：把视口中心平移到这个世界 y（x 回到 0、缩放不变；不改选中）。
-  final ValueChanged<double> onJumpTo;
 }

@@ -20,7 +20,6 @@ import '../providers/image_generation_provider.dart';
 import '../providers/krita/krita_bridge_notifier.dart';
 import '../providers/local_gallery_focus_provider.dart';
 import '../providers/local_gallery_provider.dart';
-import '../providers/share_image_settings_provider.dart';
 import '../providers/shortcuts_provider.dart';
 import '../router/app_router.dart';
 import '../ui/viewer/viewer_contract.dart';
@@ -465,7 +464,6 @@ class _ImageViewerWiringState extends ConsumerState<ImageViewerWiring> {
   @override
   Widget build(BuildContext context) {
     final window = ref.watch(imageViewerWindowProvider);
-    final settings = ref.watch(shareImageSettingsProvider);
     final highlight = ref.watch(highlightEmphasisSettingsProvider);
     final shortcuts = ref.watch(shortcutConfigNotifierProvider);
     final krita =
@@ -483,10 +481,7 @@ class _ImageViewerWiringState extends ConsumerState<ImageViewerWiring> {
           image.id: image.filePath!,
     };
     final key = backend.currentKey ?? '';
-    final items = [
-      for (final source in backend.sources)
-        _item(source, saved, settings.effectiveConfirmDangerousActions),
-    ];
+    final items = [for (final source in backend.sources) _item(source, saved)];
     final current = backend.current;
     final path =
         saved[key] ?? (current == null ? null : viewerSourcePath(current));
@@ -679,11 +674,7 @@ class _ImageViewerWiringState extends ConsumerState<ImageViewerWiring> {
     );
   }
 
-  ViewerItem _item(
-    ImageDetailData source,
-    Map<String, String> saved,
-    bool protected,
-  ) {
+  ViewerItem _item(ImageDetailData source, Map<String, String> saved) {
     final key = source.identifier;
     final media = _media[key];
     final dimensions = widget.session.dimensions[key];
@@ -709,7 +700,6 @@ class _ImageViewerWiringState extends ConsumerState<ImageViewerWiring> {
       thumb: media?.thumb,
       date: widget.session.dates[key] ?? media?.date,
       favorite: favorite,
-      protected: protected,
       saved: saved.containsKey(key) || media?.saved == true,
       missing: media?.missing ?? false,
       path: saved[key] ?? media?.path ?? viewerSourcePath(source),

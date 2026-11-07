@@ -756,6 +756,7 @@ class SettingsShortcut {
     required this.keys,
     required this.defaultKeys,
     this.conflictWith,
+    this.fixed = false,
   });
 
   final String id;
@@ -773,7 +774,10 @@ class SettingsShortcut {
   /// 同一上下文里和它冲突的另一个动作 id（接线方算好）。
   final String? conflictWith;
 
-  bool get changed => !listEquals(keys, defaultKeys);
+  /// 由输入框或当前页面直接处理，不能录制、清除或重置。
+  final bool fixed;
+
+  bool get changed => !fixed && !listEquals(keys, defaultKeys);
 }
 
 @immutable

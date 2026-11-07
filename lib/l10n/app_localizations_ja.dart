@@ -2577,11 +2577,6 @@ class AppLocalizationsJa extends AppLocalizations {
       'コレクションがありません。左の + で作成';
 
   @override
-  String localGallery_confirmDeleteImageContent(Object name) {
-    return '画像「$name」を削除しますか?\n\n画像はすぐにギャラリーから消え、ファイルは次回起動時に完全に削除されます（このセッション内では元に戻せます）。';
-  }
-
-  @override
   String get localGallery_moveTo => '移動先…';
 
   @override
@@ -2674,14 +2669,6 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get localGallery_protectedDeleteTitle => '保護モード: 削除を再度確認してください';
-
-  @override
-  String localGallery_protectedDeleteImagesContent(Object count) {
-    return 'これにより、$count 個のローカル イメージ ファイルが完全に削除されます。これを元に戻すことはできません。';
-  }
-
-  @override
   String get localGallery_protectedBulkMoveTitle => '保護モード: 一括移動の確認';
 
   @override
@@ -2692,11 +2679,6 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String localGallery_importParamsFailed(Object error) {
     return 'パラメータのインポートに失敗しました: $error';
-  }
-
-  @override
-  String localGallery_protectedDeleteImageContent(Object name) {
-    return 'これにより、イメージ「$name」が完全に削除されます。これを元に戻すことはできません。';
   }
 
   @override
@@ -2952,20 +2934,45 @@ class AppLocalizationsJa extends AppLocalizations {
   String get localGallery_redone => 'やり直し';
 
   @override
-  String get localGallery_confirmBulkDelete => '一括削除の確認';
-
-  @override
-  String localGallery_confirmBulkDeleteContent(Object count) {
-    return '$count 個の選択した画像を削除してもよろしいですか?\n\n画像はすぐにギャラリーから消え、ファイルは次回起動時に完全に削除されます（このセッション内では元に戻せます）。';
-  }
-
-  @override
   String localGallery_deletedToPool(Object count) {
     return '$count 個の画像を削除しました。次回起動時に完全に削除されます。';
   }
 
   @override
   String get localGallery_trashTitle => 'ゴミ箱';
+
+  @override
+  String get localGallery_moveToDeletePool => 'ゴミ箱に移動';
+
+  @override
+  String localGallery_moveToDeletePoolTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 枚の画像をゴミ箱に移動しますか？',
+      one: 'この画像をゴミ箱に移動しますか？',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get localGallery_moveToDeletePoolDescription =>
+      'Studio を再起動するまでは、ゴミ箱から復元できます。次回の起動時にゴミ箱のファイルは完全に削除されます。';
+
+  @override
+  String localGallery_deleteForeverTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'この $count 枚の画像を完全に削除しますか？',
+      one: 'この画像を完全に削除しますか？',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get localGallery_deleteForeverDescription =>
+      'ファイルはディスクから直ちに削除され、復元できません。';
 
   @override
   String get localGallery_trashEmpty => 'ゴミ箱は空です';
@@ -13183,7 +13190,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get imageViewer_dragFrame => '枠をドラッグ';
 
   @override
-  String get imageViewer_movedToTrash => 'ごみ箱に移動しました';
+  String get imageViewer_movedToTrash => 'ゴミ箱に移動しました';
 
   @override
   String get imageViewer_undo => '元に戻す';
@@ -13395,9 +13402,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get imageViewer_copyTo => 'コピー先…';
 
   @override
-  String get imageViewer_moveToTrash => 'ごみ箱に移動';
-
-  @override
   String get imageViewer_collections => 'コレクション';
 
   @override
@@ -13456,15 +13460,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get imageViewer_helpUndo => '削除を元に戻す';
-
-  @override
-  String get imageViewer_protectedTitle => 'この画像は保護されています。ごみ箱に移動しますか？';
-
-  @override
-  String get imageViewer_protectedBody => 'ごみ箱から元に戻せます。';
-
-  @override
-  String get imageViewer_cancel => 'キャンセル';
 
   @override
   String get imageViewer_justNow => 'たった今';
@@ -16317,16 +16312,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get channel_ruler => '時刻目盛り';
 
   @override
-  String get channel_rulerSub => 'バッチ時刻、日付の区切り、右端のスクラバー';
+  String get channel_rulerSub => 'バッチ時刻と日付の区切り';
 
   @override
   String get channel_motion => 'アイドル時の動き';
 
   @override
   String get channel_motionSub => 'ごく軽い動き。生成中は自動で止まります';
-
-  @override
-  String get channel_toastTitle => '今回のチャンネル';
 
   @override
   String channel_batch(String time, int count) {
@@ -16378,11 +16370,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get channel_weekday7 => '日';
-
-  @override
-  String channel_scrubWhen(String day, String time) {
-    return '$day $time';
-  }
 
   @override
   String get rag_title => 'RAG ベクトルシステム';
@@ -17432,7 +17419,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get set_cvRuler => 'タイムスケール';
 
   @override
-  String get set_cvRulerSub => 'バッチ時刻、日付区切り、右側の目盛り';
+  String get set_cvRulerSub => 'バッチ時刻と日付の区切り';
 
   @override
   String get set_cvMotion => 'アイドル時の動き';
@@ -17588,6 +17575,68 @@ class AppLocalizationsJa extends AppLocalizations {
   String set_scHelpTip(Object key) {
     return '$key でそのページのショートカットを表示します。';
   }
+
+  @override
+  String get set_scFixed => '固定ショートカット';
+
+  @override
+  String set_scFixedConflictSub(Object context, Object a, Object b) {
+    return '$contextの「$a」は固定ショートカットです。「$b」には別のキーを選んでください。';
+  }
+
+  @override
+  String get shortcut_fixedUndoPrompt => 'プロンプト編集を元に戻す';
+
+  @override
+  String get shortcut_fixedRedoPrompt => 'プロンプト編集をやり直す';
+
+  @override
+  String get shortcut_fixedUndoGallery => 'ギャラリーの操作を元に戻す';
+
+  @override
+  String get shortcut_fixedRedoGallery => 'ギャラリーの操作をやり直す';
+
+  @override
+  String get shortcut_fixedUndoText => 'テキスト編集を元に戻す';
+
+  @override
+  String get shortcut_fixedRedoText => 'テキスト編集をやり直す';
+
+  @override
+  String get shortcut_fixedUndoMask => 'マスク編集を元に戻す';
+
+  @override
+  String get shortcut_fixedRedoMask => 'マスク編集をやり直す';
+
+  @override
+  String get shortcut_fixedPanCanvas => '生成キャンバスを移動';
+
+  @override
+  String get shortcut_fixedNextBatch => '次の画像バッチにフォーカス';
+
+  @override
+  String get shortcut_fixedPreviousBatch => '前の画像バッチにフォーカス';
+
+  @override
+  String get shortcut_fixedFirstBatch => '最初の画像バッチにフォーカス';
+
+  @override
+  String get shortcut_fixedLastBatch => '最後の画像バッチにフォーカス';
+
+  @override
+  String get shortcut_fixedFocusCanvas => 'フォーカス中の画像に戻る';
+
+  @override
+  String get shortcut_fixedResetCanvas => 'キャンバス表示をリセット';
+
+  @override
+  String get shortcut_fixedFirstImage => '最初の画像に移動';
+
+  @override
+  String get shortcut_fixedLastImage => '最後の画像に移動';
+
+  @override
+  String get shortcut_fixedUndoSetting => '直前に保存した設定を元に戻す';
 
   @override
   String get set_scEmpty => '一致するショートカットはありません';
@@ -21843,11 +21892,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get localGallery_deleteForever => '完全に削除';
-
-  @override
-  String localGallery_deleteForeverConfirm(int count) {
-    return '選択した $count 個のファイルを完全に削除します。元に戻せません。';
-  }
 
   @override
   String ag_chatAgeMinutes(int count) {

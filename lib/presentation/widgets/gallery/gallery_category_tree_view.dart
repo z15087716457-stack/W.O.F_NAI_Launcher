@@ -57,6 +57,7 @@ class GalleryCategoryTreeView extends StatefulWidget {
   final List<GalleryCategory> categories;
   final int totalImageCount;
   final int favoriteCount;
+  final int? trashCount;
   final String? selectedCategoryId;
   final ValueChanged<String?> onCategorySelected;
   final void Function(String id, String newName)? onCategoryRename;
@@ -97,6 +98,7 @@ class GalleryCategoryTreeView extends StatefulWidget {
     required this.categories,
     required this.totalImageCount,
     this.favoriteCount = 0,
+    this.trashCount,
     this.selectedCategoryId,
     required this.onCategorySelected,
     this.onCategoryRename,
@@ -219,6 +221,7 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
           key: const Key('gallery-sidebar-trash'),
           icon: StudioIcons.galleryTrash,
           label: l10n.localGallery_trashTitle,
+          count: widget.trashCount,
           isSelected: widget.selectedCategoryId == 'trash',
           showChevronSlot: false,
           onTap: widget.onOpenTrash!,

@@ -1157,12 +1157,6 @@
   },
   "localGallery_unfavorite": "Remove Favorite",
   "localGallery_favoriteMenuEmptyCollections": "No collections yet — create one with + on the left",
-  "localGallery_confirmDeleteImageContent": "Delete image \"{name}\"?\n\nThe image will disappear from the gallery immediately; the file will be removed permanently on the next launch (can be undone in this session).",
-  "@localGallery_confirmDeleteImageContent": {
-    "placeholders": {
-      "name": {}
-    }
-  },
   "localGallery_moveTo": "Move to…",
   "localGallery_copyTo": "Copy to…",
   "localGallery_externalSourceMoveConfirmTitle": "Move External Gallery File",
@@ -1214,13 +1208,6 @@
       "error": {}
     }
   },
-  "localGallery_protectedDeleteTitle": "Protected Mode: Confirm Delete Again",
-  "localGallery_protectedDeleteImagesContent": "This will permanently delete {count} local image files. This cannot be undone.",
-  "@localGallery_protectedDeleteImagesContent": {
-    "placeholders": {
-      "count": {}
-    }
-  },
   "localGallery_protectedBulkMoveTitle": "Protected Mode: Confirm Bulk Move",
   "localGallery_protectedBulkMoveContent": "This will move {count} local image files to the target folder. Confirm this is not a mistake.",
   "@localGallery_protectedBulkMoveContent": {
@@ -1232,12 +1219,6 @@
   "@localGallery_importParamsFailed": {
     "placeholders": {
       "error": {}
-    }
-  },
-  "localGallery_protectedDeleteImageContent": "This will permanently delete image \"{name}\". This cannot be undone.",
-  "@localGallery_protectedDeleteImageContent": {
-    "placeholders": {
-      "name": {}
     }
   },
   "localGallery_saveZipArchive": "Save ZIP Archive",
@@ -1392,13 +1373,6 @@
   "localGallery_gotIt": "Got it",
   "localGallery_undone": "Undone",
   "localGallery_redone": "Redone",
-  "localGallery_confirmBulkDelete": "Confirm Bulk Delete",
-  "localGallery_confirmBulkDeleteContent": "Are you sure you want to delete {count} selected images?\n\nThey will disappear from the gallery immediately; the files will be removed permanently on the next launch (can be undone in this session).",
-  "@localGallery_confirmBulkDeleteContent": {
-    "placeholders": {
-      "count": {}
-    }
-  },
   "localGallery_deletedToPool": "Deleted {count} images. They will be removed permanently on the next launch.",
   "@localGallery_deletedToPool": {
     "placeholders": {
@@ -1406,6 +1380,25 @@
     }
   },
   "localGallery_trashTitle": "Trash",
+  "localGallery_moveToDeletePool": "Move to Trash",
+  "localGallery_moveToDeletePoolTitle": "{count, plural, =1{Move this image to Trash?} other{Move {count} images to Trash?}}",
+  "@localGallery_moveToDeletePoolTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "localGallery_moveToDeletePoolDescription": "You can restore the images from Trash until Studio restarts. Studio permanently deletes them the next time it starts.",
+  "localGallery_deleteForeverTitle": "{count, plural, =1{Permanently delete this image?} other{Permanently delete these {count} images?}}",
+  "@localGallery_deleteForeverTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "localGallery_deleteForeverDescription": "The files will be deleted from disk immediately and cannot be recovered.",
   "localGallery_trashEmpty": "Trash is empty",
   "localGallery_trashHint": "Files in the trash are still on disk and will be removed permanently on the next launch. Restored files return to the gallery immediately.",
   "localGallery_trashRestore": "Restore",
@@ -7348,7 +7341,7 @@
   "imageViewer_hintFit": "Fit to window",
   "imageViewer_hintActual": "Actual size",
   "imageViewer_dragFrame": "Drag the frame",
-  "imageViewer_movedToTrash": "Moved to Recycle Bin",
+  "imageViewer_movedToTrash": "Moved to Trash",
   "imageViewer_undo": "Undo",
   "imageViewer_details": "Info",
   "imageViewer_generationResult": "Result",
@@ -7466,7 +7459,6 @@
   "imageViewer_addToCollection": "Add to collection",
   "imageViewer_moveTo": "Move to…",
   "imageViewer_copyTo": "Copy to…",
-  "imageViewer_moveToTrash": "Move to Recycle Bin",
   "imageViewer_collections": "Collections",
   "imageViewer_newCollection": "New collection…",
   "imageViewer_helpTitle": "Viewer shortcuts",
@@ -7487,9 +7479,6 @@
   "imageViewer_keyDouble": "Double-click",
   "imageViewer_helpCopyPrompt": "Copy prompt",
   "imageViewer_helpUndo": "Undo delete",
-  "imageViewer_protectedTitle": "This image is protected. Move to Recycle Bin?",
-  "imageViewer_protectedBody": "You can restore it from the Recycle Bin.",
-  "imageViewer_cancel": "Cancel",
   "imageViewer_justNow": "just now",
   "imageViewer_minutesAgo": "{count} min ago",
   "@imageViewer_minutesAgo": {
@@ -8918,10 +8907,9 @@
   "channel_levelStandard": "Normal",
   "channel_levelStrong": "Bold",
   "channel_ruler": "Time marks",
-  "channel_rulerSub": "Batch times, day dividers and the scrubber",
+  "channel_rulerSub": "Batch times and date dividers",
   "channel_motion": "Idle motion",
   "channel_motionSub": "Subtle animation, paused while generating",
-  "channel_toastTitle": "This session",
   "channel_batch": "{time} · ×{count}",
   "@channel_batch": {"placeholders": {"time": {"type": "String"}, "count": {"type": "int"}}},
   "channel_batchNewest": "{time} · ×{count} · latest",
@@ -8941,8 +8929,6 @@
   "channel_weekday5": "Fri",
   "channel_weekday6": "Sat",
   "channel_weekday7": "Sun",
-  "channel_scrubWhen": "{day} {time}",
-  "@channel_scrubWhen": {"placeholders": {"day": {"type": "String"}, "time": {"type": "String"}}},
   "rag_title": "RAG vector system",
   "rag_description": "Manage local retrieval, models and contextual tag suggestions",
   "rag_enabled": "Enable RAG",
@@ -9558,7 +9544,7 @@
   },
   "set_cvLevel": "Intensity",
   "set_cvRuler": "Time ruler",
-  "set_cvRulerSub": "Batch times, date dividers and the side ruler",
+  "set_cvRulerSub": "Batch times and date dividers",
   "set_cvMotion": "Idle motion",
   "set_cvMotionSub": "Pauses while generating or when reduce motion is on",
   "set_cvOps": "Canvas controls",
@@ -9656,6 +9642,33 @@
   "@set_scHelpTip": {
     "placeholders": {
       "key": {}
+    }
+  },
+  "set_scFixed": "Fixed shortcut",
+  "set_scFixedConflictSub": "In {context}, {a} has a fixed shortcut. Choose a different key for {b}.",
+  "shortcut_fixedUndoPrompt": "Undo prompt edit",
+  "shortcut_fixedRedoPrompt": "Redo prompt edit",
+  "shortcut_fixedUndoGallery": "Undo gallery action",
+  "shortcut_fixedRedoGallery": "Redo gallery action",
+  "shortcut_fixedUndoText": "Undo text edit",
+  "shortcut_fixedRedoText": "Redo text edit",
+  "shortcut_fixedUndoMask": "Undo mask edit",
+  "shortcut_fixedRedoMask": "Redo mask edit",
+  "shortcut_fixedPanCanvas": "Pan generation canvas",
+  "shortcut_fixedNextBatch": "Focus next image batch",
+  "shortcut_fixedPreviousBatch": "Focus previous image batch",
+  "shortcut_fixedFirstBatch": "Focus first image batch",
+  "shortcut_fixedLastBatch": "Focus last image batch",
+  "shortcut_fixedFocusCanvas": "Return to focused image",
+  "shortcut_fixedResetCanvas": "Reset canvas view",
+  "shortcut_fixedFirstImage": "Go to first image",
+  "shortcut_fixedLastImage": "Go to last image",
+  "shortcut_fixedUndoSetting": "Undo the setting just saved",
+  "@set_scFixedConflictSub": {
+    "placeholders": {
+      "context": {},
+      "a": {},
+      "b": {}
     }
   },
   "set_scEmpty": "No matching shortcuts",
@@ -11576,14 +11589,6 @@
   "localGallery_recentViews": "Recently viewed",
   "localGallery_recentViewsEmpty": "No recently viewed images",
   "localGallery_deleteForever": "Delete permanently",
-  "localGallery_deleteForeverConfirm": "Permanently delete the selected {count} files? This cannot be undone.",
-  "@localGallery_deleteForeverConfirm": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "ag_chatAgeMinutes": "{count}m",
   "@ag_chatAgeMinutes": {
     "placeholders": {

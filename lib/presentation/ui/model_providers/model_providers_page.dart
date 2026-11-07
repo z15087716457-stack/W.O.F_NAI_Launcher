@@ -1531,7 +1531,7 @@ class _SaveDock extends StatelessWidget {
     final errs = ProvidersValidate.errors(ctrl.display(item)).length;
     final saving = d?.saving ?? false;
     final (glyph, tone, text) = saving
-        ? (null, c.tipInk, l.mp_saving)
+        ? (null, c.muted, l.mp_saving)
         : errs > 0
         ? (ProvidersGlyphs.alert, c.warn, l.mp_invalid('$errs'))
         : switch (d?.result) {
@@ -1547,7 +1547,7 @@ class _SaveDock extends StatelessWidget {
             ),
             _ => (
               UiGlyphs.infoCircle,
-              c.tipInk,
+              c.muted,
               l.mp_unsaved(item.settings.name, '$n'),
             ),
           };
@@ -1564,16 +1564,12 @@ class _SaveDock extends StatelessWidget {
             text,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: UiText.sans(12.5, color: c.tipInk),
+            style: UiText.sans(12.5, color: c.ink),
           ),
         ),
         Text(
           'Ctrl+S',
-          style: UiText.mono(
-            10.5,
-            weight: FontWeight.w500,
-            color: c.tipInk.withValues(alpha: .55),
-          ),
+          style: UiText.mono(10.5, weight: FontWeight.w500, color: c.muted),
         ),
         SettingsDockButton(
           label: l.set_discard,

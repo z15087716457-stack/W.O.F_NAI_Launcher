@@ -19,6 +19,13 @@ final galleryTrashServiceProvider = Provider(
   ),
 );
 
+final galleryTrashCountProvider = FutureProvider.autoDispose<int>((ref) async {
+  const pool = GalleryDeletePoolStore();
+  final subscription = pool.changes.listen((_) => ref.invalidateSelf());
+  ref.onDispose(subscription.cancel);
+  return (await pool.load()).length;
+});
+
 /// Explicit deletion-pool scope. It never changes the normal library query.
 final galleryTrashTimelineProvider = FutureProvider<List<GalleryTimelineEntry>>(
   (ref) async {

@@ -1215,6 +1215,7 @@ class _SettingsShortcutsPageState extends State<SettingsShortcutsPage> {
   var _contextInit = false;
 
   static const _mods = ['', 'Ctrl', 'Shift', 'Alt'];
+  List<String> get _layerKeys => _layer.isEmpty ? const [] : _layer.split('+');
 
   @override
   Widget build(BuildContext context) {
@@ -1234,7 +1235,7 @@ class _SettingsShortcutsPageState extends State<SettingsShortcutsPage> {
         return false;
       }
       if (_key != null) {
-        final want = [if (_layer.isNotEmpty) _layer, _key!];
+        final want = [..._layerKeys, _key!];
         if (!_same(x.keys, want)) return false;
       }
       return true;
@@ -1261,7 +1262,9 @@ class _SettingsShortcutsPageState extends State<SettingsShortcutsPage> {
       if (o != null &&
           !conflicts.any((p) => {p.$1.id, p.$2.id}.containsAll({o.id, x.id}))) {
         // Prefer resetting the customized side, regardless of list order.
-        conflicts.add(!x.changed && o.changed ? (x, o) : (o, x));
+        conflicts.add(
+          x.fixed || !o.fixed && !x.changed && o.changed ? (x, o) : (o, x),
+        );
       }
     }
     final customized = data.shortcuts.where((x) => x.changed).length;
@@ -1373,24 +1376,31 @@ class _SettingsShortcutsPageState extends State<SettingsShortcutsPage> {
                       Padding(
                         padding: const EdgeInsets.fromLTRB(15, 6, 0, 10),
                         child: Text(
-                          l.set_scConflictSub(
+                          (a.fixed
+                              ? l.set_scFixedConflictSub
+                              : l.set_scConflictSub)(
                             data.contexts
-                                    .where((x) => x.id == b.context)
+                                    .where(
+                                      (x) =>
+                                          x.id ==
+                                          (a.fixed ? a.context : b.context),
+                                    )
                                     .firstOrNull
                                     ?.label ??
-                                b.context,
+                                (a.fixed ? a.context : b.context),
                             a.label,
                             b.label,
                           ),
                           style: UiText.sans(11, color: c.muted, height: 1.5),
                         ),
                       ),
-                      SettingsBtn(
-                        key: Key('shortcut-fix-${b.id}'),
-                        label: l.set_scFix(b.label, b.defaultKeys.join('+')),
-                        small: true,
-                        onTap: () => s.actions.onShortcutReset(b.id),
-                      ),
+                      if (!b.fixed)
+                        SettingsBtn(
+                          key: Key('shortcut-fix-${b.id}'),
+                          label: l.set_scFix(b.label, b.defaultKeys.join('+')),
+                          small: true,
+                          onTap: () => s.actions.onShortcutReset(b.id),
+                        ),
                     ],
                   ],
                 ),
@@ -1492,6 +1502,9 @@ class _SettingsShortcutsPageState extends State<SettingsShortcutsPage> {
       ].every((x) => x);
 
   static bool _keyMatch(String a, String b) {
+    const symbols = {'equal': '=', 'minus': '-', 'slash': '/'};
+    a = symbols[a.toLowerCase()] ?? a;
+    b = symbols[b.toLowerCase()] ?? b;
     if (a.toUpperCase() == b.toUpperCase()) return true;
     final r = RegExp(r'^(\d)…(\d)$');
     final m = r.firstMatch(a) ?? r.firstMatch(b);
@@ -1583,9 +1596,27 @@ class _SettingsShortcutsPageState extends State<SettingsShortcutsPage> {
     final scope = data.shortcuts
         .where((x) => _context == null || x.context == _context)
         .toList();
-    List<SettingsShortcut> at(String key) => scope
-        .where((x) => _same(x.keys, [if (_layer.isNotEmpty) _layer, key]))
-        .toList();
+    final layers = {
+      ..._mods,
+      for (final layer in ['Ctrl+Shift', 'Meta', 'Meta+Shift'])
+        if (layer == _layer ||
+            scope.any(
+              (x) =>
+                  x.keys.length > 1 &&
+                  x.keys.take(x.keys.length - 1).join('+').toLowerCase() ==
+                      layer.toLowerCase(),
+            ))
+          layer,
+    }.toList();
+    const navigation = [('Home', 1.8), ('End', 1.8), ('Delete', 1.8)];
+    final showNavigation = scope.any(
+      (x) =>
+          x.fixed &&
+          x.keys.length == 1 &&
+          navigation.any((key) => _keyMatch(key.$1, x.keys.single)),
+    );
+    List<SettingsShortcut> at(String key) =>
+        scope.where((x) => _same(x.keys, [..._layerKeys, key])).toList();
     final focus = _hover ?? _key;
     final focusHits = focus == null ? const <SettingsShortcut>[] : at(focus);
     return Column(
@@ -1598,7 +1629,7 @@ class _SettingsShortcutsPageState extends State<SettingsShortcutsPage> {
             children: [
               UiSegmented<String>(
                 key: const Key('shortcut-layer'),
-                values: _mods,
+                values: layers,
                 selected: _layer,
                 labelOf: (m) => m.isEmpty ? l.set_scNoMod : m,
                 onChanged: (m) => setState(() {
@@ -1616,19 +1647,26 @@ class _SettingsShortcutsPageState extends State<SettingsShortcutsPage> {
                   style: UiText.sans(12, color: c.faint),
                 ),
               ),
-              const Spacer(),
               if (focusHits.isNotEmpty)
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  spacing: 6,
-                  children: [
-                    SettingsKey(focus!),
-                    Text(
-                      focusHits.map((x) => x.label).join(' / '),
-                      style: UiText.sans(12, color: c.muted),
-                    ),
-                  ],
-                ),
+                Flexible(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    spacing: 6,
+                    children: [
+                      SettingsKey(focus!),
+                      Flexible(
+                        child: Text(
+                          focusHits.map((x) => x.label).join(' / '),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: UiText.sans(12, color: c.muted),
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              else
+                const Spacer(),
             ],
           ),
         ),
@@ -1642,7 +1680,7 @@ class _SettingsShortcutsPageState extends State<SettingsShortcutsPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: 5,
                 children: [
-                  for (final row in _rows)
+                  for (final row in [..._rows, if (showNavigation) navigation])
                     Row(
                       spacing: 5,
                       children: [
@@ -1666,7 +1704,8 @@ class _SettingsShortcutsPageState extends State<SettingsShortcutsPage> {
     List<SettingsShortcut> hits,
   ) {
     final c = context.ui;
-    final isMod = k == _layer && _layer.isNotEmpty;
+    final isMod =
+        _layerKeys.contains(k) || k == 'Win' && _layerKeys.contains('Meta');
     // The same key can be valid in mutually exclusive pages. Use the backend's
     // context-aware result instead of treating every duplicate in "All" as red.
     final conflict = hits.any((x) => x.conflictWith != null);
@@ -1850,7 +1889,18 @@ class _ShortcutTable extends StatelessWidget {
                       ),
                   ],
                 ),
-                recording == x.id
+                x.fixed
+                    ? Align(
+                        alignment: Alignment.centerLeft,
+                        child: Wrap(
+                          spacing: 3,
+                          runSpacing: 3,
+                          children: [
+                            for (final key in x.keys) SettingsKey(key),
+                          ],
+                        ),
+                      )
+                    : recording == x.id
                     ? _Recorder(
                         onKeys: (keys) {
                           onStop();
@@ -1879,12 +1929,16 @@ class _ShortcutTable extends StatelessWidget {
                         ),
                       ),
                 Text(
-                  x.changed && x.defaultKeys.isNotEmpty
+                  x.fixed
+                      ? l.set_scFixed
+                      : x.changed && x.defaultKeys.isNotEmpty
                       ? l.set_scDefaultIs(x.defaultKeys.join('+'))
                       : '',
                   style: UiText.sans(11, color: c.faint),
                 ),
-                x.changed
+                x.fixed
+                    ? const SizedBox.shrink()
+                    : x.changed
                     ? SettingsIconBtn(
                         key: Key('shortcut-reset-${x.id}'),
                         glyph: SettingsGlyphs.undo,

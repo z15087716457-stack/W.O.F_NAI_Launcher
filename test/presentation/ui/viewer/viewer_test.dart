@@ -206,46 +206,18 @@ void main() {
     await done(t);
   });
 
-  testWidgets('删除：普通图直接删，受保护的先确认', (t) async {
+  testWidgets('删除：快捷键和详情按钮都先确认移入删除池', (t) async {
     await pump(t, ViewerFixture.gallery());
     await key(t, LogicalKeyboardKey.delete);
-    await tapKey(t, 'viewer-info-delete');
-    expect(rec.calls.where((c) => c.startsWith('delete')), [
-      'delete:08',
-      'delete:08',
-    ]);
-
-    rec.calls.clear();
-    final d = ViewerFixture.gallery();
-    final protected = ViewerViewData(
-      mode: d.mode,
-      items: [
-        for (final i in d.items)
-          ViewerItem(
-            key: i.key,
-            width: i.width,
-            height: i.height,
-            thumb: i.thumb,
-            image: i.image,
-            protected: true,
-          ),
-      ],
-      currentKey: d.currentKey,
-      now: d.now,
-      position: d.position,
-      total: d.total,
-      detail: d.detail,
-      actions: d.actions,
-    );
-    await pump(t, protected);
-    await key(t, LogicalKeyboardKey.delete);
-    expect(find.byKey(const Key('viewer-delete')), findsOneWidget);
+    expect(find.byKey(const Key('gallery-delete-dialog')), findsOneWidget);
     expect(rec.calls.where((c) => c.startsWith('delete')), isEmpty);
     await key(t, LogicalKeyboardKey.escape);
-    expect(find.byKey(const Key('viewer-delete')), findsNothing);
+    expect(find.byKey(const Key('gallery-delete-dialog')), findsNothing);
     expect(rec.calls, isNot(contains('close:true')));
-    await key(t, LogicalKeyboardKey.delete);
-    await tapKey(t, 'viewer-delete-confirm');
+    await tapKey(t, 'viewer-info-delete');
+    expect(rec.calls.where((c) => c.startsWith('delete')), isEmpty);
+    await tapKey(t, 'gallery-delete-confirm');
+    expect(find.byKey(const Key('gallery-delete-dialog')), findsNothing);
     expect(rec.calls.where((c) => c.startsWith('delete')), ['delete:08']);
     await done(t);
   });
@@ -615,6 +587,7 @@ void main() {
     await tapKey(t, 'viewer-col-travel');
     expect(rec.calls.last, 'collection:08:travel:true');
     await tapKey(t, 'viewer-more-delete');
+    await tapKey(t, 'gallery-delete-confirm');
     expect(rec.calls.last, 'delete:08');
     await tapKey(t, 'viewer-info-folder');
     expect(rec.calls.last, 'action:08:showInFolder');

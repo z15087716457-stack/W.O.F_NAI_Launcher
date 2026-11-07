@@ -136,12 +136,15 @@ class NaiAgentWindowController extends ChangeNotifier {
   bool _nativeReveal = false;
   bool? _presentationExpanded;
   double _openingGrowth = 0;
+  double? _closingShrink;
   // Layout remains docked after manual movement, resizing and maximization.
   // Ownership below controls automatic restoration only.
   bool get docked => _docked;
   bool get nativeReveal => _nativeReveal;
   bool? get presentationExpanded => _presentationExpanded;
   double get openingGrowth => _openingGrowth;
+  // The Flutter view can receive its new metrics after setBounds replies.
+  double? get closingShrink => _closingShrink;
   double get addedWidth => _original == null || _expected == null
       ? 0
       : _expected!.width - _original!.width;
@@ -226,6 +229,7 @@ class NaiAgentWindowController extends ChangeNotifier {
     final restore = !expanded && await _ownsBounds();
     _nativeReveal = plan != null || restore;
     _openingGrowth = plan == null ? 0 : plan.target.width - plan.original.width;
+    _closingShrink = restore ? addedWidth : null;
     _presentationExpanded = expanded;
     _docked = expanded;
     notifyListeners();
@@ -248,16 +252,25 @@ class NaiAgentWindowController extends ChangeNotifier {
         } else {
           _forgetOwnership();
         }
-      } else if (restore && _original != null && await _ownsBounds()) {
-        _applying = true;
-        await host!.setBounds(_original!);
-        _forgetOwnership();
+      } else if (restore) {
+        if (await _ownsBounds() && !_disposed) {
+          final original = _original!;
+          _applying = true;
+          await host!.setBounds(original);
+          if (!_near(await host!.bounds(), original)) _closingShrink = null;
+          _forgetOwnership();
+        } else {
+          _closingShrink = null;
+        }
       }
     } on MissingPluginException {
+      _closingShrink = null;
       _forgetOwnership();
     } on PlatformException {
+      _closingShrink = null;
       _forgetOwnership();
     } catch (_) {
+      _closingShrink = null;
       _presentationExpanded = !expanded;
       _docked = !expanded;
       rethrow;

@@ -2525,11 +2525,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get localGallery_favoriteMenuEmptyCollections => '暂无收藏集，左侧 + 创建';
 
   @override
-  String localGallery_confirmDeleteImageContent(Object name) {
-    return '确定要删除图片「$name」吗？\n\n图片会立即从画廊消失，文件将在下次启动时彻底清理（本次会话内可撤销）。';
-  }
-
-  @override
   String get localGallery_moveTo => '移动到…';
 
   @override
@@ -2619,14 +2614,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get localGallery_protectedDeleteTitle => '保护模式：再次确认删除';
-
-  @override
-  String localGallery_protectedDeleteImagesContent(Object count) {
-    return '将永久删除 $count 张本地图片文件。此操作无法撤销。';
-  }
-
-  @override
   String get localGallery_protectedBulkMoveTitle => '保护模式：确认批量移动';
 
   @override
@@ -2637,11 +2624,6 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String localGallery_importParamsFailed(Object error) {
     return '导入参数失败: $error';
-  }
-
-  @override
-  String localGallery_protectedDeleteImageContent(Object name) {
-    return '将永久删除图片「$name」。此操作无法撤销。';
   }
 
   @override
@@ -2896,20 +2878,44 @@ class AppLocalizationsZh extends AppLocalizations {
   String get localGallery_redone => '已重做';
 
   @override
-  String get localGallery_confirmBulkDelete => '确认批量删除';
-
-  @override
-  String localGallery_confirmBulkDeleteContent(Object count) {
-    return '确定要删除选中的 $count 张图片吗？\n\n图片会立即从画廊消失，文件将在下次启动时彻底清理（本次会话内可撤销）。';
-  }
-
-  @override
   String localGallery_deletedToPool(Object count) {
     return '已删除 $count 张图片，下次启动时彻底清理。';
   }
 
   @override
   String get localGallery_trashTitle => '删除池';
+
+  @override
+  String get localGallery_moveToDeletePool => '移入删除池';
+
+  @override
+  String localGallery_moveToDeletePoolTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '将 $count 张图片移入删除池？',
+      one: '将这张图片移入删除池？',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get localGallery_moveToDeletePoolDescription =>
+      '重启前可在删除池恢复。下次启动 Studio 时，池内文件会被彻底删除。';
+
+  @override
+  String localGallery_deleteForeverTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '彻底删除这 $count 张图片？',
+      one: '彻底删除这张图片？',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get localGallery_deleteForeverDescription => '文件会立即从磁盘删除，无法恢复。';
 
   @override
   String get localGallery_trashEmpty => '删除池是空的';
@@ -12981,7 +12987,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get imageViewer_dragFrame => '拖框移动';
 
   @override
-  String get imageViewer_movedToTrash => '已移到回收站';
+  String get imageViewer_movedToTrash => '已移入删除池';
 
   @override
   String get imageViewer_undo => '撤销';
@@ -13193,9 +13199,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get imageViewer_copyTo => '复制到…';
 
   @override
-  String get imageViewer_moveToTrash => '移到回收站';
-
-  @override
   String get imageViewer_collections => '收藏集';
 
   @override
@@ -13254,15 +13257,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get imageViewer_helpUndo => '撤销删除';
-
-  @override
-  String get imageViewer_protectedTitle => '这张图受保护，移到回收站？';
-
-  @override
-  String get imageViewer_protectedBody => '移到回收站后可以在回收站里还原。';
-
-  @override
-  String get imageViewer_cancel => '取消';
 
   @override
   String get imageViewer_justNow => '刚刚';
@@ -16101,16 +16095,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get channel_ruler => '时间刻度';
 
   @override
-  String get channel_rulerSub => '批次时间、日期分隔和右侧刻度条';
+  String get channel_rulerSub => '批次时间和日期分隔';
 
   @override
   String get channel_motion => '空闲微动';
 
   @override
   String get channel_motionSub => '很轻的动效，生成时自动暂停';
-
-  @override
-  String get channel_toastTitle => '本次通道';
 
   @override
   String channel_batch(String time, int count) {
@@ -16162,11 +16153,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get channel_weekday7 => '周日';
-
-  @override
-  String channel_scrubWhen(String day, String time) {
-    return '$day $time';
-  }
 
   @override
   String get rag_title => 'RAG 向量系统';
@@ -17212,7 +17198,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_cvRuler => '时间刻度';
 
   @override
-  String get set_cvRulerSub => '批次时间、日期分隔和右侧刻度条';
+  String get set_cvRulerSub => '批次时间和日期分隔';
 
   @override
   String get set_cvMotion => '空闲微动';
@@ -17368,6 +17354,68 @@ class AppLocalizationsZh extends AppLocalizations {
   String set_scHelpTip(Object key) {
     return '按 $key 在任何页面查看当前页可用的快捷键。';
   }
+
+  @override
+  String get set_scFixed => '固定快捷键';
+
+  @override
+  String set_scFixedConflictSub(Object context, Object a, Object b) {
+    return '在$context中，$a是固定快捷键。请为$b选择其他按键。';
+  }
+
+  @override
+  String get shortcut_fixedUndoPrompt => '撤销提示词编辑';
+
+  @override
+  String get shortcut_fixedRedoPrompt => '重做提示词编辑';
+
+  @override
+  String get shortcut_fixedUndoGallery => '撤销图库操作';
+
+  @override
+  String get shortcut_fixedRedoGallery => '重做图库操作';
+
+  @override
+  String get shortcut_fixedUndoText => '撤销文字编辑';
+
+  @override
+  String get shortcut_fixedRedoText => '重做文字编辑';
+
+  @override
+  String get shortcut_fixedUndoMask => '撤销蒙版操作';
+
+  @override
+  String get shortcut_fixedRedoMask => '重做蒙版操作';
+
+  @override
+  String get shortcut_fixedPanCanvas => '平移生图画布';
+
+  @override
+  String get shortcut_fixedNextBatch => '聚焦下一批图片';
+
+  @override
+  String get shortcut_fixedPreviousBatch => '聚焦上一批图片';
+
+  @override
+  String get shortcut_fixedFirstBatch => '聚焦首批图片';
+
+  @override
+  String get shortcut_fixedLastBatch => '聚焦末批图片';
+
+  @override
+  String get shortcut_fixedFocusCanvas => '回到画布焦点图片';
+
+  @override
+  String get shortcut_fixedResetCanvas => '重置画布视图';
+
+  @override
+  String get shortcut_fixedFirstImage => '跳到第一张图片';
+
+  @override
+  String get shortcut_fixedLastImage => '跳到最后一张图片';
+
+  @override
+  String get shortcut_fixedUndoSetting => '撤销刚保存的设置更改';
 
   @override
   String get set_scEmpty => '没有匹配的快捷键';
@@ -21592,11 +21640,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get localGallery_deleteForever => '彻底删除';
 
   @override
-  String localGallery_deleteForeverConfirm(int count) {
-    return '将立即物理删除选中的 $count 个文件，不可恢复。';
-  }
-
-  @override
   String ag_chatAgeMinutes(int count) {
     return '${count}m';
   }
@@ -24189,11 +24232,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get localGallery_favoriteMenuEmptyCollections => '暫無收藏集，左側 + 建立';
 
   @override
-  String localGallery_confirmDeleteImageContent(Object name) {
-    return '確定要刪除圖片「$name」嗎？\n\n圖片會立即從畫廊消失，檔案將在下次啟動時徹底清理（本次會話內可復原）。';
-  }
-
-  @override
   String get localGallery_moveTo => '移動到…';
 
   @override
@@ -24283,14 +24321,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
-  String get localGallery_protectedDeleteTitle => '保護模式：再次確認刪除';
-
-  @override
-  String localGallery_protectedDeleteImagesContent(Object count) {
-    return '將永久刪除 $count 張本地圖片檔案。此操作無法復原。';
-  }
-
-  @override
   String get localGallery_protectedBulkMoveTitle => '保護模式：確認批次移動';
 
   @override
@@ -24301,11 +24331,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   @override
   String localGallery_importParamsFailed(Object error) {
     return '匯入參數失敗: $error';
-  }
-
-  @override
-  String localGallery_protectedDeleteImageContent(Object name) {
-    return '將永久刪除圖片「$name」。此操作無法復原。';
   }
 
   @override
@@ -24560,20 +24585,44 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get localGallery_redone => '已重做';
 
   @override
-  String get localGallery_confirmBulkDelete => '確認批次刪除';
-
-  @override
-  String localGallery_confirmBulkDeleteContent(Object count) {
-    return '確定要刪除選中的 $count 張圖片嗎？\n\n圖片會立即從畫廊消失，檔案將在下次啟動時徹底清理（本次會話內可復原）。';
-  }
-
-  @override
   String localGallery_deletedToPool(Object count) {
     return '已刪除 $count 張圖片，下次啟動時徹底清理。';
   }
 
   @override
   String get localGallery_trashTitle => '刪除池';
+
+  @override
+  String get localGallery_moveToDeletePool => '移入刪除池';
+
+  @override
+  String localGallery_moveToDeletePoolTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '將 $count 張圖片移入刪除池？',
+      one: '將這張圖片移入刪除池？',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get localGallery_moveToDeletePoolDescription =>
+      '重啟前可在刪除池恢復。下次啟動 Studio 時，池內檔案會被徹底刪除。';
+
+  @override
+  String localGallery_deleteForeverTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '徹底刪除這 $count 張圖片？',
+      one: '徹底刪除這張圖片？',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get localGallery_deleteForeverDescription => '檔案會立即從磁碟刪除，無法恢復。';
 
   @override
   String get localGallery_trashEmpty => '刪除池是空的';
@@ -34645,7 +34694,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get imageViewer_dragFrame => '拖框移動';
 
   @override
-  String get imageViewer_movedToTrash => '已移到回收站';
+  String get imageViewer_movedToTrash => '已移入刪除池';
 
   @override
   String get imageViewer_undo => '復原';
@@ -34857,9 +34906,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get imageViewer_copyTo => '複製到…';
 
   @override
-  String get imageViewer_moveToTrash => '移到回收站';
-
-  @override
   String get imageViewer_collections => '收藏集';
 
   @override
@@ -34918,15 +34964,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get imageViewer_helpUndo => '復原刪除';
-
-  @override
-  String get imageViewer_protectedTitle => '這張圖受保護，移到回收站？';
-
-  @override
-  String get imageViewer_protectedBody => '移到回收站後可以在回收站裡還原。';
-
-  @override
-  String get imageViewer_cancel => '取消';
 
   @override
   String get imageViewer_justNow => '剛剛';
@@ -37765,16 +37802,13 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get channel_ruler => '時間刻度';
 
   @override
-  String get channel_rulerSub => '批次時間、日期分隔和右側刻度條';
+  String get channel_rulerSub => '批次時間和日期分隔';
 
   @override
   String get channel_motion => '空閒微動';
 
   @override
   String get channel_motionSub => '很輕的動效，生成時自動暫停';
-
-  @override
-  String get channel_toastTitle => '本次通道';
 
   @override
   String channel_batch(String time, int count) {
@@ -37826,11 +37860,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get channel_weekday7 => '週日';
-
-  @override
-  String channel_scrubWhen(String day, String time) {
-    return '$day $time';
-  }
 
   @override
   String get rag_title => 'RAG 向量系統';
@@ -38876,7 +38905,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get set_cvRuler => '時間刻度';
 
   @override
-  String get set_cvRulerSub => '批次時間、日期分隔和右側刻度條';
+  String get set_cvRulerSub => '批次時間和日期分隔';
 
   @override
   String get set_cvMotion => '空閒微動';
@@ -39032,6 +39061,68 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String set_scHelpTip(Object key) {
     return '按 $key 在任何頁面檢視當前頁可用的快速鍵。';
   }
+
+  @override
+  String get set_scFixed => '固定快速鍵';
+
+  @override
+  String set_scFixedConflictSub(Object context, Object a, Object b) {
+    return '在$context中，$a是固定快速鍵。請為$b選擇其他按鍵。';
+  }
+
+  @override
+  String get shortcut_fixedUndoPrompt => '復原提示詞編輯';
+
+  @override
+  String get shortcut_fixedRedoPrompt => '重做提示詞編輯';
+
+  @override
+  String get shortcut_fixedUndoGallery => '復原圖庫操作';
+
+  @override
+  String get shortcut_fixedRedoGallery => '重做圖庫操作';
+
+  @override
+  String get shortcut_fixedUndoText => '復原文字編輯';
+
+  @override
+  String get shortcut_fixedRedoText => '重做文字編輯';
+
+  @override
+  String get shortcut_fixedUndoMask => '復原遮罩操作';
+
+  @override
+  String get shortcut_fixedRedoMask => '重做遮罩操作';
+
+  @override
+  String get shortcut_fixedPanCanvas => '平移生圖畫布';
+
+  @override
+  String get shortcut_fixedNextBatch => '聚焦下一批圖片';
+
+  @override
+  String get shortcut_fixedPreviousBatch => '聚焦上一批圖片';
+
+  @override
+  String get shortcut_fixedFirstBatch => '聚焦首批圖片';
+
+  @override
+  String get shortcut_fixedLastBatch => '聚焦末批圖片';
+
+  @override
+  String get shortcut_fixedFocusCanvas => '回到畫布焦點圖片';
+
+  @override
+  String get shortcut_fixedResetCanvas => '重設畫布檢視';
+
+  @override
+  String get shortcut_fixedFirstImage => '跳到第一張圖片';
+
+  @override
+  String get shortcut_fixedLastImage => '跳到最後一張圖片';
+
+  @override
+  String get shortcut_fixedUndoSetting => '復原剛儲存的設定更改';
 
   @override
   String get set_scEmpty => '沒有匹配的快速鍵';
@@ -43254,11 +43345,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get localGallery_deleteForever => '徹底刪除';
-
-  @override
-  String localGallery_deleteForeverConfirm(int count) {
-    return '將立即物理刪除選中的 $count 個檔案，不可恢復。';
-  }
 
   @override
   String ag_chatAgeMinutes(int count) {

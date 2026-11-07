@@ -145,6 +145,39 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('help searches fixed undo and groups inpaint redo', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_host());
+    await tester.pumpAndSettle();
+    final l = AppLocalizations.of(
+      tester.element(find.byType(ShortcutHelpDialog)),
+    )!;
+    final search = find.byKey(const Key('shortcut-help-search'));
+    await tester.enterText(search, 'Ctrl+Z');
+    await tester.pumpAndSettle();
+    final undo = find.byKey(
+      const Key('shortcut-help-item-fixed-generation-undo'),
+    );
+    expect(undo, findsOneWidget);
+    expect(
+      find.descendant(of: undo, matching: find.text(l.set_scFixed)),
+      findsOneWidget,
+    );
+
+    final filter = find.byKey(const Key('shortcut-context-inpaint'));
+    await tester.ensureVisible(filter);
+    await tester.tap(filter);
+    await tester.enterText(search, 'Ctrl+Shift+Z');
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const Key('shortcut-help-item-fixed-inpaint-redo-shift')),
+      findsOneWidget,
+    );
+    expect(undo, findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
   for (final customize in [false, true]) {
     testWidgets('header action closes help customize=$customize', (
       tester,

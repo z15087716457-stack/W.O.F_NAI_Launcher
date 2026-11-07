@@ -86,7 +86,6 @@ void main() {
         final operation = args['operation'];
         if (operation == 'records') {
           return {
-            'confirmDangerousActions': true,
             'records': [
               for (final id in args['ids'] as List)
                 {
@@ -272,9 +271,9 @@ void main() {
       );
       scope.controller.requestDelete();
       await tester.pump();
-      expect(find.byKey(const Key('viewer-delete-confirm')), findsOneWidget);
+      expect(find.byKey(const Key('gallery-delete-confirm')), findsOneWidget);
       expect(calls.where((call) => call['operation'] == 'delete'), isEmpty);
-      await tester.tap(find.byKey(const Key('viewer-delete-confirm')));
+      await tester.tap(find.byKey(const Key('gallery-delete-confirm')));
       await flush(tester);
       expect(viewer(tester).data.currentKey, paths[1]);
       expect(viewer(tester).data.undo, isNotNull);

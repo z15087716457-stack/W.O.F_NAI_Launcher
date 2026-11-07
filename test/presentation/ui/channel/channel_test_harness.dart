@@ -86,13 +86,11 @@ class ChannelHostState extends State<ChannelHost> {
         editor: GenFixtureEditor.builder,
         canvas: (context, tile) => ChannelFixtureCanvas(
           settings: settings,
-          onSettingsChanged: _set,
           generating: widget.generating,
           overview: widget.overview,
           focusY: widget.focusY,
           focusScale: widget.focusScale,
           images: widget.images,
-          onJump: (y) => widget.calls.add('onJumpTo(${y.round()})'),
         ),
       ),
     );
@@ -140,8 +138,5 @@ Future<List<String>> pumpChannel(
         if (t.key != null) ?f(t.key!),
     for (final b in base.history.batches) ...b.images.map((i) => i.thumb),
   ]);
-  // 进入提示 4.2 秒后收起；截图前让它走完
-  await tester.pump(const Duration(seconds: 5));
-  await tester.pumpAndSettle();
   return calls;
 }

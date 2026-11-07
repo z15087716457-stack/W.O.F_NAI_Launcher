@@ -8,7 +8,6 @@ import '../kit/ui_colors.dart';
 import '../kit/ui_fixture_image.dart';
 import 'channel_contract.dart';
 import 'channel_layer.dart';
-import 'channel_overlay.dart';
 
 /// 假数据：和 HTML 原型（.devin/mockups/canvas-channel/mock.html）同一批历史，
 /// 排法同原型（多张近方阵、三张单上双下、组间距 340、新组在上）。
@@ -153,12 +152,11 @@ class ChannelFixtureTile {
 }
 
 /// 预览 / 测试用的“小画布”：假历史 + 自己的相机（滚轮上下、Shift+滚轮左右、Ctrl+滚轮缩放、拖动平移），
-/// 底下垫 [ChannelBackdrop]、上面盖 [ChannelOverlay]——也是接线方把通道接进真实画布引擎的参考摆法。
+/// 图块下方用 [ChannelBackdrop] 绘制真实通道。
 class ChannelFixtureCanvas extends StatefulWidget {
   const ChannelFixtureCanvas({
     super.key,
     required this.settings,
-    required this.onSettingsChanged,
     this.generating = false,
     this.overview = false,
     this.pad = const EdgeInsets.fromLTRB(40, 50, 40, 70),
@@ -167,17 +165,15 @@ class ChannelFixtureCanvas extends StatefulWidget {
     this.focusScale,
     this.images,
     this.now,
-    this.onJump,
   });
 
   final ChannelSettings settings;
-  final ValueChanged<ChannelSettings> onSettingsChanged;
   final bool generating;
 
   /// 一打开就缩到全局（Ctrl+0）。
   final bool overview;
 
-  /// 聚焦最新一批时的留白与最大缩放（默认同生图页 `GenCanvas.pad`、放大填满关）。
+  /// 原型聚焦最新一批时的留白与最大缩放（默认关闭放大填满）。
   final EdgeInsets pad;
   final double maxScale;
 
@@ -186,9 +182,6 @@ class ChannelFixtureCanvas extends StatefulWidget {
   final double? focusScale;
   final ImageProvider? Function(String key)? images;
   final DateTime? now;
-
-  /// 刻度条跳转时额外通知（测试用）。
-  final ValueChanged<double>? onJump;
 
   @override
   State<ChannelFixtureCanvas> createState() => _ChannelFixtureCanvasState();
@@ -309,16 +302,6 @@ class _ChannelFixtureCanvasState extends State<ChannelFixtureCanvas> {
                         t,
                         images,
                       ),
-                ChannelOverlay(
-                  data: data,
-                  actions: ChannelActions(
-                    onSettingsChanged: widget.onSettingsChanged,
-                    onJumpTo: (y) {
-                      widget.onJump?.call(y);
-                      setState(() => _center = Offset(0, y));
-                    },
-                  ),
-                ),
               ],
             ),
           ),

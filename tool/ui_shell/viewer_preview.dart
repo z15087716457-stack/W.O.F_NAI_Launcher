@@ -9,7 +9,7 @@ import 'package:nai_launcher/presentation/ui/viewer/viewer_contract.dart';
 import 'package:nai_launcher/presentation/ui/viewer/viewer_fixture.dart';
 
 /// 预设状态（预览顶栏切换）。
-enum ViewerScene { gallery, nometa, generation, loading, missing, protected }
+enum ViewerScene { gallery, nometa, generation, loading, missing }
 
 final _images = <String, ImageProvider>{};
 
@@ -68,9 +68,7 @@ class ViewerPreviewSim extends ChangeNotifier {
         _base = 0;
       default:
         _keys = ViewerFixture.order;
-        current = s == ViewerScene.gallery || s == ViewerScene.protected
-            ? '08'
-            : '16';
+        current = s == ViewerScene.gallery ? '08' : '16';
         _base = 1284 - 1 - _keys.indexOf('08');
         if (s == ViewerScene.loading) _simulateLoad();
     }
@@ -118,7 +116,6 @@ class ViewerPreviewSim extends ChangeNotifier {
           date: i.date,
           favorite: _favorites.contains(i.key),
           missing: _scene == ViewerScene.missing && i.key == current,
-          protected: _scene == ViewerScene.protected,
           saved: _saved.contains(i.key),
           path: i.path,
           sizeBytes: i.sizeBytes,

@@ -48,7 +48,6 @@ class _ResourceGalleryViewerState extends State<ResourceGalleryViewer> {
   List<ViewerCollection>? _collections;
   String? _selection;
   bool _infoOpen = true, _fullscreen = false, _zoomHintSeen = false;
-  bool _confirmDangerous = true;
   bool _highlight = true, _kritaConnected = false;
   Map<ViewerCommand, List<SingleActivator>> _keys = ViewerKeys.defaults;
 
@@ -69,7 +68,6 @@ class _ResourceGalleryViewerState extends State<ResourceGalleryViewer> {
       pageSize: 12,
       load: (keys) async {
         final result = resourceMap(await _request('records', {'ids': keys}));
-        _confirmDangerous = result['confirmDangerousActions'] as bool;
         _highlight = result['highlight'] as bool? ?? true;
         _kritaConnected = result['kritaConnected'] as bool? ?? false;
         final shortcuts = result['shortcuts'] as String?;
@@ -308,7 +306,6 @@ class _ResourceGalleryViewerState extends State<ResourceGalleryViewer> {
                 date: media.date,
                 sizeBytes: media.sizeBytes,
                 favorite: _favorites[media.key] ?? source.isFavorite,
-                protected: _confirmDangerous,
               ),
         ],
         detail: viewerDetailOf(

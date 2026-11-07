@@ -202,41 +202,6 @@ void main() {
   });
 
   group('画布上的通道', () {
-    testWidgets('进入提示：随机时出现、4.2 秒后收起；固定时不出', (t) async {
-      final calls = <String>[];
-      await t.pumpWidget(
-        genApp(ChannelHost(initial: channelSettings(), calls: calls)),
-      );
-      await t.pump();
-      await t.pump(const Duration(milliseconds: 100));
-      expect(find.byKey(const Key('channel-toast')), findsOneWidget);
-      expect(find.text('本次通道'), findsOneWidget);
-      await t.pump(const Duration(seconds: 5));
-      await t.pumpAndSettle();
-      expect(find.byKey(const Key('channel-toast')), findsNothing);
-
-      await pumpChannel(t, settings: channelSettings(mode: ChannelMode.fixed));
-      expect(find.byKey(const Key('channel-toast')), findsNothing);
-    });
-
-    testWidgets('刻度条：点一下跳过去，悬停出主题和时间', (t) async {
-      final calls = await pumpChannel(t);
-      final bar = find.byKey(const Key('channel-scrubber'));
-      expect(bar, findsOneWidget);
-      final r = t.getRect(bar);
-      await t.tapAt(Offset(r.center.dx, r.top + r.height * .6));
-      await t.pump();
-      expect(calls.where((c) => c.startsWith('onJumpTo(')), hasLength(1));
-
-      await hoverOver(t, bar);
-      expect(find.byKey(const Key('channel-scrub-tip')), findsOneWidget);
-    });
-
-    testWidgets('关掉时间刻度后没有刻度条', (t) async {
-      await pumpChannel(t, settings: channelSettings(ruler: false));
-      expect(find.byKey(const Key('channel-scrubber')), findsNothing);
-    });
-
     testWidgets('滚轮上下翻、Ctrl+滚轮缩放（假画布）', (t) async {
       await pumpChannel(t);
       final canvas = find.byKey(const Key('channel-fixture-canvas'));

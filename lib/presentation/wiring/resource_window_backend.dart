@@ -155,9 +155,6 @@ class ResourceLibraryBackend implements ResourceWindowBackend {
               'favorite': record.isFavorite,
             },
         ],
-        'confirmDangerousActions': ref
-            .read(shareImageSettingsProvider)
-            .effectiveConfirmDangerousActions,
         'highlight': ref.read(highlightEmphasisSettingsProvider),
         'kritaConnected':
             ref.exists(kritaBridgeNotifierProvider) &&

@@ -25,6 +25,9 @@ enum UiBtnTone {
   /// 品牌蓝实心。
   primary,
 
+  /// 实心危险操作。
+  danger,
+
   /// 透明、次要文字色。
   ghost,
 
@@ -78,6 +81,11 @@ class UiBtn extends StatelessWidget {
             hover ? Color.lerp(c.brand, Colors.black, .08)! : c.brand,
             c.brand,
             c.onBrand,
+          ),
+          UiBtnTone.danger => (
+            hover ? Color.lerp(c.error, Colors.black, .08)! : c.error,
+            c.error,
+            c.onError,
           ),
           UiBtnTone.ghost => (
             hover ? c.hover : Colors.transparent,

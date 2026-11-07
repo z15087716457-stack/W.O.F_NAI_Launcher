@@ -159,7 +159,7 @@ class ChannelEnv {
     return ids;
   }
 
-  /// 从世界 y 所在段起往下的主题顺序（设置里“本次”、进入提示用）。
+  /// 从世界 y 所在段起往下的主题顺序（设置里“本次”用）。
   List<ChannelTheme> sequenceFrom(double worldY, int count) {
     final k0 = ChannelGeo.zoneOf(worldY / ChannelGeo.decorScale);
     return [for (var i = 0; i < count; i++) themeOf(k0 + i)];

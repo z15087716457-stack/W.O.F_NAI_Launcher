@@ -3,7 +3,7 @@
 /// 这是新侧栏和后端之间唯一的接口：
 /// - [AgentViewData]：此刻侧栏要显示的全部数据。由转接层从 controller / provider 组装，界面只读不改。
 /// - [AgentActions]：用户在侧栏上能做的全部操作。由转接层接到 controller / provider / 路由。
-/// - [AgentSlots]：需要平台能力的包装（系统拖放、图片拖出），由转接层提供。
+/// - [AgentSlots]：由转接层提供的标题状态标志和平台交互包装。
 ///
 /// 界面文件（本目录除本文件外的 `agent_*.dart`）不 import 任何 provider、service、数据库或路由。
 /// 缺字段时在这里加并通知界面方，不要在界面里取数。
@@ -1592,10 +1592,13 @@ class AgentActions {
 
 enum AgentMemoryTarget { global, chatPrefix, workspace, skills, quick }
 
-/// 需要平台能力的包装，由转接层提供；null = 不包。
+/// 转接层提供的可选显示与平台交互。
 @immutable
 class AgentSlots {
-  const AgentSlots({this.dropTarget, this.imageDrag});
+  const AgentSlots({this.headerMark, this.dropTarget, this.imageDrag});
+
+  /// The status mark subscribes independently of the conversation panel.
+  final Widget? headerMark;
 
   /// 包住输入卡片的系统拖放区（外部文件、历史缩略图拖进来 = 附图）。
   /// [onHover] 由转接层在拖入 / 离开时调用，界面据此显示「松开以附加」。

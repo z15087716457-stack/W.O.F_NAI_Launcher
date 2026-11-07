@@ -47,7 +47,6 @@ class ViewerItem {
     this.date,
     this.favorite = false,
     this.missing = false,
-    this.protected = false,
     this.saved = false,
     this.path,
     this.sizeBytes,
@@ -72,9 +71,6 @@ class ViewerItem {
 
   /// 文件已经被移动、改名或删除。
   final bool missing;
-
-  /// 受保护的图：删除前先确认（其他图直接移到回收站，带撤销）。
-  final bool protected;
 
   /// 生成结果已经保存到图库（主按钮变成“已保存”）。
   final bool saved;

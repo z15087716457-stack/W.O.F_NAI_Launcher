@@ -45,7 +45,7 @@ WebP 初始 quality 82（method 6），必要时逐级降低质量；硬检查 h
 | `readme_data.dart` | 中英示范 ViewData，虚构 `sample_*` 画师、账号、路径、积木、历史、Agent 对话与设置 |
 | `images.dart` | 读取私有索引，按方向记忆化分配 `MemoryImage`，支持指定文件 |
 | `agent_scenes.dart` | 十类 Agent 特写的中英合成契约；真实 `AgentThread` + 隔离 `AgentScope` 宿主、交互、图片去重及几何断言 |
-| `canvas_scene.dart` | 文档专用四图混合横竖排布，复用真实 `ChannelBackdrop`／`ChannelOverlay` |
+| `canvas_scene.dart` | 文档专用四图混合横竖排布，复用真实 `ChannelBackdrop` |
 | `gallery_scene.dart` | 真实 `LocalGalleryScreen` + FakeGalleryServiceNotifier、缩略缓存、原生拖放替身和隔离存储 |
 | `semantic_scenes.dart` | 真实标签扩展／Wiki 页面，自建本地语义搜索、词库、Wiki、翻译控制器替身及标签扩展宿主 |
 | `safety.dart` | 从现有 fixture 补齐真实名称黑名单，扫描 Text／RichText／EditableText；另含路径、用户名等禁词 |

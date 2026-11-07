@@ -37,7 +37,6 @@ const keys = {
   'level': 'channel-level',
   'ruler': 'channel-ruler',
   'motion': 'channel-motion',
-  'scrub': 'channel-scrubber',
   'canvas': 'channel-fixture-canvas',
 };
 
