@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/data/models/upscale/local_upscale_models.dart';
+import 'package:nai_launcher/data/services/advanced_upscale_component_manager.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/generation/local_upscale_provider.dart';
 import 'package:nai_launcher/presentation/screens/settings/widgets/advanced_upscale_components.dart';
@@ -25,8 +26,11 @@ class _Install extends AdvancedUpscaleInstall {
     installs.add(id);
     state = AdvancedUpscaleInstallState(
       id: id,
-      phase: 'weights',
-      fraction: .42,
+      progress: const AdvancedUpscaleProgress(
+        'weights',
+        received: 42,
+        total: 100,
+      ),
     );
   }
 

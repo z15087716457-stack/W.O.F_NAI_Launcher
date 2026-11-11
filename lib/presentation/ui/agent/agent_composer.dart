@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/utils/localization_extension.dart';
+import '../../widgets/common/continuous_text_selection.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_controls.dart' show UiSpinner;
 import '../kit/ui_lib_controls.dart';
@@ -505,71 +506,77 @@ class AgentComposerState extends State<AgentComposer> {
                         child: Focus(
                           onKeyEvent: _key,
                           onFocusChange: (_) => setState(() {}),
-                          child: TextField(
-                            key: const Key('agent-input'),
-                            controller: _text,
-                            focusNode: _focus,
-                            minLines: 1,
-                            maxLines: 8,
-                            onChanged: _changed,
-                            style: UiText.sans(13.5, color: c.ink, height: 1.6),
-                            cursorColor: c.accent,
-                            cursorWidth: 1.5,
-                            contextMenuBuilder: (context, editable) =>
-                                AdaptiveTextSelectionToolbar.buttonItems(
-                                  anchors: editable.contextMenuAnchors,
-                                  buttonItems: [
-                                    for (final item
-                                        in editable.contextMenuButtonItems)
-                                      if (item.type ==
-                                          ContextMenuButtonType.paste)
-                                        ContextMenuButtonItem(
-                                          type: ContextMenuButtonType.paste,
-                                          onPressed: () {
-                                            ContextMenuController.removeAny();
-                                            unawaited(_paste());
-                                          },
-                                        )
-                                      else
-                                        item,
-                                  ],
-                                ),
-                            decoration:
-                                agentBareInput(
-                                  padding: const EdgeInsets.fromLTRB(
-                                    12,
-                                    10,
-                                    12,
-                                    4,
+                          child: ContinuousTextSelection(
+                            child: TextField(
+                              key: const Key('agent-input'),
+                              controller: _text,
+                              focusNode: _focus,
+                              minLines: 1,
+                              maxLines: 8,
+                              onChanged: _changed,
+                              style: UiText.sans(
+                                13.5,
+                                color: c.ink,
+                                height: 1.6,
+                              ),
+                              cursorColor: c.accent,
+                              cursorWidth: 1.5,
+                              contextMenuBuilder: (context, editable) =>
+                                  AdaptiveTextSelectionToolbar.buttonItems(
+                                    anchors: editable.contextMenuAnchors,
+                                    buttonItems: [
+                                      for (final item
+                                          in editable.contextMenuButtonItems)
+                                        if (item.type ==
+                                            ContextMenuButtonType.paste)
+                                          ContextMenuButtonItem(
+                                            type: ContextMenuButtonType.paste,
+                                            onPressed: () {
+                                              ContextMenuController.removeAny();
+                                              unawaited(_paste());
+                                            },
+                                          )
+                                        else
+                                          item,
+                                    ],
                                   ),
-                                  constraints: const BoxConstraints(
-                                    minHeight: 44,
-                                  ),
-                                  hint: suggestion ?? l.ag_placeholder,
-                                  hintMaxLines: suggestion == null ? 1 : 8,
-                                  hintStyle: UiText.sans(
-                                    13.5,
-                                    color: c.faint,
-                                    height: 1.6,
-                                  ),
-                                ).copyWith(
-                                  suffixIcon: suggestion == null
-                                      ? null
-                                      : const Padding(
-                                          padding: EdgeInsets.only(
-                                            left: 8,
-                                            right: 12,
+                              decoration:
+                                  agentBareInput(
+                                    padding: const EdgeInsets.fromLTRB(
+                                      12,
+                                      10,
+                                      12,
+                                      4,
+                                    ),
+                                    constraints: const BoxConstraints(
+                                      minHeight: 44,
+                                    ),
+                                    hint: suggestion ?? l.ag_placeholder,
+                                    hintMaxLines: suggestion == null ? 1 : 8,
+                                    hintStyle: UiText.sans(
+                                      13.5,
+                                      color: c.faint,
+                                      height: 1.6,
+                                    ),
+                                  ).copyWith(
+                                    suffixIcon: suggestion == null
+                                        ? null
+                                        : const Padding(
+                                            padding: EdgeInsets.only(
+                                              left: 8,
+                                              right: 12,
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [AgentKey('Tab')],
+                                            ),
                                           ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [AgentKey('Tab')],
-                                          ),
-                                        ),
-                                  suffixIconConstraints: const BoxConstraints(
-                                    minWidth: 0,
-                                    minHeight: 0,
+                                    suffixIconConstraints: const BoxConstraints(
+                                      minWidth: 0,
+                                      minHeight: 0,
+                                    ),
                                   ),
-                                ),
+                            ),
                           ),
                         ),
                       ),

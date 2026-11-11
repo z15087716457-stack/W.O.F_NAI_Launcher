@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/gestures.dart' show kSecondaryMouseButton;
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 
+import '../../common/continuous_text_selection.dart';
 import '../../../../data/models/prompt_block/pill_document.dart';
 import '../../../../core/utils/prompt_input_normalization.dart';
 import '../nai_syntax_controller.dart';
@@ -250,33 +251,35 @@ class _TranslationPillViewState extends State<TranslationPillView> {
               width: width,
               child: Actions(
                 actions: _sourceActions,
-                child: TextField(
-                  key: const Key('translation-pill-source-input'),
-                  controller: _syntaxController,
-                  focusNode: _sourceFocus,
-                  style: textStyle,
-                  minLines: 1,
-                  maxLines: null,
-                  scrollPadding: EdgeInsets.zero,
-                  decoration: const InputDecoration(
-                    isCollapsed: true,
-                    isDense: true,
-                    filled: false,
-                    contentPadding: EdgeInsets.zero,
-                    constraints: BoxConstraints(),
-                    border: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    disabledBorder: InputBorder.none,
-                    errorBorder: InputBorder.none,
-                    focusedErrorBorder: InputBorder.none,
+                child: ContinuousTextSelection(
+                  child: TextField(
+                    key: const Key('translation-pill-source-input'),
+                    controller: _syntaxController,
+                    focusNode: _sourceFocus,
+                    style: textStyle,
+                    minLines: 1,
+                    maxLines: null,
+                    scrollPadding: EdgeInsets.zero,
+                    decoration: const InputDecoration(
+                      isCollapsed: true,
+                      isDense: true,
+                      filled: false,
+                      contentPadding: EdgeInsets.zero,
+                      constraints: BoxConstraints(),
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      disabledBorder: InputBorder.none,
+                      errorBorder: InputBorder.none,
+                      focusedErrorBorder: InputBorder.none,
+                    ),
+                    onTapOutside: (_) => _sourceFocus.unfocus(),
+                    contextMenuBuilder: _sourceContextMenu,
+                    onChanged: (source) {
+                      setState(() {});
+                      widget.onSourceChanged!(source);
+                    },
                   ),
-                  onTapOutside: (_) => _sourceFocus.unfocus(),
-                  contextMenuBuilder: _sourceContextMenu,
-                  onChanged: (source) {
-                    setState(() {});
-                    widget.onSourceChanged!(source);
-                  },
                 ),
               ),
             );

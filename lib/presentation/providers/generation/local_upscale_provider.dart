@@ -21,6 +21,8 @@ import '../../screens/generation/widgets/canvas/canvas_feed_layout.dart';
 
 final localUpscaleModelManagerProvider = Provider((ref) {
   final manager = LocalUpscaleModelManager(
+    proxyAddress: () =>
+        ref.read(proxySettingsNotifierProvider).effectiveProxyAddress,
     bundledExecutable: Platform.isMacOS
         ? p.join(
             AppBundlePaths.toolsDirectory,
@@ -43,7 +45,8 @@ final localUpscaleServiceProvider = Provider(
 );
 final advancedUpscaleComponentManagerProvider = Provider((ref) {
   final manager = AdvancedUpscaleComponentManager(
-    proxyAddress: () => ref.read(currentProxyAddressProvider),
+    proxyAddress: () =>
+        ref.read(proxySettingsNotifierProvider).effectiveProxyAddress,
   );
   ref.onDispose(manager.dispose);
   return manager;
@@ -59,19 +62,19 @@ final localUpscaleModelsProvider = FutureProvider(
 class AdvancedUpscaleInstallState {
   const AdvancedUpscaleInstallState({
     this.id,
-    this.phase = '',
-    this.fraction,
+    this.progress = const AdvancedUpscaleProgress(''),
     this.error,
     this.details,
     this.cancelling = false,
   });
   final String? id;
-  final String phase;
-  final double? fraction;
+  final AdvancedUpscaleProgress progress;
   final LocalUpscaleError? error;
   final String? details;
   final bool cancelling;
   bool get running => id != null;
+  String get phase => progress.phase;
+  double? get fraction => progress.fraction;
 }
 
 final advancedUpscaleInstallProvider =
@@ -102,8 +105,7 @@ class AdvancedUpscaleInstall extends Notifier<AdvancedUpscaleInstallState> {
     if (!state.running) return;
     state = AdvancedUpscaleInstallState(
       id: state.id,
-      phase: state.phase,
-      fraction: state.fraction,
+      progress: state.progress,
       cancelling: true,
     );
     _cancel?.cancel();
@@ -123,7 +125,10 @@ class AdvancedUpscaleInstall extends Notifier<AdvancedUpscaleInstallState> {
     var locked = false;
     final cancellation = LocalUpscaleCancellation();
     _cancel = cancellation;
-    state = AdvancedUpscaleInstallState(id: id, phase: 'component');
+    state = AdvancedUpscaleInstallState(
+      id: id,
+      progress: const AdvancedUpscaleProgress('component'),
+    );
     try {
       base.claimInference(id);
       locked = true;
@@ -134,13 +139,9 @@ class AdvancedUpscaleInstall extends Notifier<AdvancedUpscaleInstallState> {
         await manager.install(
           id,
           cancellation: cancellation,
-          onProgress: (phase, fraction) {
+          onProgress: (progress) {
             if (!_disposed && !cancellation.isCancelled) {
-              state = AdvancedUpscaleInstallState(
-                id: id,
-                phase: phase,
-                fraction: fraction,
-              );
+              state = AdvancedUpscaleInstallState(id: id, progress: progress);
             }
           },
         );
@@ -149,7 +150,7 @@ class AdvancedUpscaleInstall extends Notifier<AdvancedUpscaleInstallState> {
     } catch (error) {
       if (!_disposed) {
         state = AdvancedUpscaleInstallState(
-          phase: state.phase,
+          progress: state.progress,
           details: cancellation.isCancelled
               ? null
               : AdvancedUpscaleComponentManager.safeDiagnostics(

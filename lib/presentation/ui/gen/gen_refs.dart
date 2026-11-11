@@ -119,7 +119,9 @@ class _RefRow extends StatelessWidget {
         height: 46,
         padding: const EdgeInsets.only(left: 12, right: 6),
         decoration: BoxDecoration(
-          color: !img && hover ? c.control.withValues(alpha: .45) : null,
+          color: !open && !img && hover
+              ? c.control.withValues(alpha: .45)
+              : null,
           border: Border(
             top: BorderSide(color: img ? Colors.transparent : c.line),
           ),

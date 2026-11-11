@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/data/models/image/image_params.dart';
 import 'package:nai_launcher/data/models/upscale/local_upscale_models.dart';
+import 'package:nai_launcher/data/services/advanced_upscale_component_manager.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/generation/local_upscale_provider.dart';
 import 'package:nai_launcher/presentation/providers/generation/image_workflow_controller.dart';
@@ -62,7 +63,7 @@ class _BusyLocalTask extends LocalUpscaleTask {
 class _FailedInstallState extends AdvancedUpscaleInstall {
   @override
   AdvancedUpscaleInstallState build() => const AdvancedUpscaleInstallState(
-    phase: 'runtime',
+    progress: AdvancedUpscaleProgress('runtime'),
     error: LocalUpscaleError.modelOperationFailed,
     details: 'uv pip: exit 2\nTLS handshake failed',
   );

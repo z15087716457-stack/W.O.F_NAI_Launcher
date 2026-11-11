@@ -22033,4 +22033,31 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get ag_tool_agent_manage => 'Agent 관리';
+
+  @override
+  String get navShell_updateDownloading => '업데이트 다운로드 중';
+
+  @override
+  String get navShell_updateReady => '다시 시작하여 업데이트';
+
+  @override
+  String navShell_updateAvailableVersion(String version) {
+    return '$version 다운로드 가능';
+  }
+
+  @override
+  String navShell_updateReadyVersion(String version) {
+    return '$version 준비 완료';
+  }
+
+  @override
+  String navShell_updateDownloadProgress(int percent) {
+    return '$percent% · Studio를 계속 사용할 수 있습니다';
+  }
+
+  @override
+  String get navShell_updateRetryHint => '자세한 내용 확인 및 재시도';
+
+  @override
+  String get updateDownloadInBackground => '백그라운드에서 다운로드';
 }

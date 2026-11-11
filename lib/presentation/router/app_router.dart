@@ -1,6 +1,7 @@
 import 'dart:async';
 import '../wiring/style_explore_platform.dart';
 import '../widgets/navigation/integrated_title_bar.dart';
+import '../widgets/navigation/retained_branch_viewport.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -400,8 +401,7 @@ GoRouter appRouter(Ref ref) {
 /// 主布局 Shell - 包含导航 (StatefulShellRoute 版本)
 ///
 /// 使用混合保活策略：
-/// - 画廊页面（本地/在线）使用 Offstage 保活
-/// - Vibe库、精准参考库和 Prompt 块库使用 Offstage 保活
+/// - 画廊、参考库、Prompt 块库和标签百科保活，隐藏期间保留上次视口
 /// - 其他页面不保活
 class MainShell extends ConsumerStatefulWidget {
   final StatefulNavigationShell navigationShell;
@@ -466,7 +466,7 @@ class _MainShellState extends ConsumerState<MainShell> {
     }
 
     // 构建混合保活内容栈
-    // - 画廊、Vibe 库、精准参考库和块库使用 Offstage 保活
+    // - 保活页面隐藏时不跟随外窗重排；再次显示时使用最新视口
     // - 其他索引不保活，切换时销毁重建
     // 索引随 AppBranch 枚举顺序联动，插入/删除分支时无需改字面量
     const keepAliveBranches = {
@@ -484,9 +484,9 @@ class _MainShellState extends ConsumerState<MainShell> {
         final child = entry.value;
         final isActive = index == currentIndex;
 
-        // 保活页面始终保持在树中，通过 TickerMode 控制动画
+        // IndexedStack 本身仍会布局隐藏分支，暂停 ticker 不足以隔离缩放。
         if (keepAliveBranches.any((branch) => branch.index == index)) {
-          return TickerMode(enabled: isActive, child: child);
+          return RetainedBranchViewport(active: isActive, child: child);
         }
 
         // 其他索引：非活动时显示空容器（不保活）
@@ -568,23 +568,7 @@ class DesktopShell extends ConsumerWidget {
         // 侧边导航栏
         navigationShell: navigationShell,
         // 主内容区
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return Stack(
-              clipBehavior: Clip.none,
-              children: [
-                content,
-                if (!WindowChromeScope.activeOf(context))
-                  const Positioned(
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    child: UpdateNoticeBanner(),
-                  ),
-              ],
-            );
-          },
-        ),
+        child: content,
       ),
     );
   }

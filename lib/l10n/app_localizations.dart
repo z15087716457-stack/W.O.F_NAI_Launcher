@@ -39477,6 +39477,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Manage Agent'**
   String get ag_tool_agent_manage;
+
+  /// No description provided for @navShell_updateDownloading.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading update'**
+  String get navShell_updateDownloading;
+
+  /// No description provided for @navShell_updateReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Restart to update'**
+  String get navShell_updateReady;
+
+  /// No description provided for @navShell_updateAvailableVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'{version} available to download'**
+  String navShell_updateAvailableVersion(String version);
+
+  /// No description provided for @navShell_updateReadyVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'{version} ready'**
+  String navShell_updateReadyVersion(String version);
+
+  /// No description provided for @navShell_updateDownloadProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% · Keep using Studio'**
+  String navShell_updateDownloadProgress(int percent);
+
+  /// No description provided for @navShell_updateRetryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'View details and retry'**
+  String get navShell_updateRetryHint;
+
+  /// No description provided for @updateDownloadInBackground.
+  ///
+  /// In en, this message translates to:
+  /// **'Download in background'**
+  String get updateDownloadInBackground;
 }
 
 class _AppLocalizationsDelegate

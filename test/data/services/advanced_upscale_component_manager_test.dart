@@ -1452,6 +1452,7 @@ void main() {
     () async {
       final bytes = _archive();
       final offsets = <int>[];
+      final progress = <AdvancedUpscaleProgress>[];
       final manager = fixture(
         download: (request) async {
           final range = request.headers['Range'] as String?;
@@ -1473,9 +1474,15 @@ void main() {
       await manager.install(
         'rtx-vsr',
         cancellation: LocalUpscaleCancellation(),
+        onProgress: progress.add,
       );
       expect(offsets.length, greaterThan(1));
       expect(offsets.take(3), [0, 43, 86]);
+      final transfer = progress.where((p) => p.phase == 'component');
+      expect(transfer.first.received, 0);
+      expect(transfer.last.received, bytes.length);
+      expect(transfer.map((p) => p.total), everyElement(bytes.length));
+      expect(progress.last.phase, 'checking');
       expect((await manager.models()).last.installed, isTrue);
     },
   );
@@ -1651,7 +1658,8 @@ void main() {
           await manager.install(
             'seedvr2-3b',
             cancellation: cancellation,
-            onProgress: (next, _) {
+            onProgress: (progress) {
+              final next = progress.phase;
               if (phase != next) {
                 phase = next;
                 print('SeedVR2 runtime audit: $phase');

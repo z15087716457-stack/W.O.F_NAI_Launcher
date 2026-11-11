@@ -13,7 +13,7 @@ on:
       include_macos:
         description: Include the verified macOS universal package
         type: boolean
-        default: false
+        default: true
 
 permissions:
   contents: write
@@ -211,13 +211,13 @@ jobs:
           if-no-files-found: error
 
   build-macos:
-    if: github.event_name == 'workflow_dispatch' && inputs.include_macos
+    if: github.event_name == 'push' || inputs.include_macos
     needs: prepare
     permissions:
       contents: read
     uses: ./.github/workflows/macos-build.yml
     with:
-      checkout-ref: ${{ inputs.tag }}
+      checkout-ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
       version: ${{ needs.prepare.outputs.version }}
 
   publish:

@@ -28,6 +28,7 @@ import '../ui/nav/nav_contract.dart';
 import '../ui/nav/nav_shell.dart';
 import '../widgets/auth/account_switch_helper.dart';
 import '../widgets/auth/add_account_dialog.dart';
+import '../widgets/common/update_check_dialog.dart';
 
 const navBranchPages = <AppBranch, NavPage>{
   AppBranch.generation: NavPage.generation,
@@ -43,6 +44,29 @@ const navBranchPages = <AppBranch, NavPage>{
 };
 
 NavPage navPageForBranch(AppBranch branch) => navBranchPages[branch]!;
+
+NavUpdateData? navUpdateData(UpdateState state) {
+  if (!state.hasNewVersion) return null;
+  return NavUpdateData(
+    status: switch (state.status) {
+      UpdateStatus.available => NavUpdateStatus.available,
+      UpdateStatus.downloading => NavUpdateStatus.downloading,
+      UpdateStatus.downloaded => NavUpdateStatus.downloaded,
+      UpdateStatus.installing => NavUpdateStatus.installing,
+      UpdateStatus.error =>
+        state.hasDownloadedUpdate
+            ? NavUpdateStatus.installFailed
+            : NavUpdateStatus.downloadFailed,
+      _ => throw StateError('Not an update state: ${state.status}'),
+    },
+    version: state.versionInfo?.version,
+    progress: state.downloadProgress.isFinite
+        ? state.downloadProgress.clamp(0.0, 1.0)
+        : 0,
+    manualReplace: state.downloadedUpdate?.asset.requiresManualReplace ?? false,
+  );
+}
+
 AppBranch navBranchForPage(NavPage page) =>
     navBranchPages.entries.firstWhere((entry) => entry.value == page).key;
 
@@ -310,7 +334,7 @@ class _NavWiringState extends ConsumerState<NavWiring> {
         ctrlHintSeen: layout.mainNavCtrlHintSeen,
         pinned: layout.mainNavRailExpanded,
         reducedMotion: ref.watch(canvasReducedMotionNotifierProvider),
-        updateAvailable: ref.watch(updateStateProvider).hasNewVersion,
+        update: navUpdateData(ref.watch(updateStateProvider)),
         account: navAccountData(
           auth: auth,
           sortedAccounts: accounts,
@@ -359,6 +383,8 @@ class _NavWiringState extends ConsumerState<NavWiring> {
             _ifMounted(() => unawaited(commands.logout(context, ref))),
         onCancelTask: activityController.cancelTask,
         onUndoTask: (id) => unawaited(activityController.undoTask(id)),
+        onOpenUpdate: () =>
+            _ifMounted(() => unawaited(UpdateCheckDialog.show(context))),
       ),
       child: widget.child,
     );

@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/models/upscale/local_upscale_models.dart';
 import '../../../providers/generation/local_upscale_provider.dart';
+import '../../../widgets/common/local_upscale_labels.dart';
 import 'local_upscale_brand_logo.dart';
 
 /// Component management keeps its viewed model separate from generation settings.
@@ -322,13 +323,7 @@ class _AdvancedUpscaleComponentsState
               child: Text(
                 install.cancelling
                     ? l.localUpscale_cancelling
-                    : switch (install.phase) {
-                        'python' => l.localUpscale_installingPython,
-                        'runtime' => l.localUpscale_installingRuntime,
-                        'weights' => l.localUpscale_downloadProgress,
-                        'checking' => l.localUpscale_checkingComponent,
-                        _ => l.localUpscale_installingComponent,
-                      },
+                    : localUpscaleInstallPhaseLabel(l, install.phase),
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ),

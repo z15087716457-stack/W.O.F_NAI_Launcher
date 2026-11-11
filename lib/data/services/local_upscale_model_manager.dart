@@ -10,6 +10,7 @@ import 'package:path/path.dart' as p;
 import 'package:nai_launcher/core/utils/app_support_directory.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../core/network/download_dio.dart';
 import '../models/upscale/local_upscale_models.dart';
 
 /// Private versioned files, independent of ComfyUI paths, ports and settings.
@@ -18,16 +19,15 @@ class LocalUpscaleModelManager {
     Future<Directory> Function()? rootDirectory,
     Future<Uint8List> Function(String)? loadAsset,
     Dio? dio,
+    String? Function()? proxyAddress,
     this.bundledExecutable,
   }) : _rootDirectory = rootDirectory ?? _defaultDirectory,
        _loadAsset = loadAsset ?? _bundleBytes,
        _dio =
            dio ??
-           Dio(
-             BaseOptions(
-               connectTimeout: const Duration(seconds: 30),
-               receiveTimeout: const Duration(minutes: 2),
-             ),
+           createDownloadDio(
+             receiveTimeout: const Duration(minutes: 2),
+             resolveProxy: proxyAddress,
            );
 
   static const manifestSha256 =

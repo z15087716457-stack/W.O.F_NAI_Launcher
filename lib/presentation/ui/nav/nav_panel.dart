@@ -10,6 +10,7 @@ import '../kit/ui_text.dart';
 import 'nav_contract.dart';
 import 'nav_labels.dart';
 import 'nav_rail.dart';
+import 'nav_update.dart';
 
 /// 展开导航：236 宽。不钉住时是盖在页面上的浮层（带投影）；钉住时是常驻栏（推开页面，没有投影）。
 class NavPanel extends StatelessWidget {
@@ -20,6 +21,7 @@ class NavPanel extends StatelessWidget {
     required this.onAccount,
     required this.onPinnedChanged,
     required this.onCollapse,
+    required this.onOpenUpdate,
   });
 
   static const width = 236.0;
@@ -29,6 +31,7 @@ class NavPanel extends StatelessWidget {
   final ValueChanged<BuildContext> onAccount;
   final ValueChanged<bool> onPinnedChanged;
   final VoidCallback onCollapse;
+  final VoidCallback onOpenUpdate;
 
   @override
   Widget build(BuildContext context) {
@@ -174,6 +177,64 @@ class NavPanel extends StatelessWidget {
             trailing: UiSwitch(value: data.pinned),
             onTap: () => onPinnedChanged(!data.pinned),
           ),
+          if (data.update case final update?) ...[
+            Semantics(
+              button: true,
+              label: update.tooltip(context),
+              excludeSemantics: true,
+              child: _Hoverable(
+                key: const Key('main-nav-panel-update'),
+                radius: 8,
+                tint: update.failed ? c.error : c.accent,
+                onTap: onOpenUpdate,
+                child: SizedBox(
+                  height: 48,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: Row(
+                      spacing: 10,
+                      children: [
+                        SizedBox(
+                          width: 30,
+                          child: Center(
+                            child: NavUpdateGlyph(
+                              data: update,
+                              reducedMotion: data.reducedMotion,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                update.title(context),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: UiText.sans(
+                                  13,
+                                  color: update.failed ? c.error : c.accent,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                update.subtitle(context),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: UiText.sans(10, color: c.muted),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 6),
+          ],
           _PanelRow(
             rowKey: const Key('main-nav-panel-collapse'),
             leading: UiGlyph(UiGlyphs.doubleLeft, size: 17, color: c.muted),
@@ -275,12 +336,14 @@ class _Hoverable extends StatefulWidget {
     required this.onTap,
     required this.radius,
     this.selected = false,
+    this.tint,
   });
 
   final Widget child;
   final VoidCallback onTap;
   final double radius;
   final bool selected;
+  final Color? tint;
 
   @override
   State<_Hoverable> createState() => _HoverableState();
@@ -293,11 +356,13 @@ class _HoverableState extends State<_Hoverable> {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    final bg = widget.selected
-        ? c.accent.withValues(alpha: _hover ? .16 : .10)
-        : _hover
-        ? c.hover
-        : null;
+    final bg =
+        widget.tint?.withValues(alpha: _hover ? .16 : .08) ??
+        (widget.selected
+            ? c.accent.withValues(alpha: _hover ? .16 : .10)
+            : _hover
+            ? c.hover
+            : null);
     return FocusableActionDetector(
       mouseCursor: SystemMouseCursors.click,
       onShowFocusHighlight: (v) => setState(() => _focus = v),

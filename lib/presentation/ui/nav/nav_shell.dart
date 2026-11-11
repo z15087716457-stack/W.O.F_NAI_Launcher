@@ -148,6 +148,11 @@ class _NavShellState extends State<NavShell>
     _a.onOpenPage(p);
   }
 
+  void _openUpdate() {
+    if (_opened) _setOpen(false, instant: true);
+    _after(_a.onOpenUpdate);
+  }
+
   void _openCustomize(Offset at) {
     final box = context.findRenderObject()! as RenderBox;
     final railRight = box.localToGlobal(
@@ -200,6 +205,7 @@ class _NavShellState extends State<NavShell>
         UiPopoverAnchor.beside(ctx, dx: 6, dy: 6, alignBottom: true),
       ),
       onExpand: () => _setOpen(true),
+      onOpenUpdate: _openUpdate,
       onContextMenu: (p) => _show(_Popup.menu, UiPopoverAnchor(p)),
     );
     NavPanel panel() => NavPanel(
@@ -212,6 +218,7 @@ class _NavShellState extends State<NavShell>
         _a.onPinnedChanged(v);
       },
       onCollapse: () => _d.pinned ? _a.onPinnedChanged(false) : _setOpen(false),
+      onOpenUpdate: _openUpdate,
     );
     final scrim = Colors.black.withValues(alpha: c.dark ? .35 : .08);
 

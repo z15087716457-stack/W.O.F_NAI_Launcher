@@ -34,7 +34,10 @@ Widget navApp(
   child: MaterialApp(
     debugShowCheckedModeBanner: false,
     theme: dark ? GeistTheme.dark : GeistTheme.light,
-    locale: Locale(locale),
+    locale: Locale.fromSubtags(
+      languageCode: locale.split('-').first,
+      countryCode: locale.contains('-') ? locale.split('-').last : null,
+    ),
     supportedLocales: AppLocalizations.supportedLocales,
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     builder: (context, child) => MediaQuery(
@@ -79,6 +82,7 @@ class RecordingNavActions {
   var added = 0;
   var managed = 0;
   var loggedOut = 0;
+  var updates = 0;
 
   NavActions get actions => NavActions(
     onOpenPage: pages.add,
@@ -92,5 +96,6 @@ class RecordingNavActions {
     onLogout: () => loggedOut++,
     onCancelTask: cancelled.add,
     onUndoTask: undone.add,
+    onOpenUpdate: () => updates++,
   );
 }

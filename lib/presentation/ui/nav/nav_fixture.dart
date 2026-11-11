@@ -65,7 +65,7 @@ abstract final class NavFixture {
     Set<NavPage> hidden = const {},
     bool pinned = false,
     bool ctrlHintSeen = true,
-    bool updateAvailable = false,
+    NavUpdateData? update,
     NavAccountData? account,
     ImageProvider? preview,
   }) => NavViewData(
@@ -74,7 +74,7 @@ abstract final class NavFixture {
     hidden: hidden,
     pinned: pinned,
     ctrlHintSeen: ctrlHintSeen,
-    updateAvailable: updateAvailable,
+    update: update,
     account: account ?? NavFixture.account,
     generation: preview == null
         ? generation

@@ -2437,6 +2437,75 @@ class _SettingsUpscalePageState extends State<SettingsUpscalePage> {
       danger: true,
       onConfirm: () => a.onUpscaleRemove(m.id),
     );
+    Widget percentage(SettingsUpscaleModel m) => m.total <= 0 || m.cancelling
+        ? const SizedBox.shrink()
+        : Text(
+            SettingsFormat.percent(m.received / m.total),
+            style: UiText.mono(11, color: c.accent),
+          );
+
+    Widget? activity(SettingsUpscaleModel m) {
+      final status = m.status;
+      if (m.diagnostics case final diagnostics?) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: 6,
+          children: [
+            Text(
+              status ?? l.set_upFailed,
+              style: UiText.sans(11, color: c.error),
+            ),
+            SettingsBtn(
+              key: Key('upscale-diagnostics-${m.id}'),
+              label: l.set_abCopyDiag,
+              small: true,
+              onTap: () => a.onUpscaleCopyDiagnostics(diagnostics),
+            ),
+          ],
+        );
+      }
+      if (m.state != SettingsInstallState.downloading) return null;
+      final showBytes = !m.cancelling && (m.total > 0 || m.received > 0);
+      final detailStyle = UiText.mono(11, color: c.faint);
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 6,
+        children: [
+          if (showBytes && status != null) Text(status, style: detailStyle),
+          if (showBytes && m.total > 0)
+            SettingsBar(value: m.received / m.total),
+          Row(
+            spacing: 8,
+            children: [
+              Expanded(
+                child: Text(
+                  showBytes
+                      ? l.set_upProgress(
+                          SettingsFormat.bytes(m.received),
+                          m.total > 0 ? SettingsFormat.bytes(m.total) : '—',
+                          SettingsFormat.bytes(m.speed),
+                        )
+                      : status ?? l.localUpscale_downloadProgress,
+                  maxLines: showBytes ? 1 : null,
+                  overflow: showBytes ? TextOverflow.ellipsis : null,
+                  style: detailStyle,
+                ),
+              ),
+              if (!m.cancelling)
+                UiPressable(
+                  key: Key('upscale-cancel-${m.id}'),
+                  onTap: () => a.onUpscaleCancel(m.id),
+                  builder: (context, _) => Text(
+                    l.set_cancel,
+                    style: UiText.sans(11, color: c.accent),
+                  ),
+                ),
+            ],
+          ),
+        ],
+      );
+    }
+
     Widget card(SettingsUpscaleModel m, {required bool seed}) {
       final downloading = m.state == SettingsInstallState.downloading;
       final installed =
@@ -2448,29 +2517,28 @@ class _SettingsUpscalePageState extends State<SettingsUpscalePage> {
         SettingsInstallState.failed => l.set_upFailed,
         _ => l.set_upNotInstalled,
       };
+      final feedback = activity(m);
       final Widget action = downloading
-          ? Text(
-              SettingsFormat.percent(m.total <= 0 ? 0 : m.received / m.total),
-              style: UiText.mono(11, color: c.accent),
-            )
+          ? percentage(m)
           : installed
           ? (m.state == SettingsInstallState.builtin
                 ? const SizedBox()
                 : seed
                 ? SettingsMoreButton(
+                    enabled: !up.busy,
                     items: [(l.set_delete, () => remove(m), true)],
                   )
                 : SettingsIconBtn(
                     glyph: SettingsGlyphs.trash,
                     tooltip: l.set_delete,
-                    onTap: () => remove(m),
+                    onTap: up.busy ? null : () => remove(m),
                   ))
           : SettingsBtn(
               key: Key('upscale-install-${m.id}'),
               label: seed ? l.set_install : l.set_download,
               glyph: UiGlyphs.download,
               small: true,
-              onTap: () => a.onUpscaleInstall(m.id),
+              onTap: up.busy ? null : () => a.onUpscaleInstall(m.id),
             );
       return Container(
         key: Key('upscale-${m.id}'),
@@ -2535,41 +2603,15 @@ class _SettingsUpscalePageState extends State<SettingsUpscalePage> {
                   ? UiText.sans(12, color: c.muted)
                   : UiText.mono(12, color: c.muted),
             ),
-            if (downloading) ...[
-              const SizedBox(height: 12),
-              SettingsBar(value: m.total <= 0 ? 0 : m.received / m.total),
-              const SizedBox(height: 6),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      l.set_upProgress(
-                        SettingsFormat.bytes(m.received),
-                        m.total > 0 ? SettingsFormat.bytes(m.total) : '—',
-                        SettingsFormat.bytes(m.speed),
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: UiText.mono(11, color: c.faint),
-                    ),
-                  ),
-                  UiPressable(
-                    key: Key('upscale-cancel-${m.id}'),
-                    onTap: () => a.onUpscaleCancel(m.id),
-                    builder: (context, _) => Text(
-                      l.set_cancel,
-                      style: UiText.sans(11, color: c.accent),
-                    ),
-                  ),
-                ],
-              ),
-            ] else ...[
+            if (!downloading) ...[
               const SizedBox(height: 10),
               Wrap(
                 spacing: 10,
                 runSpacing: 2,
                 children: [
-                  if (!seed)
+                  if (!seed &&
+                      (m.state != SettingsInstallState.failed ||
+                          feedback == null))
                     Text(stateText, style: UiText.mono(11, color: c.faint)),
                   Text(
                     m.bytes > 0 ? SettingsFormat.bytes(m.bytes) : '—',
@@ -2583,6 +2625,7 @@ class _SettingsUpscalePageState extends State<SettingsUpscalePage> {
                 ],
               ),
             ],
+            if (feedback != null) ...[const SizedBox(height: 12), feedback],
           ],
         ),
       );
@@ -2728,7 +2771,7 @@ class _SettingsUpscalePageState extends State<SettingsUpscalePage> {
                         label: l.set_upImport,
                         glyph: SettingsGlyphs.upload,
                         small: true,
-                        onTap: a.onUpscaleImport,
+                        onTap: up.busy ? null : a.onUpscaleImport,
                       ),
                       Text(
                         l.set_upImportHint,
@@ -2834,7 +2877,7 @@ class _SettingsUpscalePageState extends State<SettingsUpscalePage> {
             ],
           ],
         ),
-        if (up.rtx != null)
+        if (up.rtx case final rtx?)
           SettingsSection(
             title: l.set_upRtx,
             badge: const UpscaleBrandLogo.nvidia(
@@ -2846,26 +2889,30 @@ class _SettingsUpscalePageState extends State<SettingsUpscalePage> {
               SettingsRow(
                 title: l.set_upRtxName,
                 subtitle: l.set_upRtxNeeds,
-                control:
-                    up.rtx!.state == SettingsInstallState.installed ||
-                        up.rtx!.state == SettingsInstallState.builtin
+                below: activity(rtx),
+                control: rtx.state == SettingsInstallState.downloading
+                    ? percentage(rtx)
+                    : rtx.state == SettingsInstallState.installed ||
+                          rtx.state == SettingsInstallState.builtin
                     ? Row(
                         mainAxisSize: MainAxisSize.min,
                         spacing: 8,
                         children: [
                           UiMini(l.set_upInstalled, tone: UiMiniTone.ok),
                           SettingsMoreButton(
-                            items: [
-                              (l.set_delete, () => remove(up.rtx!), true),
-                            ],
+                            enabled: !up.busy,
+                            items: [(l.set_delete, () => remove(rtx), true)],
                           ),
                         ],
                       )
                     : SettingsBtn(
+                        key: Key('upscale-install-${rtx.id}'),
                         label: l.set_install,
                         glyph: UiGlyphs.download,
                         small: true,
-                        onTap: () => a.onUpscaleInstall(up.rtx!.id),
+                        onTap: up.busy
+                            ? null
+                            : () => a.onUpscaleInstall(rtx.id),
                       ),
               ),
             ],

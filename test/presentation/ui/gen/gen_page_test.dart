@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_contract.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_parts.dart'
-    show GenTokenBar;
+    show GenIb, GenTokenBar;
 import 'package:nai_launcher/presentation/ui/gen/gen_fixture.dart';
 import 'package:nai_launcher/presentation/ui/kit/ui_preview_image.dart';
 import 'package:nai_launcher/presentation/utils/generation_error_presentation.dart';
@@ -477,6 +477,62 @@ void main() {
       expect(find.byKey(const Key('gen-img2img-body')), findsOneWidget);
       await tapKey(t, 'gen-img2img-sketch');
       expect(r.called('onImg2ImgSketch'), isTrue);
+    });
+
+    testWidgets('参考行展开时清除整行悬停，箭头保留独立悬停', (t) async {
+      await pump(
+        t,
+        GenFixture.empty().copyWith(
+          refs: const GenRefsData(
+            vibes: GenVibesData(),
+            precise: GenPreciseData(),
+          ),
+        ),
+        1600,
+        1300,
+      );
+      Color? fill(Finder area) {
+        final container = find
+            .descendant(of: area, matching: find.byType(Container))
+            .first;
+        final decoration =
+            t.widget<Container>(container).decoration as BoxDecoration;
+        return decoration.color;
+      }
+
+      final mouse = await t.createGesture(kind: PointerDeviceKind.mouse);
+      await mouse.addPointer(location: const Offset(1, 1));
+      for (final id in ['img2img', 'vibe', 'precise']) {
+        final row = find.byKey(Key('gen-ref-$id-row'));
+        final body = find.byKey(Key('gen-$id-body'));
+        await t.ensureVisible(row);
+        await t.pumpAndSettle();
+        final title = t.getTopLeft(row) + const Offset(46, 23);
+        await mouse.moveTo(title);
+        await t.pump();
+        expect(fill(row), isNotNull, reason: id);
+        await mouse.down(title);
+        await mouse.up();
+        await t.pumpAndSettle();
+        expect(body, findsOneWidget);
+        expect(fill(row), isNull, reason: id);
+
+        final arrow = find
+            .descendant(of: row, matching: find.byType(GenIb))
+            .last;
+        expect(fill(arrow), isNull);
+        await mouse.moveTo(t.getCenter(arrow));
+        await t.pump();
+        expect(fill(arrow), isNotNull, reason: id);
+        expect(fill(row), isNull, reason: id);
+        await mouse.moveTo(title);
+        await mouse.down(title);
+        await mouse.up();
+        await t.pumpAndSettle();
+        expect(body, findsNothing);
+        expect(fill(row), isNotNull, reason: id);
+      }
+      await mouse.removePointer();
     });
 
     testWidgets('风格迁移和精准参考同时启用时两边都提示冲突，可一键暂停 Vibe', (t) async {

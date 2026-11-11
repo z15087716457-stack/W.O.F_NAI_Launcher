@@ -11625,5 +11625,33 @@
   "set_agMcpTest": "接続テスト",
   "set_agMcpJsonOne": "MCP サーバーを 1 つずつインポートしてください。",
   "set_agMcpPending": "次のターンで適用",
-  "ag_tool_agent_manage": "Agent を管理"
+  "ag_tool_agent_manage": "Agent を管理",
+  "navShell_updateDownloading": "更新をダウンロード中",
+  "navShell_updateReady": "再起動して更新",
+  "navShell_updateAvailableVersion": "{version} をダウンロードできます",
+  "navShell_updateReadyVersion": "{version} の準備ができました",
+  "navShell_updateDownloadProgress": "{percent}% · Studio は引き続き使えます",
+  "navShell_updateRetryHint": "詳細を確認して再試行",
+  "updateDownloadInBackground": "バックグラウンドでダウンロード",
+  "@navShell_updateAvailableVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "@navShell_updateReadyVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "@navShell_updateDownloadProgress": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  }
 }

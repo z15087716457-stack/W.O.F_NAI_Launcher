@@ -147,7 +147,21 @@ bool FlutterWindow::OnCreate() {
       [this](const flutter::MethodCall<flutter::EncodableValue>& call,
              std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>>
                  result) {
-        if (call.method_name() == "refreshFrame") {
+        if (call.method_name() == "getVisibleBounds") {
+          const HWND hwnd = GetHandle();
+          RECT bounds{};
+          if (IsIconic(hwnd) || !GetWindowRect(hwnd, &bounds) ||
+              !MonitorFromRect(&bounds, MONITOR_DEFAULTTONULL)) {
+            result->Success();
+            return;
+          }
+          const double scale = std::get<double>(*call.arguments());
+          result->Success(flutter::EncodableValue(flutter::EncodableList{
+              flutter::EncodableValue(bounds.left / scale),
+              flutter::EncodableValue(bounds.top / scale),
+              flutter::EncodableValue((bounds.right - bounds.left) / scale),
+              flutter::EncodableValue((bounds.bottom - bounds.top) / scale)}));
+        } else if (call.method_name() == "refreshFrame") {
           HWND hwnd = GetHandle();
           if (hwnd != nullptr) {
             RECT rect;

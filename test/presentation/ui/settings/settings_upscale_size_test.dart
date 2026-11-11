@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/data/models/upscale/local_upscale_models.dart';
 import 'package:nai_launcher/data/services/advanced_upscale_component_manager.dart';
 import 'package:nai_launcher/data/services/local_upscale_model_manager.dart';
+import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/generation/image_workflow_controller.dart';
 import 'package:nai_launcher/presentation/providers/generation/local_upscale_provider.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_contract.dart';
@@ -43,6 +44,7 @@ void main() {
   SettingsViewData view({
     bool installed = false,
     SettingsUpscaleOperation operation = const SettingsUpscaleOperation(),
+    AdvancedUpscaleInstallState advanced = const AdvancedUpscaleInstallState(),
   }) => SettingsFixture.view(page: SettingsPageId.upscale).copyWith(
     upscale: settingsUpscaleData(
       [
@@ -50,8 +52,9 @@ void main() {
           model.withInstalled(model.bundled || installed),
       ],
       operation,
-      const AdvancedUpscaleInstallState(),
+      advanced,
       const UpscaleWorkflowSettings(),
+      l10n: lookupAppLocalizations(const Locale('zh')),
     ),
   );
 
@@ -147,4 +150,110 @@ void main() {
       expect(t.takeException(), isNull);
     },
   );
+
+  testWidgets(
+    'SeedVR2 shows runtime stage, transfer, cancellation and failure',
+    (t) async {
+      const id = 'seedvr2-7b';
+      const cardKey = Key('upscale-seed7b');
+      final rec = await pumpSettings(
+        t,
+        data: view(
+          advanced: const AdvancedUpscaleInstallState(
+            id: id,
+            progress: AdvancedUpscaleProgress('runtime'),
+          ),
+        ),
+        window: 900,
+        height: 2100,
+      );
+      final host = t.state<SettingsHostState>(find.byType(SettingsHost));
+      final card = find.byKey(cardKey);
+      final l = lookupAppLocalizations(const Locale('zh'));
+      expect(find.text(l.localUpscale_installingRuntime), findsOneWidget);
+      expect(
+        find.descendant(of: card, matching: find.byType(SettingsBar)),
+        findsNothing,
+      );
+
+      const transfer = AdvancedUpscaleProgress(
+        'weights',
+        received: 4119864852,
+        total: 8239729704,
+        speed: 4194304,
+      );
+      host.updateData(
+        view(
+          advanced: const AdvancedUpscaleInstallState(
+            id: id,
+            progress: transfer,
+          ),
+        ),
+      );
+      await t.pumpAndSettle();
+      expect(
+        find.descendant(of: card, matching: find.text('50%')),
+        findsOneWidget,
+      );
+      expect(find.textContaining('4 MB/s'), findsOneWidget);
+      await t.tap(find.byKey(const Key('upscale-cancel-seed7b')));
+      expect(rec.calls, contains('cancel:seed7b'));
+      host.updateData(
+        view(
+          advanced: const AdvancedUpscaleInstallState(
+            id: id,
+            progress: transfer,
+            cancelling: true,
+          ),
+        ),
+      );
+      await t.pumpAndSettle();
+      expect(find.text(l.localUpscale_cancelling), findsOneWidget);
+      expect(find.byKey(const Key('upscale-cancel-seed7b')), findsNothing);
+      host.updateData(
+        view(
+          operation: const SettingsUpscaleOperation(
+            failedId: id,
+            failedPhase: 'weights',
+            error: LocalUpscaleException(
+              LocalUpscaleError.modelOperationFailed,
+              details: 'HTTP 403',
+            ),
+          ),
+        ),
+      );
+      await t.pumpAndSettle();
+      final stage = l.localUpscale_installFailed(
+        l.localUpscale_downloadProgress,
+      );
+      expect(find.textContaining(stage), findsOneWidget);
+      await t.tap(find.byKey(const Key('upscale-diagnostics-seed7b')));
+      expect(rec.calls.last, allOf(contains(stage), contains('HTTP 403')));
+      expect(t.takeException(), isNull);
+    },
+  );
+
+  testWidgets('RTX row exposes the shared download and cancel controls', (
+    t,
+  ) async {
+    final rec = await pumpSettings(
+      t,
+      data: view(
+        advanced: const AdvancedUpscaleInstallState(
+          id: 'rtx-vsr',
+          progress: AdvancedUpscaleProgress(
+            'component',
+            received: 25,
+            total: 100,
+          ),
+        ),
+      ),
+      height: 2100,
+    );
+    expect(find.text('25%'), findsOneWidget);
+    expect(find.byKey(const Key('upscale-install-rtxVideo')), findsNothing);
+    await t.tap(find.byKey(const Key('upscale-cancel-rtxVideo')));
+    expect(rec.calls, contains('cancel:rtxVideo'));
+    expect(t.takeException(), isNull);
+  });
 }

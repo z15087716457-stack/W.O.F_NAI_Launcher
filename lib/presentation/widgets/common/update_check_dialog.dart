@@ -13,17 +13,38 @@ import '../../../data/models/version/version_info.dart';
 import '../../providers/update_provider.dart';
 import '../../providers/image_generation_provider.dart';
 import '../../providers/style_explore/explore_run_runner.dart';
+import '../../providers/nav_activity_provider.dart';
+import '../../providers/nai_agent/nai_agent_workspace_provider.dart';
 import 'app_toast.dart';
 
-/// Installation waits for generation and exploration to be idle. Keeping this
-/// projection separate also lets widget tests run without user data or APIs.
-final updateTaskBusyProvider = Provider<bool>(
-  (ref) =>
+/// 安装前等待生成、探索、放大／批量任务及所有已创建的 Agent 会话。
+/// 关闭的 Agent 不因打开更新详情而初始化。
+final updateTaskBusyProvider = Provider.autoDispose<bool>((ref) {
+  final generation = ref.watch(
+    imageGenerationNotifierProvider.select((s) => s.isGenerating),
+  );
+  final explore = ref.watch(
+    exploreRunRunnerProvider.select((s) => s.isRunning),
+  );
+  final background = ref.watch(
+    navActivityProvider.select((s) => s.tasks.any((task) => !task.finished)),
+  );
+  final agent =
+      ref.exists(naiAgentControllerProvider) &&
       ref.watch(
-        imageGenerationNotifierProvider.select((s) => s.isGenerating),
-      ) ||
-      ref.watch(exploreRunRunnerProvider.select((s) => s.isRunning)),
-);
+        naiAgentControllerProvider.select(
+          (c) => c.heldRuntimes.any(
+            (r) =>
+                r.running ||
+                r.starting ||
+                r.waitingForSlot ||
+                r.compacting ||
+                r.pendingSends > 0,
+          ),
+        ),
+      );
+  return generation || explore || background || agent;
+});
 
 /// Release notes and update actions share one dialog throughout the download.
 class UpdateCheckDialog extends ConsumerWidget {
@@ -532,15 +553,15 @@ class UpdateCheckDialog extends ConsumerWidget {
       ],
       UpdateStatus.downloading => [
         TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text(context.l10n.updateInstallLater),
-        ),
-        TextButton(
           onPressed: () {
             ref.read(updateStateProvider.notifier).cancelDownload();
             AppToast.info(context, context.l10n.updateDownloadCancelled);
           },
           child: Text(context.l10n.common_cancel),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(context.l10n.updateDownloadInBackground),
         ),
       ],
       UpdateStatus.downloaded => [

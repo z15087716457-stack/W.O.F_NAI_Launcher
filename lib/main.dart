@@ -122,10 +122,25 @@ void _runDeferredStartupStep(
   });
 }
 
-Future<WindowStateSnapshot> _saveCurrentWindowState() async {
+const _windowControlChannel = MethodChannel('com.nailauncher/window_control');
+
+Future<Rect?> _visibleWindowsBounds() async {
+  final bounds = await _windowControlChannel.invokeListMethod<double>(
+    'getVisibleBounds',
+    windowManager.getDevicePixelRatio(),
+  );
+  if (bounds == null) return null;
+  return Rect.fromLTWH(bounds[0], bounds[1], bounds[2], bounds[3]);
+}
+
+Future<WindowStateSnapshot?> _saveCurrentWindowState() async {
+  final bounds = Platform.isWindows
+      ? await _visibleWindowsBounds()
+      : await windowManager.getBounds();
+  if (bounds == null) return null;
   final snapshot = WindowStateSnapshot(
-    size: await windowManager.getSize(),
-    position: await windowManager.getPosition(),
+    size: bounds.size,
+    position: bounds.topLeft,
   );
   final box = Hive.box(StorageKeys.settingsBox);
   await persistWindowStateSnapshot(
@@ -149,6 +164,7 @@ class WindowStateObserver extends WidgetsBindingObserver {
         state == AppLifecycleState.detached) {
       try {
         final snapshot = await _saveCurrentWindowState();
+        if (snapshot == null) return;
 
         AppLogger.i(
           'Window state saved: ${snapshot.size.width}x${snapshot.size.height} at (${snapshot.position.dx}, ${snapshot.position.dy})',
@@ -250,6 +266,7 @@ class AppWindowListener extends WindowListener {
 
     try {
       final snapshot = await _saveCurrentWindowState();
+      if (snapshot == null) return;
 
       AppLogger.d(
         'Window size/position saved: ${snapshot.size.width}x${snapshot.size.height} at (${snapshot.position.dx}, ${snapshot.position.dy})',
@@ -276,6 +293,7 @@ class AppWindowListener extends WindowListener {
 
     try {
       final snapshot = await _saveCurrentWindowState();
+      if (snapshot == null) return;
 
       AppLogger.d(
         'Window position saved: (${snapshot.position.dx}, ${snapshot.position.dy})',
@@ -295,8 +313,7 @@ class AppWindowListener extends WindowListener {
 void setupWindowsWakeUpChannel() {
   if (!Platform.isWindows) return;
 
-  const channel = MethodChannel('com.nailauncher/window_control');
-  channel.setMethodCallHandler((call) async {
+  _windowControlChannel.setMethodCallHandler((call) async {
     if (call.method == 'wakeUp') {
       if (DesktopAppShutdownService.isShuttingDown) return;
       try {
@@ -319,9 +336,7 @@ void setupWindowsWakeUpChannel() {
 Future<void> refreshWindowFrame() async {
   if (!Platform.isWindows) return;
   try {
-    await const MethodChannel(
-      'com.nailauncher/window_control',
-    ).invokeMethod('refreshFrame');
+    await _windowControlChannel.invokeMethod('refreshFrame');
   } catch (e) {
     AppLogger.w('refreshWindowFrame failed: $e', 'Main');
   }
@@ -682,10 +697,18 @@ Future<void> _bootstrapPreparedApplication() async {
       await windowManager.waitUntilReadyToShow(windowOptions, () async {
         if (savedX != null && savedY != null) {
           await windowManager.setPosition(Offset(savedX, savedY));
-          AppLogger.d(
-            'Window state restored: ${effWidth}x$effHeight at ($savedX, $savedY)',
-            'Main',
-          );
+          if (Platform.isWindows && await _visibleWindowsBounds() == null) {
+            await windowManager.center();
+            AppLogger.i(
+              'Saved window was outside the displays; centered',
+              'Main',
+            );
+          } else {
+            AppLogger.d(
+              'Window state restored: ${effWidth}x$effHeight at ($savedX, $savedY)',
+              'Main',
+            );
+          }
         } else {
           AppLogger.d(
             'Window initialized with default state: ${effWidth}x$effHeight (centered)',

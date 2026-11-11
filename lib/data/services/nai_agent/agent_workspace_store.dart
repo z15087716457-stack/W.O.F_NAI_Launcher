@@ -514,6 +514,8 @@ class AgentWorkspaceStore {
       Directory(p.join(root.path, 'prompts'));
   Directory get globalSkillsDirectory => Directory(p.join(root.path, 'skills'));
   Future<void> _tail = Future.value();
+  // The workspace store lives for one app session. Always start with a closed dock.
+  bool _panelExpanded = false;
   static final _ids = RegExp(r'^[a-zA-Z0-9][a-zA-Z0-9_-]{0,100}$');
 
   Future<T> _write<T>(Future<T> Function() action) {
@@ -745,9 +747,10 @@ class AgentWorkspaceStore {
     return Map<String, dynamic>.from(value);
   }
 
-  Future<AgentSettings> readSettings() async => AgentSettings.fromJson(
-    await _read(File(p.join(root.path, 'settings.json'))),
-  );
+  Future<AgentSettings> readSettings() async => AgentSettings.fromJson({
+    ...await _read(File(p.join(root.path, 'settings.json'))),
+    'panelExpanded': _panelExpanded,
+  });
   Future<void> saveSettings(AgentSettings settings) => _write(() async {
     await _saveSettings(settings);
   });
@@ -850,7 +853,8 @@ class AgentWorkspaceStore {
         },
       );
     }
-    await _atomic(file, settings.toJson());
+    await _atomic(file, settings.toJson()..remove('panelExpanded'));
+    _panelExpanded = settings.panelExpanded;
   }
 
   Future<AgentWorkspace> createWorkspace(String name) => _write(() async {

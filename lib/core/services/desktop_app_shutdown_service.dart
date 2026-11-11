@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:tray_manager/tray_manager.dart';
 import 'package:window_manager/window_manager.dart';
@@ -70,6 +71,13 @@ class DesktopAppShutdownService {
     await _cleanup('Hive', Hive.close);
     if (isSupportedDesktop) {
       await _cleanup('Tray', trayManager.destroy);
+    }
+    if (Platform.isWindows && exitCode != null) {
+      await _cleanup('WebView composition', () async {
+        await const MethodChannel(
+          'com.pichillilorenzo/flutter_inappwebview_manager',
+        ).invokeMethod<void>('studioReleaseComposition');
+      });
     }
     AppLogger.i(
       'Application shutdown completed in ${elapsed.elapsedMilliseconds}ms',

@@ -11625,5 +11625,33 @@
   "set_agMcpTest": "测试连接",
   "set_agMcpJsonOne": "请一次导入一个 MCP 服务器。",
   "set_agMcpPending": "下轮生效",
-  "ag_tool_agent_manage": "管理 Agent"
+  "ag_tool_agent_manage": "管理 Agent",
+  "navShell_updateDownloading": "正在下载更新",
+  "navShell_updateReady": "重启以完成更新",
+  "navShell_updateAvailableVersion": "{version} 可供下载",
+  "navShell_updateReadyVersion": "{version} 已就绪",
+  "navShell_updateDownloadProgress": "{percent}% · 可继续使用 Studio",
+  "navShell_updateRetryHint": "点击查看原因并重试",
+  "updateDownloadInBackground": "后台下载",
+  "@navShell_updateAvailableVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "@navShell_updateReadyVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "@navShell_updateDownloadProgress": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  }
 }

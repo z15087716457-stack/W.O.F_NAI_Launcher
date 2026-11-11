@@ -10,6 +10,7 @@ import 'package:path/path.dart' as p;
 import 'package:nai_launcher/core/utils/app_support_directory.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../core/network/download_dio.dart';
 import '../../core/utils/fatal_diagnostics.dart';
 import '../models/upscale/local_upscale_models.dart';
 import 'owned_upscale_process.dart';
@@ -19,6 +20,22 @@ class AdvancedUpscaleCommand {
   final String host;
   final String executable;
   final List<String> arguments;
+}
+
+class AdvancedUpscaleProgress {
+  const AdvancedUpscaleProgress(
+    this.phase, {
+    this.received = 0,
+    this.total = 0,
+    this.speed = 0,
+  });
+
+  final String phase;
+  final int received;
+  final int total;
+  final int speed;
+
+  double? get fraction => total > 0 ? received / total : null;
 }
 
 /// Optional components. Listing and resolving never download a missing file.
@@ -35,11 +52,9 @@ class AdvancedUpscaleComponentManager {
        _loadAsset = loadAsset ?? _bundleBytes,
        _dio =
            dio ??
-           Dio(
-             BaseOptions(
-               connectTimeout: const Duration(seconds: 30),
-               receiveTimeout: const Duration(minutes: 3),
-             ),
+           createDownloadDio(
+             receiveTimeout: const Duration(minutes: 3),
+             resolveProxy: proxyAddress,
            );
 
   static const manifestSha256 =
@@ -355,7 +370,7 @@ class AdvancedUpscaleComponentManager {
   Future<File> _download(
     Map<String, dynamic> spec,
     LocalUpscaleCancellation cancellation,
-    void Function(String, double?)? progress,
+    void Function(AdvancedUpscaleProgress)? progress,
     String phase,
   ) async {
     cancellation.check();
@@ -372,6 +387,7 @@ class AdvancedUpscaleComponentManager {
     await _contained(partial.path);
     await _contained(complete.path);
     if (await complete.exists()) {
+      progress?.call(const AdvancedUpscaleProgress('checking'));
       await _verify(complete, spec);
       return complete;
     }
@@ -382,10 +398,30 @@ class AdvancedUpscaleComponentManager {
     }
     final token = CancelToken();
     final stop = cancellation.listen(() => token.cancel());
+    final sample = Stopwatch();
+    var lastReceived = received;
+    void report() {
+      final elapsed = sample.elapsedMicroseconds;
+      progress?.call(
+        AdvancedUpscaleProgress(
+          phase,
+          received: received,
+          total: expected,
+          speed: elapsed == 0
+              ? 0
+              : (received - lastReceived) * 1000000 ~/ elapsed,
+        ),
+      );
+      lastReceived = received;
+      sample
+        ..reset()
+        ..start();
+    }
+
     try {
+      report();
       while (received < expected) {
         cancellation.check();
-        progress?.call(phase, received / expected);
         final response = await _dio.get<ResponseBody>(
           spec['url'] as String,
           options: Options(
@@ -403,7 +439,12 @@ class AdvancedUpscaleComponentManager {
             throw const LocalUpscaleException(LocalUpscaleError.integrity);
           }
         } else if (response.statusCode == 200) {
-          received = 0; // Server does not support resume: replace the partial.
+          if (received > 0) {
+            received = 0; // Replace the partial when the host ignores Range.
+            sample.stop();
+            sample.reset();
+            report();
+          }
         } else {
           throw const LocalUpscaleException(
             LocalUpscaleError.modelOperationFailed,
@@ -421,7 +462,9 @@ class AdvancedUpscaleComponentManager {
               throw const LocalUpscaleException(LocalUpscaleError.integrity);
             }
             sink.add(chunk);
-            progress?.call(phase, received / expected);
+            if (sample.elapsedMilliseconds >= 200 || received == expected) {
+              report();
+            }
           }
           await sink.flush();
         } finally {
@@ -434,6 +477,7 @@ class AdvancedUpscaleComponentManager {
         }
       }
       cancellation.check();
+      progress?.call(const AdvancedUpscaleProgress('checking'));
       try {
         await _verify(partial, spec);
       } on LocalUpscaleException {
@@ -487,7 +531,7 @@ class AdvancedUpscaleComponentManager {
   Future<void> install(
     String id, {
     required LocalUpscaleCancellation cancellation,
-    void Function(String, double?)? onProgress,
+    void Function(AdvancedUpscaleProgress)? onProgress,
   }) async {
     final key = _key(id);
     claimInference();
@@ -528,7 +572,7 @@ class AdvancedUpscaleComponentManager {
         final files = (spec['files'] as List).cast<Map<String, dynamic>>();
         await _extract(zip, stage, files);
         cancellation.check();
-        onProgress?.call('checking', null);
+        onProgress?.call(const AdvancedUpscaleProgress('checking'));
         probe = await runOwnedUpscaleProcess(
           host: host,
           executable: host,
@@ -617,7 +661,11 @@ class AdvancedUpscaleComponentManager {
             p.join(stage.path, 'requirements.lock'),
           ],
         ]) {
-          onProgress?.call(args.first == 'venv' ? 'python' : 'runtime', null);
+          onProgress?.call(
+            AdvancedUpscaleProgress(
+              args.first == 'venv' ? 'python' : 'runtime',
+            ),
+          );
           final result = await runOwnedUpscaleProcess(
             host: host,
             executable: uvExe,
@@ -636,7 +684,7 @@ class AdvancedUpscaleComponentManager {
             );
           }
         }
-        onProgress?.call('checking', null);
+        onProgress?.call(const AdvancedUpscaleProgress('checking'));
         probe = await runOwnedUpscaleProcess(
           host: host,
           executable: python,
@@ -688,7 +736,7 @@ class AdvancedUpscaleComponentManager {
           key == 'rtx' ? LocalUpscaleError.noRtx : LocalUpscaleError.noCuda,
         );
       }
-      onProgress?.call('checking', null);
+      onProgress?.call(const AdvancedUpscaleProgress('checking'));
       await _publishReceipt(id, name, verified);
       stage = null; // The venv must remain at its original absolute path.
     } finally {
@@ -751,8 +799,9 @@ class AdvancedUpscaleComponentManager {
     String id,
     Map<String, dynamic> receipt,
     LocalUpscaleCancellation cancellation,
-    void Function(String, double?)? progress,
+    void Function(AdvancedUpscaleProgress)? progress,
   ) async {
+    progress?.call(const AdvancedUpscaleProgress('checking'));
     await _verifyReceipt(id, receipt, cancellation, requireModel: false);
     final root = p.join(directory.path, 'installs', receipt['installation']);
     final added = <File>[];
@@ -763,7 +812,6 @@ class AdvancedUpscaleComponentManager {
           .toList();
       await _installSeedInt8Files(id, root, files, added: added);
       if (id.endsWith('-int8')) {
-        progress?.call('checking', null);
         final probe = await runOwnedUpscaleProcess(
           host: await worker(),
           executable: p.join(root, 'venv', 'Scripts', 'python.exe'),

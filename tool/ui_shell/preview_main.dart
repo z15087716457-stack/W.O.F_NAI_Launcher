@@ -136,7 +136,12 @@ class _PreviewAppState extends State<_PreviewApp> {
       pinned: _pinned,
       hidden: _hidden,
       ctrlHintSeen: _ctrlHintSeen,
-      updateAvailable: _update,
+      update: _update
+          ? const NavUpdateData(
+              status: NavUpdateStatus.available,
+              version: '2.3.3',
+            )
+          : null,
       account: _signedIn ? null : const NavAccountData(),
       generation: switch (_gen) {
         _Gen.idle => const NavGeneration.idle(),
@@ -173,7 +178,7 @@ class _PreviewAppState extends State<_PreviewApp> {
       ctrlNumbers: _ctrlNumbers,
       ctrlHintSeen: base.ctrlHintSeen,
       pinned: base.pinned,
-      updateAvailable: base.updateAvailable,
+      update: base.update,
       account: base.account,
       generation: base.generation,
       tasks: base.tasks,
@@ -195,6 +200,7 @@ class _PreviewAppState extends State<_PreviewApp> {
     onLogout: () => setState(() => _signedIn = false),
     onCancelTask: (id) => setState(() => _cancelling.add(id)),
     onUndoTask: (id) => setState(() => _undone.add(id)),
+    onOpenUpdate: () => _log('onOpenUpdate'),
   );
 
   StatsViewData get _stats => StatsFixture.view(

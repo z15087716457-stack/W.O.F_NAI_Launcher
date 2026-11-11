@@ -246,6 +246,8 @@ class SettingsHostState extends State<SettingsHost> {
         onImportTagSemantics: () => call('importTagSemantics'),
         onTestComfy: () => call('testComfy'),
         onUpscaleInstall: (id) => call('install:$id'),
+        onUpscaleCancel: (id) => call('cancel:$id'),
+        onUpscaleCopyDiagnostics: (text) => call('upscaleDiagnostics:$text'),
         onAssign:
             (
               t, {

@@ -28,7 +28,17 @@ void main() {
 
   final scenes =
       <(String, NavViewData, Size, Future<void> Function(WidgetTester)?)>[
-        ('rail', NavFixture.view(updateAvailable: true), _small, null),
+        (
+          'rail',
+          NavFixture.view(
+            update: const NavUpdateData(
+              status: NavUpdateStatus.available,
+              version: '2.3.3',
+            ),
+          ),
+          _small,
+          null,
+        ),
         (
           'status',
           NavFixture.view(
@@ -93,9 +103,20 @@ void main() {
           await tester.pumpAndSettle();
         }
         final masks = <Rect>[];
-        for (final key in ['main-nav-avatar', 'main-nav-panel-account']) {
+        for (final key in [
+          'main-nav-avatar',
+          'main-nav-panel-account',
+          if (data.update != null) 'main-nav-update',
+        ]) {
           final anchor = find.byKey(Key(key));
           if (anchor.evaluate().isNotEmpty) masks.add(tester.getRect(anchor));
+        }
+        if (data.update != null) {
+          // 只排除已移除的旧设置红点，不放宽整个设置按钮的比对。
+          final center = tester.getCenter(
+            find.byKey(const Key('main-nav-settings')),
+          );
+          masks.add(Rect.fromLTWH(center.dx + 7, center.dy - 15, 8, 8));
         }
         await expectOutsideApprovedRegions(
           tester,

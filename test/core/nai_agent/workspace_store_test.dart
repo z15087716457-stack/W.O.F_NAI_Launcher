@@ -13,6 +13,28 @@ void main() {
   });
   tearDown(() => root.delete(recursive: true));
 
+  test('Agent starts collapsed and keeps its saved width', () async {
+    final file = File('${root.path}/settings.json');
+    await file.writeAsString(
+      jsonEncode({'panelExpanded': true, 'panelWidth': 680}),
+    );
+    final initial = await store.readSettings();
+    expect(initial.panelExpanded, isFalse);
+    expect(initial.panelWidth, 680);
+
+    await store.patchSettings({'panelExpanded': true});
+    await store.patchSettings({'panelWidth': 720});
+    expect((await store.readSettings()).panelExpanded, isTrue);
+    expect(
+      jsonDecode(await file.readAsString()),
+      isNot(contains('panelExpanded')),
+    );
+
+    final restarted = await AgentWorkspaceStore(root).readSettings();
+    expect(restarted.panelExpanded, isFalse);
+    expect(restarted.panelWidth, 720);
+  });
+
   test(
     'suggestion and cache settings default, serialize and persist',
     () async {

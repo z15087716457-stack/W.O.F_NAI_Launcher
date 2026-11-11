@@ -7,10 +7,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/services/desktop_app_shutdown_service.dart';
 import '../../../core/services/settings_gpu_probe.dart';
+import '../../../core/utils/localization_extension.dart';
 import '../../../data/models/upscale/local_upscale_models.dart';
+import '../../../data/services/advanced_upscale_component_manager.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../providers/generation/image_workflow_controller.dart';
 import '../../providers/generation/local_upscale_provider.dart';
 import '../../ui/settings/settings_contract.dart';
+import '../../widgets/common/local_upscale_labels.dart';
 import 'settings_values.dart';
 
 /// Public contract IDs are translated here; managers always receive catalog IDs.
@@ -35,13 +39,17 @@ class SettingsUpscaleOperation {
     this.received = 0,
     this.total = 0,
     this.speed = 0,
+    this.removing = false,
+    this.cancelling = false,
     this.error,
     this.failedId,
+    this.failedPhase,
   });
   final String? id;
   final int received, total, speed;
-  final Object? error;
-  final String? failedId;
+  final bool removing, cancelling;
+  final LocalUpscaleException? error;
+  final String? failedId, failedPhase;
 }
 
 final settingsUpscaleOperationProvider =
@@ -70,7 +78,16 @@ class SettingsUpscaleOperations extends Notifier<SettingsUpscaleOperation> {
 
   void cancel(String id) {
     final actual = settingsUpscaleId(id);
-    if (state.id == actual) _cancel?.cancel();
+    if (state.id == actual && !state.removing && !state.cancelling) {
+      state = SettingsUpscaleOperation(
+        id: actual,
+        received: state.received,
+        total: state.total,
+        speed: state.speed,
+        cancelling: true,
+      );
+      _cancel?.cancel();
+    }
     if (ref.read(advancedUpscaleInstallProvider).id == actual) {
       ref.read(advancedUpscaleInstallProvider.notifier).cancel();
     }
@@ -88,8 +105,9 @@ class SettingsUpscaleOperations extends Notifier<SettingsUpscaleOperation> {
   }
 
   Future<void> _operate(String id, bool remove) async {
-    state = SettingsUpscaleOperation(id: id);
+    state = SettingsUpscaleOperation(id: id, removing: remove);
     final token = _cancel = CancelToken();
+    String? failedPhase;
     try {
       if (advancedUpscaleCatalog.any((model) => model.id == id)) {
         final actions = ref.read(advancedUpscaleInstallProvider.notifier);
@@ -98,8 +116,11 @@ class SettingsUpscaleOperations extends Notifier<SettingsUpscaleOperation> {
         } else {
           await actions.install(id);
         }
-        final error = ref.read(advancedUpscaleInstallProvider).error;
-        if (error != null) throw LocalUpscaleException(error);
+        final result = ref.read(advancedUpscaleInstallProvider);
+        if (result.error case final error?) {
+          if (!remove) failedPhase = result.phase;
+          throw LocalUpscaleException(error, details: result.details);
+        }
       } else {
         final manager = ref.read(localUpscaleModelManagerProvider);
         if (remove) {
@@ -131,7 +152,19 @@ class SettingsUpscaleOperations extends Notifier<SettingsUpscaleOperation> {
       if (!_disposed) {
         state = cancelled
             ? const SettingsUpscaleOperation()
-            : SettingsUpscaleOperation(error: error, failedId: id);
+            : SettingsUpscaleOperation(
+                error: error is LocalUpscaleException
+                    ? error
+                    : LocalUpscaleException(
+                        LocalUpscaleError.modelOperationFailed,
+                        details:
+                            AdvancedUpscaleComponentManager.safeDiagnostics(
+                              '$error',
+                            ),
+                      ),
+                failedId: id,
+                failedPhase: failedPhase,
+              );
       }
       if (cancelled) return;
       rethrow;
@@ -175,7 +208,9 @@ SettingsUpscaleData settingsUpscaleData(
   AdvancedUpscaleInstallState advanced,
   UpscaleWorkflowSettings workflow, {
   SettingsGpuInfo? gpu,
+  AppLocalizations? l10n,
 }) {
+  final l = l10n ?? currentL10n;
   SettingsUpscaleModel map(LocalUpscaleModel model) {
     final id =
         settingsUpscaleIds.entries
@@ -183,23 +218,54 @@ SettingsUpscaleData settingsUpscaleData(
             .firstOrNull
             ?.key ??
         model.id;
-    final active = operation.id == model.id || advanced.id == model.id;
+    final active = operation.id == model.id
+        ? !operation.removing
+        : advanced.id == model.id;
+    final progress = active && advanced.id == model.id
+        ? advanced.progress
+        : null;
+    final cancelling =
+        (operation.id == model.id && operation.cancelling) ||
+        (advanced.id == model.id && advanced.cancelling);
+    final failure = !active && operation.failedId == model.id
+        ? operation.error
+        : null;
+    String? status;
+    String? diagnostics;
+    if (failure != null) {
+      final reason = localUpscaleErrorLabel(l, failure.code);
+      final phase = operation.failedPhase;
+      status = phase == null
+          ? reason
+          : '${l.localUpscale_installFailed(localUpscaleInstallPhaseLabel(l, phase))}\n$reason';
+      final details = failure.details;
+      diagnostics = details == null || details.isEmpty
+          ? status
+          : '$status\n$details';
+    } else if (cancelling) {
+      status = l.localUpscale_cancelling;
+    } else if (progress != null) {
+      status = localUpscaleInstallPhaseLabel(l, progress.phase);
+    }
     return SettingsUpscaleModel(
       id: id,
-      state: operation.failedId == model.id && operation.error != null
-          ? SettingsInstallState.failed
-          : active
+      state: active
           ? SettingsInstallState.downloading
           : model.bundled
           ? SettingsInstallState.builtin
           : model.installed
           ? SettingsInstallState.installed
+          : failure != null
+          ? SettingsInstallState.failed
           : SettingsInstallState.notInstalled,
       bytes: model.modelBytes,
       file: model.engineName,
-      received: operation.id == model.id ? operation.received : 0,
-      total: operation.id == model.id ? operation.total : 0,
-      speed: operation.id == model.id ? operation.speed : 0,
+      received: progress?.received ?? (active ? operation.received : 0),
+      total: progress?.total ?? (active ? operation.total : 0),
+      speed: progress?.speed ?? (active ? operation.speed : 0),
+      status: status,
+      diagnostics: diagnostics,
+      cancelling: cancelling,
       isDefault:
           workflow.backend == UpscaleBackend.local &&
           workflow.localModel == model.id,
@@ -207,6 +273,7 @@ SettingsUpscaleData settingsUpscaleData(
   }
 
   return SettingsUpscaleData(
+    busy: operation.id != null || advanced.running,
     gpuName: gpu?.name,
     vramGb: gpu == null ? 0 : (gpu.vramMb / 1024).round(),
     cudaVersion: gpu?.cuda ?? '',

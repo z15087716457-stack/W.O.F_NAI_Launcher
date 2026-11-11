@@ -41,7 +41,7 @@ class NavViewData {
     this.ctrlHintSeen = true,
     this.pinned = false,
     this.reducedMotion = false,
-    this.updateAvailable = false,
+    this.update,
     this.account = const NavAccountData(),
     this.generation = const NavGeneration.idle(),
     this.tasks = const [],
@@ -76,8 +76,8 @@ class NavViewData {
   /// 系统级的减少动态效果界面自己读 `MediaQuery`，不用传。
   final bool reducedMotion;
 
-  /// 设置图标上的更新红点（`updateStateProvider.hasNewVersion`）。
-  final bool updateAvailable;
+  /// 有已知新版本时显示底部更新入口；检查中／无新版／检查失败为 null。
+  final NavUpdateData? update;
 
   final NavAccountData account;
 
@@ -88,6 +88,36 @@ class NavViewData {
   /// 任务结束后接线方继续保留 10 秒（[NavTask.finished] = true），再从列表里去掉。
   /// 生图不放在这里：正在生成时界面自己把 [generation] 列为第一行。
   final List<NavTask> tasks;
+}
+
+enum NavUpdateStatus {
+  available,
+  downloading,
+  downloaded,
+  installing,
+  downloadFailed,
+  installFailed,
+}
+
+@immutable
+class NavUpdateData {
+  const NavUpdateData({
+    required this.status,
+    this.version,
+    this.progress = 0,
+    this.manualReplace = false,
+  });
+
+  final NavUpdateStatus status;
+  final String? version;
+
+  /// 接线处归一化到 0..1 的下载进度。
+  final double progress;
+  final bool manualReplace;
+
+  bool get failed =>
+      status == NavUpdateStatus.downloadFailed ||
+      status == NavUpdateStatus.installFailed;
 }
 
 /// 账号区：头像、展开浮层头部、账号弹窗都用这一份。
@@ -281,6 +311,7 @@ class NavActions {
     required this.onLogout,
     required this.onCancelTask,
     required this.onUndoTask,
+    required this.onOpenUpdate,
   });
 
   /// 切到某页（`navigationShell.goBranch`）。后台任务里生图那行的“查看”也走这里。
@@ -310,6 +341,9 @@ class NavActions {
   final ValueChanged<String> onCancelTask;
   final ValueChanged<String> onUndoTask;
 
+  /// 只打开共用更新详情；下载、安装和重启必须在详情里明确触发。
+  final VoidCallback onOpenUpdate;
+
   static final none = NavActions(
     onOpenPage: (_) {},
     onPinnedChanged: (_) {},
@@ -322,5 +356,6 @@ class NavActions {
     onLogout: () {},
     onCancelTask: (_) {},
     onUndoTask: (_) {},
+    onOpenUpdate: () {},
   );
 }

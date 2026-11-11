@@ -11637,5 +11637,33 @@
   "set_agMcpTest": "Test connection",
   "set_agMcpJsonOne": "Import one MCP server at a time.",
   "set_agMcpPending": "Applies next turn",
-  "ag_tool_agent_manage": "Manage Agent"
+  "ag_tool_agent_manage": "Manage Agent",
+  "navShell_updateDownloading": "Downloading update",
+  "navShell_updateReady": "Restart to update",
+  "navShell_updateAvailableVersion": "{version} available to download",
+  "@navShell_updateAvailableVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "navShell_updateReadyVersion": "{version} ready",
+  "@navShell_updateReadyVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "navShell_updateDownloadProgress": "{percent}% · Keep using Studio",
+  "@navShell_updateDownloadProgress": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "navShell_updateRetryHint": "View details and retry",
+  "updateDownloadInBackground": "Download in background"
 }

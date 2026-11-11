@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,6 +7,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:nai_launcher/core/shortcuts/default_shortcuts.dart';
+import 'package:nai_launcher/core/services/update_installer_service.dart';
+import 'package:nai_launcher/data/models/version/version_info.dart';
+import 'package:nai_launcher/data/models/version/release_asset_info.dart';
 import 'package:nai_launcher/core/shortcuts/shortcut_config.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/data/models/auth/saved_account.dart';
@@ -29,6 +33,9 @@ import 'package:nai_launcher/presentation/router/app_router.dart';
 import 'package:nai_launcher/presentation/ui/nav/nav_contract.dart';
 import 'package:nai_launcher/presentation/ui/nav/nav_shell.dart';
 import 'package:nai_launcher/presentation/wiring/nav_wiring.dart';
+import 'package:nai_launcher/presentation/widgets/navigation/retained_branch_viewport.dart';
+import 'package:nai_launcher/presentation/widgets/common/update_check_dialog.dart';
+import 'package:nai_launcher/presentation/widgets/common/update_notice_banner.dart';
 
 class _Shell extends Mock implements StatefulNavigationShell {
   @override
@@ -101,8 +108,32 @@ class _Shortcuts extends ShortcutConfigNotifier {
 }
 
 class _Update extends UpdateStateNotifier {
+  static const asset = ReleaseAssetInfo(
+    type: ReleaseAssetType.windowsPortable,
+    platform: 'windows',
+    fileName: 'update.zip',
+    downloadUrl: 'https://example.test/update.zip',
+    sha256: 'fixture-only-checksum',
+  );
+  static const info = VersionInfo(version: '2.3.3', primaryAsset: asset);
+  int downloads = 0, installs = 0;
   @override
-  UpdateState build() => const UpdateState(status: UpdateStatus.available);
+  UpdateState build() =>
+      const UpdateState(status: UpdateStatus.available, versionInfo: info);
+  void emit(UpdateState value) => state = value;
+  @override
+  Future<void> downloadUpdate() async {
+    downloads++;
+    state = state.copyWith(
+      status: UpdateStatus.downloading,
+      downloadProgress: .46,
+    );
+  }
+
+  @override
+  Future<void> installDownloadedUpdate() async {
+    installs++;
+  }
 }
 
 class _Generation extends ImageGenerationNotifier {
@@ -327,6 +358,7 @@ void main() {
     WidgetTester tester, {
     bool realCommands = false,
     bool desktop = false,
+    List<Widget>? branches,
   }) async {
     branchIndex = AppBranch.statistics.index;
     shell = _Shell();
@@ -343,6 +375,7 @@ void main() {
         subscriptionNotifierProvider.overrideWith(_Subscription.new),
         shortcutConfigNotifierProvider.overrideWith(_Shortcuts.new),
         updateStateProvider.overrideWith(_Update.new),
+        updateTaskBusyProvider.overrideWithValue(false),
         imageGenerationNotifierProvider.overrideWith(_Generation.new),
         localUpscaleTaskProvider.overrideWith(_Local.new),
         cloudUpscaleTaskProvider.overrideWith(_Cloud.new),
@@ -358,7 +391,9 @@ void main() {
           locale: const Locale('zh'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: desktop
+          home: branches != null
+              ? MainShell(navigationShell: shell, children: branches)
+              : desktop
               ? DesktopShell(
                   navigationShell: shell,
                   content: const Text('Content'),
@@ -378,6 +413,47 @@ void main() {
   NavShell view(WidgetTester tester) =>
       tester.widget<NavShell>(find.byType(NavShell));
 
+  testWidgets('main shell keeps hidden branch layouts out of window resizing', (
+    tester,
+  ) async {
+    addTearDown(tester.view.reset);
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(1400, 900);
+    final layouts = <int, int>{};
+    await mount(
+      tester,
+      branches: [
+        for (final branch in AppBranch.values)
+          LayoutBuilder(
+            builder: (context, constraints) {
+              layouts.update(branch.index, (n) => n + 1, ifAbsent: () => 1);
+              return SizedBox.expand(child: Text(branch.name));
+            },
+          ),
+      ],
+    );
+    final retained = tester
+        .widgetList<RetainedBranchViewport>(
+          find.byType(RetainedBranchViewport, skipOffstage: false),
+        )
+        .toList();
+    expect(retained, hasLength(6));
+    expect(retained.every((branch) => !branch.active), isTrue);
+    final before = Map<int, int>.of(layouts);
+    for (var i = 0; i < 8; i++) {
+      tester.view.physicalSize = Size(1420 + i * 20, 910 + i * 5);
+      await tester.pump();
+    }
+    for (final branch in AppBranch.values) {
+      if (branch == AppBranch.statistics) {
+        expect(layouts[branch.index], greaterThan(before[branch.index]!));
+      } else {
+        expect(layouts[branch.index], before[branch.index]);
+      }
+    }
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets(
     'wiring assembles providers and connects every preference and navigation action',
     (tester) async {
@@ -388,7 +464,7 @@ void main() {
       expect(data.account.others.single.id, 'other');
       expect(data.account.anlas, 300);
       expect(data.account.plan, 'Opus');
-      expect(data.updateAvailable, isTrue);
+      expect(data.update?.status, NavUpdateStatus.available);
       expect(data.shortcuts.length, 10);
       final actions = view(tester).actions;
       actions.onPinnedChanged(true);
@@ -582,6 +658,48 @@ void main() {
       expect(find.byType(NavWiring), findsOneWidget);
       expect(find.byType(NavShell), findsOneWidget);
       expect(find.text('Content'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'sidebar update reopens background downloads and requires an explicit install click',
+    (tester) async {
+      await mount(tester, desktop: true);
+      final update = container.read(updateStateProvider.notifier) as _Update;
+      expect(find.byType(UpdateNoticeBanner), findsNothing);
+      await tester.tap(find.byKey(const Key('main-nav-update')));
+      await tester.pumpAndSettle();
+      expect(find.byType(UpdateCheckDialog), findsOneWidget);
+      expect(update.downloads, 0);
+      expect(update.installs, 0);
+      await tester.tap(find.widgetWithText(FilledButton, '下载更新'));
+      await tester.pumpAndSettle();
+      expect(update.downloads, 1);
+      expect(view(tester).data.update?.status, NavUpdateStatus.downloading);
+      expect(view(tester).data.update?.progress, .46);
+      await tester.tap(find.widgetWithText(FilledButton, '后台下载'));
+      await tester.pumpAndSettle();
+      expect(find.byType(UpdateCheckDialog), findsNothing);
+      update.emit(
+        UpdateState(
+          status: UpdateStatus.downloaded,
+          versionInfo: _Update.info,
+          downloadedUpdate: DownloadedUpdate(
+            file: File('unused-test-update.zip'),
+            asset: _Update.asset,
+            version: '2.3.3',
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('main-nav-update')));
+      await tester.pumpAndSettle();
+      expect(update.installs, 0);
+      await tester.tap(find.widgetWithText(FilledButton, '安装并重启'));
+      await tester.pump();
+      expect(update.installs, 1);
+      expect(branchIndex, AppBranch.statistics.index);
       expect(tester.takeException(), isNull);
     },
   );

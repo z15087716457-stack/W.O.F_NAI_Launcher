@@ -477,6 +477,8 @@ class _SettingsWiringState extends ConsumerState<SettingsWiring> {
       onRagDiscoverModels: () => _run(plans.discover),
       onUpscaleInstall: (id) => _run(() => upscale.install(id)),
       onUpscaleCancel: upscale.cancel,
+      onUpscaleCopyDiagnostics: (text) =>
+          _run(() => Clipboard.setData(ClipboardData(text: text))),
       onUpscaleRemove: (id) => _run(() => upscale.remove(id)),
       onUpscaleImport: () => _run(upscale.importModel),
       onCopyKritaEndpoint: () => _run(connections.copyEndpoint),

@@ -21709,6 +21709,33 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ag_tool_agent_manage => '管理 Agent';
+
+  @override
+  String get navShell_updateDownloading => '正在下载更新';
+
+  @override
+  String get navShell_updateReady => '重启以完成更新';
+
+  @override
+  String navShell_updateAvailableVersion(String version) {
+    return '$version 可供下载';
+  }
+
+  @override
+  String navShell_updateReadyVersion(String version) {
+    return '$version 已就绪';
+  }
+
+  @override
+  String navShell_updateDownloadProgress(int percent) {
+    return '$percent% · 可继续使用 Studio';
+  }
+
+  @override
+  String get navShell_updateRetryHint => '点击查看原因并重试';
+
+  @override
+  String get updateDownloadInBackground => '后台下载';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -43416,4 +43443,31 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get ag_tool_agent_manage => '管理 Agent';
+
+  @override
+  String get navShell_updateDownloading => '正在下載更新';
+
+  @override
+  String get navShell_updateReady => '重啟以完成更新';
+
+  @override
+  String navShell_updateAvailableVersion(String version) {
+    return '$version 可供下載';
+  }
+
+  @override
+  String navShell_updateReadyVersion(String version) {
+    return '$version 已就緒';
+  }
+
+  @override
+  String navShell_updateDownloadProgress(int percent) {
+    return '$percent% · 可繼續使用 Studio';
+  }
+
+  @override
+  String get navShell_updateRetryHint => '點選檢視原因並重試';
+
+  @override
+  String get updateDownloadInBackground => '後臺下載';
 }

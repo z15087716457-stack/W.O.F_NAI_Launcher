@@ -140,6 +140,8 @@ void main() {
       final box = await Hive.openBox(StorageKeys.settingsBox);
       final release = Completer<void>();
       final started = Completer<void>();
+      final webviewReleaseStarted = Completer<void>();
+      final webviewReleased = Completer<void>();
       final calls = <String>[];
       final messenger =
           TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
@@ -157,7 +159,17 @@ void main() {
         calls.add('tray:${call.method}');
         return null;
       });
+      const webview = MethodChannel(
+        'com.pichillilorenzo/flutter_inappwebview_manager',
+      );
+      messenger.setMockMethodCallHandler(webview, (call) async {
+        calls.add('webview:${call.method}');
+        webviewReleaseStarted.complete();
+        await webviewReleased.future;
+        return null;
+      });
       addTearDown(() async {
+        messenger.setMockMethodCallHandler(webview, null);
         messenger.setMockMethodCallHandler(
           const MethodChannel('window_manager'),
           null,
@@ -219,6 +231,11 @@ void main() {
       expect(calls, ['window:hide', 'owner:cancel']);
 
       release.complete();
+      if (Platform.isWindows) {
+        await webviewReleaseStarted.future;
+        expect(exits, 0);
+        webviewReleased.complete();
+      }
       await exited;
       expect(exits, 1);
       expect(calls, [
@@ -226,6 +243,7 @@ void main() {
         'owner:cancel',
         'owner:saved',
         'tray:destroy',
+        if (Platform.isWindows) 'webview:studioReleaseComposition',
         'exit:7',
       ]);
       expect(Hive.isBoxOpen(StorageKeys.settingsBox), isFalse);

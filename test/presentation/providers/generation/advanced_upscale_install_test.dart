@@ -6,6 +6,7 @@ import 'package:nai_launcher/data/models/upscale/local_upscale_models.dart';
 import 'package:nai_launcher/data/services/advanced_upscale_component_manager.dart';
 import 'package:nai_launcher/data/services/local_upscale_model_manager.dart';
 import 'package:nai_launcher/presentation/providers/generation/local_upscale_provider.dart';
+import 'package:nai_launcher/presentation/wiring/settings/settings_upscale.dart';
 
 class _PendingInstall extends AdvancedUpscaleComponentManager {
   final cancelled = Completer<void>();
@@ -14,11 +15,11 @@ class _PendingInstall extends AdvancedUpscaleComponentManager {
   Future<void> install(
     String id, {
     required LocalUpscaleCancellation cancellation,
-    void Function(String, double?)? onProgress,
+    void Function(AdvancedUpscaleProgress)? onProgress,
   }) async {
     final remove = cancellation.listen(() => cancelled.complete());
     try {
-      onProgress?.call('runtime', null);
+      onProgress?.call(const AdvancedUpscaleProgress('runtime'));
       await released.future;
       cancellation.check();
     } finally {
@@ -32,9 +33,9 @@ class _FailedInstall extends AdvancedUpscaleComponentManager {
   Future<void> install(
     String id, {
     required LocalUpscaleCancellation cancellation,
-    void Function(String, double?)? onProgress,
+    void Function(AdvancedUpscaleProgress)? onProgress,
   }) async {
-    onProgress?.call('runtime', null);
+    onProgress?.call(const AdvancedUpscaleProgress('runtime'));
     throw const LocalUpscaleException(
       LocalUpscaleError.modelOperationFailed,
       details:
@@ -60,9 +61,12 @@ void main() {
         manager.dispose();
         base.dispose();
       });
-      await container
-          .read(advancedUpscaleInstallProvider.notifier)
-          .install('seedvr2-3b');
+      await expectLater(
+        container
+            .read(settingsUpscaleOperationProvider.notifier)
+            .install('seed3b'),
+        throwsA(isA<LocalUpscaleException>()),
+      );
       final state = container.read(advancedUpscaleInstallProvider);
       expect(state.running, isFalse);
       expect(state.phase, 'runtime');
@@ -71,6 +75,10 @@ void main() {
         state.details,
         allOf(contains('uv pip failed'), isNot(contains('private'))),
       );
+      final settings = container.read(settingsUpscaleOperationProvider);
+      expect(settings.failedId, 'seedvr2-3b');
+      expect(settings.failedPhase, 'runtime');
+      expect(settings.error?.details, state.details);
       base.claimInference('anime');
       base.releaseInference();
     },

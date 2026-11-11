@@ -7,31 +7,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/models/upscale/local_upscale_models.dart';
 import '../../../providers/generation/local_upscale_provider.dart';
+import '../../../widgets/common/local_upscale_labels.dart';
 import '../widgets/advanced_upscale_components.dart';
 
-String localUpscaleErrorText(BuildContext context, LocalUpscaleError error) {
-  final l = context.l10n;
-  return switch (error) {
-    LocalUpscaleError.unsupportedPlatform => l.localUpscale_unsupportedPlatform,
-    LocalUpscaleError.engineMissing => l.localUpscale_engineMissing,
-    LocalUpscaleError.integrity => l.localUpscale_integrity,
-    LocalUpscaleError.modelMissing => l.localUpscale_modelMissing,
-    LocalUpscaleError.invalidModel => l.localUpscale_invalidModel,
-    LocalUpscaleError.invalidImage => l.localUpscale_invalidImage,
-    LocalUpscaleError.sizeLimit => l.localUpscale_sizeLimit,
-    LocalUpscaleError.noVulkan => l.localUpscale_noVulkan,
-    LocalUpscaleError.noCuda => l.localUpscale_noCuda,
-    LocalUpscaleError.noInt8 => l.localUpscale_noInt8,
-    LocalUpscaleError.noRtx => l.localUpscale_noRtx,
-    LocalUpscaleError.outOfMemory => l.localUpscale_outOfMemory,
-    LocalUpscaleError.processFailed => l.localUpscale_processFailed,
-    LocalUpscaleError.modelOperationFailed =>
-      l.localUpscale_modelOperationFailed,
-    LocalUpscaleError.timeout => l.localUpscale_timeout,
-    LocalUpscaleError.busy => l.localUpscale_busy,
-    LocalUpscaleError.cancelled => l.localUpscale_cancelled,
-  };
-}
+String localUpscaleErrorText(BuildContext context, LocalUpscaleError error) =>
+    localUpscaleErrorLabel(context.l10n, error);
 
 String localUpscaleModelName(BuildContext context, LocalUpscaleModel model) =>
     switch (model.id) {
@@ -306,13 +286,9 @@ class _LocalUpscaleSettingsSectionState
           Text(
             install.error == LocalUpscaleError.cancelled
                 ? localUpscaleErrorText(context, install.error!)
-                : l.localUpscale_installFailed(switch (install.phase) {
-                    'python' => l.localUpscale_installingPython,
-                    'runtime' => l.localUpscale_installingRuntime,
-                    'weights' => l.localUpscale_downloadProgress,
-                    'checking' => l.localUpscale_checkingComponent,
-                    _ => l.localUpscale_installingComponent,
-                  }),
+                : l.localUpscale_installFailed(
+                    localUpscaleInstallPhaseLabel(l, install.phase),
+                  ),
             style: TextStyle(color: theme.colorScheme.error),
           ),
           if (install.error != LocalUpscaleError.cancelled)

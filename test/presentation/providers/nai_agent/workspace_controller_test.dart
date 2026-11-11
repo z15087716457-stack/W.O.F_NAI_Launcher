@@ -172,7 +172,6 @@ createInterface({input:process.stdin}).on('line', line=>{
           providerId: 'local',
           modelId: 'test',
           mcpServers: [server],
-          panelExpanded: true,
         ),
       );
       const idle = Duration(milliseconds: 300);
@@ -184,6 +183,7 @@ createInterface({input:process.stdin}).on('line', line=>{
         },
       );
       await c.initialize(restoreHistory: false);
+      await c.updateSettings({'panelExpanded': true});
       final client = c.selected!.client!;
       final status = await client.mcpCommand('status');
       expect(status['mcpStatus'], contains('exa: connected, 1 tool'));

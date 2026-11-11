@@ -3,6 +3,7 @@ import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/utils/localization_extension.dart';
+import 'continuous_text_selection.dart';
 import 'inset_shadow_container.dart';
 import 'themed_confirm_dialog.dart';
 import 'themed_text_selection_toolbar.dart';
@@ -398,6 +399,9 @@ class _ThemedInputState extends State<ThemedInput> {
       contextMenuBuilder: widget.contextMenuBuilder ?? themedContextMenuBuilder,
     );
 
+    final input = widget.maxLines == 1
+        ? field
+        : ContinuousTextSelection(child: field);
     final textField = widget.enableNativeRedoShortcut
         ? Shortcuts(
             shortcuts: const <ShortcutActivator, Intent>{
@@ -405,9 +409,9 @@ class _ThemedInputState extends State<ThemedInput> {
                 SelectionChangedCause.keyboard,
               ),
             },
-            child: field,
+            child: input,
           )
-        : field;
+        : input;
 
     Widget content = textField;
 

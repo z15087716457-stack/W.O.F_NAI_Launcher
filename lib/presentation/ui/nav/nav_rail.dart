@@ -13,6 +13,7 @@ import '../kit/ui_tip.dart';
 import 'nav_contract.dart';
 import 'nav_labels.dart';
 import 'nav_tips.dart';
+import 'nav_update.dart';
 
 /// 48 宽图标栏：头像固定在顶，中间四组可滚动，底部是后台任务、展开、设置。
 class NavRail extends StatelessWidget {
@@ -25,6 +26,7 @@ class NavRail extends StatelessWidget {
     required this.onAvatar,
     required this.onTasks,
     required this.onExpand,
+    required this.onOpenUpdate,
     required this.onContextMenu,
   });
 
@@ -43,6 +45,7 @@ class NavRail extends StatelessWidget {
   final ValueChanged<BuildContext> onAvatar;
   final ValueChanged<BuildContext> onTasks;
   final VoidCallback onExpand;
+  final VoidCallback onOpenUpdate;
   final ValueChanged<Offset> onContextMenu;
 
   @override
@@ -130,6 +133,21 @@ class NavRail extends StatelessWidget {
               ),
               const SizedBox(height: 6),
             ],
+            if (data.update case final update?) ...[
+              NavRailButton(
+                key: const Key('main-nav-update'),
+                tint: update.failed ? c.error : c.accent,
+                semanticLabel: update.tooltip(context),
+                tipsEnabled: tipsEnabled,
+                tip: () => NavSimpleTip(label: update.tooltip(context)),
+                onTap: onOpenUpdate,
+                child: (_) => NavUpdateGlyph(
+                  data: update,
+                  reducedMotion: data.reducedMotion,
+                ),
+              ),
+              const SizedBox(height: 6),
+            ],
             NavRailButton(
               key: const Key('main-nav-toggle'),
               muted: true,
@@ -155,7 +173,6 @@ class NavRail extends StatelessWidget {
               ),
               onTap: () => onOpenPage(NavPage.settings),
               badges: [
-                if (data.updateAvailable) _Dot(color: c.error),
                 if (ctrlHeld)
                   if (data.ctrlNumber(NavPage.settings) case final n?)
                     _CtrlNumber(n),
@@ -222,6 +239,7 @@ class NavRailButton extends StatefulWidget {
     this.onTap,
     this.onTapWithContext,
     this.badges = const [],
+    this.tint,
   });
 
   /// 页面图标（带点击动效）；和 [child] 二选一。
@@ -230,6 +248,7 @@ class NavRailButton extends StatefulWidget {
   final double plateSize;
   final Widget Function(Color color)? child;
   final bool selected;
+  final Color? tint;
 
   /// 底部的展开 / 设置：平时用次要文字色。
   final bool muted;
@@ -310,11 +329,13 @@ class _NavRailButtonState extends State<NavRailButton> {
         : widget.muted
         ? c.muted
         : c.ink.withValues(alpha: .7);
-    final bg = on
-        ? c.accent.withValues(alpha: _hover ? .16 : .11)
-        : _hover
-        ? c.hover
-        : Colors.transparent;
+    final bg =
+        widget.tint?.withValues(alpha: _hover ? .16 : .08) ??
+        (on
+            ? c.accent.withValues(alpha: _hover ? .16 : .11)
+            : _hover
+            ? c.hover
+            : Colors.transparent);
     final reduce =
         widget.reducedMotion || MediaQuery.disableAnimationsOf(context);
     final glyph = widget.icon != null

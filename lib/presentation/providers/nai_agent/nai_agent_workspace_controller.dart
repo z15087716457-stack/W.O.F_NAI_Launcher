@@ -26,6 +26,8 @@ typedef AgentClientFactory =
       File? resume,
     );
 
+enum AgentStreamPhase { thinking, writing }
+
 /// Live projections and UI drafts only. Official Pi owns messages and execution.
 class AgentChatRuntime {
   AgentChatRuntime(this.workspace, this.chat, AgentComposerState composer)
@@ -95,7 +97,57 @@ class AgentChatRuntime {
     _visionNoticeRevision++;
   }
 
-  bool running = false, starting = false, waitingForSlot = false;
+  bool _running = false;
+  bool get running => _running;
+  set running(bool value) {
+    if (value && !_running) {
+      streamPhase = AgentStreamPhase.thinking;
+      executingTools.clear();
+    }
+    _running = value;
+  }
+
+  bool starting = false, waitingForSlot = false;
+  AgentStreamPhase streamPhase = AgentStreamPhase.thinking;
+  final Map<String, Map<String, dynamic>> executingTools = {};
+
+  /// Activity is transient, separate from the completed tool history in tools.
+  /// The controller publishes it with the existing event notification cadence.
+  void recordActivityEvent(Map<String, dynamic> envelope) {
+    if (envelope['type'] == 'request_started') {
+      streamPhase = AgentStreamPhase.thinking;
+    }
+    final event = envelope['event'];
+    if (event is! Map) return;
+    switch (event['type']) {
+      case 'message_start':
+        if ((event['message'] as Map?)?['role'] == 'assistant') {
+          streamPhase = AgentStreamPhase.thinking;
+        }
+      case 'message_update':
+        final delta = event['assistantMessageEvent'] as Map?;
+        switch (delta?['type']) {
+          case 'text_delta':
+            streamPhase = AgentStreamPhase.writing;
+          case 'thinking_delta' || 'toolcall_delta':
+            streamPhase = AgentStreamPhase.thinking;
+        }
+      case 'tool_execution_start':
+        executingTools[event['toolCallId'] as String] = Map.from(event);
+      case 'tool_execution_update':
+        final id = event['toolCallId'] as String;
+        if (executingTools.containsKey(id)) {
+          executingTools[id] = {
+            ...executingTools[id]!,
+            ...Map<String, dynamic>.from(event),
+          };
+        }
+      case 'tool_execution_end':
+        executingTools.remove(event['toolCallId']);
+        streamPhase = AgentStreamPhase.thinking;
+    }
+  }
+
   Future<void>? _starting, _closingHost;
   String? error, providerId, modelId, reasoningEffort;
   int usageRevision = 0;
@@ -1708,6 +1760,7 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
 
   void _event(AgentChatRuntime runtime, Map<String, dynamic> envelope) {
     if (_disposed) return;
+    runtime.recordActivityEvent(envelope);
     runtime.uiRevision++;
     if (envelope['type'] == 'usage') _applyUsage(runtime, envelope);
     if (envelope['type'] == 'suggestion') {
