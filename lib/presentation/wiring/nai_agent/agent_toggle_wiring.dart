@@ -37,7 +37,14 @@ class AgentToggleWiring extends ConsumerWidget {
             : AgentToggleBadge.none,
         tooltip: context.l10n.naiAgent_title,
         onPressed: () => unawaited(
-          window.toggle().catchError((Object _) {
+          (() async {
+            if (!expanded && ref.exists(naiAgentControllerProvider)) {
+              final controller = ref.read(naiAgentControllerProvider);
+              final unread = controller.latestUnreadExternal;
+              if (unread != null) await controller.showExternal(unread);
+            }
+            await window.toggle();
+          })().catchError((Object _) {
             if (context.mounted) {
               AppToast.error(context, context.l10n.naiAgent_error);
             }

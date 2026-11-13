@@ -167,6 +167,8 @@ class BlockThumb {
     this.offsetX = 0,
     this.offsetY = 0,
     this.scale = 1,
+    this.path,
+    this.pickToken,
   });
   final ImageProvider image;
 
@@ -177,12 +179,18 @@ class BlockThumb {
   /// 1…3。
   final double scale;
 
+  /// Existing managed path, or a pending selection owned by the platform layer.
+  final String? path;
+  final String? pickToken;
+
   BlockThumb copyWith({double? offsetX, double? offsetY, double? scale}) =>
       BlockThumb(
         image,
         offsetX: offsetX ?? this.offsetX,
         offsetY: offsetY ?? this.offsetY,
         scale: scale ?? this.scale,
+        path: path,
+        pickToken: pickToken,
       );
 }
 
@@ -205,6 +213,7 @@ class BlockData {
     this.folderId,
     this.folderName,
     this.thumb,
+    this.additionalThumbs = const [],
     this.useCount = 0,
     this.favorite = false,
     required this.createdAt,
@@ -240,6 +249,11 @@ class BlockData {
   /// 文件夹名（只放最后一级，例如“画风”）。
   final String? folderName;
   final BlockThumb? thumb;
+  final List<BlockThumb> additionalThumbs;
+  List<BlockThumb> get thumbs => [
+    if (thumb != null) thumb!,
+    ...additionalThumbs,
+  ];
   final int useCount;
   final bool favorite;
   final DateTime createdAt;
@@ -284,7 +298,7 @@ class BlockDraft {
     this.tags = const [],
     this.params,
     this.thumb,
-    this.thumbToken,
+    this.additionalThumbs = const [],
     this.clearThumb = false,
   });
 
@@ -302,8 +316,11 @@ class BlockDraft {
   /// 当前预览图（含偏移 / 缩放）。
   final BlockThumb? thumb;
 
-  /// 换过图时，[BlockEditActions.onPickThumbnail] 返回的新图标识（文件路径）；null = 没换图。
-  final String? thumbToken;
+  final List<BlockThumb> additionalThumbs;
+  List<BlockThumb> get thumbs => [
+    if (thumb != null) thumb!,
+    ...additionalThumbs,
+  ];
 
   /// 用户清除了预览图。
   final bool clearThumb;
@@ -319,6 +336,7 @@ class BlockDraft {
     tags: b.tags,
     params: b.params,
     thumb: b.thumb,
+    additionalThumbs: b.additionalThumbs,
   );
 
   BlockDraft copyWith({
@@ -337,7 +355,7 @@ class BlockDraft {
     BlockParams? params,
     bool clearParams = false,
     BlockThumb? thumb,
-    String? thumbToken,
+    List<BlockThumb>? additionalThumbs,
     bool? clearThumb,
   }) => BlockDraft(
     title: title ?? this.title,
@@ -351,7 +369,9 @@ class BlockDraft {
     tags: tags ?? this.tags,
     params: clearParams ? null : (params ?? this.params),
     thumb: (clearThumb ?? false) ? null : (thumb ?? this.thumb),
-    thumbToken: (clearThumb ?? false) ? null : (thumbToken ?? this.thumbToken),
+    additionalThumbs: (clearThumb ?? false)
+        ? const []
+        : (additionalThumbs ?? this.additionalThumbs),
     clearThumb: clearThumb ?? this.clearThumb,
   );
 }
@@ -631,6 +651,7 @@ class BlocksLibraryActions {
     required this.onExport,
     required this.onApplyParams,
     required this.onPickThumbnail,
+    this.onPickThumbnails,
     required this.onCaptureParams,
     required this.onCreateFolder,
     required this.onRenameFolder,
@@ -722,6 +743,7 @@ class BlocksLibraryActions {
 
   /// 选图（文件选择器）；取消返回 null。
   final Future<BlockThumbPick?> Function() onPickThumbnail;
+  final Future<List<BlockThumbPick>> Function()? onPickThumbnails;
 
   /// 读当前生图页参数，填进块的附带参数。
   final Future<BlockParams?> Function() onCaptureParams;
@@ -1247,6 +1269,7 @@ class BlockEditActions {
     required this.onSave,
     required this.onCancel,
     required this.onPickThumbnail,
+    this.onPickThumbnails,
     required this.onCaptureParams,
     this.onDelete,
   });
@@ -1255,6 +1278,7 @@ class BlockEditActions {
   final ValueChanged<BlockDraft> onSave;
   final VoidCallback onCancel;
   final Future<BlockThumbPick?> Function() onPickThumbnail;
+  final Future<List<BlockThumbPick>> Function()? onPickThumbnails;
   final Future<BlockParams?> Function() onCaptureParams;
 
   /// 删除块（新建时不传）。界面先确认。

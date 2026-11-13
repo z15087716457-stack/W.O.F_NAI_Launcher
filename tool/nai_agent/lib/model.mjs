@@ -181,18 +181,16 @@ export async function createStudioModelRuntime(config, { acquireRequest, transfo
     const { studioSuggestion = false, ...providerOptions } = options;
     options = providerOptions;
     options.signal?.throwIfAborted();
+    const requestContext = transformContext ? await transformContext(context) : context;
+    options.signal?.throwIfAborted();
     // The host shares Studio's provider gate. Waiting for a slot is cancellable
-    // and does not consume the HTTP timeout or start a provider request.
+    // and does not start a provider request.
     const { release, accessToken } = await acquireRequest?.(options.signal) ?? {};
     const sanitize = redactor(subscription ? { apiKey: accessToken } : config);
-    const timeout = new AbortController();
-    const timer = setTimeout(() => timeout.abort(new Error('Provider request timed out')),
-      (config.timeoutSeconds ?? 120) * 1000);
-    const signal = options.signal ? AbortSignal.any([options.signal, timeout.signal]) : timeout.signal;
     try {
       if (subscription && !accessToken) throw new Error('Reconnect ChatGPT in Agent settings');
-      const stream = adapter[method](current, transformContext ? transformContext(context) : context, {
-        ...options, apiKey: subscription ? accessToken : config.apiKey || 'studio-header-auth', signal,
+      const stream = adapter[method](current, requestContext, {
+        ...options, apiKey: subscription ? accessToken : config.apiKey || 'studio-header-auth',
         maxTokens: Math.min(options.maxTokens ?? model.maxTokens, model.maxTokens),
         ...(config.allowsSampling === false ? { temperature: undefined }
           : config.temperature == null ? {} : { temperature: config.temperature }),
@@ -234,24 +232,43 @@ export async function createStudioModelRuntime(config, { acquireRequest, transfo
       // Provider error bodies can echo credentials. Sanitize terminal errors
       // before Pi persists them, not just after they reach the UI transport.
       const output = createAssistantMessageEventStream();
-      void (async () => {
-        try {
-          for await (const event of stream) output.push(event.type === 'error' ? sanitize(event) : event);
-          output.end();
-        } finally { clearTimeout(timer); release?.(); }
-      })().catch(error => {
-        const message = {
-          role: 'assistant', content: [], api: current.api, provider: current.provider,
-          model: current.id, stopReason: 'error', timestamp: Date.now(),
-          errorMessage: sanitize({ text: String(error) }).text,
+      let partial;
+      const failure = (message, errorMessage, reason = 'error') => {
+        const error = { role: 'assistant', content: [], api: current.api, provider: current.provider,
+          model: current.id, timestamp: Date.now(),
           usage: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, totalTokens: 0,
             cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 } },
-        };
-        output.push({ type: 'error', reason: 'error', error: message }); output.end();
+          ...message, stopReason: reason, errorMessage };
+        return sanitize({ type: 'error', reason, error });
+      };
+      void (async () => {
+        let terminal = false;
+        try {
+          for await (const event of stream) {
+            partial = event.partial ?? event.message ?? event.error ?? partial;
+            if (event.type === 'done' || event.type === 'error') {
+              terminal = true;
+              // Pi's one-token, no-retry cache warming and optional suggestions
+              // deliberately permit an empty answer; interactive requests do not.
+              if (event.type === 'done' && !studioSuggestion && !(options.maxTokens === 1 && options.maxRetries === 0)
+                && !event.message.content.some(part => part.type === 'toolCall' || part.type === 'text' && part.text.trim())) {
+                output.push(failure(event.message, 'STUDIO_EMPTY_RESPONSE: The model returned no text or tool calls.'));
+              } else output.push(event.type === 'error' ? sanitize(event) : event);
+            } else output.push(event);
+          }
+          if (!terminal) output.push(options.signal?.aborted
+            ? failure(partial, 'Request aborted', 'aborted')
+            : failure(partial, 'STUDIO_EMPTY_RESPONSE: The provider stream ended without a result.'));
+          output.end();
+        } finally { release?.(); }
+      })().catch(error => {
+        if (options.signal?.aborted) {
+          output.push(failure(partial, 'Request aborted', 'aborted'));
+        } else output.push(failure(partial, String(error)));
+        output.end();
       });
       return output;
     } catch (error) {
-      clearTimeout(timer);
       release?.();
       throw error;
     }

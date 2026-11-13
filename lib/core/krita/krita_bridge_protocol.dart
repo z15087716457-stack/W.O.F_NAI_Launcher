@@ -77,6 +77,25 @@ class KritaBridgeProtocol {
 
     final payload = _payload(decoded);
     switch (type) {
+      case 'agent_request':
+        if (id == null || id.isEmpty) {
+          return _invalid(id, 'Missing request id');
+        }
+        final operation = payload['operation'];
+        if (operation is! String ||
+            !const {
+              'session',
+              'call',
+              'cancel',
+              'end',
+              'skills',
+              'skill_read',
+            }.contains(operation)) {
+          return _invalid(id, 'Invalid Agent operation');
+        }
+        return KritaBridgeDecodeResult.message(
+          KritaAgentMessage(id: id, operation: operation, payload: payload),
+        );
       case 'get_params':
         return _decodeGetParams(id);
       case 'cancel':

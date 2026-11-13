@@ -21,6 +21,7 @@ import 'package:nai_launcher/presentation/ui/kit/ui_fixture_image.dart';
 
 import '../../test/helpers/studio_capture_fonts.dart';
 import '../../test/presentation/ui/blocks/blocks_test_harness.dart';
+import '../../test/presentation/ui/blocks/blocks_gallery_test.dart' as gallery;
 
 const _assets = '../../mockups/blocks/assets';
 final _images = <String, ImageProvider>{};
@@ -137,6 +138,12 @@ Widget _onPage(Widget child) => Builder(
 );
 
 void main() {
+  // Approved gallery iteration: real images/geometry without recapturing the
+  // unrelated original block-management scenes.
+  if (Platform.environment['BLOCK_GALLERY_ONLY'] == '1') {
+    gallery.main();
+    return;
+  }
   setUpAll(loadStudioCaptureFonts);
   final out = Directory('.dart_tool/ui-shell/blocks/flutter')
     ..createSync(recursive: true);

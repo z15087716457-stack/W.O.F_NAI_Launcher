@@ -78,6 +78,11 @@ class _BlocksDockState extends State<BlocksDock> {
     if (_hover != null) setState(() => _hover = null);
   }
 
+  void _scheduleExit() {
+    _hoverTimer?.cancel();
+    _hoverTimer = Timer(const Duration(milliseconds: 160), _exit);
+  }
+
   void _openMenu(BlockData b, Offset at) {
     final l10n = context.l10n;
     _exit();
@@ -120,7 +125,7 @@ class _BlocksDockState extends State<BlocksDock> {
       return MouseRegion(
         cursor: SystemMouseCursors.click,
         onEnter: (_) => _enter(b, ctx),
-        onExit: (_) => _exit(),
+        onExit: (_) => _scheduleExit(),
         child: GestureDetector(
           key: Key('dock-pill-${b.id}'),
           onTap: () {
@@ -487,43 +492,43 @@ class _BlocksDockState extends State<BlocksDock> {
     final reduce = MediaQuery.disableAnimationsOf(context);
     final c = context.ui;
     return Positioned.fill(
-      child: IgnorePointer(
-        child: CustomMultiChildLayout(
-          delegate: _PreviewLayout(
-            pill: pill,
-            dockRight: dockRight,
-            line: line,
-          ),
-          children: [
-            LayoutId(
-              id: _PreviewPart.line,
+      child: CustomMultiChildLayout(
+        delegate: _PreviewLayout(pill: pill, dockRight: dockRight, line: line),
+        children: [
+          LayoutId(
+            id: _PreviewPart.line,
+            child: IgnorePointer(
               child: CustomPaint(
                 key: const Key('dock-preview-connector'),
                 painter: _DashPainter(c.strong, line),
               ),
             ),
-            LayoutId(
-              id: _PreviewPart.card,
-              child: TweenAnimationBuilder<double>(
-                key: ValueKey(b.id),
-                tween: Tween(begin: reduce ? 1 : 0, end: 1),
-                duration: const Duration(milliseconds: 160),
-                curve: Curves.easeOutCubic,
-                builder: (context, t, child) => Opacity(
-                  opacity: t,
-                  child: Transform.translate(
-                    offset: Offset(-4 * (1 - t), 0),
-                    child: child,
-                  ),
+          ),
+          LayoutId(
+            id: _PreviewPart.card,
+            child: TweenAnimationBuilder<double>(
+              key: ValueKey(b.id),
+              tween: Tween(begin: reduce ? 1 : 0, end: 1),
+              duration: const Duration(milliseconds: 160),
+              curve: Curves.easeOutCubic,
+              builder: (context, t, child) => Opacity(
+                opacity: t,
+                child: Transform.translate(
+                  offset: Offset(-4 * (1 - t), 0),
+                  child: child,
                 ),
+              ),
+              child: MouseRegion(
+                onEnter: (_) => _hoverTimer?.cancel(),
+                onExit: (_) => _scheduleExit(),
                 child: SingleChildScrollView(
                   primary: false,
                   child: BlockHoverCard(b),
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

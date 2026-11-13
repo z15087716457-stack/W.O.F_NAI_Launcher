@@ -69,7 +69,7 @@ void main() {
         controller.updateEnhanceUpscaleFactor(1.5);
         expect(container.read(generationParamsNotifierProvider), same(before));
         final request = container.read(generationRequestParamsProvider);
-        expect((request.width, request.height), (1248, 1824));
+        expect((request.width, request.height), (1280, 1856));
         expect(request.sourceImage, same(source));
         controller.closeTemporaryTool();
         controller.openTemporaryTool(
@@ -218,7 +218,7 @@ void main() {
     );
 
     test(
-      'enhance uses the five website presets and preserves fractional source scaling',
+      'enhance uses the five website presets and aligns scaled source dimensions',
       () {
         final controller = container.read(
           imageWorkflowControllerProvider.notifier,
@@ -230,8 +230,8 @@ void main() {
         controller.setSourceImageDimensions(832, 1216);
         controller.enterEnhanceMode();
         controller.updateEnhanceUpscaleFactor(1.5);
-        expect(container.read(generationParamsNotifierProvider).width, 1248);
-        expect(container.read(generationParamsNotifierProvider).height, 1824);
+        expect(container.read(generationParamsNotifierProvider).width, 1280);
+        expect(container.read(generationParamsNotifierProvider).height, 1856);
         const expected = [
           (0.2, 0.0),
           (0.4, 0.0),
@@ -319,7 +319,7 @@ void main() {
         isFalse,
       );
       final request = container.read(generationRequestParamsProvider);
-      expect((request.width, request.height), (1248, 1824));
+      expect((request.width, request.height), (1280, 1856));
       expect((request.strength, request.noise), (.42, .16));
       expect(request.sourceImage, same(source));
       controller.closeTemporaryTool();

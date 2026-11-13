@@ -79,10 +79,30 @@ Map<String, dynamic> blockDraftSnapshot(BlockDraft draft) {
             'y': draft.thumb!.offsetY,
             'scale': draft.thumb!.scale,
           },
-    'thumbToken': draft.thumbToken,
+    'thumbToken': draft.thumb?.pickToken,
+    'additionalThumbs': [
+      for (final thumb in draft.additionalThumbs)
+        {
+          'path': thumb.path,
+          'pickToken': thumb.pickToken,
+          if (thumb.image case MemoryImage(:final bytes))
+            'bytes': base64Encode(bytes),
+          'x': thumb.offsetX,
+          'y': thumb.offsetY,
+          'scale': thumb.scale,
+        },
+    ],
     'clearThumb': draft.clearThumb,
   };
 }
+
+BlockThumb blockThumbOf(PromptBlockThumbnail image) => BlockThumb(
+  FileImage(File(image.path)),
+  path: image.path,
+  offsetX: image.offsetX,
+  offsetY: image.offsetY,
+  scale: image.scale,
+);
 
 BlockData blockDataOf(
   PromptBlock b,
@@ -107,11 +127,13 @@ BlockData blockDataOf(
   thumb: b.hasThumbnail
       ? BlockThumb(
           FileImage(File(b.thumbnail!)),
+          path: b.thumbnail,
           offsetX: b.thumbnailOffsetX,
           offsetY: b.thumbnailOffsetY,
           scale: b.thumbnailScale,
         )
       : null,
+  additionalThumbs: b.additionalThumbnails.map(blockThumbOf).toList(),
   useCount: b.useCount,
   favorite: b.isFavorite,
   createdAt: b.createdAt.toLocal(),

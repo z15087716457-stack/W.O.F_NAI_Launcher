@@ -5,7 +5,6 @@ import '../../../core/utils/inpaint_focus_region.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/api_constants.dart';
-import '../../../core/constants/model_spec.dart';
 import '../../../core/constants/storage_keys.dart';
 import '../../../core/storage/local_storage_service.dart';
 import '../../../core/utils/app_logger.dart';
@@ -20,20 +19,8 @@ enum ImageWorkflowMode { base, inpaint, enhance, upscale }
 
 enum UpscaleBackend { local, comfyui, novelai }
 
-List<double> canvasEnhanceFactors(String model, int width, int height) {
-  if ((width == 832 && height == 1216) || (width == 1216 && height == 832)) {
-    return const [1.0, 1.5];
-  }
-  final step = ModelSpecs.of(model).isV5 ? 32 : 64;
-  return [1.0, 1.5, 2.0]
-      .where(
-        (factor) =>
-            width * height * factor * factor <= MaxEnhanceMath.maxArea &&
-            (width * factor) % step == 0 &&
-            (height * factor) % step == 0,
-      )
-      .toList();
-}
+List<double> canvasEnhanceFactors(String model, int width, int height) =>
+    NativeImageEnhance.factors(model, width, height);
 
 ImageParams canvasEnhanceRequest(
   ImageParams draft,
@@ -52,6 +39,9 @@ ImageParams canvasEnhanceRequest(
   final factor = factors.contains(settings.upscaleFactor)
       ? settings.upscaleFactor
       : 1.0;
+  final target = max
+      ? (width: width, height: height)
+      : NativeImageEnhance.targetSize(width, height, factor);
   const magnitudes = [
     (0.2, 0.0),
     (0.4, 0.0),
@@ -71,8 +61,8 @@ ImageParams canvasEnhanceRequest(
     isOutpaint: false,
     enhanceWorkflow: true,
     upscaledEnhance: max,
-    width: max ? width : (width * factor).round(),
-    height: max ? height : (height * factor).round(),
+    width: target.width,
+    height: target.height,
     strength: strengthNoise.$1,
     noise: strengthNoise.$2,
   );
@@ -1926,17 +1916,18 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
     final baseHeight = state.sourceHeight ?? state.baseHeight ?? _params.height;
     // Max✨ 档仅对可用模型生效（模型切换后残留的开启状态自动降级）。
     final maxEnabled = state.enhance.maxUpscale && isEnhanceMaxUpscaleEligible;
-    final requestWidth = maxEnabled
-        ? baseWidth
-        : (baseWidth * state.enhance.upscaleFactor).round();
-    final requestHeight = maxEnabled
-        ? baseHeight
-        : (baseHeight * state.enhance.upscaleFactor).round();
+    final target = maxEnabled
+        ? (width: baseWidth, height: baseHeight)
+        : NativeImageEnhance.targetSize(
+            baseWidth,
+            baseHeight,
+            state.enhance.upscaleFactor,
+          );
     final resolved = state.enhance.showIndividualSettings
         ? (state.enhance.strength, state.enhance.noise)
         : _resolveMagnitude(state.enhance.magnitude);
 
-    _paramsNotifier.updateSize(requestWidth, requestHeight, persist: false);
+    _paramsNotifier.updateSize(target.width, target.height, persist: false);
     _paramsNotifier.updateEnhanceWorkflow(true);
     _paramsNotifier.updateUpscaledEnhance(maxEnabled);
     _paramsNotifier.updateStrength(resolved.$1);

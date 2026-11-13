@@ -3694,6 +3694,24 @@ class AppLocalizationsZh extends AppLocalizations {
   String get preciseRef_referenceType => '参考类型';
 
   @override
+  String get preciseRef_importTitle => '导入精准参考';
+
+  @override
+  String get preciseRef_importTypePrompt => '想让这张图片提供哪一类参考？';
+
+  @override
+  String get preciseRef_importTypeHint => '点击选项即可导入';
+
+  @override
+  String get preciseRef_characterDescription => '参考人物的外观与特征';
+
+  @override
+  String get preciseRef_styleDescription => '参考配色、笔触与画面质感';
+
+  @override
+  String get preciseRef_characterAndStyleDescription => '同时参考人物特征与视觉风格';
+
+  @override
   String get preciseRef_strength => '参考强度';
 
   @override
@@ -15822,6 +15840,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get naiAgent_error => '操作未完成，请检查模型设置或工作区文件。';
 
   @override
+  String get naiAgent_emptyResponse => '模型结束了请求，但没有返回正文或工具调用。请重试，或检查模型输出设置。';
+
+  @override
+  String get naiAgent_imageRequestTooLarge =>
+      '本次图片总量过大或无法处理。请减少图片数量、缩小图片或更换格式后重试。';
+
+  @override
   String get naiAgent_visionCurrentProvider => '当前服务商';
 
   @override
@@ -21461,6 +21486,21 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ag_cacheWarmIdle => '待机，下次运行时开始';
 
   @override
+  String get ag_cacheWarmExpired => '已错过保温时机，等待下一次模型请求';
+
+  @override
+  String get ag_cacheWarmContextChanged => '上下文已变化，等待下一次模型请求';
+
+  @override
+  String get ag_cacheWarmSafetyLimit => '已到保温时长上限，等待下一次模型请求';
+
+  @override
+  String get ag_cacheWarmUnavailable => '当前请求不支持缓存保温';
+
+  @override
+  String get ag_cacheWarmEconomics => '预计收益不足，本次保温已暂停';
+
+  @override
   String ag_cacheWarmNext(String time) {
     return '$time 后续期';
   }
@@ -21736,6 +21776,95 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get updateDownloadInBackground => '后台下载';
+
+  @override
+  String get blocks_showRange => '显示范围';
+
+  @override
+  String get blocks_rangeHover => '悬浮卡';
+
+  @override
+  String get blocks_rangeDetail => '详情预览';
+
+  @override
+  String blocks_cropRange(String target) {
+    return '虚线内为$target显示范围';
+  }
+
+  @override
+  String blocks_previewCount(int count) {
+    return '$count 张预览图';
+  }
+
+  @override
+  String blocks_previewNumber(int index) {
+    return '第 $index 张预览图';
+  }
+
+  @override
+  String get blocks_scrollPreviews => '滚轮左右浏览';
+
+  @override
+  String get blocks_resetZoom => '恢复100%缩放';
+
+  @override
+  String get blocks_previousPreview => '上一张预览图';
+
+  @override
+  String get blocks_nextPreview => '下一张预览图';
+
+  @override
+  String get blocks_removePreview => '移除这张预览图';
+
+  @override
+  String get ag_external => '外部';
+
+  @override
+  String get ag_externalRequest => '外部请求';
+
+  @override
+  String get ag_externalConnected => '外部 Agent 已连接';
+
+  @override
+  String get ag_externalDisconnected => '连接已结束 · 产物保留';
+
+  @override
+  String get ag_externalHint => '完整对话和推理由外部 Agent 承担，Studio 记录工具与产物。';
+
+  @override
+  String get ag_externalDisconnect => '断开';
+
+  @override
+  String get ag_externalView => '查看';
+
+  @override
+  String get ag_externalApproval => '外部工具需要确认';
+
+  @override
+  String get ag_externalAllow => '允许一次';
+
+  @override
+  String get ag_externalDeny => '拒绝';
+
+  @override
+  String ag_externalArtifactUpdated(String client, String title) {
+    return '$client 更新了「$title」';
+  }
+
+  @override
+  String ag_externalWorkspaceUpdated(String client) {
+    return '$client 更新了工作区';
+  }
+
+  @override
+  String ag_externalResultFailed(String client) {
+    return '$client 的操作未完成';
+  }
+
+  @override
+  String ag_externalNeedsAttention(String client) {
+    return '$client 有操作需要你处理';
+  }
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -25426,6 +25555,24 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get preciseRef_referenceType => '參考類型';
+
+  @override
+  String get preciseRef_importTitle => '匯入精準參考';
+
+  @override
+  String get preciseRef_importTypePrompt => '想讓這張圖片提供哪一類參考？';
+
+  @override
+  String get preciseRef_importTypeHint => '點選選項即可匯入';
+
+  @override
+  String get preciseRef_characterDescription => '參考人物的外觀與特徵';
+
+  @override
+  String get preciseRef_styleDescription => '參考配色、筆觸與畫面質感';
+
+  @override
+  String get preciseRef_characterAndStyleDescription => '同時參考人物特徵與視覺風格';
 
   @override
   String get preciseRef_strength => '參考強度';
@@ -37556,6 +37703,13 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get naiAgent_error => '操作未完成，請檢查模型設定或工作區檔案。';
 
   @override
+  String get naiAgent_emptyResponse => '模型結束了請求，但沒有返回正文或工具呼叫。請重試，或檢查模型輸出設定。';
+
+  @override
+  String get naiAgent_imageRequestTooLarge =>
+      '本次圖片總量過大或無法處理。請減少圖片數量、縮小圖片或更換格式後重試。';
+
+  @override
   String get naiAgent_visionCurrentProvider => '當前服務商';
 
   @override
@@ -43195,6 +43349,21 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get ag_cacheWarmIdle => '待機，下次執行時開始';
 
   @override
+  String get ag_cacheWarmExpired => '已錯過保溫時機，等待下一次模型請求';
+
+  @override
+  String get ag_cacheWarmContextChanged => '上下文已變化，等待下一次模型請求';
+
+  @override
+  String get ag_cacheWarmSafetyLimit => '已到保溫時長上限，等待下一次模型請求';
+
+  @override
+  String get ag_cacheWarmUnavailable => '當前請求不支援快取保溫';
+
+  @override
+  String get ag_cacheWarmEconomics => '預計收益不足，本次保溫已暫停';
+
+  @override
   String ag_cacheWarmNext(String time) {
     return '$time 後續期';
   }
@@ -43470,4 +43639,93 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get updateDownloadInBackground => '後臺下載';
+
+  @override
+  String get blocks_showRange => '顯示範圍';
+
+  @override
+  String get blocks_rangeHover => '懸浮卡';
+
+  @override
+  String get blocks_rangeDetail => '詳情預覽';
+
+  @override
+  String blocks_cropRange(String target) {
+    return '虛線內為$target顯示範圍';
+  }
+
+  @override
+  String blocks_previewCount(int count) {
+    return '$count 張預覽圖';
+  }
+
+  @override
+  String blocks_previewNumber(int index) {
+    return '第 $index 張預覽圖';
+  }
+
+  @override
+  String get blocks_scrollPreviews => '滾輪左右瀏覽';
+
+  @override
+  String get blocks_resetZoom => '恢復100%縮放';
+
+  @override
+  String get blocks_previousPreview => '上一張預覽圖';
+
+  @override
+  String get blocks_nextPreview => '下一張預覽圖';
+
+  @override
+  String get blocks_removePreview => '移除這張預覽圖';
+
+  @override
+  String get ag_external => '外部';
+
+  @override
+  String get ag_externalRequest => '外部請求';
+
+  @override
+  String get ag_externalConnected => '外部 Agent 已連線';
+
+  @override
+  String get ag_externalDisconnected => '連線已結束 · 產物保留';
+
+  @override
+  String get ag_externalHint => '完整對話和推理由外部 Agent 承擔，Studio 記錄工具與產物。';
+
+  @override
+  String get ag_externalDisconnect => '斷開';
+
+  @override
+  String get ag_externalView => '檢視';
+
+  @override
+  String get ag_externalApproval => '外部工具需要確認';
+
+  @override
+  String get ag_externalAllow => '允許一次';
+
+  @override
+  String get ag_externalDeny => '拒絕';
+
+  @override
+  String ag_externalArtifactUpdated(String client, String title) {
+    return '$client 更新了「$title」';
+  }
+
+  @override
+  String ag_externalWorkspaceUpdated(String client) {
+    return '$client 更新了工作區';
+  }
+
+  @override
+  String ag_externalResultFailed(String client) {
+    return '$client 的操作未完成';
+  }
+
+  @override
+  String ag_externalNeedsAttention(String client) {
+    return '$client 有操作需要你處理';
+  }
 }

@@ -162,6 +162,10 @@ class NaiAgentWindowController extends ChangeNotifier {
     await _setExpanded(!settings.panelExpanded, settings.panelWidth);
   });
   Future<void> close() => _serial(() => _setExpanded(false, 0));
+  Future<void> open() => _serial(() async {
+    final settings = await readSettings();
+    await _setExpanded(true, settings.panelWidth);
+  });
 
   bool _near(Rect a, Rect b) =>
       (a.left - b.left).abs() <= 1 &&

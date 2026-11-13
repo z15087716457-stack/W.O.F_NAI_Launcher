@@ -383,7 +383,9 @@ class _AgentChatsPopoverState extends State<AgentChatsPopover> {
                                   ),
                                   Expanded(
                                     child: Text(
-                                      chat.title,
+                                      chat.externalClient == null
+                                          ? chat.title
+                                          : '${l.ag_external} · ${chat.externalClient} · ${chat.title}',
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: UiText.sans(
@@ -876,7 +878,18 @@ class _AgentCacheWarmingSectionState extends State<AgentCacheWarmingSection> {
         '${sec ~/ 60}:${(sec % 60).toString().padLeft(2, '0')}',
       );
     } else {
-      status = l.ag_cacheWarmIdle;
+      status = switch (w.reason) {
+        'cache refresh deadline missed' => l.ag_cacheWarmExpired,
+        'conversation context changed' => l.ag_cacheWarmContextChanged,
+        '30-minute idle safety limit reached' ||
+        'one-hour safety limit reached' => l.ag_cacheWarmSafetyLimit,
+        'request cannot be replayed safely' ||
+        'cache lifetime unavailable' ||
+        'request disabled prompt caching' => l.ag_cacheWarmUnavailable,
+        'expected savings below threshold' ||
+        'cache economics unavailable' => l.ag_cacheWarmEconomics,
+        _ => l.ag_cacheWarmIdle,
+      };
     }
     return Column(
       key: const Key('agent-usage-cache-warming'),

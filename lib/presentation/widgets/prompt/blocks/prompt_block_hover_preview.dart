@@ -14,6 +14,8 @@ import '../../../widgets/common/thumbnail_display.dart';
 import '../../../widgets/prompt/blocks/prompt_block_colors.dart';
 import '../../../widgets/prompt/blocks/prompt_block_icons.dart';
 import '../../../widgets/prompt/blocks/prompt_block_tag_chip.dart';
+import '../../../ui/blocks/blocks_contract.dart';
+import '../../../ui/blocks/blocks_gallery.dart';
 import 'atom_chip.dart';
 
 Future<Size?> _readBlockThumbnailSize(String path) async {
@@ -387,6 +389,25 @@ class _BlockDetailImageState extends State<_BlockDetailImage> {
     final blockColor = promptBlockColorFromString(block.color);
     const radius = BorderRadius.vertical(top: Radius.circular(16));
 
+    if (block.additionalThumbnails.isNotEmpty) {
+      return BlockImageGallery(
+        key: ValueKey(block.id),
+        height: widget.compact ? 150 : 176,
+        images: [
+          for (final (index, image) in block.thumbnails.indexed)
+            BlockThumb(
+              index == 0 && widget.previewImageProvider != null
+                  ? widget.previewImageProvider!
+                  : FileImage(File(image.path)),
+              path: image.path,
+              offsetX: image.offsetX,
+              offsetY: image.offsetY,
+              scale: image.scale,
+            ),
+        ],
+      );
+    }
+
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
@@ -526,6 +547,7 @@ class PromptBlockPreviewOverlay extends StatelessWidget {
     required this.cardSize,
     required this.cardPosition,
     required this.onDismiss,
+    this.onEnter,
     this.initialThumbnailSize,
     this.previewImageProvider,
   });
@@ -536,6 +558,7 @@ class PromptBlockPreviewOverlay extends StatelessWidget {
   final Size cardSize;
   final Offset cardPosition;
   final VoidCallback onDismiss;
+  final VoidCallback? onEnter;
   final Size? initialThumbnailSize;
   final ImageProvider? previewImageProvider;
 
@@ -560,6 +583,7 @@ class PromptBlockPreviewOverlay extends StatelessWidget {
         showWhenUnlinked: false,
         offset: Offset(showOnRight ? cardSize.width + 8 : -previewWidth - 8, 0),
         child: MouseRegion(
+          onEnter: (_) => onEnter?.call(),
           onExit: (_) => onDismiss(),
           child: Material(
             elevation: 16,
@@ -631,6 +655,7 @@ class _PromptBlockHoverPreviewState extends State<PromptBlockHoverPreview> {
   final LayerLink _layerLink = LayerLink();
   OverlayEntry? _overlayEntry;
   Timer? _timer;
+  Timer? _exitTimer;
   bool _pressed = false;
   bool _hovering = false;
   int _previewRequestId = 0;
@@ -640,8 +665,7 @@ class _PromptBlockHoverPreviewState extends State<PromptBlockHoverPreview> {
     super.didUpdateWidget(oldWidget);
     if (!widget.enabled) {
       _hidePreview();
-    } else if (_hovering &&
-        oldWidget.block.thumbnail != widget.block.thumbnail) {
+    } else if (_hovering && oldWidget.block != widget.block) {
       _hidePreview();
       _schedule();
     }
@@ -650,6 +674,7 @@ class _PromptBlockHoverPreviewState extends State<PromptBlockHoverPreview> {
   @override
   void dispose() {
     _timer?.cancel();
+    _exitTimer?.cancel();
     _removeOverlay();
     super.dispose();
   }
@@ -709,7 +734,8 @@ class _PromptBlockHoverPreviewState extends State<PromptBlockHoverPreview> {
         layerLink: _layerLink,
         cardSize: renderBox.size,
         cardPosition: renderBox.localToGlobal(Offset.zero),
-        onDismiss: _hidePreview,
+        onDismiss: _scheduleHide,
+        onEnter: () => _exitTimer?.cancel(),
         initialThumbnailSize: prepared?.size,
         previewImageProvider: prepared?.provider,
       ),
@@ -723,10 +749,16 @@ class _PromptBlockHoverPreviewState extends State<PromptBlockHoverPreview> {
   }
 
   void _hidePreview() {
+    _exitTimer?.cancel();
     _previewRequestId++;
     _timer?.cancel();
     _timer = null;
     _removeOverlay();
+  }
+
+  void _scheduleHide() {
+    _exitTimer?.cancel();
+    _exitTimer = Timer(const Duration(milliseconds: 160), _hidePreview);
   }
 
   @override
@@ -735,13 +767,14 @@ class _PromptBlockHoverPreviewState extends State<PromptBlockHoverPreview> {
       link: _layerLink,
       child: MouseRegion(
         onEnter: (_) {
+          _exitTimer?.cancel();
           _hovering = true;
           _schedule();
         },
         onExit: (_) {
           _hovering = false;
           _pressed = false;
-          _hidePreview();
+          _scheduleHide();
         },
         child: Listener(
           behavior: HitTestBehavior.opaque,

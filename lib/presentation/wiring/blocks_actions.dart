@@ -262,6 +262,7 @@ class BlocksActions {
     final block = existing == null ? null : blockDataOf(existing, library);
     final platform = ref.read(blocksPlatformProvider);
     var deleting = false;
+    final pickedTokens = <String>{};
     var decided = false;
     void finish(BuildContext dialog, BlockDraft? value) {
       if (decided || !dialog.mounted) return;
@@ -311,28 +312,46 @@ class BlocksActions {
                         finish(ctx, null);
                       }
                     },
-              onPickThumbnail: () =>
-                  run<BlockThumbPick?>(platform.pickThumbnail),
+              onPickThumbnail: () async {
+                final picked = await run<BlockThumbPick?>(
+                  platform.pickThumbnail,
+                );
+                if (picked != null) pickedTokens.add(picked.token);
+                return picked;
+              },
+              onPickThumbnails: () async {
+                final picked =
+                    await run(platform.pickThumbnails) ??
+                    const <BlockThumbPick>[];
+                pickedTokens.addAll(picked.map((image) => image.token));
+                return picked;
+              },
               onCaptureParams: captureParams,
             ),
           ),
         ),
       ),
     );
-    if (!alive() || !context.mounted) return null;
-    if (deleting && id != null) {
-      await delete([id]);
-      return null;
+    try {
+      if (!alive() || !context.mounted) return null;
+      if (deleting && id != null) {
+        await delete([id]);
+        return null;
+      }
+      if (draft == null) return null;
+      return await run(
+        () => service.save(
+          draft,
+          id: id,
+          expected: existing,
+          isFavorite: isFavorite,
+        ),
+      );
+    } finally {
+      for (final token in pickedTokens) {
+        platform.releaseThumbnail(token);
+      }
     }
-    if (draft == null) return null;
-    return run(
-      () => service.save(
-        draft,
-        id: id,
-        expected: existing,
-        isFavorite: isFavorite,
-      ),
-    );
   }
 
   Future<void> delete(List<String> ids) async {

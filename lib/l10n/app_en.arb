@@ -1851,6 +1851,12 @@
   "preciseRef_clearAll": "Clear All",
   "preciseRef_remove": "Remove",
   "preciseRef_referenceType": "Reference Type",
+  "preciseRef_importTitle": "Import Precise Reference",
+  "preciseRef_importTypePrompt": "What should this image be used to reference?",
+  "preciseRef_importTypeHint": "Select a type to import",
+  "preciseRef_characterDescription": "Reference the character’s appearance and features",
+  "preciseRef_styleDescription": "Reference colors, brushwork, and visual texture",
+  "preciseRef_characterAndStyleDescription": "Reference both the character and visual style",
   "preciseRef_strength": "Strength",
   "preciseRef_fidelity": "Fidelity",
   "preciseRef_v4Only": "This feature requires V4+ models",
@@ -8765,6 +8771,8 @@
   "naiAgent_toolsHint": "Read current state, images, prompts and workspace files on demand. Detailed Studio usage lives in skills such as nai-studio and nai-prompt, loaded only when needed.",
   "naiAgent_unknownCost": "Actual cost is set by the provider",
   "naiAgent_error": "Operation failed. Check model settings or workspace files.",
+  "naiAgent_emptyResponse": "The model finished without returning text or a tool call. Retry or check the model output settings.",
+  "naiAgent_imageRequestTooLarge": "This image batch is too large or could not be processed. Send fewer images, reduce their size, or try another format.",
   "naiAgent_visionCurrentProvider": "the current provider",
   "naiAgent_visionModelUnsupported": "The selected model for provider {providerName} has no confirmed image-input support. Check Model → Capabilities → Image input in Settings → Models & APIs → {providerName}, or select a model that supports images.",
   "@naiAgent_visionModelUnsupported": {
@@ -11483,6 +11491,11 @@
   "ag_cacheWarmOff": "Off",
   "ag_cacheWarmRefreshing": "Refreshing the cache…",
   "ag_cacheWarmIdle": "Waiting — starts with the next run",
+  "ag_cacheWarmExpired": "Refresh window missed — waiting for the next model request",
+  "ag_cacheWarmContextChanged": "Context changed — waiting for the next model request",
+  "ag_cacheWarmSafetyLimit": "Warming time limit reached — waiting for the next model request",
+  "ag_cacheWarmUnavailable": "Cache warming is unavailable for this request",
+  "ag_cacheWarmEconomics": "Warming paused because the estimated savings are too low",
   "ag_cacheWarmNext": "Next refresh in {time}",
   "@ag_cacheWarmNext": {
     "placeholders": {
@@ -11665,5 +11678,82 @@
     }
   },
   "navShell_updateRetryHint": "View details and retry",
-  "updateDownloadInBackground": "Download in background"
+  "updateDownloadInBackground": "Download in background",
+  "blocks_showRange": "Display range",
+  "blocks_rangeHover": "Hover card",
+  "blocks_rangeDetail": "Detail preview",
+  "blocks_cropRange": "Inside the dashed line: {target}",
+  "blocks_previewCount": "{count} preview images",
+  "blocks_previewNumber": "Preview image {index}",
+  "blocks_scrollPreviews": "Scroll to browse",
+  "blocks_resetZoom": "Reset zoom to 100%",
+  "blocks_previousPreview": "Previous preview image",
+  "blocks_nextPreview": "Next preview image",
+  "blocks_removePreview": "Remove this preview",
+  "@blocks_cropRange": {
+    "placeholders": {
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "@blocks_previewCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@blocks_previewNumber": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_external": "External",
+  "ag_externalRequest": "External request",
+  "ag_externalConnected": "Connected to external Agent",
+  "ag_externalDisconnected": "Connection ended · artifacts retained",
+  "ag_externalHint": "Conversation and inference stay in the external Agent. Studio records tools and artifacts.",
+  "ag_externalDisconnect": "Disconnect",
+  "ag_externalView": "View",
+  "ag_externalApproval": "Approve external tool",
+  "ag_externalAllow": "Allow once",
+  "ag_externalDeny": "Deny",
+  "ag_externalArtifactUpdated": "{client} updated “{title}”",
+  "ag_externalWorkspaceUpdated": "{client} updated the workspace",
+  "ag_externalResultFailed": "An action from {client} did not complete",
+  "ag_externalNeedsAttention": "{client} needs your attention",
+  "@ag_externalArtifactUpdated": {
+    "placeholders": {
+      "client": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "@ag_externalWorkspaceUpdated": {
+    "placeholders": {
+      "client": {
+        "type": "String"
+      }
+    }
+  },
+  "@ag_externalResultFailed": {
+    "placeholders": {
+      "client": {
+        "type": "String"
+      }
+    }
+  },
+  "@ag_externalNeedsAttention": {
+    "placeholders": {
+      "client": {
+        "type": "String"
+      }
+    }
+  }
 }

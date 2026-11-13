@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:typed_data';
 import '../../core/constants/api_constants.dart';
 import '../../core/utils/max_enhance_utils.dart';
@@ -11,7 +12,7 @@ class NativeImageEnhance {
     if ((width == 832 && height == 1216) || (width == 1216 && height == 832)) {
       return const [1.0, 1.5];
     }
-    final step = ImageModels.isV5Model(model) ? 32 : 64;
+    const step = 64;
     return [1.0, 1.5, 2.0]
         .where(
           (factor) =>
@@ -20,6 +21,18 @@ class NativeImageEnhance {
               (height * factor) % step == 0,
         )
         .toList();
+  }
+
+  /// Ordinary Enhance uses the website's 64px request grid, including V5.
+  /// Round halfway up, so 1216x832 at 1.5x becomes 1856x1280.
+  static ({int width, int height}) targetSize(
+    int width,
+    int height,
+    double factor,
+  ) {
+    int align(int side) =>
+        math.max(64, ((side * factor).floor() / 64).round() * 64);
+    return (width: align(width), height: align(height));
   }
 
   static (double, double) magnitude(double value) {
@@ -45,6 +58,9 @@ class NativeImageEnhance {
   }) {
     final model = ImageModels.resolveBaseModel(current.model);
     final maxEnabled = max && MaxEnhanceMath.isEligible(model, width, height);
+    final target = maxEnabled
+        ? (width: width, height: height)
+        : targetSize(width, height, factor);
     return current.copyWith(
       model: model,
       sourceImage: source,
@@ -53,8 +69,8 @@ class NativeImageEnhance {
       isOutpaint: false,
       enhanceWorkflow: true,
       upscaledEnhance: maxEnabled,
-      width: maxEnabled ? width : (width * factor).round(),
-      height: maxEnabled ? height : (height * factor).round(),
+      width: target.width,
+      height: target.height,
       strength: strength,
       noise: noise,
     );

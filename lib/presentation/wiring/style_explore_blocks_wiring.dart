@@ -62,11 +62,13 @@ BlockData styleExploreBlockData(
   thumb: block.hasThumbnail
       ? BlockThumb(
           FileImage(File(block.thumbnail!)),
+          path: block.thumbnail,
           offsetX: block.thumbnailOffsetX,
           offsetY: block.thumbnailOffsetY,
           scale: block.thumbnailScale,
         )
       : null,
+  additionalThumbs: block.additionalThumbnails.map(blockThumbOf).toList(),
   useCount: block.useCount,
   favorite: block.isFavorite,
   createdAt: block.createdAt,

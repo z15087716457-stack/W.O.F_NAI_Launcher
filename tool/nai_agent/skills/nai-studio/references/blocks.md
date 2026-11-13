@@ -38,7 +38,7 @@ No dedicated actions; compose them. Each write returns the next `draft_version`,
 
 `create(changes.title/content)`, `update(id, changes)`, `delete(id)` and `insert(id)` manage entries and insert them into a prompt.
 
-`changes.thumbnail: {image_id:"..."}` or `{path:"workspace/relative/image.png"}` copies a preview into managed storage; `null` removes it. `thumbnailOffsetX/Y` (-1..1, left/top to right/bottom) and `thumbnailScale` (1..3) select the visible area, using the native editor's coordinates. New previews default to center/1x; omit thumbnail to adjust only the framing. Read current framing and version with `block_query(id)`.
+`changes.thumbnail: {image_id:"..."}` or `{path:"workspace/relative/image.png"}` copies a cover into managed storage, retaining other preview images; `null` clears the entire gallery. `thumbnailOffsetX/Y` (-1..1, left/top to right/bottom) and `thumbnailScale` (1..3) select the cover's visible area, using the native editor's coordinates. New covers default to center/1x; omit thumbnail to adjust only its framing. Read current framing and version with `block_query(id)`. Additional gallery entries appear as `additionalThumbnails` in queries; manage these in the block editor, not through `changes`.
 
 `changes.generationSettings`: model, width, height, steps, scale, sampler, noiseSchedule, cfgRescale, qualityPreset (`standard/light/none`), ucPreset (`0/1/2/3/7/8/9`), qualityCustomBlockId/ucCustomBlockId (library IDs replacing native presets). Content edits clear obsolete atom pools unless new atoms are given.
 

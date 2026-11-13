@@ -88,6 +88,7 @@ class KritaBridgeServer {
 
   BridgeClient? get currentClient =>
       (Zone.current[_clientScope] as BridgeRequest?)?.client;
+  bool agentToolsEnabled = false;
   bool ownsActiveOperation(String clientId) =>
       _mutationOwner?.client.id == clientId;
 
@@ -296,7 +297,12 @@ class KritaBridgeServer {
           socket.add(
             jsonEncode({
               ...KritaBridgeProtocol.encodePong(),
-              'capabilities': ['multi_client', 'guarded_set', 'raw_draft'],
+              'capabilities': [
+                'multi_client',
+                'guarded_set',
+                'raw_draft',
+                if (agentToolsEnabled) 'agent_tools_v1',
+              ],
               'client_id': clientId,
             }),
           );
@@ -421,6 +427,10 @@ class KritaBridgeServer {
     await Future.wait(
       agents.map((c) => _sockets[c.id]?.close() ?? Future.value()),
     );
+  }
+
+  Future<void> disconnectClient(String id) async {
+    await _sockets[id]?.close();
   }
 
   void _sendError(WebSocket socket, KritaBridgeError error) {

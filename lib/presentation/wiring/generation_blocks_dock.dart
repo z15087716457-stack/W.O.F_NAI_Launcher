@@ -13,6 +13,7 @@ import '../providers/prompt_block_library_provider.dart';
 import '../providers/prompt_block_palette_provider.dart';
 import '../router/app_router.dart';
 import 'blocks_actions.dart';
+import 'blocks_mapping.dart' show blockThumbOf;
 import '../ui/blocks/blocks_contract.dart';
 import '../ui/blocks/blocks_dock.dart';
 import '../utils/prompt_block_bundle_insertion.dart';
@@ -57,11 +58,13 @@ BlockData generationBlockData(
   thumb: block.hasThumbnail
       ? BlockThumb(
           FileImage(File(block.thumbnail!)),
+          path: block.thumbnail,
           offsetX: block.thumbnailOffsetX,
           offsetY: block.thumbnailOffsetY,
           scale: block.thumbnailScale,
         )
       : null,
+  additionalThumbs: block.additionalThumbnails.map(blockThumbOf).toList(),
   useCount: block.useCount,
   favorite: block.isFavorite,
   createdAt: block.createdAt.toLocal(),

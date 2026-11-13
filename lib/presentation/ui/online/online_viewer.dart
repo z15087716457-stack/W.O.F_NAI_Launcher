@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/utils/localization_extension.dart';
+import '../../widgets/navigation/window_chrome_layout.dart';
 import '../kit/ui_controls.dart';
 import '../kit/ui_glyph.dart';
 import '../kit/ui_lib_controls.dart';
@@ -221,63 +222,77 @@ class _OnlineViewerState extends State<OnlineViewer> {
     final stage = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SizedBox(
-          height: 56,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              spacing: 10,
-              children: [
-                OnlineSourceMark(data.source, size: 22, light: true),
-                Expanded(
-                  child: Row(
-                    spacing: 10,
-                    children: [
-                      Flexible(
-                        child: Text(
-                          w.title ?? '#${w.id}',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: UiText.sans(
-                            14,
-                            weight: FontWeight.w700,
-                            color: fg,
-                          ),
-                        ),
-                      ),
-                      if (w.author != null)
-                        Text(w.author!, style: UiText.sans(12, color: dim)),
-                    ],
+        // 静态文字透传给拖窗层，右侧按钮保留自己的命中。
+        WindowHeaderDragSurface(
+          key: const Key('online-viewer-header'),
+          child: SizedBox(
+            height: 56,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                spacing: 10,
+                children: [
+                  IgnorePointer(
+                    child: OnlineSourceMark(data.source, size: 22, light: true),
                   ),
-                ),
-                Text(
-                  media.length > 1 || w.mediaCount > 1
-                      ? l10n.online_viewerPosition(
-                          m + 1,
-                          w.mediaCount,
-                          index + 1,
-                          items.length,
-                        )
-                      : l10n.online_viewerWorkPosition(index + 1, items.length),
-                  key: const Key('online-viewer-position'),
-                  style: UiText.mono(12, color: const Color(0xFFAAAAAA)),
-                ),
-                UiIconBox(
-                  glyph: UiGlyphs.external,
-                  glyphSize: 16,
-                  color: const Color(0xFFCCCCCC),
-                  tooltip: l10n.online_openInBrowser,
-                  onTap: () => scope.actions.onOpenInBrowser(w.key),
-                ),
-                UiIconBox(
-                  key: const Key('online-viewer-close'),
-                  glyph: UiGlyphs.close,
-                  glyphSize: 17,
-                  color: const Color(0xFFCCCCCC),
-                  tooltip: l10n.online_close,
-                  onTap: widget.onClose,
-                ),
-              ],
+                  Expanded(
+                    child: IgnorePointer(
+                      child: Row(
+                        spacing: 10,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              w.title ?? '#${w.id}',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: UiText.sans(
+                                14,
+                                weight: FontWeight.w700,
+                                color: fg,
+                              ),
+                            ),
+                          ),
+                          if (w.author != null)
+                            Text(w.author!, style: UiText.sans(12, color: dim)),
+                        ],
+                      ),
+                    ),
+                  ),
+                  IgnorePointer(
+                    child: Text(
+                      media.length > 1 || w.mediaCount > 1
+                          ? l10n.online_viewerPosition(
+                              m + 1,
+                              w.mediaCount,
+                              index + 1,
+                              items.length,
+                            )
+                          : l10n.online_viewerWorkPosition(
+                              index + 1,
+                              items.length,
+                            ),
+                      key: const Key('online-viewer-position'),
+                      style: UiText.mono(12, color: const Color(0xFFAAAAAA)),
+                    ),
+                  ),
+                  UiIconBox(
+                    key: const Key('online-viewer-open-browser'),
+                    glyph: UiGlyphs.external,
+                    glyphSize: 16,
+                    color: const Color(0xFFCCCCCC),
+                    tooltip: l10n.online_openInBrowser,
+                    onTap: () => scope.actions.onOpenInBrowser(w.key),
+                  ),
+                  UiIconBox(
+                    key: const Key('online-viewer-close'),
+                    glyph: UiGlyphs.close,
+                    glyphSize: 17,
+                    color: const Color(0xFFCCCCCC),
+                    tooltip: l10n.online_close,
+                    onTap: widget.onClose,
+                  ),
+                ],
+              ),
             ),
           ),
         ),

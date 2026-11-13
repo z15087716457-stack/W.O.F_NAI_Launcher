@@ -487,10 +487,7 @@ final generationViewDataProvider = Provider.autoDispose
           positiveTokens: tokens(positive),
           negativeTokens: tokens(negativeUsage),
           qualityPresets: [
-            GenOption(
-              id: 'standard',
-              label: spec.isV5 ? l.qualityTags_standard : l.qualityTags_label,
-            ),
+            GenOption(id: 'standard', label: l.qualityTags_standard),
             if (spec.isV5) GenOption(id: 'light', label: l.qualityTags_light),
             GenOption(id: 'none', label: l.qualityTags_none),
             for (final id in quality.customEntryIds)

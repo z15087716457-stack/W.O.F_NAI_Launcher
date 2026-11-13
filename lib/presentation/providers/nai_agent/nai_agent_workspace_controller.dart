@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart' show StringCharacters;
 import 'package:path/path.dart' as p;
 import 'package:uuid/uuid.dart';
 import '../../../core/nai_agent/agent_tool.dart';
+import '../../../core/nai_agent/external_session.dart';
 import '../../../core/nai_agent/attachment_manifest.dart';
 import '../../../core/nai_agent/pi_host_client.dart';
 import '../../../core/nai_agent/attachment_image.dart';
@@ -55,6 +56,9 @@ class AgentChatRuntime {
   }
 
   PiHostClient? client;
+  ExternalAgentSession? external;
+  final Map<String, NaiAgentCancellation> externalCalls = {};
+  Future<void> Function()? disconnectExternal;
   StreamSubscription<Map<String, dynamic>>? subscription;
   List<Map<String, dynamic>> messages = [], queue = [];
   List<Map<String, dynamic>> historyMessages = [];
@@ -62,6 +66,9 @@ class AgentChatRuntime {
   /// Full current-branch display, with live updates replacing persisted copies.
   /// This never changes the compacted messages sent to Pi/model providers.
   List<Map<String, dynamic>> get displayMessages {
+    if (external case final value?) {
+      return value.displayMessages(chat.createdAt);
+    }
     if (historyMessages.isEmpty) return messages;
     Object key(Map<String, dynamic> message) =>
         (message['role'], message['timestamp']);
@@ -230,6 +237,140 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
   Iterable<AgentChatRuntime> get heldRuntimes => _runtimes.values;
   Iterable<AgentChatRuntime> get runningChats =>
       _runtimes.values.where((chat) => chat.running);
+
+  AgentChatRuntime? get latestUnreadExternal {
+    AgentChatRuntime? latest;
+    for (final runtime in _runtimes.values) {
+      if (runtime.external?.unread != true) continue;
+      if (latest == null ||
+          runtime.external!.unreadAt > latest.external!.unreadAt) {
+        latest = runtime;
+      }
+    }
+    return latest;
+  }
+
+  void externalResult(AgentChatRuntime runtime, ExternalAgentCall call) {
+    final result = call.result!;
+    final details = result['details'] as Map?;
+    final session = runtime.external!;
+    if (details?['code'] == 'cancelled' ||
+        details?['status'] == 'cancelled' ||
+        details?['cancelled'] == true) {
+      session.unread = session.notice != null;
+      if (session.notice != null) {
+        session.unreadAt = session.notice!.at.millisecondsSinceEpoch;
+      }
+      return;
+    }
+    session.unread = selected != runtime || !settings.panelExpanded;
+    session.unreadAt = call.finishedAt!;
+    session.notice = session.unread
+        ? ExternalAgentNotice(
+            id: call.id,
+            at: DateTime.fromMillisecondsSinceEpoch(call.finishedAt!),
+            isError: result['isError'] == true || details?['ok'] == false,
+            title: call.name == 'prompt_set'
+                ? (details?['title'] as String?)
+                : null,
+          )
+        : null;
+  }
+
+  /// External sessions never create a Pi host or replace the current composer.
+  Future<AgentChatRuntime> openExternal({
+    required String workspaceId,
+    required String client,
+    String? sessionId,
+    String summary = '',
+  }) async {
+    await ready;
+    final workspace = await store.getWorkspace(workspaceId);
+    final AgentChat chat;
+    if (sessionId == null) {
+      chat = await store.createChat(
+        workspaceId,
+        summary.trim().isEmpty ? client : summary.trim().split('\n').first,
+        externalClient: client,
+      );
+    } else {
+      chat = (await store.listChats(workspaceId)).firstWhere(
+        (c) => c.id == sessionId && c.externalClient == client,
+        orElse: () => throw const NaiAgentToolError(
+          'session_missing',
+          'External session does not belong to this workspace/client',
+        ),
+      );
+    }
+    final runtime = _runtimes[chat.id] ??= AgentChatRuntime(
+      workspace,
+      chat,
+      const AgentComposerState(),
+    );
+    runtime.external ??= ExternalAgentSession.fromJson(
+      await store.readExternalChat(workspaceId, chat.id),
+    );
+    if (runtime.external!.summary.isEmpty) runtime.external!.summary = summary;
+    runtime.tools.addAll(runtime.external!.displayTools);
+    if (selectedWorkspace?.id == workspaceId) {
+      chats = [chat, ...chats.where((c) => c.id != chat.id)];
+    }
+    await saveExternal(runtime);
+    return runtime;
+  }
+
+  Future<void> saveExternal(AgentChatRuntime runtime) async {
+    await store.saveExternalChat(
+      runtime.workspace.id,
+      runtime.chat.id,
+      runtime.external!.toJson(),
+    );
+    runtime.chat = await store.updateChat(
+      runtime.workspace.id,
+      runtime.chat.id,
+      lastActivityAt: DateTime.now(),
+    );
+    if (selectedWorkspace?.id == runtime.workspace.id) {
+      chats = [
+        for (final chat in chats)
+          chat.id == runtime.chat.id ? runtime.chat : chat,
+      ]..sort((a, b) => b.activityAt.compareTo(a.activityAt));
+    }
+    runtime.tools
+      ..clear()
+      ..addAll(runtime.external!.displayTools);
+    runtime.uiRevision++;
+    _notify();
+  }
+
+  void externalChanged(AgentChatRuntime runtime) {
+    runtime.uiRevision++;
+    _notify();
+  }
+
+  Future<void> showExternal(AgentChatRuntime runtime) async {
+    final current = selected;
+    if (current != null &&
+        current.chat.isDraft &&
+        (current.composer.text.isNotEmpty ||
+            current.composer.attachments.isNotEmpty)) {
+      current.chat = await store.saveDraftChat(current.chat);
+      await _persist(current);
+      chats = [
+        for (final chat in chats)
+          chat.id == current.chat.id ? current.chat : chat,
+      ];
+    }
+    if (selectedWorkspace?.id != runtime.workspace.id) {
+      await selectWorkspace(runtime.workspace.id, restoreHistory: false);
+    }
+    await selectChat(runtime.chat.id);
+  }
+
+  Future<void> disconnectExternal() async {
+    await selected?.disconnectExternal?.call();
+  }
+
   void _notify() {
     _streamNotification?.cancel();
     _streamNotification = null;
@@ -246,6 +387,7 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
   Future<void> loadHistory() async {
     final runtime = selected;
     if (runtime == null) return;
+    if (runtime.chat.isExternal) return;
     try {
       if (runtime._closingHost case final closing?) await closing;
       if (_disposed ||
@@ -267,7 +409,10 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
     }
   }
 
-  Future<void> initialize({bool restoreHistory = true}) async {
+  Future<void> initialize({
+    bool restoreHistory = true,
+    bool connectMcp = true,
+  }) async {
     settings = await store.readSettings();
     workspaces = await store.listWorkspaces();
     if (workspaces.isEmpty) {
@@ -281,7 +426,7 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
     await selectWorkspace(workspace.id, restoreHistory: restoreHistory);
     initialized = true;
     _notify();
-    if (settings.mcpServers.any((server) => server.enabled)) {
+    if (connectMcp && settings.mcpServers.any((server) => server.enabled)) {
       await loadHistory();
     }
   }
@@ -320,7 +465,9 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
     await _discardOtherDrafts(chat.id);
     for (final runtime
         in _runtimes.values
-            .where((r) => r.chat.id != chat.id && !_busy(r))
+            .where(
+              (r) => !r.chat.isExternal && r.chat.id != chat.id && !_busy(r),
+            )
             .toList()) {
       await _disconnectHost(runtime);
       runtime.messages = [];
@@ -350,9 +497,17 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
         );
       }
       _runtimes[chat.id] = runtime;
+      if (chat.isExternal) {
+        runtime.external = ExternalAgentSession.fromJson(
+          await store.readExternalChat(workspace.id, chat.id),
+        );
+        runtime.tools.addAll(runtime.external!.displayTools);
+      }
     }
     if (_disposed || revision != _selectionRevision) return;
     selected = runtime;
+    runtime.external?.unread = false;
+    runtime.external?.notice = null;
     if (!chat.isDraft) await _rememberChat(workspace.id, chat.id);
     _notify();
     // Restoring history is entirely local; no prompt or model call is made.
@@ -406,6 +561,7 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
   }
 
   Future<void> _closeRuntime(AgentChatRuntime runtime) async {
+    await runtime.disconnectExternal?.call();
     await _disconnectHost(runtime);
     _runtimes.remove(runtime.chat.id);
   }
@@ -1054,6 +1210,12 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
   }
 
   Future<PiHostClient> _ensureClient(AgentChatRuntime runtime) async {
+    if (runtime.chat.isExternal) {
+      throw const NaiAgentToolError(
+        'external_session',
+        'This conversation is controlled by an external Agent',
+      );
+    }
     if (runtime._closingHost case final closing?) await closing;
     if (_disposed ||
         _deletingChats.contains(runtime.chat.id) ||
@@ -1575,6 +1737,12 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
   Future<void> stop() => _stopRuntime(selected!);
 
   Future<void> _stopRuntime(AgentChatRuntime runtime) async {
+    if (runtime.external != null) {
+      for (final token in runtime.externalCalls.values) {
+        token.cancel();
+      }
+      return;
+    }
     if (runtime.compacting) return;
     final recovered = [
       for (final item in runtime.composer.pending) {...item, 'recovered': true},
@@ -2020,8 +2188,13 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
   ) {
     if (_recordRunLimit(runtime, message['errorMessage'])) return;
     runtime.runLimitHit = null;
-    runtime.error =
-        '${currentL10n.naiAgent_error}\n${message['errorMessage'] ?? ''}';
+    final detail = '${message['errorMessage'] ?? ''}';
+    final l = currentL10n;
+    runtime.error = detail.contains('STUDIO_EMPTY_RESPONSE:')
+        ? l.naiAgent_emptyResponse
+        : detail.contains('STUDIO_IMAGE_BUDGET:')
+        ? l.naiAgent_imageRequestTooLarge
+        : '${l.naiAgent_error}\n$detail';
   }
 
   String? _error(Object error, [AgentChatRuntime? runtime]) {
@@ -2057,6 +2230,10 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
     await ready;
     await Future.wait(
       _runtimes.values.toList().map((runtime) async {
+        for (final token in runtime.externalCalls.values) {
+          token.cancel();
+        }
+        if (runtime.external != null) await saveExternal(runtime);
         await runtime._starting;
         await _persist(runtime);
         await _disconnectHost(runtime);

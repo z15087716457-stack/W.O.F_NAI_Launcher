@@ -1,6 +1,7 @@
 // Pi 1.5.0 does not export getCacheWarmingDelayMs through its package exports.
-// Mirror its delay for status projection only; Pi still owns every timer,
-// replay-safety check, deadline and the 30-minute / one-hour safety limits.
+// Mirror its delay for status projection. The live-mode compatibility bridge
+// rearms Pi's first timer using its existing run, replay checks and deadlines;
+// later refreshes and the 30-minute / one-hour safety limits remain Pi-owned.
 function warmingDelayMs(ttlSeconds) {
   const ttlMs = ttlSeconds * 1000;
   return ttlMs <= 10_000 ? undefined : Math.max(1, Math.floor(Math.min(ttlMs * 0.9, ttlMs - 10_000)));
@@ -22,7 +23,7 @@ export class StudioCacheWarming {
       factory: pi => {
         pi.on('agent_start', () => { this.running = true; });
         // agent_end can be followed by retry/recovery/queued work.
-        pi.on('agent_settled', () => { this.running = false; });
+        pi.on('agent_settled', () => { this.running = false; this.currentRequest = undefined; });
         pi.on('cache_warming_decision', (_event, ctx) => {
           if (!priceUnknown(ctx.model ?? this.model)) return;
           const mode = this.settingsManager.getCacheWarmingMode();
@@ -36,6 +37,21 @@ export class StudioCacheWarming {
 
   attach(session) {
     this.session = session;
+    // Pi 1.5.0's public mode setter only reconciles an existing warmer. Keep
+    // this compatibility bridge here: reuse Pi's request validity, replay
+    // checks, timers and safety limits when enabling an off-started run.
+    const warmer = session._cacheWarmer;
+    const start = warmer.start.bind(warmer);
+    warmer.start = (request, isCurrent) => {
+      this.currentRequest = { request, isCurrent, startedAt: Date.now() };
+      return start(request, isCurrent);
+    };
+    const modeChanged = warmer.onModeChanged.bind(warmer);
+    warmer.onModeChanged = () => {
+      modeChanged();
+      this.resumeCurrentRequest(warmer, start);
+      this.onChange?.();
+    };
     // Counts belong to this Pi session, including usage persisted before resume.
     for (const entry of session.sessionManager.getEntries()) this.recordWarm(entry);
     const stream = session.agent.streamFunction;
@@ -51,6 +67,27 @@ export class StudioCacheWarming {
     session.subscribe(event => {
       if (event.type === 'entry_appended') this.recordWarm(event.entry);
     });
+  }
+
+  resumeCurrentRequest(warmer, start) {
+    const current = this.currentRequest;
+    if (!this.running || this.settingsManager.getCacheWarmingMode() === 'off' || warmer.run
+      || !current || !current.isCurrent() || warmer.inactive.reason !== 'cache warming disabled') return;
+    start(current.request, current.isCurrent);
+    const run = warmer.run;
+    if (!run) return; // Pi rejected the request's replay or cache lifetime.
+    clearTimeout(run.timer);
+    run.startedAt = current.startedAt;
+    run.nextWarmAt = Math.max(current.startedAt, this.lastWarmAt ?? 0) + run.delayMs;
+    run.refreshDeadlineAt = run.nextWarmAt + Math.floor((run.ttlMs - run.delayMs) / 2);
+    const reason = warmer.getModeStopReason(run);
+    if (reason || Date.now() > run.refreshDeadlineAt) {
+      warmer.stop(reason ?? 'cache refresh deadline missed');
+      return;
+    }
+    this.nextWarmAt = run.nextWarmAt;
+    run.timer = setTimeout(() => void warmer.refresh(run), Math.max(0, run.nextWarmAt - Date.now()));
+    run.timer.unref();
   }
 
   recordWarm(entry) {

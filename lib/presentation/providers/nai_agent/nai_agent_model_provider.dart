@@ -160,7 +160,6 @@ NaiAgentModelConnection mapNaiAgentModel(
         'max' => 'xhigh',
         _ => 'off',
       },
-      'timeoutSeconds': provider.timeoutSeconds.clamp(10, 600),
       'retryAttempts': provider.retryAttempts.clamp(0, 5),
       'maxConcurrentRequests': provider.maxConcurrentRequests.clamp(1, 20),
     },

@@ -275,6 +275,36 @@ void main() {
   });
 
   test(
+    'legacy Agent preview edits retain extra images and clearing removes the gallery',
+    () async {
+      final block = await repository.createBlock(
+        title: 'Gallery',
+        content: 'a',
+        thumbnail: 'cover.png',
+        additionalThumbnails: [
+          const PromptBlockThumbnail(path: 'extra.png', offsetY: -.4, scale: 2),
+        ],
+      );
+      await tools.manage({
+        'action': 'update',
+        'id': block.id,
+        'expected_version': naiAgentBlockVersion(block),
+        'changes': {'thumbnailScale': 1.5},
+      }, NaiAgentCancellation());
+      final changed = (await repository.getBlock(block.id))!;
+      expect(changed.thumbnailScale, 1.5);
+      expect(changed.additionalThumbnails, block.additionalThumbnails);
+      await tools.manage({
+        'action': 'update',
+        'id': block.id,
+        'expected_version': naiAgentBlockVersion(changed),
+        'changes': {'thumbnail': null},
+      }, NaiAgentCancellation());
+      expect((await repository.getBlock(block.id))!.thumbnails, isEmpty);
+    },
+  );
+
+  test(
     'final Hive comparison detects an edit after the repository has read its old row',
     () async {
       final original = await repository.createBlock(

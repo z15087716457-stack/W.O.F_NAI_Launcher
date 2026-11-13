@@ -9,6 +9,7 @@ import '../kit/ui_inputs.dart';
 import '../kit/ui_popover.dart';
 import '../kit/ui_text.dart';
 import 'blocks_contract.dart';
+import 'blocks_gallery.dart';
 import 'blocks_format.dart';
 
 /// 块 → 药丸（统一入口：标题、颜色、图标、外观都取块自己的）。
@@ -144,7 +145,7 @@ class BlockAtom extends StatelessWidget {
   }
 }
 
-/// 一组内容项：间距 5。超过 [max] 项时尾部“+N”。
+/// 一组内容项：间距 5。超过 [max] 项或 [maxRows] 行时尾部“+N”。
 class BlockAtoms extends StatelessWidget {
   const BlockAtoms(
     this.atoms, {
@@ -152,13 +153,15 @@ class BlockAtoms extends StatelessWidget {
     this.small = true,
     this.mono = false,
     this.max,
+    this.maxRows,
     this.fontSize,
-  });
+  }) : assert(maxRows == null || maxRows > 0);
 
   final List<String> atoms;
   final bool small;
   final bool mono;
   final int? max;
+  final int? maxRows;
   final double? fontSize;
 
   @override
@@ -166,15 +169,69 @@ class BlockAtoms extends StatelessWidget {
     final shown = max == null || atoms.length <= max!
         ? atoms
         : atoms.take(max!).toList();
-    final more = atoms.length - shown.length;
-    return Wrap(
+    Widget wrap(int count) => Wrap(
       spacing: 5,
       runSpacing: 5,
       children: [
-        for (final a in shown)
+        for (final a in shown.take(count))
           BlockAtom(a, small: small, mono: mono, fontSize: fontSize),
-        if (more > 0) BlockAtom('+$more', small: small, muted: true),
+        if (count < atoms.length)
+          BlockAtom('+${atoms.length - count}', small: small, muted: true),
       ],
+    );
+    final rows = maxRows;
+    if (rows == null) return wrap(shown.length);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (!constraints.hasBoundedWidth) return wrap(shown.length);
+        final size = fontSize ?? (small ? 11.0 : 12.0);
+        final painter = TextPainter(
+          textDirection: Directionality.of(context),
+          textScaler: MediaQuery.textScalerOf(context),
+          locale: Localizations.maybeLocaleOf(context),
+        );
+        final style = mono
+            ? UiText.mono(size, height: 1.2)
+            : UiText.sans(
+                size,
+                weight: small ? FontWeight.w400 : FontWeight.w500,
+                height: 1.2,
+              );
+        double width(String text) {
+          painter.text = TextSpan(text: text, style: style);
+          painter.layout();
+          return (painter.width + (small ? 12 : 16)).clamp(
+            0.0,
+            constraints.maxWidth,
+          );
+        }
+
+        // Keep each prefix's final row so the remaining-count chip can fit
+        // within the same row budget without measuring the content again.
+        final ends = [(1, 0.0)];
+        for (final atom in shown) {
+          var (row, used) = ends.last;
+          final w = width(atom);
+          if (used > 0 && used + 5 + w > constraints.maxWidth) {
+            row++;
+            used = 0;
+          }
+          if (row > rows) break;
+          ends.add((row, used == 0 ? w : used + 5 + w));
+        }
+        var count = ends.length - 1;
+        while (count > 0 && count < atoms.length) {
+          final (row, used) = ends[count];
+          if (row < rows ||
+              used + 5 + width('+${atoms.length - count}') <=
+                  constraints.maxWidth) {
+            break;
+          }
+          count--;
+        }
+        painter.dispose();
+        return wrap(count);
+      },
     );
   }
 }
@@ -610,7 +667,7 @@ class BlockCover extends StatelessWidget {
 }
 
 /// 悬停预览卡（原型 `.hvc`）：宽 300；有图时图高 150；药丸（大）+ 分类、项数 / 附带参数 / 含负面、
-/// 前 7 项内容、底栏操作提示和使用次数。侧栏、积木、管理页三处共用。
+/// 最多 5 行内容、底栏操作提示和使用次数。侧栏、积木、管理页三处共用。
 class BlockHoverCard extends StatelessWidget {
   const BlockHoverCard(this.block, {super.key});
   final BlockData block;
@@ -628,7 +685,13 @@ class BlockHoverCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (b.thumb != null) SizedBox(height: 150, child: BlockCover(b)),
+          if (b.thumb != null)
+            BlockImageGallery(
+              key: ValueKey(b.id),
+              images: b.thumbs,
+              height: 150,
+              borderRadius: BorderRadius.zero,
+            ),
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 10, 12, 0),
             child: Row(
@@ -660,7 +723,7 @@ class BlockHoverCard extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
-            child: BlockAtoms(atoms, max: 7),
+            child: BlockAtoms(atoms, maxRows: 5),
           ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
@@ -673,10 +736,17 @@ class BlockHoverCard extends StatelessWidget {
               child: Row(
                 spacing: 10,
                 children: [
-                  Text(l10n.blocks_hintClick),
-                  Text(l10n.blocks_hintDrag),
-                  Text(l10n.blocks_hintRightClick),
-                  const Spacer(),
+                  Expanded(
+                    child: Wrap(
+                      spacing: 10,
+                      runSpacing: 4,
+                      children: [
+                        Text(l10n.blocks_hintClick),
+                        Text(l10n.blocks_hintDrag),
+                        Text(l10n.blocks_hintRightClick),
+                      ],
+                    ),
+                  ),
                   Text(l10n.blocks_usedTimes(b.useCount)),
                 ],
               ),

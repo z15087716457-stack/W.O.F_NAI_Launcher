@@ -57,6 +57,8 @@ class AgentViewData {
     this.slashCommands = const [],
     this.localAction,
     this.localActionRevision = 0,
+    this.externalConnected = false,
+    this.externalNotice,
   });
 
   /// 当前时间（欢迎语「上午好 / 下午好」、相对时间）。测试里固定。
@@ -103,6 +105,8 @@ class AgentViewData {
   /// Minimal hook: open the existing model/thinking/history panel once per revision.
   final AgentLocalAction? localAction;
   final int localActionRevision;
+  final bool externalConnected;
+  final String? externalNotice;
 
   /// 欢迎页的「当前草稿」卡；null = 不显示（例如不在生图页）。
   final AgentDraftSummary? draft;
@@ -238,6 +242,7 @@ class AgentChatInfo {
     this.lastActivityAt,
     this.state = AgentChatState.idle,
     this.canExport = false,
+    this.externalClient,
   });
   final String id;
   final String title;
@@ -248,6 +253,7 @@ class AgentChatInfo {
 
   /// 已有 Pi 会话文件，可导出 `.jsonl`。
   final bool canExport;
+  final String? externalClient;
 }
 
 // ─────────────────────────────── 对话流 ───────────────────────────────
@@ -1448,6 +1454,8 @@ class AgentActions {
     this.onPromptSetAction,
     this.onSelectSlashCommand,
     this.onAcceptSuggestion,
+    this.onDisconnectExternal,
+    this.onViewExternal,
   });
 
   final Future<bool> Function(
@@ -1459,6 +1467,7 @@ class AgentActions {
 
   final Future<bool> Function(AgentSlashCommand command)? onSelectSlashCommand;
   final Future<bool> Function()? onAcceptSuggestion;
+  final Future<bool> Function()? onDisconnectExternal, onViewExternal;
 
   /// 收起侧栏。
   final VoidCallback onClose;

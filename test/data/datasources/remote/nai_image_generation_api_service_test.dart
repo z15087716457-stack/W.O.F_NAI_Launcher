@@ -17,6 +17,7 @@ import 'package:nai_launcher/data/datasources/remote/nai_image_enhancement_api_s
 import 'package:nai_launcher/data/datasources/remote/nai_image_generation_api_service.dart';
 import 'package:nai_launcher/data/models/image/image_params.dart';
 import 'package:nai_launcher/data/models/vibe/vibe_reference.dart';
+import 'package:nai_launcher/presentation/providers/generation/image_workflow_controller.dart';
 
 void main() {
   test(
@@ -51,6 +52,70 @@ void main() {
   );
 
   for (final streamed in [false, true]) {
+    test(
+      'V5 Full 1.5x Enhance uploads 64px-aligned image and request stream=$streamed',
+      () async {
+        final adapter = _PendingDioAdapter();
+        final dio = Dio()..httpClientAdapter = adapter;
+        final endpoint = NaiApiEndpointService();
+        final service = NAIImageGenerationApiService(
+          dio,
+          NAIImageEnhancementApiService(dio, endpoint),
+          endpoint,
+        );
+        final source = _solidPng(width: 1216, height: 832, r: 10, g: 20, b: 30);
+        final params = canvasEnhanceRequest(
+          const ImageParams(
+            model: 'nai-diffusion-5-full',
+            prompt: 'source prompt',
+            seed: 123,
+            steps: 28,
+          ),
+          const EnhanceWorkflowSettings(magnitude: 0, upscaleFactor: 1.5),
+          source,
+          1216,
+          832,
+        );
+        final operation = streamed
+            ? service.generateImageStream(params).drain<Object?>()
+            : service.generateImage(params).then<Object?>((_) => null);
+        final handled = operation.catchError((_) => null);
+        await _waitForRequestCount(adapter, 1);
+        final parts = Map.fromEntries(
+          (adapter.requests.single.options.data as FormData).files,
+        );
+        expect(parts.keys, unorderedEquals(['image', 'request']));
+        final uploaded = img.decodeImage(
+          Uint8List.fromList(
+            await parts['image']!.clone().finalize().expand((b) => b).toList(),
+          ),
+        )!;
+        final payload =
+            jsonDecode(
+                  utf8.decode(
+                    await parts['request']!
+                        .clone()
+                        .finalize()
+                        .expand((b) => b)
+                        .toList(),
+                  ),
+                )
+                as Map;
+        final parameters = payload['parameters'] as Map;
+        expect((parameters['width'], parameters['height']), (1856, 1280));
+        expect((uploaded.width, uploaded.height), (1856, 1280));
+        expect((parameters['strength'], parameters['noise']), (.2, 0));
+        expect(parameters['image'], 'image');
+        expect(parameters.containsKey('upscaled_enhance'), isFalse);
+        expect(payload['model'], 'nai-diffusion-5-full');
+        expect(payload['action'], 'img2img');
+        expect(payload['input'], contains('-2::upscaled, blurry::'));
+        expect(params.sourceImage, same(source));
+        adapter.requests.single.completeWithEmptyZip();
+        await handled;
+      },
+    );
+
     for (final action in [
       ImageGenerationAction.img2img,
       ImageGenerationAction.infill,

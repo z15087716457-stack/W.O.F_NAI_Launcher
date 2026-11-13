@@ -265,6 +265,12 @@ class TestPlatform extends BlocksPlatform {
   }
 
   @override
+  Future<List<BlockThumbPick>> pickThumbnails() async {
+    calls.add('thumbnails');
+    return [];
+  }
+
+  @override
   Future<List<String>> pickTxt(String title) async {
     calls.add('txt');
     return [];
@@ -473,6 +479,7 @@ void main() {
       a.onExportBackup();
       a.onExport([blockId]);
       await tester.runAsync(a.onPickThumbnail);
+      expect(await tester.runAsync(a.onPickThumbnails!), isEmpty);
       final params = await tester.runAsync(a.onCaptureParams);
       await flush(tester);
       expect(
@@ -485,6 +492,7 @@ void main() {
           'exportBackup',
           'export:1',
           'thumbnail',
+          'thumbnails',
         ]),
       );
       expect(params, isNotNull);

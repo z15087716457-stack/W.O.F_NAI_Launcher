@@ -494,7 +494,7 @@ void main() {
       await tapKey(t, 'block-edit-save');
       final d = rec.drafts.single;
       expect(d.text, '1girl, (solo:1.2)');
-      expect(d.thumbToken, 'c12');
+      expect(d.thumb?.pickToken, 'c12');
       expect(d.params, BlocksFixture.y99Params);
     });
 

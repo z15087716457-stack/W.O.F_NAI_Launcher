@@ -47,6 +47,7 @@ void main() {
       expect(value['payloadParameters'], {'reasoning_effort': 'medium'});
       expect(value['contextWindow'], 100000);
       expect(value['maxTokens'], 8192);
+      expect(value, isNot(contains('timeoutSeconds')));
       expect(connection.allowsImages, isTrue);
       expect(connection.toString(), isNot(contains('synthetic-key')));
       expect(connection.toString(), isNot(contains('model-header')));

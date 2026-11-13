@@ -63,6 +63,21 @@ abstract class KritaBridgeMessage {
   String? get id;
 }
 
+/// Authenticated external Studio tool/session request (not a Krita mutation).
+class KritaAgentMessage extends KritaBridgeMessage {
+  const KritaAgentMessage({
+    required this.id,
+    required this.operation,
+    required this.payload,
+  });
+  @override
+  String get type => 'agent_request';
+  @override
+  final String id;
+  final String operation;
+  final Map<String, dynamic> payload;
+}
+
 class KritaPingMessage extends KritaBridgeMessage {
   const KritaPingMessage({
     required this.version,

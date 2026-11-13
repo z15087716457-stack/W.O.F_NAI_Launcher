@@ -250,6 +250,20 @@ void main() {
           'test/presentation/ui/blocks/goldens/$file.png',
           [
             if (bar.evaluate().isNotEmpty) t.getRect(bar).deflate(1),
+            // 2026-11-13: the approved five-row hover card is taller. Keep
+            // the original PNG; exclude only its card and shadow footprint
+            // (40px blur: 3 sigma, plus the 18px vertical offset).
+            for (final e
+                in find.byKey(const Key('block-hover-card')).evaluate())
+              t
+                  .getRect(find.byWidget(e.widget))
+                  .inflate(72)
+                  .shift(const Offset(0, 18)),
+            // 2026-11-13: approved gallery controls and crop guides replace the
+            // left preview panel. Its new geometry/behavior has dedicated tests.
+            for (final e
+                in find.byKey(const Key('block-edit-preview-panel')).evaluate())
+              t.getRect(find.byWidget(e.widget)).deflate(1),
             // 2026-10-27 C03（用户确认）：图标网格改为固定 4.5 行高的内部滚动区，
             // 末尾接新增 / NSFW 图标；只排除网格区本身（编辑框其余部分照旧锁定）。
             for (final e

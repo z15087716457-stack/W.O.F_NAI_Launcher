@@ -914,6 +914,12 @@
   "preciseRef_clearAll": "清空全部",
   "preciseRef_remove": "移除",
   "preciseRef_referenceType": "參考類型",
+  "preciseRef_importTitle": "匯入精準參考",
+  "preciseRef_importTypePrompt": "想讓這張圖片提供哪一類參考？",
+  "preciseRef_importTypeHint": "點選選項即可匯入",
+  "preciseRef_characterDescription": "參考人物的外觀與特徵",
+  "preciseRef_styleDescription": "參考配色、筆觸與畫面質感",
+  "preciseRef_characterAndStyleDescription": "同時參考人物特徵與視覺風格",
   "preciseRef_strength": "參考強度",
   "preciseRef_fidelity": "保真度",
   "preciseRef_v4Only": "此功能需要 V4+ 模型",
@@ -8775,6 +8781,8 @@
   "naiAgent_toolsHint": "當前狀態、圖片、提示詞和工作區檔案按需呼叫；業務操作的詳細用法寫在 nai-studio、nai-prompt 等 Skill 裡，用到時才讀取。",
   "naiAgent_unknownCost": "實際費用以服務商為準",
   "naiAgent_error": "操作未完成，請檢查模型設定或工作區檔案。",
+  "naiAgent_emptyResponse": "模型結束了請求，但沒有返回正文或工具呼叫。請重試，或檢查模型輸出設定。",
+  "naiAgent_imageRequestTooLarge": "本次圖片總量過大或無法處理。請減少圖片數量、縮小圖片或更換格式後重試。",
   "naiAgent_visionCurrentProvider": "當前服務商",
   "naiAgent_visionModelUnsupported": "服務商 {providerName} 下的所選模型未宣告支援圖片輸入。請在 設定 → 模型與介面 → {providerName} → 模型 → 能力 → 圖片輸入 確認支援，或切換到支援圖片輸入的模型。",
   "@naiAgent_visionModelUnsupported": {
@@ -12057,6 +12065,11 @@
   "ag_cacheWarmOff": "已關閉",
   "ag_cacheWarmRefreshing": "正在續期快取…",
   "ag_cacheWarmIdle": "待機，下次執行時開始",
+  "ag_cacheWarmExpired": "已錯過保溫時機，等待下一次模型請求",
+  "ag_cacheWarmContextChanged": "上下文已變化，等待下一次模型請求",
+  "ag_cacheWarmSafetyLimit": "已到保溫時長上限，等待下一次模型請求",
+  "ag_cacheWarmUnavailable": "當前請求不支援快取保溫",
+  "ag_cacheWarmEconomics": "預計收益不足，本次保溫已暫停",
   "ag_cacheWarmNext": "{time} 後續期",
   "@ag_cacheWarmNext": {
     "placeholders": {
@@ -12239,5 +12252,30 @@
         "type": "int"
       }
     }
-  }
+  },
+  "blocks_showRange": "顯示範圍",
+  "blocks_rangeHover": "懸浮卡",
+  "blocks_rangeDetail": "詳情預覽",
+  "blocks_cropRange": "虛線內為{target}顯示範圍",
+  "blocks_previewCount": "{count} 張預覽圖",
+  "blocks_previewNumber": "第 {index} 張預覽圖",
+  "blocks_scrollPreviews": "滾輪左右瀏覽",
+  "blocks_resetZoom": "恢復100%縮放",
+  "blocks_previousPreview": "上一張預覽圖",
+  "blocks_nextPreview": "下一張預覽圖",
+  "blocks_removePreview": "移除這張預覽圖",
+  "ag_external": "外部",
+  "ag_externalRequest": "外部請求",
+  "ag_externalConnected": "外部 Agent 已連線",
+  "ag_externalDisconnected": "連線已結束 · 產物保留",
+  "ag_externalHint": "完整對話和推理由外部 Agent 承擔，Studio 記錄工具與產物。",
+  "ag_externalDisconnect": "斷開",
+  "ag_externalView": "檢視",
+  "ag_externalApproval": "外部工具需要確認",
+  "ag_externalAllow": "允許一次",
+  "ag_externalDeny": "拒絕",
+  "ag_externalArtifactUpdated": "{client} 更新了「{title}」",
+  "ag_externalWorkspaceUpdated": "{client} 更新了工作區",
+  "ag_externalResultFailed": "{client} 的操作未完成",
+  "ag_externalNeedsAttention": "{client} 有操作需要你處理"
 }

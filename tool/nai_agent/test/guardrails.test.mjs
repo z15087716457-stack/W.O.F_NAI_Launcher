@@ -30,19 +30,82 @@ async function setup(handler, config = {}) {
   } };
 }
 
-test('provider timeout aborts an actual pending HTTP stream', async () => {
-  const fixture = await setup(async (req, res) => {
+test('a buffered response can exceed the legacy timeout before headers, complete, and send again', async () => {
+  const fixture = await setup(async (_req, res) => {
+    await new Promise(resolve => setTimeout(resolve, 400));
     res.writeHead(200, { 'content-type': 'text/event-stream' });
-    res.flushHeaders();
-    await new Promise(resolve => res.on('close', resolve));
-  });
+    res.end('data: ' + JSON.stringify({ choices: [{ delta: { content: 'Finished' }, finish_reason: 'stop' }] }) + '\n\ndata: [DONE]\n\n');
+  }, { timeoutSeconds: .1 });
   try {
     await fixture.session.prompt('read state');
-    assert.equal(fixture.requests.length, 1);
-    assert.equal(fixture.session.messages.at(-1).stopReason, 'aborted');
+    assert.equal(fixture.requests.length, 1, JSON.stringify(fixture.session.messages.at(-1)));
+    assert.equal(fixture.session.messages.at(-1).stopReason, 'stop');
+    assert.ok(fixture.session.messages.at(-1).content.some(part => part.text === 'Finished'));
     assert.equal(fixture.session.isStreaming, false);
+    await fixture.session.prompt('continue');
+    assert.equal(fixture.session.messages.at(-1).stopReason, 'stop');
+    assert.equal(fixture.requests.length, 2);
   } finally { await fixture.close(); }
 });
+
+test('streaming response progress completes normally', async () => {
+  const fixture = await setup(async (_req, res) => {
+    res.writeHead(200, { 'content-type': 'text/event-stream' });
+    for (let i = 0; i < 7; i++) {
+      res.write('data: ' + JSON.stringify({ choices: [{ delta: { reasoning_content: 'thinking ' }, finish_reason: null }] }) + '\n\n');
+      await new Promise(resolve => setTimeout(resolve, 200));
+    }
+    res.end('data: ' + JSON.stringify({ choices: [{ delta: { content: 'Finished' }, finish_reason: 'stop' }] }) + '\n\ndata: [DONE]\n\n');
+  }, { timeoutSeconds: 1 });
+  try {
+    await fixture.session.prompt('long but active');
+    const reply = fixture.session.messages.at(-1);
+    assert.equal(reply.stopReason, 'stop', reply.errorMessage);
+    assert.ok(reply.content.some(part => part.text === 'Finished'));
+  } finally { await fixture.close(); }
+});
+
+test('a stalled partial response waits for manual Stop, retains text, and allows another send', async () => {
+  const { promise: entered, resolve: enter } = Promise.withResolvers();
+  const fixture = await setup(async (_req, res) => {
+    res.writeHead(200, { 'content-type': 'text/event-stream' });
+    if (fixture.requests.length > 1) {
+      res.end('data: ' + JSON.stringify({ choices: [{ delta: { content: 'Recovered' }, finish_reason: 'stop' }] }) + '\n\ndata: [DONE]\n\n');
+      return;
+    }
+    res.write('data: ' + JSON.stringify({ choices: [{ delta: { content: 'Partial' }, finish_reason: null }] }) + '\n\n');
+    enter();
+    await new Promise(resolve => res.on('close', resolve));
+  }, { timeoutSeconds: .1 });
+  try {
+    const running = fixture.session.prompt('stall until manual stop');
+    await entered;
+    await new Promise(resolve => setTimeout(resolve, 400));
+    assert.equal(fixture.session.isStreaming, true);
+    await fixture.session.abort(); await running;
+    const stopped = fixture.session.messages.at(-1);
+    assert.equal(stopped.stopReason, 'aborted');
+    assert.ok(stopped.content.some(part => part.text === 'Partial'));
+    await fixture.session.prompt('continue after stop');
+    assert.equal(fixture.session.messages.at(-1).stopReason, 'stop');
+    assert.equal(fixture.requests.length, 2);
+  } finally { await fixture.session.abort(); await fixture.close(); }
+});
+
+for (const reasoningOnly of [false, true]) {
+  test(`empty final response becomes an explicit error (thinking only=${reasoningOnly})`, async () => {
+    const fixture = await setup(async (_req, res) => {
+      res.writeHead(200, { 'content-type': 'text/event-stream' });
+      res.end('data: ' + JSON.stringify({ choices: [{ delta: reasoningOnly
+        ? { reasoning_content: 'No final answer' } : { content: ' ' }, finish_reason: 'stop' }] }) + '\n\ndata: [DONE]\n\n');
+    });
+    try {
+      await fixture.session.prompt('empty');
+      assert.equal(fixture.session.messages.at(-1).stopReason, 'error');
+      assert.match(fixture.session.messages.at(-1).errorMessage, /STUDIO_EMPTY_RESPONSE/);
+    } finally { await fixture.close(); }
+  });
+}
 
 test('provider errors that echo credentials are redacted before official session persistence', async () => {
   const fixture = await setup(async (req, res) => {

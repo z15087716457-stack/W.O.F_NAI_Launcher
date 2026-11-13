@@ -301,7 +301,11 @@ void main() {
         const BlockDraft(title: 'Before', atoms: ['a']),
       );
       final saving = service.save(
-        const BlockDraft(title: 'Old save', atoms: ['a'], thumbToken: 'picked'),
+        const BlockDraft(
+          title: 'Old save',
+          atoms: ['a'],
+          thumb: BlockThumb(AssetImage('unused'), pickToken: 'picked'),
+        ),
         id: b.id,
       );
       final expectation = expectLater(saving, throwsStateError);

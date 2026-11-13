@@ -754,6 +754,7 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
           generations.forChat(chat.id).isNotEmpty ||
           imageApprovals.forChat(chat.id).isNotEmpty;
       return AgentChatInfo(
+        externalClient: chat.externalClient,
         id: chat.id,
         title: chat.title.trim().isEmpty ? c.initialChatName : chat.title,
         createdAt: chat.createdAt.toLocal(),
@@ -769,7 +770,10 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
 
     final workspace = c.selectedWorkspace;
     final tokenStats = agentMap(r?.stats['tokens']);
+    final unreadExternal = c.latestUnreadExternal;
     final data = AgentViewData(
+      externalConnected: r?.external?.connected ?? false,
+      externalNotice: unreadExternal?.chat.externalClient,
       now: DateTime.now(),
       workspace: AgentWorkspaceInfo(
         id: workspace?.id ?? '',
@@ -999,6 +1003,13 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
       ),
     );
     final actions = AgentActions(
+      onDisconnectExternal: () => _run(c.disconnectExternal),
+      onViewExternal: unreadExternal == null
+          ? null
+          : () => _run(() async {
+              await c.showExternal(unreadExternal);
+              await ref.read(naiAgentWindowControllerProvider).open();
+            }),
       onPromptSetAction: (id, index, action) async =>
           r != null && await _promptAction(r, id, index, action),
       onClose: () =>

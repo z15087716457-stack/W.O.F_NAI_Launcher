@@ -106,6 +106,7 @@ class PromptBlockRepository {
     double thumbnailOffsetX = 0.0,
     double thumbnailOffsetY = 0.0,
     double thumbnailScale = 1.0,
+    List<PromptBlockThumbnail> additionalThumbnails = const [],
     int? sortOrder,
     List<String>? atoms,
     String negativeContent = '',
@@ -139,6 +140,7 @@ class PromptBlockRepository {
       thumbnailOffsetX: thumbnailOffsetX,
       thumbnailOffsetY: thumbnailOffsetY,
       thumbnailScale: thumbnailScale,
+      additionalThumbnails: additionalThumbnails,
       sortOrder: sortOrder ?? _nextSortOrder(blocks, folderId),
     );
     if (beforeWrite == null) {

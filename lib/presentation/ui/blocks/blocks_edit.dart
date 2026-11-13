@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import '../../../core/constants/api_constants.dart';
 import '../../../core/enums/quality_tag_preset.dart';
 import 'package:flutter/services.dart';
@@ -22,6 +23,7 @@ import '../kit/ui_popover.dart';
 import '../kit/ui_slider.dart';
 import '../kit/ui_text.dart';
 import 'blocks_contract.dart';
+import 'blocks_gallery.dart';
 import 'blocks_format.dart';
 import 'blocks_parts.dart';
 
@@ -162,6 +164,9 @@ enum _Tab { positive, negative, text }
 
 class _BlockEditDialogState extends State<BlockEditDialog> {
   late BlockDraft _d = widget.data.draft;
+  int _thumbIndex = 0;
+  bool _showRange = true;
+  bool _detailRange = false;
   late var _tab = widget.data.draft.atoms == null ? _Tab.text : _Tab.positive;
   late final _text = TextEditingController(
     text:
@@ -384,6 +389,7 @@ class _BlockEditDialogState extends State<BlockEditDialog> {
     atoms: _atoms,
     negativeAtoms: _d.negativeAtoms,
     thumb: _d.thumb,
+    additionalThumbs: _d.additionalThumbs,
     folderName: widget.data.folders
         .where((f) => f.id == _d.folderId)
         .firstOrNull
@@ -397,128 +403,286 @@ class _BlockEditDialogState extends State<BlockEditDialog> {
     final l10n = context.l10n;
     final b = _shown;
     final data = widget.data;
-    final t = _d.thumb;
+    final thumbs = _d.thumbs;
+    final t = thumbs.elementAtOrNull(_thumbIndex);
+    final target = _detailRange
+        ? l10n.blocks_rangeDetail
+        : l10n.blocks_rangeHover;
+    void select(int index) => setState(() => _thumbIndex = index);
+    void update(BlockThumb value) {
+      final changed = [..._d.thumbs];
+      changed[_thumbIndex] = value;
+      _setThumbs(changed);
+    }
+
+    void move(int delta) =>
+        select((_thumbIndex + delta + thumbs.length) % thumbs.length);
     return Container(
+      key: const Key('block-edit-preview-panel'),
       width: 330,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: c.panel,
         border: Border(right: BorderSide(color: c.line)),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: 14,
-        children: [
-          BlockLabel(l10n.blocks_preview),
-          SizedBox(
-            height: 210,
-            child: t == null
-                ? UiDashedBox(
-                    radius: 10,
-                    color: c.strong,
-                    child: Center(
-                      child: Builder(
-                        builder: (ctx) => UiBtn(
-                          key: const Key('block-edit-pick'),
-                          size: UiBtnSize.small,
-                          onTap: _pick,
-                          children: [
-                            const UiGlyph(UiGlyphs.picture, size: 13),
-                            Text(l10n.blocks_addThumb),
-                          ],
-                        ),
-                      ),
-                    ),
-                  )
-                : _Crop(
-                    thumb: t,
-                    onChanged: (v) => _set(_d.copyWith(thumb: v)),
-                    onPick: _pick,
-                    onClear: () => _set(_d.copyWith(clearThumb: true)),
-                  ),
-          ),
-          BlockBox(
-            child: Text.rich(
-              TextSpan(
-                children: [
-                  const TextSpan(text: '…, wide shot, '),
-                  WidgetSpan(
-                    alignment: PlaceholderAlignment.middle,
-                    child: BlockPill(b),
-                  ),
-                  const TextSpan(text: ' white dress, blue flower, …'),
-                ],
-              ),
-              style: UiText.sans(13, color: c.ink, height: 1.6),
-            ),
-          ),
-          BlockBox(
-            padding: EdgeInsets.zero,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
-                  child: Row(
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: 14,
+          children: [
+            BlockLabel(
+              l10n.blocks_preview,
+              count: thumbs.isEmpty
+                  ? null
+                  : '${_thumbIndex + 1} / ${thumbs.length}',
+              trailing: Semantics(
+                toggled: _showRange,
+                button: true,
+                child: UiPressable(
+                  key: const Key('block-edit-show-range'),
+                  onTap: () => setState(() => _showRange = !_showRange),
+                  builder: (context, _) => Row(
+                    mainAxisSize: MainAxisSize.min,
                     spacing: 6,
                     children: [
-                      Expanded(
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: BlockPill(b, large: true),
-                        ),
+                      Icon(Icons.crop_free, size: 13, color: c.faint),
+                      Text(
+                        l10n.blocks_showRange,
+                        style: UiText.sans(10, color: c.muted),
                       ),
-                      if (b.folderName != null)
-                        Text(
-                          b.folderName!,
-                          style: UiText.sans(11, color: c.faint),
-                        ),
+                      UiSwitch(value: _showRange, width: 22, height: 12),
                     ],
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
-                  child: BlockAtoms(
-                    b.atoms.isEmpty ? b.negativeAtoms : b.atoms,
-                    max: 5,
-                  ),
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                BlockSeg<bool>(
+                  values: const [false, true],
+                  selected: _detailRange,
+                  mini: true,
+                  expand: true,
+                  keyOf: (v) =>
+                      Key('block-edit-range-${v ? 'detail' : 'hover'}'),
+                  labelOf: (v) =>
+                      v ? l10n.blocks_rangeDetail : l10n.blocks_rangeHover,
+                  onTap: (v) => setState(() => _detailRange = v),
                 ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  height: 210,
+                  child: t == null
+                      ? UiDashedBox(
+                          radius: 10,
+                          color: c.strong,
+                          child: Center(
+                            child: UiBtn(
+                              key: const Key('block-edit-pick'),
+                              size: UiBtnSize.small,
+                              onTap: _pick,
+                              children: [
+                                const UiGlyph(UiGlyphs.picture, size: 13),
+                                Text(l10n.blocks_addThumb),
+                              ],
+                            ),
+                          ),
+                        )
+                      : _Crop(
+                          key: ValueKey(_thumbIndex),
+                          thumb: t,
+                          showRange: _showRange,
+                          target: _detailRange
+                              ? blockInspectorPreviewSize
+                              : blockHoverPreviewSize,
+                          onChanged: update,
+                          onPick: () => _pick(replace: true),
+                          onClear: () {
+                            final remaining = [..._d.thumbs]
+                              ..removeAt(_thumbIndex);
+                            _thumbIndex = math.max(
+                              0,
+                              math.min(_thumbIndex, remaining.length - 1),
+                            );
+                            _setThumbs(remaining);
+                          },
+                          onPrevious: thumbs.length > 1 ? () => move(-1) : null,
+                          onNext: thumbs.length > 1 ? () => move(1) : null,
+                        ),
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  spacing: 8,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        t != null && _showRange
+                            ? l10n.blocks_cropRange(target)
+                            : '',
+                        key: const Key('block-edit-range-caption'),
+                        maxLines: 2,
+                        style: UiText.sans(10, color: c.faint, height: 1.5),
+                      ),
+                    ),
+                    if (t != null)
+                      Tooltip(
+                        message: l10n.blocks_resetZoom,
+                        child: UiPressable(
+                          key: const Key('block-edit-reset-zoom'),
+                          onTap: () => update(t.copyWith(scale: 1)),
+                          builder: (context, hover) => Row(
+                            mainAxisSize: MainAxisSize.min,
+                            spacing: 4,
+                            children: [
+                              Icon(
+                                Icons.zoom_in,
+                                size: 14,
+                                color: hover ? c.ink : c.muted,
+                              ),
+                              Text(
+                                '${(t.scale * 100).round()}%',
+                                key: const Key('block-edit-zoom-percent'),
+                                style: UiText.sans(
+                                  10,
+                                  color: hover ? c.ink : c.muted,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                if (thumbs.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  BlockThumbnailStrip(
+                    images: thumbs,
+                    selected: _thumbIndex,
+                    onSelected: select,
+                    onAdd: _pick,
+                  ),
+                  const SizedBox(height: 7),
+                  Row(
+                    children: [
+                      Text(
+                        l10n.blocks_previewCount(thumbs.length),
+                        style: UiText.sans(10, color: c.faint),
+                      ),
+                      const Spacer(),
+                      if (thumbs.length > 4)
+                        Text(
+                          l10n.blocks_scrollPreviews,
+                          style: UiText.sans(10, color: c.faint),
+                        ),
+                    ],
+                  ),
+                ],
               ],
             ),
-          ),
-          const Spacer(),
-          if (data.sourcePath != null)
-            Text(
-              [
-                l10n.blocks_sourceFile(data.sourcePath!),
-                [
-                  if (data.importedAt != null)
-                    l10n.blocks_importedAt(BlocksFormat.date(data.importedAt!)),
-                  switch (data.sourceState) {
-                    BlockSourceState.synced => l10n.blocks_sourceSynced,
-                    BlockSourceState.changed => l10n.blocks_sourceChanged,
-                    BlockSourceState.missing => l10n.blocks_sourceMissing,
-                    BlockSourceState.none => '',
-                  },
-                ].where((s) => s.isNotEmpty).join(' · '),
-              ].join('\n'),
-              style: UiText.sans(11, color: c.faint, height: 1.7),
+            BlockBox(
+              child: Text.rich(
+                TextSpan(
+                  children: [
+                    const TextSpan(text: '…, wide shot, '),
+                    WidgetSpan(
+                      alignment: PlaceholderAlignment.middle,
+                      child: BlockPill(b),
+                    ),
+                    const TextSpan(text: ' white dress, blue flower, …'),
+                  ],
+                ),
+                style: UiText.sans(13, color: c.ink, height: 1.6),
+              ),
             ),
-        ],
+            BlockBox(
+              padding: EdgeInsets.zero,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+                    child: Row(
+                      spacing: 6,
+                      children: [
+                        Expanded(
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: BlockPill(b, large: true),
+                          ),
+                        ),
+                        if (b.folderName != null)
+                          Text(
+                            b.folderName!,
+                            style: UiText.sans(11, color: c.faint),
+                          ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
+                    child: BlockAtoms(
+                      b.atoms.isEmpty ? b.negativeAtoms : b.atoms,
+                      max: 5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (data.sourcePath != null)
+              Text(
+                [
+                  l10n.blocks_sourceFile(data.sourcePath!),
+                  [
+                    if (data.importedAt != null)
+                      l10n.blocks_importedAt(
+                        BlocksFormat.date(data.importedAt!),
+                      ),
+                    switch (data.sourceState) {
+                      BlockSourceState.synced => l10n.blocks_sourceSynced,
+                      BlockSourceState.changed => l10n.blocks_sourceChanged,
+                      BlockSourceState.missing => l10n.blocks_sourceMissing,
+                      BlockSourceState.none => '',
+                    },
+                  ].where((s) => s.isNotEmpty).join(' · '),
+                ].join('\n'),
+                style: UiText.sans(11, color: c.faint, height: 1.7),
+              ),
+          ],
+        ),
       ),
     );
   }
 
-  Future<void> _pick() async {
-    final r = await widget.actions.onPickThumbnail();
-    if (r == null || !mounted) return;
-    _set(
-      _d.copyWith(
-        thumb: BlockThumb(r.image),
-        thumbToken: r.token,
-        clearThumb: false,
-      ),
-    );
+  void _setThumbs(List<BlockThumb> images) => _set(
+    _d.copyWith(
+      thumb: images.firstOrNull,
+      additionalThumbs: images.skip(1).toList(),
+      clearThumb: images.isEmpty,
+    ),
+  );
+
+  Future<void> _pick({bool replace = false}) async {
+    final List<BlockThumbPick> picked;
+    if (!replace && widget.actions.onPickThumbnails != null) {
+      picked = await widget.actions.onPickThumbnails!();
+    } else {
+      final image = await widget.actions.onPickThumbnail();
+      picked = [if (image != null) image];
+    }
+    if (!mounted || picked.isEmpty) return;
+    final images = [..._d.thumbs];
+    final added = [
+      for (final image in picked)
+        BlockThumb(image.image, pickToken: image.token),
+    ];
+    if (replace && _thumbIndex < images.length) {
+      images[_thumbIndex] = added.first;
+    } else {
+      _thumbIndex = images.length;
+      images.addAll(added);
+    }
+    _setThumbs(images);
   }
 
   Widget _field(String label, Widget child, {Widget? trailing, String? hint}) {
@@ -958,15 +1122,24 @@ class _BlockEditDialogState extends State<BlockEditDialog> {
 /// 预览图裁剪：拖动平移、滚轮或触控板捏合缩放（1…3）。
 class _Crop extends StatefulWidget {
   const _Crop({
+    super.key,
     required this.thumb,
     required this.onChanged,
     required this.onPick,
     required this.onClear,
+    required this.showRange,
+    required this.target,
+    this.onPrevious,
+    this.onNext,
   });
   final BlockThumb thumb;
   final ValueChanged<BlockThumb> onChanged;
   final VoidCallback onPick;
   final VoidCallback onClear;
+  final bool showRange;
+  final Size target;
+  final VoidCallback? onPrevious;
+  final VoidCallback? onNext;
 
   @override
   State<_Crop> createState() => _CropState();
@@ -974,6 +1147,58 @@ class _Crop extends StatefulWidget {
 
 class _CropState extends State<_Crop> {
   double? _pinchStartScale;
+  Size? _imageSize;
+  ImageProvider? _resolved;
+  ImageStream? _stream;
+  ImageStreamListener? _listener;
+
+  void _stopImage() {
+    if (_listener != null) _stream?.removeListener(_listener!);
+    _listener = null;
+    _stream = null;
+  }
+
+  void _resolveImage() {
+    if (_resolved == widget.thumb.image) return;
+    _stopImage();
+    _resolved = widget.thumb.image;
+    _imageSize = null;
+    _stream = widget.thumb.image.resolve(
+      createLocalImageConfiguration(context),
+    );
+    _listener = ImageStreamListener((info, _) {
+      final size = Size(
+        info.image.width.toDouble(),
+        info.image.height.toDouble(),
+      );
+      info.dispose();
+      if (!mounted) return;
+      _imageSize = size;
+      _stopImage();
+      if (SchedulerBinding.instance.schedulerPhase ==
+          SchedulerPhase.persistentCallbacks) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) setState(() {});
+        });
+      } else {
+        setState(() {});
+      }
+    }, onError: (Object _, StackTrace? __) => _stopImage());
+    _stream!.addListener(_listener!);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _resolveImage();
+  }
+
+  @override
+  void dispose() {
+    _stopImage();
+    super.dispose();
+  }
+
   // Pan and pinch events can arrive before the parent rebuilds.
   BlockThumb? _pending;
 
@@ -988,6 +1213,7 @@ class _CropState extends State<_Crop> {
   void didUpdateWidget(covariant _Crop oldWidget) {
     super.didUpdateWidget(oldWidget);
     _pending = null;
+    _resolveImage();
   }
 
   @override
@@ -1007,11 +1233,14 @@ class _CropState extends State<_Crop> {
         onPointerPanZoomEnd: (_) => _pinchStartScale = null,
         onPointerSignal: (e) {
           if (e is PointerScrollEvent) {
-            _change(
-              _current.copyWith(
-                scale: (_current.scale - e.scrollDelta.dy / 600).clamp(
-                  1.0,
-                  3.0,
+            GestureBinding.instance.pointerSignalResolver.register(
+              e,
+              (_) => _change(
+                _current.copyWith(
+                  scale: (_current.scale - e.scrollDelta.dy / 600).clamp(
+                    1.0,
+                    3.0,
+                  ),
                 ),
               ),
             );
@@ -1048,53 +1277,82 @@ class _CropState extends State<_Crop> {
                   width: 2,
                 ),
               ),
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  UiCroppedImage(
-                    image: thumb.image,
-                    offsetX: thumb.offsetX,
-                    offsetY: thumb.offsetY,
-                    scale: thumb.scale,
-                  ),
-                  Positioned(
-                    left: 8,
-                    bottom: 8,
-                    child: _darkBtn(
-                      UiGlyphs.picture,
-                      l10n.blocks_changeImage,
-                      widget.onPick,
-                      const Key('block-edit-pick'),
-                    ),
-                  ),
-                  Positioned(
-                    right: 8,
-                    top: 8,
-                    child: _darkBtn(
-                      UiGlyphs.close,
-                      '',
-                      widget.onClear,
-                      const Key('block-edit-clear-thumb'),
-                      tip: l10n.blocks_clearThumb,
-                    ),
-                  ),
-                  Positioned(
-                    right: 10,
-                    bottom: 12,
-                    child: Text(
-                      l10n.blocks_cropHint,
-                      style:
-                          UiText.sans(
-                            11,
-                            color: Colors.white.withValues(alpha: .9),
-                          ).copyWith(
-                            shadows: const [
-                              Shadow(color: Color(0x80000000), blurRadius: 4),
-                            ],
+              child: BlockGalleryFrame(
+                onPrevious: widget.onPrevious,
+                onNext: widget.onNext,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    if (_imageSize == null)
+                      UiCroppedImage(
+                        image: thumb.image,
+                        offsetX: thumb.offsetX,
+                        offsetY: thumb.offsetY,
+                        scale: thumb.scale,
+                      )
+                    else
+                      Positioned.fromRect(
+                        rect: blockEditorImageRect(
+                          _imageSize!,
+                          box.biggest,
+                          thumb,
+                          target: widget.target,
+                        ),
+                        child: Image(image: thumb.image, fit: BoxFit.fill),
+                      ),
+                    if (widget.showRange && _imageSize != null)
+                      IgnorePointer(
+                        child: CustomPaint(
+                          key: const Key('block-edit-crop-range'),
+                          painter: BlockPreviewGuidePainter(
+                            blockPreviewRange(
+                              _imageSize!,
+                              box.biggest,
+                              widget.target,
+                              thumb,
+                            ),
                           ),
+                        ),
+                      ),
+                    Positioned(
+                      left: 8,
+                      bottom: 8,
+                      child: _darkBtn(
+                        UiGlyphs.picture,
+                        l10n.blocks_changeImage,
+                        widget.onPick,
+                        const Key('block-edit-pick'),
+                      ),
                     ),
-                  ),
-                ],
+                    Positioned(
+                      right: 8,
+                      top: 8,
+                      child: _darkBtn(
+                        UiGlyphs.close,
+                        '',
+                        widget.onClear,
+                        const Key('block-edit-clear-thumb'),
+                        tip: l10n.blocks_removePreview,
+                      ),
+                    ),
+                    Positioned(
+                      right: 10,
+                      bottom: 12,
+                      child: Text(
+                        l10n.blocks_cropHint,
+                        style:
+                            UiText.sans(
+                              11,
+                              color: Colors.white.withValues(alpha: .9),
+                            ).copyWith(
+                              shadows: const [
+                                Shadow(color: Color(0x80000000), blurRadius: 4),
+                              ],
+                            ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

@@ -187,7 +187,14 @@ void main() {
       );
       sheet.actions.onScale('1.5');
       await drain(tester);
-      expect(container.read(generationRequestParamsProvider).width, 1248);
+      expect(container.read(generationRequestParamsProvider).width, 1280);
+      final scaledSheet = tester.widget<ToolsEnhanceSheet>(
+        find.byType(ToolsEnhanceSheet),
+      );
+      expect(
+        (scaledSheet.data.outWidth, scaledSheet.data.outHeight),
+        (1280, 1856),
+      );
       expect(
         container.read(generationParamsNotifierProvider).width,
         before.width,

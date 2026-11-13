@@ -6899,6 +6899,42 @@ abstract class AppLocalizations {
   /// **'Reference Type'**
   String get preciseRef_referenceType;
 
+  /// No description provided for @preciseRef_importTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Precise Reference'**
+  String get preciseRef_importTitle;
+
+  /// No description provided for @preciseRef_importTypePrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'What should this image be used to reference?'**
+  String get preciseRef_importTypePrompt;
+
+  /// No description provided for @preciseRef_importTypeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a type to import'**
+  String get preciseRef_importTypeHint;
+
+  /// No description provided for @preciseRef_characterDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference the character’s appearance and features'**
+  String get preciseRef_characterDescription;
+
+  /// No description provided for @preciseRef_styleDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference colors, brushwork, and visual texture'**
+  String get preciseRef_styleDescription;
+
+  /// No description provided for @preciseRef_characterAndStyleDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference both the character and visual style'**
+  String get preciseRef_characterAndStyleDescription;
+
   /// No description provided for @preciseRef_strength.
   ///
   /// In en, this message translates to:
@@ -28793,6 +28829,18 @@ abstract class AppLocalizations {
   /// **'Operation failed. Check model settings or workspace files.'**
   String get naiAgent_error;
 
+  /// No description provided for @naiAgent_emptyResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'The model finished without returning text or a tool call. Retry or check the model output settings.'**
+  String get naiAgent_emptyResponse;
+
+  /// No description provided for @naiAgent_imageRequestTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'This image batch is too large or could not be processed. Send fewer images, reduce their size, or try another format.'**
+  String get naiAgent_imageRequestTooLarge;
+
   /// No description provided for @naiAgent_visionCurrentProvider.
   ///
   /// In en, this message translates to:
@@ -39028,6 +39076,36 @@ abstract class AppLocalizations {
   /// **'Waiting — starts with the next run'**
   String get ag_cacheWarmIdle;
 
+  /// No description provided for @ag_cacheWarmExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh window missed — waiting for the next model request'**
+  String get ag_cacheWarmExpired;
+
+  /// No description provided for @ag_cacheWarmContextChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Context changed — waiting for the next model request'**
+  String get ag_cacheWarmContextChanged;
+
+  /// No description provided for @ag_cacheWarmSafetyLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Warming time limit reached — waiting for the next model request'**
+  String get ag_cacheWarmSafetyLimit;
+
+  /// No description provided for @ag_cacheWarmUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Cache warming is unavailable for this request'**
+  String get ag_cacheWarmUnavailable;
+
+  /// No description provided for @ag_cacheWarmEconomics.
+  ///
+  /// In en, this message translates to:
+  /// **'Warming paused because the estimated savings are too low'**
+  String get ag_cacheWarmEconomics;
+
   /// No description provided for @ag_cacheWarmNext.
   ///
   /// In en, this message translates to:
@@ -39519,6 +39597,156 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Download in background'**
   String get updateDownloadInBackground;
+
+  /// No description provided for @blocks_showRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Display range'**
+  String get blocks_showRange;
+
+  /// No description provided for @blocks_rangeHover.
+  ///
+  /// In en, this message translates to:
+  /// **'Hover card'**
+  String get blocks_rangeHover;
+
+  /// No description provided for @blocks_rangeDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Detail preview'**
+  String get blocks_rangeDetail;
+
+  /// No description provided for @blocks_cropRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Inside the dashed line: {target}'**
+  String blocks_cropRange(String target);
+
+  /// No description provided for @blocks_previewCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} preview images'**
+  String blocks_previewCount(int count);
+
+  /// No description provided for @blocks_previewNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview image {index}'**
+  String blocks_previewNumber(int index);
+
+  /// No description provided for @blocks_scrollPreviews.
+  ///
+  /// In en, this message translates to:
+  /// **'Scroll to browse'**
+  String get blocks_scrollPreviews;
+
+  /// No description provided for @blocks_resetZoom.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset zoom to 100%'**
+  String get blocks_resetZoom;
+
+  /// No description provided for @blocks_previousPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous preview image'**
+  String get blocks_previousPreview;
+
+  /// No description provided for @blocks_nextPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Next preview image'**
+  String get blocks_nextPreview;
+
+  /// No description provided for @blocks_removePreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this preview'**
+  String get blocks_removePreview;
+
+  /// No description provided for @ag_external.
+  ///
+  /// In en, this message translates to:
+  /// **'External'**
+  String get ag_external;
+
+  /// No description provided for @ag_externalRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'External request'**
+  String get ag_externalRequest;
+
+  /// No description provided for @ag_externalConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected to external Agent'**
+  String get ag_externalConnected;
+
+  /// No description provided for @ag_externalDisconnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection ended · artifacts retained'**
+  String get ag_externalDisconnected;
+
+  /// No description provided for @ag_externalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Conversation and inference stay in the external Agent. Studio records tools and artifacts.'**
+  String get ag_externalHint;
+
+  /// No description provided for @ag_externalDisconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect'**
+  String get ag_externalDisconnect;
+
+  /// No description provided for @ag_externalView.
+  ///
+  /// In en, this message translates to:
+  /// **'View'**
+  String get ag_externalView;
+
+  /// No description provided for @ag_externalApproval.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve external tool'**
+  String get ag_externalApproval;
+
+  /// No description provided for @ag_externalAllow.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow once'**
+  String get ag_externalAllow;
+
+  /// No description provided for @ag_externalDeny.
+  ///
+  /// In en, this message translates to:
+  /// **'Deny'**
+  String get ag_externalDeny;
+
+  /// No description provided for @ag_externalArtifactUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'{client} updated “{title}”'**
+  String ag_externalArtifactUpdated(String client, String title);
+
+  /// No description provided for @ag_externalWorkspaceUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'{client} updated the workspace'**
+  String ag_externalWorkspaceUpdated(String client);
+
+  /// No description provided for @ag_externalResultFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'An action from {client} did not complete'**
+  String ag_externalResultFailed(String client);
+
+  /// No description provided for @ag_externalNeedsAttention.
+  ///
+  /// In en, this message translates to:
+  /// **'{client} needs your attention'**
+  String ag_externalNeedsAttention(String client);
 }
 
 class _AppLocalizationsDelegate

@@ -246,6 +246,19 @@ NaiAgentBlockTools bindNaiAgentBlocks(
           'data_base64': base64Encode(await file.readAsBytes()),
         };
       }
+      final additional = <Map<String, dynamic>>[];
+      for (final image
+          in affected?.additionalThumbnails ?? const <PromptBlockThumbnail>[]) {
+        final file = File(image.path);
+        if (!await file.exists()) continue;
+        if (await file.length() > 64 * 1024 * 1024) {
+          throw const FormatException('Block thumbnail exceeds backup limit');
+        }
+        additional.add({
+          'path': image.path,
+          'data_base64': base64Encode(await file.readAsBytes()),
+        });
+      }
       return (await AgentSnapshotFiles(
             workspace,
           ).save('Before block operation', {
@@ -255,10 +268,23 @@ NaiAgentBlockTools bindNaiAgentBlocks(
             'collections': data.collections.map((b) => b.toJson()).toList(),
             'draft': draft.toJson(),
             if (thumbnail != null) 'affected_thumbnail': thumbnail,
+            if (additional.isNotEmpty)
+              'affected_additional_thumbnails': additional,
           }, backup: true))['path']
           as String;
     },
-    afterDelete: (block) => deletePromptBlockThumbnail(block.thumbnail),
+    afterDelete: (block) async {
+      final remaining = await ref.read(promptBlockRepositoryProvider).load();
+      final used = {
+        for (final other in remaining.blocks)
+          for (final image in other.thumbnails) image.path,
+      };
+      for (final image in block.thumbnails) {
+        if (!used.contains(image.path)) {
+          await deletePromptBlockThumbnail(image.path);
+        }
+      }
+    },
     validateInstance: validate,
     promoteInstance: (params, check) async {
       final draft = readBridgeDraft(ref);

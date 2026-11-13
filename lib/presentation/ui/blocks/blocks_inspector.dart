@@ -12,6 +12,7 @@ import '../kit/ui_menu.dart';
 import '../kit/ui_popover.dart';
 import '../kit/ui_text.dart';
 import 'blocks_contract.dart';
+import 'blocks_gallery.dart';
 import 'blocks_edit.dart';
 import 'blocks_format.dart';
 import 'blocks_page.dart';
@@ -226,14 +227,12 @@ class _SingleState extends State<_Single> {
         spacing: 14,
         children: [
           if (b.thumb != null)
-            Container(
+            BlockImageGallery(
+              key: ValueKey(b.id),
+              images: b.thumbs,
               height: 176,
-              clipBehavior: Clip.antiAlias,
-              decoration: BoxDecoration(borderRadius: BorderRadius.circular(9)),
-              child: Stack(
-                fit: StackFit.expand,
+              overlay: Stack(
                 children: [
-                  BlockCover(b),
                   Positioned(
                     right: 8,
                     bottom: 8,

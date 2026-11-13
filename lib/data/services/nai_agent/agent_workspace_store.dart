@@ -348,10 +348,13 @@ class AgentChat {
     this.sessionFile,
     this.isDraft = false,
     this.systemPromptPrefix = '',
+    this.externalClient,
   });
   final bool isDraft;
   final String id, workspaceId, title;
   final String systemPromptPrefix;
+  final String? externalClient;
+  bool get isExternal => externalClient != null;
   final DateTime createdAt;
   final DateTime? lastActivityAt;
   DateTime get activityAt => lastActivityAt ?? createdAt;
@@ -372,6 +375,7 @@ class AgentChat {
     lastActivityAt: lastActivityAt ?? this.lastActivityAt,
     sessionFile: sessionFile ?? this.sessionFile,
     systemPromptPrefix: systemPromptPrefix ?? this.systemPromptPrefix,
+    externalClient: externalClient,
     isDraft: isDraft ?? this.isDraft,
   );
 
@@ -384,6 +388,7 @@ class AgentChat {
     'lastActivityAt': lastActivityAt?.toIso8601String(),
     'sessionFile': sessionFile,
     'systemPromptPrefix': systemPromptPrefix,
+    if (externalClient != null) 'externalClient': externalClient,
   };
 }
 
@@ -1225,28 +1230,32 @@ class AgentWorkspaceStore {
     }
   }
 
-  Future<AgentChat> createChat(String workspaceId, String title) =>
-      _write(() async {
-        await getWorkspace(workspaceId);
-        final chat = AgentChat(
-          id: const Uuid().v4(),
-          workspaceId: workspaceId,
-          title: title.trim(),
-          createdAt: DateTime.now(),
-        );
-        await _atomic(
-          File(
-            p.join(
-              _workspaceDataDirectory(workspaceId).path,
-              'ui',
-              'chats',
-              '${chat.id}.json',
-            ),
-          ),
-          chat.toJson(),
-        );
-        return chat;
-      });
+  Future<AgentChat> createChat(
+    String workspaceId,
+    String title, {
+    String? externalClient,
+  }) => _write(() async {
+    await getWorkspace(workspaceId);
+    final chat = AgentChat(
+      id: const Uuid().v4(),
+      workspaceId: workspaceId,
+      title: title.trim(),
+      createdAt: DateTime.now(),
+      externalClient: externalClient,
+    );
+    await _atomic(
+      File(
+        p.join(
+          _workspaceDataDirectory(workspaceId).path,
+          'ui',
+          'chats',
+          '${chat.id}.json',
+        ),
+      ),
+      chat.toJson(),
+    );
+    return chat;
+  });
 
   /// Materialize an in-memory draft with its existing identity, never overwrite.
   Future<AgentChat> saveDraftChat(AgentChat draft) => _write(() async {
@@ -1322,6 +1331,7 @@ class AgentWorkspaceStore {
               : DateTime.parse(value['lastActivityAt'] as String),
           sessionFile: value['sessionFile'] as String?,
           systemPromptPrefix: value['systemPromptPrefix'] as String? ?? '',
+          externalClient: value['externalClient'] as String?,
         ),
       );
     }
@@ -1633,6 +1643,7 @@ class AgentWorkspaceStore {
     final allowed = {
       'ui/chats/$chatId.json',
       'ui/$chatId.json',
+      'ui/external/$chatId.json',
       'attachments/$chatId',
     };
     for (final file in files) {
@@ -1687,6 +1698,7 @@ class AgentWorkspaceStore {
         for (final relative in [
           'ui/chats/$chatId.json',
           'ui/$chatId.json',
+          'ui/external/$chatId.json',
           if (chat.sessionFile != null)
             _sessionRelative(chat.sessionFile!).replaceAll('\\', '/'),
           'attachments/$chatId',
@@ -2113,6 +2125,35 @@ class AgentWorkspaceStore {
     }
     return hits;
   }
+
+  File _externalChat(String workspaceId, String chatId) {
+    _id(chatId);
+    return File(
+      p.join(
+        _workspaceDataDirectory(workspaceId).path,
+        'ui',
+        'external',
+        '$chatId.json',
+      ),
+    );
+  }
+
+  Future<Map<String, dynamic>> readExternalChat(
+    String workspaceId,
+    String chatId,
+  ) async {
+    await getWorkspace(workspaceId);
+    return _read(_externalChat(workspaceId, chatId));
+  }
+
+  Future<void> saveExternalChat(
+    String workspaceId,
+    String chatId,
+    Map<String, dynamic> record,
+  ) => _write(() async {
+    await getWorkspace(workspaceId);
+    await _atomic(_externalChat(workspaceId, chatId), record);
+  });
 
   File _composer(String workspaceId, String sessionId) {
     _id(sessionId);

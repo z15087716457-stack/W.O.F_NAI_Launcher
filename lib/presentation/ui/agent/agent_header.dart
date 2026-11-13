@@ -103,7 +103,9 @@ class _AgentHeaderState extends State<AgentHeader> {
                                 builder: (context) => _Title(
                                   key: const Key('agent-chats'),
                                   open: _chats != null,
-                                  eyebrow: '${d.workspace.name}$number',
+                                  eyebrow: d.chat.externalClient == null
+                                      ? '${d.workspace.name}$number'
+                                      : '${l.ag_external} · ${d.chat.externalClient}',
                                   title: d.chat.title,
                                   onTap: () =>
                                       setState(() => _chats = _below(context)),
@@ -281,7 +283,7 @@ class _AgentHeaderState extends State<AgentHeader> {
           divider: true,
           label: l.ag_menuCompact,
           glyph: AgentGlyphs.layers,
-          enabled: !busy,
+          enabled: !busy && d.chat.externalClient == null,
           onTap: () => s.run(a.onCompact),
         ),
         UiMenuItem(

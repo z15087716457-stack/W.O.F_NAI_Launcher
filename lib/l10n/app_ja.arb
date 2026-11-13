@@ -1851,6 +1851,12 @@
   "preciseRef_clearAll": "すべてクリア",
   "preciseRef_remove": "削除",
   "preciseRef_referenceType": "参照タイプ",
+  "preciseRef_importTitle": "精密参照をインポート",
+  "preciseRef_importTypePrompt": "この画像の何を参照しますか？",
+  "preciseRef_importTypeHint": "項目を選ぶとインポートします",
+  "preciseRef_characterDescription": "人物の外見や特徴を参照",
+  "preciseRef_styleDescription": "配色、筆致、画面の質感を参照",
+  "preciseRef_characterAndStyleDescription": "人物の特徴と画風の両方を参照",
   "preciseRef_strength": "強度",
   "preciseRef_fidelity": "忠実度",
   "preciseRef_v4Only": "この機能には V4 以降のモデルが必要です",
@@ -8765,6 +8771,8 @@
   "naiAgent_toolsHint": "状態・画像・プロンプト・ファイルを必要に応じて取得します。Studio 操作の詳しい使い方は nai-studio・nai-prompt などの Skill にあり、必要なときだけ読み込みます。",
   "naiAgent_unknownCost": "実際の料金は提供元によります",
   "naiAgent_error": "操作に失敗しました。モデル設定やファイルを確認してください。",
+  "naiAgent_emptyResponse": "モデルは本文やツール呼び出しを返さずに終了しました。再試行するか、モデルの出力設定を確認してください。",
+  "naiAgent_imageRequestTooLarge": "画像の合計サイズが大きすぎるか、処理できませんでした。枚数やサイズを減らすか、別の形式をお試しください。",
   "naiAgent_visionCurrentProvider": "現在のプロバイダー",
   "naiAgent_visionModelUnsupported": "プロバイダー {providerName} の選択中モデルは、画像入力への対応が確認されていません。「設定 → モデルとAPI → {providerName} → モデル → 能力 → 画像入力」で対応を確認するか、画像対応モデルに切り替えてください。",
   "@naiAgent_visionModelUnsupported": {
@@ -11471,6 +11479,11 @@
   "ag_cacheWarmOff": "オフ",
   "ag_cacheWarmRefreshing": "キャッシュを延長中…",
   "ag_cacheWarmIdle": "待機中 — 次の実行で開始",
+  "ag_cacheWarmExpired": "更新のタイミングを過ぎました — 次のモデルリクエストを待機中",
+  "ag_cacheWarmContextChanged": "コンテキストが変わりました — 次のモデルリクエストを待機中",
+  "ag_cacheWarmSafetyLimit": "保温の制限時間に達しました — 次のモデルリクエストを待機中",
+  "ag_cacheWarmUnavailable": "このリクエストではキャッシュ保温を利用できません",
+  "ag_cacheWarmEconomics": "予想される節約効果が低いため保温を停止しました",
   "ag_cacheWarmNext": "{time} 後に延長",
   "@ag_cacheWarmNext": {
     "placeholders": {
@@ -11653,5 +11666,30 @@
         "type": "int"
       }
     }
-  }
+  },
+  "blocks_showRange": "表示範囲",
+  "blocks_rangeHover": "ホバーカード",
+  "blocks_rangeDetail": "詳細プレビュー",
+  "blocks_cropRange": "破線内が{target}の表示範囲",
+  "blocks_previewCount": "プレビュー画像 {count} 枚",
+  "blocks_previewNumber": "プレビュー画像 {index}",
+  "blocks_scrollPreviews": "スクロールで横に移動",
+  "blocks_resetZoom": "ズームを100%に戻す",
+  "blocks_previousPreview": "前のプレビュー画像",
+  "blocks_nextPreview": "次のプレビュー画像",
+  "blocks_removePreview": "このプレビューを削除",
+  "ag_external": "外部",
+  "ag_externalRequest": "外部リクエスト",
+  "ag_externalConnected": "外部 Agent に接続中",
+  "ag_externalDisconnected": "接続終了 · 成果物は保持",
+  "ag_externalHint": "会話と推論は外部 Agent で行い、Studio はツールと成果物を記録します。",
+  "ag_externalDisconnect": "切断",
+  "ag_externalView": "表示",
+  "ag_externalApproval": "外部ツールの承認",
+  "ag_externalAllow": "今回のみ許可",
+  "ag_externalDeny": "拒否",
+  "ag_externalArtifactUpdated": "{client} が「{title}」を更新しました",
+  "ag_externalWorkspaceUpdated": "{client} がワークスペースを更新しました",
+  "ag_externalResultFailed": "{client} の操作は完了しませんでした",
+  "ag_externalNeedsAttention": "{client} の操作を確認してください"
 }

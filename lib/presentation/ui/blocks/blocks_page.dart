@@ -292,6 +292,7 @@ class BlocksLibraryPageState extends State<BlocksLibraryPage> {
         },
         onCancel: _closeDialog,
         onPickThumbnail: _actions.onPickThumbnail,
+        onPickThumbnails: _actions.onPickThumbnails,
         onCaptureParams: _actions.onCaptureParams,
         onDelete: _editId == null
             ? null

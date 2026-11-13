@@ -288,6 +288,33 @@ createInterface({input:process.stdin}).on('line', line=>{
   );
 
   test(
+    'enabling cache warming during a live off-started run updates Dart immediately',
+    () async {
+      final c = controller(promptCacheSeconds: 30);
+      await c.initialize();
+      await c.updateSettings({'cacheWarming': 'off', 'nextSuggestion': false});
+      final entered = Completer<void>();
+      final finish = Completer<void>();
+      waitForResponse = () async {
+        if (!entered.isCompleted) entered.complete();
+        await finish.future;
+      };
+      final run = c.sendText('enable warming during this synthetic request');
+      await entered.future.timeout(const Duration(seconds: 10));
+      expect(c.selected!.running, true);
+      await c.updateSettings({'cacheWarming': 'idle'});
+      expect(c.selected!.cacheWarming['mode'], 'idle');
+      expect(c.selected!.cacheWarming['state'], 'scheduled');
+      expect(c.selected!.cacheWarming['nextWarmAt'], isA<int>());
+      finish.complete();
+      await run;
+      await c.updateSettings({'cacheWarming': 'off'});
+      expect(requests.length, 1);
+      expect(c.selected!.messages.where((m) => m['role'] == 'user').length, 1);
+    },
+  );
+
+  test(
     'cache_warm usage pushes updated tokens and warming status to Dart while idle',
     () async {
       final c = controller(promptCacheSeconds: 11);

@@ -258,14 +258,14 @@ void main() {
     'enhance freezes composed prompt/characters and magnitude while newer draft edits remain untouched',
     () async {
       await configurePromptComposition(container);
-      final q = await quote({
-        'operation': 'enhance',
-        'magnitude': 5,
-        'scale': 1.5,
-      });
+      final q = await quote(
+        {'operation': 'enhance', 'magnitude': 5, 'scale': 1.5},
+        width: 832,
+        height: 1216,
+      );
       expect(q['samples'], 1);
-      expect(q['width'], 384);
-      expect(q['height'], 576);
+      expect(q['width'], 1280);
+      expect(q['height'], 1856);
       expect(q['strength'], .7);
       expect(q['noise'], .1);
       container
@@ -275,6 +275,7 @@ void main() {
       final result = await run(q);
       expect(result['status'], 'completed');
       final request = requests.single;
+      expect((request.width, request.height), (1280, 1856));
       expectComposedPromptParams(
         request.copyWith(width: 832, height: 1216, nSamples: 1),
       );

@@ -8,6 +8,9 @@ import 'package:hive/hive.dart';
 import '../../../core/constants/storage_keys.dart';
 import '../../../core/krita/krita_bridge_server.dart';
 import '../../../core/krita/bridge_session.dart';
+import '../../../core/krita/bridge_agent_service.dart';
+import '../../../core/krita/krita_bridge_models.dart';
+import '../nai_agent/nai_agent_external_bridge.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../data/datasources/remote/nai_image_generation_api_service.dart';
 import '../image_generation_provider.dart';
@@ -101,6 +104,7 @@ class KritaBridgeNotifier extends StateNotifier<KritaBridgeState> {
     KritaBridgeServerFactory? serverFactory,
     KritaBridgeEnabledPersister? persistEnabled,
     KritaBridgeServiceFactory? serviceFactory,
+    this.agentServiceFactory,
   }) : _serverFactory = serverFactory ?? (() => KritaBridgeServer()),
        _persistEnabled = persistEnabled,
        _serviceFactory = serviceFactory,
@@ -109,6 +113,8 @@ class KritaBridgeNotifier extends StateNotifier<KritaBridgeState> {
   final KritaBridgeServerFactory _serverFactory;
   final KritaBridgeEnabledPersister? _persistEnabled;
   final KritaBridgeServiceFactory? _serviceFactory;
+  final BridgeAgentService Function(KritaBridgeServer)? agentServiceFactory;
+  BridgeAgentService? _agentService;
   int _operation = 0;
   Future<void> _lifecycle = Future.value();
   bool _ownsOperation(int operation) => mounted && operation == _operation;
@@ -152,6 +158,7 @@ class KritaBridgeNotifier extends StateNotifier<KritaBridgeState> {
   Future<void> _startServer(int operation, bool persist) async {
     if (!_ownsOperation(operation)) return;
     final server = _serverFactory();
+    server.agentToolsEnabled = agentServiceFactory != null;
     var registered = false;
     try {
       AppLogger.i('Enabling Krita bridge', _logTag);
@@ -160,16 +167,33 @@ class KritaBridgeNotifier extends StateNotifier<KritaBridgeState> {
       _server = server;
       registered = true;
       _service = _serviceFactory?.call(server);
+      _agentService = agentServiceFactory?.call(server);
       _service?.setActiveRequestReporter((id) {
         if (_ownsOperation(operation)) _setActiveRequest(id);
       });
       _messagesSubscription = server.requests.listen((request) {
         final service = _service;
-        if (!_ownsOperation(operation) || service == null) {
+        if (!_ownsOperation(operation)) {
           return;
         }
         unawaited(
-          server.inClientScope(request, () => service.handle(request.message)),
+          server.inClientScope(request, () async {
+            if (request.message is KritaAgentMessage) {
+              final agent = _agentService;
+              if (agent == null) {
+                server.send({
+                  'type': 'error',
+                  'id': request.message.id,
+                  'code': 'unsupported_message',
+                  'message': 'External Agent tools are unavailable',
+                });
+              } else {
+                await agent.handle(request);
+              }
+            } else {
+              await service?.handle(request.message);
+            }
+          }),
         );
       });
       _sessionSubscription = server.sessionChanges.listen((session) {
@@ -178,6 +202,7 @@ class KritaBridgeNotifier extends StateNotifier<KritaBridgeState> {
         }
       });
       _disconnectSubscription = server.disconnections.listen((client) {
+        if (_ownsOperation(operation)) _agentService?.disconnected(client);
         if (_ownsOperation(operation) &&
             server.ownsActiveOperation(client.id)) {
           _service?.handleClientDisconnected();
@@ -215,6 +240,8 @@ class KritaBridgeNotifier extends StateNotifier<KritaBridgeState> {
       AppLogger.i('Krita bridge enabled on port ${server.port}', _logTag);
     } catch (error) {
       if (identical(_server, server)) {
+        _agentService?.close();
+        _agentService = null;
         _server = null;
         _service = null;
         registered = false;
@@ -233,6 +260,8 @@ class KritaBridgeNotifier extends StateNotifier<KritaBridgeState> {
 
   Future<void> disable({bool persist = true}) async {
     final operation = ++_operation;
+    _agentService?.close();
+    _agentService = null;
     if (mounted && state.isBridgeGenerating) {
       _service?.handleClientDisconnected();
     }
@@ -346,6 +375,7 @@ final kritaBridgeNotifierProvider =
     StateNotifierProvider<KritaBridgeNotifier, KritaBridgeState>((ref) {
       final box = Hive.box(StorageKeys.settingsBox);
       final notifier = KritaBridgeNotifier(
+        agentServiceFactory: (server) => NaiAgentExternalBridge(ref, server),
         serverFactory: ref.read(kritaBridgeServerFactoryProvider),
         persistEnabled: (enabled) =>
             box.put(StorageKeys.kritaBridgeEnabled, enabled),

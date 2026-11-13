@@ -165,13 +165,20 @@ final agentToggleBadgeProvider = Provider<AgentToggleBadge>((ref) {
         for (final r in runtimes)
           r.chat.id: r.runLimitHit != null
               ? AgentToggleBadge.runLimit
-              : r.error != null
+              : r.error != null ||
+                    r.external?.notice?.isError == true ||
+                    r.external?.calls.lastOrNull?.result?['isError'] == true
               ? AgentToggleBadge.error
               : AgentToggleBadge.done,
       },
     );
-    syncCompletion(badge);
-    return badge;
+    final visibleBadge =
+        badge == AgentToggleBadge.none &&
+            runtimes.any((r) => r.external?.unread == true)
+        ? AgentToggleBadge.done
+        : badge;
+    syncCompletion(visibleBadge);
+    return visibleBadge;
   };
 
   // Listen instead of watch: preserve the ledger across notifications. Sampling

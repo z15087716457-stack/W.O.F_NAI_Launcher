@@ -914,6 +914,12 @@
   "preciseRef_clearAll": "清空全部",
   "preciseRef_remove": "移除",
   "preciseRef_referenceType": "参考类型",
+  "preciseRef_importTitle": "导入精准参考",
+  "preciseRef_importTypePrompt": "想让这张图片提供哪一类参考？",
+  "preciseRef_importTypeHint": "点击选项即可导入",
+  "preciseRef_characterDescription": "参考人物的外观与特征",
+  "preciseRef_styleDescription": "参考配色、笔触与画面质感",
+  "preciseRef_characterAndStyleDescription": "同时参考人物特征与视觉风格",
   "preciseRef_strength": "参考强度",
   "preciseRef_fidelity": "保真度",
   "preciseRef_v4Only": "此功能需要 V4+ 模型",
@@ -8765,6 +8771,8 @@
   "naiAgent_toolsHint": "当前状态、图片、提示词和工作区文件按需调用；业务操作的详细用法写在 nai-studio、nai-prompt 等 Skill 里，用到时才读取。",
   "naiAgent_unknownCost": "实际费用以服务商为准",
   "naiAgent_error": "操作未完成，请检查模型设置或工作区文件。",
+  "naiAgent_emptyResponse": "模型结束了请求，但没有返回正文或工具调用。请重试，或检查模型输出设置。",
+  "naiAgent_imageRequestTooLarge": "本次图片总量过大或无法处理。请减少图片数量、缩小图片或更换格式后重试。",
   "naiAgent_visionCurrentProvider": "当前服务商",
   "naiAgent_visionModelUnsupported": "服务商 {providerName} 下的所选模型未声明支持图片输入。请在 设置 → 模型与接口 → {providerName} → 模型 → 能力 → 图片输入 确认支持，或切换到支持图片输入的模型。",
   "@naiAgent_visionModelUnsupported": {
@@ -11471,6 +11479,11 @@
   "ag_cacheWarmOff": "已关闭",
   "ag_cacheWarmRefreshing": "正在续期缓存…",
   "ag_cacheWarmIdle": "待机，下次运行时开始",
+  "ag_cacheWarmExpired": "已错过保温时机，等待下一次模型请求",
+  "ag_cacheWarmContextChanged": "上下文已变化，等待下一次模型请求",
+  "ag_cacheWarmSafetyLimit": "已到保温时长上限，等待下一次模型请求",
+  "ag_cacheWarmUnavailable": "当前请求不支持缓存保温",
+  "ag_cacheWarmEconomics": "预计收益不足，本次保温已暂停",
   "ag_cacheWarmNext": "{time} 后续期",
   "@ag_cacheWarmNext": {
     "placeholders": {
@@ -11653,5 +11666,30 @@
         "type": "int"
       }
     }
-  }
+  },
+  "blocks_showRange": "显示范围",
+  "blocks_rangeHover": "悬浮卡",
+  "blocks_rangeDetail": "详情预览",
+  "blocks_cropRange": "虚线内为{target}显示范围",
+  "blocks_previewCount": "{count} 张预览图",
+  "blocks_previewNumber": "第 {index} 张预览图",
+  "blocks_scrollPreviews": "滚轮左右浏览",
+  "blocks_resetZoom": "恢复100%缩放",
+  "blocks_previousPreview": "上一张预览图",
+  "blocks_nextPreview": "下一张预览图",
+  "blocks_removePreview": "移除这张预览图",
+  "ag_external": "外部",
+  "ag_externalRequest": "外部请求",
+  "ag_externalConnected": "外部 Agent 已连接",
+  "ag_externalDisconnected": "连接已结束 · 产物保留",
+  "ag_externalHint": "完整对话和推理由外部 Agent 承担，Studio 记录工具与产物。",
+  "ag_externalDisconnect": "断开",
+  "ag_externalView": "查看",
+  "ag_externalApproval": "外部工具需要确认",
+  "ag_externalAllow": "允许一次",
+  "ag_externalDeny": "拒绝",
+  "ag_externalArtifactUpdated": "{client} 更新了「{title}」",
+  "ag_externalWorkspaceUpdated": "{client} 更新了工作区",
+  "ag_externalResultFailed": "{client} 的操作未完成",
+  "ag_externalNeedsAttention": "{client} 有操作需要你处理"
 }

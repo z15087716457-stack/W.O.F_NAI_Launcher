@@ -3,10 +3,11 @@ import { resolve, join, relative, isAbsolute } from 'node:path';
 import { createAgentSession, createReadTool, DefaultResourceLoader, SessionManager, SettingsManager,
   createCodemodeExtension, createToolSearchExtension }
   from '@earendil-works/pi-coding-agent';
-import { Type } from 'typebox';
 import { getCurrentSystemMessage } from '@earendil-works/pi-ai';
 import { createStudioModelRuntime } from './model.mjs';
-import { domainTools } from './domain-tools.mjs';
+import { createImageContext } from './image-context.mjs';
+import { studioTools } from './studio-tools.mjs';
+export { studioTools } from './studio-tools.mjs';
 import { createNaiInteractionExtension } from './extensions/interaction.mjs';
 import { createSessionHistoryExtension } from './extensions/session-history.mjs';
 import { StudioCacheWarming } from './extensions/cache-warming.mjs';
@@ -26,31 +27,6 @@ class StudioResourceLoader extends DefaultResourceLoader {
     this.currentPrompt = currentPrompt;
   }
   getSystemPrompt() { return this.currentPrompt(); }
-}
-
-export function studioTools(execute, extraToolNames = []) {
-  const tool = (name, description, parameters) => ({
-    name, label: name, description, parameters,
-    execute: (id, params, signal) => execute(name, id, params, signal),
-  });
-  return [
-    tool('studio_context', 'Read current Studio state, including local search status and tool guidance. scope=draft returns RAW editable fields, pill documents and field_versions. Never write effective preset text back.',
-      Type.Object({ scope: Type.Optional(Type.Unsafe({ type: 'string', enum: ['summary', 'draft'] })) })),
-    tool('image_read', 'Read one actual canvas/history or library image by image_id (selected means current canvas selection; gallery:<ID> comes from gallery_query), or any image file using its workspace-relative path (including .W.O.F/attachments/ and .W.O.F/outputs/). metadata_only=true reads original dimensions and metadata locally without returning pixels or requiring vision. Default returns a separate visual copy and original metadata, without altering the original file or draft.',
-      Type.Object({ image_id: Type.Optional(Type.String()), path: Type.Optional(Type.String()), metadata_only: Type.Optional(Type.Boolean()) })),
-    tool('prompt_update', 'Patch draft fields read by studio_context(scope=draft); expected maps each changed field to its field_version (aliases: clear_characters->characters, seed_lock->seed, quality_toggle->quality_preset). Backs up, rechecks and returns readback. Lanes containing blocks only accept unchanged text (else pill_conflict): edit those with block_manage instance_*.',
-      Type.Object({ changes: Type.Record(Type.String(), Type.Unknown()),
-        expected: Type.Record(Type.String(), Type.String()) })),
-    ...domainTools.filter(definition => extraToolNames.includes(definition.name))
-      .map(definition => tool(definition.name, definition.description, definition.parameters)),
-    ...(extraToolNames.includes('ask_user') ? [
-      tool('ask_user', 'Ask one to three concise questions when inputs/preferences are missing. Options are optional and free text is always available. Wait for this tool result; do not repeat questions as queued chat or ask routine implementation approval.',
-        Type.Object({ questions: Type.Array(Type.Object({
-          id: Type.String(), question: Type.String(),
-          options: Type.Optional(Type.Array(Type.String(), { maxItems: 8 })),
-        }), { minItems: 1, maxItems: 3 }) })),
-    ] : []),
-  ];
 }
 
 export async function createStudioSession({ config, cwd, agentDir, systemPrompt, executeTool,
@@ -75,7 +51,9 @@ export async function createStudioSession({ config, cwd, agentDir, systemPrompt,
   validateStudioMcp(mcp);
   const redact = mcpRedactor(config, mcp);
   const permissions = createNaiPermissions({ cwd: root, mode: config.permissionMode ?? 'auto', labels: config.permissionLabels, redact });
-  const { runtime, model } = await createStudioModelRuntime(config, { acquireRequest });
+  const { runtime, model } = await createStudioModelRuntime(config, {
+    acquireRequest, transformContext: createImageContext(),
+  });
   let prompt = systemPrompt;
   const definitions = studioTools(executeTool, extraToolNames);
   const interactionTools = definitions.filter(tool => ['studio_context', 'ask_user'].includes(tool.name));

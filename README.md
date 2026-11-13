@@ -35,7 +35,7 @@ W.O.F NAI Studio 是一个 Windows 桌面上的 NovelAI 第三方客户端。它
 | --- | --- |
 | `WOF_NAI_Studio_Windows_<版本>_Setup.exe` | **大多数人选这个。** 装到当前用户目录，不需要管理员权限，有开始菜单和桌面快捷方式。 |
 | `WOF_NAI_Studio_Windows_<版本>_Portable.zip` | 想放在自己指定的文件夹、U 盘或多台电脑之间带着走。解压后运行 `nai_launcher.exe`。 |
-| `WOF_NAI_Studio_macOS_<版本>_Portable.zip` | macOS 13.5 及以上的 Apple 芯片和 Intel Mac 通用。[下载 2.3.3 通用包](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/download/v2.3.3/WOF_NAI_Studio_macOS_2.3.3_Portable.zip)。 |
+| `WOF_NAI_Studio_macOS_<版本>_Portable.zip` | macOS 13.5 及以上的 Apple 芯片和 Intel Mac 通用。[下载 2.3.4 通用包](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/download/v2.3.4/WOF_NAI_Studio_macOS_2.3.4_Portable.zip)。 |
 
 Windows 两个版本都支持应用内更新，设置、图库数据库和 Agent 数据放在程序旁边的 `user-data/` 和 `agent-data/`。Mac 数据在用户的 Application Support 目录，更新下载并校验后用 Finder 替换应用。
 
@@ -55,9 +55,9 @@ Windows 两个版本都支持应用内更新，设置、图库数据库和 Agent
 
 **2.3.0 更新**带来大图自动适应、画布按显示尺寸解码、图库 RAG 增量索引、Agent 空闲回收，以及生图报价和重试修复。Windows 应用内更新显示安装进度，macOS 通用测试包由 GitHub Actions 构建。
 
-**2.3.3 更新**新增侧栏更新按钮与后台下载，改善窗口缩放、跨行文字选择、小水滴动画和本地放大下载进度；同时提供 Windows 与 Mac 通用包。Mac 包暂用临时签名，尚未通过 Apple 公证，首次启动说明见下文。
+**2.3.4 更新**加入积木多图预览与独立裁切，悬浮卡词条扩至五行；外部 Agent 可通过 MCP／命令行使用已启用 Skill 和原生业务工具，操作记录与产物进入独立外部会话。另改进图片历史压缩、缓存保温、空回提示、参考导入弹窗、增强尺寸对齐和大图顶栏拖窗。同时提供 Windows 与 Mac 通用包；Mac 包暂用临时签名，尚未通过 Apple 公证，首次启动说明见下文。
 
-详细功能、修复与升级说明见 [2.3.3 更新日志](CHANGELOG.md#233---2026-11-11) 和 [正式版下载](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/tag/v2.3.3)。Agent 建议、缓存保温及翻译调整使用你自己的模型服务，可在设置中调整相关功能。
+详细功能、修复与升级说明见 [2.3.4 更新日志](CHANGELOG.md#234---2026-11-13) 和 [正式版下载](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/tag/v2.3.4)。Agent 建议、缓存保温及翻译调整使用你自己的模型服务，可在设置中调整相关功能。
 
 ## 三步上手
 

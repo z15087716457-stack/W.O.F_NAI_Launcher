@@ -576,7 +576,12 @@ class NaiAgentBlockTools {
           beforeWrite: () => check(),
         );
       } else if (action == 'update') {
-        final updated = PromptBlock.fromJson({...block!.toJson(), ...changes!});
+        final updated = PromptBlock.fromJson({
+          ...block!.toJson(),
+          ...changes!,
+          if (changes.containsKey('thumbnail') && changes['thumbnail'] == null)
+            'additionalThumbnails': const [],
+        });
         actual = await repository.updateBlock(updated, beforeWrite: check);
       } else {
         await repository.deleteBlock(block!.id, beforeWrite: check);
@@ -588,12 +593,16 @@ class NaiAgentBlockTools {
         await deletePromptBlockThumbnail(createdThumbnail);
       }
     }
-    if (action == 'update' &&
-        block!.thumbnail != actual?.thumbnail &&
-        !repository.currentLibrary.blocks.any(
-          (other) => other.thumbnail == block.thumbnail,
-        )) {
-      await deletePromptBlockThumbnail(block.thumbnail);
+    if (action == 'update') {
+      final used = {
+        for (final other in repository.currentLibrary.blocks)
+          for (final image in other.thumbnails) image.path,
+      };
+      for (final image in block!.thumbnails) {
+        if (!used.contains(image.path)) {
+          await deletePromptBlockThumbnail(image.path);
+        }
+      }
     }
     await refresh();
     final readBack = actual == null

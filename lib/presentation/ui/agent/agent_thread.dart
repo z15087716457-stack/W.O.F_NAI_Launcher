@@ -690,7 +690,15 @@ class _UserLineState extends State<_UserLine> {
               child: Row(
                 spacing: 6,
                 children: [
-                  AgentEyebrow(l.ag_you, color: c.ink),
+                  if (s.data.chat.externalClient == null)
+                    AgentEyebrow(l.ag_you, color: c.ink)
+                  else
+                    Flexible(
+                      child: AgentEyebrow(
+                        '${l.ag_externalRequest} · ${s.data.chat.externalClient}',
+                        color: c.ink,
+                      ),
+                    ),
                   Text(
                     agentClock(m.at),
                     style: UiText.mono(11, color: c.faint, height: 1),

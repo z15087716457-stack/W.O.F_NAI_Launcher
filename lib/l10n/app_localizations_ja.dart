@@ -3754,6 +3754,24 @@ class AppLocalizationsJa extends AppLocalizations {
   String get preciseRef_referenceType => '参照タイプ';
 
   @override
+  String get preciseRef_importTitle => '精密参照をインポート';
+
+  @override
+  String get preciseRef_importTypePrompt => 'この画像の何を参照しますか？';
+
+  @override
+  String get preciseRef_importTypeHint => '項目を選ぶとインポートします';
+
+  @override
+  String get preciseRef_characterDescription => '人物の外見や特徴を参照';
+
+  @override
+  String get preciseRef_styleDescription => '配色、筆致、画面の質感を参照';
+
+  @override
+  String get preciseRef_characterAndStyleDescription => '人物の特徴と画風の両方を参照';
+
+  @override
   String get preciseRef_strength => '強度';
 
   @override
@@ -16033,6 +16051,14 @@ class AppLocalizationsJa extends AppLocalizations {
   String get naiAgent_error => '操作に失敗しました。モデル設定やファイルを確認してください。';
 
   @override
+  String get naiAgent_emptyResponse =>
+      'モデルは本文やツール呼び出しを返さずに終了しました。再試行するか、モデルの出力設定を確認してください。';
+
+  @override
+  String get naiAgent_imageRequestTooLarge =>
+      '画像の合計サイズが大きすぎるか、処理できませんでした。枚数やサイズを減らすか、別の形式をお試しください。';
+
+  @override
   String get naiAgent_visionCurrentProvider => '現在のプロバイダー';
 
   @override
@@ -21711,6 +21737,21 @@ class AppLocalizationsJa extends AppLocalizations {
   String get ag_cacheWarmIdle => '待機中 — 次の実行で開始';
 
   @override
+  String get ag_cacheWarmExpired => '更新のタイミングを過ぎました — 次のモデルリクエストを待機中';
+
+  @override
+  String get ag_cacheWarmContextChanged => 'コンテキストが変わりました — 次のモデルリクエストを待機中';
+
+  @override
+  String get ag_cacheWarmSafetyLimit => '保温の制限時間に達しました — 次のモデルリクエストを待機中';
+
+  @override
+  String get ag_cacheWarmUnavailable => 'このリクエストではキャッシュ保温を利用できません';
+
+  @override
+  String get ag_cacheWarmEconomics => '予想される節約効果が低いため保温を停止しました';
+
+  @override
   String ag_cacheWarmNext(String time) {
     return '$time 後に延長';
   }
@@ -21990,4 +22031,93 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get updateDownloadInBackground => 'バックグラウンドでダウンロード';
+
+  @override
+  String get blocks_showRange => '表示範囲';
+
+  @override
+  String get blocks_rangeHover => 'ホバーカード';
+
+  @override
+  String get blocks_rangeDetail => '詳細プレビュー';
+
+  @override
+  String blocks_cropRange(String target) {
+    return '破線内が$targetの表示範囲';
+  }
+
+  @override
+  String blocks_previewCount(int count) {
+    return 'プレビュー画像 $count 枚';
+  }
+
+  @override
+  String blocks_previewNumber(int index) {
+    return 'プレビュー画像 $index';
+  }
+
+  @override
+  String get blocks_scrollPreviews => 'スクロールで横に移動';
+
+  @override
+  String get blocks_resetZoom => 'ズームを100%に戻す';
+
+  @override
+  String get blocks_previousPreview => '前のプレビュー画像';
+
+  @override
+  String get blocks_nextPreview => '次のプレビュー画像';
+
+  @override
+  String get blocks_removePreview => 'このプレビューを削除';
+
+  @override
+  String get ag_external => '外部';
+
+  @override
+  String get ag_externalRequest => '外部リクエスト';
+
+  @override
+  String get ag_externalConnected => '外部 Agent に接続中';
+
+  @override
+  String get ag_externalDisconnected => '接続終了 · 成果物は保持';
+
+  @override
+  String get ag_externalHint => '会話と推論は外部 Agent で行い、Studio はツールと成果物を記録します。';
+
+  @override
+  String get ag_externalDisconnect => '切断';
+
+  @override
+  String get ag_externalView => '表示';
+
+  @override
+  String get ag_externalApproval => '外部ツールの承認';
+
+  @override
+  String get ag_externalAllow => '今回のみ許可';
+
+  @override
+  String get ag_externalDeny => '拒否';
+
+  @override
+  String ag_externalArtifactUpdated(String client, String title) {
+    return '$client が「$title」を更新しました';
+  }
+
+  @override
+  String ag_externalWorkspaceUpdated(String client) {
+    return '$client がワークスペースを更新しました';
+  }
+
+  @override
+  String ag_externalResultFailed(String client) {
+    return '$client の操作は完了しませんでした';
+  }
+
+  @override
+  String ag_externalNeedsAttention(String client) {
+    return '$client の操作を確認してください';
+  }
 }

@@ -20,12 +20,23 @@ Future<void> pumpOnline(
   double height = 1000,
   String locale = 'zh',
   bool dark = false,
+  bool chromeEnabled = true,
+  bool? draggable,
 }) async {
   tester.view.devicePixelRatio = 1;
   tester.view.physicalSize = Size(window - onlineRail, height);
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
-  await tester.pumpWidget(onlineApp(data, actions, locale: locale, dark: dark));
+  await tester.pumpWidget(
+    onlineApp(
+      data,
+      actions,
+      locale: locale,
+      dark: dark,
+      chromeEnabled: chromeEnabled,
+      draggable: draggable,
+    ),
+  );
   await precacheOnline(tester, data);
 }
 
@@ -34,6 +45,8 @@ Widget onlineApp(
   OnlineActions? actions, {
   String locale = 'zh',
   bool dark = false,
+  bool chromeEnabled = true,
+  bool? draggable,
 }) => RepaintBoundary(
   key: const Key('online-capture'),
   child: MaterialApp(
@@ -50,6 +63,8 @@ Widget onlineApp(
     ),
     home: Scaffold(
       body: WindowChromeScope(
+        enabled: chromeEnabled,
+        draggable: draggable,
         child: OnlineGalleryPage(
           data: data,
           actions: actions ?? OnlineActions.none,

@@ -4,6 +4,50 @@ import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
 import 'package:nai_launcher/data/models/prompt_block/prompt_block_folder.dart';
 
 void main() {
+  test('legacy preview becomes the cover without a storage migration', () {
+    final original = PromptBlock.create(
+      title: 'Old',
+      content: 'a',
+      thumbnail: 'cover.png',
+      thumbnailOffsetY: -.5,
+      thumbnailScale: 1.6,
+    );
+    final json = original.toJson()..remove('additionalThumbnails');
+    final restored = PromptBlock.fromJson(json);
+    expect(restored.additionalThumbnails, isEmpty);
+    expect(restored.thumbnails, [
+      const PromptBlockThumbnail(path: 'cover.png', offsetY: -.5, scale: 1.6),
+    ]);
+  });
+
+  test(
+    'gallery round trips and removing its cover promotes the next framing',
+    () {
+      const images = [
+        PromptBlockThumbnail(path: 'a.png', offsetX: .2),
+        PromptBlockThumbnail(path: 'b.png', offsetY: -.6, scale: 2),
+        PromptBlockThumbnail(path: 'c.png'),
+      ];
+      final block = PromptBlock.create(
+        title: 'Gallery',
+        content: 'a',
+      ).withThumbnails(images);
+      expect(PromptBlock.fromJson(block.toJson()).thumbnails, images);
+      final promoted = block.withThumbnails(images.skip(1).toList());
+      expect(promoted.thumbnail, 'b.png');
+      expect(promoted.thumbnailOffsetY, -.6);
+      expect(promoted.thumbnailScale, 2);
+      expect(promoted.additionalThumbnails, [images.last]);
+      final cleared = promoted.withThumbnails([]);
+      expect(cleared.thumbnail, isNull);
+      expect(cleared.additionalThumbnails, isEmpty);
+      expect(cleared.thumbnails, isEmpty);
+      expect(
+        block.copyWith(thumbnailScale: 3).additionalThumbnails,
+        images.skip(1),
+      );
+    },
+  );
   test('saved translation keeps its language and independent edit states', () {
     final block = PromptBlock.create(
       title: '青い目',

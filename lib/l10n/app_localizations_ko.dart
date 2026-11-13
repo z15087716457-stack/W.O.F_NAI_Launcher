@@ -3752,6 +3752,25 @@ class AppLocalizationsKo extends AppLocalizations {
   String get preciseRef_referenceType => '참조 유형';
 
   @override
+  String get preciseRef_importTitle => '정밀 참조 가져오기';
+
+  @override
+  String get preciseRef_importTypePrompt => '이 이미지에서 무엇을 참고할까요?';
+
+  @override
+  String get preciseRef_importTypeHint => '유형을 선택하면 가져옵니다';
+
+  @override
+  String get preciseRef_characterDescription => '인물의 외모와 특징을 참고';
+
+  @override
+  String get preciseRef_styleDescription => '색감, 붓 터치와 화면 질감을 참고';
+
+  @override
+  String get preciseRef_characterAndStyleDescription =>
+      '인물의 특징과 시각적 스타일을 함께 참고';
+
+  @override
   String get preciseRef_strength => '강도';
 
   @override
@@ -16070,6 +16089,14 @@ class AppLocalizationsKo extends AppLocalizations {
   String get naiAgent_error => '작업에 실패했습니다. 모델 설정이나 파일을 확인하세요.';
 
   @override
+  String get naiAgent_emptyResponse =>
+      '모델이 본문이나 도구 호출을 반환하지 않고 종료했습니다. 다시 시도하거나 모델 출력 설정을 확인하세요.';
+
+  @override
+  String get naiAgent_imageRequestTooLarge =>
+      '이미지의 전체 크기가 너무 크거나 처리할 수 없습니다. 이미지 수나 크기를 줄이거나 다른 형식을 시도하세요.';
+
+  @override
   String get naiAgent_visionCurrentProvider => '현재 제공자';
 
   @override
@@ -21781,6 +21808,22 @@ class AppLocalizationsKo extends AppLocalizations {
   String get ag_cacheWarmIdle => '대기 중 — 다음 실행 시 시작';
 
   @override
+  String get ag_cacheWarmExpired => '갱신 시점을 놓쳤습니다 — 다음 모델 요청을 기다리는 중';
+
+  @override
+  String get ag_cacheWarmContextChanged => '컨텍스트가 변경되었습니다 — 다음 모델 요청을 기다리는 중';
+
+  @override
+  String get ag_cacheWarmSafetyLimit =>
+      '캐시 유지 시간 제한에 도달했습니다 — 다음 모델 요청을 기다리는 중';
+
+  @override
+  String get ag_cacheWarmUnavailable => '이 요청에서는 캐시 유지를 사용할 수 없습니다';
+
+  @override
+  String get ag_cacheWarmEconomics => '예상 절감 효과가 낮아 캐시 유지를 일시 중지했습니다';
+
+  @override
   String ag_cacheWarmNext(String time) {
     return '$time 후 연장';
   }
@@ -22060,4 +22103,94 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get updateDownloadInBackground => '백그라운드에서 다운로드';
+
+  @override
+  String get blocks_showRange => '표시 범위';
+
+  @override
+  String get blocks_rangeHover => '호버 카드';
+
+  @override
+  String get blocks_rangeDetail => '상세 미리보기';
+
+  @override
+  String blocks_cropRange(String target) {
+    return '점선 안쪽이 $target 표시 범위입니다';
+  }
+
+  @override
+  String blocks_previewCount(int count) {
+    return '미리보기 이미지 $count개';
+  }
+
+  @override
+  String blocks_previewNumber(int index) {
+    return '미리보기 이미지 $index';
+  }
+
+  @override
+  String get blocks_scrollPreviews => '스크롤하여 좌우 탐색';
+
+  @override
+  String get blocks_resetZoom => '확대/축소를 100%로 복원';
+
+  @override
+  String get blocks_previousPreview => '이전 미리보기 이미지';
+
+  @override
+  String get blocks_nextPreview => '다음 미리보기 이미지';
+
+  @override
+  String get blocks_removePreview => '이 미리보기 삭제';
+
+  @override
+  String get ag_external => '외부';
+
+  @override
+  String get ag_externalRequest => '외부 요청';
+
+  @override
+  String get ag_externalConnected => '외부 Agent 연결됨';
+
+  @override
+  String get ag_externalDisconnected => '연결 종료 · 결과물 보존';
+
+  @override
+  String get ag_externalHint =>
+      '대화와 추론은 외부 Agent에서 진행하며 Studio는 도구와 결과물을 기록합니다.';
+
+  @override
+  String get ag_externalDisconnect => '연결 해제';
+
+  @override
+  String get ag_externalView => '보기';
+
+  @override
+  String get ag_externalApproval => '외부 도구 승인';
+
+  @override
+  String get ag_externalAllow => '한 번 허용';
+
+  @override
+  String get ag_externalDeny => '거부';
+
+  @override
+  String ag_externalArtifactUpdated(String client, String title) {
+    return '$client에서 「$title」 업데이트';
+  }
+
+  @override
+  String ag_externalWorkspaceUpdated(String client) {
+    return '$client에서 작업 공간 업데이트';
+  }
+
+  @override
+  String ag_externalResultFailed(String client) {
+    return '$client의 작업이 완료되지 않았습니다';
+  }
+
+  @override
+  String ag_externalNeedsAttention(String client) {
+    return '$client의 작업을 확인해 주세요';
+  }
 }

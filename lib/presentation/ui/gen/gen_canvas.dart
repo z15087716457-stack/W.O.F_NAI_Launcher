@@ -193,13 +193,16 @@ class _GenCanvasState extends State<GenCanvas> {
                     ),
                   ),
                 ),
+              ],
+              if (bar || scope.slots.canvasNotice != null)
                 Positioned.fill(
                   child: _BottomBars(
                     infoKey: _infoBarKey,
                     actionKey: _actionBarKey,
+                    showBars: bar,
+                    notice: scope.slots.canvasNotice,
                   ),
                 ),
-              ],
               if (strip && sheet == null)
                 const Positioned(
                   top: GenCanvas.sheetTop,
@@ -1338,12 +1341,15 @@ class _CanvasBarViewport extends StatelessWidget {
 }
 
 class _BottomBars extends StatelessWidget {
-  const _BottomBars({required this.infoKey, required this.actionKey});
-
+  const _BottomBars({
+    required this.infoKey,
+    required this.actionKey,
+    this.showBars = true,
+    this.notice,
+  });
   static const _bottom = 14.0;
   static const _gap = 8.0;
   static const _stackWidth = 360.0;
-
   static double infoOffset(double width, bool hasOriginal) {
     if (width < _stackWidth) {
       return _bottom + GenCanvas._defaultBarHeight + _gap;
@@ -1351,15 +1357,17 @@ class _BottomBars extends StatelessWidget {
     return hasOriginal && width < 500 ? 62 : _bottom;
   }
 
-  final Key infoKey;
-  final Key actionKey;
-
+  final Key infoKey, actionKey;
+  final bool showBars;
+  final Widget? notice;
   @override
   Widget build(BuildContext context) {
-    final hasOriginal = GenScope.of(
-      context,
-      GenAspect.canvas,
-    ).data.canvas.info!.canCompareOriginal;
+    final hasOriginal =
+        GenScope.of(
+          context,
+          GenAspect.canvas,
+        ).data.canvas.info?.canCompareOriginal ??
+        false;
     final info = SizeChangedLayoutNotifier(
       key: infoKey,
       child: const _InfoBar(),
@@ -1369,36 +1377,125 @@ class _BottomBars extends StatelessWidget {
       child: const _ActionBar(),
     );
     return LayoutBuilder(
-      builder: (context, box) => box.maxWidth < _stackWidth
-          ? Stack(
-              children: [
-                Positioned(
-                  left: 8,
-                  right: 8,
-                  bottom: _bottom,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    spacing: _gap,
-                    children: [
-                      _CanvasBarViewport(child: info),
-                      _CanvasBarViewport(child: actions),
-                    ],
-                  ),
-                ),
-              ],
-            )
-          : Stack(
-              children: [
-                Positioned(
-                  left: 16,
-                  bottom: infoOffset(box.maxWidth, hasOriginal),
-                  child: info,
-                ),
-                Positioned(right: 16, bottom: _bottom, child: actions),
-              ],
+      builder: (context, box) {
+        final stacked = box.maxWidth < _stackWidth;
+        if (notice != null) {
+          return CustomMultiChildLayout(
+            delegate: _BottomNoticeLayout(
+              showBars: showBars,
+              stacked: stacked,
+              infoBottom: infoOffset(box.maxWidth, hasOriginal),
             ),
+            children: [
+              if (showBars) ...[
+                LayoutId(
+                  id: _BottomItem.info,
+                  child: stacked ? _CanvasBarViewport(child: info) : info,
+                ),
+                LayoutId(
+                  id: _BottomItem.actions,
+                  child: stacked ? _CanvasBarViewport(child: actions) : actions,
+                ),
+              ],
+              LayoutId(id: _BottomItem.notice, child: notice!),
+            ],
+          );
+        }
+        return stacked
+            ? Stack(
+                children: [
+                  Positioned(
+                    left: 8,
+                    right: 8,
+                    bottom: _bottom,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      spacing: _gap,
+                      children: [
+                        _CanvasBarViewport(child: info),
+                        _CanvasBarViewport(child: actions),
+                      ],
+                    ),
+                  ),
+                ],
+              )
+            : Stack(
+                children: [
+                  Positioned(
+                    left: 16,
+                    bottom: infoOffset(box.maxWidth, hasOriginal),
+                    child: info,
+                  ),
+                  Positioned(right: 16, bottom: _bottom, child: actions),
+                ],
+              );
+      },
     );
   }
+}
+
+enum _BottomItem { info, actions, notice }
+
+/// One parent measures its bars before fitting the centered notification.
+class _BottomNoticeLayout extends MultiChildLayoutDelegate {
+  _BottomNoticeLayout({
+    required this.showBars,
+    required this.stacked,
+    required this.infoBottom,
+  });
+  final bool showBars, stacked;
+  final double infoBottom;
+  @override
+  void performLayout(Size size) {
+    const margin = 16.0, gap = 8.0;
+    var width = math.max(0.0, size.width - margin * 2);
+    var bottom = _BottomBars._bottom;
+    if (showBars) {
+      final constraints = stacked
+          ? BoxConstraints(
+              maxWidth: math.max(0.0, size.width - 16),
+              minWidth: math.max(0.0, size.width - 16),
+            )
+          : BoxConstraints(maxHeight: size.height);
+      final info = layoutChild(_BottomItem.info, constraints);
+      final actions = layoutChild(_BottomItem.actions, constraints);
+      final actionsTop = size.height - bottom - actions.height;
+      final infoTop = stacked
+          ? actionsTop - gap - info.height
+          : size.height - infoBottom - info.height;
+      positionChild(_BottomItem.info, Offset(stacked ? 8 : margin, infoTop));
+      positionChild(
+        _BottomItem.actions,
+        Offset(stacked ? 8 : size.width - margin - actions.width, actionsTop),
+      );
+      final left = infoBottom == bottom ? margin + info.width + gap : margin;
+      final right = size.width - margin - actions.width - gap;
+      final centeredWidth =
+          2.0 * math.min(size.width / 2 - left, right - size.width / 2);
+      if (!stacked && centeredWidth >= 168) {
+        width = centeredWidth;
+      } else {
+        bottom = size.height - math.min(infoTop, actionsTop) + gap;
+      }
+    }
+    final notice = layoutChild(
+      _BottomItem.notice,
+      BoxConstraints.loose(Size(math.min(440.0, width), size.height)),
+    );
+    positionChild(
+      _BottomItem.notice,
+      Offset(
+        (size.width - notice.width) / 2,
+        math.max(0.0, size.height - bottom - notice.height),
+      ),
+    );
+  }
+
+  @override
+  bool shouldRelayout(_BottomNoticeLayout oldDelegate) =>
+      showBars != oldDelegate.showBars ||
+      stacked != oldDelegate.stacked ||
+      infoBottom != oldDelegate.infoBottom;
 }
 
 /// 右下操作条：OLD / 钉住 / 复制 / 保存 / 信息（开大图）。

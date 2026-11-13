@@ -3848,6 +3848,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get preciseRef_referenceType => 'Reference Type';
 
   @override
+  String get preciseRef_importTitle => 'Import Precise Reference';
+
+  @override
+  String get preciseRef_importTypePrompt =>
+      'What should this image be used to reference?';
+
+  @override
+  String get preciseRef_importTypeHint => 'Select a type to import';
+
+  @override
+  String get preciseRef_characterDescription =>
+      'Reference the character’s appearance and features';
+
+  @override
+  String get preciseRef_styleDescription =>
+      'Reference colors, brushwork, and visual texture';
+
+  @override
+  String get preciseRef_characterAndStyleDescription =>
+      'Reference both the character and visual style';
+
+  @override
   String get preciseRef_strength => 'Strength';
 
   @override
@@ -16510,6 +16532,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'Operation failed. Check model settings or workspace files.';
 
   @override
+  String get naiAgent_emptyResponse =>
+      'The model finished without returning text or a tool call. Retry or check the model output settings.';
+
+  @override
+  String get naiAgent_imageRequestTooLarge =>
+      'This image batch is too large or could not be processed. Send fewer images, reduce their size, or try another format.';
+
+  @override
   String get naiAgent_visionCurrentProvider => 'the current provider';
 
   @override
@@ -22476,6 +22506,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ag_cacheWarmIdle => 'Waiting — starts with the next run';
 
   @override
+  String get ag_cacheWarmExpired =>
+      'Refresh window missed — waiting for the next model request';
+
+  @override
+  String get ag_cacheWarmContextChanged =>
+      'Context changed — waiting for the next model request';
+
+  @override
+  String get ag_cacheWarmSafetyLimit =>
+      'Warming time limit reached — waiting for the next model request';
+
+  @override
+  String get ag_cacheWarmUnavailable =>
+      'Cache warming is unavailable for this request';
+
+  @override
+  String get ag_cacheWarmEconomics =>
+      'Warming paused because the estimated savings are too low';
+
+  @override
   String ag_cacheWarmNext(String time) {
     return 'Next refresh in $time';
   }
@@ -22760,4 +22810,94 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get updateDownloadInBackground => 'Download in background';
+
+  @override
+  String get blocks_showRange => 'Display range';
+
+  @override
+  String get blocks_rangeHover => 'Hover card';
+
+  @override
+  String get blocks_rangeDetail => 'Detail preview';
+
+  @override
+  String blocks_cropRange(String target) {
+    return 'Inside the dashed line: $target';
+  }
+
+  @override
+  String blocks_previewCount(int count) {
+    return '$count preview images';
+  }
+
+  @override
+  String blocks_previewNumber(int index) {
+    return 'Preview image $index';
+  }
+
+  @override
+  String get blocks_scrollPreviews => 'Scroll to browse';
+
+  @override
+  String get blocks_resetZoom => 'Reset zoom to 100%';
+
+  @override
+  String get blocks_previousPreview => 'Previous preview image';
+
+  @override
+  String get blocks_nextPreview => 'Next preview image';
+
+  @override
+  String get blocks_removePreview => 'Remove this preview';
+
+  @override
+  String get ag_external => 'External';
+
+  @override
+  String get ag_externalRequest => 'External request';
+
+  @override
+  String get ag_externalConnected => 'Connected to external Agent';
+
+  @override
+  String get ag_externalDisconnected => 'Connection ended · artifacts retained';
+
+  @override
+  String get ag_externalHint =>
+      'Conversation and inference stay in the external Agent. Studio records tools and artifacts.';
+
+  @override
+  String get ag_externalDisconnect => 'Disconnect';
+
+  @override
+  String get ag_externalView => 'View';
+
+  @override
+  String get ag_externalApproval => 'Approve external tool';
+
+  @override
+  String get ag_externalAllow => 'Allow once';
+
+  @override
+  String get ag_externalDeny => 'Deny';
+
+  @override
+  String ag_externalArtifactUpdated(String client, String title) {
+    return '$client updated “$title”';
+  }
+
+  @override
+  String ag_externalWorkspaceUpdated(String client) {
+    return '$client updated the workspace';
+  }
+
+  @override
+  String ag_externalResultFailed(String client) {
+    return 'An action from $client did not complete';
+  }
+
+  @override
+  String ag_externalNeedsAttention(String client) {
+    return '$client needs your attention';
+  }
 }

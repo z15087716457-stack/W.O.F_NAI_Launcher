@@ -411,6 +411,8 @@ class _BlocksLibraryWiringState extends ConsumerState<BlocksLibraryWiring> {
       onApplyParams: host.applyParams,
       onPickThumbnail: () =>
           host.run(platform.pickThumbnail).then((value) => value),
+      onPickThumbnails: () async =>
+          await host.run(platform.pickThumbnails) ?? const [],
       onCaptureParams: host.captureParams,
       onCreateFolder: (name, {parentId}) => host.run(
         () => backend.serialize(

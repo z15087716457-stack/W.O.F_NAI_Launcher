@@ -33,8 +33,9 @@ abstract final class BlocksEditWiring {
           atoms: initialContent == null ? const [] : null,
           text: initialContent,
           folderId: initialFolderId,
-          thumb: picked == null ? null : BlockThumb(picked.image),
-          thumbToken: picked?.token,
+          thumb: picked == null
+              ? null
+              : BlockThumb(picked.image, pickToken: picked.token),
         ),
       );
     } finally {

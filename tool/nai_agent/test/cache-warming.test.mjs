@@ -49,6 +49,7 @@ test('status uses Pi delay and persisted warm usage, preserving every real stop 
   const warming = new StudioCacheWarming({ model, settingsManager });
   const warm = { type: 'usage', kind: 'cache_warm', timestamp: '2026-10-26T00:00:00.000Z' };
   const session = { model, agent: { streamFunction() {} }, subscribe() {},
+    _cacheWarmer: { start() {}, onModeChanged() {} },
     sessionManager: { getEntries: () => [warm, { ...warm, kind: 'next_suggestion' }, warm] },
     cacheWarmingStatus: { state: 'inactive', reason: 'cache economics unavailable' } };
   warming.attach(session);
@@ -171,4 +172,65 @@ test('off never warms and short non-replayable lifetimes stay inactive', async (
       assert.equal((await f.request('state')).cacheWarming.warmCount, 0);
     } finally { await f.close(); }
   }
+});
+
+test('enabling warming during an off-started run schedules the current request without resetting its cache age', async () => {
+  const f = await hostFixture({ config: { cacheWarming: 'off', nextSuggestion: false, promptCacheSeconds: 12 } });
+  try {
+    const run = f.request('prompt', { text: 'enable cache warming while this request is still running' });
+    await f.wait(() => f.responses.length === 1);
+    await pause(350);
+    const toggledAt = Date.now();
+    const enabled = await f.request('settings', { cacheWarming: 'idle' });
+    assert.equal(enabled.cacheWarming.mode, 'idle');
+    assert.equal(enabled.cacheWarming.state, 'scheduled');
+    assert.ok(enabled.cacheWarming.nextWarmAt < toggledAt + 1800, 'keep the original request clock');
+    await f.wait(() => f.responses.length === 2);
+    assert.equal(outputCap(f.requests[1]), 1);
+    assert.deepEqual(f.requests[1].messages, f.requests[0].messages);
+    finishReply(f.responses[1]);
+    await f.wait(() => f.events.some(e => e.type === 'usage' && e.cacheWarming.warmCount === 1));
+    finishReply(f.responses[0]);
+    assert.equal((await run).cacheWarming.state, 'scheduled');
+    await f.request('settings', { cacheWarming: 'off' });
+  } finally { await f.close(); }
+});
+
+test('live mode changes preserve an existing deadline and resume from the last actual warm', async () => {
+  const f = await hostFixture({ config: { nextSuggestion: false, promptCacheSeconds: 12 } });
+  try {
+    const run = f.request('prompt', { text: 'keep this main request open through mode changes' });
+    await f.wait(() => f.responses.length === 1);
+    const original = (await f.request('state')).cacheWarming.nextWarmAt;
+    const idle = await f.request('settings', { cacheWarming: 'idle' });
+    assert.equal(idle.cacheWarming.nextWarmAt, original);
+    await f.wait(() => f.responses.length === 2);
+    finishReply(f.responses[1]);
+    await f.wait(() => f.events.some(e => e.type === 'usage' && e.cacheWarming.warmCount === 1));
+    const afterWarm = (await f.request('state')).cacheWarming;
+    await f.request('settings', { cacheWarming: 'off' });
+    await pause(250);
+    const resumed = (await f.request('settings', { cacheWarming: 'idle' })).cacheWarming;
+    assert.equal(resumed.state, 'scheduled');
+    assert.equal(resumed.nextWarmAt, afterWarm.nextWarmAt);
+    assert.equal(resumed.lastWarmAt, afterWarm.lastWarmAt);
+    assert.equal(f.requests.length, 2, 'settings must not repeat the main request');
+    finishReply(f.responses[0]); await run;
+    await f.request('settings', { cacheWarming: 'off' });
+  } finally { await f.close(); }
+});
+
+test('enabling too late does not replay an expired cache prefix', async () => {
+  const f = await hostFixture({ config: { cacheWarming: 'off', nextSuggestion: false, promptCacheSeconds: 11 } });
+  try {
+    const run = f.request('prompt', { text: 'the old cache window will expire while warming is off' });
+    await f.wait(() => f.responses.length === 1);
+    await pause(6100);
+    const status = (await f.request('settings', { cacheWarming: 'idle' })).cacheWarming;
+    assert.equal(status.state, 'inactive');
+    assert.equal(status.reason, 'cache refresh deadline missed');
+    await pause(100);
+    assert.equal(f.requests.length, 1);
+    finishReply(f.responses[0]); await run;
+  } finally { await f.close(); }
 });

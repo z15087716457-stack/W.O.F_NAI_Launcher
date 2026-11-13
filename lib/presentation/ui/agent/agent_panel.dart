@@ -39,6 +39,69 @@ class AgentPanel extends StatefulWidget {
   State<AgentPanel> createState() => _AgentPanelState();
 }
 
+class _ExternalFooter extends StatelessWidget {
+  const _ExternalFooter({required this.data, required this.actions});
+  final AgentViewData data;
+  final AgentActions actions;
+  @override
+  Widget build(BuildContext context) {
+    final c = context.ui, l = context.l10n;
+    return Container(
+      key: const Key('agent-external-footer'),
+      margin: const EdgeInsets.fromLTRB(12, 6, 12, 12),
+      padding: const EdgeInsets.fromLTRB(12, 10, 8, 6),
+      decoration: BoxDecoration(
+        color: c.control,
+        border: Border.all(color: c.border),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 6,
+                height: 6,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: data.externalConnected ? c.accent : c.faint,
+                ),
+              ),
+              const SizedBox(width: 7),
+              Expanded(
+                child: Text(
+                  data.externalConnected
+                      ? l.ag_externalConnected
+                      : l.ag_externalDisconnected,
+                  style: UiText.sans(12, color: c.ink),
+                ),
+              ),
+              if (data.status == AgentRunStatus.working ||
+                  data.status == AgentRunStatus.waitingUser)
+                TextButton(
+                  onPressed: () => AgentScope.of(context).run(actions.onStop),
+                  child: Text(l.ag_stop),
+                ),
+              if (data.externalConnected)
+                TextButton(
+                  key: const Key('agent-external-disconnect'),
+                  onPressed: actions.onDisconnectExternal == null
+                      ? null
+                      : () => AgentScope.of(
+                          context,
+                        ).run(actions.onDisconnectExternal!),
+                  child: Text(l.ag_externalDisconnect),
+                ),
+            ],
+          ),
+          Text(l.ag_externalHint, style: UiText.sans(11, color: c.faint)),
+        ],
+      ),
+    );
+  }
+}
+
 class _AgentPanelState extends State<AgentPanel> {
   late var _tab = widget.initialTab;
   var _composer = GlobalKey<AgentComposerState>();
@@ -288,8 +351,11 @@ class _AgentPanelState extends State<AgentPanel> {
         if (_dropping) const Positioned.fill(child: _DropOverlay()),
       ],
     );
+    if (d.chat.externalClient != null) {
+      composer = _ExternalFooter(data: d, actions: widget.actions);
+    }
     final drop = widget.slots.dropTarget;
-    if (drop != null) {
+    if (drop != null && d.chat.externalClient == null) {
       composer = drop(context, (v) {
         if (v != _dropping && mounted) setState(() => _dropping = v);
       }, composer);
@@ -315,6 +381,27 @@ class _AgentPanelState extends State<AgentPanel> {
               widget.actions.onClose();
             },
           ),
+          if (d.externalNotice != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      '${context.l10n.ag_external} · ${d.externalNotice}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: UiText.sans(12, color: c.muted),
+                    ),
+                  ),
+                  TextButton(
+                    key: const Key('agent-view-external'),
+                    onPressed: () => _run(widget.actions.onViewExternal!),
+                    child: Text(context.l10n.ag_externalView),
+                  ),
+                ],
+              ),
+            ),
           if (d.status == AgentRunStatus.starting ||
               d.status == AgentRunStatus.working ||
               d.status == AgentRunStatus.compacting ||
@@ -333,7 +420,17 @@ class _AgentPanelState extends State<AgentPanel> {
                 d.thread.isEmpty &&
                         d.composer.pending.isEmpty &&
                         d.error == null
-                    ? const AgentWelcome()
+                    ? d.chat.externalClient == null
+                          ? const AgentWelcome()
+                          : Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(24),
+                                child: Text(
+                                  context.l10n.ag_externalHint,
+                                  style: UiText.sans(12, color: c.muted),
+                                ),
+                              ),
+                            )
                     : const AgentThread(),
               AgentTab.shelf => const AgentShelf(),
               AgentTab.memory =>

@@ -7,6 +7,42 @@
 有意改动（左栏 232→240、顶栏 52→61、详情 360→340）会整体带出位移，见接线说明。"""
 import json, re, subprocess, sys, tempfile, time
 from pathlib import Path
+
+def measure_gallery():
+    """Compare native component dimensions with CUA-measured approved HTML."""
+    root = Path('.dart_tool/block-preview-gallery-20261113')
+    native = json.loads((root / 'captures/native-geometry.json').read_text(encoding='utf-8'))
+    prototype = json.loads((root / 'prototype-geometry.json').read_text(encoding='utf-8'))
+    boxes = {item['selector']: item for item in prototype['boxes']}
+    comparisons = [
+        ('editor image', native['editor-zh-dark']['block-edit-crop'][2:], '.crop'),
+        ('editor thumbnail', native['editor-zh-dark']['block-thumbnail-0'][2:], '.editor-panel .thumbnail'),
+        ('hover image', native['hover-zh-dark']['block-gallery-viewport'][2:], '.result-photo'),
+        ('hover thumbnail', native['hover-zh-dark']['block-thumbnail-0'][2:], '.result-thumbnails .thumbnail'),
+        ('zoom info', native['editor-zh-dark']['block-edit-reset-zoom'][2:], '.zoom-percent'),
+    ]
+    rows = []
+    for label, actual, selector in comparisons:
+        expected = [boxes[selector]['width'], boxes[selector]['height']]
+        residual = [round(a-b, 3) for a, b in zip(actual, expected)]
+        rows.append({'component': label, 'native': actual, 'prototype': expected, 'delta': residual})
+        print(f'{label}: native={actual}, prototype={expected}, delta={residual}')
+    maximum = max(abs(delta) for row in rows for delta in row['delta'])
+    report = {
+        'rows': rows, 'maxResidualPx': maximum,
+        'intentional': ['Existing native borders reduce editor/hover image widths by 1/2 pixels; crop guides use the true content viewports.',
+                        'Caption width flexes for translations; its text is outside the image. Native body below the gallery retains the existing extra preview section and scrolling.',
+                        'The current HTML image position is user-adjustable; guide offsets are verified against consumer geometry, not the current pointer state.'],
+    }
+    (root / 'measurement.json').write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')
+    print(f'Maximum dimension residual: {maximum}px')
+    if maximum > 3:
+        raise SystemExit('Gallery dimensions need review')
+
+if '--gallery' in sys.argv:
+    measure_gallery()
+    raise SystemExit(0)
+
 EDGE = r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
 D = Path('.dart_tool/ui-shell/blocks')
 PROFILE = Path(tempfile.gettempdir()).resolve() / 'wof-blocks-measure-edge'; PROFILE.mkdir(parents=True, exist_ok=True)

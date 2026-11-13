@@ -173,7 +173,7 @@ final naiAgentControllerProvider =
         ref.read(naiAgentUiPreferencesProvider).replace(controller.settings);
       });
       controller.ready = controller
-          .initialize(restoreHistory: false)
+          .initialize(restoreHistory: false, connectMcp: false)
           .catchError(controller.initializationFailed);
       return controller;
     });

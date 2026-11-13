@@ -42,6 +42,18 @@ class BlocksPlatform {
     return BlockThumbPick(FileImage(File(path)), path);
   }
 
+  Future<List<BlockThumbPick>> pickThumbnails() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+      allowMultiple: true,
+    );
+    final paths = result?.paths.whereType<String>().toList() ?? <String>[];
+    _picked.addAll(paths);
+    return [
+      for (final path in paths) BlockThumbPick(FileImage(File(path)), path),
+    ];
+  }
+
   Future<String> saveThumbnail(String token) async {
     final bytes = _images[token];
     if (bytes != null) return savePromptBlockThumbnail(bytes);

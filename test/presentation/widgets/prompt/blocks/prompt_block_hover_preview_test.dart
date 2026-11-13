@@ -500,8 +500,22 @@ void main() {
         findsNothing,
       );
 
+      // Crossing the gap must leave time to enter and use the gallery.
+      await gesture.moveTo(
+        tester.getCenter(find.byKey(const Key('prompt-block-preview-view'))),
+      );
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(
+        find.byKey(const Key('prompt-block-preview-overlay')),
+        findsOneWidget,
+      );
       await gesture.moveTo(const Offset(4, 4));
       await tester.pump();
+      expect(
+        find.byKey(const Key('prompt-block-preview-overlay')),
+        findsOneWidget,
+      );
+      await tester.pump(const Duration(milliseconds: 180));
       expect(
         find.byKey(const Key('prompt-block-preview-overlay')),
         findsNothing,

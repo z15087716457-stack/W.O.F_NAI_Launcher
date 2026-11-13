@@ -68,7 +68,7 @@ class BlocksLibraryBackend {
   Future<void> discardUnusedThumbnail(String path) async {
     try {
       final blocks = await ref.read(promptBlockStorageProvider).getBlocks();
-      if (!blocks.any((b) => b.thumbnail == path)) {
+      if (!blocks.any((b) => b.thumbnails.any((image) => image.path == path))) {
         await deletePromptBlockThumbnail(path);
       }
     } catch (_) {}
@@ -84,15 +84,33 @@ class BlocksLibraryBackend {
     if (expected != null && before != expected) {
       throw StateError(currentL10n.bridge_conflict);
     }
-    String? thumbnail = draft.clearThumb ? null : before?.thumbnail;
-    String? createdThumbnail;
-    if (draft.thumbToken case final token?) {
-      createdThumbnail = await ref
-          .read(blocksPlatformProvider)
-          .saveThumbnail(token);
-      thumbnail = createdThumbnail;
-    }
+    final createdThumbnails = <String>[];
     try {
+      final images = <PromptBlockThumbnail>[];
+      if (!draft.clearThumb) {
+        for (final (index, thumb) in draft.thumbs.indexed) {
+          String? path = thumb.path;
+          if (thumb.pickToken case final token?) {
+            path = await ref.read(blocksPlatformProvider).saveThumbnail(token);
+            createdThumbnails.add(path);
+          }
+          path ??= before?.thumbnails.elementAtOrNull(index)?.path;
+          if (path == null) throw StateError('Missing block preview source');
+          images.add(
+            PromptBlockThumbnail(
+              path: path,
+              offsetX: thumb.offsetX,
+              offsetY: thumb.offsetY,
+              scale: thumb.scale,
+            ),
+          );
+        }
+        if (draft.thumbs.isEmpty && before != null) {
+          images.addAll(before.thumbnails);
+        }
+      }
+      final cover = images.firstOrNull;
+      final thumbnail = cover?.path;
       if (id != null && requireBlock(id) != before) {
         throw StateError(currentL10n.bridge_conflict);
       }
@@ -118,7 +136,6 @@ class BlocksLibraryBackend {
           : draft.negativeAtoms.join(', ');
       final tags = tagsOf(draft.tags);
       final params = storedBlockParams(draft.params);
-      final thumb = draft.thumb;
       final result = before == null
           ? await notifier.createBlock(
               title: draft.title,
@@ -134,9 +151,10 @@ class BlocksLibraryBackend {
               tags: tags,
               generationSettings: params,
               thumbnail: thumbnail,
-              thumbnailOffsetX: thumb?.offsetX ?? 0,
-              thumbnailOffsetY: thumb?.offsetY ?? 0,
-              thumbnailScale: thumb?.scale ?? 1,
+              thumbnailOffsetX: cover?.offsetX ?? 0,
+              thumbnailOffsetY: cover?.offsetY ?? 0,
+              thumbnailScale: cover?.scale ?? 1,
+              additionalThumbnails: images.skip(1).toList(),
             )
           : await notifier.updateBlock(
               before.copyWith(
@@ -152,22 +170,25 @@ class BlocksLibraryBackend {
                 tags: tags,
                 generationSettings: params,
                 thumbnail: thumbnail,
-                thumbnailOffsetX: thumb?.offsetX ?? 0,
-                thumbnailOffsetY: thumb?.offsetY ?? 0,
-                thumbnailScale: thumb?.scale ?? 1,
+                thumbnailOffsetX: cover?.offsetX ?? 0,
+                thumbnailOffsetY: cover?.offsetY ?? 0,
+                thumbnailScale: cover?.scale ?? 1,
+                additionalThumbnails: images.skip(1).toList(),
                 readingTranslationNeedsReview:
                     before.readingTranslationNeedsReview ||
                     (before.readingTranslationZh != null &&
                         content != before.content),
               ),
             );
-      if (before?.thumbnail != thumbnail && before?.thumbnail != null) {
-        await discardUnusedThumbnail(before!.thumbnail!);
+      for (final old in before?.thumbnails ?? const <PromptBlockThumbnail>[]) {
+        if (!images.any((image) => image.path == old.path)) {
+          await discardUnusedThumbnail(old.path);
+        }
       }
       return result;
     } catch (_) {
-      if (createdThumbnail != null) {
-        await discardUnusedThumbnail(createdThumbnail);
+      for (final path in createdThumbnails) {
+        await discardUnusedThumbnail(path);
       }
       rethrow;
     }
@@ -201,45 +222,50 @@ class BlocksLibraryBackend {
     final b = requireBlock(id);
     final storage = ref.read(promptBlockStorageProvider);
     final siblings = library.blocksInFolder(b.folderId);
-    final clone = PromptBlock.create(
-      title: '${b.displayTitle} ${currentL10n.blocks_duplicate}',
-      content: b.content,
-      lineageId: b.lineageKey,
-      atoms: b.atoms,
-      negativeContent: b.negativeContent,
-      negativeAtoms: b.negativeAtoms,
-      generationSettings: b.generationSettings,
-      tags: b.tags,
-      folderId: b.folderId,
-      color: b.color,
-      appearance: b.appearance,
-      iconName: b.iconName,
-      isFavorite: b.isFavorite,
-      readingTranslationZh: b.readingTranslationZh,
-      readingTranslationMarks: b.readingTranslationMarks,
-      readingTranslationNeedsReview: b.readingTranslationNeedsReview,
-      readingTranslationLanguageCode: b.readingTranslationLanguageCode,
-      readingTranslationEdited: b.readingTranslationEdited,
-      thumbnail: b.hasThumbnail
-          ? await savePromptBlockThumbnail(
-              await File(b.thumbnail!).readAsBytes(),
-            )
-          : null,
-      thumbnailOffsetX: b.thumbnailOffsetX,
-      thumbnailOffsetY: b.thumbnailOffsetY,
-      thumbnailScale: b.thumbnailScale,
-    );
-    if (await storage.getBlock(id) != b || requireBlock(id) != b) {
-      if (clone.thumbnail != null) {
-        await discardUnusedThumbnail(clone.thumbnail!);
+    final copiedImages = <PromptBlockThumbnail>[];
+    try {
+      for (final image in b.thumbnails) {
+        copiedImages.add(
+          image.copyWith(
+            path: await savePromptBlockThumbnail(
+              await File(image.path).readAsBytes(),
+            ),
+          ),
+        );
       }
-      throw StateError(currentL10n.bridge_conflict);
+      final clone = PromptBlock.create(
+        title: '${b.displayTitle} ${currentL10n.blocks_duplicate}',
+        content: b.content,
+        lineageId: b.lineageKey,
+        atoms: b.atoms,
+        negativeContent: b.negativeContent,
+        negativeAtoms: b.negativeAtoms,
+        generationSettings: b.generationSettings,
+        tags: b.tags,
+        folderId: b.folderId,
+        color: b.color,
+        appearance: b.appearance,
+        iconName: b.iconName,
+        isFavorite: b.isFavorite,
+        readingTranslationZh: b.readingTranslationZh,
+        readingTranslationMarks: b.readingTranslationMarks,
+        readingTranslationNeedsReview: b.readingTranslationNeedsReview,
+        readingTranslationLanguageCode: b.readingTranslationLanguageCode,
+        readingTranslationEdited: b.readingTranslationEdited,
+      ).withThumbnails(copiedImages);
+      if (await storage.getBlock(id) != b || requireBlock(id) != b) {
+        throw StateError(currentL10n.bridge_conflict);
+      }
+      await storage.putBlock(clone);
+      final ids = siblings.map((b) => b.id).toList();
+      ids.insert(ids.indexOf(id) + 1, clone.id);
+      await notifier.reorderBlocks(b.folderId, ids);
+      return library.blockById(clone.id)!;
+    } finally {
+      for (final image in copiedImages) {
+        await discardUnusedThumbnail(image.path);
+      }
     }
-    await storage.putBlock(clone);
-    final ids = siblings.map((b) => b.id).toList();
-    ids.insert(ids.indexOf(id) + 1, clone.id);
-    await notifier.reorderBlocks(b.folderId, ids);
-    return library.blockById(clone.id)!;
   });
 
   Future<void> reorder(String id, String? beforeId) => serialize(() async {
@@ -335,8 +361,10 @@ class BlocksLibraryBackend {
     ];
     final thumbnails = <String, Uint8List>{};
     for (final b in blocks) {
-      if (b.hasThumbnail && await File(b.thumbnail!).exists()) {
-        thumbnails[b.id] = await File(b.thumbnail!).readAsBytes();
+      for (final image in b.thumbnails) {
+        if (await File(image.path).exists()) {
+          thumbnails[image.path] = await File(image.path).readAsBytes();
+        }
       }
     }
     final snapshot = BlocksDeletion(blocks, library.collections, thumbnails, [
@@ -362,17 +390,24 @@ class BlocksLibraryBackend {
       }
     }
     for (final b in deletion.blocks) {
-      final bytes = deletion.thumbnails[b.id];
+      final images = <PromptBlockThumbnail>[];
+      for (final image in b.thumbnails) {
+        final bytes = deletion.thumbnails[image.path];
+        if (bytes != null) {
+          images.add(
+            image.copyWith(path: await savePromptBlockThumbnail(bytes)),
+          );
+        }
+      }
       await storage.putBlock(
-        b.copyWith(
-          folderId:
-              b.folderId == null || library.folderById(b.folderId!) != null
-              ? b.folderId
-              : null,
-          thumbnail: bytes == null
-              ? null
-              : await savePromptBlockThumbnail(bytes),
-        ),
+        b
+            .withThumbnails(images)
+            .copyWith(
+              folderId:
+                  b.folderId == null || library.folderById(b.folderId!) != null
+                  ? b.folderId
+                  : null,
+            ),
       );
     }
     final restoredIds = deletion.blocks.map((b) => b.id).toSet();

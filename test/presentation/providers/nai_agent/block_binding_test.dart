@@ -117,6 +117,7 @@ class _Blocks extends PromptBlockRepository {
     double thumbnailOffsetX = 0,
     double thumbnailOffsetY = 0,
     double thumbnailScale = 1,
+    List<PromptBlockThumbnail> additionalThumbnails = const [],
     int? sortOrder,
     List<String>? atoms,
     String negativeContent = '',
@@ -141,6 +142,7 @@ class _Blocks extends PromptBlockRepository {
     thumbnailOffsetX: thumbnailOffsetX,
     thumbnailOffsetY: thumbnailOffsetY,
     thumbnailScale: thumbnailScale,
+    additionalThumbnails: additionalThumbnails,
     sortOrder: sortOrder,
     atoms: atoms,
     negativeContent: negativeContent,
@@ -2290,6 +2292,46 @@ void main() {
       expect(await File(secondPath).exists(), false);
     },
   );
+
+  test('Agent gallery backup keeps all image bytes before clearing', () async {
+    await previewSource();
+    final created = await create({
+      'title': 'gallery',
+      'content': 'raw',
+      'thumbnail': {'path': 'preview.jpg'},
+    });
+    final value = created['block'] as Map;
+    final original = (await repository.getBlock(value['id'] as String))!;
+    final extra = File(
+      '${File(original.thumbnail!).parent.path}/gallery-extra.png',
+    );
+    await extra.writeAsBytes(await File(original.thumbnail!).readAsBytes());
+    await repository.updateBlock(
+      original.copyWith(
+        additionalThumbnails: [
+          PromptBlockThumbnail(path: extra.path, offsetY: .7, scale: 2),
+        ],
+      ),
+    );
+    final current = await block(original.id);
+    final cleared = await run('block_manage', {
+      'action': 'update',
+      'id': original.id,
+      'expected_version': current['version'],
+      'changes': {'thumbnail': null},
+    });
+    final backup = jsonDecode(
+      await File(cleared['backup_path'] as String).readAsString(),
+    );
+    final copies =
+        backup['generation']['affected_additional_thumbnails'] as List;
+    expect(copies, hasLength(1));
+    expect(copies.single['path'], extra.path);
+    expect(base64Decode(copies.single['data_base64']), isNotEmpty);
+    expect(await extra.exists(), isFalse);
+    expect(await File(original.thumbnail!).exists(), isFalse);
+    expect((await repository.getBlock(original.id))!.thumbnails, isEmpty);
+  });
 
   test(
     'replacing a preview preserves a managed file used by another block',
