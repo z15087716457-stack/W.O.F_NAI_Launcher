@@ -1,11 +1,55 @@
 import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/core/utils/prompt_reading_units.dart';
+import 'package:nai_launcher/core/utils/nai_prompt_syntax.dart';
 import 'package:nai_launcher/core/utils/prompt_translation_document.dart';
 import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
 import 'package:nai_launcher/data/models/prompt_reading.dart';
 
 void main() {
+  test(
+    'standalone library aliases and quoted markup retain literal readings',
+    () {
+      const source = '<library_alias>, "literal <style>", blue eyes';
+      expect(PromptReadingUnit.parse(source).map((u) => u.text), [
+        '<library_alias>',
+        '"literal <style>"',
+        'blue eyes',
+      ]);
+      expect(PromptReadingUnit.isSyntaxOnly('<library_alias>'), isFalse);
+      expect(PromptReadingUnit.isSingleSection('<library_alias>'), isTrue);
+      final batch = PromptTranslationBatch.prepare({
+        'main': const PillDocument(text: source, instances: {}),
+      }, mode: PromptTranslationMode.inline);
+      expect(
+        () => batch.parseGroups(
+          jsonEncode({
+            'fields': [
+              {
+                'id': 'main',
+                'groups': [
+                  {
+                    'ids': batch.segments['main']!.map((s) => s.id).toList(),
+                    'readings': [
+                      {'source': '"literal <style>"', 'zh': '字面文字'},
+                      {'source': 'blue eyes', 'zh': '蓝眼'},
+                    ],
+                  },
+                ],
+              },
+            ],
+          }),
+        ),
+        throwsFormatException,
+      );
+      expect(
+        PromptReadingUnit.parse(
+          '<scene mood="calm">blue eyes, silver hair</scene>',
+        ).map((u) => u.text),
+        ['blue eyes', 'silver hair'],
+      );
+    },
+  );
   test(
     'commas inside weighting groups delimit independent exact source ranges',
     () {
@@ -56,7 +100,7 @@ void main() {
     },
   );
   test(
-    'inline request sends clean per-ID units and rejects merged responses',
+    'inline request preserves source and resolves semantic readings by exact anchors',
     () {
       const source = '{1girl, blue eyes},';
       final batch = PromptTranslationBatch.prepare({
@@ -68,7 +112,7 @@ void main() {
         (request['fields'][0]['segments'] as List).map(
           (item) => item['source'],
         ),
-        ['1girl', 'blue eyes'],
+        ['{1girl,', ' blue eyes},'],
       );
       final ids = batch.segments['main']!.map((item) => item.id).toList();
       String response(List<Map<String, Object>> groups) => jsonEncode({
@@ -88,11 +132,15 @@ void main() {
         response([
           {
             'ids': [ids[0]],
-            'zh': '4::1个女孩::,',
+            'readings': [
+              {'source': '1girl', 'zh': '4::1个女孩::,'},
+            ],
           },
           {
             'ids': [ids[1]],
-            'zh': '{蓝眼},',
+            'readings': [
+              {'source': 'blue eyes', 'zh': '{蓝眼},'},
+            ],
           },
         ]),
       );
@@ -109,6 +157,217 @@ void main() {
       );
     },
   );
+  test(
+    'XML boundaries remain local to readings and preserve glossary hints',
+    () {
+      const source =
+          '<artist>\n1.3::artist:alpha::, artist:beta\n</artist>, <style>\n'
+          'masterpiece, soft lighting\n</style>, blue eyes';
+      final units = PromptReadingUnit.parse(source);
+      expect(units.map((u) => u.text), [
+        'artist:alpha',
+        'artist:beta',
+        'masterpiece',
+        'soft lighting',
+        'blue eyes',
+      ]);
+      expect(units[0].section, units[1].section);
+      expect(units[1].section, isNot(units[2].section));
+      expect(units[3].section, isNot(units[4].section));
+      expect(
+        NaiPromptSyntax.scan(source).single.kind,
+        NaiPromptTokenKind.opaque,
+      );
+      final batch = PromptTranslationBatch.prepare({
+        'main': const PillDocument(text: source, instances: {}),
+      }, mode: PromptTranslationMode.inline);
+      expect(batch.segments['main']!.map((s) => s.source).join(), source);
+      expect(
+        batch.tagCandidates,
+        containsAll(['artist:alpha', 'soft_lighting']),
+      );
+      expect(batch.segments['main']![0].run, batch.segments['main']![1].run);
+      expect(
+        batch.segments['main']![1].run,
+        isNot(batch.segments['main']![2].run),
+      );
+    },
+  );
+
+  test(
+    'semantic fragments split fields and combine prose without changing source',
+    () {
+      const source =
+          '<scene>Subject: a girl; Lighting: warm</scene>\n'
+          'She opens a book, then looks left.';
+      final batch = PromptTranslationBatch.prepare({
+        'main': const PillDocument(text: source, instances: {}),
+      }, mode: PromptTranslationMode.inline);
+      final items = batch.segments['main']!;
+      final groups = batch.parseGroups(
+        jsonEncode({
+          'fields': [
+            {
+              'id': 'main',
+              'groups': [
+                {
+                  'ids': [items[0].id],
+                  'readings': [
+                    {'source': 'Subject: a girl', 'zh': '主体：一个女孩'},
+                    {'source': 'Lighting: warm', 'zh': '光照：暖色'},
+                  ],
+                },
+                {
+                  'ids': [items[1].id, items[2].id],
+                  'readings': [
+                    {
+                      'source': 'She opens a book, then looks left.',
+                      'zh': '她翻开书，然后看向左侧',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        }),
+      );
+      final result = batch.buildFromGroups(
+        groups,
+        mode: PromptTranslationMode.inline,
+      )['main']!;
+      expect(result.text, source);
+      expect(result.readings.map((r) => r.source), [
+        'Subject: a girl',
+        'Lighting: warm',
+        'She opens a book, then looks left.',
+      ]);
+      expect(
+        PromptTranslationBatch.prepare(
+          {'main': result},
+          mode: PromptTranslationMode.inline,
+          skipReadings: true,
+        ).isEmpty,
+        isTrue,
+      );
+    },
+  );
+
+  for (final anchors in [
+    ['blue eyes'], // Omitted meaningful source.
+    ['green hair', 'blue eyes'], // Invented source.
+    ['blue eyes', 'silver hair'], // Reordered source.
+    ['silver hair', 'silver hair', 'blue eyes'], // Duplicate source.
+  ]) {
+    test('invalid semantic anchors are rejected: $anchors', () {
+      final batch = PromptTranslationBatch.prepare({
+        'main': const PillDocument(
+          text: 'silver hair, blue eyes',
+          instances: {},
+        ),
+      }, mode: PromptTranslationMode.inline);
+      expect(
+        () => batch.parseGroups(
+          jsonEncode({
+            'fields': [
+              {
+                'id': 'main',
+                'groups': [
+                  {
+                    'ids': batch.segments['main']!.map((s) => s.id).toList(),
+                    'readings': [
+                      for (final anchor in anchors)
+                        {'source': anchor, 'zh': '译文'},
+                    ],
+                  },
+                ],
+              },
+            ],
+          }),
+        ),
+        throwsFormatException,
+      );
+    });
+  }
+
+  test(
+    'repeated source anchors resolve sequentially and never cross structural runs',
+    () {
+      const source = '<scene>blue eyes, blue eyes</scene>\nsoft lighting';
+      final batch = PromptTranslationBatch.prepare({
+        'main': const PillDocument(text: source, instances: {}),
+      }, mode: PromptTranslationMode.inline);
+      final ids = batch.segments['main']!.map((s) => s.id).toList();
+      final response = {
+        'fields': [
+          {
+            'id': 'main',
+            'groups': [
+              {
+                'ids': ids.take(2).toList(),
+                'readings': [
+                  {'source': 'blue eyes', 'zh': '蓝眼一'},
+                  {'source': 'blue eyes', 'zh': '蓝眼二'},
+                ],
+              },
+              {
+                'ids': [ids.last],
+                'readings': [
+                  {'source': 'soft lighting', 'zh': '柔和光线'},
+                ],
+              },
+            ],
+          },
+        ],
+      };
+      final groups = batch.parseGroups(jsonEncode(response))['main']!;
+      expect(groups[0].start, source.indexOf('blue eyes'));
+      expect(groups[1].start, source.lastIndexOf('blue eyes'));
+      expect(
+        () => batch.parseGroups(
+          jsonEncode({
+            'fields': [
+              {
+                'id': 'main',
+                'groups': [
+                  {
+                    'ids': ids,
+                    'readings': [
+                      {'source': source, 'zh': '错误合并'},
+                    ],
+                  },
+                ],
+              },
+            ],
+          }),
+        ),
+        throwsFormatException,
+      );
+    },
+  );
+
+  test('old whole-XML annotations are eligible for retranslation', () {
+    const source = '<scene>silver hair, blue eyes</scene>';
+    const reading = PromptReading(
+      start: 0,
+      end: source.length,
+      source: source,
+      translation: '整篇旧译文',
+      perSegment: true,
+    );
+    final batch = PromptTranslationBatch.prepare(
+      {
+        'main': const PillDocument(
+          text: source,
+          instances: {},
+          readings: [reading],
+        ),
+      },
+      mode: PromptTranslationMode.inline,
+      skipReadings: true,
+    );
+    // A whole container must be repaired even if it contains only one line.
+    expect(batch.isEmpty, isFalse);
+  });
   test(
     'legacy grouped readings are retranslated while current units remain incremental',
     () {

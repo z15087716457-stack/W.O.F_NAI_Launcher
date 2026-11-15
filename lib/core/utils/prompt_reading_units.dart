@@ -1,25 +1,82 @@
 import 'nai_prompt_syntax.dart';
 import 'pill_document_editor.dart';
 
-/// One comma-delimited reading, anchored to the unchanged UTF-16 source.
+/// Local lookup hints, anchored to the unchanged UTF-16 source. The translation
+/// model may split or combine these within a structural section.
 class PromptReadingUnit {
+  static final _markup = RegExp(r'^<\s*/?\s*[\w:.-]+(?:\s[^<>]*)?\s*/?>$');
+  static final _separators = RegExp(r'[\s,，;；:：.!?。！？]+');
+
+  static bool isSyntaxOnly(String source, {bool? structuralMarkup}) => clean(
+    source,
+    structuralMarkup: structuralMarkup,
+  ).replaceAll(_separators, '').isEmpty;
   const PromptReadingUnit({
     required this.start,
     required this.end,
     required this.textStart,
     required this.textEnd,
     required this.text,
+    this.section = 0,
   });
 
   final int start, end, textStart, textEnd;
   final String text;
+  final int section;
 
-  static List<PromptReadingUnit> parse(String source) {
+  PromptReadingUnit shifted(int offset) => PromptReadingUnit(
+    start: start + offset,
+    end: end + offset,
+    textStart: textStart + offset,
+    textEnd: textEnd + offset,
+    text: text,
+    section: section,
+  );
+
+  /// One display range for an already anchored semantic reading.
+  static PromptReadingUnit? cover(String source) {
+    final units = parse(source);
+    if (units.isEmpty) return null;
+    return PromptReadingUnit(
+      start: 0,
+      end: source.length,
+      textStart: units.first.textStart,
+      textEnd: units.last.textEnd,
+      text: clean(source),
+    );
+  }
+
+  static bool isSingleSection(String source, {bool? structuralMarkup}) {
+    final markup = structuralMarkup ?? NaiPromptSyntax.isXml(source);
+    final units = parse(source, structuralMarkup: markup);
+    return units.isNotEmpty &&
+        units.first.section == units.last.section &&
+        !(markup &&
+            NaiPromptSyntax.scan(source, protectXml: false).any(
+              (token) =>
+                  token.kind == NaiPromptTokenKind.literal &&
+                  _markup.hasMatch(token.source(source)),
+            ));
+  }
+
+  static List<PromptReadingUnit> parse(
+    String source, {
+    bool? structuralMarkup,
+  }) {
     final removed = <int>{};
     final cuts = <int>{};
-    _scan(source, 0, removed, cuts);
+    final breaks = <int>{};
+    _scan(
+      source,
+      0,
+      removed,
+      cuts,
+      breaks,
+      structuralMarkup ?? NaiPromptSyntax.isXml(source),
+    );
     final result = <PromptReadingUnit>[];
     var start = 0;
+    var section = 0;
     for (final end in {...cuts, source.length}.toList()..sort()) {
       var first = -1, last = -1;
       final plain = StringBuffer();
@@ -42,18 +99,27 @@ class PromptReadingUnit {
             textStart: first,
             textEnd: last,
             text: plain.toString().trim(),
+            section: section,
           ),
         );
       }
       start = end;
+      if (breaks.contains(end)) section++;
     }
     return result;
   }
 
-  /// Only NAI weighting syntax is removed; counts, names and literals remain.
-  static String clean(String text) {
+  /// Remove weighting and structural markup; counts, names and literals remain.
+  static String clean(String text, {bool? structuralMarkup}) {
     final removed = <int>{};
-    _scan(text, 0, removed, <int>{});
+    _scan(
+      text,
+      0,
+      removed,
+      <int>{},
+      <int>{},
+      structuralMarkup ?? NaiPromptSyntax.isXml(text),
+    );
     return [
       for (var i = 0; i < text.length; i++)
         if (!removed.contains(i)) text[i],
@@ -65,8 +131,10 @@ class PromptReadingUnit {
     int offset,
     Set<int> removed,
     Set<int> cuts,
+    Set<int> breaks,
+    bool structuralMarkup,
   ) {
-    for (final token in NaiPromptSyntax.scan(source)) {
+    for (final token in NaiPromptSyntax.scan(source, protectXml: false)) {
       switch (token.kind) {
         case NaiPromptTokenKind.prefix:
         case NaiPromptTokenKind.closure:
@@ -84,11 +152,16 @@ class PromptReadingUnit {
               offset + token.start + 1,
               removed,
               cuts,
+              breaks,
+              structuralMarkup,
             );
           }
         case NaiPromptTokenKind.text:
           for (var i = token.start; i < token.end; i++) {
-            if (source.codeUnitAt(i) == 10) cuts.add(offset + i + 1);
+            if (source.codeUnitAt(i) == 10) {
+              cuts.add(offset + i + 1);
+              breaks.add(offset + i + 1);
+            }
             if (isPillMarkerCodeUnit(source.codeUnitAt(i))) {
               cuts.add(offset + i);
               cuts.add(offset + i + 1);
@@ -96,6 +169,13 @@ class PromptReadingUnit {
             }
           }
         case NaiPromptTokenKind.literal:
+          if (structuralMarkup && _markup.hasMatch(token.source(source))) {
+            cuts.addAll([offset + token.start, offset + token.end]);
+            breaks.addAll([offset + token.start, offset + token.end]);
+            for (var i = token.start; i < token.end; i++) {
+              removed.add(offset + i);
+            }
+          }
           break;
         case NaiPromptTokenKind.opaque:
           // Incremental translation can start or end inside an existing group.
@@ -106,6 +186,8 @@ class PromptReadingUnit {
               offset + token.start + 1,
               removed,
               cuts,
+              breaks,
+              structuralMarkup,
             );
           }
           break;

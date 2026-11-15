@@ -35,7 +35,7 @@ Get the package for your operating system from [Releases](https://github.com/z15
 | --- | --- |
 | `WOF_NAI_Studio_Windows_<version>_Setup.exe` | **The choice for most people.** Installs to your user directory without administrator rights, with Start menu and desktop shortcuts. |
 | `WOF_NAI_Studio_Windows_<version>_Portable.zip` | For keeping the app in a folder of your choice, on a USB drive, or taking it between computers. Extract it and run `nai_launcher.exe`. |
-| `WOF_NAI_Studio_macOS_<version>_Portable.zip` | For Apple silicon and Intel Macs on macOS 13.5 or later. [Download the 2.4.0 universal package](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/download/v2.4.0/WOF_NAI_Studio_macOS_2.4.0_Portable.zip). |
+| `WOF_NAI_Studio_macOS_<version>_Portable.zip` | For Apple silicon and Intel Macs on macOS 13.5 or later. [Download the 2.4.1 universal package](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/download/v2.4.1/WOF_NAI_Studio_macOS_2.4.1_Portable.zip). |
 
 Both Windows packages support in-app updates. Settings, the gallery database and Agent data live in `user-data/` and `agent-data/` beside the program. On Mac, data lives in your Application Support directory. The app downloads and verifies updates, then opens Finder for you to replace the app.
 
@@ -55,9 +55,9 @@ Both Windows packages support in-app updates. Settings, the gallery database and
 
 **2.3.0** brings automatic fit in the image viewer, canvas decoding at display size, incremental gallery RAG indexing, idle Agent host cleanup, and fixes to generation quotes and retries. Windows in-app updates show installation progress, and GitHub Actions builds the macOS universal test package.
 
-**2.4.0** adds lightweight translations aligned to comma-separated prompt terms (edit the source in place while readings remain visible; changed terms show a pending status), 80%–150% interface scaling, and clearer gallery sources and image/Vibe/Precise Reference folders. Agent instructions now show workspace AGENTS.md and workspace prefixes; cost cards use the Anlas icon, free operations skip confirmation under Full Access, and paid-operation auto-approval is off by default. Search guidance distinguishes exact tag lookup, RAG and co-occurrence, and Chinese tag data and Tag/Wiki snapshots are updated. Reproduced rapid-drop issues are fixed, with a centered drag/read indicator over a window-wide scrim. Windows and universal Mac packages are included; the Mac package remains ad-hoc signed and is not Apple-notarized.
+**2.4.1** fixes lightweight translation alignment for V5 XML sections, fields and mixed prose. The model segments phrases by meaning, and readings follow exact source ranges using the existing model route and glossary. Comma-separated tags and direct source editing remain available. Weight-fill overflow, stretched closing markers, seams and manual-newline caret issues are also fixed; wrapped readings follow the final source line.
 
-See the [complete 2.4.0 changelog](CHANGELOG.md#240---2026-11-15) and [release downloads](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/tag/v2.4.0). Agent suggestions, cache warming and translation adjustments use your own model service. Their settings are configurable.
+See the [complete 2.4.1 changelog](CHANGELOG.md#241---2026-11-15) and [release downloads](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/tag/v2.4.1). Agent suggestions, cache warming and translation adjustments use your own model service. Their settings are configurable.
 
 ## Get started in three steps
 

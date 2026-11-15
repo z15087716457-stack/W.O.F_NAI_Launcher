@@ -35,7 +35,7 @@ W.O.F NAI Studio 是一个 Windows 桌面上的 NovelAI 第三方客户端。它
 | --- | --- |
 | `WOF_NAI_Studio_Windows_<版本>_Setup.exe` | **大多数人选这个。** 装到当前用户目录，不需要管理员权限，有开始菜单和桌面快捷方式。 |
 | `WOF_NAI_Studio_Windows_<版本>_Portable.zip` | 想放在自己指定的文件夹、U 盘或多台电脑之间带着走。解压后运行 `nai_launcher.exe`。 |
-| `WOF_NAI_Studio_macOS_<版本>_Portable.zip` | macOS 13.5 及以上的 Apple 芯片和 Intel Mac 通用。[下载 2.4.0 通用包](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/download/v2.4.0/WOF_NAI_Studio_macOS_2.4.0_Portable.zip)。 |
+| `WOF_NAI_Studio_macOS_<版本>_Portable.zip` | macOS 13.5 及以上的 Apple 芯片和 Intel Mac 通用。[下载 2.4.1 通用包](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/download/v2.4.1/WOF_NAI_Studio_macOS_2.4.1_Portable.zip)。 |
 
 Windows 两个版本都支持应用内更新，设置、图库数据库和 Agent 数据放在程序旁边的 `user-data/` 和 `agent-data/`。Mac 数据在用户的 Application Support 目录，更新下载并校验后用 Finder 替换应用。
 
@@ -55,9 +55,9 @@ Windows 两个版本都支持应用内更新，设置、图库数据库和 Agent
 
 **2.3.0 更新**带来大图自动适应、画布按显示尺寸解码、图库 RAG 增量索引、Agent 空闲回收，以及生图报价和重试修复。Windows 应用内更新显示安装进度，macOS 通用测试包由 GitHub Actions 构建。
 
-**2.4.0 更新**新增按逗号逐项对齐的轻量翻译（原文直接编辑、译文持续显示，修改项标记待更新）、80%–150%整体界面缩放，以及更清楚的图库来源和图片／Vibe／PR目录设置。Agent指令页整合工作区AGENTS.md与前置内容，费用卡使用Anlas图标，完全权限下免费操作免确认、付费免确认默认关闭；明确基础搜索、RAG和共现的分工，并更新中文标签及Tag／Wiki快照。另修复已复现的快速拖图问题，拖入和读取使用全窗口遮罩与居中提示。提供Windows与Mac通用包；Mac仍为临时签名、未Apple公证。
+**2.4.1 修复**轻量翻译对 V5 XML 分区、字段及非严格逗号写法的错位：模型按语义拆分短语，译文按原文精确定位，继续共用现有模型和术语表。保留普通逗号逐项显示及原文直接编辑；同时修复权重底色越界、行尾绿块、接缝与手动换行光标，长片段译文跟随最后一行。
 
-详细功能、修复与升级说明见 [2.4.0 更新日志](CHANGELOG.md#240---2026-11-15) 和 [正式版下载](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/tag/v2.4.0)。Agent 建议、缓存保温及翻译调整使用你自己的模型服务，可在设置中调整相关功能。
+详细功能、修复与升级说明见 [2.4.1 更新日志](CHANGELOG.md#241---2026-11-15) 和 [正式版下载](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/tag/v2.4.1)。Agent 建议、缓存保温及翻译调整使用你自己的模型服务，可在设置中调整相关功能。
 
 ## 三步上手
 

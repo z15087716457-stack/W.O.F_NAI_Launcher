@@ -97,9 +97,10 @@ abstract final class NaiPromptSyntax {
     return -1;
   }
 
-  static List<NaiPromptToken> scan(String text) {
+  /// Source transforms keep XML opaque; read-only annotations may inspect it.
+  static List<NaiPromptToken> scan(String text, {bool protectXml = true}) {
     if (text.isEmpty) return const [];
-    if (isXml(text)) {
+    if (protectXml && isXml(text)) {
       return [NaiPromptToken(NaiPromptTokenKind.opaque, 0, text.length)];
     }
     final tokens = <NaiPromptToken>[];

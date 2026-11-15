@@ -29,6 +29,130 @@ import '../../helpers/fake_tag_translation_glossary.dart';
 
 void main() {
   test(
+    'semantic inline translation shares glossary, scopes and incremental editing',
+    () async {
+      const source =
+          '<scene>\n1.3::kagamine rin::, blue eyes\n</scene>\nShe reads; warm light';
+      final service = _TranslationService(), tags = _Tags();
+      final requests = <Map>[];
+      when(
+        () => service.translatePromptGroup(
+          any(),
+          sessionId: any(named: 'sessionId'),
+        ),
+      ).thenAnswer((call) async {
+        final request =
+            jsonDecode(call.positionalArguments.single as String) as Map;
+        requests.add(request);
+        return jsonEncode({
+          'fields': [
+            for (final field in request['fields'] as List)
+              {
+                'id': field['id'],
+                'groups': [
+                  for (final segment in field['segments'] as List)
+                    {
+                      'ids': [segment['id']],
+                      'readings': [
+                        for (final entry in const {
+                          'kagamine rin': '镜音铃',
+                          'blue eyes': '蓝眼睛',
+                          'silver hair': '银发',
+                          'She reads': '她读书',
+                          'She paints': '她画画',
+                          'warm light': '暖光',
+                        }.entries)
+                          if ((segment['source'] as String).contains(entry.key))
+                            {'source': entry.key, 'zh': entry.value},
+                      ],
+                    },
+                ],
+              },
+          ],
+        });
+      });
+      final container = ProviderContainer(
+        overrides: [
+          characterPromptNotifierProvider.overrideWith(_Characters.new),
+          promptBlockLibraryNotifierProvider.overrideWith(_Library.new),
+          promptAssistantServiceProvider.overrideWithValue(service),
+          unifiedTagRepositoryProvider.overrideWith((ref) => tags),
+          tagTranslationGlossaryProvider.overrideWith(
+            (ref) => const FakeTagTranslationGlossary(),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+      final main = container.read(pillWorkspaceNotifierProvider.notifier);
+      main.restoreDocument(
+        const PillDocument(
+          text: source,
+          instances: {},
+          readings: [
+            PromptReading(
+              start: 0,
+              end: source.length,
+              source: source,
+              translation: '旧的整篇错位译文',
+              perSegment: true,
+            ),
+          ],
+        ),
+      );
+      container
+          .read(pillWorkspaceProvider('char:active:pos').notifier)
+          .replaceWithPlainText('1.4::silver hair::, blue eyes');
+      final coordinator = container.read(promptTranslationCoordinatorProvider);
+      final result = await coordinator.translate(
+        false,
+        mode: PromptTranslationMode.inline,
+      );
+      expect(result.convertedFields, 2);
+      expect(requests, hasLength(1));
+      final glossary = requests.single['glossary'] as List;
+      expect(glossary, contains(containsPair('tag', 'kagamine_rin')));
+      expect(glossary, contains(containsPair('definition', '虹膜呈蓝色的眼睛。')));
+      var document = container.read(pillWorkspaceNotifierProvider).document;
+      expect(document.text, source);
+      expect(document.instances, isEmpty);
+      expect(document.readings.map((r) => r.translation), [
+        '镜音铃',
+        '蓝眼睛',
+        '她读书',
+        '暖光',
+      ]);
+      expect(
+        container
+            .read(pillWorkspaceProvider('char:active:pos'))
+            .document
+            .readings
+            .map((r) => r.translation),
+        ['银发', '蓝眼睛'],
+      );
+      await coordinator.translate(false, mode: PromptTranslationMode.inline);
+      expect(requests, hasLength(1));
+      final edited = source
+          .replaceFirst('She reads', 'She paints')
+          .replaceFirst('warm light', '');
+      main.setText(edited, userEdit: true);
+      document = container.read(pillWorkspaceNotifierProvider).document;
+      expect(document.readings.where((r) => r.needsReview), hasLength(1));
+      expect(document.readings.any((r) => r.translation == '暖光'), isFalse);
+      await coordinator.translate(false, mode: PromptTranslationMode.inline);
+      document = container.read(pillWorkspaceNotifierProvider).document;
+      expect(document.text, edited);
+      expect(document.readings.map((r) => r.translation), [
+        '镜音铃',
+        '蓝眼睛',
+        '她画画',
+      ]);
+      expect(requests, hasLength(2));
+      expect((requests.last['fields'] as List), hasLength(1));
+      expect(requests.last['fields'][0]['id'], 'main');
+    },
+  );
+
+  test(
     'lightweight translation uses the shared request and updates only changed ranges',
     () async {
       final service = _TranslationService();
@@ -55,7 +179,12 @@ void main() {
                   for (final segment in field['segments'] as List)
                     {
                       'ids': [segment['id']],
-                      'zh': 'reading ${segment['source']}',
+                      'readings': [
+                        {
+                          'source': segment['source'],
+                          'zh': 'reading ${segment['source']}',
+                        },
+                      ],
                     },
                 ],
               },
@@ -99,7 +228,7 @@ void main() {
       expect(container.read(pillWorkspaceNotifierProvider).document, annotated);
       workspace.redo();
       await coordinator.translate(false, mode: PromptTranslationMode.inline);
-      expect(requests.last, ['green eyes']);
+      expect(requests.last, ['green eyes, ']);
       current = container.read(pillWorkspaceNotifierProvider).document;
       expect(current.readings.every((r) => !r.needsReview), isTrue);
       expect(current.text, 'green eyes, \uE000 silver hair');
@@ -166,7 +295,9 @@ void main() {
               'groups': [
                 {
                   'ids': ['main:0'],
-                  'zh': '旧译文',
+                  'readings': [
+                    {'source': 'blue eyes', 'zh': '旧译文'},
+                  ],
                 },
               ],
             },

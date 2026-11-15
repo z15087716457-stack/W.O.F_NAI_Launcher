@@ -1,7 +1,9 @@
 import 'dart:ui' as ui;
 import 'dart:io';
+import 'dart:math' as math;
 import 'package:flutter/rendering.dart';
 import 'package:nai_launcher/presentation/ui/kit/ui_glyph.dart';
+import 'package:nai_launcher/presentation/widgets/prompt/nai_syntax_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -27,11 +29,14 @@ class _MemorySettings extends LocalStorageService {
 
 const readingSource =
     '4::1girl, 1boy::, silver hair,\n\n1.4::soft lighting::, blue eyes';
-PillDocument readingDocument([String source = readingSource]) {
+PillDocument readingDocument([
+  String source = readingSource,
+  List<String>? labels,
+]) {
   final batch = PromptTranslationBatch.prepare({
     'main': PillDocument(text: source, instances: const {}),
   }, mode: PromptTranslationMode.inline);
-  const translations = ['1个女孩', '1个男孩', '银发', '柔和光线', '蓝眼'];
+  final translations = labels ?? const ['1个女孩', '1个男孩', '银发', '柔和光线', '蓝眼'];
   return batch.buildFromGroups({
     'main': [
       for (final (i, item) in batch.segments['main']!.indexed)
@@ -60,6 +65,30 @@ Rect sourceRect(WidgetTester t, int start, int end) {
       .first;
   return MatrixUtils.transformRect(editable.getTransformTo(null), box.toRect());
 }
+
+const semanticSource =
+    '<artist>\n1.3::artist:alpha::, artist:beta\n</artist>, <style>\n'
+    'soft lighting; warm colors\n</style>\n'
+    'Subject: a girl; Camera: from above\n'
+    'She opens a book, then looks left.';
+List<PromptReading> semanticReadings() => [
+  for (final (anchor, label) in const [
+    ('artist:alpha', '画师：alpha'),
+    ('artist:beta', '画师：beta'),
+    ('soft lighting', '柔和光线'),
+    ('warm colors', '暖色调'),
+    ('Subject: a girl', '主体：一个女孩'),
+    ('Camera: from above', '镜头：俯视'),
+    ('She opens a book, then looks left.', '她翻开书，然后看向左侧'),
+  ])
+    PromptReading(
+      start: semanticSource.indexOf(anchor),
+      end: semanticSource.indexOf(anchor) + anchor.length,
+      source: anchor,
+      translation: label,
+      perSegment: true,
+    ),
+];
 
 Future<void> pumpReadingEditor(
   WidgetTester t,
@@ -117,6 +146,494 @@ Future<void> pumpReadingEditor(
 void main() {
   setUpAll(loadStudioCaptureFonts);
   setUp(() => SharedPreferences.setMockInitialValues({}));
+  for (final dark in [true, false]) {
+    for (final width in [320.0, 736.0]) {
+      for (final scale in [1.0, 1.5]) {
+        testWidgets(
+          'semantic captions align independently of commas dark=$dark width=$width scale=$scale',
+          (t) async {
+            final controller = TextEditingController(text: semanticSource);
+            final readings = semanticReadings();
+            await pumpReadingEditor(
+              t,
+              controller,
+              readings,
+              width: width,
+              scale: scale,
+              brightness: dark ? Brightness.dark : Brightness.light,
+            );
+            expect(readingLabels(), findsNWidgets(readings.length));
+            final editable = t
+                .state<EditableTextState>(find.byType(EditableText))
+                .renderEditable;
+            for (final (i, label) in readingLabels().evaluate().indexed) {
+              final rect = t.getRect(find.byWidget(label.widget));
+              final reading = readings[i];
+              final boxes = editable.getBoxesForSelection(
+                TextSelection(
+                  baseOffset: reading.start,
+                  extentOffset: reading.end,
+                ),
+              );
+              final lastTop = boxes.last.top;
+              final lastRow = boxes.where((b) => (b.top - lastTop).abs() < 1);
+              final source = MatrixUtils.transformRect(
+                editable.getTransformTo(null),
+                Rect.fromLTRB(
+                  lastRow.map((b) => b.left).reduce(math.min),
+                  lastTop,
+                  lastRow.map((b) => b.right).reduce(math.max),
+                  lastRow.map((b) => b.bottom).reduce(math.max),
+                ),
+              );
+              expect(rect.left, closeTo(source.left, .02));
+              expect(rect.top - source.bottom, closeTo(scale, .02));
+              expect(rect.right, lessThanOrEqualTo(width + .02));
+            }
+            expect(editable.text!.toPlainText(), semanticSource);
+            expect(controller.text, semanticSource);
+            expect(t.takeException(), isNull);
+            final capture = Platform.environment['SEMANTIC_READING_CAPTURE'];
+            if (capture != null) {
+              await t.runAsync(() async {
+                await Directory(capture).create(recursive: true);
+                final boundary = t.renderObject<RenderRepaintBoundary>(
+                  find.byType(RepaintBoundary).first,
+                );
+                final image = await boundary.toImage();
+                final png = await image.toByteData(
+                  format: ui.ImageByteFormat.png,
+                );
+                await File(
+                  '$capture/dark-$dark-width-$width-scale-$scale.png',
+                ).writeAsBytes(png!.buffer.asUint8List());
+                image.dispose();
+              });
+            }
+            await t.pumpWidget(const SizedBox());
+            controller.dispose();
+            await t.binding.setSurfaceSize(null);
+          },
+        );
+      }
+    }
+  }
+  testWidgets(
+    'semantic source edits keep the editor, pending state and neighboring captions',
+    (t) async {
+      final controller = TextEditingController(text: semanticSource),
+          focus = FocusNode();
+      var readings = semanticReadings();
+      await pumpReadingEditor(t, controller, readings, focusNode: focus);
+      final state = t.state<EditableTextState>(find.byType(EditableText));
+      final start = semanticSource.indexOf('warm colors');
+      await t.tapAt(sourceRect(t, start, start + 4).center);
+      await t.pump();
+      expect(focus.hasFocus, isTrue);
+      await t.showKeyboard(find.byType(TextField));
+      final edited = semanticSource.replaceFirst('warm colors', 'cool colors');
+      t.testTextInput.updateEditingValue(
+        TextEditingValue(
+          text: edited,
+          selection: TextSelection.collapsed(offset: start + 4),
+        ),
+      );
+      readings = PromptReading.rebase(readings, semanticSource, edited);
+      await pumpReadingEditor(t, controller, readings, focusNode: focus);
+      expect(
+        t.state<EditableTextState>(find.byType(EditableText)),
+        same(state),
+      );
+      expect(find.text('待更新'), findsOneWidget);
+      expect(find.text('暖色调'), findsNothing);
+      expect(find.text('柔和光线'), findsOneWidget);
+      final deleted = edited.replaceFirst('cool colors', '');
+      t.testTextInput.updateEditingValue(
+        TextEditingValue(
+          text: deleted,
+          selection: TextSelection.collapsed(offset: start),
+        ),
+      );
+      readings = PromptReading.rebase(readings, edited, deleted);
+      await pumpReadingEditor(t, controller, readings, focusNode: focus);
+      expect(find.text('待更新'), findsNothing);
+      expect(readingLabels(), findsNWidgets(6));
+      expect(find.text('镜头：俯视'), findsOneWidget);
+      expect(controller.text, deleted);
+      expect(t.takeException(), isNull);
+      await t.pumpWidget(const SizedBox());
+      controller.dispose();
+      focus.dispose();
+      await t.binding.setSurfaceSize(null);
+    },
+  );
+  testWidgets(
+    'a semantic anchor before closing weights keeps the blank-line caret below its caption',
+    (t) async {
+      const source = '1.4::soft lighting::,\n\n';
+      final controller = TextEditingController(text: source);
+      await pumpReadingEditor(t, controller, const [
+        PromptReading(
+          start: 5,
+          end: 18,
+          source: 'soft lighting',
+          translation: '柔和光线',
+          perSegment: true,
+        ),
+      ]);
+      final e = t
+          .state<EditableTextState>(find.byType(EditableText))
+          .renderEditable;
+      final caret = e.getLocalRectForCaret(
+        TextPosition(offset: source.indexOf('\n') + 1),
+      );
+      final rect = MatrixUtils.transformRect(e.getTransformTo(null), caret);
+      expect(
+        rect.top,
+        greaterThanOrEqualTo(t.getRect(readingLabels().first).bottom + 1),
+      );
+      expect(caret.height, lessThanOrEqualTo(23));
+      expect(e.text!.toPlainText(), source);
+      await t.pumpWidget(const SizedBox());
+      controller.dispose();
+      await t.binding.setSurfaceSize(null);
+    },
+  );
+  for (final weighted in ['2::soft lighting::', '2::soft lighting']) {
+    for (final scale in [1.0, 1.5]) {
+      for (final suffix in ['\n', '\n\n', '\nnew text']) {
+        testWidgets(
+          'manual newline caret clears the preceding reading scale=$scale suffix=${suffix.length} weighted=$weighted',
+          (t) async {
+            final source = weighted + suffix;
+            final controller = TextEditingController(text: weighted),
+                focus = FocusNode();
+            await pumpReadingEditor(
+              t,
+              controller,
+              [
+                PromptReading(
+                  start: 0,
+                  end: weighted.length,
+                  source: weighted,
+                  translation: '柔和光线',
+                  perSegment: true,
+                ),
+              ],
+              focusNode: focus,
+              scale: scale,
+              width: 320,
+            );
+            focus.requestFocus();
+            await t.pump();
+            await t.pump();
+            final before = t.state<EditableTextState>(
+              find.byType(EditableText),
+            );
+            await t.showKeyboard(find.byType(TextField));
+            t.testTextInput.updateEditingValue(
+              TextEditingValue(
+                text: source,
+                selection: TextSelection.collapsed(offset: weighted.length + 1),
+              ),
+            );
+            await t.pump();
+            await t.pump();
+            expect(
+              t.state<EditableTextState>(find.byType(EditableText)),
+              same(before),
+            );
+            final e = t
+                .state<EditableTextState>(find.byType(EditableText))
+                .renderEditable;
+            final caret = e.getLocalRectForCaret(
+              TextPosition(offset: weighted.length + 1),
+            );
+            final visible = MatrixUtils.transformRect(
+              e.getTransformTo(null),
+              caret,
+            );
+            final caption = t.getRect(readingLabels().first);
+            expect(
+              visible.top,
+              greaterThanOrEqualTo(caption.bottom + scale),
+              reason:
+                  'The new source row must begin below the complete caption',
+            );
+            // macOS uses the ordinary 21px strut plus its native 2px caret margin.
+            expect(caret.height, lessThanOrEqualTo(23));
+            if (suffix == '\n\n') {
+              final next = e.getLocalRectForCaret(
+                TextPosition(offset: weighted.length + 2),
+              );
+              expect(
+                next.top - caret.top,
+                inInclusiveRange(20.0, 23.0),
+                reason: 'An empty source line keeps its ordinary height',
+              );
+            }
+            expect(e.text!.toPlainText(), source);
+            expect(controller.text, source);
+            expect(t.takeException(), isNull);
+            await t.pumpWidget(const SizedBox());
+            controller.dispose();
+            focus.dispose();
+            await t.binding.setSurfaceSize(null);
+          },
+          variant: const TargetPlatformVariant({
+            TargetPlatform.windows,
+            TargetPlatform.macOS,
+          }),
+        );
+      }
+    }
+  }
+  for (final scale in [1.0, 1.5]) {
+    testWidgets('long readings leave closing symbols compact scale=$scale', (
+      t,
+    ) async {
+      const source = '1.4::pov::\n\n1.4::pov, blue eyes::';
+      final controller = TextEditingController(text: source);
+      final document = readingDocument(source, const [
+        '第一人称视角',
+        '第一人称视角',
+        '蓝眼',
+      ]);
+      await pumpReadingEditor(
+        t,
+        controller,
+        document.readings,
+        width: 320,
+        scale: scale,
+      );
+      final e = t
+          .state<EditableTextState>(find.byType(EditableText))
+          .renderEditable;
+      final firstClosing = source.indexOf('pov') + 3;
+      final offsets = [
+        for (var i = firstClosing; i <= firstClosing + 2; i++)
+          e.getLocalRectForCaret(TextPosition(offset: i)).left,
+      ];
+      final caption = t.renderObject<RenderParagraph>(
+        find.text('第一人称视角').first,
+      );
+      expect(caption.didExceedMaxLines, isFalse);
+      await pumpReadingEditor(
+        t,
+        controller,
+        const [],
+        width: 320,
+        scale: scale,
+      );
+      final plain = t
+          .state<EditableTextState>(find.byType(EditableText))
+          .renderEditable;
+      for (final (i, x) in offsets.indexed) {
+        expect(
+          plain
+              .getLocalRectForCaret(TextPosition(offset: firstClosing + i))
+              .left,
+          closeTo(x, .01),
+          reason: 'The closing colons must keep their original advance',
+        );
+      }
+      expect(controller.text, source);
+      expect(t.takeException(), isNull);
+      await t.pumpWidget(const SizedBox());
+      controller.dispose();
+      await t.binding.setSurfaceSize(null);
+    });
+  }
+  for (final openWeight in [false, true]) {
+    for (final dark in [true, false]) {
+      for (final scale in [1.0, 1.5]) {
+        for (final width in [320.0, 736.0]) {
+          testWidgets(
+            'weight fills stay inside source rows dark=$dark scale=$scale width=$width open=$openWeight',
+            (t) async {
+              const closedSource =
+                  '0.4::artist:alpha, artist:beta::,\n[[artist:gamma]], {artist:delta},\n\n4::1girl, 1boy::,\n\n1.4::pov::,\n2::soft lighting, blue eyes, silver hair, detailed background::';
+              final source =
+                  closedSource +
+                  (openWeight
+                      ? '\n\n1.8::soft colors,\n\nloose sleeves::'
+                      : '');
+              final batch = PromptTranslationBatch.prepare({
+                'main': PillDocument(text: source, instances: const {}),
+              }, mode: PromptTranslationMode.inline);
+              final document = batch.buildFromGroups({
+                'main': [
+                  for (final (i, unit) in batch.segments['main']!.indexed)
+                    (
+                      start: unit.start,
+                      end: unit.end,
+                      zh: '译文$i',
+                      marks: const <TranslationTagMark>[],
+                    ),
+                ],
+              }, mode: PromptTranslationMode.inline)['main']!;
+              final controller = TextEditingController(text: source);
+              await pumpReadingEditor(
+                t,
+                controller,
+                document.readings,
+                width: width,
+                scale: scale,
+                brightness: dark ? Brightness.dark : Brightness.light,
+              );
+              final state = t.state<EditableTextState>(
+                find.byType(EditableText),
+              );
+              expect(
+                state.renderEditable.selection?.isCollapsed ?? true,
+                isTrue,
+              );
+              final boundary = t.renderObject<RenderRepaintBoundary>(
+                find.byType(RepaintBoundary).first,
+              );
+              final transform = state.renderEditable.getTransformTo(boundary);
+              final rows = <Rect>[];
+              for (final line in RegExp(r'[^\n]+').allMatches(source)) {
+                var from = line.start;
+                while (from < line.end) {
+                  final visual = state.renderEditable.getLineAtOffset(
+                    TextPosition(offset: from),
+                  );
+                  final end = math.min(visual.end, line.end);
+                  expect(end, greaterThan(from));
+                  final a = state.renderEditable.getLocalRectForCaret(
+                    TextPosition(offset: from),
+                  );
+                  final b = state.renderEditable.getLocalRectForCaret(
+                    TextPosition(offset: end, affinity: TextAffinity.upstream),
+                  );
+                  rows.add(
+                    MatrixUtils.transformRect(
+                      transform,
+                      Rect.fromLTRB(
+                        math.min(a.left, b.left),
+                        math.min(a.top, b.top),
+                        math.max(a.left, b.left),
+                        math.max(a.bottom, b.bottom),
+                      ),
+                    ).inflate(1),
+                  );
+                  from = end;
+                }
+              }
+              final theme = Theme.of(t.element(find.byType(TextField)));
+              final syntax = NaiSyntaxController(text: source);
+              final colors = <Color>{};
+              void collect(InlineSpan span) {
+                if (span is! TextSpan) return;
+                final color = span.style?.backgroundColor;
+                if (color != null && color.a > 0) {
+                  colors.add(
+                    Color.alphaBlend(color, theme.scaffoldBackgroundColor),
+                  );
+                }
+                for (final child in span.children ?? const <InlineSpan>[]) {
+                  collect(child);
+                }
+              }
+
+              collect(
+                syntax.buildTextSpan(
+                  context: t.element(find.byType(TextField)),
+                  style: state.widget.style,
+                  withComposing: false,
+                ),
+              );
+              syntax.dispose();
+              expect(colors, isNotEmpty);
+              await t.runAsync(() async {
+                final image = await boundary.toImage();
+                final data = await image.toByteData(
+                  format: ui.ImageByteFormat.rawRgba,
+                );
+                final bytes = data!.buffer.asUint8List();
+                final firstUnit = state.renderEditable
+                    .getBoxesForSelection(
+                      TextSelection(
+                        baseOffset: 0,
+                        extentOffset: source.indexOf(',') + 1,
+                      ),
+                    )
+                    .map((box) => box.toRect())
+                    .reduce((a, b) => a.expandToInclude(b));
+                final band = MatrixUtils.transformRect(transform, firstUnit);
+                final expected = Color.alphaBlend(
+                  NaiSyntaxColors.fromTheme(theme).weightBottom,
+                  theme.scaffoldBackgroundColor,
+                );
+                final sampleY = (band.top + scale).ceil();
+                for (
+                  var x = (band.left + scale).ceil();
+                  x < (band.right - scale).floor();
+                  x++
+                ) {
+                  final at = (sampleY * image.width + x) * 4;
+                  expect(
+                    bytes[at],
+                    closeTo((expected.r * 255).round(), 1),
+                    reason:
+                        'No fractional seam inside a continuous weight range',
+                  );
+                  expect(bytes[at + 1], closeTo((expected.g * 255).round(), 1));
+                  expect(bytes[at + 2], closeTo((expected.b * 255).round(), 1));
+                }
+                var inside = 0, outside = 0;
+                for (var y = 0; y < image.height; y++) {
+                  for (var x = 0; x < image.width; x++) {
+                    final index = (y * image.width + x) * 4;
+                    if (!colors.any(
+                      (c) =>
+                          (bytes[index] - (c.r * 255).round()).abs() <= 1 &&
+                          (bytes[index + 1] - (c.g * 255).round()).abs() <= 1 &&
+                          (bytes[index + 2] - (c.b * 255).round()).abs() <= 1,
+                    )) {
+                      continue;
+                    }
+                    if (rows.any((r) => r.contains(Offset(x + .5, y + .5)))) {
+                      inside++;
+                    } else {
+                      outside++;
+                    }
+                  }
+                }
+                final capture =
+                    Platform.environment['WEIGHT_BACKGROUND_CAPTURE'];
+                if (capture != null) {
+                  final png = await image.toByteData(
+                    format: ui.ImageByteFormat.png,
+                  );
+                  await File(
+                    '$capture/dark-$dark-scale-$scale-width-$width-open-$openWeight.png',
+                  ).writeAsBytes(png!.buffer.asUint8List());
+                }
+                image.dispose();
+                expect(
+                  inside,
+                  greaterThan(80),
+                  reason: 'Weight colors must remain visible on the source',
+                );
+                expect(
+                  outside,
+                  0,
+                  reason: 'Weight fills must not enter captions or empty lines',
+                );
+              });
+              expect(controller.text, source);
+              expect(t.takeException(), isNull);
+              await t.pumpWidget(const SizedBox());
+              controller.dispose();
+              await t.binding.setSurfaceSize(null);
+            },
+          );
+        }
+      }
+    }
+  }
   for (final locale in AppLocalizations.supportedLocales) {
     for (final dark in [false, true]) {
       for (final width in [320.0, 736.0]) {

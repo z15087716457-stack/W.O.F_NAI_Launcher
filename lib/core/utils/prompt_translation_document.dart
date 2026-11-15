@@ -16,8 +16,8 @@ typedef PromptTranslationGroup = ({
   List<TranslationTagMark> marks,
 });
 
-/// A lossless request snapshot. The model can group segment IDs, but it never
-/// supplies source text or offsets for document mutation.
+/// A lossless request snapshot. Model readings are resolved against this
+/// snapshot; model output never replaces source text.
 class PromptTranslationSegment {
   const PromptTranslationSegment({
     required this.id,
@@ -86,11 +86,14 @@ class PromptTranslationBatch {
       final document = entry.value;
       final items = <PromptTranslationSegment>[];
       final text = document.text;
+      final structuralMarkup = NaiPromptSyntax.isXml(text);
       final translated = {
         if (skipReadings)
           for (final item in document.readings)
             if (!item.needsReview &&
-                (mode != PromptTranslationMode.inline || item.perSegment))
+                (mode != PromptTranslationMode.inline ||
+                    (item.perSegment &&
+                        PromptReadingUnit.isSingleSection(item.source))))
               item.start: item.end,
       };
       var run = 0;
@@ -99,18 +102,36 @@ class PromptTranslationBatch {
         if (start >= end || text.substring(start, end).trim().isEmpty) return;
         final source = text.substring(start, end);
         if (mode == PromptTranslationMode.inline) {
-          for (final unit in PromptReadingUnit.parse(source)) {
+          if (PromptReadingUnit.isSyntaxOnly(
+            source,
+            structuralMarkup: structuralMarkup,
+          )) {
+            return;
+          }
+          final units = PromptReadingUnit.parse(
+            source,
+            structuralMarkup: structuralMarkup,
+          );
+          var local = 0;
+          var section = units.firstOrNull?.section;
+          for (final (index, unit) in units.indexed) {
+            if (unit.section != section) run++;
+            section = unit.section;
+            final unitEnd = index == units.length - 1
+                ? source.length
+                : unit.end;
             items.add(
               PromptTranslationSegment(
                 id: '$field:${items.length}',
                 fieldId: field,
                 run: run,
-                start: start + unit.start,
-                end: start + unit.end,
-                source: source.substring(unit.start, unit.end),
+                start: start + local,
+                end: start + unitEnd,
+                source: source.substring(local, unitEnd),
                 reading: unit.text,
               ),
             );
+            local = unitEnd;
           }
           return;
         }
@@ -245,19 +266,15 @@ class PromptTranslationBatch {
             'id': entry.key,
             'segments': [
               for (final item in entry.value)
-                {
-                  'id': item.id,
-                  'run': item.run,
-                  'source': item.reading ?? item.source,
-                },
+                {'id': item.id, 'run': item.run, 'source': item.source},
             ],
           },
     ],
     'glossary': glossary,
   });
 
-  /// Validate full ordered coverage. The model supplies no source text or
-  /// offsets, so every returned group is anchored to local snapshot ranges.
+  /// Validate full ordered coverage, resolving inline source fragments in the
+  /// original snapshot rather than accepting model-generated offsets.
   Map<String, List<PromptTranslationGroup>> parseGroups(
     String raw, {
     List<Map<String, String>> glossary = const [],
@@ -290,22 +307,12 @@ class PromptTranslationBatch {
       final groups = <PromptTranslationGroup>[];
       var cursor = 0;
       for (final rawGroup in response['groups'] as List) {
-        if (rawGroup is! Map ||
-            rawGroup['ids'] is! List ||
-            rawGroup['zh'] is! String) {
+        if (rawGroup is! Map || rawGroup['ids'] is! List) {
           throw const FormatException('Translation group is invalid');
         }
         final ids = rawGroup['ids'] as List;
-        if (mode == PromptTranslationMode.inline && ids.length != 1) {
-          throw const FormatException(
-            'Inline readings require one segment per group',
-          );
-        }
-        final zh = mode == PromptTranslationMode.inline
-            ? PromptReadingUnit.clean(rawGroup['zh'] as String)
-            : (rawGroup['zh'] as String).trim();
-        if (ids.isEmpty || zh.isEmpty || zh.length > 20000) {
-          throw const FormatException('Translation group is empty or too long');
+        if (ids.isEmpty) {
+          throw const FormatException('Translation group is empty');
         }
         if (cursor >= items.length) {
           throw const FormatException('Translation contains extra groups');
@@ -319,6 +326,24 @@ class PromptTranslationBatch {
             throw const FormatException('Translation IDs are out of order');
           }
           cursor++;
+        }
+        if (mode == PromptTranslationMode.inline) {
+          groups.addAll(
+            _parseReadings(
+              rawGroup['readings'],
+              documents[entry.key]!.text,
+              items[first].start,
+              items[cursor - 1].end,
+            ),
+          );
+          continue;
+        }
+        if (rawGroup['zh'] is! String) {
+          throw const FormatException('Translation group needs a reading');
+        }
+        final zh = (rawGroup['zh'] as String).trim();
+        if (zh.isEmpty || zh.length > 20000) {
+          throw const FormatException('Translation group is empty or too long');
         }
         final sourceTags = {
           for (var index = first; index < cursor; index++)
@@ -347,6 +372,60 @@ class PromptTranslationBatch {
         throw const FormatException('Translation segments are incomplete');
       }
       result[entry.key] = groups;
+    }
+    return result;
+  }
+
+  static List<PromptTranslationGroup> _parseReadings(
+    Object? raw,
+    String source,
+    int start,
+    int end,
+  ) {
+    if (raw is! List || raw.isEmpty) {
+      throw const FormatException('Inline translation needs source readings');
+    }
+    final result = <PromptTranslationGroup>[];
+    final original = source.substring(start, end);
+    final structuralMarkup = NaiPromptSyntax.isXml(source);
+    var cursor = 0;
+    for (final item in raw) {
+      if (item is! Map || item['source'] is! String || item['zh'] is! String) {
+        throw const FormatException('Inline reading is invalid');
+      }
+      final anchor = item['source'] as String;
+      final zh = PromptReadingUnit.clean(item['zh'] as String);
+      final index = original.indexOf(anchor, cursor);
+      final anchorEnd = index + anchor.length;
+      if (anchor.isEmpty ||
+          zh.isEmpty ||
+          zh.length > 20000 ||
+          index < 0 ||
+          !PromptReadingUnit.isSyntaxOnly(
+            original.substring(cursor, index),
+            structuralMarkup: structuralMarkup,
+          ) ||
+          !PillDocumentEditor.isUtf16Boundary(original, index) ||
+          !PillDocumentEditor.isUtf16Boundary(original, anchorEnd) ||
+          !PromptReadingUnit.isSingleSection(
+            anchor,
+            structuralMarkup: structuralMarkup,
+          )) {
+        throw const FormatException('Inline source readings do not align');
+      }
+      result.add((
+        start: start + index,
+        end: start + anchorEnd,
+        zh: zh,
+        marks: const [],
+      ));
+      cursor = anchorEnd;
+    }
+    if (!PromptReadingUnit.isSyntaxOnly(
+      original.substring(cursor),
+      structuralMarkup: structuralMarkup,
+    )) {
+      throw const FormatException('Inline source readings are incomplete');
     }
     return result;
   }
