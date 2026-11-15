@@ -40,6 +40,19 @@ class PromptAutocompleteBinding extends StatefulWidget {
   final PromptAutocompleteBuilder? builder;
   final Widget child;
 
+  static Future<void> paste(
+    EditableTextState editor,
+    SelectionChangedCause cause,
+  ) {
+    final autocomplete = editor.context
+        .findAncestorStateOfType<_PromptAutocompleteBindingState>()
+        ?.widget
+        .autocomplete;
+    return autocomplete == null
+        ? editor.pasteText(cause)
+        : autocomplete.runWithoutCompletion(() => editor.pasteText(cause));
+  }
+
   @override
   State<PromptAutocompleteBinding> createState() =>
       _PromptAutocompleteBindingState();
@@ -65,6 +78,7 @@ class _PromptAutocompleteBindingState extends State<PromptAutocompleteBinding> {
 
   void _attach() {
     if (widget.autocomplete == null) return;
+    widget.autocomplete!.synchronize(widget.controller.value);
     widget.controller.addListener(_changed);
     widget.focusNode.addListener(_focusChanged);
   }
@@ -96,8 +110,8 @@ class _PromptAutocompleteBindingState extends State<PromptAutocompleteBinding> {
   }
 
   void _changed() {
-    if (_accepting || !widget.focusNode.hasPrimaryFocus) return;
-    widget.autocomplete?.update(widget.controller.value, locale: widget.locale);
+    if (_accepting) return;
+    widget.autocomplete?.synchronize(widget.controller.value);
   }
 
   void _focusChanged() {
@@ -130,6 +144,21 @@ class _PromptAutocompleteBindingState extends State<PromptAutocompleteBinding> {
       onKeyEvent: widget.autocomplete == null ? null : _key,
       child: widget.child,
     );
+    final content = Actions(
+      actions: {
+        if (widget.autocomplete != null)
+          PasteTextIntent: CallbackAction<PasteTextIntent>(
+            onInvoke: (intent) {
+              final editor = widget.focusNode.context
+                  ?.findAncestorStateOfType<EditableTextState>();
+              return editor == null
+                  ? null
+                  : PromptAutocompleteBinding.paste(editor, intent.cause);
+            },
+          ),
+      },
+      child: child,
+    );
     return widget.autocomplete != null && widget.builder != null
         ? widget.builder!(context, widget.autocomplete!, (index) {
             final autocomplete = widget.autocomplete!;
@@ -137,7 +166,7 @@ class _PromptAutocompleteBindingState extends State<PromptAutocompleteBinding> {
                 ? autocomplete.accept(index, widget.autoInsertComma)
                 : autocomplete.acceptRelated(index, widget.autoInsertComma);
             if (value != null) _accept(value);
-          }, child)
-        : child;
+          }, content)
+        : content;
   }
 }

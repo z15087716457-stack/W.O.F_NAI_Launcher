@@ -407,15 +407,21 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
                       : const [],
                   pillScope: widget.pillScope,
                   focusNode: _focusNode,
-                  onUserEdit: (value) => ref
-                      .read(_workspace.notifier)
-                      .setText(
-                        value.text,
-                        userEdit: true,
-                        composing:
-                            value.composing.isValid &&
-                            !value.composing.isCollapsed,
-                      ),
+                  onUserEdit: (value) {
+                    autocomplete?.update(
+                      value,
+                      locale: Localizations.localeOf(context).toLanguageTag(),
+                    );
+                    ref
+                        .read(_workspace.notifier)
+                        .setText(
+                          value.text,
+                          userEdit: true,
+                          composing:
+                              value.composing.isValid &&
+                              !value.composing.isCollapsed,
+                        );
+                  },
                   onUndo: () => _restoreHistory(redo: false),
                   onRedo: () => _restoreHistory(redo: true),
                   // A source field inside a WidgetSpan owns its own caret.

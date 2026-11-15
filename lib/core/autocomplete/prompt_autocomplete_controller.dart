@@ -122,6 +122,8 @@ class PromptAutocompleteController
   int? _relatedInsertionOffset;
   Timer? _timer;
   TextEditingValue? _editing;
+  int? _inputStart;
+  int _suppressedEdits = 0;
 
   bool get enabled => _enabled;
   set enabled(bool enabled) {
@@ -130,20 +132,61 @@ class PromptAutocompleteController
     dismiss();
   }
 
+  /// Mirror external text/selection writes without treating them as typing.
+  void synchronize(TextEditingValue editing) {
+    if (_editing == editing) return;
+    _editing = editing;
+    dismiss();
+  }
+
+  /// Clipboard commands still use native editing, history and input formatting.
+  Future<void> runWithoutCompletion(Future<void> Function() edit) async {
+    _suppressedEdits++;
+    dismiss();
+    try {
+      await edit();
+    } finally {
+      _suppressedEdits--;
+    }
+  }
+
+  /// Called only by the native edit formatter, before its controller is mirrored.
   void update(TextEditingValue editing, {required String locale}) {
+    final previous = _editing ?? const TextEditingValue();
+    final inputStart = _inputStart;
     _editing = editing;
     dismiss();
     if (!_enabled ||
+        _suppressedEdits > 0 ||
         !editing.selection.isValid ||
-        !editing.selection.isCollapsed ||
-        (editing.composing.isValid && !editing.composing.isCollapsed)) {
+        !editing.selection.isCollapsed) {
       return;
     }
+    final committed =
+        !previous.composing.isCollapsed && editing.composing.isCollapsed;
+    if (previous.text == editing.text && !committed) return;
+    final oldCursor = previous.selection.isValid ? previous.selection.start : 0;
+    final cursor = editing.selection.extentOffset;
+    var changedStart = 0;
+    while (changedStart < oldCursor &&
+        changedStart < cursor &&
+        previous.text.codeUnitAt(changedStart) ==
+            editing.text.codeUnitAt(changedStart)) {
+      changedStart++;
+    }
+    final start =
+        inputStart != null && changedStart >= inputStart && cursor >= inputStart
+        ? inputStart
+        : changedStart;
+    if (cursor <= start) return;
+    _inputStart = start;
+    if (editing.composing.isValid && !editing.composing.isCollapsed) return;
     final query = PromptTokenParser.parse(
       text: editing.text,
       cursorPosition: editing.selection.extentOffset,
       limit: limit,
       locale: locale,
+      inputRange: TextReplacementRange(start: start, end: cursor),
     );
     if (query.kind != CompletionQueryKind.tag ||
         query.token.runes.length < (query.isChinese ? 1 : 2) ||
@@ -320,6 +363,7 @@ class PromptAutocompleteController
   }
 
   void dismiss() {
+    _inputStart = null;
     _revision++;
     _relatedRevision++;
     _relatedInsertionOffset = null;

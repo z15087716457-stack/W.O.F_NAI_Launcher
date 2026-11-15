@@ -15,7 +15,7 @@ class PromptAutocompleteEnabledNotifier extends Notifier<bool> {
       ref
           .read(localStorageServiceProvider)
           .getSetting<bool>(StorageKeys.promptAutocompleteEnabled) ??
-      false;
+      true;
 
   Future<void> setEnabled(bool enabled) async {
     await ref

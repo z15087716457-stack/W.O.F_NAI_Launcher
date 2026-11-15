@@ -112,12 +112,16 @@ class EditingTextProjection {
                     isDirectional: selection.isDirectional,
                   )
           : selection,
-      composing: value.composing.isValid && !value.composing.isCollapsed
+      // A valid empty range starts/finishes an IME composition. Preserve it;
+      // replacing it with TextRange.empty sends a cancellation to the IME.
+      composing: value.composing.isValid
           ? TextRange(
               start: toDisplay(value.composing.start),
               end: toDisplay(
                 value.composing.end,
-                affinity: TextAffinity.upstream,
+                affinity: value.composing.isCollapsed
+                    ? TextAffinity.downstream
+                    : TextAffinity.upstream,
               ),
             )
           : TextRange.empty,
@@ -230,7 +234,7 @@ class EditingTextProjection {
         baseOffset: position(after.selection.baseOffset),
         extentOffset: position(after.selection.extentOffset),
       ),
-      composing: after.composing.isValid && !after.composing.isCollapsed
+      composing: after.composing.isValid
           ? TextRange(
               start: position(after.composing.start),
               end: position(after.composing.end),

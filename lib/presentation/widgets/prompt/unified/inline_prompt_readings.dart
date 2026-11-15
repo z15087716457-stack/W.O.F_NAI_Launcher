@@ -732,7 +732,16 @@ class _RenderReadingEditorMetrics extends RenderProxyBox {
   void performLayout() {
     void visit(RenderObject node) {
       if (node is RenderEditable) {
-        node.selectionHeightStyle = ui.BoxHeightStyle.strut;
+        final hasReadings = switch (node.text) {
+          SourceMappedTextSpan(:final projection) => projection.parts.any(
+            (part) => part.annotation != null,
+          ),
+          _ => false,
+        };
+        // Full lines stay connected; annotated lines reserve their captions.
+        node.selectionHeightStyle = hasReadings
+            ? ui.BoxHeightStyle.strut
+            : ui.BoxHeightStyle.max;
         return;
       }
       node.visitChildren(visit);

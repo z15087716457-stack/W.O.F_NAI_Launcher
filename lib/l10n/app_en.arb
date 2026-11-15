@@ -11569,7 +11569,7 @@
   },
   "prompt_autocompleteTitle": "Complete",
   "prompt_autocompleteHint": "↑↓ move · → related · ← back · Tab / Enter complete · Esc close",
-  "prompt_autocompleteHintRelated": "↑↓ move · ← back · Enter / click to add · Esc close related",
+  "prompt_autocompleteHintRelated": "↑↓ move · ← back · Tab / Enter to add · Esc close related",
   "resourceWindow_pin": "Keep on top",
   "resourceWindow_newWindow": "Open another resource window",
   "resourceWindow_rowHeight": "Row height",

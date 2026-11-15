@@ -20,6 +20,26 @@ EditingTextProjection sample() =>
 
 void main() {
   test(
+    'zero-length IME ranges stay valid at annotation and line boundaries',
+    () {
+      final p = sample();
+      for (final offset in [0, 3, 5, 14]) {
+        final raw = TextEditingValue(
+          text: p.source,
+          selection: TextSelection.collapsed(offset: offset),
+          composing: TextRange(start: offset, end: offset),
+        );
+        final displayed = p.toDisplayValue(raw);
+        expect(displayed.isComposingRangeValid, isTrue);
+        expect(displayed.composing.isValid, isTrue);
+        expect(displayed.composing.isCollapsed, isTrue);
+        final restored = p.sourceEdit(displayed, displayed);
+        expect(restored.composing, raw.composing);
+        expect(restored.text, raw.text);
+      }
+    },
+  );
+  test(
     'source boundaries and selections round-trip through annotation positions',
     () {
       final p = sample();

@@ -11609,7 +11609,7 @@
   },
   "prompt_autocompleteTitle": "자동 완성",
   "prompt_autocompleteHint": "↑↓ 선택 · → 연관 · ← 돌아가기 · Tab / Enter 완성 · Esc 닫기",
-  "prompt_autocompleteHintRelated": "↑↓ 선택 · ← 돌아가기 · Enter / 클릭 추가 · Esc 연관 닫기",
+  "prompt_autocompleteHintRelated": "↑↓ 선택 · ← 돌아가기 · Tab / Enter 추가 · Esc 연관 닫기",
   "resourceWindow_pin": "항상 위에",
   "resourceWindow_newWindow": "리소스 창 하나 더 열기",
   "resourceWindow_rowHeight": "행 높이",

@@ -68,7 +68,7 @@ enum SettingKey {
   themeMode, // light / dark / system（system 是新增：跟随 Windows）
   fontFamily, // 选项由 [SettingsViewData.options] 给
   uiScale, // Complete interface, 0.8–1.5
-  promptAutocomplete, // 本地输入补全，默认关闭
+  promptAutocomplete, // 本地输入补全
   language, // zh / zh_TW / en / ja / ko
   reduceMotion, // 现有画布“减少动态效果”（也让视觉通道停微动）
   completionSound,
@@ -220,7 +220,7 @@ class SettingSpec {
       step: .1,
       defaultValue: 1.0,
     ),
-    SettingKey.promptAutocomplete: SettingSpec._(_t, _ge, defaultValue: false),
+    SettingKey.promptAutocomplete: SettingSpec._(_t, _ge, defaultValue: true),
     SettingKey.language: SettingSpec._(
       _c,
       _ap,

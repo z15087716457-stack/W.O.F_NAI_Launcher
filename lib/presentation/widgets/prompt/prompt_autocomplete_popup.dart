@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -43,10 +45,7 @@ class PromptAutocompletePopup extends ConsumerStatefulWidget {
 
   static const width = 300.0;
   static const relatedWidth = 240.0;
-  static const rowHeight = 30.0;
-  static const maxRows = 8;
-  static const headerHeight = 26.0;
-  static const footerHeight = 26.0;
+  static const maxListHeight = 240.0;
 
   final PromptAutocompleteController controller;
 
@@ -66,6 +65,8 @@ class _PromptAutocompletePopupState
   final _childKey = GlobalKey();
   final _scroll = ScrollController();
   final _relatedScroll = ScrollController();
+  final _selectedRow = GlobalKey();
+  final _selectedRelatedRow = GlobalKey();
   late final String _surface = 'prompt-autocomplete-${identityHashCode(this)}';
   late final AutoTagTranslationController _translation;
   Set<String> _observed = const {};
@@ -119,10 +120,6 @@ class _PromptAutocompletePopupState
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted && widget.controller.value.visible) setState(() {});
       });
-      _keepVisible(_scroll, state.selectedIndex);
-      if (state.relatedFor != null) {
-        _keepVisible(_relatedScroll, state.relatedSelected);
-      }
     }
   }
 
@@ -150,24 +147,33 @@ class _PromptAutocompletePopupState
     _observed = next;
   }
 
-  void _keepVisible(ScrollController scroll, int i) {
+  void _keepVisible(ScrollController scroll, GlobalKey selected) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!scroll.hasClients) return;
-      const h = PromptAutocompletePopup.rowHeight;
-      final top = i * h, bottom = top + h;
+      final row = selected.currentContext?.findRenderObject() as RenderBox?;
+      if (!scroll.hasClients || row == null) return;
+      final viewport = RenderAbstractViewport.of(row);
+      final top = viewport.getOffsetToReveal(row, 0).offset;
+      // Column 已布局实际行高；下方保留一个完整候选再开始滚动。
+      final next = (row.parentData! as FlexParentData).nextSibling;
+      final bottom = viewport.getOffsetToReveal(next ?? row, 1).offset;
       final pos = scroll.position;
-      if (top < pos.pixels) {
-        scroll.jumpTo(top);
-      } else if (bottom > pos.pixels + pos.viewportDimension) {
-        scroll.jumpTo(bottom - pos.viewportDimension);
+      final target = top < pos.pixels
+          ? top
+          : math.max(pos.pixels, math.min(top, bottom));
+      final clamped = target.clamp(pos.minScrollExtent, pos.maxScrollExtent);
+      if (clamped != pos.pixels) {
+        scroll.jumpTo(clamped);
       }
     });
   }
 
-  /// 当前词左下角相对编辑区的位置；找不到可编辑渲染对象时放在编辑区底部。
-  Offset _anchor(double popupWidth) {
-    final root = _childKey.currentContext?.findRenderObject();
-    if (root is! RenderBox || !root.hasSize) return Offset.zero;
+  /// 在同一个 Overlay 坐标系里留出边距，空间不足时向上展开。
+  ({Offset offset, bool above, double height}) _placement(
+    RenderBox overlay,
+    Size viewport,
+    double popupWidth,
+  ) {
+    final root = _childKey.currentContext!.findRenderObject()! as RenderBox;
     RenderEditable? editable;
     void visit(RenderObject o) {
       if (editable != null) return;
@@ -180,20 +186,29 @@ class _PromptAutocompletePopupState
 
     visit(root);
     final e = editable;
-    if (e == null || !e.hasSize) return Offset(0, root.size.height);
-    final offset = widget.controller.value.anchorTextOffset;
-    final caret = e.getLocalRectForCaret(
-      displayPositionForEditable(e, TextPosition(offset: offset)),
+    final field = e ?? root;
+    final caret = e == null
+        ? Rect.fromLTWH(0, root.size.height, 0, 0)
+        : e.getLocalRectForCaret(
+            displayPositionForEditable(
+              e,
+              TextPosition(offset: widget.controller.value.anchorTextOffset),
+            ),
+          );
+    Offset point(Offset p) => overlay.globalToLocal(field.localToGlobal(p));
+    final top = point(caret.topLeft), bottom = point(caret.bottomLeft);
+    final below = math.max(0.0, viewport.height - bottom.dy - 12);
+    final above = math.max(0.0, top.dy - 12);
+    final opensAbove = below < 300 && above > below;
+    final anchor = Offset(
+      bottom.dx.clamp(8.0, math.max(8.0, viewport.width - popupWidth - 8)),
+      opensAbove ? top.dy - 4 : bottom.dy + 4,
     );
-    final local = root.globalToLocal(e.localToGlobal(caret.bottomLeft));
-    // 两栏放不下时整体往左让，宁可盖住一点左侧也不出窗口。
-    final screen = MediaQuery.sizeOf(context).width;
-    final origin = root.localToGlobal(Offset.zero).dx;
-    final maxX = (screen - origin - popupWidth - 8).clamp(
-      -origin + 8,
-      double.infinity,
+    return (
+      offset: root.globalToLocal(overlay.localToGlobal(anchor)),
+      above: opensAbove,
+      height: opensAbove ? above : below,
     );
-    return Offset(local.dx.clamp(-origin + 8, maxX), local.dy + 4);
   }
 
   static String _count(int n) => n >= 1000000
@@ -221,65 +236,87 @@ class _PromptAutocompletePopupState
     );
   }
 
-  Widget _overlay(BuildContext context) {
+  Widget _overlay(BuildContext context) => Positioned.fill(
+    child: LayoutBuilder(
+      builder: (context, constraints) => Align(
+        alignment: Alignment.topLeft,
+        child: _popup(context, constraints.biggest),
+      ),
+    ),
+  );
+
+  Widget _popup(BuildContext context, Size viewport) {
     final state = widget.controller.value;
     if (!state.visible) return const SizedBox.shrink();
     final c = context.ui;
     final l = context.l10n;
     final related = state.relatedFor;
-    final rows = state.candidates.length.clamp(
-      1,
-      PromptAutocompletePopup.maxRows,
+    final overlay =
+        Overlay.of(context).context.findRenderObject()! as RenderBox;
+    // 首次宽度容下整行快捷键提示，不随候选内容或选中项改变。
+    final mainWidth = math.max(
+      PromptAutocompletePopup.width,
+      (TextPainter.computeWidth(
+                text: TextSpan(
+                  text: l.prompt_autocompleteHint,
+                  style: _Footer.textStyle,
+                ),
+                textDirection: Directionality.of(context),
+                textScaler: MediaQuery.textScalerOf(context),
+                locale: Localizations.localeOf(context),
+              ) +
+              _Footer.padding.horizontal)
+          .ceilToDouble(),
     );
-    final listHeight = rows * PromptAutocompletePopup.rowHeight;
-    final width =
-        PromptAutocompletePopup.width +
-        (related == null ? 0 : PromptAutocompletePopup.relatedWidth + 1);
+    final desiredWidth =
+        mainWidth +
+        (related == null ? 0 : PromptAutocompletePopup.relatedWidth + 1) +
+        2;
+    final width = math.min(desiredWidth, viewport.width - 16);
+    final stacked = related != null && width - 2 <= 420;
+    final placement = _placement(overlay, viewport, width);
+    _keepVisible(_scroll, _selectedRow);
+    if (related != null) _keepVisible(_relatedScroll, _selectedRelatedRow);
 
     Widget column({
       required Key key,
-      required double width,
       required String title,
       String? tail,
       required Widget body,
-    }) => SizedBox(
+    }) => Column(
       key: key,
-      width: width,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          SizedBox(
-            height: PromptAutocompletePopup.headerHeight,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 11),
-              child: Row(
-                spacing: 6,
-                children: [
-                  Text(
-                    title,
-                    style: UiText.sans(
-                      11,
-                      weight: FontWeight.w500,
-                      color: c.muted,
-                      height: 1,
-                    ),
-                  ),
-                  if (tail != null)
-                    Flexible(
-                      child: Text(
-                        tail,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: UiText.sans(11, color: c.faint, height: 1),
-                      ),
-                    ),
-                ],
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(11, 7, 11, 5),
+          child: Wrap(
+            spacing: 6,
+            runSpacing: 2,
+            children: [
+              Text(
+                title,
+                style: UiText.sans(
+                  11,
+                  weight: FontWeight.w500,
+                  color: c.muted,
+                  height: 1.3,
+                ),
               ),
-            ),
+              if (tail != null)
+                Text(tail, style: UiText.sans(11, color: c.faint, height: 1.3)),
+            ],
           ),
-          SizedBox(height: listHeight, child: body),
-        ],
-      ),
+        ),
+        Flexible(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxHeight: PromptAutocompletePopup.maxListHeight,
+            ),
+            child: body,
+          ),
+        ),
+      ],
     );
 
     final main = _List(
@@ -289,22 +326,25 @@ class _PromptAutocompletePopupState
       row: (i) {
         final cand = state.candidates[i];
         final selected = i == state.selectedIndex;
-        return _Row(
-          key: Key('prompt-autocomplete-$i'),
-          tag: TagNormalizer.toDisplay(cand.canonicalTag),
-          zh: _zh(cand),
-          count: cand.postCount > 0 ? _count(cand.postCount) : null,
-          leading: _Dot(TagCategoryVisuals.color(context, cand.category)),
-          selected: selected,
-          // 关联栏开着时主栏选中项退成描边：键盘焦点在右边。
-          dim: related != null && related.index != i,
-          source: related?.index == i,
-          // 鼠标：左键补全，右键开关联（键盘 → / ← 开关，见控制器）。
-          onTap: () {
-            widget.controller.closeRelated();
-            widget.onAccept(i);
-          },
-          onSecondaryTap: () => widget.controller.openRelated(i),
+        return KeyedSubtree(
+          key: selected ? _selectedRow : null,
+          child: _Row(
+            key: Key('prompt-autocomplete-$i'),
+            tag: TagNormalizer.toDisplay(cand.canonicalTag),
+            zh: _zh(cand),
+            count: cand.postCount > 0 ? _count(cand.postCount) : null,
+            leading: _Dot(TagCategoryVisuals.color(context, cand.category)),
+            selected: selected,
+            // 关联栏开着时主栏选中项退成描边：键盘焦点在右边。
+            dim: related != null && related.index != i,
+            source: related?.index == i,
+            // 鼠标：左键补全，右键开关联（键盘 → / ← 开关，见控制器）。
+            onTap: () {
+              widget.controller.closeRelated();
+              widget.onAccept(i);
+            },
+            onSecondaryTap: () => widget.controller.openRelated(i),
+          ),
         );
       },
     );
@@ -333,30 +373,34 @@ class _PromptAutocompletePopupState
               row: (i) {
                 final cand = state.related[i];
                 final added = state.relatedAdded.contains(cand.canonicalTag);
-                return _Row(
-                  key: Key('prompt-autocomplete-related-$i'),
-                  tag: TagNormalizer.toDisplay(cand.canonicalTag),
-                  zh: _zh(cand),
-                  count: cand.postCount > 0 ? _count(cand.postCount) : null,
-                  leading: SizedBox(
-                    width: 12,
-                    child: added
-                        ? UiGlyph(UiGlyphs.check, size: 12, color: c.ok)
-                        : null,
+                return KeyedSubtree(
+                  key: i == state.relatedSelected ? _selectedRelatedRow : null,
+                  child: _Row(
+                    key: Key('prompt-autocomplete-related-$i'),
+                    tag: TagNormalizer.toDisplay(cand.canonicalTag),
+                    zh: _zh(cand),
+                    count: cand.postCount > 0 ? _count(cand.postCount) : null,
+                    leading: SizedBox(
+                      width: 12,
+                      child: added
+                          ? UiGlyph(UiGlyphs.check, size: 12, color: c.ok)
+                          : null,
+                    ),
+                    selected: i == state.relatedSelected,
+                    muted: added,
+                    onTap: () => widget.onAccept(i),
                   ),
-                  selected: i == state.relatedSelected,
-                  muted: added,
-                  onTap: () => widget.onAccept(i),
                 );
               },
             );
       side = Container(
         decoration: BoxDecoration(
-          border: Border(left: BorderSide(color: c.border)),
+          border: stacked
+              ? Border(top: BorderSide(color: c.border))
+              : Border(left: BorderSide(color: c.border)),
         ),
         child: column(
           key: const Key('prompt-autocomplete-related'),
-          width: PromptAutocompletePopup.relatedWidth,
           title: l.tagExpansion_relatedTitle,
           tail: '· ${TagNormalizer.toDisplay(related.canonicalTag)}',
           body: body,
@@ -364,35 +408,54 @@ class _PromptAutocompletePopupState
       );
     }
 
-    return Positioned(
-      left: 0,
-      top: 0,
-      child: CompositedTransformFollower(
-        link: _link,
-        offset: _anchor(width),
-        // 点候选不让编辑框失焦（失焦会清掉候选）。
-        child: TextFieldTapRegion(
+    return CompositedTransformFollower(
+      link: _link,
+      offset: placement.offset,
+      followerAnchor: placement.above
+          ? Alignment.bottomLeft
+          : Alignment.topLeft,
+      // 点候选不让编辑框失焦（失焦会清掉候选）。
+      child: TextFieldTapRegion(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: placement.height),
           child: UiPopoverSurface(
             key: const Key('prompt-autocomplete'),
-            width: width + 2,
+            width: width,
             radius: 9,
             padding: const EdgeInsets.only(top: 2),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    column(
-                      key: const Key('prompt-autocomplete-main'),
-                      width: PromptAutocompletePopup.width,
-                      title: l.prompt_autocompleteTitle,
-                      tail: '${state.candidates.length}',
-                      body: main,
-                    ),
-                    ?side,
-                  ],
+                Flexible(
+                  child: Flex(
+                    direction: stacked ? Axis.vertical : Axis.horizontal,
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: stacked
+                        ? CrossAxisAlignment.stretch
+                        : CrossAxisAlignment.start,
+                    children: [
+                      Flexible(
+                        flex: related == null || stacked
+                            ? 1
+                            : mainWidth.round(),
+                        child: column(
+                          key: const Key('prompt-autocomplete-main'),
+                          title: l.prompt_autocompleteTitle,
+                          tail: '${state.candidates.length}',
+                          body: main,
+                        ),
+                      ),
+                      if (side != null)
+                        Flexible(
+                          flex: stacked
+                              ? 1
+                              : (PromptAutocompletePopup.relatedWidth + 1)
+                                    .round(),
+                          child: side,
+                        ),
+                    ],
+                  ),
                 ),
                 _Footer(related: related != null),
               ],
@@ -404,7 +467,7 @@ class _PromptAutocompletePopupState
   }
 }
 
-/// 候选列表：固定行高；滚轮在这里吃掉，不冒泡到外层提示词框。
+/// 候选按内容增高；数量有限，直接布局全部行以支持精确的键盘滚动。
 class _List extends StatelessWidget {
   const _List({
     super.key,
@@ -436,13 +499,13 @@ class _List extends StatelessWidget {
     },
     child: ScrollConfiguration(
       behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-      child: ListView.builder(
+      child: SingleChildScrollView(
         controller: controller,
-        padding: EdgeInsets.zero,
         physics: const ClampingScrollPhysics(),
-        itemExtent: PromptAutocompletePopup.rowHeight,
-        itemCount: count,
-        itemBuilder: (context, i) => row(i),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: List.generate(count, row),
+        ),
       ),
     ),
   );
@@ -480,8 +543,9 @@ class _Row extends StatelessWidget {
         onTap: onTap,
         onSecondaryTap: onSecondaryTap,
         child: Container(
+          constraints: const BoxConstraints(minHeight: 30),
           margin: const EdgeInsets.symmetric(horizontal: 3),
-          padding: const EdgeInsets.symmetric(horizontal: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
           decoration: BoxDecoration(
             color: source
                 ? c.accent.withValues(alpha: c.dark ? .16 : .08)
@@ -492,41 +556,38 @@ class _Row extends StatelessWidget {
           ),
           child: Row(
             spacing: 7,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              leading,
+              Padding(padding: const EdgeInsets.only(top: 5), child: leading),
               // 标签和中文名一起占满中间，热度数字始终贴右对齐。
               Expanded(
-                child: Row(
+                child: Wrap(
                   spacing: 7,
+                  runSpacing: 2,
                   children: [
-                    Flexible(
-                      flex: 3,
-                      child: Text(
-                        tag,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: UiText.sans(
-                          12.5,
-                          color: muted ? c.faint : c.ink,
-                          height: 1.2,
-                        ),
+                    Text(
+                      tag,
+                      style: UiText.sans(
+                        12.5,
+                        color: muted ? c.faint : c.ink,
+                        height: 1.4,
                       ),
                     ),
                     if (zh != null)
-                      Flexible(
-                        flex: 2,
-                        child: Text(
-                          zh!,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: UiText.sans(11.5, color: c.faint, height: 1.2),
-                        ),
+                      Text(
+                        zh!,
+                        style: UiText.sans(11.5, color: c.faint, height: 1.45),
                       ),
                   ],
                 ),
               ),
               if (count != null)
-                Text(count!, style: UiText.mono(10.5, color: c.faint)),
+                Text(
+                  count!,
+                  softWrap: false,
+                  textAlign: TextAlign.right,
+                  style: UiText.mono(11, color: c.faint, height: 1.45),
+                ),
             ],
           ),
         ),
@@ -549,6 +610,8 @@ class _Dot extends StatelessWidget {
 /// 一行浅色操作提示：主栏时提示右键关联，关联栏开着时提示追加 / 关闭。
 class _Footer extends StatelessWidget {
   const _Footer({required this.related});
+  static const padding = EdgeInsets.symmetric(horizontal: 11, vertical: 6);
+  static final textStyle = UiText.sans(11, height: 1.45);
   final bool related;
 
   @override
@@ -557,18 +620,15 @@ class _Footer extends StatelessWidget {
     final l = context.l10n;
     return Container(
       key: const Key('prompt-autocomplete-footer'),
-      height: PromptAutocompletePopup.footerHeight,
       margin: const EdgeInsets.only(top: 3),
-      padding: const EdgeInsets.symmetric(horizontal: 11),
+      padding: padding,
       decoration: BoxDecoration(
         border: Border(top: BorderSide(color: c.border)),
       ),
       alignment: Alignment.centerLeft,
       child: Text(
         related ? l.prompt_autocompleteHintRelated : l.prompt_autocompleteHint,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: UiText.sans(10.5, color: c.faint, height: 1),
+        style: textStyle.copyWith(color: c.faint),
       ),
     );
   }

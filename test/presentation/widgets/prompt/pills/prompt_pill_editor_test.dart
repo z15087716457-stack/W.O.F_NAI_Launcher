@@ -22,6 +22,7 @@ import 'package:nai_launcher/data/models/character/character_prompt.dart';
 import 'package:nai_launcher/presentation/providers/character_prompt_provider.dart';
 import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
 import 'package:nai_launcher/data/models/prompt_reading.dart';
+import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/presentation/utils/text_editing_projection.dart';
 import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
 import 'package:nai_launcher/data/models/image/image_params.dart';
@@ -48,8 +49,14 @@ class _AutocompleteSource implements CompletionSource {
 }
 
 class _MemorySettings extends LocalStorageService {
+  _MemorySettings(this.savedAutocomplete);
+  final bool? savedAutocomplete;
   @override
-  T? getSetting<T>(String key, {T? defaultValue}) => defaultValue;
+  T? getSetting<T>(String key, {T? defaultValue}) =>
+      (key == StorageKeys.promptAutocompleteEnabled
+              ? savedAutocomplete
+              : defaultValue)
+          as T?;
   @override
   Future<void> setSetting<T>(String key, T value) async {}
 }
@@ -57,6 +64,26 @@ class _MemorySettings extends LocalStorageService {
 class _MemoryCharacters extends CharacterPromptNotifier {
   @override
   CharacterPromptConfig build() => const CharacterPromptConfig();
+}
+
+Future<void> _replaceTyping(
+  WidgetTester tester,
+  Finder field,
+  String text, {
+  int? caret,
+}) async {
+  final controller = tester.widget<TextField>(field).controller!;
+  controller.selection = TextSelection(
+    baseOffset: 0,
+    extentOffset: controller.text.length,
+  );
+  tester.testTextInput.updateEditingValue(
+    TextEditingValue(
+      text: text,
+      selection: TextSelection.collapsed(offset: caret ?? text.length),
+    ),
+  );
+  await tester.pump();
 }
 
 class _TestBlocksPlatform extends BlocksPlatform {
@@ -275,7 +302,7 @@ void main() {
     PillScopes.charNeg('autocomplete-character'),
   ]) {
     testWidgets(
-      'typed completion is opt-in and replaces current token in $scope',
+      'typed completion defaults on, replaces the current token and can be disabled in $scope',
       (tester) async {
         var services = 0;
         final source = _AutocompleteSource();
@@ -283,6 +310,7 @@ void main() {
         ValueChanged<int>? accept;
         final container = await _pump(
           tester,
+          savedAutocomplete: null,
           libraryState: PromptBlockLibraryState(
             blocks: const [],
             folders: const [],
@@ -321,15 +349,10 @@ void main() {
         await tester.tap(field);
         await tester.enterText(field, 'bl');
         await tester.pump(const Duration(milliseconds: 200));
-        expect(services, 0);
-        expect(source.queries, isEmpty);
-        await container
-            .read(promptAutocompleteEnabledProvider.notifier)
-            .setEnabled(true);
-        await tester.pump();
-        await tester.enterText(field, '2.5::bl::');
-        tester.widget<TextField>(field).controller!.selection =
-            const TextSelection.collapsed(offset: 7);
+        expect(container.read(promptAutocompleteEnabledProvider), true);
+        expect(services, 1);
+        expect(source.queries.last.token, 'bl');
+        await _replaceTyping(tester, field, '2.5::bl::', caret: 7);
         await tester.pump(const Duration(milliseconds: 120));
         expect(services, 1);
         expect(completion!.value.visible, true);
@@ -344,7 +367,7 @@ void main() {
           tester.widget<TextField>(field).focusNode!.hasPrimaryFocus,
           true,
         );
-        await tester.enterText(field, 'bl');
+        await _replaceTyping(tester, field, 'bl');
         await tester.pump(const Duration(milliseconds: 120));
         accept!(1);
         await tester.pump();
@@ -381,7 +404,7 @@ void main() {
           tester.widget<TextField>(field).focusNode!.hasPrimaryFocus,
           true,
         );
-        await tester.enterText(field, 'bl');
+        await _replaceTyping(tester, field, 'bl');
         await tester.pump(const Duration(milliseconds: 150));
         await completion!.openRelated(0);
         accept!(1);
@@ -403,6 +426,33 @@ void main() {
         expect(completion!.value.relatedFor, isNull);
         await tester.sendKeyEvent(LogicalKeyboardKey.escape);
         expect(completion!.value.visible, false);
+        const imported = 'masterpiece, very aesthetic ';
+        final beforeImport = source.queries.length;
+        container.read(pillWorkspaceProvider(scope).notifier).setText(imported);
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 150));
+        expect(source.queries.length, beforeImport);
+        expect(completion!.value.visible, false);
+        tester.widget<TextField>(field).controller!.selection =
+            const TextSelection.collapsed(offset: imported.length);
+        tester.testTextInput.updateEditingValue(
+          const TextEditingValue(
+            text: '${imported}bl',
+            selection: TextSelection.collapsed(offset: imported.length + 2),
+          ),
+        );
+        await tester.pump(const Duration(milliseconds: 150));
+        expect(source.queries.last.token, 'bl');
+        expect(
+          completion!.value.query!.replacementRange.start,
+          imported.length,
+        );
+        await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+        await tester.pump();
+        expect(
+          container.read(pillWorkspaceProvider(scope)).document.text,
+          '${imported}blue eyes, ',
+        );
         await container
             .read(promptAutocompleteEnabledProvider.notifier)
             .setEnabled(false);
@@ -2288,6 +2338,7 @@ Future<ProviderContainer> _pump(
   String pillScope = PillScopes.main,
   Offset appOffset = Offset.zero,
   double editorWidth = 960,
+  bool? savedAutocomplete = false,
   List<Override> overrides = const [],
 }) async {
   final originalSize = tester.view.physicalSize;
@@ -2304,7 +2355,10 @@ Future<ProviderContainer> _pump(
   final app = ProviderScope(
     overrides: [
       blocksPlatformProvider.overrideWithValue(_TestBlocksPlatform()),
-      localStorageServiceProvider.overrideWithValue(_MemorySettings()),
+      // Unrelated block fixtures have autocomplete explicitly disabled.
+      localStorageServiceProvider.overrideWithValue(
+        _MemorySettings(savedAutocomplete),
+      ),
       characterPromptNotifierProvider.overrideWith(_MemoryCharacters.new),
       promptBlockLibraryNotifierProvider.overrideWith(() => notifier),
       ...overrides,

@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/data/models/character/character_prompt.dart';
 import 'package:nai_launcher/data/models/image/image_params.dart';
@@ -25,7 +26,9 @@ import 'package:nai_launcher/presentation/utils/prompt_block_instance_bundle.dar
 
 class _MemorySettings extends LocalStorageService {
   @override
-  T? getSetting<T>(String key, {T? defaultValue}) => defaultValue;
+  // Undo fixtures exercise editing only; completion has dedicated local fakes.
+  T? getSetting<T>(String key, {T? defaultValue}) =>
+      key == StorageKeys.promptAutocompleteEnabled ? false as T : defaultValue;
   @override
   Future<void> setSetting<T>(String key, T value) async {}
 }

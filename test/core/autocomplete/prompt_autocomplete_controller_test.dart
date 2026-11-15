@@ -240,6 +240,7 @@ void main() {
       requests.last.complete(candidates);
       await pending;
       expect(controller.value.visible, false);
+      controller.synchronize(editing(''));
       controller.update(editing('bl'), locale: 'en');
       await tester.pump(const Duration(milliseconds: 120));
       pending = controller.openRelated(0);
@@ -410,6 +411,7 @@ void main() {
     expect(key(LogicalKeyboardKey.tab, PhysicalKeyboardKey.tab), true);
     expect(accepted!.text, 'blue eyes');
     expect(key(LogicalKeyboardKey.escape, PhysicalKeyboardKey.escape), false);
+    controller.synchronize(editing(''));
     controller.update(editing('bl'), locale: 'en');
     await tester.pump(const Duration(milliseconds: 120));
     expect(key(LogicalKeyboardKey.escape, PhysicalKeyboardKey.escape), true);

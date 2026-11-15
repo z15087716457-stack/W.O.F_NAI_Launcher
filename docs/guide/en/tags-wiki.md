@@ -14,7 +14,7 @@ In a prompt field:
 - **Ctrl+drag-select** a passage to see “Related tags”—tags that often appear with it.
 - The popover also has a “Tag wiki” view to explain the tag right there.
 
-Normal typing does not trigger autocomplete, so it stays out of your way. The same tag search is also available in Local Gallery search, Online Gallery search, the blacklist and the block library.
+Autocomplete is enabled by default in prompt and character fields. It suggests local tags only while typing and searches from the first character of the current input. Imports, pastes and cursor movement do not open it; IME composition is queried after confirmation. Long tags and translations wrap, and the candidate list scrolls internally. Ctrl tag expansion is also enabled by default; use ⌘ on Mac. You can turn either feature off independently in Settings, and saved choices are preserved. Local Gallery search, Online Gallery search, the blacklist and the block library use the Ctrl tag search described above.
 
 **Data sources**:
 

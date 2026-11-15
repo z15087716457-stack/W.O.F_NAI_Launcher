@@ -17,6 +17,7 @@ class PromptTokenParser {
     required int limit,
     required String locale,
     bool splitOnSpaces = false,
+    TextReplacementRange? inputRange,
   }) {
     final cursor = cursorPosition.clamp(0, text.length);
     final (isTypingAlias, partialAlias, aliasStart) =
@@ -48,7 +49,21 @@ class PromptTokenParser {
     final segment = segments.firstWhere(
       (range) => range.start <= cursor && cursor <= range.end,
     );
-    final range = _contentRange(text, segment, splitOnSpaces);
+    var range = _contentRange(text, segment, splitOnSpaces);
+    if (inputRange != null &&
+        inputRange.end >= range.start &&
+        inputRange.start <= range.end) {
+      range = _contentRange(
+        text,
+        TextReplacementRange(
+          start: range.start > inputRange.start
+              ? range.start
+              : inputRange.start,
+          end: range.end < inputRange.end ? range.end : inputRange.end,
+        ),
+        splitOnSpaces,
+      );
+    }
     final token = TagNormalizer.normalize(
       text.substring(range.start, range.end),
     );

@@ -21621,7 +21621,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get prompt_autocompleteHintRelated =>
-      '↑↓ 选择 · ← 返回 · 回车 / 点击 追加 · Esc 关闭关联';
+      '↑↓ 选择 · ← 返回 · Tab / 回车 追加 · Esc 关闭关联';
 
   @override
   String get resourceWindow_pin => '窗口置顶';
@@ -43540,7 +43540,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get prompt_autocompleteHintRelated =>
-      '↑↓ 選擇 · ← 返回 · 回車 / 點選 追加 · Esc 關閉關聯';
+      '↑↓ 選擇 · ← 返回 · Tab / 回車 追加 · Esc 關閉關聯';
 
   @override
   String get resourceWindow_pin => '視窗置頂';

@@ -11,14 +11,20 @@ import '../../core/settings/settings_preferences_service_test.dart'
 
 void main() {
   test(
-    'typed autocomplete defaults off and never rewrites explicit picker settings',
+    'both input helpers default on and retain independent saved choices',
     () async {
       final storage = MemoryStorage();
       ProviderContainer create() => ProviderContainer(
         overrides: [localStorageServiceProvider.overrideWithValue(storage)],
       );
       final container = create();
-      expect(container.read(promptAutocompleteEnabledProvider), false);
+      expect(container.read(promptAutocompleteEnabledProvider), true);
+      expect(
+        container.read(autocompleteSettingsProvider).relatedTagsEnabled,
+        true,
+      );
+      expect(SettingSpec.of(SettingKey.promptAutocomplete).defaultValue, true);
+      expect(SettingSpec.of(SettingKey.relatedTags).defaultValue, true);
       expect(container.read(autocompleteSettingsProvider).enabled, true);
       await container
           .read(settingsValueStoreProvider)
@@ -34,7 +40,24 @@ void main() {
           .read(settingsValueStoreProvider)
           .write(SettingKey.promptAutocomplete, false);
       expect(reloaded.read(promptAutocompleteEnabledProvider), false);
-      expect(SettingSpec.of(SettingKey.promptAutocomplete).defaultValue, false);
+      await reloaded
+          .read(settingsValueStoreProvider)
+          .write(SettingKey.relatedTags, false);
+      final restored = create();
+      addTearDown(restored.dispose);
+      expect(restored.read(promptAutocompleteEnabledProvider), false);
+      expect(
+        restored.read(autocompleteSettingsProvider).relatedTagsEnabled,
+        false,
+      );
+      await restored
+          .read(settingsValueStoreProvider)
+          .write(SettingKey.promptAutocomplete, true);
+      expect(restored.read(promptAutocompleteEnabledProvider), true);
+      expect(
+        restored.read(autocompleteSettingsProvider).relatedTagsEnabled,
+        false,
+      );
     },
   );
 }

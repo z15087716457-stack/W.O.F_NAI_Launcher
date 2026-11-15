@@ -16,6 +16,7 @@ import '../../common/weight_adjust_toolbar.dart';
 import '../../tag_expansion/tag_expansion_wrapper.dart';
 import '../comfyui_import_wrapper.dart';
 import '../nai_syntax_controller.dart';
+import '../prompt_autocomplete_binding.dart';
 import '../pills/translation_pill_view.dart';
 import 'unified_prompt_config.dart';
 import 'inline_prompt_readings.dart';
@@ -815,6 +816,15 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
                 }
                 editableTextState.hideToolbar();
               },
+            )
+          else if (item.type == ContextMenuButtonType.paste)
+            ContextMenuButtonItem(
+              type: item.type,
+              label: item.label,
+              onPressed: () => PromptAutocompleteBinding.paste(
+                editableTextState,
+                SelectionChangedCause.toolbar,
+              ),
             )
           else
             item,

@@ -21951,7 +21951,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get prompt_autocompleteHintRelated =>
-      '↑↓ 선택 · ← 돌아가기 · Enter / 클릭 추가 · Esc 연관 닫기';
+      '↑↓ 선택 · ← 돌아가기 · Tab / Enter 추가 · Esc 연관 닫기';
 
   @override
   String get resourceWindow_pin => '항상 위에';

@@ -33,6 +33,12 @@ void main() {
               autoInsertComma: true,
               onAccept: (value) => text.value = value,
               child: TextField(
+                inputFormatters: [
+                  TextInputFormatter.withFunction((oldValue, newValue) {
+                    completion.update(newValue, locale: 'en');
+                    return newValue;
+                  }),
+                ],
                 controller: text,
                 focusNode: focus,
                 maxLines: null,
@@ -106,6 +112,12 @@ void main() {
                     autoInsertComma: true,
                     onAccept: (value) => text.value = value,
                     child: TextField(
+                      inputFormatters: [
+                        TextInputFormatter.withFunction((oldValue, newValue) {
+                          completion.update(newValue, locale: 'en');
+                          return newValue;
+                        }),
+                      ],
                       controller: text,
                       focusNode: focus,
                       maxLines: null,

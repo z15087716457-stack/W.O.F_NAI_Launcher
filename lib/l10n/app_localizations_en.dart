@@ -22651,7 +22651,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get prompt_autocompleteHintRelated =>
-      '↑↓ move · ← back · Enter / click to add · Esc close related';
+      '↑↓ move · ← back · Tab / Enter to add · Esc close related';
 
   @override
   String get resourceWindow_pin => 'Keep on top';

@@ -39313,7 +39313,7 @@ abstract class AppLocalizations {
   /// No description provided for @prompt_autocompleteHintRelated.
   ///
   /// In en, this message translates to:
-  /// **'↑↓ move · ← back · Enter / click to add · Esc close related'**
+  /// **'↑↓ move · ← back · Tab / Enter to add · Esc close related'**
   String get prompt_autocompleteHintRelated;
 
   /// No description provided for @resourceWindow_pin.

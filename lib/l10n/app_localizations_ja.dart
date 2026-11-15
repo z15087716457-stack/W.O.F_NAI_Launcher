@@ -21874,7 +21874,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get prompt_autocompleteHintRelated =>
-      '↑↓ 選択 · ← 戻る · Enter / クリックで追加 · Esc で関連を閉じる';
+      '↑↓ 選択 · ← 戻る · Tab / Enter で追加 · Esc で関連を閉じる';
 
   @override
   String get resourceWindow_pin => '最前面に表示';
