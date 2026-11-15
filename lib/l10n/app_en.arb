@@ -4729,7 +4729,7 @@
   "promptReading_clear": "Clear translations",
   "promptReading_cleared": "Translations cleared",
   "promptReading_pending": "Needs update",
-  "promptReading_guide": "Read-only translations align with comma-delimited segments and omit weight syntax. Click the source to edit; readings return when editing ends. Deleting a source segment removes its reading. Use the menu to update, hide or clear readings. Copy and generation use the source.",
+  "promptReading_guide": "Read-only translations align with comma-delimited source segments and omit weight syntax. Edit the source directly while readings stay visible. Changed segments are marked pending; deleting a segment removes its reading. Use the menu to update, hide or clear readings. Copy and generation use the source.",
   "promptTranslation_guideBack": "Back to actions",
   "promptTranslation_guideMiddleTitle": "Middle-click a block",
   "promptTranslation_guideMiddleText": "Switch original and translation",

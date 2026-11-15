@@ -1,4 +1,7 @@
 import 'dart:ui' as ui;
+import 'dart:io';
+import 'package:flutter/rendering.dart';
+import 'package:nai_launcher/presentation/ui/kit/ui_glyph.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -44,13 +47,20 @@ PillDocument readingDocument([String source = readingSource]) {
 
 Finder readingLabels() => find.byWidgetPredicate(
   (widget) =>
-      widget is Text &&
+      widget is Row &&
       widget.key is ValueKey<String> &&
       (widget.key! as ValueKey<String>).value.startsWith('prompt-reading-'),
 );
-Finder readingOriginal(String value) => find.byWidgetPredicate(
-  (widget) => widget is Text && widget.textSpan?.toPlainText() == value,
-);
+Rect sourceRect(WidgetTester t, int start, int end) {
+  final editable = t
+      .state<EditableTextState>(find.byType(EditableText))
+      .renderEditable;
+  final box = editable
+      .getBoxesForSelection(TextSelection(baseOffset: start, extentOffset: end))
+      .first;
+  return MatrixUtils.transformRect(editable.getTransformTo(null), box.toRect());
+}
+
 Future<void> pumpReadingEditor(
   WidgetTester t,
   TextEditingController controller,
@@ -124,24 +134,22 @@ void main() {
             );
             expect(readingLabels(), findsNWidgets(5));
             final originals = [
-              readingOriginal('1girl,'),
-              readingOriginal('1boy::,'),
-              readingOriginal('silver hair,'),
-              readingOriginal('soft lighting::,'),
-              readingOriginal('blue eyes'),
+              '1girl',
+              '1boy',
+              'silver hair',
+              'soft lighting',
+              'blue eyes',
             ];
             for (final (i, label) in readingLabels().evaluate().indexed) {
               final rect = t.getRect(find.byWidget(label.widget));
-              final sourceRect = t.getRect(originals[i]);
-              expect(rect.left, closeTo(sourceRect.left, .01));
-              expect(rect.top - sourceRect.bottom, closeTo(1, .01));
+              final start = readingSource.indexOf(originals[i]);
+              final source = sourceRect(t, start, start + originals[i].length);
+              expect(rect.left, closeTo(source.left, .01));
+              expect(rect.top - source.bottom, closeTo(1, .01));
               expect(rect.right, lessThanOrEqualTo(width + .01));
+              expect(source.height, lessThan(24));
             }
-            expect(
-              t.getTopLeft(originals[0]).dy,
-              t.getTopLeft(originals[1]).dy,
-            );
-            expect(t.getTopLeft(originals[0]).dy, closeTo(0, .01));
+            expect(sourceRect(t, 0, 1).top, lessThan(4));
             expect(controller.text, readingSource);
             expect(t.takeException(), isNull);
             await t.pumpWidget(const SizedBox());
@@ -152,53 +160,47 @@ void main() {
       }
     }
   }
-  testWidgets(
-    'source click enters the same native editor; captions do not edit',
-    (t) async {
-      final controller = TextEditingController(text: readingSource),
-          focus = FocusNode();
-      await pumpReadingEditor(
-        t,
-        controller,
-        readingDocument().readings,
-        focusNode: focus,
-      );
-      final state = t.state<EditableTextState>(
+  testWidgets('source edits in place while read-only captions remain visible', (
+    t,
+  ) async {
+    final controller = TextEditingController(text: readingSource),
+        focus = FocusNode();
+    await pumpReadingEditor(
+      t,
+      controller,
+      readingDocument().readings,
+      focusNode: focus,
+    );
+    final state = t.state<EditableTextState>(
+      find.byType(EditableText, skipOffstage: false),
+    );
+    final start = readingSource.indexOf('soft lighting');
+    await t.tapAt(sourceRect(t, start, start + 4).center);
+    await t.pump();
+    expect(focus.hasFocus, isTrue);
+    expect(readingLabels(), findsNWidgets(5));
+    expect(t.state<EditableTextState>(find.byType(EditableText)), same(state));
+    expect(
+      controller.selection.extentOffset,
+      inInclusiveRange(
+        readingSource.indexOf('soft lighting'),
+        readingSource.indexOf('soft lighting') + 17,
+      ),
+    );
+    focus.unfocus();
+    await t.pump();
+    expect(readingLabels(), findsNWidgets(5));
+    expect(
+      t.state<EditableTextState>(
         find.byType(EditableText, skipOffstage: false),
-      );
-      await t.tapAt(t.getCenter(find.text('1个女孩')));
-      await t.pump();
-      expect(focus.hasFocus, isFalse);
-      await t.tap(readingOriginal('soft lighting::,'));
-      await t.pump();
-      expect(focus.hasFocus, isTrue);
-      expect(readingLabels(), findsNothing);
-      expect(
-        t.state<EditableTextState>(find.byType(EditableText)),
-        same(state),
-      );
-      expect(
-        controller.selection.extentOffset,
-        inInclusiveRange(
-          readingSource.indexOf('soft lighting'),
-          readingSource.indexOf('soft lighting') + 17,
-        ),
-      );
-      focus.unfocus();
-      await t.pump();
-      expect(readingLabels(), findsNWidgets(5));
-      expect(
-        t.state<EditableTextState>(
-          find.byType(EditableText, skipOffstage: false),
-        ),
-        same(state),
-      );
-      await t.pumpWidget(const SizedBox());
-      controller.dispose();
-      focus.dispose();
-      await t.binding.setSurfaceSize(null);
-    },
-  );
+      ),
+      same(state),
+    );
+    await t.pumpWidget(const SizedBox());
+    controller.dispose();
+    focus.dispose();
+    await t.binding.setSurfaceSize(null);
+  });
   testWidgets(
     'native caret, empty lines, copy and IME use only unchanged original text',
     (t) async {
@@ -218,12 +220,13 @@ void main() {
           null,
         ),
       );
-      final controller = TextEditingController(text: readingSource),
+      final source = readingSource.replaceFirst('\n\n', '\n\n\n');
+      final controller = TextEditingController(text: source),
           focus = FocusNode();
       await pumpReadingEditor(
         t,
         controller,
-        readingDocument().readings,
+        readingDocument(source).readings,
         focusNode: focus,
         scale: 1.5,
         width: 320,
@@ -236,18 +239,18 @@ void main() {
       final state = t.state<EditableTextState>(find.byType(EditableText)),
           e = state.renderEditable;
       final old = e.selectionHeightStyle;
-      e.selectionHeightStyle = ui.BoxHeightStyle.tight;
+      e.selectionHeightStyle = ui.BoxHeightStyle.strut;
       for (final position in [
         0,
-        readingSource.indexOf('silver hair'),
-        readingSource.length - 1,
-        readingSource.length,
+        source.indexOf('silver hair'),
+        source.length - 1,
+        source.length,
       ]) {
         final glyph = e
             .getBoxesForSelection(
               TextSelection(
-                baseOffset: position.clamp(0, readingSource.length - 1),
-                extentOffset: (position + 1).clamp(0, readingSource.length),
+                baseOffset: position.clamp(0, source.length - 1),
+                extentOffset: (position + 1).clamp(0, source.length),
               ),
             )
             .first;
@@ -259,20 +262,20 @@ void main() {
         expect(caret.height, lessThan(23));
       }
       e.selectionHeightStyle = old;
-      final blank = readingSource.indexOf('\n') + 1;
+      final blank = source.indexOf('\n') + 1;
       expect(
         e.getLocalRectForCaret(TextPosition(offset: blank + 1)).top -
             e.getLocalRectForCaret(TextPosition(offset: blank)).top,
         inInclusiveRange(17.0, 23.0),
       );
-      controller.selection = const TextSelection(
+      controller.selection = TextSelection(
         baseOffset: 0,
-        extentOffset: readingSource.length,
+        extentOffset: source.length,
       );
       await t.pump();
       state.copySelection(SelectionChangedCause.keyboard);
       await t.pump();
-      expect(copied, readingSource);
+      expect(copied, source);
       t.testTextInput.updateEditingValue(
         const TextEditingValue(
           text: 'silver hai',
@@ -370,10 +373,6 @@ void main() {
         maxLines: 2,
       );
       expect(readingLabels(), findsNWidgets(2));
-      expect(
-        t.getTopLeft(find.text(second)).dy,
-        greaterThan(t.getBottomLeft(find.text(first)).dy),
-      );
       final scroll = t.state<ScrollableState>(find.byType(Scrollable).first);
       scroll.position.jumpTo(scroll.position.maxScrollExtent);
       await t.pump();
@@ -381,6 +380,115 @@ void main() {
       expect(controller.text, prose);
       await t.pumpWidget(const SizedBox());
       controller.dispose();
+      await t.binding.setSurfaceSize(null);
+    },
+  );
+  testWidgets(
+    'partial edits show a small wrench status and Unicode remains intact',
+    (t) async {
+      const source = '1girl, smile 🐺';
+      final controller = TextEditingController(text: source);
+      final original = [
+        const PromptReading(
+          start: 0,
+          end: 6,
+          source: '1girl,',
+          translation: '1个女孩',
+          perSegment: true,
+        ),
+        const PromptReading(
+          start: 7,
+          end: 15,
+          source: 'smile 🐺',
+          translation: '微笑的狼',
+          perSegment: true,
+        ),
+      ];
+      final next = source.replaceFirst('1girl', '2girls');
+      controller.text = next;
+      await pumpReadingEditor(
+        t,
+        controller,
+        PromptReading.rebase(original, source, next),
+      );
+      expect(find.text('待更新'), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is UiGlyph && w.path == UiGlyphs.wrench && w.size == 12,
+        ),
+        findsOneWidget,
+      );
+      final e = t
+          .state<EditableTextState>(find.byType(EditableText))
+          .renderEditable;
+      expect(e.text!.toPlainText(), next);
+      expect(find.text('微笑的狼'), findsOneWidget);
+      final status = t.renderObject<RenderParagraph>(find.text('待更新'));
+      expect(status.didExceedMaxLines, isFalse);
+      expect(t.takeException(), isNull);
+      final capture = Platform.environment['INLINE_EDIT_CAPTURE'];
+      if (capture != null) {
+        await t.runAsync(() async {
+          final boundary = t.renderObject<RenderRepaintBoundary>(
+            find.byType(RepaintBoundary).first,
+          );
+          final image = await boundary.toImage();
+          final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+          await File(capture).writeAsBytes(bytes!.buffer.asUint8List());
+          image.dispose();
+        });
+      }
+      await t.pumpWidget(const SizedBox());
+      controller.dispose();
+      await t.binding.setSurfaceSize(null);
+    },
+  );
+  testWidgets(
+    'weighted source selection stays one source line high while captions remain',
+    (t) async {
+      final controller = TextEditingController(text: readingSource),
+          focus = FocusNode();
+      await pumpReadingEditor(
+        t,
+        controller,
+        readingDocument().readings,
+        focusNode: focus,
+        width: 320,
+      );
+      focus.requestFocus();
+      await t.pump();
+      await t.pump();
+      controller.selection = TextSelection(
+        baseOffset: readingSource.indexOf('soft lighting'),
+        extentOffset: readingSource.indexOf('blue eyes') + 4,
+      );
+      await t.pump();
+      final e = t
+          .state<EditableTextState>(find.byType(EditableText))
+          .renderEditable;
+      for (final box in e.getBoxesForSelection(controller.selection)) {
+        expect(box.bottom - box.top, lessThan(24));
+      }
+      expect(readingLabels(), findsNWidgets(5));
+      expect(e.text!.toPlainText(), readingSource);
+      final capture = Platform.environment['INLINE_EDIT_CAPTURE'];
+      if (capture != null) {
+        await t.runAsync(() async {
+          final boundary = t.renderObject<RenderRepaintBoundary>(
+            find.byType(RepaintBoundary).first,
+          );
+          final image = await boundary.toImage();
+          final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+          await File(
+            '$capture.weighted.png',
+          ).writeAsBytes(bytes!.buffer.asUint8List());
+          image.dispose();
+        });
+      }
+      expect(t.takeException(), isNull);
+      await t.pumpWidget(const SizedBox());
+      controller.dispose();
+      focus.dispose();
       await t.binding.setSurfaceSize(null);
     },
   );

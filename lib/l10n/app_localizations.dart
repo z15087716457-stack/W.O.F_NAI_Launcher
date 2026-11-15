@@ -15485,7 +15485,7 @@ abstract class AppLocalizations {
   /// No description provided for @promptReading_guide.
   ///
   /// In en, this message translates to:
-  /// **'Read-only translations align with comma-delimited segments and omit weight syntax. Click the source to edit; readings return when editing ends. Deleting a source segment removes its reading. Use the menu to update, hide or clear readings. Copy and generation use the source.'**
+  /// **'Read-only translations align with comma-delimited source segments and omit weight syntax. Edit the source directly while readings stay visible. Changed segments are marked pending; deleting a segment removes its reading. Use the menu to update, hide or clear readings. Copy and generation use the source.'**
   String get promptReading_guide;
 
   /// No description provided for @promptTranslation_guideBack.

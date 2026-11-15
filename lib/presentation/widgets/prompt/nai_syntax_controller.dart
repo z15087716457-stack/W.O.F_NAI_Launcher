@@ -32,6 +32,9 @@ class NaiSyntaxController extends TextEditingController {
   /// 纯字段不自动刷新：调用方改完后应调 [refreshPillSpans]。
   PillSpanBuilder? pillBuilder;
 
+  /// Adds reading metrics without changing the source or its UTF-16 offsets.
+  TextSpan Function(TextSpan span)? readingDecorator;
+
   /// 药丸视觉数据（实例/块库）变化后强制重建 span 缓存。
   void refreshPillSpans() {
     clearCache();
@@ -114,16 +117,12 @@ class NaiSyntaxController extends TextEditingController {
     required BuildContext context,
     TextStyle? style,
     required bool withComposing,
-  }) => _buildSpan(context: context, style: style, applySelection: true);
-
-  TextSpan buildReadingSpan(BuildContext context, TextStyle style) =>
-      _buildSpan(context: context, style: style, applySelection: false);
-
-  TextSpan _buildSpan({
-    required BuildContext context,
-    TextStyle? style,
-    required bool applySelection,
   }) {
+    final span = _buildSpan(context: context, style: style);
+    return readingDecorator?.call(span) ?? span;
+  }
+
+  TextSpan _buildSpan({required BuildContext context, TextStyle? style}) {
     final baseStyle = style ?? const TextStyle();
 
     // Material TextField paints the Windows caret below text, so opaque syntax
@@ -167,8 +166,7 @@ class NaiSyntaxController extends TextEditingController {
     final finalSpans = _cachedFinalSpans!;
     final selected = selection;
     final editor = context.widget;
-    if (!applySelection ||
-        !selected.isValid ||
+    if (!selected.isValid ||
         selected.isCollapsed ||
         editor is EditableText && editor.selectionColor == null) {
       return TextSpan(style: baseStyle, children: finalSpans);

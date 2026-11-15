@@ -28,7 +28,6 @@ import '../blocks/prompt_block_colors.dart';
 import '../blocks/prompt_block_drag_data.dart';
 import '../unified/unified_prompt_config.dart';
 import '../unified/unified_prompt_input.dart';
-import '../unified/inline_prompt_readings.dart';
 import '../../../ui/kit/ui_block_pill.dart';
 import '../../../ui/kit/ui_popover.dart';
 import '../../../wiring/blocks_instance_wiring.dart';
@@ -887,11 +886,6 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
   /// 滚动补偿），别再预先换算，否则双重减偏移、落点系统性偏上。
   /// 文本下方空白区落点 clamp 归末尾（可接受语义）。
   int _offsetForGlobalPosition(Offset global) {
-    final reading = InlinePromptReadings.offsetForPoint(
-      _fieldAreaKey.currentContext,
-      global,
-    );
-    if (reading != null) return reading.clamp(0, _controller.text.length);
     final editable = _findRenderEditable();
     if (editable == null) return _controller.text.length;
     final position = editable.getPositionForPoint(global);

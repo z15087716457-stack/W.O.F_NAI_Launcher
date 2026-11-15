@@ -8456,7 +8456,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get promptReading_guide =>
-      '按逗号逐项显示只读译文，不显示权重语法。点击原文进入编辑，离开后恢复译文；原文段删除后，对应译文消失。菜单可更新、隐藏或清除译文。复制与生成使用原文。';
+      '按逗号逐项显示只读译文，译文不含权重语法。原文可直接编辑，译文保持显示；修改项标记待更新，整段删除后对应译文消失。菜单可更新、隐藏或清除译文。复制与生成使用原文。';
 
   @override
   String get promptTranslation_guideBack => '返回操作';
@@ -30375,7 +30375,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get promptReading_guide =>
-      '按逗號逐項顯示只讀譯文，不顯示權重語法。點選原文進入編輯，離開後恢復譯文；原文段刪除後，對應譯文消失。選單可更新、隱藏或清除譯文。複製與生成使用原文。';
+      '按逗號逐項顯示只讀譯文，譯文不含權重語法。原文可直接編輯，譯文保持顯示；修改項標記待更新，整段刪除後對應譯文消失。選單可更新、隱藏或清除譯文。複製與生成使用原文。';
 
   @override
   String get promptTranslation_guideBack => '返回操作';

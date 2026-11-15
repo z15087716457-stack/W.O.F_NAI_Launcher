@@ -827,16 +827,9 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
   Widget build(BuildContext context) {
     return InlinePromptReadings(
       controller: _syntaxController!,
-      focusNode: _effectiveFocusNode,
       readings: widget.readings,
       enabled: !_searchVisible,
       style: _sourceStyle,
-      padding:
-          widget.decoration?.contentPadding ??
-          const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      minLines: widget.minLines ?? 1,
-      maxLines: widget.maxLines,
-      expands: widget.expands || !widget.fitContent,
       builder: _buildContent,
     );
   }
@@ -1133,7 +1126,9 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
       style: _sourceStyle,
       // A translated pill may span several lines. The default forced strut
       // only reserves a text line and lets the pill paint over its neighbors.
-      strutStyle: widget.config.pillBuilder == null
+      strutStyle: widget.readings.isNotEmpty && !_searchVisible
+          ? StrutStyle.fromTextStyle(_sourceStyle)
+          : widget.config.pillBuilder == null
           ? null
           : StrutStyle.disabled,
       controller: _effectiveController,

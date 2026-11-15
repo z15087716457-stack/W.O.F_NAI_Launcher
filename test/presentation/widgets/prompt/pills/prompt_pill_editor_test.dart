@@ -1,7 +1,6 @@
 import 'package:nai_launcher/presentation/widgets/common/translation_icon.dart';
 import 'package:nai_launcher/presentation/utils/prompt_block_bundle_insertion.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -110,15 +109,20 @@ void main() {
     );
     await tester.pump();
     await tester.pump();
-    final visible = find.byWidgetPredicate(
-      (widget) =>
-          widget is Text && widget.textSpan?.toPlainText() == 'blue eyes',
-    );
-    final point = tester.getCenter(visible);
-    final paragraph = tester.renderObject<RenderParagraph>(visible);
-    final expected =
-        source.indexOf('blue eyes') +
-        paragraph.getPositionForOffset(paragraph.globalToLocal(point)).offset;
+    final editable = tester
+        .state<EditableTextState>(find.byType(EditableText).first)
+        .renderEditable;
+    final bounds = editable
+        .getBoxesForSelection(
+          TextSelection(
+            baseOffset: source.indexOf('blue eyes'),
+            extentOffset: source.length,
+          ),
+        )
+        .first
+        .toRect();
+    final point = editable.localToGlobal(bounds.center);
+    final expected = editable.getPositionForPoint(point).offset;
     _acceptDrop(
       tester,
       const PromptBlockDragData(blockId: 'style'),
@@ -131,7 +135,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
   testWidgets(
-    'read-only readings coexist with existing blocks and return to native editing',
+    'read-only readings coexist with blocks and remain during native editing',
     (tester) async {
       final container = await _pump(
         tester,
@@ -174,14 +178,22 @@ void main() {
       expect(tester.takeException(), isNull);
       await tester.sendKeyEvent(LogicalKeyboardKey.escape);
       await tester.pumpAndSettle();
-      final sourceText = find.byWidgetPredicate(
-        (widget) =>
-            widget is Text && widget.textSpan?.toPlainText() == 'blue eyes',
-      );
-      await tester.tap(sourceText);
+      final editable = tester
+          .state<EditableTextState>(find.byType(EditableText).first)
+          .renderEditable;
+      final bounds = editable
+          .getBoxesForSelection(
+            TextSelection(
+              baseOffset: source.indexOf('blue eyes'),
+              extentOffset: source.length,
+            ),
+          )
+          .first
+          .toRect();
+      await tester.tapAt(editable.localToGlobal(bounds.center));
       await tester.pump();
       await tester.pump();
-      expect(find.text('银发'), findsNothing);
+      expect(find.text('银发'), findsOneWidget);
       expect(
         container.read(pillWorkspaceNotifierProvider).document.text,
         source,

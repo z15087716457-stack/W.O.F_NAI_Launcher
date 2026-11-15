@@ -4781,7 +4781,7 @@
   "promptReading_clear": "清除译文",
   "promptReading_cleared": "已清除译文",
   "promptReading_pending": "待更新",
-  "promptReading_guide": "按逗号逐项显示只读译文，不显示权重语法。点击原文进入编辑，离开后恢复译文；原文段删除后，对应译文消失。菜单可更新、隐藏或清除译文。复制与生成使用原文。",
+  "promptReading_guide": "按逗号逐项显示只读译文，译文不含权重语法。原文可直接编辑，译文保持显示；修改项标记待更新，整段删除后对应译文消失。菜单可更新、隐藏或清除译文。复制与生成使用原文。",
   "promptTranslation_guideBack": "返回操作",
   "promptTranslation_guideMiddleTitle": "中键点块",
   "promptTranslation_guideMiddleText": "切换原文与译文",
