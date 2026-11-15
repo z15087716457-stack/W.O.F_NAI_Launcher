@@ -2,6 +2,7 @@ import '../comfyui_import_wrapper.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import '../../../utils/text_editing_projection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/autocomplete/autocomplete_settings.dart';
@@ -888,7 +889,10 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
   int _offsetForGlobalPosition(Offset global) {
     final editable = _findRenderEditable();
     if (editable == null) return _controller.text.length;
-    final position = editable.getPositionForPoint(global);
+    final position = sourcePositionForEditable(
+      editable,
+      editable.getPositionForPoint(global),
+    );
     return position.offset.clamp(0, _controller.text.length);
   }
 

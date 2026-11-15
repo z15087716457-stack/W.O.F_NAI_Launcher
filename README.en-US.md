@@ -55,7 +55,7 @@ Both Windows packages support in-app updates. Settings, the gallery database and
 
 **2.3.0** brings automatic fit in the image viewer, canvas decoding at display size, incremental gallery RAG indexing, idle Agent host cleanup, and fixes to generation quotes and retries. Windows in-app updates show installation progress, and GitHub Actions builds the macOS universal test package.
 
-**2.4.1** fixes lightweight translation alignment for V5 XML sections, fields and mixed prose. The model segments phrases by meaning, and readings follow exact source ranges using the existing model route and glossary. Comma-separated tags and direct source editing remain available. Weight-fill overflow, stretched closing markers, seams and manual-newline caret issues are also fixed; wrapped readings follow the final source line.
+**2.4.1** fixes lightweight translation alignment for V5 XML sections, fields and mixed prose using the existing model route and glossary. Short tags stay compact; longer source passages and their complete translations wrap in sequence without truncation or overlap. Direct source editing, IME input, selection, copy/cut/undo and pending-update indicators remain available. Weight-fill overflow, trailing green blocks, seams and manual-newline caret issues are also fixed.
 
 See the [complete 2.4.1 changelog](CHANGELOG.md#241---2026-11-15) and [release downloads](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/tag/v2.4.1). Agent suggestions, cache warming and translation adjustments use your own model service. Their settings are configurable.
 

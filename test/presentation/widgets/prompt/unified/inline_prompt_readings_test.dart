@@ -4,6 +4,8 @@ import 'dart:math' as math;
 import 'package:flutter/rendering.dart';
 import 'package:nai_launcher/presentation/ui/kit/ui_glyph.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/nai_syntax_controller.dart';
+import 'package:nai_launcher/presentation/utils/text_editing_projection.dart';
+import 'package:nai_launcher/presentation/widgets/prompt/unified/inline_prompt_readings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -61,9 +63,77 @@ Rect sourceRect(WidgetTester t, int start, int end) {
       .state<EditableTextState>(find.byType(EditableText))
       .renderEditable;
   final box = editable
-      .getBoxesForSelection(TextSelection(baseOffset: start, extentOffset: end))
+      .getBoxesForSelection(displaySelection(editable, start, end))
       .first;
   return MatrixUtils.transformRect(editable.getTransformTo(null), box.toRect());
+}
+
+TextSelection displaySelection(RenderEditable e, int start, int end) {
+  final p = (e.text as SourceMappedTextSpan).projection;
+  return TextSelection(
+    baseOffset: p.toDisplay(start),
+    extentOffset: p.toDisplay(end, affinity: TextAffinity.upstream),
+  );
+}
+
+void expectSource(RenderEditable e, String source) {
+  expect((e.text as SourceMappedTextSpan).projection.source, source);
+  expect(
+    e.text!.toPlainText(),
+    (e.text as SourceMappedTextSpan).projection.text,
+  );
+}
+
+// Exercise the actual platform buffer while expressing fixture edits in source
+// coordinates. Generated annotations are retained outside the edited range.
+void updateSourceInput(WidgetTester t, TextEditingValue after) {
+  final view =
+      t.widget<EditableText>(find.byType(EditableText)).controller
+          as ReadingEditingController;
+  final before = view.source.value, p = view.projection;
+  var prefix = 0, suffix = 0;
+  while (prefix < before.text.length &&
+      prefix < after.text.length &&
+      before.text[prefix] == after.text[prefix]) {
+    prefix++;
+  }
+  while (suffix < before.text.length - prefix &&
+      suffix < after.text.length - prefix &&
+      before.text[before.text.length - 1 - suffix] ==
+          after.text[after.text.length - 1 - suffix]) {
+    suffix++;
+  }
+  final end = before.text.length - suffix;
+  final insertedEnd = after.text.length - suffix;
+  final from = prefix == 0 ? 0 : p.toDisplay(prefix);
+  final to = end == before.text.length
+      ? p.text.length
+      : p.toDisplay(end, affinity: TextAffinity.upstream);
+  final inserted = after.text.substring(prefix, insertedEnd);
+  int position(int raw) {
+    if (raw < 0) return raw;
+    if (raw < prefix) return p.toDisplay(raw);
+    if (raw <= insertedEnd) return from + raw - prefix;
+    return p.toDisplay(raw - (insertedEnd - end)) +
+        inserted.length -
+        (to - from);
+  }
+
+  t.testTextInput.updateEditingValue(
+    TextEditingValue(
+      text: p.text.replaceRange(from, to, inserted),
+      selection: after.selection.copyWith(
+        baseOffset: position(after.selection.baseOffset),
+        extentOffset: position(after.selection.extentOffset),
+      ),
+      composing: after.composing.isValid
+          ? TextRange(
+              start: position(after.composing.start),
+              end: position(after.composing.end),
+            )
+          : TextRange.empty,
+    ),
+  );
 }
 
 const semanticSource =
@@ -101,6 +171,7 @@ Future<void> pumpReadingEditor(
   Brightness brightness = Brightness.dark,
   Locale locale = const Locale('zh'),
   double fontSize = 14,
+  bool readOnly = false,
 }) async {
   await t.binding.setSurfaceSize(Size(width, 900));
   await t.pumpWidget(
@@ -124,9 +195,10 @@ Future<void> pumpReadingEditor(
             fitContent: true,
             maxLines: maxLines,
             textStyle: TextStyle(fontSize: fontSize, height: 1.5),
-            config: const UnifiedPromptConfig(
+            config: UnifiedPromptConfig(
               embedded: true,
               enableAutoFormat: false,
+              readOnly: readOnly,
             ),
             decoration: const InputDecoration(
               contentPadding: EdgeInsets.zero,
@@ -171,8 +243,17 @@ void main() {
               final reading = readings[i];
               final boxes = editable.getBoxesForSelection(
                 TextSelection(
-                  baseOffset: reading.start,
-                  extentOffset: reading.end,
+                  baseOffset: displayPositionForEditable(
+                    editable,
+                    TextPosition(offset: reading.start),
+                  ).offset,
+                  extentOffset: displayPositionForEditable(
+                    editable,
+                    TextPosition(
+                      offset: reading.end,
+                      affinity: TextAffinity.upstream,
+                    ),
+                  ).offset,
                 ),
               );
               final lastTop = boxes.last.top;
@@ -187,10 +268,10 @@ void main() {
                 ),
               );
               expect(rect.left, closeTo(source.left, .02));
-              expect(rect.top - source.bottom, closeTo(scale, .02));
+              expect(rect.top - source.bottom, closeTo(3 * scale, .02));
               expect(rect.right, lessThanOrEqualTo(width + .02));
             }
-            expect(editable.text!.toPlainText(), semanticSource);
+            expectSource(editable, semanticSource);
             expect(controller.text, semanticSource);
             expect(t.takeException(), isNull);
             final capture = Platform.environment['SEMANTIC_READING_CAPTURE'];
@@ -232,7 +313,8 @@ void main() {
       expect(focus.hasFocus, isTrue);
       await t.showKeyboard(find.byType(TextField));
       final edited = semanticSource.replaceFirst('warm colors', 'cool colors');
-      t.testTextInput.updateEditingValue(
+      updateSourceInput(
+        t,
         TextEditingValue(
           text: edited,
           selection: TextSelection.collapsed(offset: start + 4),
@@ -248,7 +330,8 @@ void main() {
       expect(find.text('暖色调'), findsNothing);
       expect(find.text('柔和光线'), findsOneWidget);
       final deleted = edited.replaceFirst('cool colors', '');
-      t.testTextInput.updateEditingValue(
+      updateSourceInput(
+        t,
         TextEditingValue(
           text: deleted,
           selection: TextSelection.collapsed(offset: start),
@@ -285,7 +368,10 @@ void main() {
           .state<EditableTextState>(find.byType(EditableText))
           .renderEditable;
       final caret = e.getLocalRectForCaret(
-        TextPosition(offset: source.indexOf('\n') + 1),
+        displayPositionForEditable(
+          e,
+          TextPosition(offset: source.indexOf('\n') + 1),
+        ),
       );
       final rect = MatrixUtils.transformRect(e.getTransformTo(null), caret);
       expect(
@@ -293,7 +379,7 @@ void main() {
         greaterThanOrEqualTo(t.getRect(readingLabels().first).bottom + 1),
       );
       expect(caret.height, lessThanOrEqualTo(23));
-      expect(e.text!.toPlainText(), source);
+      expectSource(e, source);
       await t.pumpWidget(const SizedBox());
       controller.dispose();
       await t.binding.setSurfaceSize(null);
@@ -331,7 +417,8 @@ void main() {
               find.byType(EditableText),
             );
             await t.showKeyboard(find.byType(TextField));
-            t.testTextInput.updateEditingValue(
+            updateSourceInput(
+              t,
               TextEditingValue(
                 text: source,
                 selection: TextSelection.collapsed(offset: weighted.length + 1),
@@ -347,7 +434,10 @@ void main() {
                 .state<EditableTextState>(find.byType(EditableText))
                 .renderEditable;
             final caret = e.getLocalRectForCaret(
-              TextPosition(offset: weighted.length + 1),
+              displayPositionForEditable(
+                e,
+                TextPosition(offset: weighted.length + 1),
+              ),
             );
             final visible = MatrixUtils.transformRect(
               e.getTransformTo(null),
@@ -364,7 +454,10 @@ void main() {
             expect(caret.height, lessThanOrEqualTo(23));
             if (suffix == '\n\n') {
               final next = e.getLocalRectForCaret(
-                TextPosition(offset: weighted.length + 2),
+                displayPositionForEditable(
+                  e,
+                  TextPosition(offset: weighted.length + 2),
+                ),
               );
               expect(
                 next.top - caret.top,
@@ -372,7 +465,7 @@ void main() {
                 reason: 'An empty source line keeps its ordinary height',
               );
             }
-            expect(e.text!.toPlainText(), source);
+            expectSource(e, source);
             expect(controller.text, source);
             expect(t.takeException(), isNull);
             await t.pumpWidget(const SizedBox());
@@ -412,7 +505,11 @@ void main() {
       final firstClosing = source.indexOf('pov') + 3;
       final offsets = [
         for (var i = firstClosing; i <= firstClosing + 2; i++)
-          e.getLocalRectForCaret(TextPosition(offset: i)).left,
+          e
+              .getLocalRectForCaret(
+                displayPositionForEditable(e, TextPosition(offset: i)),
+              )
+              .left,
       ];
       final caption = t.renderObject<RenderParagraph>(
         find.text('第一人称视角').first,
@@ -431,7 +528,12 @@ void main() {
       for (final (i, x) in offsets.indexed) {
         expect(
           plain
-              .getLocalRectForCaret(TextPosition(offset: firstClosing + i))
+              .getLocalRectForCaret(
+                displayPositionForEditable(
+                  plain,
+                  TextPosition(offset: firstClosing + i),
+                ),
+              )
               .left,
           closeTo(x, .01),
           reason: 'The closing colons must keep their original advance',
@@ -493,32 +595,17 @@ void main() {
               );
               final transform = state.renderEditable.getTransformTo(boundary);
               final rows = <Rect>[];
-              for (final line in RegExp(r'[^\n]+').allMatches(source)) {
-                var from = line.start;
-                while (from < line.end) {
-                  final visual = state.renderEditable.getLineAtOffset(
-                    TextPosition(offset: from),
-                  );
-                  final end = math.min(visual.end, line.end);
-                  expect(end, greaterThan(from));
-                  final a = state.renderEditable.getLocalRectForCaret(
-                    TextPosition(offset: from),
-                  );
-                  final b = state.renderEditable.getLocalRectForCaret(
-                    TextPosition(offset: end, affinity: TextAffinity.upstream),
-                  );
+              for (var offset = 0; offset < source.length; offset++) {
+                if (source[offset] == '\n') continue;
+                for (final box in state.renderEditable.getBoxesForSelection(
+                  displaySelection(state.renderEditable, offset, offset + 1),
+                )) {
                   rows.add(
                     MatrixUtils.transformRect(
                       transform,
-                      Rect.fromLTRB(
-                        math.min(a.left, b.left),
-                        math.min(a.top, b.top),
-                        math.max(a.left, b.left),
-                        math.max(a.bottom, b.bottom),
-                      ),
+                      box.toRect(),
                     ).inflate(1),
                   );
-                  from = end;
                 }
               }
               final theme = Theme.of(t.element(find.byType(TextField)));
@@ -554,9 +641,10 @@ void main() {
                 final bytes = data!.buffer.asUint8List();
                 final firstUnit = state.renderEditable
                     .getBoxesForSelection(
-                      TextSelection(
-                        baseOffset: 0,
-                        extentOffset: source.indexOf(',') + 1,
+                      displaySelection(
+                        state.renderEditable,
+                        0,
+                        source.indexOf(',') + 1,
                       ),
                     )
                     .map((box) => box.toRect())
@@ -662,7 +750,7 @@ void main() {
               final start = readingSource.indexOf(originals[i]);
               final source = sourceRect(t, start, start + originals[i].length);
               expect(rect.left, closeTo(source.left, .01));
-              expect(rect.top - source.bottom, closeTo(1, .01));
+              expect(rect.top - source.bottom, closeTo(3, .01));
               expect(rect.right, lessThanOrEqualTo(width + .01));
               expect(source.height, lessThan(24));
             }
@@ -765,13 +853,16 @@ void main() {
       ]) {
         final glyph = e
             .getBoxesForSelection(
-              TextSelection(
-                baseOffset: position.clamp(0, source.length - 1),
-                extentOffset: (position + 1).clamp(0, source.length),
+              displaySelection(
+                e,
+                position.clamp(0, source.length - 1),
+                (position + 1).clamp(0, source.length),
               ),
             )
             .first;
-        final caret = e.getLocalRectForCaret(TextPosition(offset: position));
+        final caret = e.getLocalRectForCaret(
+          displayPositionForEditable(e, TextPosition(offset: position)),
+        );
         expect(
           (caret.center.dy - (glyph.top + glyph.bottom) / 2).abs(),
           lessThan(2),
@@ -781,8 +872,19 @@ void main() {
       e.selectionHeightStyle = old;
       final blank = source.indexOf('\n') + 1;
       expect(
-        e.getLocalRectForCaret(TextPosition(offset: blank + 1)).top -
-            e.getLocalRectForCaret(TextPosition(offset: blank)).top,
+        e
+                .getLocalRectForCaret(
+                  displayPositionForEditable(
+                    e,
+                    TextPosition(offset: blank + 1),
+                  ),
+                )
+                .top -
+            e
+                .getLocalRectForCaret(
+                  displayPositionForEditable(e, TextPosition(offset: blank)),
+                )
+                .top,
         inInclusiveRange(17.0, 23.0),
       );
       controller.selection = TextSelection(
@@ -790,10 +892,14 @@ void main() {
         extentOffset: source.length,
       );
       await t.pump();
-      state.copySelection(SelectionChangedCause.keyboard);
+      Actions.invoke(
+        t.element(find.byType(EditableText)),
+        CopySelectionTextIntent.copy,
+      );
       await t.pump();
       expect(copied, source);
-      t.testTextInput.updateEditingValue(
+      updateSourceInput(
+        t,
         const TextEditingValue(
           text: 'silver hai',
           selection: TextSelection.collapsed(offset: 10),
@@ -938,7 +1044,7 @@ void main() {
       final e = t
           .state<EditableTextState>(find.byType(EditableText))
           .renderEditable;
-      expect(e.text!.toPlainText(), next);
+      expectSource(e, next);
       expect(find.text('微笑的狼'), findsOneWidget);
       final status = t.renderObject<RenderParagraph>(find.text('待更新'));
       expect(status.didExceedMaxLines, isFalse);
@@ -983,11 +1089,17 @@ void main() {
       final e = t
           .state<EditableTextState>(find.byType(EditableText))
           .renderEditable;
-      for (final box in e.getBoxesForSelection(controller.selection)) {
+      for (final box in e.getBoxesForSelection(
+        displaySelection(
+          e,
+          controller.selection.start,
+          controller.selection.end,
+        ),
+      )) {
         expect(box.bottom - box.top, lessThan(24));
       }
       expect(readingLabels(), findsNWidgets(5));
-      expect(e.text!.toPlainText(), readingSource);
+      expectSource(e, readingSource);
       final capture = Platform.environment['INLINE_EDIT_CAPTURE'];
       if (capture != null) {
         await t.runAsync(() async {

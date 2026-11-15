@@ -32,9 +32,6 @@ class NaiSyntaxController extends TextEditingController {
   /// 纯字段不自动刷新：调用方改完后应调 [refreshPillSpans]。
   PillSpanBuilder? pillBuilder;
 
-  /// Adds reading metrics without changing the source or its UTF-16 offsets.
-  TextSpan Function(TextSpan span)? readingDecorator;
-
   /// 药丸视觉数据（实例/块库）变化后强制重建 span 缓存。
   void refreshPillSpans() {
     clearCache();
@@ -118,8 +115,7 @@ class NaiSyntaxController extends TextEditingController {
     TextStyle? style,
     required bool withComposing,
   }) {
-    final span = _buildSpan(context: context, style: style);
-    return readingDecorator?.call(span) ?? span;
+    return _buildSpan(context: context, style: style);
   }
 
   TextSpan _buildSpan({required BuildContext context, TextStyle? style}) {

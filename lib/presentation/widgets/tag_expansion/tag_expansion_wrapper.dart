@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:go_router/go_router.dart';
+import '../../utils/text_editing_projection.dart';
 
 import '../../../core/autocomplete/autocomplete_settings.dart';
 import '../../../core/autocomplete/completion_models.dart';
@@ -410,7 +411,10 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     }
     final field = editable!;
     final rect = field.getLocalRectForCaret(
-      TextPosition(offset: selection.extentOffset),
+      displayPositionForEditable(
+        field,
+        TextPosition(offset: selection.extentOffset),
+      ),
     );
     return field.localToGlobal(
       Offset(rect.left, rect.top + field.preferredLineHeight),

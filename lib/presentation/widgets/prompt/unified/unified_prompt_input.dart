@@ -765,6 +765,7 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
   Widget _buildContextMenu(
     BuildContext context,
     EditableTextState editableTextState,
+    ReadingEditingController view,
   ) {
     final selectedText = TextSelectionUtils.getSelectedText(
       _effectiveController,
@@ -786,8 +787,10 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
               editableTextState.hideToolbar();
               _showSaveToLibraryDialog(context, selectedText);
             },
-            onCopy: () =>
-                editableTextState.copySelection(SelectionChangedCause.toolbar),
+            onCopy: () {
+              view.copySource();
+              editableTextState.hideToolbar();
+            },
             onToggleTranslation: toggle == null ? null : toggleTranslation,
           ),
         ],
@@ -798,7 +801,23 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
       context,
       anchors: editableTextState.contextMenuAnchors,
       buttonItems: [
-        ...editableTextState.contextMenuButtonItems,
+        for (final item in editableTextState.contextMenuButtonItems)
+          if (item.type == ContextMenuButtonType.copy ||
+              item.type == ContextMenuButtonType.cut)
+            ContextMenuButtonItem(
+              type: item.type,
+              label: item.label,
+              onPressed: () {
+                if (item.type == ContextMenuButtonType.copy) {
+                  view.copySource();
+                } else {
+                  view.cutSource();
+                }
+                editableTextState.hideToolbar();
+              },
+            )
+          else
+            item,
         if (toggle != null)
           ContextMenuButtonItem(
             label: context.l10n.promptTranslation_guideMiddleText,
@@ -827,15 +846,21 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
   Widget build(BuildContext context) {
     return InlinePromptReadings(
       controller: _syntaxController!,
+      focusNode: _effectiveFocusNode,
       readings: widget.readings,
       enabled: !_searchVisible,
+      readOnly: widget.config.readOnly,
       style: _sourceStyle,
+      padding:
+          widget.decoration?.contentPadding ??
+          const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       builder: _buildContent,
     );
   }
 
-  Widget _buildContent(BuildContext context) {
-    Widget result = _buildTextField();
+  Widget _buildContent(BuildContext context, ReadingEditingController view) {
+    view.onSourceCommand = _handleTextChanged;
+    Widget result = _buildTextField(view);
 
     // 如果启用 ComfyUI 导入，包装 ComfyuiImportWrapper
     if (widget.config.enableComfyuiImport &&
@@ -1076,7 +1101,7 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
             ).textTheme.bodyMedium!.copyWith(fontSize: 14, height: 1.55)
           : Theme.of(context).textTheme.bodyLarge!);
 
-  Widget _buildTextField() {
+  Widget _buildTextField(ReadingEditingController view) {
     final enableWheelAdjustment =
         !widget.config.readOnly &&
         ref.watch(promptWeightScrollSettingsProvider);
@@ -1131,7 +1156,7 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
           : widget.config.pillBuilder == null
           ? null
           : StrutStyle.disabled,
-      controller: _effectiveController,
+      controller: view,
       focusNode: _effectiveFocusNode,
       showCursor: widget.showCursor,
       decoration: effectiveDecoration,
@@ -1151,22 +1176,27 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
       inputFormatters: widget.config.readOnly
           ? null
           : [
-              TextInputFormatter.withFunction((oldValue, newValue) {
-                final value =
-                    TextSelectionUtils.wrapSelectionOnBracketReplacement(
-                      oldValue,
-                      newValue,
-                    );
-                widget.onUserEdit?.call(value);
-                return value;
-              }),
+              view.sourceFormatter(
+                TextInputFormatter.withFunction((oldValue, newValue) {
+                  final value =
+                      TextSelectionUtils.wrapSelectionOnBracketReplacement(
+                        oldValue,
+                        newValue,
+                      );
+                  widget.onUserEdit?.call(value);
+                  return value;
+                }),
+              ),
             ],
-      onChanged: _handleTextChanged,
-      onSubmitted: widget.onSubmitted,
+      onChanged: (_) => _handleTextChanged(_effectiveController.text),
+      onSubmitted: widget.onSubmitted == null
+          ? null
+          : (_) => widget.onSubmitted!(_effectiveController.text),
       showClearButton: widget.config.showClearButton,
       onClearPressed: widget.config.showClearButton ? _handleClear : null,
       clearNeedsConfirm: widget.config.clearNeedsConfirm,
-      contextMenuBuilder: _buildContextMenu,
+      contextMenuBuilder: (context, state) =>
+          _buildContextMenu(context, state, view),
     );
 
     // Tag expansion opens explicitly on Ctrl + click or selection.

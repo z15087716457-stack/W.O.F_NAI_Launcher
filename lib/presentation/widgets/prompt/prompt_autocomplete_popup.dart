@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../utils/text_editing_projection.dart';
 
 import '../../../core/autocomplete/completion_models.dart';
 import '../../../core/autocomplete/prompt_autocomplete_controller.dart';
@@ -181,7 +182,9 @@ class _PromptAutocompletePopupState
     final e = editable;
     if (e == null || !e.hasSize) return Offset(0, root.size.height);
     final offset = widget.controller.value.anchorTextOffset;
-    final caret = e.getLocalRectForCaret(TextPosition(offset: offset));
+    final caret = e.getLocalRectForCaret(
+      displayPositionForEditable(e, TextPosition(offset: offset)),
+    );
     final local = root.globalToLocal(e.localToGlobal(caret.bottomLeft));
     // 两栏放不下时整体往左让，宁可盖住一点左侧也不出窗口。
     final screen = MediaQuery.sizeOf(context).width;

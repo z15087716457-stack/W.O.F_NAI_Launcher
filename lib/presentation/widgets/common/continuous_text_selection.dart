@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import '../../utils/text_editing_projection.dart';
 
 /// A source highlight whose fill follows the editor's source-line boxes, rather
 /// than the paragraph height reserved for annotations. Padding stays unpainted.
@@ -211,7 +212,20 @@ class _SelectionPainter extends RenderEditablePainter {
     if (!editable.hasFocus || selection == null || selection.isCollapsed) {
       return;
     }
-    final boxes = editable.getBoxesForSelection(selection);
+    final spans = editable.text;
+    final ranges = spans is SourceMappedTextSpan
+        ? spans.projection.sourceRanges
+        : [TextRange(start: 0, end: editable.text!.toPlainText().length)];
+    final boxes = [
+      for (final range in ranges)
+        if (range.start < selection.end && range.end > selection.start)
+          ...editable.getBoxesForSelection(
+            TextSelection(
+              baseOffset: math.max(range.start, selection.start),
+              extentOffset: math.min(range.end, selection.end),
+            ),
+          ),
+    ];
     if (boxes.isEmpty) return;
     final top = boxes.first.top;
     final bottom = boxes.last.bottom;

@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import '../../utils/text_editing_projection.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
 import 'package:nai_launcher/core/utils/nai_weight_syntax.dart';
 
@@ -537,7 +538,10 @@ class _WeightAdjustToolbarState extends State<_WeightAdjustToolbar> {
       return const Offset(0, -52);
     }
 
-    final caretPosition = TextPosition(offset: selection.start);
+    final caretPosition = displayPositionForEditable(
+      renderEditable,
+      TextPosition(offset: selection.start),
+    );
     final caretRect = renderEditable.getLocalRectForCaret(caretPosition);
 
     const toolbarHeight = 48.0;

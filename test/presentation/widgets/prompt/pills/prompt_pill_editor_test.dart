@@ -22,6 +22,7 @@ import 'package:nai_launcher/data/models/character/character_prompt.dart';
 import 'package:nai_launcher/presentation/providers/character_prompt_provider.dart';
 import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
 import 'package:nai_launcher/data/models/prompt_reading.dart';
+import 'package:nai_launcher/presentation/utils/text_editing_projection.dart';
 import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
 import 'package:nai_launcher/data/models/image/image_params.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
@@ -114,15 +115,25 @@ void main() {
         .renderEditable;
     final bounds = editable
         .getBoxesForSelection(
-          TextSelection(
-            baseOffset: source.indexOf('blue eyes'),
-            extentOffset: source.length,
-          ),
+          (editable.text as SourceMappedTextSpan).projection
+              .toDisplayValue(
+                TextEditingValue(
+                  text: source,
+                  selection: TextSelection(
+                    baseOffset: source.indexOf('blue eyes'),
+                    extentOffset: source.length,
+                  ),
+                ),
+              )
+              .selection,
         )
         .first
         .toRect();
     final point = editable.localToGlobal(bounds.center);
-    final expected = editable.getPositionForPoint(point).offset;
+    final expected = sourcePositionForEditable(
+      editable,
+      editable.getPositionForPoint(point),
+    ).offset;
     _acceptDrop(
       tester,
       const PromptBlockDragData(blockId: 'style'),
@@ -183,10 +194,17 @@ void main() {
           .renderEditable;
       final bounds = editable
           .getBoxesForSelection(
-            TextSelection(
-              baseOffset: source.indexOf('blue eyes'),
-              extentOffset: source.length,
-            ),
+            (editable.text as SourceMappedTextSpan).projection
+                .toDisplayValue(
+                  TextEditingValue(
+                    text: source,
+                    selection: TextSelection(
+                      baseOffset: source.indexOf('blue eyes'),
+                      extentOffset: source.length,
+                    ),
+                  ),
+                )
+                .selection,
           )
           .first
           .toRect();
@@ -198,6 +216,56 @@ void main() {
         container.read(pillWorkspaceNotifierProvider).document.text,
         source,
       );
+      final state = tester.state<EditableTextState>(
+        find.byType(EditableText).first,
+      );
+      final view = state.widget.controller;
+      final projection =
+          (state.renderEditable.text as SourceMappedTextSpan).projection;
+      view.selection = projection
+          .toDisplayValue(
+            TextEditingValue(
+              text: source,
+              selection: TextSelection(
+                baseOffset: source.indexOf('blue eyes'),
+                extentOffset: source.length,
+              ),
+            ),
+          )
+          .selection;
+      await tester.showKeyboard(find.byType(TextField).first);
+      final before = view.value, selection = view.selection;
+      tester.testTextInput.updateEditingValue(
+        before.copyWith(
+          text: before.text.replaceRange(
+            selection.start,
+            selection.end,
+            'green eyes',
+          ),
+          selection: TextSelection.collapsed(offset: selection.start + 10),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+      var workspace = container.read(pillWorkspaceNotifierProvider);
+      expect(
+        workspace.document.text,
+        source.replaceFirst('blue eyes', 'green eyes'),
+      );
+      expect(workspace.projection, contains('CONTENT'));
+      expect(workspace.projection, isNot(contains('\u2060')));
+      expect(workspace.projection, isNot(contains('\uFFFC')));
+      expect(find.text('待更新'), findsOneWidget);
+      expect(
+        tester.state<EditableTextState>(find.byType(EditableText).first),
+        same(state),
+      );
+      await _controlKey(tester, LogicalKeyboardKey.keyZ);
+      await tester.pump();
+      workspace = container.read(pillWorkspaceNotifierProvider);
+      expect(workspace.document.text, source);
+      expect(find.text('蓝眼'), findsOneWidget);
+      expect(find.byType(UiBlockPill), findsOneWidget);
       expect(tester.takeException(), isNull);
     },
   );
