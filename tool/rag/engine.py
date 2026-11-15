@@ -449,25 +449,25 @@ class Engine:
             self.pool.end_build()
             if not closing: self._checkpoint()
 
-    def search(self, text, cursor, mode, existing, lexical, negative, limit=40, cancelled=lambda: False, keyword=''):
+    def search(self, text, cursor, mode, existing, lexical, negative, limit=40, cancelled=lambda: False, keyword='', budget=120):
         original = self.sources
         self.sources = Sources(*original.paths, optional_supplements=True)
         try:
-            result = self._search(text, cursor, mode, existing, lexical, negative, limit, cancelled, keyword)
+            result = self._search(text, cursor, mode, existing, lexical, negative, limit, cancelled, keyword, budget)
             if self.sources.degraded: result['degraded'] = ['supplements_unavailable']
             return result
         finally: self.sources = original
 
-    def _search(self, text, cursor, mode, existing, lexical, negative, limit=40, cancelled=lambda: False, keyword=''):
+    def _search(self, text, cursor, mode, existing, lexical, negative, limit=40, cancelled=lambda: False, keyword='', budget=120):
         import numpy as np
         if mode not in ('before','around'): raise ValueError('invalid_context_mode')
         if not len(self.ann): return {'items': [], 'context_tokens':0}
         manual = bool(keyword.strip())
         keyword = clean_tag(keyword[:1024])
         # A typed search is its own query. Prompt context is only used for
-        # idle recommendations, including the existing 120-token window.
+        # idle recommendations with the selected Gemma token budget.
         window = ({'text':keyword,'tokens':self.models.count(keyword),'mode':'query'} if manual else
-                  context_window(text, cursor, mode, self.models.count))
+                  context_window(text, cursor, mode, self.models.count, budget))
         if not window['text']: return {'items': [], 'context_tokens': window['tokens']}
         if cancelled(): raise ValueError('cancelled')
         query_text = window['text']

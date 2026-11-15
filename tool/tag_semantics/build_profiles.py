@@ -69,7 +69,18 @@ def read_profiles(source, lock):
         # A missing summary remains missing: never turn synonyms into a made-up definition.
         profiles.append((tag, json.dumps(terms, ensure_ascii=False), terms[0], row['wiki'].strip(),
                          category, count, sensitive, number, row_digest(row)))
-    summary = {'sourceRows': len(rows), 'profiles': len(profiles),
+    source_rows = len(rows)
+    known = {profile[0] for profile in profiles}
+    for addition in lock.get('additions', []):
+        incoming, incoming_issues, incoming_summary = read_profiles(source.parent / addition['file'], addition)
+        if incoming_issues:
+            raise ValueError('invalid_additions')
+        for profile in incoming:
+            if profile[0] not in known:
+                profiles.append(profile)
+                known.add(profile[0])
+        source_rows += incoming_summary['sourceRows']
+    summary = {'sourceRows': source_rows, 'profiles': len(profiles),
                'quarantinedRows': len(issues), 'missingSummaries': sum(not r[3] for r in profiles),
                'categories': dict(sorted(Counter(str(r[4]) for r in profiles).items()))}
     for field, expected in [('profiles', 'expectedProfiles'), ('quarantinedRows', 'expectedQuarantinedRows'),
@@ -85,11 +96,13 @@ def build(source, lock, target):
     if source.resolve() == target.resolve():
         raise ValueError('source_is_target')
     profiles, issues, summary = read_profiles(source, lock)
-    version = hashlib.sha256((BUILD_RULE + ':' + lock['sha256']).encode()).hexdigest()[:12]
+    sources = [lock['sha256'], *(addition['sha256'] for addition in lock.get('additions', []))]
+    version = hashlib.sha256((BUILD_RULE + ':' + ':'.join(sources)).encode()).hexdigest()[:12]
     metadata = {'schema_version': str(SCHEMA_VERSION), 'data_version': version,
                 'build_rule': BUILD_RULE, 'language': 'zh', 'source_repository': lock['repository'],
                 'source_commit': lock['commit'], 'source_path': lock['path'],
                 'source_sha256': lock['sha256'], 'source_license': lock['license'],
+                'source_additions': json.dumps(lock.get('additions', []), ensure_ascii=False, sort_keys=True),
                 **{key: json.dumps(value, ensure_ascii=False, sort_keys=True) for key, value in summary.items()}}
     target.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix='tag-profiles-', dir=target.parent) as temporary:

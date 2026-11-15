@@ -1,15 +1,15 @@
-import 'studio_sandbox.dart';
+import 'dart:io';
 
 import 'package:path/path.dart' as p;
 import 'package:nai_launcher/core/utils/app_support_directory.dart';
 
-import 'app_logger.dart';
+import '../constants/storage_keys.dart';
+import '../storage/local_storage_service.dart';
 import 'file_system_utils.dart';
 
 /// 精准参考库路径管理助手
 ///
-/// 管理精准参考库原图文件的保存目录（{Documents}/NAI_Launcher/precise_refs/）。
-/// MVP 不支持自定义路径；新功能无历史数据，也不需要旧位置迁移。
+/// 精准参考原图默认放在应用数据目录，已有条目保留其原图路径。
 class PreciseRefLibraryPathHelper {
   PreciseRefLibraryPathHelper._();
 
@@ -19,34 +19,29 @@ class PreciseRefLibraryPathHelper {
   static const String _defaultFolderName = 'precise_refs';
   static const String _tag = 'PreciseRefLibrary';
 
-  String? _cachedDefaultPath;
+  String? getCustomPath() => LocalStorageService().getSetting<String>(
+    StorageKeys.preciseRefLibrarySavePath,
+  );
 
-  /// 获取默认保存路径（{Documents}/NAI_Launcher/precise_refs/）
-  Future<String> getDefaultPath() async {
-    if (_cachedDefaultPath != null) {
-      return _cachedDefaultPath!;
-    }
+  Future<String> getPath() async {
+    final custom = getCustomPath();
+    return custom != null && custom.isNotEmpty ? custom : getDefaultPath();
+  }
 
-    try {
-      final appDir = await getApplicationDocumentsDirectory();
-      final defaultPath = p.join(
-        appDir.path,
-        'NAI_Launcher',
-        _defaultFolderName,
-      );
-      _cachedDefaultPath = defaultPath;
-      return defaultPath;
-    } catch (e) {
-      AppLogger.e('获取应用目录失败', e);
-      final tempDir = studioTemporaryRoot();
-      final fallbackPath = p.join(
-        tempDir.path,
-        'nai_launcher',
-        _defaultFolderName,
-      );
-      _cachedDefaultPath = fallbackPath;
-      return fallbackPath;
-    }
+  Future<String> getDefaultPath() => getUserAssetPath(_defaultFolderName);
+
+  /// Include the former default when reconciling interrupted imports/deletes.
+  Future<List<String>> getReadPaths() async {
+    final current = await getPath();
+    final legacy = p.join(
+      (await getApplicationDocumentsDirectory()).path,
+      'NAI_Launcher',
+      _defaultFolderName,
+    );
+    return [
+      current,
+      if (legacy != current && await Directory(legacy).exists()) legacy,
+    ];
   }
 
   /// 确保路径存在（如果不存在则创建）

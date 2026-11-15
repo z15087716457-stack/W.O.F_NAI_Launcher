@@ -26,6 +26,7 @@ import '../krita/bridge_draft_snapshot.dart';
 import '../prompt_block_library_provider.dart';
 import 'nai_agent_generation_approvals.dart';
 import 'nai_agent_generation_binding.dart';
+import 'nai_agent_cost_policy.dart';
 
 class _SourceRequest {
   _SourceRequest(this.source, this.params, this.operation, this.storageBytes);
@@ -50,6 +51,7 @@ class NaiAgentSourceGenerationBinding {
     this.isAlive,
   ) : files = AgentWorkspaceFiles(workspace) {
     generation = NaiAgentGenerationTools(
+      autoApprove: (cost) => naiAgentCanAutoApproveCost(ref, cost),
       readInput: _read,
       isAlive: isAlive,
       refreshBalance: () => refreshBalanceBeforeBlocking(ref),

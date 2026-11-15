@@ -515,8 +515,10 @@ class _LayerTileState extends State<_LayerTile>
 
     // 获取按钮位置用于定位菜单
     final RenderBox button = context.findRenderObject() as RenderBox;
-    final Offset offset = button.localToGlobal(Offset.zero);
-    final screenSize = MediaQuery.of(context).size;
+    final overlay =
+        Overlay.of(context).context.findRenderObject()! as RenderBox;
+    final Offset offset = button.localToGlobal(Offset.zero, ancestor: overlay);
+    final screenSize = overlay.size;
 
     // 使用 Rect 定义菜单弹出的锚点位置
     final menuAnchor = Rect.fromLTWH(

@@ -23,7 +23,9 @@ List<SettingsStorageSlice> settingsClassifyStorage({
     if (measurement.incomplete) {
       incomplete.add(kind);
       if (gallery) incomplete.add(SettingsStorageKind.thumbnails);
-      if (gallery || kind == SettingsStorageKind.vibes) {
+      if (gallery ||
+          kind == SettingsStorageKind.vibes ||
+          kind == SettingsStorageKind.preciseRefs) {
         incomplete.add(SettingsStorageKind.other);
       }
     }
@@ -32,16 +34,26 @@ List<SettingsStorageSlice> settingsClassifyStorage({
       final file = entry.value;
       var owner = kind;
       var priority = 20;
-      if (kind == SettingsStorageKind.vibes) {
+      if (kind == SettingsStorageKind.vibes ||
+          kind == SettingsStorageKind.preciseRefs) {
         final extension = p.extension(file.path).toLowerCase();
-        final isVibe =
+        final isLibraryFile =
             canonicalRoot != null &&
             p.equals(p.dirname(file.path), canonicalRoot) &&
-            (extension == '.naiv4vibe' || extension == '.naiv4vibebundle');
-        owner = isVibe ? SettingsStorageKind.vibes : SettingsStorageKind.other;
-        // A Vibe library is more specific than its enclosing image root.
+            (kind == SettingsStorageKind.vibes
+                ? extension == '.naiv4vibe' || extension == '.naiv4vibebundle'
+                : const {
+                    '.png',
+                    '.jpg',
+                    '.jpeg',
+                    '.webp',
+                    '.gif',
+                    '.bmp',
+                  }.contains(extension));
+        owner = isLibraryFile ? kind : SettingsStorageKind.other;
+        // A reference library is more specific than its enclosing image root.
         // Its non-library files are Other, never relabelled as gallery images.
-        priority = isVibe ? 100 : 70;
+        priority = isLibraryFile ? 100 : 70;
       } else if (gallery) {
         owner = file.thumbnail
             ? SettingsStorageKind.thumbnails

@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/integrated_title_bar.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
+import 'package:nai_launcher/presentation/ui/kit/ui_scale.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -43,7 +44,9 @@ void main() {
     bool immersive = false,
     VoidCallback? toggle,
     Widget? languageButton,
+    double scale = 1,
   }) => MaterialApp(
+    builder: (_, child) => UiScale(scale: scale, child: child!),
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
     home: IntegratedTitleBarShell(
@@ -53,6 +56,31 @@ void main() {
       child: child,
     ),
   );
+
+  testWidgets('native caption exclusion follows interface scale', (t) async {
+    for (final scale in [.8, 1.3, 1.5]) {
+      await t.pumpWidget(
+        host(const Scaffold(), immersive: true, toggle: () {}, scale: scale),
+      );
+      await t.pumpAndSettle();
+      expect(
+        (calls.last.arguments as Map)['barHeight'],
+        closeTo(36 * scale, .001),
+      );
+      expect(
+        (calls.last.arguments as Map)['reservedRight'],
+        closeTo(187 * scale, .001),
+      );
+      expect(
+        t.getRect(find.byKey(const Key('window-caption-controls'))).width,
+        closeTo(187 * scale, .001),
+      );
+      await t.tap(find.byIcon(Icons.remove));
+      expect(windowCalls.last, 'minimize');
+      expect(t.takeException(), isNull);
+    }
+    await t.pumpWidget(const SizedBox());
+  });
 
   testWidgets(
     'content starts at zero; caption buttons stay fixed and callable',

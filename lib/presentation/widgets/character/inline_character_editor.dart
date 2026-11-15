@@ -1,7 +1,6 @@
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../common/workspace_text_scale_scope.dart';
 
 import '../../../data/models/character/character_prompt.dart';
 import '../../providers/character_prompt_provider.dart';
@@ -88,8 +87,7 @@ class _CharacterPromptEditorState extends ConsumerState<CharacterPromptEditor> {
   }
 
   @override
-  Widget build(BuildContext context) =>
-      WorkspaceTextScaleScope(child: Builder(builder: _buildEditor));
+  Widget build(BuildContext context) => _buildEditor(context);
 
   Widget _buildEditor(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;

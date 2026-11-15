@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/ui/kit/ui_scale.dart';
 import 'package:nai_launcher/core/utils/primary_activator.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/foundation.dart';
@@ -58,7 +59,7 @@ class _AgentThreadState extends State<AgentThread> {
       if (!mounted || !identical(_navigation, nav)) return;
       final viewport = context.findRenderObject() as RenderBox?;
       if (viewport == null || !viewport.hasSize) return;
-      final rect = viewport.localToGlobal(Offset.zero) & viewport.size;
+      final rect = UiScale.globalRectOf(viewport);
       final visible = <String>{};
       for (final e in AgentScope.of(context).data.history) {
         final turn = AgentScope.of(
@@ -77,7 +78,7 @@ class _AgentThreadState extends State<AgentThread> {
         if (box != null &&
             box.attached &&
             box.hasSize &&
-            rect.overlaps(box.localToGlobal(Offset.zero) & box.size)) {
+            rect.overlaps(UiScale.globalRectOf(box))) {
           visible.add(e.id);
         }
       }

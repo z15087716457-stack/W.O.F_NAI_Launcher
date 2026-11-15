@@ -982,13 +982,13 @@ abstract class AppLocalizations {
   /// No description provided for @settings_extraRootsTitle.
   ///
   /// In en, this message translates to:
-  /// **'Gallery Sources'**
+  /// **'Gallery sources'**
   String get settings_extraRootsTitle;
 
   /// No description provided for @settings_extraRootsHint.
   ///
   /// In en, this message translates to:
-  /// **'Extra gallery sources can be browsed and searched, and their images can be moved or copied to categories. They are not used for auto-save. New sources are scanned immediately.'**
+  /// **'Add folders for browsing and search. Adding a parent combines the sources it covers. Removing a source keeps its files and save location.'**
   String get settings_extraRootsHint;
 
   /// No description provided for @settings_extraRootsEmpty.
@@ -1057,16 +1057,10 @@ abstract class AppLocalizations {
   /// **'This folder is already a gallery source'**
   String get settings_extraRootsDuplicate;
 
-  /// No description provided for @settings_extraRootsSameAsMain.
-  ///
-  /// In en, this message translates to:
-  /// **'This folder is the same as the image save location'**
-  String get settings_extraRootsSameAsMain;
-
   /// No description provided for @settings_extraRootsNested.
   ///
   /// In en, this message translates to:
-  /// **'Gallery sources cannot contain each other; choose another folder'**
+  /// **'This folder is already covered by an existing gallery source.'**
   String get settings_extraRootsNested;
 
   /// No description provided for @settings_extraRootsNotFound.
@@ -1371,7 +1365,7 @@ abstract class AppLocalizations {
   /// No description provided for @generation_canvasZoomToFill.
   ///
   /// In en, this message translates to:
-  /// **'Zoom to fill (allows >100%)'**
+  /// **'Enlarge to fit canvas (allows over 100%)'**
   String get generation_canvasZoomToFill;
 
   /// No description provided for @generation_canvasEmpty.
@@ -1917,7 +1911,7 @@ abstract class AppLocalizations {
   /// No description provided for @prompt_cooccurrenceRecommendationSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Ctrl+click to search local tags; Ctrl+drag to explore related tags'**
+  /// **'Hold Ctrl (⌘ on Mac) and click or drag-select to search tags and see related suggestions.'**
   String get prompt_cooccurrenceRecommendationSubtitle;
 
   /// No description provided for @prompt_formatted.
@@ -4137,8 +4131,14 @@ abstract class AppLocalizations {
   /// No description provided for @drop_processing.
   ///
   /// In en, this message translates to:
-  /// **'Processing image...'**
+  /// **'Preparing image'**
   String get drop_processing;
+
+  /// No description provided for @drop_processingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a use after loading'**
+  String get drop_processingSubtitle;
 
   /// No description provided for @characterEditor_clearAll.
   ///
@@ -6782,8 +6782,14 @@ abstract class AppLocalizations {
   /// No description provided for @drop_hint.
   ///
   /// In en, this message translates to:
-  /// **'Drop image here'**
+  /// **'Release to import image'**
   String get drop_hint;
+
+  /// No description provided for @drop_hintSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Next, choose how to use it'**
+  String get drop_hintSubtitle;
 
   /// No description provided for @drop_img2img.
   ///
@@ -7670,7 +7676,7 @@ abstract class AppLocalizations {
   /// No description provided for @settings_fontScale.
   ///
   /// In en, this message translates to:
-  /// **'Font Size'**
+  /// **'Interface scale'**
   String get settings_fontScale;
 
   /// No description provided for @settings_fontScale_previewSmall.
@@ -9728,7 +9734,7 @@ abstract class AppLocalizations {
   /// No description provided for @autocomplete_relatedTagsSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Ctrl+click to search local tags; Ctrl+drag to explore related tags'**
+  /// **'Hold Ctrl (⌘ on Mac) and click or drag-select to search tags and see related suggestions.'**
   String get autocomplete_relatedTagsSubtitle;
 
   /// No description provided for @tagExpansion_searchHint.
@@ -10567,7 +10573,7 @@ abstract class AppLocalizations {
   /// prompt_cooccurrenceRecommendationSubtitle (default on).
   ///
   /// In en, this message translates to:
-  /// **'Ctrl+click a tag to look it up in the local tag library; Ctrl+drag across a phrase to see tags that often appear with it.'**
+  /// **'Hold Ctrl (⌘ on Mac) and click or drag-select to open Tag Expansion. Search tags or see related suggestions.'**
   String get tips_prompt_guide_3;
 
   /// Selection context menu promptBlockLibrary_saveToLibrary.
@@ -12457,7 +12463,7 @@ abstract class AppLocalizations {
   /// No description provided for @settings_adjustSettingsPagesDialogsOnly.
   ///
   /// In en, this message translates to:
-  /// **'Adjust settings pages and dialogs only'**
+  /// **'Resize text, icons and controls throughout the app. Image resolution stays the same.'**
   String get settings_adjustSettingsPagesDialogsOnly;
 
   /// No description provided for @settings_motionNotifications.
@@ -15415,6 +15421,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'How it works'**
   String get promptTranslation_tutorial;
+
+  /// No description provided for @promptReading_mode.
+  ///
+  /// In en, this message translates to:
+  /// **'Lightweight translation'**
+  String get promptReading_mode;
+
+  /// No description provided for @promptReading_modeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Read translations below the source'**
+  String get promptReading_modeSubtitle;
+
+  /// No description provided for @promptReading_blocks.
+  ///
+  /// In en, this message translates to:
+  /// **'Translation blocks'**
+  String get promptReading_blocks;
+
+  /// No description provided for @promptReading_blocksSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Read and edit bilingual blocks'**
+  String get promptReading_blocksSubtitle;
+
+  /// No description provided for @promptReading_update.
+  ///
+  /// In en, this message translates to:
+  /// **'Translate new / changed text'**
+  String get promptReading_update;
+
+  /// No description provided for @promptReading_hide.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide translations'**
+  String get promptReading_hide;
+
+  /// No description provided for @promptReading_show.
+  ///
+  /// In en, this message translates to:
+  /// **'Show translations'**
+  String get promptReading_show;
+
+  /// No description provided for @promptReading_clear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear translations'**
+  String get promptReading_clear;
+
+  /// No description provided for @promptReading_cleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Translations cleared'**
+  String get promptReading_cleared;
+
+  /// No description provided for @promptReading_pending.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs update'**
+  String get promptReading_pending;
+
+  /// No description provided for @promptReading_guide.
+  ///
+  /// In en, this message translates to:
+  /// **'Read-only translations align with comma-delimited segments and omit weight syntax. Click the source to edit; readings return when editing ends. Deleting a source segment removes its reading. Use the menu to update, hide or clear readings. Copy and generation use the source.'**
+  String get promptReading_guide;
 
   /// No description provided for @promptTranslation_guideBack.
   ///
@@ -23251,12 +23323,6 @@ abstract class AppLocalizations {
   /// **'Change'**
   String get blocks_changeImage;
 
-  /// No description provided for @blocks_clearThumb.
-  ///
-  /// In en, this message translates to:
-  /// **'Remove preview'**
-  String get blocks_clearThumb;
-
   /// No description provided for @blocks_cropHint.
   ///
   /// In en, this message translates to:
@@ -26762,13 +26828,13 @@ abstract class AppLocalizations {
   /// No description provided for @gen_zoomToFill.
   ///
   /// In en, this message translates to:
-  /// **'Zoom to fill'**
+  /// **'Enlarge to fit canvas'**
   String get gen_zoomToFill;
 
   /// No description provided for @gen_zoomToFillSub.
   ///
   /// In en, this message translates to:
-  /// **'Scale small images up to fill the canvas'**
+  /// **'Allow focused images to exceed 100% while keeping the whole image visible'**
   String get gen_zoomToFillSub;
 
   /// No description provided for @gen_useSeed.
@@ -29636,13 +29702,13 @@ abstract class AppLocalizations {
   /// No description provided for @rag_tagsEnabled.
   ///
   /// In en, this message translates to:
-  /// **'Contextual tag suggestions'**
+  /// **'Semantic tag search & suggestions'**
   String get rag_tagsEnabled;
 
   /// No description provided for @rag_tagsHint.
   ///
   /// In en, this message translates to:
-  /// **'Combine semantics, cooccurrence and reranking; keep fields, characters and polarity separate.'**
+  /// **'Search using your input, or get tag suggestions from the context before the caret.'**
   String get rag_tagsHint;
 
   /// No description provided for @rag_context.
@@ -29654,20 +29720,8 @@ abstract class AppLocalizations {
   /// No description provided for @rag_contextHint.
   ///
   /// In en, this message translates to:
-  /// **'Both modes use at most 120 Gemma tokens at tag boundaries. Full field text is used only for deduplication.'**
+  /// **'Use complete tags before the caret. Adjustable from 32 to 512 Gemma tokens.'**
   String get rag_contextHint;
-
-  /// No description provided for @rag_contextBefore.
-  ///
-  /// In en, this message translates to:
-  /// **'Before caret · 120 tokens'**
-  String get rag_contextBefore;
-
-  /// No description provided for @rag_contextAround.
-  ///
-  /// In en, this message translates to:
-  /// **'Around caret · 120 tokens'**
-  String get rag_contextAround;
 
   /// No description provided for @rag_buildIndex.
   ///
@@ -31009,7 +31063,7 @@ abstract class AppLocalizations {
   /// No description provided for @set_apSystemSub.
   ///
   /// In en, this message translates to:
-  /// **'Follows the Windows setting'**
+  /// **'Follows the system\'s light or dark appearance'**
   String get set_apSystemSub;
 
   /// No description provided for @set_apText.
@@ -31033,13 +31087,13 @@ abstract class AppLocalizations {
   /// No description provided for @set_apScale.
   ///
   /// In en, this message translates to:
-  /// **'Settings & dialog text size'**
+  /// **'Interface scale'**
   String get set_apScale;
 
   /// No description provided for @set_apScaleSub.
   ///
   /// In en, this message translates to:
-  /// **'Affects settings and dialogs only, not the canvas'**
+  /// **'Scale text, icons and controls throughout the app. Image resolution stays unchanged.'**
   String get set_apScaleSub;
 
   /// No description provided for @set_apSampleTitle.
@@ -31117,13 +31171,13 @@ abstract class AppLocalizations {
   /// No description provided for @set_apNotify.
   ///
   /// In en, this message translates to:
-  /// **'Notifications'**
+  /// **'Action notifications'**
   String get set_apNotify;
 
   /// No description provided for @set_apNotifySub.
   ///
   /// In en, this message translates to:
-  /// **'Toasts appear top-right and fade after 3 seconds'**
+  /// **'Preview how in-app action notifications are displayed'**
   String get set_apNotifySub;
 
   /// No description provided for @set_apNotifyPreview.
@@ -31243,13 +31297,13 @@ abstract class AppLocalizations {
   /// No description provided for @set_cvFill.
   ///
   /// In en, this message translates to:
-  /// **'Zoom new images to fill'**
+  /// **'Enlarge to fit canvas'**
   String get set_cvFill;
 
   /// No description provided for @set_cvFillSub.
   ///
   /// In en, this message translates to:
-  /// **'Fit the visible area instead of actual pixels'**
+  /// **'When focusing an image, allow enlargement beyond 100% to fit the visible area while keeping its proportions and the whole image visible. When off, automatic fitting is capped at 100%.'**
   String get set_cvFillSub;
 
   /// No description provided for @set_cvChannel.
@@ -31831,13 +31885,13 @@ abstract class AppLocalizations {
   /// No description provided for @set_gnRelated.
   ///
   /// In en, this message translates to:
-  /// **'Related tag suggestions'**
+  /// **'Ctrl tag expansion'**
   String get set_gnRelated;
 
   /// No description provided for @set_gnRelatedSub.
   ///
   /// In en, this message translates to:
-  /// **'Suggest tags that often appear together'**
+  /// **'Hold Ctrl (⌘ on Mac) and click or drag-select to search tags and see related suggestions.'**
   String get set_gnRelatedSub;
 
   /// No description provided for @set_gnRag.
@@ -31849,7 +31903,7 @@ abstract class AppLocalizations {
   /// No description provided for @set_gnRagSub.
   ///
   /// In en, this message translates to:
-  /// **'Context-aware suggestions from Semantic search'**
+  /// **'Semantic search and context-based suggestions for Tag Expansion. Configure in Semantic search.'**
   String get set_gnRagSub;
 
   /// No description provided for @set_gnReady.
@@ -32005,8 +32059,14 @@ abstract class AppLocalizations {
   /// No description provided for @set_stSavePath.
   ///
   /// In en, this message translates to:
-  /// **'Image folder'**
+  /// **'Generated image folder'**
   String get set_stSavePath;
+
+  /// No description provided for @set_stSavePathSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic and manual saves are written to:\n{path}'**
+  String set_stSavePathSub(String path);
 
   /// No description provided for @set_stAutoSave.
   ///
@@ -32029,8 +32089,32 @@ abstract class AppLocalizations {
   /// No description provided for @set_stVibePath.
   ///
   /// In en, this message translates to:
-  /// **'Vibe library folder'**
+  /// **'Vibe files folder'**
   String get set_stVibePath;
+
+  /// No description provided for @set_stVibePathSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Read and save Vibe files here. Existing files stay in place.'**
+  String get set_stVibePathSub;
+
+  /// No description provided for @set_stPr.
+  ///
+  /// In en, this message translates to:
+  /// **'PR library'**
+  String get set_stPr;
+
+  /// No description provided for @set_stPrPath.
+  ///
+  /// In en, this message translates to:
+  /// **'PR files folder'**
+  String get set_stPrPath;
+
+  /// No description provided for @set_stPrPathSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Precise Reference originals here. Existing files stay in place.'**
+  String get set_stPrPathSub;
 
   /// No description provided for @set_stQuality.
   ///
@@ -32065,14 +32149,8 @@ abstract class AppLocalizations {
   /// No description provided for @set_stRootsSub.
   ///
   /// In en, this message translates to:
-  /// **'Any folder can be browsed and searched in the gallery; auto-save does not write there.'**
+  /// **'Folders used for browsing and search. Removing a source keeps its images and does not change the save location.'**
   String get set_stRootsSub;
-
-  /// No description provided for @set_stPrimary.
-  ///
-  /// In en, this message translates to:
-  /// **'Main'**
-  String get set_stPrimary;
 
   /// No description provided for @set_stCount.
   ///
@@ -32386,18 +32464,6 @@ abstract class AppLocalizations {
   /// **'{n} entries'**
   String set_dcEntries(Object n);
 
-  /// No description provided for @set_dcSemantics.
-  ///
-  /// In en, this message translates to:
-  /// **'Personal semantic data'**
-  String get set_dcSemantics;
-
-  /// No description provided for @set_dcSemanticsSub.
-  ///
-  /// In en, this message translates to:
-  /// **'Saved Chinese supplements are preserved when translation caches are cleared'**
-  String get set_dcSemanticsSub;
-
   /// No description provided for @set_dcTranslate.
   ///
   /// In en, this message translates to:
@@ -32515,7 +32581,7 @@ abstract class AppLocalizations {
   /// No description provided for @set_dcTip.
   ///
   /// In en, this message translates to:
-  /// **'Dictionaries and caches can be restored. Export personal semantic supplements here; other personal data is under Storage → App data folder.'**
+  /// **'Dictionaries can be downloaded again and caches rebuilt. Saved Chinese supplements survive translation-cache clearing. Find the data under Storage & gallery → App data folder.'**
   String get set_dcTip;
 
   /// No description provided for @set_mdDesc.
@@ -32827,7 +32893,7 @@ abstract class AppLocalizations {
   /// No description provided for @set_agInstrSub.
   ///
   /// In en, this message translates to:
-  /// **'Combined in this order. Existing chats keep their prompt; new requests use the new text.'**
+  /// **'Choose a scope to view. Global instructions and the workspace AGENTS.md apply together; changes affect subsequent requests.'**
   String get set_agInstrSub;
 
   /// No description provided for @set_agOrderBuiltin.
@@ -32847,12 +32913,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Global instructions'**
   String get set_agOrderGlobal;
-
-  /// No description provided for @set_agOrderWorkspace.
-  ///
-  /// In en, this message translates to:
-  /// **'Workspace rules'**
-  String get set_agOrderWorkspace;
 
   /// No description provided for @set_agGlobal.
   ///
@@ -33133,13 +33193,13 @@ abstract class AppLocalizations {
   /// No description provided for @set_rgTags.
   ///
   /// In en, this message translates to:
-  /// **'Tag suggestions'**
+  /// **'Semantic tag search & suggestions'**
   String get set_rgTags;
 
   /// No description provided for @set_rgTagsSub.
   ///
   /// In en, this message translates to:
-  /// **'Semantics, co-occurrence and rerank; computed per prompt box and character'**
+  /// **'Search using your input, or get tag suggestions from the context before the caret.'**
   String get set_rgTagsSub;
 
   /// No description provided for @set_rgWiki.
@@ -33241,26 +33301,14 @@ abstract class AppLocalizations {
   /// No description provided for @set_rgContextSub.
   ///
   /// In en, this message translates to:
-  /// **'Both take up to 120 Gemma tokens, cut at whole tags.'**
+  /// **'Use complete tags before the caret. Adjustable from 32 to 512 Gemma tokens.'**
   String get set_rgContextSub;
 
   /// No description provided for @set_rgRange.
   ///
   /// In en, this message translates to:
-  /// **'Sample range'**
+  /// **'Sample length'**
   String get set_rgRange;
-
-  /// No description provided for @set_rgBefore.
-  ///
-  /// In en, this message translates to:
-  /// **'Before cursor'**
-  String get set_rgBefore;
-
-  /// No description provided for @set_rgAround.
-  ///
-  /// In en, this message translates to:
-  /// **'Around cursor'**
-  String get set_rgAround;
 
   /// No description provided for @set_rgRuntime.
   ///
@@ -35038,6 +35086,18 @@ abstract class AppLocalizations {
   /// **'Discard built-in system prompt changes?'**
   String get set_agBaseSwitchTitle;
 
+  /// No description provided for @set_agPrefixSwitchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard prefix changes?'**
+  String get set_agPrefixSwitchTitle;
+
+  /// No description provided for @set_agPrefixInheritHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave blank to use the global prefix.'**
+  String get set_agPrefixInheritHint;
+
   /// No description provided for @set_agBaseSwitchBody.
   ///
   /// In en, this message translates to:
@@ -35265,12 +35325,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Kept out of the prompt, so the Agent will not use it on its own; type /skill:name in the chat box to invoke it.'**
   String get set_agSkillManualTip;
-
-  /// No description provided for @set_agWorkspaceRulesSub.
-  ///
-  /// In en, this message translates to:
-  /// **'Extra rules for this workspace only, saved as instructions.md in the workspace and added after the global instructions. Edit opens it in your system editor; leave it empty to add nothing.'**
-  String get set_agWorkspaceRulesSub;
 
   /// No description provided for @set_agSkillDescNaiPrompt.
   ///
@@ -35725,7 +35779,7 @@ abstract class AppLocalizations {
   /// No description provided for @ag_modeBypassHint.
   ///
   /// In en, this message translates to:
-  /// **'Never asks; everything runs directly. Spending Anlas still needs your OK'**
+  /// **'Runs actions directly; free actions skip confirmation, paid actions follow Agent settings'**
   String get ag_modeBypassHint;
 
   /// No description provided for @ag_bypassConfirmTitle.
@@ -35737,7 +35791,7 @@ abstract class AppLocalizations {
   /// No description provided for @ag_bypassConfirmBody.
   ///
   /// In en, this message translates to:
-  /// **'The Agent will stop asking: it edits files, runs commands, calls unknown tools and can touch files outside the workspace. Anything that spends Anlas still asks first. Use it only for tasks you trust.'**
+  /// **'The Agent will stop asking: it edits files, runs commands, calls unknown tools and can touch files outside the workspace. Free generation runs automatically. Paid actions require confirmation by default; you can disable it in Agent settings. Use it only for tasks you trust.'**
   String get ag_bypassConfirmBody;
 
   /// No description provided for @ag_bypassConfirmOk.
@@ -37402,12 +37456,6 @@ abstract class AppLocalizations {
   /// **'Applies only to this chat, before the built-in system prompt.'**
   String get ag_memoryChatPrefixHint;
 
-  /// No description provided for @ag_memoryWorkspace.
-  ///
-  /// In en, this message translates to:
-  /// **'Workspace rules'**
-  String get ag_memoryWorkspace;
-
   /// No description provided for @ag_memorySkills.
   ///
   /// In en, this message translates to:
@@ -39010,6 +39058,18 @@ abstract class AppLocalizations {
   /// **'Next-message suggestions'**
   String get set_agNextSuggestion;
 
+  /// No description provided for @set_agSkipPaidConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip paid-action confirmation'**
+  String get set_agSkipPaidConfirmation;
+
+  /// No description provided for @set_agSkipPaidConfirmationSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Full access only. Free actions run automatically; enable this to also run generation and image actions that spend Anlas without confirmation.'**
+  String get set_agSkipPaidConfirmationSub;
+
   /// No description provided for @set_agNextSuggestionSub.
   ///
   /// In en, this message translates to:
@@ -39019,13 +39079,13 @@ abstract class AppLocalizations {
   /// No description provided for @set_agCacheWarming.
   ///
   /// In en, this message translates to:
-  /// **'Prompt cache warming'**
+  /// **'Prompt cache keepalive'**
   String get set_agCacheWarming;
 
   /// No description provided for @set_agCacheWarmingSub.
   ///
   /// In en, this message translates to:
-  /// **'Keeps the model\'s prompt cache warm with a 1-token request just before it expires (5-minute lifetime, all models), so the next step reads the cache instead of resending the whole context.'**
+  /// **'Uses lightweight requests to keep prompt caches alive and reduce later context processing. Cache hits depend on the provider.'**
   String get set_agCacheWarmingSub;
 
   /// No description provided for @set_agCacheOff.
@@ -39049,13 +39109,13 @@ abstract class AppLocalizations {
   /// No description provided for @set_agCacheIdleCost.
   ///
   /// In en, this message translates to:
-  /// **'Warming while idle (up to 30 minutes) costs extra model usage.'**
+  /// **'Keeping caches alive while idle (up to 30 minutes) incurs extra model costs.'**
   String get set_agCacheIdleCost;
 
   /// No description provided for @ag_cacheWarmTitle.
   ///
   /// In en, this message translates to:
-  /// **'Cache warming'**
+  /// **'Cache keepalive'**
   String get ag_cacheWarmTitle;
 
   /// No description provided for @ag_cacheWarmOff.
@@ -39166,12 +39226,6 @@ abstract class AppLocalizations {
   /// **'cache {minutes} min'**
   String ag_cacheWarmTtl(int minutes);
 
-  /// No description provided for @set_workspaceFontScale.
-  ///
-  /// In en, this message translates to:
-  /// **'Creative text size'**
-  String get set_workspaceFontScale;
-
   /// No description provided for @set_promptAutocomplete.
   ///
   /// In en, this message translates to:
@@ -39183,12 +39237,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open resource window'**
   String get shortcut_action_open_resource_window;
-
-  /// No description provided for @set_workspaceFontScaleSub.
-  ///
-  /// In en, this message translates to:
-  /// **'Text in prompt boxes, character boxes, blocks and the viewer prompt. Independent of the interface size above.'**
-  String get set_workspaceFontScaleSub;
 
   /// No description provided for @set_promptAutocompleteSub.
   ///
@@ -39747,6 +39795,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{client} needs your attention'**
   String ag_externalNeedsAttention(String client);
+
+  /// No description provided for @set_agViewScope.
+  ///
+  /// In en, this message translates to:
+  /// **'View scope'**
+  String get set_agViewScope;
+
+  /// No description provided for @set_agViewGlobalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Instructions and prefix shared by all workspaces'**
+  String get set_agViewGlobalHint;
+
+  /// No description provided for @set_agViewWorkspaceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Project rules for the selected workspace'**
+  String get set_agViewWorkspaceHint;
+
+  /// No description provided for @set_agProjectRules.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace AGENTS.md'**
+  String get set_agProjectRules;
+
+  /// No description provided for @set_agRulesReadonly.
+  ///
+  /// In en, this message translates to:
+  /// **'Read-only'**
+  String get set_agRulesReadonly;
+
+  /// No description provided for @set_agRulesView.
+  ///
+  /// In en, this message translates to:
+  /// **'View'**
+  String get set_agRulesView;
+
+  /// No description provided for @set_agRulesMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'This workspace has no AGENTS.md yet'**
+  String get set_agRulesMissing;
+
+  /// No description provided for @set_agRulesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'AGENTS.md is empty'**
+  String get set_agRulesEmpty;
+
+  /// No description provided for @set_agRulesLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to read AGENTS.md. Check file permissions.'**
+  String get set_agRulesLoadFailed;
 }
 
 class _AppLocalizationsDelegate

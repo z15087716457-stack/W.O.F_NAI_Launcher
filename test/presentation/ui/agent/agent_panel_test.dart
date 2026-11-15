@@ -19,6 +19,31 @@ import 'agent_test_harness.dart';
 void main() {
   setUpAll(loadStudioCaptureFonts);
 
+  testWidgets('Agent text, controls and narrow sidebar scale together', (
+    t,
+  ) async {
+    for (final scale in [.8, 1.5]) {
+      for (final scene in [
+        AgentScene.welcome,
+        AgentScene.chat,
+        AgentScene.run,
+      ]) {
+        await t.pumpWidget(const SizedBox());
+        await pumpAgent(t, scene: scene, width: 320, uiScale: scale);
+        expect(
+          t.getRect(find.byKey(const Key('agent-panel'))).width,
+          closeTo(320 * scale, .001),
+        );
+        expect(
+          MediaQuery.textScalerOf(
+            t.element(find.byKey(const Key('agent-panel'))),
+          ).scale(12),
+          12,
+        );
+        expect(t.takeException(), isNull);
+      }
+    }
+  });
   group('布局', () {
     for (final width in [320.0, 360.0, 420.0, 520.0]) {
       for (final scene in AgentScene.values) {

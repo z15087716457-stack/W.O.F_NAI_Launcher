@@ -120,7 +120,7 @@ class Worker:
             return 'database_locked'
         # Never expose paths, query text, URLs, or raw backend exceptions.
         allowed = {'cancelled','source_changed','invalid_plan','index_busy','cuda_unavailable',
-                   'invalid_embeddings','invalid_rerank_scores','invalid_context_mode','disabled_source',
+                   'invalid_embeddings','invalid_rerank_scores','invalid_context_mode','invalid_context_budget','disabled_source',
                    'invalid_source','source_too_large','invalid_snapshot'}
         code = str(error)
         return code if code in allowed else 'rag_runtime_error'
@@ -256,9 +256,9 @@ class Worker:
             if self.suspended: return {'items':[],'fallback':'resource_busy'}
             if len(p['text']) > 262144: raise ValueError('input_too_large')
             self.last_use = time.monotonic()
-            return engine.search(p['text'],p['cursor'],p.get('mode','around'),
+            return engine.search(p['text'],p['cursor'],p.get('mode','before'),
                 p.get('existing',[])[:20000],p.get('lexical',[])[:80],p.get('negative',False),
-                min(80,max(1,p.get('limit',40))),token.is_set,p.get('keyword',''))
+                min(80,max(1,p.get('limit',40))),token.is_set,p.get('keyword',''),p.get('budget',120))
         raise ValueError('unknown_operation')
 
     def status(self, progress=None, cancelled=lambda: False):

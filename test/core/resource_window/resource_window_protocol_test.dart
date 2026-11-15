@@ -48,6 +48,7 @@ void main() {
         brightness: 'light',
         locale: 'zh-TW',
         fontKey: 'system:Arial',
+        uiScale: 1.3,
         rect: {
           'left': -800.0,
           'top': 10.0,
@@ -61,6 +62,7 @@ void main() {
       expect(decoded.brightness, 'light');
       expect(decoded.locale, 'zh-TW');
       expect(decoded.fontKey, 'system:Arial');
+      expect(decoded.uiScale, 1.3);
       expect(decoded.rect, args.rect);
       expect(decoded.alwaysOnTop, true);
     },

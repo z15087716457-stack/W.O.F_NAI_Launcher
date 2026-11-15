@@ -22,7 +22,7 @@ import '../wiring/image_viewer_session.dart';
 import '../wiring/image_viewer_wiring.dart';
 import '../wiring/online_wiring.dart';
 import '../wiring/settings/settings_wiring.dart';
-import '../screens/settings/widgets/settings_typography_scope.dart';
+import '../screens/settings/widgets/settings_motion_scope.dart';
 import '../screens/slideshow_screen.dart';
 import '../screens/image_comparison_screen.dart';
 import '../wiring/statistics_wiring.dart';
@@ -287,7 +287,7 @@ GoRouter appRouter(Ref ref) {
                 path: AppRoutes.settings,
                 name: 'settings',
                 builder: (context, state) => WindowChromePage(
-                  child: SettingsTypographyScope(
+                  child: SettingsMotionScope(
                     child: SettingsWiring(
                       initialPage: settingsPageFromUri(state.uri),
                       initialQuery: state.uri.queryParameters['q'] ?? '',

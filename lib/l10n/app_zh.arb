@@ -1,5 +1,57 @@
 {
   "@@locale": "zh",
+  "@blocks_cropRange": {
+    "placeholders": {
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "@blocks_previewCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@blocks_previewNumber": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "@ag_externalArtifactUpdated": {
+    "placeholders": {
+      "client": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "@ag_externalWorkspaceUpdated": {
+    "placeholders": {
+      "client": {
+        "type": "String"
+      }
+    }
+  },
+  "@ag_externalResultFailed": {
+    "placeholders": {
+      "client": {
+        "type": "String"
+      }
+    }
+  },
+  "@ag_externalNeedsAttention": {
+    "placeholders": {
+      "client": {
+        "type": "String"
+      }
+    }
+  },
   "app_title": "W.O.F NAI Studio",
   "settings_visualAssets": "界面字体与许可",
   "brand_entryTagline": "给想象，一个发生的地方。",
@@ -179,8 +231,8 @@
   "settings_imageSavePath": "图片保存位置",
   "settings_autoSave": "自动保存",
   "settings_autoSaveSubtitle": "生成后自动保存图片",
-  "settings_extraRootsTitle": "图库源管理",
-  "settings_extraRootsHint": "额外图库源：可浏览可搜索，图片可移动/复制到分类；不参与自动保存。添加后会立即扫描。",
+  "settings_extraRootsTitle": "图库来源",
+  "settings_extraRootsHint": "添加的文件夹用于浏览和搜索；父文件夹会合并其下已收录的来源。移除不删除图片，也不改变保存位置。",
   "settings_extraRootsEmpty": "尚未添加额外图库源",
   "settings_extraRootsAdd": "添加文件夹",
   "settings_extraRootsAddTitle": "选择要添加的图库源文件夹",
@@ -192,8 +244,7 @@
   "settings_extraRootsWaitingScan": "当前图库正在扫描，完成后会继续导入此文件夹",
   "settings_extraRootsRemoved": "图库源已移除",
   "settings_extraRootsDuplicate": "该文件夹已在图库源中",
-  "settings_extraRootsSameAsMain": "该文件夹与图片保存位置相同",
-  "settings_extraRootsNested": "图库源之间不能互相包含，请选择其他文件夹",
+  "settings_extraRootsNested": "这个文件夹已包含在现有图库来源中，无需重复添加",
   "settings_extraRootsNotFound": "所选文件夹不存在",
   "@settings_extraRootsRemoveConfirmContent": {
     "placeholders": {
@@ -302,7 +353,7 @@
   },
   "generation_setAsReferenceImage": "已设为参考图",
   "generation_canvasDisplaySettings": "画布显示",
-  "generation_canvasZoomToFill": "放大填充（允许 >100%）",
+  "generation_canvasZoomToFill": "放大适应画布（允许超过 100%）",
   "generation_canvasEmpty": "画布为空",
   "generation_canvasBackground": "透明区域底色",
   "generation_canvasBackgroundChecker": "棋盘格",
@@ -422,7 +473,7 @@
   "prompt_sdSyntaxAutoConvertSubtitle": "失焦或生成时将 SD 权重语法转换为 NAI 格式",
   "prompt_formatted": "已格式化",
   "prompt_cooccurrenceRecommendation": "标签扩展",
-  "prompt_cooccurrenceRecommendationSubtitle": "Ctrl+单击搜索本地标签；Ctrl+拖选查看关联标签",
+  "prompt_cooccurrenceRecommendationSubtitle": "按住 Ctrl 点击标签或拖选文字，搜索标签与相关推荐；Mac 使用 ⌘。",
   "image_save": "保存",
   "image_copy": "复制",
   "image_upscale": "放大",
@@ -886,8 +937,10 @@
   "api_error_timeout_hint": "网络连接超时，请检查网络后重试",
   "api_error_network": "网络错误",
   "api_error_network_hint": "无法连接到服务器，请检查网络",
-  "drop_hint": "拖拽图片到这里",
-  "drop_processing": "正在解析图片...",
+  "drop_hint": "松开以导入图片",
+  "drop_hintSubtitle": "下一步选择图片用途",
+  "drop_processing": "正在准备图片",
+  "drop_processingSubtitle": "读取完成后选择用途",
   "drop_img2img": "图生图",
   "drop_vibeTransfer": "风格迁移",
   "drop_characterReference": "精准参考",
@@ -2074,7 +2127,7 @@
       "client": {}
     }
   },
-  "settings_fontScale": "字体大小",
+  "settings_fontScale": "界面缩放",
   "settings_fontScale_previewSmall": "光影落在画布上。",
   "settings_fontScale_previewMedium": "色から物語が生まれる。",
   "settings_fontScale_previewLarge": "Let colors tell a story.",
@@ -2884,7 +2937,7 @@
   },
   "autocomplete_resultLimit": "结果数量",
   "autocomplete_relatedTagsTitle": "标签扩展",
-  "autocomplete_relatedTagsSubtitle": "Ctrl+单击搜索本地标签；Ctrl+拖选查看关联标签",
+  "autocomplete_relatedTagsSubtitle": "按住 Ctrl 点击标签或拖选文字，搜索标签与相关推荐；Mac 使用 ⌘。",
   "tagExpansion_searchHint": "搜索标签或别名",
   "tagExpansion_relatedTitle": "关联标签",
   "tagExpansion_empty": "输入词语搜索本地标签",
@@ -3267,7 +3320,7 @@
   "@tips_prompt_guide_2": {
     "description": "Weight scroll modifier (default Alt)."
   },
-  "tips_prompt_guide_3": "Ctrl+单击提示词里的标签，直接在本地标签库里搜它；Ctrl+拖选一段，看看哪些标签常和它一起出现。",
+  "tips_prompt_guide_3": "按住 Ctrl（Mac 用 ⌘）点击标签或拖选文字，打开标签扩展，搜索标签或查看相关推荐。",
   "@tips_prompt_guide_3": {
     "description": "prompt_cooccurrenceRecommendationSubtitle (default on)."
   },
@@ -4042,7 +4095,7 @@
   "settings_chooseLightDarkWorkspace": "选择工作台的明暗风格",
   "settings_textLanguage": "文字与语言",
   "settings_makeReadingComfortable": "统一阅读体验",
-  "settings_adjustSettingsPagesDialogsOnly": "仅调整设置页面与设置弹窗的字号",
+  "settings_adjustSettingsPagesDialogsOnly": "统一调整应用内文字、图标和控件大小，不改变图片分辨率。",
   "settings_motionNotifications": "动效与提醒",
   "settings_reduceDistractionsKnowWorkFinishes": "减少打扰，及时获知完成",
   "settings_notificationStyle": "通知样式",
@@ -4718,6 +4771,17 @@
   "promptTranslation_undoRestore": "撤销原文还原，恢复翻译块",
   "promptTranslation_restoreAll": "全部翻译块还原为原文文本",
   "promptTranslation_tutorial": "操作教程",
+  "promptReading_mode": "轻量翻译",
+  "promptReading_modeSubtitle": "原文下方显示译文",
+  "promptReading_blocks": "翻译块",
+  "promptReading_blocksSubtitle": "以翻译块阅读和编辑",
+  "promptReading_update": "翻译新增／改动内容",
+  "promptReading_hide": "隐藏译文",
+  "promptReading_show": "显示译文",
+  "promptReading_clear": "清除译文",
+  "promptReading_cleared": "已清除译文",
+  "promptReading_pending": "待更新",
+  "promptReading_guide": "按逗号逐项显示只读译文，不显示权重语法。点击原文进入编辑，离开后恢复译文；原文段删除后，对应译文消失。菜单可更新、隐藏或清除译文。复制与生成使用原文。",
   "promptTranslation_guideBack": "返回操作",
   "promptTranslation_guideMiddleTitle": "中键点块",
   "promptTranslation_guideMiddleText": "切换原文与译文",
@@ -7268,7 +7332,6 @@
   "blocks_newBlockHint": "块存进块库后，可以从生图页侧栏点一下插入",
   "blocks_addThumb": "添加预览图",
   "blocks_changeImage": "换图",
-  "blocks_clearThumb": "清除预览图",
   "blocks_cropHint": "拖动 / 滚轮缩放",
   "blocks_namePlaceholder": "不填就用第一项",
   "blocks_plainText": "纯文本",
@@ -8322,8 +8385,8 @@
   "gen_bdGreen": "绿",
   "gen_bdBlue": "蓝",
   "gen_bdCustom": "自定义",
-  "gen_zoomToFill": "放大填满",
-  "gen_zoomToFillSub": "比画布小的图也放大到撑满",
+  "gen_zoomToFill": "放大适应画布",
+  "gen_zoomToFillSub": "聚焦时允许超过 100% 放大，按比例完整显示",
   "gen_useSeed": "用这个种子（并固定）",
   "gen_copySeed": "复制种子",
   "gen_pinImage": "钉在画布上",
@@ -8985,12 +9048,10 @@
   "rag_installing": "正在安装运行环境",
   "rag_device": "运行设备",
   "rag_auto": "自动选择",
-  "rag_tagsEnabled": "标签上下文推荐",
-  "rag_tagsHint": "结合语义、共现与文字重排；各框、角色和正负面独立。",
+  "rag_tagsEnabled": "标签语义搜索与推荐",
+  "rag_tagsHint": "支持按输入内容搜索，也可根据光标前上下文推荐标签。",
   "rag_context": "推荐上下文范围",
-  "rag_contextHint": "两种模式均最多 120 个 Gemma tokens，按完整标签取样；全文仅用于去重。",
-  "rag_contextBefore": "光标前 · 120 tokens",
-  "rag_contextAround": "插入点前后 · 120 tokens",
+  "rag_contextHint": "固定取光标前，按完整标签截取。可调整为 32–512 个 Gemma token。",
   "rag_buildIndex": "预览并建立索引",
   "rag_plan": "将收录当前标签目录的 {total} 项标签、别名与已有本地释义。首次处理可能较久；可暂停，已完成部分可提前使用。",
   "@rag_plan": {
@@ -9492,12 +9553,12 @@
   "set_apLight": "浅色",
   "set_apDark": "深色",
   "set_apSystem": "跟随系统",
-  "set_apSystemSub": "按 Windows 设置自动切换",
+  "set_apSystemSub": "跟随系统的浅色或深色外观",
   "set_apText": "文字",
   "set_apFont": "界面字体",
   "set_apFontSub": "中文用 HarmonyOS Sans SC，数字与代码用 Geist Mono",
-  "set_apScale": "设置与对话框字号",
-  "set_apScaleSub": "只放大设置页和弹窗，不影响画布和图片",
+  "set_apScale": "界面缩放",
+  "set_apScaleSub": "统一调整应用内文字、图标和控件大小，不改变图片分辨率。",
   "set_apSampleTitle": "标题 · 生成完成",
   "set_apSampleBody": "正文 · 结果已保存到本地画廊，可以继续调整提示词。",
   "set_apSampleNote": "说明 · 拖动上面的滑块，这里实时预览。",
@@ -9510,8 +9571,8 @@
   "set_apSoundSub": "一批图片全部完成后播放",
   "set_apSoundFile": "完成音效文件",
   "set_apPreviewSound": "试听",
-  "set_apNotify": "通知样式",
-  "set_apNotifySub": "提示从窗口右上角出现，3 秒后自动消失",
+  "set_apNotify": "操作提示",
+  "set_apNotifySub": "预览应用内操作结果提示的显示效果",
   "set_apNotifyPreview": "预览一条",
   "set_apPreview": "预览",
   "set_apCurrent": "当前",
@@ -9536,8 +9597,8 @@
   "set_cvCanvasSec": "画布",
   "set_cvLock": "锁定画布视角",
   "set_cvLockSub": "新图出现时不自动飞过去，视角保持在你停下的位置",
-  "set_cvFill": "新图缩放到填满",
-  "set_cvFillSub": "聚焦单张时放大到可视区域，而不是按原始像素",
+  "set_cvFill": "放大适应画布",
+  "set_cvFillSub": "聚焦图片时允许超过 100% 放大，按比例完整显示在可视区域；关闭时自动适配最高为 100%。",
   "set_cvChannel": "视觉通道",
   "set_cvChannelSub": "画布中间留空的长廊，按主题绘制装饰，翻历史时会依次经过各个主题。",
   "set_cvMode": "模式",
@@ -9708,10 +9769,10 @@
   "set_gnWheel": "滚轮调整权重",
   "set_gnWheelSub": "光标放在标签上滚动滚轮，直接加减权重",
   "set_gnNoKey": "无需按键",
-  "set_gnRelated": "相关标签扩展",
-  "set_gnRelatedSub": "输入标签时附带推荐常一起出现的标签",
+  "set_gnRelated": "Ctrl 标签扩展",
+  "set_gnRelatedSub": "按住 Ctrl 点击标签或拖选文字，搜索标签与相关推荐；Mac 使用 ⌘。",
   "set_gnRag": "语义标签推荐",
-  "set_gnRagSub": "结合上下文的智能推荐，由“语义检索”提供",
+  "set_gnRagSub": "为标签扩展提供语义搜索与上下文推荐，可在“语义检索”中配置。",
   "set_gnReady": "已就绪",
   "set_gnNotReady": "未就绪",
   "set_gnGoSettings": "去设置",
@@ -9748,18 +9809,23 @@
   "set_stDict": "词库与缓存",
   "set_stAgent": "Agent",
   "set_stSave": "保存",
-  "set_stSavePath": "图片保存位置",
+  "set_stSavePath": "生成图片保存目录",
+  "set_stSavePathSub": "自动和手动保存的实际目录：\n{path}",
+  "@set_stSavePathSub": {"placeholders": {"path": {"type": "String"}}},
   "set_stAutoSave": "自动保存",
   "set_stAutoSaveSub": "生成完成后立即写入保存位置；关掉后只留在画布和历史里",
   "set_stAssets": "素材与显示",
-  "set_stVibePath": "Vibe 库位置",
+  "set_stVibePath": "Vibe 文件目录",
+  "set_stVibePathSub": "读取和保存 Vibe 文件；旧文件保留原位置。",
+  "set_stPr": "PR 库",
+  "set_stPrPath": "PR 文件目录",
+  "set_stPrPathSub": "保存精准参考原图；旧文件保留原位置。",
   "set_stQuality": "本地画廊清晰度",
   "set_stQualitySub": "缩略图的显示质量",
   "set_stHigh": "高清",
   "set_stStandard": "标清",
   "set_stRoots": "图库来源",
-  "set_stRootsSub": "任何文件夹都可以加入本地画廊浏览和搜索，不参与自动保存。",
-  "set_stPrimary": "主目录",
+  "set_stRootsSub": "用于图库浏览和搜索；移除只取消收录，不删除图片，也不改变保存位置。",
   "set_stCount": "{n} 张",
   "@set_stCount": {
     "placeholders": {
@@ -9839,8 +9905,6 @@
       "n": {}
     }
   },
-  "set_dcSemantics": "个人语义资料",
-  "set_dcSemanticsSub": "保存补充的中文资料；清理翻译缓存时保留",
   "set_dcTranslate": "标签翻译与语义补充",
   "set_dcTranslateSub": "复用已有资料，按需补齐中文核心词、同义词和简释义",
   "set_dcCaches": "缓存",
@@ -9881,7 +9945,7 @@
     }
   },
   "set_dcResetStats": "重置统计",
-  "set_dcTip": "词库和缓存可以重新获取。个人语义资料请在本页单独导出；账号、历史和块库的备份位置见“存储与图库 → 应用数据位置”。",
+  "set_dcTip": "词库可重新下载，缓存可重新生成。补充的中文资料不随翻译缓存清理；数据位置见“存储与图库 → 应用数据位置”。",
   "set_mdDesc": "翻译、反推、标签翻译和 Agent 用到的大模型服务。先添加服务商，再在“功能分配”里给每个功能选模型。",
   "set_mdProviders": "服务商",
   "set_mdTasks": "功能分配",
@@ -9964,11 +10028,10 @@
   "set_agMaxSub": "防止 Agent 陷入循环",
   "set_agTimesUnit": "次",
   "set_agInstr": "指令",
-  "set_agInstrSub": "按下面的顺序拼成最终提示词；已有聊天保持原样，之后的请求使用新内容。",
+  "set_agInstrSub": "选择查看范围；全局指令与工作区 AGENTS.md 共同生效，修改用于之后的请求。",
   "set_agOrderBuiltin": "内置系统提示词",
   "set_agOrderPrefix": "内置提示词前",
   "set_agOrderGlobal": "全局指令",
-  "set_agOrderWorkspace": "工作区规则",
   "set_agGlobal": "全局指令",
   "set_agGlobalHint": "相当于系统级 AGENTS.md，对所有工作区生效。",
   "set_agPrefix": "内置提示词前",
@@ -10025,8 +10088,8 @@
   "set_rgStepDevice": "设备",
   "set_rgSources": "来源",
   "set_rgSourcesSub": "每个来源单独建库、单独开关；建库可以暂停，已完成的部分立即可用。",
-  "set_rgTags": "标签上下文推荐",
-  "set_rgTagsSub": "结合语义、共现与重排；各提示词框、角色和正负面分开计算",
+  "set_rgTags": "标签语义搜索与推荐",
+  "set_rgTagsSub": "支持按输入内容搜索，也可根据光标前上下文推荐标签。",
   "set_rgWiki": "Wiki 语义搜索",
   "set_rgWikiSub": "本地百科正文，名称精确匹配优先，语义结果补充",
   "set_rgBlocks": "提示词块",
@@ -10067,10 +10130,8 @@
   },
   "set_rgClearBody": "只删除派生索引，原始内容和模型都保留。",
   "set_rgContext": "推荐上下文",
-  "set_rgContextSub": "两种都最多取 120 个 Gemma token，按完整标签截取。",
-  "set_rgRange": "取样范围",
-  "set_rgBefore": "光标前",
-  "set_rgAround": "插入点前后",
+  "set_rgContextSub": "固定取光标前，按完整标签截取。可调整为 32–512 个 Gemma token。",
+  "set_rgRange": "取样长度",
   "set_rgRuntime": "模型与运行环境",
   "set_rgEmbedPath": "嵌入模型目录",
   "set_rgRerankPath": "重排模型目录",
@@ -10531,6 +10592,8 @@
   "set_agBaseRestoreTitle": "恢复内置系统提示词？",
   "set_agBaseRestoreBody": "全局自定义内容会换回内置系统提示词，旧内容存入提示词历史。各工作区单独的提示词不受影响。",
   "set_agBaseSwitchTitle": "放弃内置系统提示词的修改？",
+  "set_agPrefixSwitchTitle": "放弃前置内容的修改？",
+  "set_agPrefixInheritHint": "留空则沿用全局前置内容。",
   "set_agBaseSwitchBody": "切换范围会丢掉还没保存的修改。",
   "set_agBaseSaving": "正在保存…",
   "set_agBaseFailed": "没有保存：工作区已切换或写入失败，修改还在。",
@@ -10591,7 +10654,6 @@
   "set_agSkillManual": "仅手动调用",
   "set_agSkillAutoTip": "提示词里只放名称和一句话描述，任务对得上时 Agent 会自己读取完整说明。",
   "set_agSkillManualTip": "不进提示词，Agent 不会自己用；在聊天框输入 /skill:名称 才会调用。",
-  "set_agWorkspaceRulesSub": "只对当前工作区生效的补充要求，存为工作区里的 instructions.md，排在全局指令之后；点“编辑”用系统编辑器打开，留空就不加。",
   "set_agSkillDescNaiPrompt": "按当前模型（V4／V4.5 或 V5）的规则，撰写或修改草稿里的 NovelAI 提示词：主提示词、负面、角色、积木与权重。改提示词前先读。",
   "set_agSkillDescNaiStudio": "操作 NAI Studio：草稿、图片、生成、语义搜索、图库／历史、参考图、积木、画风探索、图像工具、快照与偏好设置。除读取当前状态外，其他 Studio 操作前先读。",
   "set_agSkillView": "查看",
@@ -10688,9 +10750,9 @@
   "ag_quickEdit": "编辑快捷信息",
   "ag_quickSends": "点击直接发送",
   "ag_modeBypass": "完全权限",
-  "ag_modeBypassHint": "不再询问，所有操作直接执行；花 Anlas 仍要确认",
+  "ag_modeBypassHint": "所有操作直接执行；免费免确认，付费按 Agent 设置确认",
   "ag_bypassConfirmTitle": "切换到完全权限？",
-  "ag_bypassConfirmBody": "Agent 将不再询问，直接修改文件、运行命令、调用未知工具，也能操作工作区以外的文件。花 Anlas 的操作仍会先请你确认。只在你信任当前任务时使用。",
+  "ag_bypassConfirmBody": "Agent 将不再询问，直接修改文件、运行命令、调用未知工具，也能操作工作区以外的文件。免费生成自动执行；付费操作默认确认，可在 Agent 设置中关闭确认。只在你信任当前任务时使用。",
   "ag_bypassConfirmOk": "切换",
   "ag_bypassConfirmSilence": "不再提醒",
   "ag_menuDeleteChat": "删除对话",
@@ -11074,7 +11136,6 @@
   "ag_memoryGlobal": "全局指令",
   "ag_memoryChatPrefix": "本会话前置指令",
   "ag_memoryChatPrefixHint": "仅当前会话生效，放在内置提示词之前。",
-  "ag_memoryWorkspace": "本工作区规则",
   "ag_memorySkills": "生效的 Skill",
   "ag_memoryEmpty": "还没写",
   "ag_memoryEdit": "编辑",
@@ -11468,14 +11529,16 @@
   "ag_commandCompactArgs": "[说明]",
   "ag_commandRenameArgs": "<名称>",
   "set_agNextSuggestion": "下一句建议",
+  "set_agSkipPaidConfirmation": "付费也无需确认",
+  "set_agSkipPaidConfirmationSub": "仅完全权限生效。免费操作自动执行；开启后，消耗 Anlas 的生成和图像操作也无需确认。",
   "set_agNextSuggestionSub": "使用当前对话模型预测你的下一句消息，会额外消耗 token；按 Tab 采纳。",
-  "set_agCacheWarming": "提示缓存预热",
-  "set_agCacheWarmingSub": "在提示缓存快过期前用 1 token 的请求续上（按 5 分钟寿命，适配所有模型），下一步读缓存而不是重发整段上下文。",
+  "set_agCacheWarming": "提示缓存保温",
+  "set_agCacheWarmingSub": "通过轻量请求延长提示缓存，减少后续请求重新计算上下文的开销；是否命中缓存以服务商为准。",
   "set_agCacheOff": "关闭",
   "set_agCacheStreaming": "只在 Agent 运行时",
-  "set_agCacheIdle": "空闲时也预热",
-  "set_agCacheIdleCost": "空闲时也预热（最多 30 分钟）会产生额外模型费用。",
-  "ag_cacheWarmTitle": "缓存预热",
+  "set_agCacheIdle": "空闲时也保温",
+  "set_agCacheIdleCost": "空闲时也保温（最多 30 分钟）会产生额外模型费用。",
+  "ag_cacheWarmTitle": "缓存保温",
   "ag_cacheWarmOff": "已关闭",
   "ag_cacheWarmRefreshing": "正在续期缓存…",
   "ag_cacheWarmIdle": "待机，下次运行时开始",
@@ -11522,10 +11585,8 @@
       }
     }
   },
-  "set_workspaceFontScale": "创作区文字字号",
   "set_promptAutocomplete": "提示词自动补全",
   "shortcut_action_open_resource_window": "打开资源小窗",
-  "set_workspaceFontScaleSub": "提示词框、角色框、块与大图提示词里的文字；和上面的界面字号分开调。",
   "set_promptAutocompleteSub": "在提示词框和角色框输入时，从本地标签库给出候选；↑↓ 选择，Tab 或 Enter 采纳，Esc 关闭。",
   "floating_open": "资源小窗",
   "floating_searchGallery": "搜索（整段 / 完整标签）",
@@ -11691,5 +11752,14 @@
   "ag_externalArtifactUpdated": "{client} 更新了「{title}」",
   "ag_externalWorkspaceUpdated": "{client} 更新了工作区",
   "ag_externalResultFailed": "{client} 的操作未完成",
-  "ag_externalNeedsAttention": "{client} 有操作需要你处理"
+  "ag_externalNeedsAttention": "{client} 有操作需要你处理",
+  "set_agViewScope": "查看范围",
+  "set_agViewGlobalHint": "所有工作区共用的指令与前缀",
+  "set_agViewWorkspaceHint": "当前工作区的项目规则",
+  "set_agProjectRules": "工作区 AGENTS.md",
+  "set_agRulesReadonly": "只读",
+  "set_agRulesView": "查看",
+  "set_agRulesMissing": "此工作区尚未创建 AGENTS.md",
+  "set_agRulesEmpty": "AGENTS.md 暂无内容",
+  "set_agRulesLoadFailed": "无法读取 AGENTS.md，请检查文件权限。"
 }

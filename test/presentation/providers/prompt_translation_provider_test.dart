@@ -15,6 +15,7 @@ import 'package:nai_launcher/core/nai_agent/agent_tool.dart';
 import 'package:nai_launcher/core/nai_agent/translation_context.dart';
 import 'package:nai_launcher/data/models/character/character_prompt.dart';
 import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
+import 'package:nai_launcher/data/models/prompt_reading.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/services/prompt_assistant_service.dart';
 import 'package:nai_launcher/presentation/providers/character_prompt_provider.dart';
 import 'package:nai_launcher/presentation/providers/pill_workspace_provider.dart';
@@ -27,6 +28,165 @@ import 'package:nai_launcher/core/wiki/tag_translation_glossary.dart';
 import '../../helpers/fake_tag_translation_glossary.dart';
 
 void main() {
+  test(
+    'lightweight translation uses the shared request and updates only changed ranges',
+    () async {
+      final service = _TranslationService();
+      final requests = <List<String>>[];
+      when(
+        () => service.translatePromptGroup(
+          any(),
+          sessionId: any(named: 'sessionId'),
+        ),
+      ).thenAnswer((call) async {
+        final request =
+            jsonDecode(call.positionalArguments.single as String) as Map;
+        requests.add([
+          for (final field in request['fields'] as List)
+            for (final segment in field['segments'] as List)
+              segment['source'] as String,
+        ]);
+        return jsonEncode({
+          'fields': [
+            for (final field in request['fields'] as List)
+              {
+                'id': field['id'],
+                'groups': [
+                  for (final segment in field['segments'] as List)
+                    {
+                      'ids': [segment['id']],
+                      'zh': 'reading ${segment['source']}',
+                    },
+                ],
+              },
+          ],
+        });
+      });
+      final container = ProviderContainer(
+        overrides: [
+          characterPromptNotifierProvider.overrideWith(_Characters.new),
+          promptBlockLibraryNotifierProvider.overrideWith(_Library.new),
+          promptAssistantServiceProvider.overrideWithValue(service),
+          unifiedTagRepositoryProvider.overrideWith((ref) => _Tags()),
+          tagTranslationGlossaryProvider.overrideWith(
+            (ref) => const FakeTagTranslationGlossary(),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+      final workspace = container.read(pillWorkspaceNotifierProvider.notifier);
+      const before = PillDocument(
+        text: 'blue eyes, \uE000 silver hair',
+        instances: {'\uE000': PillInstance(blockId: 'library')},
+      );
+      workspace.restoreDocument(before);
+      final coordinator = container.read(promptTranslationCoordinatorProvider);
+      await coordinator.translate(false, mode: PromptTranslationMode.inline);
+      var current = container.read(pillWorkspaceNotifierProvider).document;
+      expect(current.text, before.text);
+      expect(current.instances, before.instances);
+      expect(current.readings.length, 2);
+      expect(container.read(promptTranslationContextsProvider), isEmpty);
+      await coordinator.translate(false, mode: PromptTranslationMode.inline);
+      expect(requests.length, 1);
+      final annotated = current;
+      workspace.closeTypingGroup();
+      workspace.setText(
+        before.text.replaceFirst('blue', 'green'),
+        userEdit: true,
+      );
+      workspace.undo();
+      expect(container.read(pillWorkspaceNotifierProvider).document, annotated);
+      workspace.redo();
+      await coordinator.translate(false, mode: PromptTranslationMode.inline);
+      expect(requests.last, ['green eyes']);
+      current = container.read(pillWorkspaceNotifierProvider).document;
+      expect(current.readings.every((r) => !r.needsReview), isTrue);
+      expect(current.text, 'green eyes, \uE000 silver hair');
+      expect(current.instances, before.instances);
+      coordinator.toggleAll(false, mode: PromptTranslationMode.inline);
+      expect(
+        container.read(pillWorkspaceNotifierProvider).document.readingsVisible,
+        isFalse,
+      );
+      expect(
+        coordinator.clearTranslations(
+          false,
+          mode: PromptTranslationMode.inline,
+        ),
+        2,
+      );
+      expect(
+        container.read(pillWorkspaceNotifierProvider).document.instances,
+        before.instances,
+      );
+      expect(coordinator.restoreTranslations(false), isTrue);
+      expect(
+        container.read(pillWorkspaceNotifierProvider).document.readings,
+        current.readings,
+      );
+    },
+  );
+
+  test(
+    'a late lightweight response never replaces newer source edits',
+    () async {
+      final service = _TranslationService();
+      final response = Completer<String>();
+      when(
+        () => service.translatePromptGroup(
+          any(),
+          sessionId: any(named: 'sessionId'),
+        ),
+      ).thenAnswer((_) => response.future);
+      final container = ProviderContainer(
+        overrides: [
+          characterPromptNotifierProvider.overrideWith(_Characters.new),
+          promptBlockLibraryNotifierProvider.overrideWith(_Library.new),
+          promptAssistantServiceProvider.overrideWithValue(service),
+          unifiedTagRepositoryProvider.overrideWith((ref) => _Tags()),
+          tagTranslationGlossaryProvider.overrideWith(
+            (ref) => const FakeTagTranslationGlossary(),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+      final workspace = container.read(pillWorkspaceNotifierProvider.notifier)
+        ..replaceWithPlainText('blue eyes');
+      final future = container
+          .read(promptTranslationCoordinatorProvider)
+          .translate(false, mode: PromptTranslationMode.inline);
+      await Future<void>.delayed(Duration.zero);
+      workspace.setText('new source');
+      response.complete(
+        jsonEncode({
+          'fields': [
+            {
+              'id': 'main',
+              'groups': [
+                {
+                  'ids': ['main:0'],
+                  'zh': '旧译文',
+                },
+              ],
+            },
+          ],
+        }),
+      );
+      final result = await future;
+      expect(result.skippedChangedFields, 1);
+      expect(result.convertedFields, 0);
+      expect(
+        container.read(pillWorkspaceNotifierProvider).document.text,
+        'new source',
+      );
+      expect(
+        container.read(pillWorkspaceNotifierProvider).document.readings,
+        isEmpty,
+      );
+    },
+  );
+
   test(
     'successful translation retains exact exchange and face block map',
     () async {

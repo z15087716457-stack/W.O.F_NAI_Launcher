@@ -9,6 +9,7 @@ import '../../../core/constants/app_version.dart';
 import '../../../core/services/desktop_app_shutdown_service.dart';
 import '../../../core/services/update_check_service.dart';
 import '../../../core/utils/localization_extension.dart';
+import '../../../core/utils/release_notes.dart';
 import '../../providers/image_generation_provider.dart';
 import '../../providers/rag_provider.dart';
 import '../../providers/update_provider.dart';
@@ -41,11 +42,7 @@ SettingsAboutData settingsAboutData(UpdateState state, DateTime? checkedAt) =>
       latest: state.versionInfo?.version ?? '',
       releasedAt: DateTime.tryParse(state.versionInfo?.publishedAt ?? ''),
       updateBytes: state.versionInfo?.primaryAsset?.size ?? 0,
-      notes: (state.versionInfo?.releaseNotes ?? '')
-          .split('\n')
-          .where((line) => line.trim().isNotEmpty)
-          .take(30)
-          .toList(),
+      notes: updateNoteItems(state.versionInfo?.releaseNotes),
       progress: state.downloadProgress,
       checkedAt: checkedAt,
       system: [

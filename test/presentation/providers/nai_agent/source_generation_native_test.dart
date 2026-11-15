@@ -1,5 +1,7 @@
 import '../../../helpers/fetch_test_server.dart';
 import 'dart:async';
+import 'package:nai_launcher/data/services/nai_agent/agent_workspace_store.dart';
+import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_workspace_provider.dart';
 import 'package:nai_launcher/core/nai_agent/pi_host_client.dart';
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_model_provider.dart';
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_session_provider.dart';
@@ -89,6 +91,9 @@ void main() {
     when(() => api.cancelGeneration()).thenReturn(null);
     container = ProviderContainer(
       overrides: [
+        naiAgentUiPreferencesProvider.overrideWith(
+          (ref) => NaiAgentUiPreferences(),
+        ),
         naiAgentModelResolverProvider.overrideWithValue(
           (_, __) async => connection,
         ),
@@ -181,6 +186,30 @@ void main() {
       (await pending.timeout(const Duration(seconds: 20)))['details'],
     );
   }
+
+  test('source generation shares the paid Full access policy', () async {
+    container
+        .read(naiAgentUiPreferencesProvider)
+        .replace(
+          const AgentSettings(
+            permissionMode: 'bypass',
+            skipPaidConfirmation: true,
+          ),
+        );
+    final q = await quote({'operation': 'variations'}, metadata: true);
+    expect(q['estimated_anlas'], greaterThan(0));
+    expect(q['authorization'], 'full_access_policy');
+    final result = await service.execute('image_generate', {
+      'action': 'run',
+      'quote_id': q['quote_id'],
+    }, NaiAgentCancellation());
+    expect(result['details']['status'], 'completed');
+    expect(requests, hasLength(1));
+    expect(
+      container.read(naiAgentGenerationApprovalsProvider).forChat('chat'),
+      isEmpty,
+    );
+  });
 
   test(
     'official variants freeze source metadata, use the native three-image seed relation and export originals',

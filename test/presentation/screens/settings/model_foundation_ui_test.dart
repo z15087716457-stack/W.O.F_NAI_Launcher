@@ -241,17 +241,15 @@ void main() {
       expect(gemini.reasoningEfforts, ['minimal', 'low', 'medium', 'high']);
       expect(gemini.supportsVision, isTrue);
       expect(gemini.supportsNativeSearch, isTrue);
-      await tester.ensureVisible(
+      // Adding a model opens its parameters and saving retains that state.
+      expect(
         find.byKey(
-          const Key('service-model-parameters-models/gemini-3-flash-preview'),
+          const Key(
+            'model-parameters-models/gemini-3-flash-preview-openaiChatCompletions',
+          ),
         ),
+        findsOneWidget,
       );
-      await tester.tap(
-        find.byKey(
-          const Key('service-model-parameters-models/gemini-3-flash-preview'),
-        ),
-      );
-      await tester.pumpAndSettle();
       await tester.ensureVisible(
         find.byKey(
           const Key(

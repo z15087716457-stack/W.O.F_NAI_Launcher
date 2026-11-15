@@ -21,6 +21,7 @@ import '../providers/image_generation_provider.dart';
 import '../providers/image_save_settings_provider.dart';
 import '../providers/krita/krita_bridge_notifier.dart';
 import '../providers/prompt_translation_provider.dart';
+import '../providers/prompt_translation_mode_provider.dart';
 import '../widgets/common/undo_snack_bar.dart';
 import '../providers/subscription_provider.dart';
 import '../router/app_router.dart';
@@ -338,11 +339,20 @@ class _GenerationWiringState extends ConsumerState<GenerationWiring> {
         onTranslate: () => run(() async {
           await ref
               .read(promptTranslationCoordinatorProvider)
-              .translate(currentData().prompt.negative);
+              .translate(
+                currentData().prompt.negative,
+                mode: currentData().prompt.translate.mode,
+              );
         }),
         onToggleTranslation: () => ref
             .read(promptTranslationCoordinatorProvider)
-            .toggleAll(currentData().prompt.negative),
+            .toggleAll(
+              currentData().prompt.negative,
+              mode: currentData().prompt.translate.mode,
+            ),
+        onTranslationMode: (mode) => run(
+          () => ref.read(promptTranslationModeProvider.notifier).select(mode),
+        ),
         onTranslationAdjust: (rect) => _translationAdjustment.toggle(
           context,
           rect,
@@ -351,10 +361,21 @@ class _GenerationWiringState extends ConsumerState<GenerationWiring> {
         onClearTranslations: () {
           final negative = currentData().prompt.negative;
           final coordinator = ref.read(promptTranslationCoordinatorProvider);
-          if (coordinator.clearTranslations(negative) == 0) return;
+          if (coordinator.clearTranslations(
+                negative,
+                mode: currentData().prompt.translate.mode,
+              ) ==
+              0) {
+            return;
+          }
           ScaffoldMessenger.of(context).showSnackBar(
             undoSnackBar(
-              content: Text(context.l10n.gen_translateCleared),
+              content: Text(
+                currentData().prompt.translate.mode ==
+                        PromptTranslationMode.inline
+                    ? context.l10n.promptReading_cleared
+                    : context.l10n.gen_translateCleared,
+              ),
               undoLabel: context.l10n.common_undo,
               onUndo: () => coordinator.restoreTranslations(negative),
             ),

@@ -96,7 +96,7 @@ flutter gen-l10n
 
 ## 字体、图标与窗口身份
 
-默认正文 HarmonyOS Sans SC，等宽参数 Geist Mono，韩文回退 Pretendard；用户选字族保持有效。主界面固定 100%，设置页及其弹窗共用独立 1.1 基准，不能重复缩放。功能入口使用 StudioIcons，常规操作使用 Material；画廊火车流图标保留 `view_day_outlined`，网格 / 瀑布流为细线字形。母版、生成器、字位和字体许可见 [品牌文档](tool/branding/README.md)。
+默认正文 HarmonyOS Sans SC，等宽参数 Geist Mono，韩文回退 Pretendard；用户选字族保持有效。界面缩放统一由根 Navigator 上的 `AppUiScale`／`UiScale` 承接，范围80%–150%、默认100%；导航、Agent、编辑器、设置和弹窗共用一个倍率，资源子窗口同步。内部文字保留逻辑字号并使用 `TextScaler.noScaling`，预览不可再乘倍率。全局锚点需转换到 Overlay 局部坐标，原生拖拽区域上报实际客户区逻辑矩形。旧字号键只用于迁移，见[实现与验证](docs/ui-scale-2026-11-14.md)。功能入口使用 StudioIcons，常规操作使用 Material；画廊火车流图标保留 `view_day_outlined`，网格 / 瀑布流为细线字形。母版、生成器、字位和字体许可见 [品牌文档](tool/branding/README.md)。
 
 独立品牌标题栏已经移除。页面内容直达顶边，窗口按钮由各路由页面绘制，Navigator 浮层在按钮上方；主工作区只有明确空白区可拖窗，登录 / 载入保留自己的原生命中区，原生 Acrylic 当前禁用。
 

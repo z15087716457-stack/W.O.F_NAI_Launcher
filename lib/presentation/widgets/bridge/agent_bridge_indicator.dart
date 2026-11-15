@@ -135,17 +135,15 @@ class AgentBridgeIndicator extends ConsumerWidget {
     final overlay =
         Navigator.of(context).overlay!.context.findRenderObject()! as RenderBox;
     final anchor = anchorRect == null
-        ? box.localToGlobal(Offset.zero, ancestor: overlay)
-        : anchorRect.topLeft - overlay.localToGlobal(Offset.zero);
+        ? box.localToGlobal(Offset.zero, ancestor: overlay) & box.size
+        : Rect.fromPoints(
+            overlay.globalToLocal(anchorRect.topLeft),
+            overlay.globalToLocal(anchorRect.bottomRight),
+          );
     await showMenu<void>(
       context: context,
       position: RelativeRect.fromRect(
-        Rect.fromLTWH(
-          anchor.dx,
-          anchor.dy + (anchorRect?.height ?? box.size.height) + 3,
-          anchorRect?.width ?? box.size.width,
-          0,
-        ),
+        Rect.fromLTWH(anchor.left, anchor.bottom + 3, anchor.width, 0),
         Offset.zero & overlay.size,
       ),
       constraints: BoxConstraints(

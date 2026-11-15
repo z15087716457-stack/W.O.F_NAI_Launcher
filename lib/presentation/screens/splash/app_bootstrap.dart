@@ -14,7 +14,7 @@ import '../../providers/update_provider.dart';
 import '../../providers/warmup_provider.dart';
 import 'splash_screen.dart';
 import '../../providers/theme_provider.dart';
-import '../../widgets/common/workspace_typography_scope.dart';
+import '../../widgets/common/app_ui_scale.dart';
 import '../../widgets/branding/entry_language_button.dart';
 import '../../widgets/navigation/integrated_title_bar.dart';
 
@@ -90,7 +90,7 @@ class _AppBootstrapState extends ConsumerState<AppBootstrap> {
       themeMode: ref.watch(themeNotifierProvider) == Brightness.dark
           ? ThemeMode.dark
           : ThemeMode.light,
-      builder: (context, child) => WorkspaceTypographyScope(
+      builder: (context, child) => AppUiScale(
         child: IntegratedTitleBarShell(
           deferToRoute: true,
           immersive: true,

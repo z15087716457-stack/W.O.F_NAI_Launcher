@@ -35,6 +35,21 @@ class PromptTranslationGuide extends StatelessWidget {
           child: Column(
             children: [
               _GuideRow(
+                icon: const Icon(Icons.subtitles_outlined, size: 20),
+                title: context.l10n.promptReading_mode,
+                text: context.l10n.promptReading_guide,
+              ),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Text(
+                    context.l10n.promptReading_blocks,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ),
+              ),
+              _GuideRow(
                 icon: const MouseGestureIcon(middle: true),
                 title: context.l10n.promptTranslation_guideMiddleTitle,
                 text: context.l10n.promptTranslation_guideMiddleText,

@@ -65,14 +65,14 @@ const promptSetContent = {kind: Type.String({minLength:1,maxLength:24}), kind_ic
 // lives in skills/nai-studio; schemas and descriptions stay beside the executors.
 export const domainTools = [
   { name: 'tag_related',
-    description: 'Find complementary tags from local pairwise co-occurrence, without RAG or network. Inputs are canonical names or known aliases. sources/support identify contributing input tags; score is association, not probability. Use studio_search(tags) for natural-language lookup and wiki_query for meanings.',
+    description: 'Find complementary tags or variants by local pairwise co-occurrence, without RAG or network. Use a few specific canonical tags or aliases; exclude current prompt tags. sources/support identify contributing inputs; score is association, not probability.',
     parameters: Type.Object({tags:Type.Array(Type.String({minLength:1,maxLength:512}),{minItems:1,maxItems:20}),
       exclude:Type.Optional(Type.Array(Type.String({minLength:1,maxLength:512}),{maxItems:500})),
       categories:Type.Optional(Type.Array(E(['general','artist','copyright','character','meta','contributor','species','lore']),{minItems:1,maxItems:8})),
       limit:Type.Optional(Type.Integer({minimum:1,maximum:50}))}, {additionalProperties:false}),
   },
   { name: 'prompt_set',
-    description: 'Create/read/update one 2–24-item prompt card. Put stable style/appearance/negative in shared and item differences in items; character additions align by index. Labels use the user\'s language; prompts use English before V5. Icons from the enum, repeats allowed. Update the same set_id with expected_revision and full content. Human Generate clicks authorize one item image; model runs use native confirmation. Fields and workflow: skills/nai-studio/references/prompt-sets.md.',
+    description: 'Create/read/update one 2–24-item prompt card. Put stable style/appearance/negative in shared and item differences in items; character additions align by index. Labels use the user\'s language; prompts use English before V5. Icons from the enum, repeats allowed. Update the same set_id with expected_revision and full content. Human Generate clicks authorize one item image; model runs follow the Studio confirmation policy. Fields and workflow: skills/nai-studio/references/prompt-sets.md.',
     // One object instead of a create/update/read union: the content (with two 79-icon enums) is
     // declared once. Dart enforces per-action requirements (set_id, expected_revision, content).
     parameters: Type.Object({action:E(['create','update','read']),
@@ -101,7 +101,7 @@ export const domainTools = [
     }),
   },
   { name: 'tag_query',
-    description: 'Search local tag indexes by English canonical name or alias: counts, category, aliases and cached short Chinese definitions. contains=true for substring match.',
+    description: 'Search local tag indexes by known English names/aliases; contains=true for name fragments. Returns counts, category, aliases and cached short Chinese definitions.',
     parameters: Type.Object({ query: Type.String({ minLength: 1, maxLength: 200 }),
       contains: Type.Optional(Type.Boolean()),
       limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 100 })),
@@ -145,7 +145,7 @@ export const domainTools = [
     parameters: Type.Object({changes: Type.Record(Type.String(), Type.Unknown()), expected_version: Type.String()}),
   },
   { name: 'explore_manage',
-    description: 'Native style exploration runs. list/read paged (default 20); read includes roll snapshots and candidate image IDs. create(name, count, expected_draft_version) records the current recipe. Edits need id + expected_version: rename, complete, heart(candidate_id, heart), folder_create/folder_rename(name), folder_delete(folder_id), candidate_move(candidate_id, folder_id|null). prepare(id, expected_version, mode basic|retry|deep; deep also family_id, parent_set_id, count) returns a 5-minute quote; run(quote_id) waits for user confirmation in Studio. status; pause/cancel affect this chat\'s run only.',
+    description: 'Native style exploration runs. list/read paged (default 20); read includes roll snapshots and candidate image IDs. create(name, count, expected_draft_version) records the current recipe. Edits need id + expected_version: rename, complete, heart(candidate_id, heart), folder_create/folder_rename(name), folder_delete(folder_id), candidate_move(candidate_id, folder_id|null). prepare(id, expected_version, mode basic|retry|deep; deep also family_id, parent_set_id, count) returns a 5-minute quote; run(quote_id) follows the Studio confirmation policy. status; pause/cancel affect this chat\'s run only.',
     parameters: Type.Object({action: E(['list','read','create','rename','complete','heart','folder_create','folder_rename','folder_delete','candidate_move','prepare','run','status','pause','cancel']),
       id: Type.Optional(Type.String()), name: Type.Optional(Type.String({minLength: 1, maxLength: 200})),
       count: Type.Optional(Type.Integer({minimum: 1, maximum: 999})), expected_version: Type.Optional(Type.String()),
@@ -162,7 +162,7 @@ export const domainTools = [
       images_per_request: Type.Optional(Type.Integer({minimum: 1, maximum: 4}))}),
   },
   { name: 'generation_run',
-    description: 'Run a generation_prepare quote after the user confirms the price card in Studio. Rechecks state, backs up, waits for completion and returns image IDs/files or error/partial results.',
+    description: 'Run a generation_prepare quote under the Studio confirmation policy. Rechecks state, backs up, waits for completion and returns image IDs/files or error/partial results.',
     parameters: Type.Object({quote_id: Type.String()}),
   },
   { name: 'generation_cancel',
@@ -265,7 +265,7 @@ export const domainTools = [
     }),
   },
   { name: 'image_tool',
-    description: 'Local and cloud image tools; draft unchanged. list: models, methods, scales, SeedVR2 defaults. upscale(model_id, scale 1–4, one image_id or path) and pixel_snap(pixel options) run locally for free; status/cancel(job_id). Cloud tools (cloud_upscale, removeBackground, extractLineArt, toSketch, colorize, fixEmotion, declutter): prepare freezes source/prompt/price, run(quote_id) waits for user confirmation in Studio. Outputs go to workspace .W.O.F/outputs/ and history. Use image_generate for variations/enhance.',
+    description: 'Local and cloud image tools; draft unchanged. list: models, methods, scales, SeedVR2 defaults. upscale(model_id, scale 1–4, one image_id or path) and pixel_snap(pixel options) run locally for free; status/cancel(job_id). Cloud tools (cloud_upscale, removeBackground, extractLineArt, toSketch, colorize, fixEmotion, declutter): prepare freezes source/prompt/price, run(quote_id) follows the Studio confirmation policy. Outputs go to workspace .W.O.F/outputs/ and history. Use image_generate for variations/enhance.',
     parameters: Type.Object({
       action: E(['list', 'status', 'upscale', 'cancel', 'pixel_snap', 'prepare', 'run']),
       tool: Type.Optional(E(['cloud_upscale','removeBackground','extractLineArt','toSketch','colorize','fixEmotion','declutter'])),
@@ -292,7 +292,7 @@ export const domainTools = [
     }),
   },
   { name: 'image_generate',
-    description: 'Variations or enhance from one image_id or workspace path; draft unchanged. prepare(operation): variations makes three images from source metadata (current prompts as fallback); enhance uses current prompts/references with magnitude 1–5 or strength/noise 0–1, scale 1/1.5/2, or V5 max=true. Reports prompts, size, count, Anlas and balance; run(quote_id) waits for user confirmation in Studio. status/cancel target this chat\'s run.',
+    description: 'Variations or enhance from one image_id or workspace path; draft unchanged. prepare(operation): variations makes three images from source metadata (current prompts as fallback); enhance uses current prompts/references with magnitude 1–5 or strength/noise 0–1, scale 1/1.5/2, or V5 max=true. Reports prompts, size, count, Anlas and balance; run(quote_id) follows the Studio confirmation policy. status/cancel target this chat\'s run.',
     parameters: Type.Object({
       action: E(['prepare', 'run', 'status', 'cancel']),
       operation: Type.Optional(E(['variations', 'enhance'])),

@@ -193,13 +193,13 @@ class AgentResources {
   }
 
   String rules(store.AgentWorkspace workspace) {
-    final key = '${workspace.directory.path}/instructions.md';
+    final key = '${workspace.directory.path}/AGENTS.md';
     if (!_rules.containsKey(key)) {
       _rules[key] = '';
       _load(key, () async {
         final bytes = await AgentWorkspaceFiles(
           workspace.directory,
-        ).read('instructions.md');
+        ).read('AGENTS.md');
         _rules[key] = utf8.decode(bytes);
       });
     }
@@ -223,7 +223,7 @@ class AgentResources {
     return _files[key];
   }
 
-  /// Refresh on returning from settings (instructions.md may have been edited).
+  /// Refresh on returning from settings (AGENTS.md may have changed).
   void refreshRules() => _rules.clear();
 
   // Static boundary keeps the resource cache and its pending Futures out of

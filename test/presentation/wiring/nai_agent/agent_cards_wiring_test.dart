@@ -29,12 +29,12 @@ void main() {
   setUp(() async {
     h = AgentWiringHarness();
     storage = MemoryStorage();
-    storage.values['font_scale'] = 1.1;
+    storage.values['ui_scale'] = 1.1;
     gallery = _Gallery();
     when(() => gallery.undoManage(any(), any())).thenAnswer((_) async => true);
     await h.init(
       overrides: [
-        agentPreferencesProvider.overrideWith((_) => {'font_scale': 1.1}),
+        agentPreferencesProvider.overrideWith((_) => {'ui_scale': 1.1}),
         agentSettingsUndoProvider.overrideWith(
           (_, path) => AgentSettingsUndo(
             NaiAgentSettingsTools(
@@ -90,9 +90,9 @@ void main() {
             'role': 'toolResult',
             'toolCallId': 's',
             'details': {
-              'applied_fields': ['font_scale'],
-              'before': {'font_scale': 1.0},
-              'values': {'font_scale': 1.1},
+              'applied_fields': ['ui_scale'],
+              'before': {'ui_scale': 1.0},
+              'values': {'ui_scale': 1.1},
               'version': 'v',
             },
           },
@@ -163,7 +163,7 @@ void main() {
           restored = await h.panel(tester).actions.onUndoDiffs([settings.id]);
         });
         expect(restored, true);
-        expect(storage.values['font_scale'], 1.0);
+        expect(storage.values['ui_scale'], 1.0);
         await tester.pumpAndSettle();
         expect(
           h

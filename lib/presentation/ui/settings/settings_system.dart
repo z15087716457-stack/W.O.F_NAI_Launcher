@@ -117,9 +117,10 @@ class SettingsBridgesPage extends StatelessWidget {
                 ),
                 title: b.kritaConnected ? l.set_brConnected : l.set_brWaiting,
                 subtitle: b.kritaConnected ? b.kritaClient : null,
-                control: Row(
-                  mainAxisSize: MainAxisSize.min,
+                control: Wrap(
                   spacing: 8,
+                  runSpacing: 8,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     Text(
                       b.kritaEndpoint,
@@ -168,9 +169,10 @@ class SettingsBridgesPage extends StatelessWidget {
                       key: const Key('agent-krita-required'),
                       style: UiText.sans(11, color: c.ink),
                     ),
-              control: Row(
-                mainAxisSize: MainAxisSize.min,
+              control: Wrap(
                 spacing: 8,
+                runSpacing: 8,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   _state(
                     context,
@@ -265,9 +267,10 @@ class SettingsBridgesPage extends StatelessWidget {
               title: l.set_brComfyUrl,
               sub: true,
               disabled: !comfy,
-              control: Row(
-                mainAxisSize: MainAxisSize.min,
+              control: Wrap(
                 spacing: 8,
+                runSpacing: 8,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   const SetText(SettingKey.comfyUrl),
                   SettingsBtn(
@@ -551,29 +554,13 @@ class SettingsPrivacyPage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     spacing: 2,
                     children: [
-                      Row(
-                        spacing: 7,
-                        children: [
-                          Flexible(
-                            child: Text(
-                              title,
-                              style: UiText.sans(
-                                13,
-                                weight: FontWeight.w500,
-                                color: c.ink,
-                              ),
-                            ),
-                          ),
-                          if (d.modified.contains(k))
-                            Container(
-                              width: 6,
-                              height: 6,
-                              decoration: BoxDecoration(
-                                color: c.accent,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                        ],
+                      Text(
+                        title,
+                        style: UiText.sans(
+                          13,
+                          weight: FontWeight.w500,
+                          color: c.ink,
+                        ),
                       ),
                       Text(
                         sub,
@@ -1242,29 +1229,43 @@ class SettingsAboutPage extends StatelessWidget {
                   SettingsBar(value: ab.progress),
                 ],
                 const SizedBox(height: 14),
-                Row(
+                Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   spacing: 8,
+                  runSpacing: 8,
                   children: [
-                    if (ab.update == SettingsUpdateState.available)
-                      SettingsBtn(
-                        key: const Key('install-update'),
-                        label: l.set_abInstall,
-                        glyph: UiGlyphs.download,
-                        tone: SettingsBtnTone.primary,
-                        onTap: a.onInstallUpdate,
-                      ),
-                    SettingsBtn(
-                      label: l.set_abChangelog,
-                      glyph: SettingsGlyphs.external,
-                      tone: SettingsBtnTone.ghost,
-                      onTap: a.onOpenChangelog,
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        if (ab.update == SettingsUpdateState.available)
+                          SettingsBtn(
+                            key: const Key('install-update'),
+                            label: l.set_abInstall,
+                            glyph: UiGlyphs.download,
+                            tone: SettingsBtnTone.primary,
+                            onTap: a.onInstallUpdate,
+                          ),
+                        SettingsBtn(
+                          label: l.set_abChangelog,
+                          glyph: SettingsGlyphs.external,
+                          tone: SettingsBtnTone.ghost,
+                          onTap: a.onOpenChangelog,
+                        ),
+                      ],
                     ),
-                    const Spacer(),
-                    Text(
-                      l.set_abPrerelease,
-                      style: UiText.sans(12, color: c.muted),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      spacing: 8,
+                      children: [
+                        Text(
+                          l.set_abPrerelease,
+                          style: UiText.sans(12, color: c.muted),
+                        ),
+                        const SetSwitch(SettingKey.includePrerelease),
+                      ],
                     ),
-                    const SetSwitch(SettingKey.includePrerelease),
                   ],
                 ),
               ],

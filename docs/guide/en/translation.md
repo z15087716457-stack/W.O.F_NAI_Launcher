@@ -2,6 +2,8 @@
 
 # Translation blocks
 
+The translation menu also offers **Lightweight translation**: small readings below the editable source. Use **Translate new / changed text** after editing; hiding or clearing readings leaves the source intact. Copy and generation always use the source. Your mode choice is remembered; fresh text defaults to lightweight translation, while documents with existing translation blocks keep block mode. The instructions below describe **Translation blocks** mode.
+
 Having trouble reading a long English prompt? Translation blocks translate it into Chinese and display it right where it was. **Generation always uses the original English text**; translations only help you read and edit.
 
 <img src="../../images/readme/en/translation.webp" alt="Translation blocks" width="100%">

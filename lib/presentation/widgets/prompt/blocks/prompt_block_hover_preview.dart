@@ -727,20 +727,25 @@ class _PromptBlockHoverPreviewState extends State<PromptBlockHoverPreview> {
       return;
     }
     final renderBox = context.findRenderObject() as RenderBox;
+    final overlay = Overlay.of(context);
+    final overlayBox = overlay.context.findRenderObject()! as RenderBox;
     _overlayEntry = OverlayEntry(
       builder: (context) => PromptBlockPreviewOverlay(
         block: widget.block,
         folders: widget.folders,
         layerLink: _layerLink,
         cardSize: renderBox.size,
-        cardPosition: renderBox.localToGlobal(Offset.zero),
+        cardPosition: renderBox.localToGlobal(
+          Offset.zero,
+          ancestor: overlayBox,
+        ),
         onDismiss: _scheduleHide,
         onEnter: () => _exitTimer?.cancel(),
         initialThumbnailSize: prepared?.size,
         previewImageProvider: prepared?.provider,
       ),
     );
-    Overlay.of(context).insert(_overlayEntry!);
+    overlay.insert(_overlayEntry!);
   }
 
   void _removeOverlay() {

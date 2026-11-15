@@ -16,6 +16,7 @@ import 'blocks_preferences.dart';
 import '../providers/collection_provider.dart';
 import '../providers/floating_resource_windows_provider.dart';
 import '../providers/font_provider.dart';
+import '../providers/ui_scale_provider.dart';
 import '../providers/gallery_category_provider.dart';
 import '../providers/gallery_scan_progress_provider.dart';
 import '../providers/image_generation_provider.dart';
@@ -76,12 +77,17 @@ class ResourceWindowOpener {
         brightness: ref.read(themeNotifierProvider).name,
         locale: ref.read(localeNotifierProvider).toLanguageTag(),
         fontKey: ref.read(fontNotifierProvider).key,
+        uiScale: ref.read(uiScaleProvider),
         rect: saved?['rect'] == null
             ? null
             : Map<String, Object?>.from(saved!['rect'] as Map),
         alwaysOnTop: saved?['alwaysOnTop'] as bool? ?? false,
       );
     };
+    ref.listen(
+      uiScaleProvider,
+      (_, scale) => unawaited(service.uiScaleChanged(scale)),
+    );
     void watch<T>(ProviderListenable<T> provider, FloatingResourceKind kind) {
       ref.listen(provider, (_, __) => unawaited(service.changed(kind)));
     }

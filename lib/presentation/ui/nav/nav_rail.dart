@@ -330,7 +330,7 @@ class _NavRailButtonState extends State<NavRailButton> {
         ? c.muted
         : c.ink.withValues(alpha: .7);
     final bg =
-        widget.tint?.withValues(alpha: _hover ? .16 : .08) ??
+        widget.tint?.withValues(alpha: _hover ? .16 : 0) ??
         (on
             ? c.accent.withValues(alpha: _hover ? .16 : .11)
             : _hover

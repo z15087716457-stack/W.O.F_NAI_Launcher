@@ -5,6 +5,7 @@ import 'package:nai_launcher/data/services/gallery/gallery_group_mode.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
 import 'package:nai_launcher/presentation/ui/kit/ui_fixture_image.dart';
+import 'package:nai_launcher/presentation/ui/kit/ui_scale.dart';
 import 'package:nai_launcher/presentation/ui/kit/ui_resource_kind.dart';
 import 'package:nai_launcher/presentation/ui/resource_window/resource_window_contract.dart';
 import 'package:nai_launcher/presentation/ui/resource_window/resource_window_fixture.dart';
@@ -51,6 +52,63 @@ ResourceWindowViewData _view(FloatingResourceKind k, [ResourceLayout? l]) =>
     );
 
 void main() {
+  testWidgets('scaled child window reports matching caption exclusions', (
+    t,
+  ) async {
+    await t.runAsync(loadStudioCaptureFonts);
+    t.view.devicePixelRatio = 1;
+    addTearDown(t.view.resetPhysicalSize);
+    addTearDown(t.view.resetDevicePixelRatio);
+    for (final width in [480.0, 1040.0]) {
+      for (final scale in [.8, 1.5]) {
+        await t.pumpWidget(const SizedBox());
+        t.view.physicalSize = Size(width, 680);
+        double? height;
+        List<Rect> blocked = [];
+        var pins = 0;
+        await t.pumpWidget(
+          MaterialApp(
+            theme: GeistTheme.light,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            builder: (_, child) => UiScale(scale: scale, child: child!),
+            home: ResourceWindowPage(
+              data: _view(FloatingResourceKind.gallery),
+              actions: ResourceWindowActions(
+                onKind: (_) {},
+                onGroup: (_) {},
+                onQuery: (_, {submit = false}) {},
+                onChip: (_) {},
+                onSort: (_) {},
+                onLayout: (_) {},
+                onCellSize: (_) {},
+                onSelect: (_) {},
+                onOpen: (_) {},
+                onAction: (_, _) {},
+                onFavorite: (_) {},
+                onLoadMore: () {},
+                onAlwaysOnTop: (_) => pins++,
+                onNewWindow: () {},
+                onDragRegion: (h, rects) {
+                  height = h;
+                  blocked = rects;
+                },
+              ),
+            ),
+          ),
+        );
+        await t.pump();
+        await t.pump(const Duration(milliseconds: 300));
+        expect(height, closeTo(ResourceWindowPage.topBarHeight * scale, .001));
+        final pin = t.getRect(find.byKey(const Key('rw-pin')));
+        expect(blocked.any((r) => r.contains(pin.center)), true);
+        expect(blocked.every((r) => r.top >= 0 && r.bottom <= height!), true);
+        await t.tapAt(pin.center);
+        expect(pins, 1);
+        expect(t.takeException(), isNull, reason: '$width / $scale');
+      }
+    }
+  });
   testWidgets('trash stays in the gallery and purge requires confirmation', (
     t,
   ) async {

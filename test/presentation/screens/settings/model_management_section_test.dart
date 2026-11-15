@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/app_ui_scale.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/services/model_catalog_repository.dart';
 import 'dart:io';
 import 'dart:ui' as ui;
@@ -22,7 +23,7 @@ import 'package:nai_launcher/presentation/providers/generation/local_upscale_pro
 import 'package:nai_launcher/presentation/screens/settings/widgets/compact_service_connection.dart';
 import '../../../helpers/studio_capture_fonts.dart';
 import 'package:nai_launcher/presentation/screens/settings/widgets/settings_ui_theme.dart';
-import 'package:nai_launcher/presentation/screens/settings/widgets/settings_typography_scope.dart';
+import 'package:nai_launcher/presentation/screens/settings/widgets/settings_motion_scope.dart';
 
 class MemorySettings extends LocalStorageService {
   final values = <String, Object?>{};
@@ -196,8 +197,10 @@ Future<ProviderContainer> pumpManagement(
                 : Brightness.light,
           ),
         ),
-        builder: (context, child) => SettingsTypographyScope(
-          child: RepaintBoundary(key: captureKey, child: child!),
+        builder: (context, child) => AppUiScale(
+          child: SettingsMotionScope(
+            child: RepaintBoundary(key: captureKey, child: child!),
+          ),
         ),
         home: const Scaffold(body: ModelManagementSection()),
       ),

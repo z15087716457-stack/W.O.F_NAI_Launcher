@@ -1,5 +1,57 @@
 {
   "@@locale": "zh_TW",
+  "@blocks_cropRange": {
+    "placeholders": {
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "@blocks_previewCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@blocks_previewNumber": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "@ag_externalArtifactUpdated": {
+    "placeholders": {
+      "client": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "@ag_externalWorkspaceUpdated": {
+    "placeholders": {
+      "client": {
+        "type": "String"
+      }
+    }
+  },
+  "@ag_externalResultFailed": {
+    "placeholders": {
+      "client": {
+        "type": "String"
+      }
+    }
+  },
+  "@ag_externalNeedsAttention": {
+    "placeholders": {
+      "client": {
+        "type": "String"
+      }
+    }
+  },
   "app_title": "W.O.F NAI Studio",
   "settings_visualAssets": "介面字型與許可",
   "brand_entryTagline": "給想像，一個發生的地方。",
@@ -179,8 +231,8 @@
   "settings_imageSavePath": "圖片儲存位置",
   "settings_autoSave": "自動儲存",
   "settings_autoSaveSubtitle": "生成後自動儲存圖片",
-  "settings_extraRootsTitle": "圖庫源管理",
-  "settings_extraRootsHint": "額外圖庫源：可瀏覽可搜尋，圖片可移動/複製到分類；不參與自動儲存。新增後會立即掃描。",
+  "settings_extraRootsTitle": "圖庫來源",
+  "settings_extraRootsHint": "新增的資料夾用於瀏覽和搜尋；父資料夾會合並其下已收錄的來源。移除不刪除圖片，也不改變儲存位置。",
   "settings_extraRootsEmpty": "尚未新增額外圖庫源",
   "settings_extraRootsAdd": "新增資料夾",
   "settings_extraRootsAddTitle": "選擇要新增的圖庫來源資料夾",
@@ -192,8 +244,7 @@
   "settings_extraRootsWaitingScan": "當前圖庫正在掃描，完成後會繼續匯入此資料夾",
   "settings_extraRootsRemoved": "圖庫源已移除",
   "settings_extraRootsDuplicate": "該資料夾已在圖庫源中",
-  "settings_extraRootsSameAsMain": "該資料夾與圖片儲存位置相同",
-  "settings_extraRootsNested": "圖庫源之間不能互相包含，請選擇其他資料夾",
+  "settings_extraRootsNested": "這個資料夾已包含在現有圖庫來源中，無需重複新增",
   "settings_extraRootsNotFound": "所選資料夾不存在",
   "@settings_extraRootsRemoveConfirmContent": {
     "placeholders": {
@@ -302,7 +353,7 @@
   },
   "generation_setAsReferenceImage": "已設為參考圖",
   "generation_canvasDisplaySettings": "畫布顯示",
-  "generation_canvasZoomToFill": "放大填充（允許 >100%）",
+  "generation_canvasZoomToFill": "放大適應畫布（允許超過 100%）",
   "generation_canvasEmpty": "畫布為空",
   "generation_canvasBackground": "透明區域底色",
   "generation_canvasBackgroundChecker": "棋盤格",
@@ -422,7 +473,7 @@
   "prompt_sdSyntaxAutoConvertSubtitle": "失焦或生成時將 SD 權重語法轉換為 NAI 格式",
   "prompt_formatted": "已格式化",
   "prompt_cooccurrenceRecommendation": "標籤擴展",
-  "prompt_cooccurrenceRecommendationSubtitle": "Ctrl+單擊搜尋本地標籤；Ctrl+拖選檢視關聯標籤",
+  "prompt_cooccurrenceRecommendationSubtitle": "按住 Ctrl 點選標籤或拖選文字，搜尋標籤與相關推薦；Mac 使用 ⌘。",
   "image_save": "儲存",
   "image_copy": "複製",
   "image_upscale": "放大",
@@ -886,8 +937,10 @@
   "api_error_timeout_hint": "網路連線逾時，請檢查網路後重試",
   "api_error_network": "網路錯誤",
   "api_error_network_hint": "無法連線到伺服器，請檢查網路",
-  "drop_hint": "拖曳圖片到這裡",
-  "drop_processing": "正在解析圖片...",
+  "drop_hint": "鬆開以匯入圖片",
+  "drop_hintSubtitle": "下一步選擇圖片用途",
+  "drop_processing": "正在準備圖片",
+  "drop_processingSubtitle": "讀取完成後選擇用途",
   "drop_img2img": "圖生圖",
   "drop_vibeTransfer": "風格遷移",
   "drop_characterReference": "精準參考",
@@ -2074,7 +2127,7 @@
       "client": {}
     }
   },
-  "settings_fontScale": "字型大小",
+  "settings_fontScale": "介面縮放",
   "settings_fontScale_previewSmall": "光影落在畫布上。",
   "settings_fontScale_previewMedium": "色から物語が生まれる。",
   "settings_fontScale_previewLarge": "Let colors tell a story.",
@@ -2884,7 +2937,7 @@
   },
   "autocomplete_resultLimit": "結果數量",
   "autocomplete_relatedTagsTitle": "標籤擴展",
-  "autocomplete_relatedTagsSubtitle": "Ctrl+單擊搜尋本地標籤；Ctrl+拖選檢視關聯標籤",
+  "autocomplete_relatedTagsSubtitle": "按住 Ctrl 點選標籤或拖選文字，搜尋標籤與相關推薦；Mac 使用 ⌘。",
   "tagExpansion_searchHint": "搜尋標籤或別名",
   "tagExpansion_relatedTitle": "關聯標籤",
   "tagExpansion_empty": "輸入詞語搜尋本地標籤",
@@ -3267,7 +3320,7 @@
   "@tips_prompt_guide_2": {
     "description": "Weight scroll modifier (default Alt)."
   },
-  "tips_prompt_guide_3": "Ctrl+單擊提示詞裡的標籤，直接在本地標籤庫裡搜它；Ctrl+拖選一段，看看哪些標籤常和它一起出現。",
+  "tips_prompt_guide_3": "按住 Ctrl（Mac 用 ⌘）點選標籤或拖選文字，開啟標籤擴展，搜尋標籤或檢視相關推薦。",
   "@tips_prompt_guide_3": {
     "description": "prompt_cooccurrenceRecommendationSubtitle (default on)."
   },
@@ -4042,7 +4095,7 @@
   "settings_chooseLightDarkWorkspace": "選擇工作臺的明暗風格",
   "settings_textLanguage": "文字與語言",
   "settings_makeReadingComfortable": "統一閱讀體驗",
-  "settings_adjustSettingsPagesDialogsOnly": "僅調整設定頁面與設定彈窗的字號",
+  "settings_adjustSettingsPagesDialogsOnly": "統一調整應用內文字、圖示和控制元件大小，不改變圖片解析度。",
   "settings_motionNotifications": "動效與提醒",
   "settings_reduceDistractionsKnowWorkFinishes": "減少打擾，及時獲知完成",
   "settings_notificationStyle": "通知樣式",
@@ -4718,6 +4771,17 @@
   "promptTranslation_undoRestore": "復原原文還原，恢復翻譯塊",
   "promptTranslation_restoreAll": "全部翻譯塊還原為原文文本",
   "promptTranslation_tutorial": "操作教程",
+  "promptReading_mode": "輕量翻譯",
+  "promptReading_modeSubtitle": "原文下方顯示譯文",
+  "promptReading_blocks": "翻譯塊",
+  "promptReading_blocksSubtitle": "以翻譯塊閱讀和編輯",
+  "promptReading_update": "翻譯新增／改動內容",
+  "promptReading_hide": "隱藏譯文",
+  "promptReading_show": "顯示譯文",
+  "promptReading_clear": "清除譯文",
+  "promptReading_cleared": "已清除譯文",
+  "promptReading_pending": "待更新",
+  "promptReading_guide": "按逗號逐項顯示只讀譯文，不顯示權重語法。點選原文進入編輯，離開後恢復譯文；原文段刪除後，對應譯文消失。選單可更新、隱藏或清除譯文。複製與生成使用原文。",
   "promptTranslation_guideBack": "返回操作",
   "promptTranslation_guideMiddleTitle": "中鍵點塊",
   "promptTranslation_guideMiddleText": "切換原文與譯文",
@@ -7278,7 +7342,6 @@
   "blocks_newBlockHint": "塊存進塊庫後，可以從生圖頁側欄點一下插入",
   "blocks_addThumb": "新增預覽圖",
   "blocks_changeImage": "換圖",
-  "blocks_clearThumb": "清除預覽圖",
   "blocks_cropHint": "拖動 / 滾輪縮放",
   "blocks_namePlaceholder": "不填就用第一項",
   "blocks_plainText": "純文本",
@@ -8332,8 +8395,8 @@
   "gen_bdGreen": "綠",
   "gen_bdBlue": "藍",
   "gen_bdCustom": "自訂",
-  "gen_zoomToFill": "放大填滿",
-  "gen_zoomToFillSub": "比畫布小的圖也放大到撐滿",
+  "gen_zoomToFill": "放大適應畫布",
+  "gen_zoomToFillSub": "聚焦時允許超過 100% 放大，按比例完整顯示",
   "gen_useSeed": "用這個種子（並固定）",
   "gen_copySeed": "複製種子",
   "gen_pinImage": "釘在畫布上",
@@ -9043,12 +9106,10 @@
   "rag_installing": "正在安裝執行環境",
   "rag_device": "執行裝置",
   "rag_auto": "自動選擇",
-  "rag_tagsEnabled": "標籤上下文推薦",
-  "rag_tagsHint": "結合語義、共現與文字重排；各框、角色和正負面獨立。",
+  "rag_tagsEnabled": "標籤語義搜尋與推薦",
+  "rag_tagsHint": "支援按輸入內容搜尋，也可根據游標前上下文推薦標籤。",
   "rag_context": "推薦上下文範圍",
-  "rag_contextHint": "兩種模式均最多 120 個 Gemma tokens，按完整標籤取樣；全文僅用於去重。",
-  "rag_contextBefore": "游標前 · 120 tokens",
-  "rag_contextAround": "插入點前後 · 120 tokens",
+  "rag_contextHint": "固定取游標前，按完整標籤擷取。可調整為 32–512 個 Gemma token。",
   "rag_buildIndex": "預覽並建立索引",
   "rag_plan": "將收錄當前標籤目錄的 {total} 項標籤、別名與已有本地釋義。首次處理可能較久；可暫停，已完成部分可提前使用。",
   "@rag_plan": {
@@ -9565,12 +9626,12 @@
   "set_apLight": "淺色",
   "set_apDark": "深色",
   "set_apSystem": "跟隨系統",
-  "set_apSystemSub": "按 Windows 設定自動切換",
+  "set_apSystemSub": "跟隨系統的淺色或深色外觀",
   "set_apText": "文字",
   "set_apFont": "介面字型",
   "set_apFontSub": "中文用 HarmonyOS Sans SC，數字與程式碼用 Geist Mono",
-  "set_apScale": "設定與對話方塊字號",
-  "set_apScaleSub": "只放大設定頁和彈窗，不影響畫布和圖片",
+  "set_apScale": "介面縮放",
+  "set_apScaleSub": "統一調整應用內文字、圖示和控制元件大小，不改變圖片解析度。",
   "set_apSampleTitle": "標題 · 生成完成",
   "set_apSampleBody": "正文 · 結果已儲存到本地畫廊，可以繼續調整提示詞。",
   "set_apSampleNote": "說明 · 拖動上面的滑塊，這裡即時預覽。",
@@ -9583,8 +9644,8 @@
   "set_apSoundSub": "一批圖片全部完成後播放",
   "set_apSoundFile": "完成音效檔案",
   "set_apPreviewSound": "試聽",
-  "set_apNotify": "通知樣式",
-  "set_apNotifySub": "提示從視窗右上角出現，3 秒後自動消失",
+  "set_apNotify": "操作提示",
+  "set_apNotifySub": "預覽應用內操作結果提示的顯示效果",
   "set_apNotifyPreview": "預覽一條",
   "set_apPreview": "預覽",
   "set_apCurrent": "當前",
@@ -9609,8 +9670,8 @@
   "set_cvCanvasSec": "畫布",
   "set_cvLock": "鎖定畫布視角",
   "set_cvLockSub": "新圖出現時不自動飛過去，視角保持在你停下的位置",
-  "set_cvFill": "新圖縮放到填滿",
-  "set_cvFillSub": "聚焦單張時放大到可視區域，而不是按原始像素",
+  "set_cvFill": "放大適應畫布",
+  "set_cvFillSub": "聚焦圖片時允許超過 100% 放大，按比例完整顯示在可視區域；關閉時自動適配最高為 100%。",
   "set_cvChannel": "視覺通道",
   "set_cvChannelSub": "畫布中間留空的長廊，按主題繪製裝飾，翻歷史時會依次經過各個主題。",
   "set_cvMode": "模式",
@@ -9781,10 +9842,10 @@
   "set_gnWheel": "滾輪調整權重",
   "set_gnWheelSub": "游標放在標籤上滾動滾輪，直接加減權重",
   "set_gnNoKey": "無需按鍵",
-  "set_gnRelated": "相關標籤擴展",
-  "set_gnRelatedSub": "輸入標籤時附帶推薦常一起出現的標籤",
+  "set_gnRelated": "Ctrl 標籤擴展",
+  "set_gnRelatedSub": "按住 Ctrl 點選標籤或拖選文字，搜尋標籤與相關推薦；Mac 使用 ⌘。",
   "set_gnRag": "語義標籤推薦",
-  "set_gnRagSub": "結合上下文的智慧推薦，由“語義檢索”提供",
+  "set_gnRagSub": "為標籤擴展提供語義搜尋與上下文推薦，可在“語義檢索”中配置。",
   "set_gnReady": "已就緒",
   "set_gnNotReady": "未就緒",
   "set_gnGoSettings": "去設定",
@@ -9821,18 +9882,29 @@
   "set_stDict": "詞庫與快取",
   "set_stAgent": "Agent",
   "set_stSave": "儲存",
-  "set_stSavePath": "圖片儲存位置",
+  "set_stSavePath": "生成圖片儲存目錄",
+  "set_stSavePathSub": "自動和手動儲存的實際目錄：\n{path}",
+  "@set_stSavePathSub": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
   "set_stAutoSave": "自動儲存",
   "set_stAutoSaveSub": "生成完成後立即寫入儲存位置；關掉後只留在畫布和歷史裡",
   "set_stAssets": "素材與顯示",
-  "set_stVibePath": "Vibe 庫位置",
+  "set_stVibePath": "Vibe 檔案目錄",
+  "set_stVibePathSub": "讀取和儲存 Vibe 檔案；舊檔案保留原位置。",
+  "set_stPr": "PR 庫",
+  "set_stPrPath": "PR 檔案目錄",
+  "set_stPrPathSub": "儲存精準參考原圖；舊檔案保留原位置。",
   "set_stQuality": "本地畫廊清晰度",
   "set_stQualitySub": "縮圖的顯示品質",
   "set_stHigh": "高畫質",
   "set_stStandard": "標清",
   "set_stRoots": "圖庫來源",
-  "set_stRootsSub": "任何資料夾都可以加入本地畫廊瀏覽和搜尋，不參與自動儲存。",
-  "set_stPrimary": "主目錄",
+  "set_stRootsSub": "用於圖庫瀏覽和搜尋；移除只取消收錄，不刪除圖片，也不改變儲存位置。",
   "set_stCount": "{n} 張",
   "@set_stCount": {
     "placeholders": {
@@ -9935,8 +10007,6 @@
       "n": {}
     }
   },
-  "set_dcSemantics": "個人語義資料",
-  "set_dcSemanticsSub": "儲存補充的中文資料；清理翻譯快取時保留",
   "set_dcTranslate": "標籤翻譯與語義補充",
   "set_dcTranslateSub": "複用已有資料，按需補齊中文核心詞、同義詞和簡釋義",
   "set_dcCaches": "快取",
@@ -9977,7 +10047,7 @@
     }
   },
   "set_dcResetStats": "重設統計",
-  "set_dcTip": "詞庫和快取可以重新取得。個人語義資料請在本頁單獨匯出；帳號、歷史和塊庫的備份位置見“儲存與圖庫 → 應用資料位置”。",
+  "set_dcTip": "詞庫可重新下載，快取可重新生成。補充的中文資料不隨翻譯快取清理；資料位置見“儲存與圖庫 → 應用資料位置”。",
   "set_mdDesc": "翻譯、反推、標籤翻譯和 Agent 用到的大模型服務。先新增服務商，再在“功能分配”裡給每個功能選模型。",
   "set_mdProviders": "服務商",
   "set_mdTasks": "功能分配",
@@ -10060,11 +10130,10 @@
   "set_agMaxSub": "防止 Agent 陷入迴圈",
   "set_agTimesUnit": "次",
   "set_agInstr": "指令",
-  "set_agInstrSub": "按下面的順序拼成最終提示詞；已有聊天保持原樣，之後的請求使用新內容。",
+  "set_agInstrSub": "選擇檢視範圍；全域指令與工作區 AGENTS.md 共同生效，修改用於之後的請求。",
   "set_agOrderBuiltin": "內建系統提示詞",
   "set_agOrderPrefix": "內建提示詞前",
   "set_agOrderGlobal": "全域指令",
-  "set_agOrderWorkspace": "工作區規則",
   "set_agGlobal": "全域指令",
   "set_agGlobalHint": "相當於系統級 AGENTS.md，對所有工作區生效。",
   "set_agPrefix": "內建提示詞前",
@@ -10121,8 +10190,8 @@
   "set_rgStepDevice": "裝置",
   "set_rgSources": "來源",
   "set_rgSourcesSub": "每個來源單獨建庫、單獨開關；建庫可以暫停，已完成的部分立即可用。",
-  "set_rgTags": "標籤上下文推薦",
-  "set_rgTagsSub": "結合語義、共現與重排；各提示詞框、角色和正負面分開計算",
+  "set_rgTags": "標籤語義搜尋與推薦",
+  "set_rgTagsSub": "支援按輸入內容搜尋，也可根據游標前上下文推薦標籤。",
   "set_rgWiki": "Wiki 語義搜尋",
   "set_rgWikiSub": "本地百科正文，名稱精確匹配優先，語義結果補充",
   "set_rgBlocks": "提示詞塊",
@@ -10163,10 +10232,8 @@
   },
   "set_rgClearBody": "只刪除派生索引，原始內容和模型都保留。",
   "set_rgContext": "推薦上下文",
-  "set_rgContextSub": "兩種都最多取 120 個 Gemma token，按完整標籤擷取。",
-  "set_rgRange": "取樣範圍",
-  "set_rgBefore": "游標前",
-  "set_rgAround": "插入點前後",
+  "set_rgContextSub": "固定取游標前，按完整標籤擷取。可調整為 32–512 個 Gemma token。",
+  "set_rgRange": "取樣長度",
   "set_rgRuntime": "模型與執行環境",
   "set_rgEmbedPath": "嵌入模型目錄",
   "set_rgRerankPath": "重排模型目錄",
@@ -10650,6 +10717,8 @@
   "set_agBaseRestoreTitle": "恢復內建系統提示詞？",
   "set_agBaseRestoreBody": "全域自訂內容會換回內建系統提示詞，舊內容存入提示詞歷史。各工作區單獨的提示詞不受影響。",
   "set_agBaseSwitchTitle": "放棄內建系統提示詞的修改？",
+  "set_agPrefixSwitchTitle": "放棄前置內容的修改？",
+  "set_agPrefixInheritHint": "留空則沿用全域前置內容。",
   "set_agBaseSwitchBody": "切換範圍會丟掉還沒儲存的修改。",
   "set_agBaseSaving": "正在儲存…",
   "set_agBaseFailed": "沒有儲存：工作區已切換或寫入失敗，修改還在。",
@@ -10710,7 +10779,6 @@
   "set_agSkillManual": "僅手動呼叫",
   "set_agSkillAutoTip": "提示詞裡只放名稱和一句話描述，任務對得上時 Agent 會自己讀取完整說明。",
   "set_agSkillManualTip": "不進提示詞，Agent 不會自己用；在聊天框輸入 /skill:名稱 才會呼叫。",
-  "set_agWorkspaceRulesSub": "只對當前工作區生效的補充要求，存為工作區裡的 instructions.md，排在全域指令之後；點“編輯”用系統編輯器開啟，留空就不加。",
   "set_agSkillDescNaiPrompt": "按當前模型（V4／V4.5 或 V5）的規則，撰寫或修改草稿裡的 NovelAI 提示詞：主提示詞、負面、角色、積木與權重。改提示詞前先讀。",
   "set_agSkillDescNaiStudio": "操作 NAI Studio：草稿、圖片、生成、語義搜尋、圖庫／歷史、參考圖、積木、畫風探索、影像工具、快照與偏好設定。除讀取當前狀態外，其他 Studio 操作前先讀。",
   "set_agSkillView": "檢視",
@@ -10819,9 +10887,9 @@
   "ag_quickEdit": "編輯快捷資訊",
   "ag_quickSends": "點選直接傳送",
   "ag_modeBypass": "完全權限",
-  "ag_modeBypassHint": "不再詢問，所有操作直接執行；花 Anlas 仍要確認",
+  "ag_modeBypassHint": "所有操作直接執行；免費免確認，付費按 Agent 設定確認",
   "ag_bypassConfirmTitle": "切換到完全權限？",
-  "ag_bypassConfirmBody": "Agent 將不再詢問，直接修改檔案、執行命令、呼叫未知工具，也能操作工作區以外的檔案。花 Anlas 的操作仍會先請你確認。只在你信任當前任務時使用。",
+  "ag_bypassConfirmBody": "Agent 將不再詢問，直接修改檔案、執行命令、呼叫未知工具，也能操作工作區以外的檔案。免費生成自動執行；付費操作預設確認，可在 Agent 設定中關閉確認。只在你信任當前任務時使用。",
   "ag_bypassConfirmOk": "切換",
   "ag_bypassConfirmSilence": "不再提醒",
   "ag_menuDeleteChat": "刪除對話",
@@ -11535,7 +11603,6 @@
   "ag_memoryGlobal": "全域指令",
   "ag_memoryChatPrefix": "本會話前置指令",
   "ag_memoryChatPrefixHint": "僅當前會話生效，放在內建提示詞之前。",
-  "ag_memoryWorkspace": "本工作區規則",
   "ag_memorySkills": "生效的 Skill",
   "ag_memoryEmpty": "還沒寫",
   "ag_memoryEdit": "編輯",
@@ -12054,14 +12121,16 @@
   "ag_commandCompactArgs": "[說明]",
   "ag_commandRenameArgs": "<名稱>",
   "set_agNextSuggestion": "下一句建議",
+  "set_agSkipPaidConfirmation": "付費也無需確認",
+  "set_agSkipPaidConfirmationSub": "僅完全權限生效。免費操作自動執行；開啟後，消耗 Anlas 的生成和影像操作也無需確認。",
   "set_agNextSuggestionSub": "使用當前對話模型預測你的下一句訊息，會額外消耗 token；按 Tab 採納。",
-  "set_agCacheWarming": "提示快取預熱",
-  "set_agCacheWarmingSub": "在提示快取快過期前用 1 token 的請求續上（按 5 分鐘壽命，適配所有模型），下一步讀快取而不是重發整段上下文。",
+  "set_agCacheWarming": "提示快取保溫",
+  "set_agCacheWarmingSub": "通過輕量請求延長提示快取，減少後續請求重新計算上下文的開銷；是否命中快取以服務商為準。",
   "set_agCacheOff": "關閉",
   "set_agCacheStreaming": "只在 Agent 執行時",
-  "set_agCacheIdle": "空閒時也預熱",
-  "set_agCacheIdleCost": "空閒時也預熱（最多 30 分鐘）會產生額外模型費用。",
-  "ag_cacheWarmTitle": "快取預熱",
+  "set_agCacheIdle": "空閒時也保溫",
+  "set_agCacheIdleCost": "空閒時也保溫（最多 30 分鐘）會產生額外模型費用。",
+  "ag_cacheWarmTitle": "快取保溫",
   "ag_cacheWarmOff": "已關閉",
   "ag_cacheWarmRefreshing": "正在續期快取…",
   "ag_cacheWarmIdle": "待機，下次執行時開始",
@@ -12108,10 +12177,8 @@
       }
     }
   },
-  "set_workspaceFontScale": "創作區文字字號",
   "set_promptAutocomplete": "提示詞自動補全",
   "shortcut_action_open_resource_window": "開啟資源小窗",
-  "set_workspaceFontScaleSub": "提示詞框、角色框、塊與大圖提示詞裡的文字；和上面的介面字號分開調。",
   "set_promptAutocompleteSub": "在提示詞框和角色框輸入時，從本地標籤庫給出候選；↑↓ 選擇，Tab 或 Enter 採納，Esc 關閉。",
   "floating_open": "資源小窗",
   "floating_searchGallery": "搜尋（整段 / 完整標籤）",
@@ -12277,5 +12344,14 @@
   "ag_externalArtifactUpdated": "{client} 更新了「{title}」",
   "ag_externalWorkspaceUpdated": "{client} 更新了工作區",
   "ag_externalResultFailed": "{client} 的操作未完成",
-  "ag_externalNeedsAttention": "{client} 有操作需要你處理"
+  "ag_externalNeedsAttention": "{client} 有操作需要你處理",
+  "set_agViewScope": "檢視範圍",
+  "set_agViewGlobalHint": "所有工作區共用的指令與字首",
+  "set_agViewWorkspaceHint": "當前工作區的專案規則",
+  "set_agProjectRules": "工作區 AGENTS.md",
+  "set_agRulesReadonly": "只讀",
+  "set_agRulesView": "檢視",
+  "set_agRulesMissing": "此工作區尚未建立 AGENTS.md",
+  "set_agRulesEmpty": "AGENTS.md 暫無內容",
+  "set_agRulesLoadFailed": "無法讀取 AGENTS.md，請檢查檔案權限。"
 }

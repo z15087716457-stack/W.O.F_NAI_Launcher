@@ -79,8 +79,16 @@ extension _GalleryFiles on NaiAgentGalleryBinding {
   }
 
   Future<bool> _externalFilePath(String path) async {
+    final base = await GalleryFolderRepository.instance.getCategoryBasePath();
+    if (await Directory(base).exists() &&
+        galleryPathIsWithin(
+          await Directory(base).resolveSymbolicLinks(),
+          path,
+        )) {
+      return false;
+    }
     for (final root
-        in await GalleryFolderRepository.instance.getExtraRootPaths()) {
+        in await GalleryFolderRepository.instance.getSourcePaths()) {
       if (await Directory(root).exists() &&
           galleryPathIsWithin(
             await Directory(root).resolveSymbolicLinks(),

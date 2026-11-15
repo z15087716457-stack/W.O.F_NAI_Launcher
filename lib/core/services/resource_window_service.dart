@@ -159,14 +159,26 @@ class ResourceWindowService {
     FloatingResourceKind kind,
     String layout, {
     String? groupMode,
+  }) => _notifyView({
+    'kind': kind.name,
+    'layout': layout,
+    if (groupMode != null) 'groupMode': groupMode,
+  }, kind: kind);
+
+  Future<void> uiScaleChanged(double scale) => _notifyView({'uiScale': scale});
+
+  Future<void> _notifyView(
+    Map<String, Object?> values, {
+    FloatingResourceKind? kind,
   }) async {
-    for (final window in _windows.values.where((w) => w.kind == kind)) {
+    for (final window in _windows.values.where(
+      (w) => kind == null || w.kind == kind,
+    )) {
       try {
-        await window.controller.invokeMethod<void>('resources.viewChanged', {
-          'kind': kind.name,
-          'layout': layout,
-          if (groupMode != null) 'groupMode': groupMode,
-        });
+        await window.controller.invokeMethod<void>(
+          'resources.viewChanged',
+          values,
+        );
       } on WindowChannelException catch (error) {
         if (!const [
           'CHANNEL_NOT_FOUND',

@@ -73,15 +73,13 @@ void main() {
       final settings = container.read(ragSettingsProvider);
       await container
           .read(ragSettingsProvider.notifier)
-          .update(
-            settings.copyWith(mode: RagContextMode.before, wikiEnabled: true),
-          );
+          .update(settings.copyWith(tokenBudget: 256, wikiEnabled: true));
       download.result.complete('verified-embedding');
       await future;
       final finalSettings = container.read(ragSettingsProvider);
       expect(finalSettings.embedding, 'verified-embedding');
       expect(finalSettings.reranker, 'old-reranker');
-      expect(finalSettings.mode, RagContextMode.before);
+      expect(finalSettings.tokenBudget, 256);
       expect(finalSettings.wikiEnabled, isTrue);
       expect(container.read(ragModelDownloadProvider).active, isFalse);
     },

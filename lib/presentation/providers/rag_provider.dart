@@ -1088,7 +1088,8 @@ class RagController extends Notifier<RagStatus> {
       final result = await c.request('search', {
         'text': text,
         'cursor': cursor,
-        'mode': ref.read(ragSettingsProvider).mode.name,
+        'mode': 'before',
+        'budget': ref.read(ragSettingsProvider).tokenBudget,
         'existing': existing.toList(),
         'lexical': lexical.map((e) => e.canonicalTag).toList(),
         'negative': negative,

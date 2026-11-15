@@ -67,8 +67,7 @@ enum SettingKey {
   // 外观
   themeMode, // light / dark / system（system 是新增：跟随 Windows）
   fontFamily, // 选项由 [SettingsViewData.options] 给
-  settingsFontScale, // 设置页与对话框字号 0.8–1.5
-  workspaceFontScale, // 创作文字，与界面字号独立
+  uiScale, // Complete interface, 0.8–1.5
   promptAutocomplete, // 本地输入补全，默认关闭
   language, // zh / zh_TW / en / ja / ko
   reduceMotion, // 现有画布“减少动态效果”（也让视觉通道停微动）
@@ -98,6 +97,7 @@ enum SettingKey {
   imageSavePath,
   autoSave,
   vibePath,
+  preciseRefPath,
   galleryQuality, // high / standard
   thumbnailCacheLimitGb, // global GiB, 1..50
   appDataPath, // Hive 目录，改后需重启
@@ -109,9 +109,10 @@ enum SettingKey {
   agentMaxRequests, // 1–200
   agentCacheWarming,
   agentNextSuggestion,
+  agentSkipPaidConfirmation,
   // 语义检索
   ragEnabled,
-  ragContext, // beforeCursor / around
+  ragContextTokens, // 32–512 Gemma tokens before the caret
   ragDevice, // auto / cuda / cpu
   ragEmbedPath,
   ragRerankPath,
@@ -211,15 +212,7 @@ class SettingSpec {
       defaultValue: 'system',
     ),
     SettingKey.fontFamily: SettingSpec._(_c, _ap, defaultValue: 'system'),
-    SettingKey.settingsFontScale: SettingSpec._(
-      _n,
-      _ap,
-      min: .8,
-      max: 1.5,
-      step: .1,
-      defaultValue: 1.0,
-    ),
-    SettingKey.workspaceFontScale: SettingSpec._(
+    SettingKey.uiScale: SettingSpec._(
       _n,
       _ap,
       min: .8,
@@ -303,6 +296,7 @@ class SettingSpec {
     SettingKey.imageSavePath: SettingSpec._(_p, _st),
     SettingKey.autoSave: SettingSpec._(_t, _st, defaultValue: true),
     SettingKey.vibePath: SettingSpec._(_p, _st),
+    SettingKey.preciseRefPath: SettingSpec._(_p, _st),
     SettingKey.galleryQuality: SettingSpec._(
       _c,
       _st,
@@ -316,6 +310,11 @@ class SettingSpec {
       defaultValue: true,
     ),
     SettingKey.agentNextSuggestion: SettingSpec._(_t, _ag, defaultValue: true),
+    SettingKey.agentSkipPaidConfirmation: SettingSpec._(
+      _t,
+      _ag,
+      defaultValue: false,
+    ),
     SettingKey.agentCacheWarming: SettingSpec._(
       _c,
       _ag,
@@ -332,11 +331,12 @@ class SettingSpec {
       defaultValue: 32.0,
     ),
     SettingKey.ragEnabled: SettingSpec._(_t, _rg, defaultValue: false),
-    SettingKey.ragContext: SettingSpec._(
-      _c,
+    SettingKey.ragContextTokens: SettingSpec._(
+      _n,
       _rg,
-      choices: ['beforeCursor', 'around'],
-      defaultValue: 'around',
+      min: 32,
+      max: 512,
+      defaultValue: 120.0,
     ),
     SettingKey.ragDevice: SettingSpec._(
       _c,
@@ -847,6 +847,7 @@ enum SettingsStorageKind {
   images,
   upscaleModels,
   vibes,
+  preciseRefs,
   thumbnails,
   ragIndex,
   dictionaries,
@@ -874,19 +875,23 @@ class SettingsGalleryRoot {
     required this.id,
     required this.path,
     required this.images,
-    this.primary = false,
   });
 
   final String id;
   final String path;
   final int images;
-
-  /// 主目录（= 图片保存位置）不能移除。
-  final bool primary;
 }
 
 /// “打开文件夹”侧注里的几个目录。
-enum SettingsFolder { images, vibes, thumbnails, appData, logs, agent }
+enum SettingsFolder {
+  images,
+  vibes,
+  preciseRefs,
+  thumbnails,
+  appData,
+  logs,
+  agent,
+}
 
 @immutable
 class SettingsStorageData {
@@ -903,6 +908,8 @@ class SettingsStorageData {
     this.thumbnailBytes = 0,
     this.thumbnailLimit = 0,
     this.folderNames = const {},
+    this.folderPaths = const {},
+    this.imageSaveDirectory = '',
     this.incomplete = false,
     this.thumbnailCount = 0,
     this.measuredAt,
@@ -928,6 +935,12 @@ class SettingsStorageData {
 
   /// 侧注里每个目录的末级名（`outputs`、`vibes`……）。
   final Map<SettingsFolder, String> folderNames;
+
+  /// Resolved current directories, including defaults; never display a guessed path.
+  final Map<SettingsFolder, String> folderPaths;
+
+  /// Actual generated-image destination, including Uncategorized.
+  final String imageSaveDirectory;
 
   final bool incomplete;
 
@@ -1378,8 +1391,13 @@ class SettingsSystemPrompt {
 class SettingsAgentData {
   const SettingsAgentData({
     this.globalInstructions = '',
-    this.workspaceRulesPath,
+    this.workspaceChoices = const [],
+    this.projectRulesPath,
+    this.projectRulesText,
+    this.projectRulesLoading = false,
+    this.projectRulesFailed = false,
     this.systemPrefix = '',
+    this.workspacePrefix,
     this.systemPrompt,
     this.extensions = const [],
     this.skills = const [],
@@ -1408,8 +1426,13 @@ class SettingsAgentData {
 
   /// 已保存的内容；界面里编辑的是草稿，点“保存”才回调。
   final String globalInstructions;
-  final String? workspaceRulesPath;
+  final List<SettingsOption> workspaceChoices;
+  final String? projectRulesPath, projectRulesText;
+  final bool projectRulesLoading, projectRulesFailed;
   final String systemPrefix;
+
+  /// null = 沿用全局；编辑框留空保存时恢复继承。
+  final String? workspacePrefix;
 
   /// 基础提示词编辑；null = 不显示这一行（Agent 未初始化时）。
   final SettingsSystemPrompt? systemPrompt;
@@ -1430,13 +1453,26 @@ class SettingsAgentData {
   final int sessions;
 
   SettingsAgentData copyWith({
+    List<SettingsOption>? workspaceChoices,
+    String? projectRulesPath,
+    String? projectRulesText,
+    bool? projectRulesLoading,
+    bool? projectRulesFailed,
     String? globalInstructions,
     String? systemPrefix,
+    String? Function()? workspacePrefix,
     SettingsSystemPrompt? systemPrompt,
   }) => SettingsAgentData(
     globalInstructions: globalInstructions ?? this.globalInstructions,
     systemPrefix: systemPrefix ?? this.systemPrefix,
-    workspaceRulesPath: workspaceRulesPath,
+    workspacePrefix: workspacePrefix != null
+        ? workspacePrefix()
+        : this.workspacePrefix,
+    workspaceChoices: workspaceChoices ?? this.workspaceChoices,
+    projectRulesPath: projectRulesPath ?? this.projectRulesPath,
+    projectRulesText: projectRulesText ?? this.projectRulesText,
+    projectRulesLoading: projectRulesLoading ?? this.projectRulesLoading,
+    projectRulesFailed: projectRulesFailed ?? this.projectRulesFailed,
     systemPrompt: systemPrompt ?? this.systemPrompt,
     extensions: extensions,
     skills: skills,
@@ -2019,8 +2055,6 @@ class SettingsActions {
     this.onUpdateDictionary = _noDictionary,
     this.onCheckDictionaryUpdates = _none,
     this.onCancelDictionaryUpdate = _none,
-    this.onExportTagSemantics = _none,
-    this.onImportTagSemantics = _none,
     // 模型
     this.onImportModelConfig = _none,
     this.onCopyModelConfig = _none,
@@ -2030,8 +2064,9 @@ class SettingsActions {
     this.onRequestDetails = _noId,
     // Agent
     this.onSaveInstructions = _noInstructions,
-    this.onEditWorkspaceRules = _none,
+    this.onSelectAgentWorkspace = _noWorkspace,
     this.onSaveSystemPrompt = _noSystemPrompt,
+    this.onSaveWorkspacePrefix = _noWorkspacePrefix,
     this.onViewBuiltinPrompt = _none,
     this.onViewFinalPrompt = _none,
     this.onExtensionEnabled = _noIdBool,
@@ -2176,7 +2211,6 @@ class SettingsActions {
   final ValueChanged<SettingsDictionaryKind> onUpdateDictionary;
   final VoidCallback onCheckDictionaryUpdates;
   final VoidCallback onCancelDictionaryUpdate;
-  final VoidCallback onExportTagSemantics, onImportTagSemantics;
 
   final VoidCallback onImportModelConfig;
   final VoidCallback onCopyModelConfig;
@@ -2217,7 +2251,15 @@ class SettingsActions {
     required String? expectedText,
   })
   onSaveSystemPrompt;
-  final VoidCallback onEditWorkspaceRules;
+
+  /// 前置内容与基础提示词分别保存；null 或空白内容恢复沿用全局。
+  final Future<bool> Function({
+    required String? text,
+    required String workspaceId,
+    required String? expectedText,
+  })
+  onSaveWorkspacePrefix;
+  final Future<bool> Function(String id) onSelectAgentWorkspace;
   final VoidCallback onViewBuiltinPrompt;
   final VoidCallback onViewFinalPrompt;
   final void Function(String id, bool enabled) onExtensionEnabled;
@@ -2338,6 +2380,7 @@ class SettingsActions {
   final VoidCallback onOpenLicenses;
 
   static void _none() {}
+  static Future<bool> _noWorkspace(String _) async => false;
   static void _noPage(SettingsPageId _) {}
   static void _noChange(SettingKey _, Object? _) {}
   static void _noKey(SettingKey _) {}
@@ -2373,6 +2416,11 @@ class SettingsActions {
     required String workspaceId,
     required String? expectedText,
   }) async => true;
+  static Future<bool> _noWorkspacePrefix({
+    required String? text,
+    required String workspaceId,
+    required String? expectedText,
+  }) async => false;
   static void _noMcpMode(String _, SettingsMcpMode _) {}
   static void _noRag(SettingsRagSourceKind _) {}
   static void _noRagBool(SettingsRagSourceKind _, bool _) {}

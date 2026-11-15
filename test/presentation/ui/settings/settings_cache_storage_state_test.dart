@@ -6,6 +6,7 @@ import 'package:nai_launcher/presentation/ui/settings/settings_fixture.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_kit.dart';
 
 import '../../../helpers/studio_capture_fonts.dart';
+import '../../../helpers/uiux_frontend_capture.dart';
 import 'settings_test_harness.dart';
 
 void main() {
@@ -49,7 +50,7 @@ void main() {
   testWidgets(
     'gallery source remains available before usage measurement finishes',
     (t) async {
-      await pumpSettings(
+      final rec = await pumpSettings(
         t,
         data: _data(
           SettingsPageId.storage,
@@ -60,7 +61,6 @@ void main() {
                 id: 'fixture',
                 path: 'C:/fixture/images',
                 images: 0,
-                primary: true,
               ),
             ],
             thumbnailLimit: 1024 * 1024,
@@ -69,6 +69,20 @@ void main() {
         ),
       );
       expect(find.text('C:/fixture/images'), findsOneWidget);
+      final remove = find.byKey(const Key('root-remove-fixture'));
+      await t.ensureVisible(remove);
+      await t.pumpAndSettle();
+      expect(remove, findsOneWidget);
+      expect(find.text('主目录'), findsNothing);
+      await captureUiuxRegion(
+        t,
+        find.byKey(const Key('settings-capture')),
+        'gallery-sources',
+        Offset.zero & t.getSize(find.byKey(const Key('settings-capture'))),
+      );
+      await t.tap(remove);
+      expect(rec.calls, ['removeRoot:fixture']);
+      expect(rec.changes, isEmpty);
       expect(find.text('0.0'), findsNothing);
       expect(find.text('—'), findsWidgets);
       expect(t.takeException(), isNull);

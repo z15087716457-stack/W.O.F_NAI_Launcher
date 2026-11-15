@@ -3,9 +3,11 @@ import 'dart:convert';
 import 'prompt_translation_language.dart';
 
 import '../../data/models/prompt_block/pill_document.dart';
+import '../../data/models/prompt_reading.dart';
 import 'nai_prompt_syntax.dart';
 import 'pill_document_editor.dart';
 import 'prompt_input_normalization.dart';
+import 'prompt_reading_units.dart';
 
 typedef PromptTranslationGroup = ({
   int start,
@@ -24,6 +26,7 @@ class PromptTranslationSegment {
     required this.start,
     required this.end,
     required this.source,
+    this.reading,
   });
 
   final String id;
@@ -32,10 +35,11 @@ class PromptTranslationSegment {
   final int start;
   final int end;
   final String source;
+  final String? reading;
 }
 
 class PromptTranslationBatch {
-  PromptTranslationBatch._(this.documents, this.segments);
+  PromptTranslationBatch._(this.documents, this.segments, this.mode);
 
   static const int maxProposedTags = 64;
   static final RegExp _tagWhitespace = RegExp(r'\s+');
@@ -43,6 +47,7 @@ class PromptTranslationBatch {
 
   final Map<String, PillDocument> documents;
   final Map<String, List<PromptTranslationSegment>> segments;
+  final PromptTranslationMode mode;
 
   bool get isEmpty => segments.values.every((items) => items.isEmpty);
 
@@ -54,7 +59,7 @@ class PromptTranslationBatch {
     var count = 0;
     void flush() {
       if (current.isEmpty) return;
-      result.add(PromptTranslationBatch._(documents, current));
+      result.add(PromptTranslationBatch._(documents, current, mode));
       current = {};
       count = 0;
     }
@@ -70,18 +75,45 @@ class PromptTranslationBatch {
     return result;
   }
 
-  factory PromptTranslationBatch.prepare(Map<String, PillDocument> documents) {
+  factory PromptTranslationBatch.prepare(
+    Map<String, PillDocument> documents, {
+    bool skipReadings = false,
+    PromptTranslationMode mode = PromptTranslationMode.blocks,
+  }) {
     final fields = <String, List<PromptTranslationSegment>>{};
     for (final entry in documents.entries) {
       final field = entry.key;
       final document = entry.value;
       final items = <PromptTranslationSegment>[];
       final text = document.text;
+      final translated = {
+        if (skipReadings)
+          for (final item in document.readings)
+            if (!item.needsReview &&
+                (mode != PromptTranslationMode.inline || item.perSegment))
+              item.start: item.end,
+      };
       var run = 0;
       var start = 0;
       void collect(int end) {
         if (start >= end || text.substring(start, end).trim().isEmpty) return;
         final source = text.substring(start, end);
+        if (mode == PromptTranslationMode.inline) {
+          for (final unit in PromptReadingUnit.parse(source)) {
+            items.add(
+              PromptTranslationSegment(
+                id: '$field:${items.length}',
+                fieldId: field,
+                run: run,
+                start: start + unit.start,
+                end: start + unit.end,
+                source: source.substring(unit.start, unit.end),
+                reading: unit.text,
+              ),
+            );
+          }
+          return;
+        }
         final cuts = <int>{};
         for (final token in NaiPromptSyntax.scan(source)) {
           if (token.kind == NaiPromptTokenKind.comma) cuts.add(token.end);
@@ -95,6 +127,10 @@ class PromptTranslationBatch {
         for (final cut in [...cuts.toList()..sort(), source.length]) {
           if (cut <= local) continue;
           final slice = source.substring(local, cut);
+          if (skipReadings && RegExp(r'^[\s,，]+$').hasMatch(slice)) {
+            local = cut;
+            continue;
+          }
           if (slice.trim().isNotEmpty) {
             items.add(
               PromptTranslationSegment(
@@ -112,6 +148,13 @@ class PromptTranslationBatch {
       }
 
       for (var i = 0; i < text.length; i++) {
+        if (translated[i] case final end?) {
+          collect(i);
+          start = end;
+          i = end - 1;
+          run++;
+          continue;
+        }
         if (!isPillMarkerCodeUnit(text.codeUnitAt(i))) continue;
         collect(i);
         start = i + 1;
@@ -120,7 +163,7 @@ class PromptTranslationBatch {
       collect(text.length);
       fields[field] = items;
     }
-    return PromptTranslationBatch._(Map.unmodifiable(documents), fields);
+    return PromptTranslationBatch._(Map.unmodifiable(documents), fields, mode);
   }
 
   /// Exact candidates only. The caller verifies these against the unified
@@ -128,7 +171,7 @@ class PromptTranslationBatch {
   Set<String> get tagCandidates {
     final result = <String>{};
     for (final item in segments.values.expand((items) => items)) {
-      final tag = _candidateTag(item.source);
+      final tag = _candidateTag(item.reading ?? item.source);
       if (tag == null) continue;
       result.add(tag);
       if (result.length >= 160) return result;
@@ -194,6 +237,7 @@ class PromptTranslationBatch {
     String languageCode = 'zh',
   }) => jsonEncode({
     'target_language': PromptTranslationLanguage.fromCode(languageCode).code,
+    if (mode == PromptTranslationMode.inline) 'mode': 'inline',
     'fields': [
       for (final entry in segments.entries)
         if (entry.value.isNotEmpty)
@@ -201,7 +245,11 @@ class PromptTranslationBatch {
             'id': entry.key,
             'segments': [
               for (final item in entry.value)
-                {'id': item.id, 'run': item.run, 'source': item.source},
+                {
+                  'id': item.id,
+                  'run': item.run,
+                  'source': item.reading ?? item.source,
+                },
             ],
           },
     ],
@@ -248,7 +296,14 @@ class PromptTranslationBatch {
           throw const FormatException('Translation group is invalid');
         }
         final ids = rawGroup['ids'] as List;
-        final zh = (rawGroup['zh'] as String).trim();
+        if (mode == PromptTranslationMode.inline && ids.length != 1) {
+          throw const FormatException(
+            'Inline readings require one segment per group',
+          );
+        }
+        final zh = mode == PromptTranslationMode.inline
+            ? PromptReadingUnit.clean(rawGroup['zh'] as String)
+            : (rawGroup['zh'] as String).trim();
         if (ids.isEmpty || zh.isEmpty || zh.length > 20000) {
           throw const FormatException('Translation group is empty or too long');
         }
@@ -267,7 +322,9 @@ class PromptTranslationBatch {
         }
         final sourceTags = {
           for (var index = first; index < cursor; index++)
-            if (_candidateTag(items[index].source) case final tag?) tag,
+            if (_candidateTag(items[index].reading ?? items[index].source)
+                case final tag?)
+              tag,
         };
         final groupSourceIds = {
           for (var index = first; index < cursor; index++) items[index].id,
@@ -351,10 +408,34 @@ class PromptTranslationBatch {
     Map<String, List<PromptTranslationGroup>> allGroups, {
     bool autoFormat = false,
     String languageCode = 'zh',
+    PromptTranslationMode mode = PromptTranslationMode.blocks,
   }) {
     final result = <String, PillDocument>{};
     for (final entry in allGroups.entries) {
       final original = documents[entry.key]!;
+      if (mode == PromptTranslationMode.inline) {
+        final updated = entry.value;
+        result[entry.key] = original.copyWith(
+          readings: [
+            for (final item in original.readings)
+              if (!updated.any(
+                (group) => group.start < item.end && group.end > item.start,
+              ))
+                item,
+            for (final group in updated)
+              PromptReading(
+                start: group.start,
+                end: group.end,
+                source: original.text.substring(group.start, group.end),
+                translation: group.zh,
+                languageCode: languageCode,
+                perSegment: this.mode == PromptTranslationMode.inline,
+              ),
+          ]..sort((a, b) => a.start.compareTo(b.start)),
+          readingsVisible: true,
+        );
+        continue;
+      }
       var text = original.text;
       final instances = Map<String, PillInstance>.of(original.instances);
       for (final group in entry.value.reversed) {
@@ -377,7 +458,7 @@ class PromptTranslationBatch {
         );
         text = text.replaceRange(group.start, group.end, marker);
       }
-      result[entry.key] = PillDocument(text: text, instances: instances);
+      result[entry.key] = original.copyWith(text: text, instances: instances);
     }
     return result;
   }

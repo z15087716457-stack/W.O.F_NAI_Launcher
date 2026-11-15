@@ -206,11 +206,11 @@ void main() {
         'disabledSkills': ['global/off'],
       });
       File(
-        '${h.c.selected!.workspace.directory.path}/instructions.md',
+        '${h.c.selected!.workspace.directory.path}/AGENTS.md',
       ).writeAsStringSync('workspace rule');
       await h.pump(tester, files: true);
       expect(h.panel(tester).data.memory!.globalInstructions, 'global rule');
-      expect(h.panel(tester).data.memory!.workspaceRules, 'workspace rule');
+      expect(h.panel(tester).data.memory!.projectRules, 'workspace rule');
       expect(h.panel(tester).data.memory!.activeSkills, ['on']);
       expect(h.panel(tester).data.skills.map((s) => s.name), ['on']);
     },
@@ -246,7 +246,7 @@ void main() {
     await tester.pumpAndSettle();
     for (final (target, anchor) in const [
       (view.AgentMemoryTarget.global, 'agentInstructions'),
-      (view.AgentMemoryTarget.workspace, 'agentWorkspaceRules'),
+      (view.AgentMemoryTarget.workspace, 'agentProjectRules'),
       (view.AgentMemoryTarget.skills, 'agentSkills'),
       (view.AgentMemoryTarget.quick, 'agentQuick'),
     ]) {

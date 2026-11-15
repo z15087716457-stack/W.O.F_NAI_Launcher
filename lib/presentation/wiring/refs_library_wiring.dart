@@ -160,13 +160,13 @@ class _RefsLibraryWiringState extends ConsumerState<_RefsLibraryWiring> {
         if (!mounted) return;
         final error = ref.read(vibeLibraryNotifierProvider).error;
         if (error != null) throw StateError(error);
-        _folderPath = await _platform.libraryFolder();
       } else {
         await _precise.initialize();
         if (!mounted) return;
         final error = ref.read(preciseRefLibraryNotifierProvider).error;
         if (error != null) throw StateError(error);
       }
+      _folderPath = await _platform.libraryFolder(widget.kind);
       if (_exportFolder.isEmpty) _exportFolder = _folderPath ?? '';
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -886,13 +886,14 @@ class _RefsLibraryWiringState extends ConsumerState<_RefsLibraryWiring> {
         } else {
           await _precise.reload(showLoading: true);
         }
+        _folderPath = await _platform.libraryFolder(widget.kind);
       } finally {
         if (mounted) setState(() => _loading = false);
       }
     }),
     onOpenFolder: (key) => _run(() async {
       final path = key == null
-          ? _folderPath
+          ? await _platform.libraryFolder(widget.kind)
           : _vibe
           ? (await _storage.getEntry(key))?.filePath
           : ref
@@ -901,7 +902,9 @@ class _RefsLibraryWiringState extends ConsumerState<_RefsLibraryWiring> {
                 .where((e) => e.id == key)
                 .firstOrNull
                 ?.imagePath;
-      if (path != null) await _platform.openFolder(path);
+      if (path != null) {
+        await _platform.openFolder(path, directory: key == null);
+      }
     }),
     onReplacePreview: (key) => _run(() async {
       final files = await _platform.pickFiles(

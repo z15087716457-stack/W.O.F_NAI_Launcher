@@ -49,6 +49,30 @@ class _SystemBrightness extends StudioSystemBrightness {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  test('RAG context length saves through settings and resets to 120', () async {
+    final storage = MemoryStorage();
+    final container = ProviderContainer(
+      overrides: [localStorageServiceProvider.overrideWithValue(storage)],
+    );
+    final store = container.read(settingsValueStoreProvider);
+    expect(container.read(ragSettingsProvider).tokenBudget, 120);
+    for (final value in [32.0, 121.0, 512.0, 120.0]) {
+      await store.write(SettingKey.ragContextTokens, value);
+      expect(container.read(ragSettingsProvider).tokenBudget, value.toInt());
+    }
+    for (final value in [31.0, 513.0, double.nan, '120']) {
+      await expectLater(
+        store.write(SettingKey.ragContextTokens, value),
+        throwsArgumentError,
+      );
+    }
+    container.dispose();
+    final fresh = ProviderContainer(
+      overrides: [localStorageServiceProvider.overrideWithValue(storage)],
+    );
+    addTearDown(fresh.dispose);
+    expect(fresh.read(ragSettingsProvider).tokenBudget, 120);
+  });
   test(
     'thumbnail limit persists, clamps and applies capacity/file budget',
     () async {

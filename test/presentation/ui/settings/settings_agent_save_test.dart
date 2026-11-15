@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
 
@@ -9,6 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_contract.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_fixture.dart';
+import 'package:nai_launcher/presentation/ui/settings/settings_kit.dart';
 
 import '../../../helpers/studio_capture_fonts.dart';
 import 'settings_test_harness.dart';
@@ -87,6 +89,7 @@ void main() {
       expect(text(t, 'agent-prefix'), 'draft prefix');
       expect(find.byKey(const Key('agent-unsaved')), findsOneWidget);
       expect(find.text('正在保存指令…'), findsOneWidget);
+      expect(find.byKey(const Key('settings-unsaved-dot')), findsNWidgets(2));
 
       await t.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
       await t.sendKeyEvent(LogicalKeyboardKey.keyS);
@@ -127,11 +130,14 @@ void main() {
         expect(text(t, 'agent-prefix'), 'retry prefix');
         expect(find.textContaining('指令未保存：'), findsOneWidget);
         expect(find.byKey(const Key('agent-unsaved')), findsOneWidget);
+        expect(find.byKey(const Key('settings-unsaved-dot')), findsNWidgets(2));
         rec.saveInstructions = ({required global, required prefix}) async =>
             true;
         await save(t);
         await refresh(t); // Acknowledgement may precede provider publication.
         expect(find.byKey(const Key('agent-unsaved')), findsNothing);
+        expect(find.byKey(const Key('settings-unsaved-dot')), findsNothing);
+        expect(find.byKey(const Key('agent-tab-dirty')), findsNothing);
         expect(text(t, 'agent-global'), 'retry global');
         expect(text(t, 'agent-prefix'), 'retry prefix');
         expect(t.takeException(), isNull);
@@ -169,6 +175,7 @@ void main() {
       expect(text(t, 'agent-global'), 'newer global');
       expect(text(t, 'agent-prefix'), 'newer prefix');
       expect(find.byKey(const Key('agent-unsaved')), findsOneWidget);
+      expect(find.byKey(const Key('settings-unsaved-dot')), findsNWidgets(2));
       rec.saveInstructions = ({required global, required prefix}) async {
         submissions.add((global, prefix));
         return true;
@@ -180,6 +187,7 @@ void main() {
         ('newer global', 'newer prefix'),
       ]);
       expect(find.byKey(const Key('agent-unsaved')), findsNothing);
+      expect(find.byKey(const Key('settings-unsaved-dot')), findsNothing);
       expect(text(t, 'agent-global'), 'newer global');
       expect(text(t, 'agent-prefix'), 'newer prefix');
     },
@@ -236,9 +244,14 @@ void main() {
       await refresh(t);
       expect(text(t, 'agent-base-text'), 'base retry');
       expect(find.byKey(const Key('agent-unsaved')), findsOneWidget);
+      expect(
+        t.widget<SettingsRow>(find.byKey(const Key('agent-base'))).unsaved,
+        isTrue,
+      );
       rec.saveSystemPrompt = null;
       await save(t);
       expect(find.byKey(const Key('agent-unsaved')), findsNothing);
+      expect(find.byKey(const Key('settings-unsaved-dot')), findsNothing);
       expect(t.takeException(), isNull);
     },
   );
@@ -257,6 +270,47 @@ void main() {
     expect(rec.pages, [SettingsPageId.network]);
     pending.complete(true);
     await t.pumpAndSettle();
+    expect(t.takeException(), isNull);
+  });
+
+  testWidgets('reverting or discarding drafts clears their blue dots', (
+    t,
+  ) async {
+    await agent(t);
+    final original = text(t, 'agent-global');
+    await edit(t, 'agent-global', 'a changed draft');
+    final mark = find.byType(SettingsUnsavedMark).first;
+    final widget = t.widget<SettingsUnsavedMark>(mark);
+    final label = t.getRect(find.byWidget(widget.child));
+    final dot = t.getRect(find.byKey(const Key('settings-unsaved-dot')));
+    expect(dot.left - label.right, closeTo(7, .001));
+    expect(dot.center.dy, closeTo(label.center.dy, .001));
+    expect(dot.size, const Size(6, 6));
+    final directory = Platform.environment['CAPTURE_SETTINGS_SAVE'];
+    if (directory != null) {
+      await t.runAsync(() async {
+        final file = File('$directory/unsaved-metrics.json');
+        await file.parent.create(recursive: true);
+        await file.writeAsString(
+          jsonEncode({
+            'dotWidth': dot.width,
+            'dotHeight': dot.height,
+            'labelGap': dot.left - label.right,
+            'centerResidual': dot.center.dy - label.center.dy,
+          }),
+        );
+      });
+    }
+    await edit(t, 'agent-global', original);
+    expect(find.byKey(const Key('settings-unsaved-dot')), findsNothing);
+    expect(find.byKey(const Key('agent-tab-dirty')), findsNothing);
+    await editBase(t, 'a base draft');
+    expect(find.byKey(const Key('settings-unsaved-dot')), findsOneWidget);
+    final dock = find.byKey(const Key('agent-unsaved'));
+    final l = AppLocalizations.of(t.element(dock))!;
+    await tap(t, find.descendant(of: dock, matching: find.text(l.set_discard)));
+    expect(find.byKey(const Key('settings-unsaved-dot')), findsNothing);
+    expect(find.byKey(const Key('agent-tab-dirty')), findsNothing);
     expect(t.takeException(), isNull);
   });
 

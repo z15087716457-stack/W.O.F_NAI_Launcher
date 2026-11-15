@@ -75,7 +75,8 @@ class NaiAgentGenerationQuote {
   final Map<String, dynamic> params;
   final DateTime expiresAt;
   bool approved = false, reserved = false;
-  Map<String, dynamic> toJson() => {
+  bool autoApproved = false;
+  Map<String, dynamic> toJson({bool automatic = false}) => {
     'quote_id': id,
     'expires_at': expiresAt.toIso8601String(),
     'action': input.raw.action.name,
@@ -105,7 +106,9 @@ class NaiAgentGenerationQuote {
     'local_enhance': input.localEnhance,
     'can_generate': input.blockedReason == null,
     'blocked_reason': input.blockedReason,
-    'authorization': 'explicit_user_button_required',
+    'authorization': automatic
+        ? 'full_access_policy'
+        : 'explicit_user_button_required',
   };
 }
 
@@ -122,8 +125,8 @@ class NaiAgentGenerationRun {
   final bool Function() cancel;
 }
 
-/// Quotes and button authorization are owned by one official Pi conversation.
-/// No model-supplied authorization flag is consulted, and nothing auto-resumes.
+/// Quotes and Studio's confirmation policy belong to one Pi conversation.
+/// No model-supplied authorization flag is consulted.
 class NaiAgentGenerationTools {
   NaiAgentGenerationTools({
     required this.readInput,
@@ -132,6 +135,7 @@ class NaiAgentGenerationTools {
     required this.start,
     required this.isAlive,
     this.refreshBalance,
+    this.autoApprove,
     DateTime Function()? clock,
   }) : clock = clock ?? DateTime.now;
   final NaiAgentGenerationInput Function(Map<String, dynamic>) readInput;
@@ -145,6 +149,7 @@ class NaiAgentGenerationTools {
   final NaiAgentGenerationRun? Function(NaiAgentGenerationInput) start;
   final bool Function() isAlive;
   final Future<void> Function()? refreshBalance;
+  final bool Function(int totalAnlas)? autoApprove;
   final DateTime Function() clock;
   final _quotes = <String, NaiAgentGenerationQuote>{};
   NaiAgentGenerationRun? _active;
@@ -195,7 +200,11 @@ class NaiAgentGenerationTools {
       _quotes.remove(disposable.id);
     }
     _quotes[quote.id] = quote;
-    return naiAgentTextResult({'quote': quote.toJson()});
+    return naiAgentTextResult({
+      'quote': quote.toJson(
+        automatic: autoApprove?.call(quote.input.estimate) == true,
+      ),
+    });
   }
 
   Future<NaiAgentGenerationQuote> _prepareFreshQuote(
@@ -286,10 +295,13 @@ class NaiAgentGenerationTools {
       final initialCheck = check();
       if (initialCheck != null) await initialCheck;
       if (!userButton && !quote.approved) {
-        final accepted = await approve(quote, token, () {
-          final current = readCurrent();
-          if (!needsBalanceCheck(current)) validate(current);
-        });
+        quote.autoApproved = autoApprove?.call(quote.input.estimate) == true;
+        final accepted =
+            quote.autoApproved ||
+            await approve(quote, token, () {
+              final current = readCurrent();
+              if (!needsBalanceCheck(current)) validate(current);
+            });
         if (!accepted) {
           _quotes.remove(quote.id);
           return naiAgentTextResult({
@@ -299,7 +311,8 @@ class NaiAgentGenerationTools {
         }
         final approvedCheck = check();
         if (approvedCheck != null) await approvedCheck;
-        quote.approved = true;
+        // A policy grant must follow the current setting on each retry.
+        quote.approved = !quote.autoApproved;
       }
       final path = await backup(quote.input);
       final submissionCheck = check();
@@ -330,7 +343,10 @@ class NaiAgentGenerationTools {
           'estimated_anlas': quote.input.estimate,
           'balance_before_anlas': quote.input.balance,
           'actual_anlas': null,
-          'authorization': {'source': 'user_button', 'quote_id': quote.id},
+          'authorization': {
+            'source': quote.autoApproved ? 'full_access_policy' : 'user_button',
+            'quote_id': quote.id,
+          },
         });
       } finally {
         if (identical(_active, job)) _active = null;

@@ -114,6 +114,15 @@ class NaiSyntaxController extends TextEditingController {
     required BuildContext context,
     TextStyle? style,
     required bool withComposing,
+  }) => _buildSpan(context: context, style: style, applySelection: true);
+
+  TextSpan buildReadingSpan(BuildContext context, TextStyle style) =>
+      _buildSpan(context: context, style: style, applySelection: false);
+
+  TextSpan _buildSpan({
+    required BuildContext context,
+    TextStyle? style,
+    required bool applySelection,
   }) {
     final baseStyle = style ?? const TextStyle();
 
@@ -158,7 +167,8 @@ class NaiSyntaxController extends TextEditingController {
     final finalSpans = _cachedFinalSpans!;
     final selected = selection;
     final editor = context.widget;
-    if (!selected.isValid ||
+    if (!applySelection ||
+        !selected.isValid ||
         selected.isCollapsed ||
         editor is EditableText && editor.selectionColor == null) {
       return TextSpan(style: baseStyle, children: finalSpans);

@@ -12,9 +12,11 @@ import '../../../../core/utils/hive_storage_helper.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../core/utils/vibe_library_path_helper.dart';
 import '../../../../data/repositories/gallery_folder_repository.dart';
+import '../../../providers/gallery_category_provider.dart';
 import '../../../providers/image_save_settings_provider.dart';
+import '../../../providers/local_gallery_provider.dart';
 import '../../../providers/tag_index_import_provider.dart';
-import '../../../utils/gallery_extra_root_add_flow.dart';
+import '../../../utils/gallery_source_add_flow.dart';
 import '../../../widgets/common/app_toast.dart';
 import '../widgets/cache_statistics_tile.dart';
 import '../widgets/data_source_cache_settings.dart';
@@ -130,7 +132,7 @@ class _StorageSettingsSectionState
             ],
           ),
         ),
-        const GalleryExtraRootsCard(labeled: true),
+        const GallerySourcesCard(labeled: true),
       ],
     );
   }
@@ -160,18 +162,17 @@ class StorageMaintenanceSection extends StatelessWidget {
 ///
 /// 额外图库源：任意文件夹加入画廊，可浏览可搜索，不参与自动保存。
 /// 图片级移动/复制仍遵循画廊现有的保护与确认流程。
-class GalleryExtraRootsCard extends ConsumerStatefulWidget {
-  const GalleryExtraRootsCard({super.key, this.labeled = false});
+class GallerySourcesCard extends ConsumerStatefulWidget {
+  const GallerySourcesCard({super.key, this.labeled = false});
 
   final bool labeled;
 
   @override
-  ConsumerState<GalleryExtraRootsCard> createState() =>
-      _GalleryExtraRootsCardState();
+  ConsumerState<GallerySourcesCard> createState() => _GallerySourcesCardState();
 }
 
-class _GalleryExtraRootsCardState extends ConsumerState<GalleryExtraRootsCard> {
-  List<String> _extraRoots = const [];
+class _GallerySourcesCardState extends ConsumerState<GallerySourcesCard> {
+  List<String> _sources = const [];
 
   @override
   void initState() {
@@ -180,13 +181,13 @@ class _GalleryExtraRootsCardState extends ConsumerState<GalleryExtraRootsCard> {
   }
 
   Future<void> _loadExtraRoots() async {
-    final roots = await GalleryFolderRepository.instance.getExtraRootPaths();
+    final roots = await GalleryFolderRepository.instance.getSourcePaths();
     if (!mounted) return;
-    setState(() => _extraRoots = roots);
+    setState(() => _sources = roots);
   }
 
   Future<void> _addExtraRoot() async {
-    final added = await GalleryExtraRootAddFlow.pickAndAdd(
+    final added = await GallerySourceAddFlow.pickAndAdd(
       context: context,
       ref: ref,
     );
@@ -225,7 +226,7 @@ class _GalleryExtraRootsCardState extends ConsumerState<GalleryExtraRootsCard> {
 
   /// 执行导入，完成后 toast 报告计数
   Future<void> _runImport(String filePath) async {
-    await GalleryExtraRootAddFlow.importTagIndex(
+    await GallerySourceAddFlow.importTagIndex(
       context: context,
       ref: ref,
       filePath: filePath,
@@ -256,10 +257,12 @@ class _GalleryExtraRootsCardState extends ConsumerState<GalleryExtraRootsCard> {
 
     if (confirmed != true || !mounted) return;
 
-    final removed = await GalleryFolderRepository.instance.removeExtraRootPath(
+    final removed = await GalleryFolderRepository.instance.removeSourcePath(
       path,
     );
     if (removed) {
+      ref.invalidate(galleryCategoryNotifierProvider);
+      await ref.read(localGalleryNotifierProvider.notifier).refreshSources();
       await _loadExtraRoots();
       if (mounted) {
         AppToast.success(context, context.l10n.settings_extraRootsRemoved);
@@ -284,7 +287,7 @@ class _GalleryExtraRootsCardState extends ConsumerState<GalleryExtraRootsCard> {
             ),
           ),
         ),
-        if (_extraRoots.isEmpty)
+        if (_sources.isEmpty)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: Text(
@@ -295,7 +298,7 @@ class _GalleryExtraRootsCardState extends ConsumerState<GalleryExtraRootsCard> {
             ),
           )
         else
-          ..._extraRoots.map(
+          ..._sources.map(
             (path) => SettingsTile(
               dense: true,
               leading: const Icon(Icons.folder_outlined, size: 20),

@@ -16,15 +16,15 @@ class ProfilesTests(unittest.TestCase):
         self.lock = json.loads((ROOT / 'tool/tag_semantics/source_lock.json').read_text('utf-8'))
         self.source = ROOT / 'tool/tag_semantics/sources/tags_enhanced.csv'
 
-    def fixture(self, rows):
-        source = self.root / 'source.csv'
+    def fixture(self, rows, name='source.csv'):
+        source = self.root / name
         with source.open('w', encoding='gbk', newline='') as stream:
             writer = csv.DictWriter(stream, COLUMNS)
             writer.writeheader()
             writer.writerows(rows)
         lock = {**self.lock, 'sha256': sha256(source), 'size': source.stat().st_size,
                 'expectedRows': len(rows)}
-        for field in ('expectedProfiles', 'expectedQuarantinedRows', 'expectedMissingSummaries'):
+        for field in ('expectedProfiles', 'expectedQuarantinedRows', 'expectedMissingSummaries', 'additions'):
             lock.pop(field)
         return source, lock
 
@@ -40,7 +40,7 @@ class ProfilesTests(unittest.TestCase):
         self.assertEqual(db.execute('PRAGMA integrity_check').fetchone()[0], 'ok')
         self.assertEqual(db.execute('SELECT * FROM tag_semantics ORDER BY tag').fetchall(), sorted(profiles))
         self.assertEqual(db.execute('SELECT * FROM source_issues ORDER BY source_row').fetchall(), issues)
-        self.assertEqual(summary['profiles'], 53860)
+        self.assertEqual(summary['profiles'], 54407)
         self.assertEqual(summary['missingSummaries'], 1)
         grass = db.execute("SELECT synonyms_zh,core_zh,summary_zh FROM tag_semantics WHERE tag='grass'").fetchone()
         self.assertEqual(json.loads(grass[0]), ['草地', '草', '户外', '自然'])
@@ -101,6 +101,28 @@ class ProfilesTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'unexpected_profiles'):
             build(source, lock, target)
         self.assertEqual(target.read_bytes(), b'previous')
+
+    def test_additions_never_replace_existing_profile_fields(self):
+        original = self.row()
+        source, lock = self.fixture([original])
+        changed = dict(original, cn_name='不能覆盖旧资料', wiki='上游新写的释义', post_count='999')
+        extra, extra_lock = self.fixture([changed, self.row('new_tag')], 'extra.csv')
+        baseline, _, _ = read_profiles(source, lock)
+        lock['additions'] = [{**extra_lock, 'file': extra.name}]
+        profiles, _, _ = read_profiles(source, lock)
+        by_tag = {profile[0]: profile for profile in profiles}
+        self.assertEqual(by_tag['grass'], baseline[0])
+        self.assertEqual(set(by_tag), {'grass', 'new_tag'})
+
+    def test_published_data_keeps_every_baseline_row_and_adds_547(self):
+        baseline_lock = {k: v for k, v in self.lock.items() if k != 'additions'}
+        baseline_lock['expectedProfiles'] = 53860
+        baseline, issues, _ = read_profiles(self.source, baseline_lock)
+        profiles, merged_issues, _ = read_profiles(self.source, self.lock)
+        current = {profile[0]: profile for profile in profiles}
+        self.assertTrue(all(current[profile[0]] == profile for profile in baseline))
+        self.assertEqual(len(current) - len(baseline), 547)
+        self.assertEqual(merged_issues, issues)
 
 
 if __name__ == '__main__':

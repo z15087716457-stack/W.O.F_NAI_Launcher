@@ -640,25 +640,8 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
     }
   }
 
-  /// 从文件系统获取所有图片文件（主源 + 额外图库源）
+  /// 从已收录的图库来源获取所有图片文件
   Future<List<File>> _getAllImageFiles() async {
-    final rootPath = await GalleryFolderRepository.instance.getRootPath();
-    if (rootPath == null || rootPath.isEmpty) {
-      throw GalleryPermissionDeniedException(
-        path: rootPath,
-        message: 'Gallery root path not set',
-      );
-    }
-
-    final rootDir = Directory(rootPath);
-    if (!await rootDir.exists()) {
-      throw GalleryPermissionDeniedException(
-        path: rootPath,
-        message: 'Gallery folder does not exist: $rootPath',
-      );
-    }
-
-    // 主源 + 全部存在的额外源
     final rootDirs = await GalleryFolderRepository.instance.getAllRootDirs();
 
     var files = <File>[];
@@ -747,7 +730,7 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
     } catch (e) {
       AppLogger.e('Failed to get image files', e, null, 'LocalGalleryService');
       throw GalleryFileSystemException(
-        path: rootPath,
+        path: e is FileSystemException ? e.path : null,
         operation: FileSystemOperation.list,
         message: 'Failed to list image files',
         cause: e,
@@ -1569,6 +1552,10 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
 
     try {
       final normalizedPath = normalizeGalleryFilePath(filePath);
+      final roots = await GalleryFolderRepository.instance.getSourcePaths();
+      if (!roots.any((root) => galleryPathIsWithin(root, normalizedPath))) {
+        return false;
+      }
       final file = File(normalizedPath);
       if (!await file.exists()) {
         AppLogger.w(
@@ -1664,10 +1651,7 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
   Future<Set<String>> applyFileChanges(GalleryFileChanges changes) async {
     _ensureInitialized();
     final folders = GalleryFolderRepository.instance;
-    final roots = [
-      (await folders.getRootPath())!,
-      ...await folders.getExtraRootPaths(),
-    ];
+    final roots = await folders.getSourcePaths();
     bool inLibrary(String path) =>
         roots.any((root) => galleryPathIsWithin(root, path));
     final candidates = {

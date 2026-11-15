@@ -269,8 +269,9 @@ class GalleryCategoryNotifier extends _$GalleryCategoryNotifier {
   Future<void> applyDeletedPaths(List<String> paths) async {
     if (paths.isEmpty || state.categories.isEmpty) return;
     try {
-      final rootPath = await GalleryFolderRepository.instance.getRootPath();
-      if (rootPath == null || rootPath.isEmpty) return;
+      final rootPath = await GalleryFolderRepository.instance
+          .getCategoryBasePath();
+      if (rootPath.isEmpty) return;
 
       final rootKey = galleryFilePathKey(rootPath);
       final byId = {for (final c in state.categories) c.id: c};

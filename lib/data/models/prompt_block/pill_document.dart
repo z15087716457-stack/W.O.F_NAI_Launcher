@@ -6,6 +6,7 @@
 library;
 
 import '../../../core/utils/prompt_translation_language.dart';
+import '../prompt_reading.dart';
 import 'package:collection/collection.dart';
 
 /// 实例随机模式（P2.5）：固定 = 投影恒为块内容；随机抽取 = 投影为物化的
@@ -700,7 +701,12 @@ class TranslationPill {
 
 /// 药丸工作区文档：文本（含标记字符）+ 实例表。
 class PillDocument {
-  const PillDocument({required this.text, required this.instances});
+  const PillDocument({
+    required this.text,
+    required this.instances,
+    this.readings = const [],
+    this.readingsVisible = true,
+  });
 
   factory PillDocument.empty() => const PillDocument(text: '', instances: {});
 
@@ -709,17 +715,31 @@ class PillDocument {
 
   /// 标记字符 → 实例。键恒为单个字符（字符串）。
   final Map<String, PillInstance> instances;
+  final List<PromptReading> readings;
+  final bool readingsVisible;
 
-  PillDocument copyWith({String? text, Map<String, PillInstance>? instances}) {
+  PillDocument copyWith({
+    String? text,
+    Map<String, PillInstance>? instances,
+    List<PromptReading>? readings,
+    bool? readingsVisible,
+  }) {
     return PillDocument(
       text: text ?? this.text,
       instances: instances ?? this.instances,
+      readings:
+          readings ??
+          PromptReading.rebase(this.readings, this.text, text ?? this.text),
+      readingsVisible: readingsVisible ?? this.readingsVisible,
     );
   }
 
   Map<String, dynamic> toJson() => {
     'text': text,
     'instances': instances.map((key, value) => MapEntry(key, value.toJson())),
+    if (readings.isNotEmpty)
+      'readings': readings.map((r) => r.toJson()).toList(),
+    if (!readingsVisible) 'readingsVisible': false,
   };
 
   factory PillDocument.fromJson(Map<String, dynamic> json) {
@@ -736,15 +756,33 @@ class PillDocument {
         }
       }
     }
+    final text = json['text'] as String? ?? '';
+    final readings = <PromptReading>[];
+    for (final raw
+        in json['readings'] is List ? json['readings'] as List : const []) {
+      if (raw is! Map) continue;
+      final item = PromptReading.fromJson(Map<String, dynamic>.from(raw), text);
+      if (item != null &&
+          (readings.isEmpty || item.start >= readings.last.end)) {
+        readings.add(item);
+      }
+    }
     return PillDocument(
-      text: json['text'] as String? ?? '',
+      text: text,
       instances: instances,
+      readings: List.unmodifiable(readings),
+      readingsVisible: json['readingsVisible'] != false,
     );
   }
 
   @override
   bool operator ==(Object other) {
-    if (other is! PillDocument || other.text != text) return false;
+    if (other is! PillDocument ||
+        other.text != text ||
+        other.readingsVisible != readingsVisible ||
+        !const ListEquality<PromptReading>().equals(other.readings, readings)) {
+      return false;
+    }
     if (other.instances.length != instances.length) return false;
     for (final entry in instances.entries) {
       if (other.instances[entry.key] != entry.value) return false;
@@ -755,6 +793,8 @@ class PillDocument {
   @override
   int get hashCode => Object.hash(
     text,
+    readingsVisible,
+    Object.hashAll(readings),
     Object.hashAll(
       instances.entries.map((entry) => Object.hash(entry.key, entry.value)),
     ),

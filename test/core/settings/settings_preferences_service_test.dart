@@ -44,7 +44,7 @@ void main() {
     () {
       storage.values.addAll({
         StorageKeys.tagExpansionResultLimit: CompletionResultLimits.all,
-        StorageKeys.fontScale: 1.3,
+        StorageKeys.uiScale: 1.3,
         StorageKeys.workspaceFontScale: 1.5,
         StorageKeys.promptAutocompleteEnabled: true,
         StorageKeys.thumbnailCacheLimitGb: 50,
@@ -54,8 +54,8 @@ void main() {
       });
       final values = service.decode(service.encode(service.capture()));
       expect(values[StorageKeys.tagExpansionResultLimit], 300000);
-      expect(values[StorageKeys.fontScale], 1.3);
-      expect(values[StorageKeys.workspaceFontScale], 1.5);
+      expect(values[StorageKeys.uiScale], 1.3);
+      expect(values, isNot(contains(StorageKeys.workspaceFontScale)));
       expect(values[StorageKeys.promptAutocompleteEnabled], true);
       expect(values[StorageKeys.thumbnailCacheLimitGb], 50);
       for (final invalid in [0, 51, 1.5, '20']) {
@@ -82,10 +82,10 @@ void main() {
         jsonEncode({
           'schema': 'other',
           'version': 1,
-          'preferences': {StorageKeys.fontScale: 1},
+          'preferences': {StorageKeys.uiScale: 1},
         }),
         service.encode({'api_key': 'fake'}),
-        service.encode({StorageKeys.fontScale: 10}),
+        service.encode({StorageKeys.uiScale: 10}),
         service.encode({StorageKeys.workspaceFontScale: 1.6}),
         service.encode({StorageKeys.promptAutocompleteEnabled: 1}),
         service.encode({StorageKeys.tagExpansionResultLimit: 0}),
@@ -144,12 +144,12 @@ void main() {
   );
   test('stale confirmation does not write or create backup', () async {
     final before = service.capture();
-    storage.values[StorageKeys.fontScale] = 1.3;
+    storage.values[StorageKeys.uiScale] = 1.3;
     await expectLater(
-      service.apply({StorageKeys.fontScale: 1.0}, expected: before),
+      service.apply({StorageKeys.uiScale: 1.0}, expected: before),
       throwsStateError,
     );
-    expect(storage.values[StorageKeys.fontScale], 1.3);
+    expect(storage.values[StorageKeys.uiScale], 1.3);
     expect(await dir.list().toList(), isEmpty);
   });
   test('rollback preserves another later write during failed import', () async {

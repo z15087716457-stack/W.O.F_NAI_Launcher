@@ -43,6 +43,19 @@ Map<String, Object?> page(Map<String, Object?> args, {String id = 'a'}) => {
   'sortId': 'updated',
 };
 void main() {
+  test('appearance updates change scale without reloading resources', () {
+    final controller = ResourceWindowController(
+      windowId: 'scale',
+      kind: FloatingResourceKind.blocks,
+      uiScale: 1.2,
+      invoke: (_, _) async =>
+          fail('Scaling must not query or modify resources'),
+    );
+    addTearDown(controller.dispose);
+    expect(controller.uiScale, 1.2);
+    controller.viewChanged({'uiScale': 1.5});
+    expect(controller.uiScale, 1.5);
+  });
   testWidgets(
     'group changes retain the loaded page, skip repeats and discard old replies in every resource',
     (tester) async {

@@ -3,8 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../storage/local_storage_service.dart';
 import 'rag_platform.dart';
 
-enum RagContextMode { before, around }
-
 enum RagDevice { auto, cpu, cuda }
 
 enum RagSource { tags, wiki, blocks, gallery }
@@ -19,9 +17,9 @@ class RagSettings {
     this.embedding = '',
     this.reranker = '',
     this.python = '',
-    this.mode = RagContextMode.around,
+    this.tokenBudget = defaultTokenBudget,
     this.device = RagDevice.auto,
-  });
+  }) : assert(tokenBudget >= minTokenBudget && tokenBudget <= maxTokenBudget);
   final bool enabled, tagsEnabled, wikiEnabled, blocksEnabled, galleryEnabled;
   bool enabledFor(RagSource source) =>
       enabled &&
@@ -32,7 +30,7 @@ class RagSettings {
         RagSource.gallery => galleryEnabled,
       };
   final String embedding, reranker, python;
-  final RagContextMode mode;
+  final int tokenBudget;
   final RagDevice device;
   RagDevice deviceOn(RagPlatform platform, {int? memoryBytes}) {
     if (platform.isMacOS) {
@@ -46,7 +44,9 @@ class RagSettings {
         : device;
   }
 
-  static const tokenBudget = 120;
+  static const defaultTokenBudget = 120;
+  static const minTokenBudget = 32;
+  static const maxTokenBudget = 512;
   Map<String, Object> toJson() => {
     'version': 1,
     'enabled': enabled,
@@ -57,7 +57,7 @@ class RagSettings {
     'embedding': embedding,
     'reranker': reranker,
     'python': python,
-    'mode': mode.name,
+    'tokenBudget': tokenBudget,
     'device': device.name,
   };
   factory RagSettings.fromJson(Map<String, dynamic> json) => RagSettings(
@@ -69,11 +69,9 @@ class RagSettings {
     embedding: json['embedding'] is String ? json['embedding'] : '',
     reranker: json['reranker'] is String ? json['reranker'] : '',
     python: json['python'] is String ? json['python'] : '',
-    mode:
-        RagContextMode.values
-            .where((e) => e.name == json['mode'])
-            .firstOrNull ??
-        RagContextMode.around,
+    tokenBudget: json['tokenBudget'] is int
+        ? (json['tokenBudget'] as int).clamp(minTokenBudget, maxTokenBudget)
+        : defaultTokenBudget,
     device:
         RagDevice.values.where((e) => e.name == json['device']).firstOrNull ??
         RagDevice.auto,
@@ -87,7 +85,7 @@ class RagSettings {
     String? embedding,
     String? reranker,
     String? python,
-    RagContextMode? mode,
+    int? tokenBudget,
     RagDevice? device,
   }) => RagSettings(
     enabled: enabled ?? this.enabled,
@@ -98,7 +96,7 @@ class RagSettings {
     embedding: embedding ?? this.embedding,
     reranker: reranker ?? this.reranker,
     python: python ?? this.python,
-    mode: mode ?? this.mode,
+    tokenBudget: tokenBudget ?? this.tokenBudget,
     device: device ?? this.device,
   );
   String get connectionKey => jsonEncode([

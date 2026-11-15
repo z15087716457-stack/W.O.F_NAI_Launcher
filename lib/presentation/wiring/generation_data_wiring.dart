@@ -16,6 +16,7 @@ import '../../data/services/alias_resolver_service.dart';
 import '../../l10n/app_localizations.dart';
 import '../prompt_assistant/providers/prompt_assistant_config_provider.dart';
 import '../providers/auth_provider.dart';
+import '../providers/prompt_translation_mode_provider.dart';
 import '../providers/canvas_settings_provider.dart';
 import '../providers/canvas_channel_provider.dart';
 import '../providers/canvas_channel_feed_provider.dart';
@@ -417,6 +418,14 @@ final generationViewDataProvider = Provider.autoDispose
           for (final instance in document.instances.values)
             if (instance.translation != null) instance.translation!,
       ];
+      final inlineReadings = translationDocuments.expand((doc) => doc.readings);
+      final translationMode =
+          ref.watch(promptTranslationModeProvider) ??
+          (inlineReadings.isNotEmpty
+              ? PromptTranslationMode.inline
+              : translations.isNotEmpty
+              ? PromptTranslationMode.blocks
+              : PromptTranslationMode.inline);
       final feedback = bridge.enabled
           ? ref.watch(bridgeAgentFeedbackProvider)
           : null;
@@ -522,10 +531,18 @@ final generationViewDataProvider = Provider.autoDispose
             related: ref.watch(cooccurrenceSettingsProvider),
           ),
           translate: GenTranslate(
+            mode: translationMode,
             busy: translating,
-            showing: translations.any((pill) => !pill.showOriginal),
-            hasTranslations: translations.isNotEmpty,
+            showing: translationMode == PromptTranslationMode.inline
+                ? translationDocuments.any(
+                    (doc) => doc.readings.isNotEmpty && doc.readingsVisible,
+                  )
+                : translations.any((pill) => !pill.showOriginal),
+            hasTranslations: translationMode == PromptTranslationMode.inline
+                ? inlineReadings.isNotEmpty
+                : translations.isNotEmpty,
             canAdjust:
+                translationMode == PromptTranslationMode.blocks &&
                 ref.watch(promptTranslationContextsProvider)[negative] != null,
             route: translationRoute,
           ),

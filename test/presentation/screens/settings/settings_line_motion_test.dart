@@ -12,7 +12,7 @@ import 'package:nai_launcher/presentation/prompt_assistant/models/prompt_assista
 import 'package:nai_launcher/presentation/providers/canvas_settings_provider.dart';
 import 'package:nai_launcher/presentation/screens/settings/widgets/provider_logo.dart';
 import 'package:nai_launcher/presentation/screens/settings/widgets/settings_tile.dart';
-import 'package:nai_launcher/presentation/screens/settings/widgets/settings_typography_scope.dart';
+import 'package:nai_launcher/presentation/screens/settings/widgets/settings_motion_scope.dart';
 import 'package:nai_launcher/presentation/screens/settings/widgets/settings_ui_theme.dart';
 import 'package:nai_launcher/presentation/themes/app_theme.dart';
 
@@ -249,7 +249,7 @@ void main() {
           overrides: [localStorageServiceProvider.overrideWithValue(storage)],
           child: MaterialApp(
             theme: _theme,
-            home: SettingsTypographyScope(
+            home: SettingsMotionScope(
               child: Builder(
                 builder: (context) => Scaffold(
                   body: _TestSurface(
@@ -283,7 +283,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       final container = ProviderScope.containerOf(
-        tester.element(find.byType(SettingsTypographyScope)),
+        tester.element(find.byType(SettingsMotionScope)),
       );
       final rect = tester.getRect(find.byKey(const Key('motion-row')));
       final mouse = await _mouse(tester);

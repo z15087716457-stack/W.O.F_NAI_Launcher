@@ -31,8 +31,10 @@ def clean_tag(value):
 
 
 def context_window(text, utf16_offset, mode, count_tokens, budget=120):
-    if mode not in ('before', 'around') or budget != 120:
+    if mode not in ('before', 'around'):
         raise ValueError('invalid_context_mode')
+    if type(budget) is not int or not 32 <= budget <= 512:
+        raise ValueError('invalid_context_budget')
     cursor = cursor_index(text, utf16_offset)
     parts = [(m.start(), m.end(), clean_tag(m.group()))
              for m in re.finditer(r'[^,，\r\n\uE000-\uF8FF]+', text)]

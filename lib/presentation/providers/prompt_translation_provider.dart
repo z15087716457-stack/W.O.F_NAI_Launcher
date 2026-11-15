@@ -13,6 +13,7 @@ import '../../core/utils/tag_normalizer.dart';
 import '../../core/wiki/tag_translation_glossary.dart';
 import '../../core/utils/nai_prompt_syntax.dart';
 import '../../data/models/prompt_block/pill_document.dart';
+import '../../data/models/prompt_reading.dart';
 import '../prompt_assistant/services/prompt_assistant_service.dart';
 import 'character_prompt_provider.dart';
 import 'image_generation_provider.dart';
@@ -327,7 +328,10 @@ class PromptTranslationCoordinator {
             .any((instance) => instance.translation != null);
       });
 
-  int clearTranslations(bool negative) {
+  int clearTranslations(
+    bool negative, {
+    PromptTranslationMode mode = PromptTranslationMode.blocks,
+  }) {
     if (_ref.read(promptTranslationBusyProvider)) return 0;
     var cleared = 0;
     final undo = <String, ({PillDocument before, PillDocument after})>{};
@@ -335,8 +339,15 @@ class PromptTranslationCoordinator {
     for (final scope in scopes) {
       final lane = pillWorkspaceProvider(scope);
       final before = _ref.read(lane).document;
-      final count = _ref.read(lane.notifier).unwrapAllTranslations();
+      final count = mode == PromptTranslationMode.inline
+          ? before.readings.length
+          : _ref.read(lane.notifier).unwrapAllTranslations();
       if (count == 0) continue;
+      if (mode == PromptTranslationMode.inline) {
+        _ref
+            .read(lane.notifier)
+            .replaceIfCurrent(before, before.copyWith(readings: const []));
+      }
       undo[scope] = (before: before, after: _ref.read(lane).document);
       cleared += count;
     }
@@ -374,8 +385,30 @@ class PromptTranslationCoordinator {
     return restored;
   }
 
-  void toggleAll(bool negative) {
+  void toggleAll(
+    bool negative, {
+    PromptTranslationMode mode = PromptTranslationMode.blocks,
+  }) {
     final scopes = _scopes(negative, includeDisabled: true);
+    if (mode == PromptTranslationMode.inline) {
+      final documents = {
+        for (final scope in scopes)
+          scope: _ref.read(pillWorkspaceProvider(scope)).document,
+      };
+      final visible = !documents.values.any(
+        (doc) => doc.readings.isNotEmpty && doc.readingsVisible,
+      );
+      for (final entry in documents.entries) {
+        if (entry.value.readings.isEmpty) continue;
+        _ref
+            .read(pillWorkspaceProvider(entry.key).notifier)
+            .replaceIfCurrent(
+              entry.value,
+              entry.value.copyWith(readingsVisible: visible),
+            );
+      }
+      return;
+    }
     final translations = [
       for (final scope in scopes)
         ..._ref
@@ -397,7 +430,10 @@ class PromptTranslationCoordinator {
     }
   }
 
-  Future<PromptTranslationResult> translate(bool negative) async {
+  Future<PromptTranslationResult> translate(
+    bool negative, {
+    PromptTranslationMode mode = PromptTranslationMode.blocks,
+  }) async {
     if (_ref.read(promptTranslationBusyProvider)) {
       return const PromptTranslationResult(0, 0);
     }
@@ -408,7 +444,11 @@ class PromptTranslationCoordinator {
         _seedIfNeeded(scope);
         snapshots[scope] = _ref.read(pillWorkspaceProvider(scope)).document;
       }
-      final batch = PromptTranslationBatch.prepare(snapshots);
+      final batch = PromptTranslationBatch.prepare(
+        snapshots,
+        skipReadings: mode == PromptTranslationMode.inline,
+        mode: mode,
+      );
       if (batch.isEmpty) return const PromptTranslationResult(0, 0);
       final language = _interfaceReadingLanguage();
 
@@ -442,6 +482,7 @@ class PromptTranslationCoordinator {
         groups,
         autoFormat: _ref.read(autoFormatPromptSettingsProvider),
         languageCode: languageCode,
+        mode: mode,
       );
       var converted = 0;
       var changed = 0;
@@ -464,7 +505,9 @@ class PromptTranslationCoordinator {
         }
       }
       _lastUndo = undo;
-      if (converted > 0 && exchanges.isNotEmpty) {
+      if (mode == PromptTranslationMode.blocks &&
+          converted > 0 &&
+          exchanges.isNotEmpty) {
         _ref.read(promptTranslationContextsProvider.notifier).state = {
           ..._ref.read(promptTranslationContextsProvider),
           negative: TranslationContext(

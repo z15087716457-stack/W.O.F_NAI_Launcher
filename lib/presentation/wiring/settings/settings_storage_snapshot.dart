@@ -34,7 +34,6 @@ class SettingsStorageSnapshotStore {
               id: r['path'] as String,
               path: r['path'] as String,
               images: r['images'] as int,
-              primary: r['primary'] as bool,
             ),
         ],
         imageCount: value['images'] as int,
@@ -62,8 +61,7 @@ class SettingsStorageSnapshotStore {
             {'kind': s.kind.name, 'bytes': s.bytes, 'paths': s.paths},
         ],
         'roots': [
-          for (final r in data.roots)
-            {'path': r.path, 'images': r.images, 'primary': r.primary},
+          for (final r in data.roots) {'path': r.path, 'images': r.images},
         ],
         'images': data.imageCount,
         'thumbBytes': data.thumbnailBytes,

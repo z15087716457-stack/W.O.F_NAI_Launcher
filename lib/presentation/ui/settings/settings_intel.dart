@@ -1,3 +1,4 @@
+import '../kit/ui_scrollable_row.dart';
 import 'package:nai_launcher/core/utils/primary_activator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -12,6 +13,7 @@ import '../kit/ui_glyph.dart';
 import '../kit/ui_lib_controls.dart';
 import '../kit/ui_text.dart';
 import 'settings_contract.dart';
+import 'settings_dialog_kit.dart';
 import 'settings_controls.dart';
 import 'settings_format.dart';
 import 'settings_kit.dart';
@@ -29,9 +31,10 @@ _AgentTab? _agentTabFor(String? anchor) => switch (anchor) {
   'agentModel' ||
   'agentEnterToSend' ||
   'agentMaxRequests' ||
+  'agentSkipPaidConfirmation' ||
   'agentQuick' => _AgentTab.general,
   'agentInstructions' ||
-  'agentWorkspaceRules' ||
+  'agentProjectRules' ||
   'agentSystemPrompt' => _AgentTab.instructions,
   'agentSkills' => _AgentTab.skills,
   'agentMcp' || 'agentExtensions' => _AgentTab.tools,
@@ -56,6 +59,8 @@ class SettingsAgentPage extends StatefulWidget {
 
 class _SettingsAgentPageState extends State<SettingsAgentPage> {
   var _tab = _lastAgentTab;
+  var _viewWorkspace = false;
+  var _scopeChanging = false;
   String? _jumped;
 
   void _select(_AgentTab t) {
@@ -81,7 +86,7 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
         decoration: BoxDecoration(
           border: Border(bottom: BorderSide(color: c.rowLine)),
         ),
-        child: Row(
+        child: UiScrollableRow(
           spacing: 4,
           children: [
             for (final t in _AgentTab.values)
@@ -146,6 +151,15 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
   var _instrFailed = false;
   var _saveInFlight = false;
 
+  final _workspacePrefix = TextEditingController();
+  var _workspacePrefixSaved = '';
+  var _workspacePrefixWs = '';
+  String? _workspacePrefixOrigin;
+  (String, String?)? _workspacePrefixObserved;
+  var _workspacePrefixDirty = false;
+  var _workspacePrefixSaving = false;
+  var _workspacePrefixFailed = false;
+
   // 基础提示词：草稿和开始编辑时的 (文字, 沿用全局)、工作区，保存时一并交回核对。
   final _base = TextEditingController();
   var _baseOpen = false;
@@ -160,7 +174,7 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
   var _loading = false;
   (String, String?, String, String?)? _baseObserved;
 
-  bool get _dirty => _instrDirty || _baseDirty;
+  bool get _dirty => _instrDirty || _baseDirty || _workspacePrefixDirty;
   bool get _protected => _dirty || _saveInFlight;
   bool get _instructionsChanged =>
       (_global!.text, _prefix!.text) != _instrSaved;
@@ -169,6 +183,7 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
   void initState() {
     super.initState();
     _base.addListener(() => _changed(base: true));
+    _workspacePrefix.addListener(() => _changed(prefix: true));
   }
 
   @override
@@ -176,6 +191,7 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
     super.didChangeDependencies();
     // 搜索跳转 / “去设置”：锚点在别的分页就先切过去（高亮由锚点自己滚动）。
     final hl = SettingsScope.of(context).highlight;
+    final projectJump = hl != _jumped && hl == 'agentProjectRules';
     if (hl != _jumped) {
       _jumped = hl;
       if (_agentTabFor(hl) case final t? when t != _tab) {
@@ -183,6 +199,10 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
       }
     }
     final a = SettingsScope.of(context).data.agent;
+    if (projectJump && a.systemPrompt?.workspaceId.isNotEmpty == true) {
+      _viewWorkspace = true;
+      _scope = SettingsPromptScope.workspace;
+    }
     final instructions = (a.globalInstructions, a.systemPrefix);
     if (_global == null) {
       _instrSaved = instructions;
@@ -198,6 +218,13 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
     _instrObserved = instructions;
     final sp = a.systemPrompt;
     if (sp != null) {
+      final prefixSource = (sp.workspaceId, a.workspacePrefix);
+      if (!_workspacePrefixDirty &&
+          !_busy(sp) &&
+          prefixSource != _workspacePrefixObserved) {
+        _loadWorkspacePrefix(a);
+        _workspacePrefixObserved = prefixSource;
+      }
       final source = (sp.builtin, sp.global, sp.workspaceId, sp.workspace);
       if (!_baseDirty &&
           !_busy(sp) &&
@@ -213,6 +240,16 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
     _loading = true;
     _global!.text = saved.$1;
     _prefix!.text = saved.$2;
+    _loading = false;
+  }
+
+  void _loadWorkspacePrefix(SettingsAgentData a) {
+    _workspacePrefixWs = a.systemPrompt!.workspaceId;
+    _workspacePrefixOrigin = a.workspacePrefix;
+    final text = a.workspacePrefix ?? '';
+    _workspacePrefixSaved = text;
+    _loading = true;
+    _workspacePrefix.text = text;
     _loading = false;
   }
 
@@ -236,7 +273,11 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
     _loading = false;
   }
 
-  void _changed({bool instructions = false, bool base = false}) {
+  void _changed({
+    bool instructions = false,
+    bool base = false,
+    bool prefix = false,
+  }) {
     if (_loading) return;
     final a = SettingsScope.of(context).data.agent;
     final was = _protected;
@@ -244,15 +285,20 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
     final baseDirty =
         a.systemPrompt != null &&
         (_base.text != _baseSaved.$1 || _useGlobal != _baseSaved.$2);
+    final prefixDirty = _workspacePrefix.text != _workspacePrefixSaved;
     if (instr != _instrDirty ||
         baseDirty != _baseDirty ||
+        prefixDirty != _workspacePrefixDirty ||
         (instructions && _instrFailed) ||
+        (prefix && _workspacePrefixFailed) ||
         (base && _baseFailed)) {
       setState(() {
         _instrDirty = instr;
         _baseDirty = baseDirty;
+        _workspacePrefixDirty = prefixDirty;
         if (instructions) _instrFailed = false;
         if (base) _baseFailed = false;
+        if (prefix) _workspacePrefixFailed = false;
       });
     }
     if (_protected != was) {
@@ -277,10 +323,15 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
     final expectedInstructions = _instrSaved;
     final base = _baseDirty ? (_base.text, _useGlobal, _scope, _baseWs) : null;
     final expectedBase = _baseOrigin;
+    final prefix = _workspacePrefixDirty
+        ? (_workspacePrefix.text, _workspacePrefixWs)
+        : null;
+    final expectedPrefix = _workspacePrefixOrigin;
     setState(() {
       _saveInFlight = true;
       _instrSaving = instructions != null;
       _baseSaving = base != null;
+      _workspacePrefixSaving = prefix != null;
     });
     s.reportDirty(true);
     try {
@@ -299,6 +350,28 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
           _instrFailed = !ok;
           if (ok) _instrSaved = instructions;
           _instrDirty = _instructionsChanged;
+        });
+      }
+      if (prefix != null) {
+        final ok = await _acknowledged(
+          () => s.actions.onSaveWorkspacePrefix(
+            text: prefix.$1,
+            workspaceId: prefix.$2,
+            expectedText: expectedPrefix,
+          ),
+        );
+        if (!mounted) return;
+        setState(() {
+          _workspacePrefixSaving = false;
+          _workspacePrefixFailed = !ok;
+          if (ok) {
+            _workspacePrefixSaved = prefix.$1;
+            _workspacePrefixOrigin = prefix.$1.trim().isEmpty
+                ? null
+                : prefix.$1;
+          }
+          _workspacePrefixDirty =
+              _workspacePrefix.text != _workspacePrefixSaved;
         });
       }
       if (base != null) {
@@ -344,12 +417,61 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
       if (a.systemPrompt != null && _baseDirty) _loadBase(a.systemPrompt!);
       _baseDirty = false;
       _baseFailed = false;
+      if (a.systemPrompt != null) _loadWorkspacePrefix(a);
+      _workspacePrefixDirty = false;
+      _workspacePrefixFailed = false;
     });
     SettingsScope.of(context).reportDirty(_protected);
   }
 
   bool _busy(SettingsSystemPrompt? sp) =>
       _saveInFlight || (sp?.saving ?? false);
+
+  void _selectInstructionView(String id) {
+    final s = SettingsScope.of(context);
+    if (_scopeChanging || _busy(s.data.agent.systemPrompt)) return;
+    final workspace = id.isNotEmpty;
+    Future<void> go() async {
+      setState(() => _scopeChanging = true);
+      final ok =
+          !workspace ||
+          await _acknowledged(
+            () => SettingsScope.of(context).actions.onSelectAgentWorkspace(id),
+          );
+      if (!mounted) return;
+      setState(() {
+        _scopeChanging = false;
+        if (!ok) return;
+        _viewWorkspace = workspace;
+        _scope = workspace
+            ? SettingsPromptScope.workspace
+            : SettingsPromptScope.global;
+        _baseDirty = false;
+        _baseFailed = false;
+        _workspacePrefixDirty = false;
+        _workspacePrefixFailed = false;
+        final agent = SettingsScope.of(context).data.agent;
+        if (agent.systemPrompt != null) _loadWorkspacePrefix(agent);
+        final sp = SettingsScope.of(context).data.agent.systemPrompt;
+        if (sp != null) _loadBase(sp);
+      });
+      SettingsScope.of(context).reportDirty(_protected);
+    }
+
+    if (!_baseDirty && !_workspacePrefixDirty) {
+      go();
+    } else {
+      s.confirm(
+        title: _workspacePrefixDirty
+            ? context.l10n.set_agPrefixSwitchTitle
+            : context.l10n.set_agBaseSwitchTitle,
+        body: context.l10n.set_agBaseSwitchBody,
+        confirm: context.l10n.set_discard,
+        danger: true,
+        onConfirm: go,
+      );
+    }
+  }
 
   void _switchScope(SettingsPromptScope to) {
     if (to == _scope) return;
@@ -432,6 +554,7 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
   void dispose() {
     _global?.dispose();
     _prefix?.dispose();
+    _workspacePrefix.dispose();
     _base.dispose();
     super.dispose();
   }
@@ -451,7 +574,7 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
       l.set_agOrderPrefix,
       l.set_agOrderBuiltin,
       l.set_agOrderGlobal,
-      l.set_agOrderWorkspace,
+      l.set_agProjectRules,
       l.set_agOrderSkills,
     ];
     String mcpState(SettingsMcpServer m) => m.pending
@@ -710,6 +833,12 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
           ),
         ),
         SettingKeyRow(
+          SettingKey.agentSkipPaidConfirmation,
+          title: l.set_agSkipPaidConfirmation,
+          subtitle: l.set_agSkipPaidConfirmationSub,
+          control: const SetSwitch(SettingKey.agentSkipPaidConfirmation),
+        ),
+        SettingKeyRow(
           SettingKey.agentNextSuggestion,
           title: l.set_agNextSuggestion,
           subtitle: l.set_agNextSuggestionSub,
@@ -724,6 +853,47 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
           control: const SetSelect(SettingKey.agentCacheWarming, width: 200),
         ),
       ],
+    );
+    final instructionScopeCard = SettingsAsideCard(
+      key: const Key('agent-instruction-scope'),
+      title: l.set_agViewScope,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SettingsSelect(
+            key: const Key('agent-instruction-scope-select'),
+            width: double.infinity,
+            menuWidth: 260,
+            label: _viewWorkspace
+                ? l.set_agScopeWorkspace(ag.systemPrompt?.workspaceName ?? '')
+                : l.set_agScopeGlobal,
+            options: _scopeChanging
+                ? const []
+                : [
+                    SettingsOption(value: '', label: l.set_agScopeGlobal),
+                    for (final option in ag.workspaceChoices)
+                      SettingsOption(
+                        value: option.value,
+                        label: l.set_agScopeWorkspace(option.label),
+                      ),
+                  ],
+            selected: _viewWorkspace ? ag.systemPrompt?.workspaceId : '',
+            onSelected: _selectInstructionView,
+          ),
+          const SizedBox(height: 10),
+          Text(
+            _viewWorkspace ? l.set_agViewWorkspaceHint : l.set_agViewGlobalHint,
+            style: UiText.sans(11.5, color: c.muted, height: 1.6),
+          ),
+          if (_viewWorkspace && ag.projectRulesPath != null) ...[
+            const SizedBox(height: 5),
+            SelectableText(
+              ag.projectRulesPath!,
+              style: UiText.mono(11, color: c.faint, height: 1.6),
+            ),
+          ],
+        ],
+      ),
     );
     final instrSection = SettingsSection(
       title: l.set_agInstr,
@@ -742,7 +912,10 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     for (final (i, t) in order.indexed) ...[
-                      SettingsChip(label: t, selected: i == 2),
+                      SettingsChip(
+                        label: t,
+                        selected: i == (_viewWorkspace ? 3 : 2),
+                      ),
                       if (i < order.length - 1)
                         UiGlyph(
                           UiGlyphs.chevronRight,
@@ -753,31 +926,125 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
                   ],
                 ),
                 const SizedBox(height: 14),
-                _label(
-                  context,
-                  l.set_agGlobal,
-                  _instrDirty && _global!.text != _instrSaved.$1,
-                ),
-                _TextArea(
-                  key: const Key('agent-global'),
-                  controller: _global!,
-                  minHeight: 92,
-                  hint: l.set_agGlobalHint,
-                  onSave: _save,
-                ),
-                const SizedBox(height: 16),
-                _label(
-                  context,
-                  l.set_agPrefix,
-                  _instrDirty && _prefix!.text != _instrSaved.$2,
-                ),
-                _TextArea(
-                  key: const Key('agent-prefix'),
-                  controller: _prefix!,
-                  minHeight: 58,
-                  hint: l.set_agPrefixHint,
-                  onSave: _save,
-                ),
+                if (_viewWorkspace) ...[
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          l.set_agProjectRules,
+                          style: UiText.sans(
+                            12.5,
+                            weight: FontWeight.w600,
+                            color: c.ink,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        l.set_agRulesReadonly,
+                        style: UiText.sans(11, color: c.faint),
+                      ),
+                      if (ag.projectRulesText != null &&
+                          !ag.projectRulesLoading) ...[
+                        const SizedBox(width: 8),
+                        SettingsCopyButton(text: ag.projectRulesText!),
+                      ],
+                    ],
+                  ),
+                  if (ag.projectRulesPath != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6, bottom: 12),
+                      child: SelectableText(
+                        ag.projectRulesPath!,
+                        style: UiText.mono(11, color: c.muted, height: 1.5),
+                      ),
+                    ),
+                  SettingsAnchor(
+                    anchor: 'agentProjectRules',
+                    child: SizedBox(
+                      key: const Key('agent-project-rules'),
+                      height: 328,
+                      child: _scopeChanging || ag.projectRulesLoading
+                          ? Center(child: Text(l.common_loading))
+                          : ag.projectRulesFailed
+                          ? Center(
+                              child: Text(
+                                l.set_agRulesLoadFailed,
+                                style: UiText.sans(12, color: c.warn),
+                              ),
+                            )
+                          : ag.projectRulesText == null
+                          ? Center(
+                              child: Text(
+                                l.set_agRulesMissing,
+                                style: UiText.sans(12.5, color: c.muted),
+                              ),
+                            )
+                          : SettingsCodeView(
+                              text: ag.projectRulesText!.isEmpty
+                                  ? l.set_agRulesEmpty
+                                  : ag.projectRulesText!,
+                            ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _label(context, l.set_agPrefix, _workspacePrefixDirty),
+                  _TextArea(
+                    key: const Key('agent-workspace-prefix'),
+                    controller: _workspacePrefix,
+                    minHeight: 58,
+                    maxLines: 8,
+                    hint: l.set_agPrefixHint,
+                    enabled: !_busy(ag.systemPrompt) && !_scopeChanging,
+                    onSave: _save,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    l.set_agPrefixInheritHint,
+                    key: const Key('agent-workspace-prefix-hint'),
+                    style: UiText.sans(11.5, color: c.muted, height: 1.6),
+                  ),
+                  if (_workspacePrefixSaving || _workspacePrefixFailed)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6),
+                      child: Text(
+                        _workspacePrefixSaving
+                            ? l.set_agInstructionsSaving
+                            : l.set_agInstructionsFailed,
+                        key: const Key('agent-workspace-prefix-status'),
+                        style: UiText.sans(
+                          11.5,
+                          color: _workspacePrefixSaving ? c.muted : c.warn,
+                          height: 1.6,
+                        ),
+                      ),
+                    ),
+                ] else ...[
+                  _label(
+                    context,
+                    l.set_agGlobal,
+                    _instrDirty && _global!.text != _instrSaved.$1,
+                  ),
+                  _TextArea(
+                    key: const Key('agent-global'),
+                    controller: _global!,
+                    minHeight: 92,
+                    hint: l.set_agGlobalHint,
+                    onSave: _save,
+                  ),
+                  const SizedBox(height: 16),
+                  _label(
+                    context,
+                    l.set_agPrefix,
+                    _instrDirty && _prefix!.text != _instrSaved.$2,
+                  ),
+                  _TextArea(
+                    key: const Key('agent-prefix'),
+                    controller: _prefix!,
+                    minHeight: 58,
+                    hint: l.set_agPrefixHint,
+                    onSave: _save,
+                  ),
+                ],
                 if (_instrSaving || _instrFailed)
                   Padding(
                     padding: const EdgeInsets.only(top: 6),
@@ -817,23 +1084,6 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
             ),
           ),
         ),
-        if (ag.workspaceRulesPath case final path?)
-          SettingsRow(
-            anchor: 'agentWorkspaceRules',
-            title: l.ag_memoryWorkspace,
-            subtitleWidget: Tooltip(
-              message: path,
-              child: Text(
-                l.set_agWorkspaceRulesSub,
-                style: UiText.sans(12, color: c.muted, height: 1.5),
-              ),
-            ),
-            control: SettingsBtn(
-              label: l.ag_memoryEdit,
-              small: true,
-              onTap: a.onEditWorkspaceRules,
-            ),
-          ),
         if (ag.systemPrompt != null) ..._basePrompt(context, ag.systemPrompt!),
       ],
     );
@@ -1045,7 +1295,7 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
       top: [_tabs(context, ag)],
       aside: switch (tab) {
         _AgentTab.general => [dataCard, trashCard, costHint],
-        _AgentTab.instructions => [?contextCard],
+        _AgentTab.instructions => [?contextCard, instructionScopeCard],
         _AgentTab.skills => [
           ?ag.skillFolders.isEmpty ? null : placesCard,
           ?contextCard,
@@ -1076,7 +1326,9 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
                 children: [
                   UiGlyph(UiGlyphs.infoCircle, size: 15, color: c.muted),
                   Text(
-                    _baseDirty ? l.set_unsavedAgent : l.set_unsavedInstructions,
+                    _baseDirty || _workspacePrefixDirty
+                        ? l.set_unsavedAgent
+                        : l.set_unsavedInstructions,
                     style: UiText.sans(12.5, color: c.ink),
                   ),
                   Text(
@@ -1128,6 +1380,7 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
         key: const Key('agent-base'),
         anchor: 'agentSystemPrompt',
         title: l.set_agBase,
+        unsaved: _baseDirty,
         subtitle: summary,
         control: SettingsBtn(
           key: const Key('agent-base-toggle'),
@@ -1230,12 +1483,12 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
     ];
   }
 
-  Widget _label(BuildContext context, String text, bool modified) {
+  Widget _label(BuildContext context, String text, bool unsaved) {
     final c = context.ui;
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
-      child: SettingsModMark(
-        on: modified,
+      child: SettingsUnsavedMark(
+        on: unsaved,
         child: Text(
           text,
           style: UiText.sans(13, weight: FontWeight.w500, color: c.ink),
@@ -1960,16 +2213,22 @@ class SettingsRagPage extends StatelessWidget {
               ),
           ],
         ),
-        SettingsSection(
-          title: l.set_rgContext,
-          subtitle: l.set_rgContextSub,
-          children: [
-            SettingKeyRow(
-              SettingKey.ragContext,
-              title: l.set_rgRange,
-              control: const SetSeg(SettingKey.ragContext),
-            ),
-          ],
+        LayoutBuilder(
+          builder: (context, constraints) => SettingsSection(
+            title: l.set_rgContext,
+            subtitle: l.set_rgContextSub,
+            children: [
+              SettingKeyRow(
+                SettingKey.ragContextTokens,
+                title: l.set_rgRange,
+                control: SetSlider(
+                  SettingKey.ragContextTokens,
+                  width: (constraints.maxWidth - 180).clamp(60, 220),
+                  label: (v) => '${v.round()} tokens',
+                ),
+              ),
+            ],
+          ),
         ),
         SettingsSection(
           title: l.set_rgRuntime,
@@ -2101,9 +2360,10 @@ class _RagModelRow extends StatelessWidget {
                 ),
               ],
             ),
-      control: Row(
-        mainAxisSize: MainAxisSize.min,
+      control: Wrap(
         spacing: 8,
+        runSpacing: 8,
+        crossAxisAlignment: WrapCrossAlignment.center,
         children: [
           if (dl != null)
             SettingsBtn(
@@ -2730,20 +2990,28 @@ class _SettingsUpscalePageState extends State<SettingsUpscalePage> {
                     ],
                   ),
                 ),
-                for (final cap in up.caps)
-                  UiMini(
-                    switch (cap) {
-                      SettingsGpuCap.vulkan => 'Vulkan',
-                      SettingsGpuCap.cuda =>
-                        up.cudaVersion.isEmpty
-                            ? 'CUDA'
-                            : 'CUDA ${up.cudaVersion}',
-                      SettingsGpuCap.int8 => 'INT8',
-                      SettingsGpuCap.rtxVideo => 'RTX Video',
-                    },
-                    tone: UiMiniTone.ok,
-                    glyph: UiGlyphs.check,
+                Flexible(
+                  child: Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: [
+                      for (final cap in up.caps)
+                        UiMini(
+                          switch (cap) {
+                            SettingsGpuCap.vulkan => 'Vulkan',
+                            SettingsGpuCap.cuda =>
+                              up.cudaVersion.isEmpty
+                                  ? 'CUDA'
+                                  : 'CUDA ${up.cudaVersion}',
+                            SettingsGpuCap.int8 => 'INT8',
+                            SettingsGpuCap.rtxVideo => 'RTX Video',
+                          },
+                          tone: UiMiniTone.ok,
+                          glyph: UiGlyphs.check,
+                        ),
+                    ],
                   ),
+                ),
               ],
             ),
           ),

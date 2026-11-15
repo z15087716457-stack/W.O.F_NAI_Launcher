@@ -60,12 +60,17 @@ void main() {
   test(
     'settings labels, raw storage mapping, anchors and guarded/undone state',
     () {
-      expect(agentSettingRows.keys.toSet(), SettingsPreferencesService.keys);
+      expect(agentSettingRows.keys.toSet(), {
+        ...SettingsPreferencesService.keys,
+        'font_scale',
+        'settings_font_scale',
+        'workspace_font_scale',
+      });
       final before = {
         'studio_theme_mode': 'light',
         'history_click_behavior': null,
         'enable_prompt_weight_scroll': false,
-        'font_scale': 1.0,
+        'ui_scale': 1.0,
         'tag_expansion_result_limit': 5,
         'locale': 'en',
       };
@@ -74,7 +79,7 @@ void main() {
         'studio_theme_mode': 'dark',
         'history_click_behavior': 'open_detail',
         'enable_prompt_weight_scroll': true,
-        'font_scale': 1.1,
+        'ui_scale': 1.1,
         'tag_expansion_result_limit': 10,
       };
       runtime.messages = [
@@ -107,13 +112,16 @@ void main() {
         anchor: 'wheelWeight',
       ));
       expect(card.changes[2].after, currentL10n.set_on);
-      expect(card.changes[3].anchor, isNull);
-      expect(card.changes[3].after, '1.1×');
+      expect(card.changes[3].anchor, (
+        section: 'appearance',
+        anchor: 'uiScale',
+      ));
+      expect(card.changes[3].after, '110%');
       expect(card.changes[4].anchor, isNull);
       expect(card.state, AgentDiffState.applied);
       expect(
         blocks(
-          preferences: {...values, 'font_scale': 1.2},
+          preferences: {...values, 'ui_scale': 1.2},
         ).whereType<AgentSettingsBlock>().single.state,
         AgentDiffState.locked,
       );
@@ -131,17 +139,17 @@ void main() {
       runtime.messages = [
         assistant([call('a', 'settings_update')]),
         result('a', {
-          'applied_fields': ['font_scale'],
-          'values': {'font_scale': 1.1},
+          'applied_fields': ['ui_scale'],
+          'values': {'ui_scale': 1.1},
           'version': 'v',
         }),
       ];
       expect(blocks().whereType<AgentSettingsBlock>(), isEmpty);
       runtime.messages.last['details'] = {
         'ok': false,
-        'before': {'font_scale': 1},
-        'applied_fields': ['font_scale'],
-        'values': {'font_scale': 1.1},
+        'before': {'ui_scale': 1},
+        'applied_fields': ['ui_scale'],
+        'values': {'ui_scale': 1.1},
         'version': 'v',
       };
       expect(blocks().whereType<AgentSettingsBlock>(), isEmpty);
@@ -498,9 +506,9 @@ void main() {
           ],
         },
         'settings_update': {
-          'applied_fields': ['font_scale'],
-          'before': {'font_scale': 1},
-          'values': {'font_scale': 1.1},
+          'applied_fields': ['ui_scale'],
+          'before': {'ui_scale': 1},
+          'values': {'ui_scale': 1.1},
           'version': 'v',
         },
         'gallery_manage': {
@@ -550,7 +558,7 @@ void main() {
             },
         });
       }
-      final mapped = mapper.map(runtime, preferences: {'font_scale': 1.1});
+      final mapped = mapper.map(runtime, preferences: {'ui_scale': 1.1});
       final projected = mapped.turns.single.reply!.blocks;
       final hits = projected.whereType<AgentStepsBlock>().single.steps;
       expect(hits.expand((step) => step.tags).map((tag) => tag.tag), [
@@ -562,7 +570,7 @@ void main() {
       expect(projected.whereType<AgentGalleryBlock>(), hasLength(1));
       final setting = projected.whereType<AgentSettingsBlock>().single;
       expect(setting.state, AgentDiffState.applied);
-      expect(mapped.settings[setting.id]!.matches({'font_scale': 1.1}), true);
+      expect(mapped.settings[setting.id]!.matches({'ui_scale': 1.1}), true);
       final gallery = projected.whereType<AgentGalleryBlock>().single;
       expect(gallery.undoable, true);
       expect(gallery.target, 'Collection');
@@ -603,14 +611,14 @@ void main() {
       'setting': {
         'type': 'tool_execution_end',
         'result': mcpResult({
-          'applied_fields': ['font_scale'],
-          'before': {'font_scale': 1},
-          'values': {'font_scale': 1.1},
+          'applied_fields': ['ui_scale'],
+          'before': {'ui_scale': 1},
+          'values': {'ui_scale': 1.1},
           'version': 'v',
         }),
       },
     });
-    final mapped = blocks(preferences: {'font_scale': 1.1});
+    final mapped = blocks(preferences: {'ui_scale': 1.1});
     expect(mapped.whereType<AgentSettingsBlock>(), hasLength(1));
     expect(
       mapped.whereType<AgentStepsBlock>().single.steps.first.tags.single.tag,
@@ -643,9 +651,9 @@ void main() {
           usage: {'input': 100, 'cacheRead': 20, 'cacheWrite': 5, 'output': 8},
         ),
         result('s', {
-          'applied_fields': ['font_scale'],
-          'before': {'font_scale': 1},
-          'values': {'font_scale': 1.1},
+          'applied_fields': ['ui_scale'],
+          'before': {'ui_scale': 1},
+          'values': {'ui_scale': 1.1},
           'version': 'v',
         }),
         result('c', {

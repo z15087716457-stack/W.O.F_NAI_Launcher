@@ -49,6 +49,22 @@ class ContextTests(unittest.TestCase):
             result=context_window(text,cursor,mode,self.count)
             self.assertLessEqual(result['tokens'],120)
             self.assertNotIn('word0,',result['text'])
+    def test_selected_budget_keeps_complete_local_tags_before_the_cursor(self):
+        before=', '.join(f'word{i}' for i in range(700))
+        text=before+', future'
+        for budget in (32,120,121,512):
+            result=context_window(text,len(before),'before',self.count,budget)
+            expected=', '.join(f'word{i}' for i in range(700-budget,700))
+            self.assertEqual(result['text'],expected)
+            self.assertEqual(result['tokens'],budget)
+            self.assertEqual(result['budget'],budget)
+    def test_budget_does_not_split_or_skip_an_adjacent_long_tag(self):
+        text='far, '+('long '*40)+', near'
+        self.assertEqual(context_window(text,len(text),'before',self.count,32)['text'],'near')
+    def test_invalid_budgets_are_rejected(self):
+        for budget in (0,31,513,120.5,'120',None,True):
+            with self.subTest(budget=budget), self.assertRaisesRegex(ValueError,'invalid_context_budget'):
+                context_window('rain',4,'before',self.count,budget)
     def test_utf16_cursor_is_not_python_codepoint_offset(self):
         self.assertEqual(cursor_index('🌧, rain, city',4),3)
         self.assertEqual(context_window('🌧, rain, city',4,'before',self.count)['text'],'🌧')

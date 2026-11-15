@@ -73,7 +73,7 @@ void main() {
         );
         expect(
           await PreciseRefLibraryPathHelper.instance.getDefaultPath(),
-          p.join(sandbox, 'documents', 'NAI_Launcher', 'precise_refs'),
+          p.join(sandbox, 'user-data', 'precise_refs'),
         );
         final oldHive = File(p.join(sandbox, 'documents', 'settings.hive'));
         await oldHive.writeAsBytes([1, 2, 3]);

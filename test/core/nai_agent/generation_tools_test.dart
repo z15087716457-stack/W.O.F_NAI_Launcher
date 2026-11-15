@@ -41,6 +41,7 @@ void main() {
   late NaiAgentGenerationInput input;
   late DateTime now;
   late bool alive, admitted;
+  late bool autoApprove;
   late int approvals, backups, starts, cancels;
   Future<bool> Function()? approval;
   Future<void> Function()? duringBackup;
@@ -53,6 +54,7 @@ void main() {
     input = generationInput();
     now = DateTime(2026, 10, 7);
     alive = admitted = true;
+    autoApprove = false;
     approvals = backups = starts = cancels = 0;
     approval = null;
     duringBackup = null;
@@ -62,6 +64,7 @@ void main() {
     startedInputs.clear();
     duringRead = null;
     tools = NaiAgentGenerationTools(
+      autoApprove: (_) => autoApprove,
       readInput: (params) {
         reads.add(params);
         duringRead?.call();
@@ -108,6 +111,77 @@ void main() {
         'quote_id': id,
         'authorized': true,
       }, token ?? NaiAgentCancellation());
+
+  test(
+    'Studio auto approval skips only the card and records its source',
+    () async {
+      autoApprove = true;
+      final prepared = await tools.prepare({}, NaiAgentCancellation());
+      final q = prepared['details']['quote'];
+      expect(q['authorization'], 'full_access_policy');
+      completion.complete({'status': 'completed'});
+      final result = (await run(q['quote_id']))['details'];
+      expect(approvals, 0);
+      expect((backups, starts), (1, 1));
+      expect(result['authorization']['source'], 'full_access_policy');
+      await expectLater(run(q['quote_id']), throwsA(error('quote_missing')));
+    },
+  );
+
+  for (final change in ['draft', 'expiry', 'cancel', 'balance']) {
+    test('auto approval still checks $change after backup', () async {
+      autoApprove = true;
+      final token = NaiAgentCancellation();
+      final id = await prepare();
+      duringBackup = () async {
+        switch (change) {
+          case 'draft':
+            input = generationInput(version: 'new-draft');
+          case 'expiry':
+            now = now.add(const Duration(minutes: 6));
+          case 'cancel':
+            token.cancel();
+          case 'balance':
+            input = generationInput(
+              balance: 0,
+              blocked: 'insufficient_balance',
+            );
+        }
+      };
+      final code = switch (change) {
+        'draft' => 'quote_changed',
+        'expiry' => 'quote_expired',
+        'cancel' => 'cancelled',
+        _ => 'quote_changed',
+      };
+      await expectLater(run(id, token: token), throwsA(error(code)));
+      expect((approvals, backups, starts), (0, 1, 0));
+    });
+  }
+
+  test('revoking auto approval after preparation requires the card', () async {
+    autoApprove = true;
+    final id = await prepare();
+    autoApprove = false;
+    approval = () async => false;
+    expect((await run(id))['details']['status'], 'cancelled');
+    expect((approvals, backups, starts), (1, 0, 0));
+  });
+
+  test(
+    'a rejected automatic start cannot keep approval after the opt-out is revoked',
+    () async {
+      autoApprove = true;
+      admitted = false;
+      final id = await prepare();
+      await expectLater(run(id), throwsA(error('not_started')));
+      expect((approvals, backups, starts), (0, 1, 1));
+      autoApprove = false;
+      approval = () async => false;
+      expect((await run(id))['details']['status'], 'cancelled');
+      expect((approvals, backups, starts), (1, 1, 1));
+    },
+  );
 
   test('refreshes a low balance once before quoting an Agent action', () async {
     input = generationInput(balance: 2, blocked: 'insufficient_balance');

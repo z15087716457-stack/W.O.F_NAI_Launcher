@@ -18,6 +18,8 @@ import '../comfyui_import_wrapper.dart';
 import '../nai_syntax_controller.dart';
 import '../pills/translation_pill_view.dart';
 import 'unified_prompt_config.dart';
+import 'inline_prompt_readings.dart';
+import '../../../../data/models/prompt_reading.dart';
 import 'package:nai_launcher/presentation/widgets/common/themed_input.dart';
 import 'package:nai_launcher/presentation/widgets/common/themed_text_selection_toolbar.dart';
 
@@ -50,6 +52,7 @@ class UnifiedPromptInput extends ConsumerStatefulWidget {
   final FocusNode? focusNode;
   final bool? showCursor;
   final String? pillScope;
+  final List<PromptReading> readings;
 
   /// 输入装饰
   final InputDecoration? decoration;
@@ -98,6 +101,7 @@ class UnifiedPromptInput extends ConsumerStatefulWidget {
     this.focusNode,
     this.showCursor,
     this.pillScope,
+    this.readings = const [],
     this.decoration,
     this.onChanged,
     this.onUserEdit,
@@ -821,6 +825,23 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
 
   @override
   Widget build(BuildContext context) {
+    return InlinePromptReadings(
+      controller: _syntaxController!,
+      focusNode: _effectiveFocusNode,
+      readings: widget.readings,
+      enabled: !_searchVisible,
+      style: _sourceStyle,
+      padding:
+          widget.decoration?.contentPadding ??
+          const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      minLines: widget.minLines ?? 1,
+      maxLines: widget.maxLines,
+      expands: widget.expands || !widget.fitContent,
+      builder: _buildContent,
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
     Widget result = _buildTextField();
 
     // 如果启用 ComfyUI 导入，包装 ComfyuiImportWrapper
@@ -1054,6 +1075,14 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
   }
 
   /// 构建文本输入框
+  TextStyle get _sourceStyle =>
+      widget.textStyle ??
+      (widget.config.embedded
+          ? Theme.of(
+              context,
+            ).textTheme.bodyMedium!.copyWith(fontSize: 14, height: 1.55)
+          : Theme.of(context).textTheme.bodyLarge!);
+
   Widget _buildTextField() {
     final enableWheelAdjustment =
         !widget.config.readOnly &&
@@ -1101,13 +1130,7 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
     // 导致 _onFocusChanged 监听不到失焦事件
     final baseInput = ThemedInput(
       embedded: widget.config.embedded,
-      style:
-          widget.textStyle ??
-          (widget.config.embedded
-              ? Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(fontSize: 14, height: 1.55)
-              : null),
+      style: _sourceStyle,
       // A translated pill may span several lines. The default forced strut
       // only reserves a text line and lets the pill paint over its neighbors.
       strutStyle: widget.config.pillBuilder == null
@@ -1118,7 +1141,7 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
       showCursor: widget.showCursor,
       decoration: effectiveDecoration,
       maxLines: widget.expands ? null : widget.maxLines,
-      minLines: widget.expands ? null : (widget.minLines ?? 1),
+      minLines: widget.expands ? null : widget.minLines ?? 1,
       expands: widget.expands,
       scrollPhysics:
           enableWheelAdjustment &&

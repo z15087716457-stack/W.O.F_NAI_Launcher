@@ -63,7 +63,7 @@ void main() {
       storage.values.addAll({
         'token': 'synthetic-secret',
         StorageKeys.promptAssistantConfigJson: 'private',
-        StorageKeys.fontScale: 1.1,
+        StorageKeys.uiScale: 1.1,
       });
       final all = await read();
       expect(jsonEncode(all), isNot(contains('synthetic-secret')));
@@ -72,9 +72,9 @@ void main() {
         isNot(contains(StorageKeys.promptAssistantConfigJson)),
       );
       final part = await read({
-        'keys': [StorageKeys.fontScale],
+        'keys': [StorageKeys.uiScale],
       });
-      expect(part['values'], {StorageKeys.fontScale: 1.1});
+      expect(part['values'], {StorageKeys.uiScale: 1.1});
       expect(part['version'], all['version']);
       await expectLater(
         read({
@@ -87,13 +87,13 @@ void main() {
   test(
     'native persisted readback, safe workspace backup and null reset',
     () async {
-      storage.values[StorageKeys.fontScale] = 1.1;
+      storage.values[StorageKeys.uiScale] = 1.1;
       final result = await update({
-        StorageKeys.fontScale: 1.3,
+        StorageKeys.uiScale: 1.3,
         StorageKeys.enableCooccurrenceRecommendation: false,
       }, (await read())['version'] as String);
-      expect(result['values'][StorageKeys.fontScale], 1.3);
-      expect(result['before'][StorageKeys.fontScale], 1.1);
+      expect(result['values'][StorageKeys.uiScale], 1.3);
+      expect(result['before'][StorageKeys.uiScale], 1.1);
       expect(
         (result['before'] as Map).keys.toSet(),
         SettingsPreferencesService.keys,
@@ -101,55 +101,55 @@ void main() {
       final backup = jsonDecode(
         await File(result['backup_path'] as String).readAsString(),
       );
-      expect(backup['generation']['preferences'][StorageKeys.fontScale], 1.1);
+      expect(backup['generation']['preferences'][StorageKeys.uiScale], 1.1);
       expect(
         result['backup_path'],
         startsWith(await dir.resolveSymbolicLinks()),
       );
-      await update({StorageKeys.fontScale: null}, result['version'] as String);
-      expect(storage.values.containsKey(StorageKeys.fontScale), isFalse);
+      await update({StorageKeys.uiScale: null}, result['version'] as String);
+      expect(storage.values[StorageKeys.uiScale], 1.0);
     },
   );
   test(
     'card undo restores before including null, allows unrelated edits, rejects changed fields',
     () async {
-      storage.values[StorageKeys.fontScale] = 1.1;
+      storage.values[StorageKeys.uiScale] = 1.1;
       final result = await update({
-        StorageKeys.fontScale: 1.3,
+        StorageKeys.uiScale: 1.3,
       }, (await read())['version'] as String);
       final restore = AgentSettingsRestore(
         'id',
         result['version'] as String,
         Map<String, Object?>.from(result['before'] as Map),
         Map<String, Object?>.from(result['values'] as Map),
-        [StorageKeys.fontScale],
+        [StorageKeys.uiScale],
       );
       storage.values[StorageKeys.locale] = 'en';
       expect(await AgentSettingsUndo(tools).restore(restore), true);
-      expect(storage.values[StorageKeys.fontScale], 1.1);
+      expect(storage.values[StorageKeys.uiScale], 1.1);
       expect(storage.values[StorageKeys.locale], 'en');
-      storage.values[StorageKeys.fontScale] = 1.4;
+      storage.values[StorageKeys.uiScale] = 1.4;
       expect(await AgentSettingsUndo(tools).restore(restore), false);
-      expect(storage.values[StorageKeys.fontScale], 1.4);
+      expect(storage.values[StorageKeys.uiScale], 1.4);
       const reset = AgentSettingsRestore(
         'reset',
         'v',
-        {StorageKeys.fontScale: null},
-        {StorageKeys.fontScale: 1.4},
-        [StorageKeys.fontScale],
+        {StorageKeys.uiScale: null},
+        {StorageKeys.uiScale: 1.4},
+        [StorageKeys.uiScale],
       );
       expect(await AgentSettingsUndo(tools).restore(reset), true);
-      expect(storage.values.containsKey(StorageKeys.fontScale), false);
+      expect(storage.values[StorageKeys.uiScale], 1.0);
     },
   );
 
   test('card undo refuses changes during asynchronous backup', () async {
-    storage.values[StorageKeys.fontScale] = 1.3;
+    storage.values[StorageKeys.uiScale] = 1.3;
     tools = NaiAgentSettingsTools(
       _BackupSettings(
         storage,
         dir,
-        () => storage.values[StorageKeys.fontScale] = 1.4,
+        () => storage.values[StorageKeys.uiScale] = 1.4,
       ),
       isAlive: () => true,
       refresh: () {},
@@ -159,23 +159,23 @@ void main() {
         const AgentSettingsRestore(
           'id',
           'v',
-          {StorageKeys.fontScale: 1.1},
-          {StorageKeys.fontScale: 1.3},
-          [StorageKeys.fontScale],
+          {StorageKeys.uiScale: 1.1},
+          {StorageKeys.uiScale: 1.3},
+          [StorageKeys.uiScale],
         ),
       ),
       false,
     );
-    expect(storage.values[StorageKeys.fontScale], 1.4);
+    expect(storage.values[StorageKeys.uiScale], 1.4);
   });
 
   test(
     'stale versions, unsupported keys and invalid native values never overwrite',
     () async {
       final version = (await read())['version'] as String;
-      storage.values[StorageKeys.fontScale] = 1.2;
+      storage.values[StorageKeys.uiScale] = 1.2;
       await expectLater(
-        update({StorageKeys.fontScale: 1.4}, version),
+        update({StorageKeys.uiScale: 1.4}, version),
         throwsA(
           isA<NaiAgentToolError>().having(
             (e) => e.code,
@@ -186,7 +186,7 @@ void main() {
       );
       for (final changes in [
         {'token': 'bad'},
-        {StorageKeys.fontScale: 100},
+        {StorageKeys.uiScale: 100},
         {StorageKeys.locale: 'invalid'},
       ]) {
         await expectLater(
@@ -194,7 +194,7 @@ void main() {
           throwsA(isA<NaiAgentToolError>()),
         );
       }
-      expect(storage.values[StorageKeys.fontScale], 1.2);
+      expect(storage.values[StorageKeys.uiScale], 1.2);
       expect(await dir.list().toList(), isEmpty);
     },
   );
@@ -208,7 +208,7 @@ void main() {
         refresh: () {},
       );
       final params = {
-        'changes': {StorageKeys.fontScale: 1.3},
+        'changes': {StorageKeys.uiScale: 1.3},
         'expected_version': (await read())['version'],
       };
       await expectLater(
@@ -222,7 +222,7 @@ void main() {
         _BackupSettings(
           storage,
           dir,
-          () => storage.values[StorageKeys.fontScale] = 1.4,
+          () => storage.values[StorageKeys.uiScale] = 1.4,
         ),
         isAlive: () => true,
         refresh: () {},
@@ -231,27 +231,27 @@ void main() {
         tools.update(params, NaiAgentCancellation()),
         throwsStateError,
       );
-      expect(storage.values[StorageKeys.fontScale], 1.4);
+      expect(storage.values[StorageKeys.uiScale], 1.4);
     },
   );
   test(
     'native rollback keeps subsequent user writes when a later field fails',
     () async {
-      storage.values[StorageKeys.fontScale] = 1.1;
+      storage.values[StorageKeys.uiScale] = 1.1;
       storage.failKey = StorageKeys.enableCooccurrenceRecommendation;
       storage.beforeWrite = (key) {
         if (key == storage.failKey) {
-          storage.values[StorageKeys.fontScale] = 1.45;
+          storage.values[StorageKeys.uiScale] = 1.45;
         }
       };
       await expectLater(
         update({
-          StorageKeys.fontScale: 1.3,
+          StorageKeys.uiScale: 1.3,
           StorageKeys.enableCooccurrenceRecommendation: true,
         }, (await read())['version'] as String),
         throwsStateError,
       );
-      expect(storage.values[StorageKeys.fontScale], 1.45);
+      expect(storage.values[StorageKeys.uiScale], 1.45);
     },
   );
 }

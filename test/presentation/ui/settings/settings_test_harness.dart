@@ -10,6 +10,7 @@ import 'package:nai_launcher/presentation/ui/settings/settings_fixture.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_page.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_intel.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
+import 'package:nai_launcher/presentation/ui/kit/ui_scale.dart';
 
 /// 主导航宽度：页面可用宽度 = 窗口宽 − 48。
 const settingsRail = 48.0;
@@ -23,6 +24,7 @@ Future<SettingsRecorder> pumpSettings(
   SettingsViewData? data,
   double window = 1600,
   double height = 1000,
+  double uiScale = 1,
   String locale = 'zh',
   bool dark = false,
   String initialQuery = '',
@@ -34,7 +36,7 @@ Future<SettingsRecorder> pumpSettings(
 }) async {
   SettingsAgentPage.resetTab();
   tester.view.devicePixelRatio = 1;
-  tester.view.physicalSize = Size(window - settingsRail, height);
+  tester.view.physicalSize = Size(window - settingsRail * uiScale, height);
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
   final rec = SettingsRecorder();
@@ -51,7 +53,10 @@ Future<SettingsRecorder> pumpSettings(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         builder: (context, child) => MediaQuery(
           data: MediaQuery.of(context).copyWith(disableAnimations: true),
-          child: TextEditingShortcuts(child: child!),
+          child: UiScale(
+            scale: uiScale,
+            child: TextEditingShortcuts(child: child!),
+          ),
         ),
         home: Scaffold(
           body: WindowChromeScope(
@@ -97,6 +102,13 @@ class SettingsRecorder {
     required String workspaceId,
   })?
   saveSystemPrompt;
+  Future<bool> Function({
+    required String? text,
+    required String workspaceId,
+    required String? expectedText,
+  })?
+  saveWorkspacePrefix;
+  Future<bool> Function(String id)? selectWorkspace;
 
   bool has(String name) => calls.any((c) => c.startsWith(name));
 }
@@ -162,6 +174,11 @@ class SettingsHostState extends State<SettingsHost> {
         onReset: (k) => call('reset:${k.name}'),
         onResetPage: (p) => call('resetPage:${p.name}'),
         onRecomputeStorage: () => call('recomputeStorage'),
+        onSelectAgentWorkspace: (id) async {
+          call('selectWorkspace:$id');
+          return await r.selectWorkspace?.call(id) ?? true;
+        },
+        onRemoveGalleryRoot: (id) => call('removeRoot:$id'),
         onUndo: (id) => call('undo:$id'),
         onChannelChanged: (c) {
           r.channel = c;
@@ -201,6 +218,20 @@ class SettingsHostState extends State<SettingsHost> {
                   ) ??
                   r.promptResult;
             },
+        onSaveWorkspacePrefix:
+            ({
+              required text,
+              required workspaceId,
+              required expectedText,
+            }) async {
+              call('savePrefix:${text ?? '<inherit>'}:$workspaceId');
+              return await r.saveWorkspacePrefix?.call(
+                    text: text,
+                    workspaceId: workspaceId,
+                    expectedText: expectedText,
+                  ) ??
+                  true;
+            },
         onDeleteAccount: (id) => call('deleteAccount:$id'),
         onSkillEnabled: (id, v) => call('skillEnabled:$id:$v'),
         onSkillManual: (id, v) => call('skillManual:$id:$v'),
@@ -233,6 +264,8 @@ class SettingsHostState extends State<SettingsHost> {
         onRagCancelDownload: () => call('ragCancelDownload'),
         onRagDiscoverModels: () => call('ragDiscover'),
         onPickPath: (k) => call('pickPath:${k.name}'),
+        onOpenPath: (k) => call('openPath:${k.name}'),
+        onOpenFolder: (f) => call('openFolder:${f.name}'),
         onResetScopes: (s) =>
             call('resetScopes:${s.map((e) => e.name).join(',')}'),
         onAddBlacklistTag: (t) => call('addTag:$t'),
@@ -242,8 +275,6 @@ class SettingsHostState extends State<SettingsHost> {
         onUpdateDictionary: (kind) => call('updateDictionary:${kind.name}'),
         onCheckDictionaryUpdates: () => call('checkDictionaryUpdates'),
         onCancelDictionaryUpdate: () => call('cancelDictionaryUpdate'),
-        onExportTagSemantics: () => call('exportTagSemantics'),
-        onImportTagSemantics: () => call('importTagSemantics'),
         onTestComfy: () => call('testComfy'),
         onUpscaleInstall: (id) => call('install:$id'),
         onUpscaleCancel: (id) => call('cancel:$id'),

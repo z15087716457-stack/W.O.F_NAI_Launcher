@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:path/path.dart' as p;
 
 import '../../../core/constants/app_version.dart';
 import '../../../core/rag/rag_settings.dart';
@@ -172,27 +171,23 @@ class _SettingsWiringState extends ConsumerState<SettingsWiring> {
     await ref
         .read(settingsEditsProvider.notifier)
         .change(key, path, title: settingTitle(context, key), label: label);
-    ref.invalidate(settingsFoldersProvider);
-    ref.invalidate(settingsStorageDataProvider);
   }
 
   Future<void> _openPath(SettingKey key) async {
-    final value = ref.read(settingsValuesProvider)[key] as String?;
-    if (value != null) {
-      await SettingsStorageActions(
-        context,
-        ref,
-      ).open(File(value).existsSync() ? File(value).parent.path : value);
-      return;
-    }
     final folder = switch (key) {
       SettingKey.imageSavePath => SettingsFolder.images,
       SettingKey.vibePath => SettingsFolder.vibes,
+      SettingKey.preciseRefPath => SettingsFolder.preciseRefs,
       SettingKey.appDataPath => SettingsFolder.appData,
       _ => null,
     };
-    if (folder == null) throw StateError('A path has not been selected');
-    await SettingsStorageActions(context, ref).openFolder(folder);
+    final storage = SettingsStorageActions(context, ref);
+    if (folder != null) return storage.openFolder(folder);
+    final value = ref.read(settingsValuesProvider)[key] as String?;
+    if (value == null) throw StateError('A path has not been selected');
+    await storage.open(
+      File(value).existsSync() ? File(value).parent.path : value,
+    );
   }
 
   Future<bool> _instructions(
@@ -312,8 +307,6 @@ class _SettingsWiringState extends ConsumerState<SettingsWiring> {
       }),
       onCancelDictionaryUpdate: () =>
           ref.read(settingsDictionaryUpdateProvider.notifier).cancel(),
-      onImportTagSemantics: () => _run(storage.importTagSemantics),
-      onExportTagSemantics: () => _run(storage.exportTagSemantics),
       providers: workbenchActions(
         ref.read(providersWorkbenchProvider.notifier),
         _run,
@@ -369,16 +362,23 @@ class _SettingsWiringState extends ConsumerState<SettingsWiring> {
               return false;
             }
           },
-      onEditWorkspaceRules: () => _run(() async {
-        final workspace = ref
-            .read(naiAgentControllerProvider)
-            .selectedWorkspace;
-        if (workspace != null) {
-          await agentBackend.openFile(
-            p.join(workspace.directory.path, 'instructions.md'),
-          );
-        }
-      }),
+      onSelectAgentWorkspace: agentBackend.selectWorkspace,
+      onSaveWorkspacePrefix:
+          ({required text, required workspaceId, required expectedText}) async {
+            try {
+              await agentBackend.saveSystemPrompt(
+                prefix: true,
+                scope: SettingsPromptScope.workspace,
+                text: text,
+                workspaceId: workspaceId,
+                expectedGlobal: null,
+                expectedWorkspace: expectedText,
+              );
+              return true;
+            } catch (_) {
+              return false;
+            }
+          },
       onViewBuiltinPrompt: () => _run(() => agent.viewPrompt(builtin: true)),
       onViewFinalPrompt: () => _run(agent.viewPrompt),
       onExtensionEnabled: (id, value) =>

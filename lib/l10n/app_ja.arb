@@ -1,5 +1,57 @@
 {
   "@@locale": "ja",
+  "@blocks_cropRange": {
+    "placeholders": {
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "@blocks_previewCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@blocks_previewNumber": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "@ag_externalArtifactUpdated": {
+    "placeholders": {
+      "client": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "@ag_externalWorkspaceUpdated": {
+    "placeholders": {
+      "client": {
+        "type": "String"
+      }
+    }
+  },
+  "@ag_externalResultFailed": {
+    "placeholders": {
+      "client": {
+        "type": "String"
+      }
+    }
+  },
+  "@ag_externalNeedsAttention": {
+    "placeholders": {
+      "client": {
+        "type": "String"
+      }
+    }
+  },
   "app_title": "W.O.F NAI Studio",
   "settings_visualAssets": "UI のフォントとライセンス",
   "brand_entryTagline": "想像が、かたちになる場所。",
@@ -183,8 +235,8 @@
   "settings_imageSavePath": "画像の保存場所",
   "settings_autoSave": "自動保存",
   "settings_autoSaveSubtitle": "生成後に画像を自動的に保存します",
-  "settings_extraRootsTitle": "ギャラリーソース",
-  "settings_extraRootsHint": "追加のギャラリーソースは閲覧・検索でき、画像をカテゴリへ移動/コピーできます（自動保存の対象外）。追加後すぐにスキャンします。",
+  "settings_extraRootsTitle": "ギャラリーの参照元",
+  "settings_extraRootsHint": "閲覧・検索するフォルダーを追加します。親フォルダーを追加すると配下の参照元を統合します。削除しても画像や保存先は変わりません。",
   "settings_extraRootsEmpty": "追加のギャラリーソースはありません",
   "settings_extraRootsAdd": "フォルダを追加",
   "settings_extraRootsAddTitle": "ギャラリーソースとして追加するフォルダを選択",
@@ -196,8 +248,7 @@
   "settings_extraRootsWaitingScan": "ギャラリーをスキャン中です。完了後にこのフォルダをインポートします",
   "settings_extraRootsRemoved": "ギャラリーソースを削除しました",
   "settings_extraRootsDuplicate": "このフォルダはすでにギャラリーソースです",
-  "settings_extraRootsSameAsMain": "このフォルダは画像保存先と同じです",
-  "settings_extraRootsNested": "ギャラリーソース同士を互いに含めることはできません。別のフォルダを選択してください",
+  "settings_extraRootsNested": "このフォルダーは既存の参照元に含まれています。",
   "settings_extraRootsNotFound": "選択したフォルダが存在しません",
   "@settings_extraRootsRemoveConfirmContent": {
     "placeholders": {
@@ -311,7 +362,7 @@
   },
   "generation_setAsReferenceImage": "参照画像に設定しました",
   "generation_canvasDisplaySettings": "キャンバス表示",
-  "generation_canvasZoomToFill": "ズームしてフィル（100%超を許可）",
+  "generation_canvasZoomToFill": "キャンバスに合わせて拡大（100%超を許可）",
   "generation_canvasEmpty": "キャンバスは空です",
   "generation_canvasBackground": "透明部分の背景",
   "generation_canvasBackgroundChecker": "市松模様",
@@ -445,7 +496,7 @@
   "prompt_sdSyntaxAutoConvert": "SD 構文自動変換",
   "prompt_sdSyntaxAutoConvertSubtitle": "フォーカスが外れたとき、または生成時に SD の重み構文を NAI 形式に変換します",
   "prompt_cooccurrenceRecommendation": "タグ拡張",
-  "prompt_cooccurrenceRecommendationSubtitle": "Ctrl+クリックでローカル検索、Ctrl+ドラッグで関連タグを表示",
+  "prompt_cooccurrenceRecommendationSubtitle": "Ctrl（Mac は ⌘）を押しながらクリック／ドラッグ選択して、タグ検索や関連候補を表示します。",
   "prompt_formatted": "フォーマット済み",
   "image_save": "保存",
   "image_copy": "コピー",
@@ -951,7 +1002,8 @@
   "api_error_network": "ネットワークエラー",
   "api_error_network_hint": "サーバーに接続できません。ネットワークを確認してください",
   "common_close": "閉じる",
-  "drop_processing": "画像を処理しています...",
+  "drop_processing": "画像を準備中",
+  "drop_processingSubtitle": "読み込み後に用途を選択",
   "characterEditor_clearAll": "すべてクリア",
   "characterEditor_clearAllTitle": "すべてのキャラクターをクリア",
   "characterEditor_clearAllConfirm": "すべてのキャラクターを削除しますか？この操作は元に戻せません。",
@@ -1824,7 +1876,8 @@
       "action": {}
     }
   },
-  "drop_hint": "ここに画像をドロップしてください",
+  "drop_hint": "離して画像を読み込む",
+  "drop_hintSubtitle": "次に画像の用途を選択",
   "drop_img2img": "Image2Image",
   "drop_vibeTransfer": "バイブストランスファー",
   "drop_characterReference": "精密参照",
@@ -2159,7 +2212,7 @@
       "client": {}
     }
   },
-  "settings_fontScale": "フォント サイズ",
+  "settings_fontScale": "UIの拡大率",
   "settings_fontScale_previewSmall": "光影落在画布上。",
   "settings_fontScale_previewMedium": "色から物語が生まれる。",
   "settings_fontScale_previewLarge": "Let colors tell a story.",
@@ -2884,7 +2937,7 @@
   },
   "autocomplete_resultLimit": "結果数",
   "autocomplete_relatedTagsTitle": "タグ拡張",
-  "autocomplete_relatedTagsSubtitle": "Ctrl+クリックでローカル検索、Ctrl+ドラッグで関連タグを表示",
+  "autocomplete_relatedTagsSubtitle": "Ctrl（Mac は ⌘）を押しながらクリック／ドラッグ選択して、タグ検索や関連候補を表示します。",
   "tagExpansion_searchHint": "タグや別名を検索",
   "tagExpansion_relatedTitle": "関連タグ",
   "tagExpansion_empty": "入力してローカルタグを検索",
@@ -3267,7 +3320,7 @@
   "@tips_prompt_guide_2": {
     "description": "Weight scroll modifier (default Alt)."
   },
-  "tips_prompt_guide_3": "タグを Ctrl+クリックするとローカルのタグで検索、Ctrl+ドラッグで選ぶと一緒によく使われるタグが見られます。",
+  "tips_prompt_guide_3": "Ctrl（Mac は ⌘）を押しながらクリック／ドラッグ選択でタグ拡張を開き、タグ検索や関連候補を確認できます。",
   "@tips_prompt_guide_3": {
     "description": "prompt_cooccurrenceRecommendationSubtitle (default on)."
   },
@@ -4042,7 +4095,7 @@
   "settings_chooseLightDarkWorkspace": "明るい・暗いスタイルを選択",
   "settings_textLanguage": "文字と言語",
   "settings_makeReadingComfortable": "読みやすさを統一",
-  "settings_adjustSettingsPagesDialogsOnly": "設定画面と設定ダイアログの文字サイズ",
+  "settings_adjustSettingsPagesDialogsOnly": "アプリ全体の文字・アイコン・操作部品の大きさを調整します。画像の解像度は変わりません。",
   "settings_motionNotifications": "動きと通知",
   "settings_reduceDistractionsKnowWorkFinishes": "邪魔を減らし、完了をお知らせ",
   "settings_notificationStyle": "通知スタイル",
@@ -4718,6 +4771,17 @@
   "promptTranslation_undoRestore": "原文への復元を取り消し、翻訳ブロックに戻す",
   "promptTranslation_restoreAll": "すべての翻訳ブロックを原文テキストに戻す",
   "promptTranslation_tutorial": "使い方",
+  "promptReading_mode": "軽量翻訳",
+  "promptReading_modeSubtitle": "原文の下に訳文を表示",
+  "promptReading_blocks": "翻訳ブロック",
+  "promptReading_blocksSubtitle": "対訳ブロックで閲覧・編集",
+  "promptReading_update": "追加・変更部分を翻訳",
+  "promptReading_hide": "訳文を隠す",
+  "promptReading_show": "訳文を表示",
+  "promptReading_clear": "訳文を消去",
+  "promptReading_cleared": "訳文を消去しました",
+  "promptReading_pending": "要更新",
+  "promptReading_guide": "カンマで区切った原文ごとに、重み構文を除いた読み取り専用の訳文を表示します。原文をクリックすると編集でき、編集を終えると訳文に戻ります。原文の項目を削除すると対応する訳文も消えます。メニューから更新・非表示・消去ができます。コピーと生成には原文を使います。",
   "promptTranslation_guideBack": "操作に戻る",
   "promptTranslation_guideMiddleTitle": "ブロックを中クリック",
   "promptTranslation_guideMiddleText": "原文と訳文を切り替え",
@@ -7268,7 +7332,6 @@
   "blocks_newBlockHint": "保存後、生成ページのサイドバーからワンクリックで挿入できます",
   "blocks_addThumb": "プレビューを追加",
   "blocks_changeImage": "画像を変更",
-  "blocks_clearThumb": "プレビューを削除",
   "blocks_cropHint": "ドラッグ / ホイールで拡大",
   "blocks_namePlaceholder": "空欄なら最初の項目",
   "blocks_plainText": "テキスト",
@@ -8322,8 +8385,8 @@
   "gen_bdGreen": "緑",
   "gen_bdBlue": "青",
   "gen_bdCustom": "カスタム",
-  "gen_zoomToFill": "拡大して埋める",
-  "gen_zoomToFillSub": "小さい画像も拡大して表示",
+  "gen_zoomToFill": "キャンバスに合わせて拡大",
+  "gen_zoomToFillSub": "フォーカス時に100%を超える拡大を許可し、縦横比を保って全体を表示",
   "gen_useSeed": "このシードを使う（固定）",
   "gen_copySeed": "シードをコピー",
   "gen_pinImage": "キャンバスに固定",
@@ -8985,12 +9048,10 @@
   "rag_installing": "実行環境をインストール中",
   "rag_device": "実行デバイス",
   "rag_auto": "自動選択",
-  "rag_tagsEnabled": "文脈に沿ったタグ候補",
-  "rag_tagsHint": "意味・共起・再順位付けを組み合わせ、入力欄・キャラクター・正負を分離します。",
+  "rag_tagsEnabled": "タグの意味検索と候補",
+  "rag_tagsHint": "入力内容で検索したり、カーソル前の文脈からタグ候補を取得できます。",
   "rag_context": "候補の文脈範囲",
-  "rag_contextHint": "両モードともタグ単位で最大 120 Gemma トークン。全文は重複除外のみに使用。",
-  "rag_contextBefore": "カーソル前 · 120 tokens",
-  "rag_contextAround": "カーソル前後 · 120 tokens",
+  "rag_contextHint": "カーソル前の完全なタグを使用します。32〜512 Gemma トークンで調整できます。",
   "rag_buildIndex": "確認して索引を作成",
   "rag_plan": "現在の {total} 件のタグ、別名、既存のローカル解説を索引化します。初回は時間がかかりますが一時停止・部分利用が可能です。",
   "@rag_plan": {
@@ -9492,12 +9553,12 @@
   "set_apLight": "ライト",
   "set_apDark": "ダーク",
   "set_apSystem": "システム",
-  "set_apSystemSub": "Windows の設定に合わせる",
+  "set_apSystemSub": "システムのライト／ダーク表示に合わせる",
   "set_apText": "文字",
   "set_apFont": "UI フォント",
   "set_apFontSub": "数字とコードは Geist Mono を使います",
-  "set_apScale": "設定とダイアログの文字サイズ",
-  "set_apScaleSub": "設定とダイアログだけを拡大します",
+  "set_apScale": "UIの拡大率",
+  "set_apScaleSub": "アプリ全体の文字・アイコン・操作部品を拡大縮小します。画像の解像度は変わりません。",
   "set_apSampleTitle": "見出し · 生成完了",
   "set_apSampleBody": "本文 · ローカルギャラリーに保存しました。",
   "set_apSampleNote": "注記 · スライダーを動かすとここに反映されます。",
@@ -9511,7 +9572,7 @@
   "set_apSoundFile": "サウンドファイル",
   "set_apPreviewSound": "試聴",
   "set_apNotify": "通知",
-  "set_apNotifySub": "右上に表示され 3 秒で消えます",
+  "set_apNotifySub": "アプリ内の操作結果通知の表示を確認できます",
   "set_apNotifyPreview": "プレビュー",
   "set_apPreview": "プレビュー",
   "set_apCurrent": "現在",
@@ -9536,8 +9597,8 @@
   "set_cvCanvasSec": "キャンバス",
   "set_cvLock": "キャンバスの視点を固定",
   "set_cvLockSub": "新しい画像が出ても視点を動かしません",
-  "set_cvFill": "新しい画像を全体表示",
-  "set_cvFillSub": "実ピクセルではなく表示領域に合わせます",
+  "set_cvFill": "キャンバスに合わせて拡大",
+  "set_cvFillSub": "画像にフォーカスしたとき、100%を超える拡大を許可し、縦横比を保って表示領域に全体を収めます。オフの場合、自動調整の上限は100%です。",
   "set_cvChannel": "ビジュアルチャネル",
   "set_cvChannelSub": "キャンバスの通路をテーマで装飾し、履歴をたどると順にテーマが変わります。",
   "set_cvMode": "モード",
@@ -9708,10 +9769,10 @@
   "set_gnWheel": "ホイールで重み調整",
   "set_gnWheelSub": "タグ上でホイールを回して重みを変更",
   "set_gnNoKey": "キー不要",
-  "set_gnRelated": "関連タグの提案",
-  "set_gnRelatedSub": "よく一緒に使われるタグを提案",
+  "set_gnRelated": "Ctrl タグ拡張",
+  "set_gnRelatedSub": "Ctrl（Mac は ⌘）を押しながらクリック／ドラッグ選択して、タグ検索や関連候補を表示します。",
   "set_gnRag": "セマンティックなタグ提案",
-  "set_gnRagSub": "セマンティック検索による文脈に応じた提案",
+  "set_gnRagSub": "タグ拡張での意味検索と文脈に応じた候補を提供します。「セマンティック検索」で設定できます。",
   "set_gnReady": "準備完了",
   "set_gnNotReady": "未準備",
   "set_gnGoSettings": "設定へ",
@@ -9748,18 +9809,23 @@
   "set_stDict": "辞書とキャッシュ",
   "set_stAgent": "Agent",
   "set_stSave": "保存",
-  "set_stSavePath": "画像の保存先",
+  "set_stSavePath": "生成画像の保存先",
+  "set_stSavePathSub": "自動・手動保存の実際の保存先：\n{path}",
+  "@set_stSavePathSub": {"placeholders": {"path": {"type": "String"}}},
   "set_stAutoSave": "自動保存",
   "set_stAutoSaveSub": "生成後すぐに保存します。オフではキャンバスと履歴にのみ残ります",
   "set_stAssets": "素材と表示",
-  "set_stVibePath": "Vibe ライブラリの場所",
+  "set_stVibePath": "Vibe ファイルの保存先",
+  "set_stVibePathSub": "Vibeファイルを読み書きします。既存ファイルは元の場所に残ります。",
+  "set_stPr": "PR ライブラリ",
+  "set_stPrPath": "PR ファイルの保存先",
+  "set_stPrPathSub": "精密参照の元画像を保存します。既存ファイルは元の場所に残ります。",
   "set_stQuality": "ギャラリーの画質",
   "set_stQualitySub": "サムネイルの表示品質",
   "set_stHigh": "高画質",
   "set_stStandard": "標準",
   "set_stRoots": "ギャラリーのフォルダー",
-  "set_stRootsSub": "任意のフォルダーをギャラリーで閲覧・検索できます。自動保存の対象外です。",
-  "set_stPrimary": "メイン",
+  "set_stRootsSub": "ギャラリーの閲覧・検索対象です。削除しても画像や保存先は変わりません。",
   "set_stCount": "{n} 枚",
   "@set_stCount": {
     "placeholders": {
@@ -9839,8 +9905,6 @@
       "n": {}
     }
   },
-  "set_dcSemantics": "個人の意味情報",
-  "set_dcSemanticsSub": "補足した中国語資料は翻訳キャッシュの削除後も保持",
   "set_dcTranslate": "タグ翻訳・意味情報",
   "set_dcTranslateSub": "既存資料を再利用し、中国語の基本名・同義語・短い説明を補完",
   "set_dcCaches": "キャッシュ",
@@ -9881,7 +9945,7 @@
     }
   },
   "set_dcResetStats": "統計をリセット",
-  "set_dcTip": "辞書とキャッシュは再取得できます。個人の意味情報はこのページから書き出してください。その他の個人データは「ストレージ → アプリデータの場所」にあります。",
+  "set_dcTip": "辞書は再ダウンロード、キャッシュは再作成できます。補足した中国語資料は翻訳キャッシュを削除しても残ります。保存場所は「ストレージとギャラリー → アプリデータの場所」で確認できます。",
   "set_mdDesc": "翻訳・逆推定・タグ翻訳・Agent が使う LLM サービス。プロバイダーを追加し、機能ごとにモデルを選びます。",
   "set_mdProviders": "プロバイダー",
   "set_mdTasks": "機能の割り当て",
@@ -9964,11 +10028,10 @@
   "set_agMaxSub": "ループを防ぎます",
   "set_agTimesUnit": "回",
   "set_agInstr": "指示",
-  "set_agInstrSub": "この順で最終プロンプトになります。既存のチャットはそのまま、以降のリクエストに反映。",
+  "set_agInstrSub": "表示範囲を選択します。グローバル指示とワークスペースの AGENTS.md は共に適用され、変更は以降のリクエストに反映されます。",
   "set_agOrderBuiltin": "内蔵システムプロンプト",
   "set_agOrderPrefix": "内蔵プロンプトの前",
   "set_agOrderGlobal": "全体の指示",
-  "set_agOrderWorkspace": "ワークスペースのルール",
   "set_agGlobal": "全体の指示",
   "set_agGlobalHint": "システム全体の AGENTS.md に相当し、すべてのワークスペースに適用されます。",
   "set_agPrefix": "内蔵プロンプトの前",
@@ -10025,8 +10088,8 @@
   "set_rgStepDevice": "デバイス",
   "set_rgSources": "ソース",
   "set_rgSourcesSub": "ソースごとに構築・切替。一時停止でき、完了分はすぐ使えます。",
-  "set_rgTags": "タグ提案",
-  "set_rgTagsSub": "意味・共起・再ランクを組み合わせ、各入力欄ごとに計算",
+  "set_rgTags": "タグの意味検索と候補",
+  "set_rgTagsSub": "入力内容で検索したり、カーソル前の文脈からタグ候補を取得できます。",
   "set_rgWiki": "百科のセマンティック検索",
   "set_rgWikiSub": "ローカル百科。名前の完全一致を優先し、意味検索で補完",
   "set_rgBlocks": "プロンプトブロック",
@@ -10067,10 +10130,8 @@
   },
   "set_rgClearBody": "派生索引だけを削除し、元の内容とモデルは残ります。",
   "set_rgContext": "提案の文脈",
-  "set_rgContextSub": "どちらも最大 120 Gemma トークン、タグ単位で切り取り。",
-  "set_rgRange": "取得範囲",
-  "set_rgBefore": "カーソルの前",
-  "set_rgAround": "カーソルの前後",
+  "set_rgContextSub": "カーソル前の完全なタグを使用します。32〜512 Gemma トークンで調整できます。",
+  "set_rgRange": "取得する長さ",
   "set_rgRuntime": "モデルと実行環境",
   "set_rgEmbedPath": "埋め込みモデルのフォルダー",
   "set_rgRerankPath": "再ランクモデルのフォルダー",
@@ -10531,6 +10592,8 @@
   "set_agBaseRestoreTitle": "内蔵システムプロンプトに戻しますか？",
   "set_agBaseRestoreBody": "全体のカスタム内容を内蔵システムプロンプトに戻します。以前の内容はプロンプト履歴に残ります。ワークスペース個別のプロンプトは変わりません。",
   "set_agBaseSwitchTitle": "内蔵システムプロンプトの変更を破棄しますか？",
+  "set_agPrefixSwitchTitle": "前置きの変更を破棄しますか？",
+  "set_agPrefixInheritHint": "空欄の場合は全体の前置きを使用します。",
   "set_agBaseSwitchBody": "範囲を切り替えると未保存の変更は失われます。",
   "set_agBaseSaving": "保存中…",
   "set_agBaseFailed": "保存できませんでした。ワークスペースが変わったか、書き込みに失敗しました。変更は残っています。",
@@ -10591,7 +10654,6 @@
   "set_agSkillManual": "手動のみ",
   "set_agSkillAutoTip": "プロンプトには名前と一行説明だけが入り、作業が合うと Agent が自分で全文を読みます。",
   "set_agSkillManualTip": "プロンプトに入らないため Agent は自分では使いません。チャット欄で /skill:名前 と入力すると呼び出します。",
-  "set_agWorkspaceRulesSub": "このワークスペースだけに適用する追加ルールです。ワークスペース内の instructions.md に保存され、全体の指示の後に追加されます。「編集」でシステムのエディターが開きます。空なら何も追加しません。",
   "set_agSkillDescNaiPrompt": "Write or revise NovelAI prompts in the Studio draft - main/negative prompts, characters, blocks and weights - following the rules of the current model (V4/V4.5 or V5). Read before changing prompt text.",
   "set_agSkillDescNaiStudio": "Operate NAI Studio drafts, images, generation, semantic search, gallery/history, references, prompt blocks, style exploration, image tools, snapshots and preferences. Read before Studio operations beyond studio_context.",
   "set_agSkillView": "表示",
@@ -10688,9 +10750,9 @@
   "ag_quickEdit": "クイックメッセージを編集",
   "ag_quickSends": "クリックですぐ送信",
   "ag_modeBypass": "フルアクセス",
-  "ag_modeBypassHint": "確認せずすべて直接実行。Anlas を使う操作だけは確認します",
+  "ag_modeBypassHint": "すべて直接実行。無料操作は確認不要、有料操作は Agent 設定に従います",
   "ag_bypassConfirmTitle": "フルアクセスに切り替えますか？",
-  "ag_bypassConfirmBody": "Agent は確認せずにファイルの変更、コマンドの実行、未知のツールの呼び出しを行い、ワークスペース外のファイルも操作できます。Anlas を使う操作は引き続き確認します。信頼できる作業のときだけ使ってください。",
+  "ag_bypassConfirmBody": "Agent は確認せずにファイルの変更、コマンドの実行、未知のツールの呼び出しを行い、ワークスペース外のファイルも操作できます。無料生成は自動実行します。有料操作は既定で確認しますが、Agent 設定で確認を無効にできます。信頼できる作業のときだけ使ってください。",
   "ag_bypassConfirmOk": "切り替える",
   "ag_bypassConfirmSilence": "今後表示しない",
   "ag_menuDeleteChat": "チャットを削除",
@@ -11074,7 +11136,6 @@
   "ag_memoryGlobal": "共通指示",
   "ag_memoryChatPrefix": "このチャットの前置指示",
   "ag_memoryChatPrefixHint": "このチャットにのみ適用され、内蔵システムプロンプトの前に追加されます。",
-  "ag_memoryWorkspace": "ワークスペースのルール",
   "ag_memorySkills": "有効なスキル",
   "ag_memoryEmpty": "未設定",
   "ag_memoryEdit": "編集",
@@ -11468,14 +11529,16 @@
   "ag_commandCompactArgs": "[指示]",
   "ag_commandRenameArgs": "<名前>",
   "set_agNextSuggestion": "次のメッセージ候補",
+  "set_agSkipPaidConfirmation": "有料操作も確認せず実行",
+  "set_agSkipPaidConfirmationSub": "完全アクセス時のみ有効です。無料操作は自動実行されます。有効にすると、Anlas を消費する生成や画像操作も確認せず実行します。",
   "set_agNextSuggestionSub": "現在の会話モデルで次のメッセージを予測します。追加のトークンを使用します。Tab で採用。",
-  "set_agCacheWarming": "プロンプトキャッシュの予熱",
-  "set_agCacheWarmingSub": "プロンプトキャッシュが切れる直前に 1 トークンのリクエストで延長します（寿命 5 分、全モデル対象）。次のステップはコンテキスト全体を再送せずキャッシュを読みます。",
+  "set_agCacheWarming": "プロンプトキャッシュの維持",
+  "set_agCacheWarmingSub": "軽量なリクエストでキャッシュを延長し、後続の文脈処理を減らします。キャッシュの利用可否はプロバイダーによります。",
   "set_agCacheOff": "オフ",
   "set_agCacheStreaming": "Agent の実行中のみ",
-  "set_agCacheIdle": "待機中も予熱",
-  "set_agCacheIdleCost": "待機中のウォームアップ（最大 30 分）は追加のモデル料金がかかります。",
-  "ag_cacheWarmTitle": "キャッシュのウォームアップ",
+  "set_agCacheIdle": "待機中も維持",
+  "set_agCacheIdleCost": "待機中のキャッシュ維持（最大 30 分）は追加のモデル料金がかかります。",
+  "ag_cacheWarmTitle": "キャッシュの維持",
   "ag_cacheWarmOff": "オフ",
   "ag_cacheWarmRefreshing": "キャッシュを延長中…",
   "ag_cacheWarmIdle": "待機中 — 次の実行で開始",
@@ -11522,10 +11585,8 @@
       }
     }
   },
-  "set_workspaceFontScale": "創作エリアの文字サイズ",
   "set_promptAutocomplete": "プロンプトの自動補完",
   "shortcut_action_open_resource_window": "リソースウィンドウを開く",
-  "set_workspaceFontScaleSub": "プロンプト欄・キャラクター欄・ブロック・ビューアのプロンプトの文字。上のUI文字サイズとは別に調整します。",
   "set_promptAutocompleteSub": "プロンプト欄とキャラクター欄の入力中にローカルのタグ辞書から候補を表示します。↑↓で選択、Tab か Enter で確定、Esc で閉じます。",
   "floating_open": "リソース小窓",
   "floating_searchGallery": "検索（フレーズ全体 / 完全一致タグ）",
@@ -11691,5 +11752,14 @@
   "ag_externalArtifactUpdated": "{client} が「{title}」を更新しました",
   "ag_externalWorkspaceUpdated": "{client} がワークスペースを更新しました",
   "ag_externalResultFailed": "{client} の操作は完了しませんでした",
-  "ag_externalNeedsAttention": "{client} の操作を確認してください"
+  "ag_externalNeedsAttention": "{client} の操作を確認してください",
+  "set_agViewScope": "表示範囲",
+  "set_agViewGlobalHint": "すべてのワークスペースで共通の指示と前置き",
+  "set_agViewWorkspaceHint": "選択したワークスペースのプロジェクトルール",
+  "set_agProjectRules": "ワークスペースの AGENTS.md",
+  "set_agRulesReadonly": "読み取り専用",
+  "set_agRulesView": "表示",
+  "set_agRulesMissing": "このワークスペースにはまだ AGENTS.md がありません",
+  "set_agRulesEmpty": "AGENTS.md は空です",
+  "set_agRulesLoadFailed": "AGENTS.md を読み取れません。ファイルのアクセス権を確認してください。"
 }

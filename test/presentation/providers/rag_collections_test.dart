@@ -13,7 +13,7 @@ import '../../helpers/rag_test_python.dart';
 
 const _worker = r'''
 import sys,json,threading
-lock=threading.Lock();sources={};suspended=False;slow=False
+lock=threading.Lock();sources={};suspended=False;slow=False;configures=0
 def emit(v):
  with lock:print(json.dumps(v),flush=True)
 def status():
@@ -26,6 +26,7 @@ for line in sys.stdin:
  if op=='cancel':continue
  i=r['id']
  if op=='configure':
+  configures+=1
   sources={s:{'indexed':8,'total':8,'complete':True,'partial':False,'building':False,'paused':False,'auto_update_allowed':False} for s in p['sources']};result=status()
  elif op=='status':
   result=status()
@@ -46,6 +47,8 @@ for line in sys.stdin:
  elif op=='text_search':
   result={'items':[{'id':source+'-hit','title':'Saved','snippet':'rain','section':'article'}]}
   if p['query']=='delay':threading.Timer(.2,emit,args=[{'id':i,'result':result}]).start();continue
+ elif op=='search':
+  result={'items':[{'name':p['mode']+':'+str(p['budget']),'category':0,'post_count':configures,'aliases':p['existing']}]}
  elif op=='gallery_search':
   if p['query']=='fail':emit({'id':i,'error':{'code':'rag_runtime_error'}});continue
   with open(p['scope'],encoding='utf-8') as f:paths=json.load(f)
@@ -133,6 +136,37 @@ void main() {
   group(
     'collection routing with a real JSON child',
     () {
+      test(
+        'recommendations send the latest budget before the caret without reconnecting',
+        () async {
+          await container
+              .read(ragSettingsProvider.notifier)
+              .update(
+                container.read(ragSettingsProvider).copyWith(tagsEnabled: true),
+              );
+          int? configurations;
+          for (final budget in [32, 121, 512]) {
+            await container
+                .read(ragSettingsProvider.notifier)
+                .update(
+                  container
+                      .read(ragSettingsProvider)
+                      .copyWith(tokenBudget: budget),
+                );
+            final items = await controller.recommend(
+              text: 'rain, future',
+              cursor: 5,
+              existing: {'rain', 'future'},
+              lexical: [],
+              cancellation: RagCancellation(),
+            );
+            expect(items.single.canonicalTag, 'before:$budget');
+            expect(items.single.aliases, containsAll(['rain', 'future']));
+            configurations ??= items.single.postCount;
+            expect(items.single.postCount, configurations);
+          }
+        },
+      );
       test(
         'verification stays busy across heartbeat, completion clears it',
         () async {

@@ -228,7 +228,7 @@ void main() {
       final pending = controller.start(SettingsDictionaryKind.tags);
       expect(
         container.read(settingsDictionaryUpdateProvider).tagInstalledDate,
-        '2026-10-01',
+        dictionarySources[DictionaryKind.tags]!.date,
       );
       expect(
         container.read(settingsDictionaryUpdateProvider).tagDate,

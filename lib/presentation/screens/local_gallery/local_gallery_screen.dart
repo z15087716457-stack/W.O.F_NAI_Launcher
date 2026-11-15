@@ -51,7 +51,7 @@ import '../../ui/kit/ui_glyph.dart';
 import '../../ui/kit/ui_text.dart';
 import '../../utils/asset_protection_guard.dart';
 import '../../utils/gallery_category_label.dart';
-import '../../utils/gallery_extra_root_add_flow.dart';
+import '../../utils/gallery_source_add_flow.dart';
 import '../../utils/image_viewer_opener.dart';
 import '../../utils/krita_send_helper.dart';
 import '../../utils/local_gallery_metadata_resolver.dart';
@@ -755,7 +755,7 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
   }
 
   Future<void> _importFolder() async {
-    final addedPath = await GalleryExtraRootAddFlow.pickAndAdd(
+    final addedPath = await GallerySourceAddFlow.pickAndAdd(
       context: context,
       ref: ref,
     );
@@ -970,7 +970,7 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
         : null;
 
     final sourceExternal = await GalleryFolderRepository.instance
-        .isExtraRootPath(imagePath);
+        .isExternalPath(imagePath);
     final targetExternal = targetCategory?.isExternal ?? false;
 
     // 外部图库源文件移动：弹出不受保护模式开关影响的强制确认（双向风险）
@@ -1342,7 +1342,7 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
     // 1. （需要时）强制确认（双向外部源移动风险）
     int extraRootCount = 0;
     for (final path in paths) {
-      if (await GalleryFolderRepository.instance.isExtraRootPath(path)) {
+      if (await GalleryFolderRepository.instance.isExternalPath(path)) {
         extraRootCount++;
       }
     }
@@ -2041,7 +2041,7 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
 
     // 2. （需要时）强制确认（双向外部源移动风险）
     final sourceExternal = await GalleryFolderRepository.instance
-        .isExtraRootPath(imagePath);
+        .isExternalPath(imagePath);
     final targetExternal = targetCategory?.isExternal ?? false;
 
     if (sourceExternal || targetExternal) {

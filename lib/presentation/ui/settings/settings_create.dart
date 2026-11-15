@@ -464,6 +464,7 @@ class SettingsStoragePage extends StatelessWidget {
       SettingsStorageKind.images => l.set_stImages,
       SettingsStorageKind.upscaleModels => l.set_stUpscaleModels,
       SettingsStorageKind.vibes => l.set_stVibes,
+      SettingsStorageKind.preciseRefs => l.set_stPr,
       SettingsStorageKind.thumbnails => l.set_stThumbs,
       SettingsStorageKind.ragIndex => l.set_stRag,
       SettingsStorageKind.dictionaries => l.set_stDict,
@@ -473,6 +474,7 @@ class SettingsStoragePage extends StatelessWidget {
     String folderName(SettingsFolder f) => switch (f) {
       SettingsFolder.images => l.set_stImages,
       SettingsFolder.vibes => l.set_stVibes,
+      SettingsFolder.preciseRefs => l.set_stPr,
       SettingsFolder.thumbnails => l.set_stThumbs,
       SettingsFolder.appData => l.set_stAppDataShort,
       SettingsFolder.logs => l.set_stLogs,
@@ -498,6 +500,7 @@ class SettingsStoragePage extends StatelessWidget {
                 for (final f in [
                   SettingsFolder.images,
                   SettingsFolder.vibes,
+                  SettingsFolder.preciseRefs,
                   SettingsFolder.thumbnails,
                   SettingsFolder.appData,
                   SettingsFolder.logs,
@@ -683,7 +686,15 @@ class SettingsStoragePage extends StatelessWidget {
               SettingKeyRow(
                 SettingKey.imageSavePath,
                 title: l.set_stSavePath,
-                control: const SetPath(SettingKey.imageSavePath),
+                subtitle: l.set_stSavePathSub(
+                  st.imageSaveDirectory.isEmpty
+                      ? l.common_loading
+                      : st.imageSaveDirectory,
+                ),
+                control: SetPath(
+                  SettingKey.imageSavePath,
+                  defaultPath: st.folderPaths[SettingsFolder.images],
+                ),
               ),
               SettingKeyRow(
                 SettingKey.autoSave,
@@ -699,9 +710,19 @@ class SettingsStoragePage extends StatelessWidget {
               SettingKeyRow(
                 SettingKey.vibePath,
                 title: l.set_stVibePath,
-                control: const SetPath(
+                subtitle: l.set_stVibePathSub,
+                control: SetPath(
                   SettingKey.vibePath,
-                  defaultPath: r'Documents\NAI_Launcher\vibes',
+                  defaultPath: st.folderPaths[SettingsFolder.vibes],
+                ),
+              ),
+              SettingKeyRow(
+                SettingKey.preciseRefPath,
+                title: l.set_stPrPath,
+                subtitle: l.set_stPrPathSub,
+                control: SetPath(
+                  SettingKey.preciseRefPath,
+                  defaultPath: st.folderPaths[SettingsFolder.preciseRefs],
                 ),
               ),
               SettingKeyRow(
@@ -727,7 +748,6 @@ class SettingsStoragePage extends StatelessWidget {
                   ),
                   title: r.path,
                   titleStyle: UiText.mono(12.5, color: c.ink),
-                  badges: [if (r.primary) UiMini(l.set_stPrimary)],
                   control: Row(
                     mainAxisSize: MainAxisSize.min,
                     spacing: 8,
@@ -746,15 +766,12 @@ class SettingsStoragePage extends StatelessWidget {
                         tooltip: l.set_open,
                         onTap: () => s.actions.onOpenGalleryRoot(r.id),
                       ),
-                      if (r.primary)
-                        const SizedBox(width: 26)
-                      else
-                        SettingsIconBtn(
-                          key: Key('root-remove-${r.id}'),
-                          glyph: UiGlyphs.close,
-                          tooltip: l.set_stRemoveRoot,
-                          onTap: () => s.actions.onRemoveGalleryRoot(r.id),
-                        ),
+                      SettingsIconBtn(
+                        key: Key('root-remove-${r.id}'),
+                        glyph: UiGlyphs.close,
+                        tooltip: l.set_stRemoveRoot,
+                        onTap: () => s.actions.onRemoveGalleryRoot(r.id),
+                      ),
                     ],
                   ),
                 ),
@@ -1181,28 +1198,6 @@ class SettingsDictionaryPage extends StatelessWidget {
                   dc.translationModel ?? l.set_tileNoModel,
                   style: UiText.sans(12, color: c.muted),
                 ),
-              ),
-            ),
-            SettingsRow(
-              title: l.set_dcSemantics,
-              subtitle: l.set_dcSemanticsSub,
-              control: Row(
-                mainAxisSize: MainAxisSize.min,
-                spacing: 8,
-                children: [
-                  SettingsBtn(
-                    label: l.set_importIt,
-                    small: true,
-                    tone: SettingsBtnTone.ghost,
-                    onTap: s.actions.onImportTagSemantics,
-                  ),
-                  SettingsBtn(
-                    label: l.set_exportIt,
-                    small: true,
-                    tone: SettingsBtnTone.ghost,
-                    onTap: s.actions.onExportTagSemantics,
-                  ),
-                ],
               ),
             ),
           ],

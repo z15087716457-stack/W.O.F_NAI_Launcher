@@ -83,7 +83,7 @@ void main() {
     final anchor = tester.getRect(gear);
     await tester.tap(gear);
     await tester.pumpAndSettle();
-    final fill = find.byTooltip('放大填充（允许 >100%）');
+    final fill = find.byTooltip('放大适应画布（允许超过 100%）');
     expect(find.byType(AlertDialog), findsNothing);
     expect(find.byTooltip('透明区域底色'), findsNothing);
     expect(find.text('平滑缩放（Ctrl+滚轮）'), findsNothing);
@@ -247,10 +247,10 @@ void main() {
       );
       await tester.tap(find.byTooltip('画布显示'));
       await tester.pumpAndSettle();
-      await tester.tap(find.byTooltip('放大填充（允许 >100%）'));
+      await tester.tap(find.byTooltip('放大适应画布（允许超过 100%）'));
       await tester.pumpAndSettle();
       expect(container.read(generationCanvasCameraProvider).scale, 1);
-      await tester.tap(find.byTooltip('放大填充（允许 >100%）'));
+      await tester.tap(find.byTooltip('放大适应画布（允许超过 100%）'));
       await tester.pumpAndSettle();
       expect(
         container.read(generationCanvasCameraProvider).scale,

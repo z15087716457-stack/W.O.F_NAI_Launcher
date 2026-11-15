@@ -15,6 +15,78 @@ import 'nav_test_harness.dart';
 Finder key(String value) => find.byKey(Key(value));
 
 void main() {
+  for (final pinned in [false, true]) {
+    for (final dark in [false, true]) {
+      testWidgets(
+        'update plate appears only on hover pinned=$pinned dark=$dark',
+        (tester) async {
+          await pumpNav(
+            tester,
+            size: const Size(640, 760),
+            dark: dark,
+            data: NavFixture.view(
+              pinned: pinned,
+              update: const NavUpdateData(
+                status: NavUpdateStatus.available,
+                version: '2.3.4',
+              ),
+            ),
+          );
+          final button = key(
+            pinned ? 'main-nav-panel-update' : 'main-nav-update',
+          );
+          final plate = find.descendant(
+            of: button,
+            matching: pinned
+                ? find.byWidgetPredicate(
+                    (widget) =>
+                        widget is Container &&
+                        widget.decoration is BoxDecoration &&
+                        (widget.decoration! as BoxDecoration).shape ==
+                            BoxShape.rectangle,
+                  )
+                : find.byType(AnimatedContainer),
+          );
+          double alpha() {
+            final decoration = pinned
+                ? tester.widget<Container>(plate).decoration
+                : tester.widget<AnimatedContainer>(plate).decoration;
+            return (decoration! as BoxDecoration).color?.a ?? 0;
+          }
+
+          expect(alpha(), 0);
+          final mouse = await tester.createGesture(
+            kind: ui.PointerDeviceKind.mouse,
+          );
+          await mouse.addPointer(location: const Offset(620, 20));
+          addTearDown(mouse.removePointer);
+          await mouse.moveTo(tester.getCenter(button));
+          await tester.pump(const Duration(milliseconds: 200));
+          expect(alpha(), greaterThan(0));
+          await mouse.moveTo(const Offset(620, 20));
+          await tester.pump(const Duration(milliseconds: 200));
+          expect(alpha(), 0);
+          expect(tester.takeException(), isNull);
+          final output = Platform.environment['NAI_RELEASE_NOTES_CAPTURE'];
+          if (output != null && !pinned && dark) {
+            final boundary = tester.renderObject<RenderRepaintBoundary>(
+              key('nav-capture'),
+            );
+            await tester.runAsync(() async {
+              final image = await boundary.toImage();
+              final bytes = await image.toByteData(
+                format: ui.ImageByteFormat.png,
+              );
+              final file = File('$output/nav-update-idle.png');
+              await file.parent.create(recursive: true);
+              await file.writeAsBytes(bytes!.buffer.asUint8List());
+              image.dispose();
+            });
+          }
+        },
+      );
+    }
+  }
   setUpAll(loadStudioCaptureFonts);
 
   testWidgets('no update leaves the existing bottom controls in place', (

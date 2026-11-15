@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/ui/kit/ui_scale.dart';
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -68,7 +69,7 @@ class _BlocksDockState extends State<BlocksDock> {
       final box = pill.findRenderObject()! as RenderBox;
       setState(() {
         _hover = b;
-        _hoverRect = box.localToGlobal(Offset.zero) & box.size;
+        _hoverRect = UiScale.globalRectOf(box);
       });
     });
   }

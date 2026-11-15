@@ -1,3 +1,4 @@
+import '../kit/ui_scrollable_row.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/utils/localization_extension.dart';
@@ -76,7 +77,7 @@ class _SettingsModelsPageState extends State<SettingsModelsPage> {
               decoration: BoxDecoration(
                 border: Border(bottom: BorderSide(color: c.rowLine)),
               ),
-              child: Row(
+              child: UiScrollableRow(
                 spacing: 2,
                 children: [
                   for (final t in _Tab.values)

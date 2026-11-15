@@ -15,6 +15,8 @@ import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/core/storage/prompt_block_storage.dart';
 import 'package:nai_launcher/data/models/image/image_params.dart';
 import 'package:nai_launcher/data/models/image/image_operation.dart';
+import 'package:nai_launcher/data/services/nai_agent/agent_workspace_store.dart';
+import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_workspace_provider.dart';
 import 'package:nai_launcher/data/repositories/character_prompt_repository.dart';
 import 'package:nai_launcher/data/repositories/prompt_block_repository.dart';
 import 'package:nai_launcher/data/services/vibe_library_storage_service.dart';
@@ -154,6 +156,9 @@ void main() {
     repository = PromptBlockRepository(storage);
     container = ProviderContainer(
       overrides: [
+        naiAgentUiPreferencesProvider.overrideWith(
+          (ref) => NaiAgentUiPreferences(),
+        ),
         localStorageServiceProvider.overrideWithValue(MemoryDraftSettings()),
         characterPromptRepositoryProvider.overrideWithValue(MemoryCharacters()),
         promptBlockRepositoryProvider.overrideWithValue(repository),
@@ -212,6 +217,55 @@ void main() {
 
   Matcher error(String code) =>
       isA<NaiAgentToolError>().having((e) => e.code, 'code', code);
+
+  for (final mode in ['bypass', 'auto', 'ask', 'readonly']) {
+    for (final skipPaid in [false, true]) {
+      for (final paid in [false, true]) {
+        test(
+          '$mode skipPaid=$skipPaid paid=$paid uses the full quoted total',
+          () async {
+            container
+                .read(naiAgentUiPreferencesProvider)
+                .replace(
+                  AgentSettings(
+                    permissionMode: mode,
+                    skipPaidConfirmation: skipPaid,
+                  ),
+                );
+            final service = tools();
+            final q = await quote(service, {
+              'requests': 1,
+              'images_per_request': paid ? 2 : 1,
+            });
+            expect(q['estimated_anlas'], paid ? greaterThan(0) : 0);
+            final automatic = mode == 'bypass' && (!paid || skipPaid);
+            expect(
+              q['authorization'],
+              automatic
+                  ? 'full_access_policy'
+                  : 'explicit_user_button_required',
+            );
+            final future = execute(service, q);
+            final broker = container.read(naiAgentGenerationApprovalsProvider);
+            if (automatic) {
+              await waitForAgentStart(native());
+              expect(broker.forChat('chat'), isEmpty);
+              native().finish();
+              expect(
+                (await future)['authorization']['source'],
+                'full_access_policy',
+              );
+            } else {
+              expect(broker.forChat('chat'), hasLength(1));
+              expect(native().requests, isEmpty);
+              decide(generate: false);
+              expect((await future)['status'], 'cancelled');
+            }
+          },
+        );
+      }
+    }
+  }
 
   test(
     'quote uses native batch billing and loaded balance without API refresh or draft mutation',

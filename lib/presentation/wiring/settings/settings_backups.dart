@@ -15,12 +15,11 @@ import '../../../core/storage/local_storage_service.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../providers/canvas_settings_provider.dart';
 import '../../providers/font_provider.dart';
-import '../../providers/font_scale_provider.dart';
 import '../../providers/generation/generation_settings_notifiers.dart';
 import '../../providers/history_click_behavior_provider.dart';
 import '../../providers/locale_provider.dart';
 import '../../providers/notification_settings_provider.dart';
-import '../../providers/settings_font_scale_provider.dart';
+import '../../providers/ui_scale_provider.dart';
 import '../../providers/workspace_text_settings_provider.dart';
 import '../../providers/share_image_settings_provider.dart';
 import '../../providers/shortcuts_provider.dart';
@@ -95,9 +94,7 @@ class SettingsBackupActions {
   void refresh() {
     ref.invalidate(themeNotifierProvider);
     ref.invalidate(fontNotifierProvider);
-    ref.invalidate(fontScaleNotifierProvider);
-    ref.invalidate(settingsFontScaleProvider);
-    ref.invalidate(workspaceFontScaleProvider);
+    ref.invalidate(uiScaleProvider);
     ref.invalidate(promptAutocompleteEnabledProvider);
     ref.invalidate(localeNotifierProvider);
     ref.invalidate(historyClickBehaviorNotifierProvider);

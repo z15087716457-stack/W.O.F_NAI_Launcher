@@ -39,6 +39,7 @@ class StorageKeys {
   static const String studioThemeMode = 'studio_theme_mode';
   static const String fontFamily = 'font_family';
   static const String fontScale = 'font_scale';
+  static const String uiScale = 'ui_scale';
   static const String workspaceFontScale = 'workspace_font_scale';
   static const String promptAutocompleteEnabled = 'prompt_autocomplete_enabled';
   static const String settingsFontScale = 'settings_font_scale';
@@ -109,8 +110,10 @@ class StorageKeys {
   static const String imageSavePath = 'image_save_path';
   static const String autoSaveImages = 'auto_save_images';
 
-  // 画廊额外图库源（只读浏览/检索，不参与自动保存）
+  // Legacy extra roots are read only when upgrading to independent sources.
   static const String galleryExtraRoots = 'gallery_extra_roots_v1';
+  static const String gallerySourcePaths = 'gallery_source_paths_v2';
+  static const String galleryCategoryBasePath = 'gallery_category_base_path_v2';
 
   static const String shareStripMetadata = 'share_strip_metadata';
   static const String addQualityTags = 'add_quality_tags';
@@ -252,6 +255,8 @@ class StorageKeys {
 
   // Vibe Library Keys (Vibe库相关)
   static const String vibeLibrarySavePath = 'vibe_library_save_path';
+  static const String preciseRefLibrarySavePath =
+      'precise_ref_library_save_path';
   static const String vibeRecentCollapsed = 'vibe_recent_collapsed';
 
   // Proxy Settings (代理设置)

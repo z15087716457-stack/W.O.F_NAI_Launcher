@@ -6,6 +6,7 @@ import '../constants/storage_keys.dart';
 import '../autocomplete/completion_models.dart';
 import '../storage/local_storage_service.dart';
 import '../utils/app_language.dart';
+import 'ui_scale_preference.dart';
 
 enum PreferenceGroup { appearance, input, protection }
 
@@ -20,9 +21,7 @@ class SettingsPreferencesService {
     PreferenceGroup.appearance: [
       StorageKeys.studioThemeMode,
       StorageKeys.fontFamily,
-      StorageKeys.fontScale,
-      StorageKeys.settingsFontScale,
-      StorageKeys.workspaceFontScale,
+      StorageKeys.uiScale,
       StorageKeys.locale,
       StorageKeys.historyClickBehavior,
       StorageKeys.simpleOutputViewer,
@@ -62,10 +61,9 @@ class SettingsPreferencesService {
     if (key == StorageKeys.fontFamily) {
       return value is String && value.isNotEmpty && value.length <= 128;
     }
-    if (key == StorageKeys.fontScale ||
-        key == StorageKeys.settingsFontScale ||
-        key == StorageKeys.workspaceFontScale) {
-      return value is num && value.isFinite && value >= .8 && value <= 1.5;
+    if (key == StorageKeys.uiScale ||
+        UiScalePreference.legacyKeys.contains(key)) {
+      return UiScalePreference.valid(value);
     }
     if (key == StorageKeys.thumbnailCacheLimitGb) {
       return value is int && value >= 1 && value <= 50;
@@ -94,9 +92,11 @@ class SettingsPreferencesService {
     return value is bool;
   }
 
-  Map<String, Object?> capture() => {
-    for (final key in keys) key: storage.getSetting<Object?>(key),
-  };
+  Object? _read(String key) => key == StorageKeys.uiScale
+      ? UiScalePreference.read(storage.getSetting<Object?>)
+      : storage.getSetting<Object?>(key);
+
+  Map<String, Object?> capture() => {for (final key in keys) key: _read(key)};
   String encode(Map<String, Object?> values) =>
       const JsonEncoder.withIndent('  ').convert({
         'schema': schema,
@@ -118,13 +118,16 @@ class SettingsPreferencesService {
     final values = Map<String, Object?>.from(data['preferences'] as Map);
     if (values.isEmpty ||
         values.entries.any(
-          (e) => !keys.contains(e.key) || !validValue(e.key, e.value),
+          (e) =>
+              !(keys.contains(e.key) ||
+                  UiScalePreference.legacyKeys.contains(e.key)) ||
+              !validValue(e.key, e.value),
         )) {
       throw const FormatException(
         'Preference backup contains unsupported keys or values.',
       );
     }
-    return values;
+    return UiScalePreference.migrate(values);
   }
 
   Map<String, Object?> defaults(Set<PreferenceGroup> selected) => {
@@ -170,7 +173,7 @@ class SettingsPreferencesService {
     void Function()? beforeWrite,
   }) async {
     beforeWrite?.call();
-    decode(encode(values));
+    values = decode(encode(values));
     bool unchanged() {
       final current = capture();
       return expected.length == current.length &&
@@ -191,7 +194,7 @@ class SettingsPreferencesService {
     try {
       for (final entry in values.entries) {
         beforeWrite?.call();
-        if (storage.getSetting<Object?>(entry.key) != expected[entry.key]) {
+        if (_read(entry.key) != expected[entry.key]) {
           throw StateError('Preference changed during import: ${entry.key}');
         }
         touched.add(entry.key);
@@ -204,7 +207,7 @@ class SettingsPreferencesService {
     } catch (_) {
       for (final key in touched.reversed) {
         // A later user write must not be overwritten by rollback.
-        if (storage.getSetting<Object?>(key) != values[key]) continue;
+        if (_read(key) != values[key]) continue;
         final previous = expected[key];
         if (previous == null) {
           await storage.deleteSetting(key);

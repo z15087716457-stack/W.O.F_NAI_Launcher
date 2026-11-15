@@ -123,7 +123,7 @@ void main() {
       ).writeAsString('STUDIO_UNIQUE');
       final prompt = await store.effectiveSystemPrompt(workspace.id);
       expect('PROJECT_UNIQUE'.allMatches(prompt), hasLength(1));
-      expect('STUDIO_UNIQUE'.allMatches(prompt), hasLength(1));
+      expect(prompt, isNot(contains('STUDIO_UNIQUE')));
       await rules.writeAsString('PROJECT_UPDATED');
       expect(
         await store.effectiveSystemPrompt(workspace.id),

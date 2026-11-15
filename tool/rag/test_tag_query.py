@@ -66,6 +66,27 @@ class TagQueryTests(unittest.TestCase):
         self.assertEqual(self.models.queries,['rain, night'])
         self.assertEqual(self.models.ranked,[('rain, night',True,'tags')])
 
+    def test_worker_passes_the_budget_and_defaults_to_before_without_rebuilding(self):
+        import threading
+        from worker import Worker
+        worker=Worker();worker.models=self.models;worker.engines={'tags':self.engine}
+        before=', '.join(f'word{i}' for i in range(700))
+        snapshot=self.engine.db.execute('SELECT id,vector FROM documents ORDER BY id').fetchall()
+        for budget in (32,121,512):
+            result=worker.execute('search',{'text':before+', future','cursor':len(before),'budget':budget},threading.Event())
+            self.assertEqual(result['context_tokens'],budget)
+            self.assertEqual(self.models.queries[-1],', '.join(f'word{i}' for i in range(700-budget,700)))
+        self.assertEqual(self.engine.db.execute('SELECT id,vector FROM documents ORDER BY id').fetchall(),snapshot)
+        with self.assertRaisesRegex(ValueError,'invalid_context_budget') as error:
+            worker.execute('search',{'text':'rain','cursor':4,'budget':513},threading.Event())
+        self.assertEqual(worker.error_code(error.exception),'invalid_context_budget')
+
+    def test_manual_query_is_independent_of_the_context_budget(self):
+        for budget in (32,512):
+            result=self.engine.search('unrelated, ',11,'before',[],[],False,keyword='sunlit running',budget=budget)
+            self.assertTrue(result['items'])
+        self.assertEqual(self.models.queries,['sunlit running']*2)
+
     def test_manual_search_keeps_existing_alias_dedup_and_never_writes_query(self):
         snapshot=self.engine.db.execute('SELECT id,name,vector,digest FROM documents ORDER BY id').fetchall()
         result=self.engine.search('unrelated, ',11,'around',['known_alias'],[],True,keyword='在阳光下奔跑')

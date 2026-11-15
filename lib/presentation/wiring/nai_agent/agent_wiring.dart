@@ -469,7 +469,7 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
     anchor ??= switch (memory) {
       AgentMemoryTarget.global => 'agentInstructions',
       AgentMemoryTarget.chatPrefix => null,
-      AgentMemoryTarget.workspace => 'agentWorkspaceRules',
+      AgentMemoryTarget.workspace => 'agentProjectRules',
       AgentMemoryTarget.skills => 'agentSkills',
       AgentMemoryTarget.quick => 'agentQuick',
       null => null,
@@ -841,7 +841,7 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
       memory: AgentMemoryData(
         globalInstructions: c.settings.globalInstructions,
         chatPrefix: r?.chat.systemPromptPrefix ?? '',
-        workspaceRules: r == null ? '' : _resources.rules(r.workspace),
+        projectRules: r == null ? '' : _resources.rules(r.workspace),
         activeSkills: active.map((s) => s.name).toList(),
       ),
       usage: AgentUsageData(

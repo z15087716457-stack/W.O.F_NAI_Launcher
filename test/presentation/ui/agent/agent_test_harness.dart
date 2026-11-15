@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/ui/kit/ui_scale.dart';
 import 'package:flutter/material.dart';
 import 'package:nai_launcher/presentation/widgets/common/text_editing_shortcuts.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -28,9 +29,10 @@ Future<AgentRecorder> pumpAgent(
   String locale = 'zh',
   bool dark = false,
   bool animate = false,
+  double uiScale = 1,
 }) async {
   tester.view.devicePixelRatio = 1;
-  tester.view.physicalSize = Size(width, height);
+  tester.view.physicalSize = Size(width * uiScale, height * uiScale);
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
   final rec = AgentRecorder();
@@ -47,7 +49,10 @@ Future<AgentRecorder> pumpAgent(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         builder: (context, child) => MediaQuery(
           data: MediaQuery.of(context).copyWith(disableAnimations: !animate),
-          child: TextEditingShortcuts(child: child!),
+          child: UiScale(
+            scale: uiScale,
+            child: TextEditingShortcuts(child: child!),
+          ),
         ),
         home: Scaffold(
           body: WindowChromeScope(

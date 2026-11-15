@@ -63,20 +63,18 @@ Future<SettingsRecorder> _pump(
   bool dark = false,
   double scale = 1,
 }) async {
-  t.platformDispatcher.textScaleFactorTestValue = 1;
-  addTearDown(t.platformDispatcher.clearTextScaleFactorTestValue);
   final d = SettingsFixture.view(page: SettingsPageId.models);
   final rec = await pumpSettings(
     t,
     data: d.copyWith(models: _models),
     locale: locale,
     window: width,
+    uiScale: scale,
     height: 1400,
     dark: dark,
   );
   await t.tap(find.byKey(const Key('models-tab-tasks')));
   await t.pumpAndSettle();
-  t.platformDispatcher.textScaleFactorTestValue = scale;
   await t.pumpAndSettle();
   return rec;
 }
@@ -155,7 +153,6 @@ void main() {
   testWidgets(
     'six columns stay aligned and narrow windows scroll, with five languages and large text',
     (t) async {
-      addTearDown(t.platformDispatcher.clearTextScaleFactorTestValue);
       for (final locale in ['zh', 'en', 'ja', 'ko', 'zh_TW']) {
         for (final (width, scale) in [
           (1600.0, 1.0),

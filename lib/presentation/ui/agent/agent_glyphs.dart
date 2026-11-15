@@ -193,16 +193,15 @@ class AgentIcon extends StatelessWidget {
   }
 }
 
-/// Anlas 水滴币。
+/// 复用官方 Anlas 图标。
 class AgentAnlas extends StatelessWidget {
   const AgentAnlas({super.key, this.size = 14, this.color});
   final double size;
   final Color? color;
 
   @override
-  Widget build(BuildContext context) => UiSvgIcon.string(
-    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#000" fill-rule="evenodd" '
-    'd="M12 2.5c3.4 4.2 6.5 7.6 6.5 11.5a6.5 6.5 0 01-13 0c0-3.9 3.1-7.3 6.5-11.5zm0 6.2c-1.6 2-3 3.6-3 5.4a3 3 0 006 0c0-1.8-1.4-3.4-3-5.4z"/></svg>',
+  Widget build(BuildContext context) => UiSvgIcon.asset(
+    'assets/icons/nai-icon-anlas.svg',
     size: size,
     colorFilter: ColorFilter.mode(color ?? context.ui.ink, BlendMode.srcIn),
     excludeFromSemantics: true,

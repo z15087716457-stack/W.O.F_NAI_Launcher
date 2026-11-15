@@ -240,13 +240,19 @@ class _SettingsPageState extends State<SettingsPage> {
             color: c.page,
             child: LayoutBuilder(
               builder: (context, constraints) {
-                final sidebar = constraints.maxWidth < 1000 ? 208.0 : 248.0;
+                final compact = constraints.maxWidth < 700;
+                final sidebar = compact
+                    ? 64.0
+                    : constraints.maxWidth < 1000
+                    ? 208.0
+                    : 248.0;
                 return Row(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     SizedBox(
                       width: sidebar,
                       child: _Sidebar(
+                        compact: compact,
                         query: _query,
                         focus: _searchFocus,
                         onQuery: (q) => setState(() {
@@ -261,6 +267,18 @@ class _SettingsPageState extends State<SettingsPage> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           _Header(searching: searching),
+                          if (compact)
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
+                              child: _SearchBox(
+                                value: _query,
+                                focus: _searchFocus,
+                                onChanged: (q) => setState(() {
+                                  _query = q;
+                                  _sel = 0;
+                                }),
+                              ),
+                            ),
                           Expanded(
                             child: Stack(
                               children: [
@@ -337,12 +355,14 @@ class _SettingsPageState extends State<SettingsPage> {
 
 class _Sidebar extends StatelessWidget {
   const _Sidebar({
+    required this.compact,
     required this.query,
     required this.focus,
     required this.onQuery,
     required this.onOpen,
   });
 
+  final bool compact;
   final String query;
   final FocusNode focus;
   final ValueChanged<String> onQuery;
@@ -358,7 +378,7 @@ class _Sidebar extends StatelessWidget {
     final items = <Widget>[];
     SettingsGroup? last;
     for (final p in SettingsPageId.values) {
-      if (p.group != last && p.group != SettingsGroup.none) {
+      if (!compact && p.group != last && p.group != SettingsGroup.none) {
         items.add(
           Padding(
             // 原型 .gl 上 14，加上前一项被折叠掉的 1px 下外边距。
@@ -379,6 +399,7 @@ class _Sidebar extends StatelessWidget {
       last = p.group;
       items.add(
         _NavItem(
+          compact: compact,
           page: p,
           selected: !searching && data.page == p,
           meta: _meta(context, p),
@@ -399,29 +420,38 @@ class _Sidebar extends StatelessWidget {
             dragBackground: true,
             child: SizedBox(
               height: 56,
-              child: Padding(
-                padding: const EdgeInsets.only(left: 20, right: 16),
-                child: Row(
-                  children: [
-                    Text(
-                      l.set_title,
-                      style: UiText.sans(
-                        15,
-                        weight: FontWeight.w600,
+              child: compact
+                  ? Center(
+                      child: Icon(
+                        Icons.settings_outlined,
+                        size: 18,
                         color: c.ink,
                       ),
+                    )
+                  : Padding(
+                      padding: const EdgeInsets.only(left: 20, right: 16),
+                      child: Row(
+                        children: [
+                          Text(
+                            l.set_title,
+                            style: UiText.sans(
+                              15,
+                              weight: FontWeight.w600,
+                              color: c.ink,
+                            ),
+                          ),
+                          const Spacer(),
+                          const SettingsKeys(['Ctrl', ',']),
+                        ],
+                      ),
                     ),
-                    const Spacer(),
-                    const SettingsKeys(['Ctrl', ',']),
-                  ],
-                ),
-              ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(12, 0, 12, 6),
-            child: _SearchBox(value: query, focus: focus, onChanged: onQuery),
-          ),
+          if (!compact)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 6),
+              child: _SearchBox(value: query, focus: focus, onChanged: onQuery),
+            ),
           Expanded(
             child: ScrollConfiguration(
               behavior: ScrollConfiguration.of(
@@ -433,32 +463,33 @@ class _Sidebar extends StatelessWidget {
               ),
             ),
           ),
-          Container(
-            padding: const EdgeInsets.fromLTRB(20, 10, 12, 10),
-            decoration: BoxDecoration(
-              border: Border(top: BorderSide(color: c.border)),
-            ),
-            child: Row(
-              spacing: 8,
-              children: [
-                Expanded(
-                  child: Text(
-                    data.version,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: UiText.mono(12, color: c.faint),
+          if (!compact)
+            Container(
+              padding: const EdgeInsets.fromLTRB(20, 10, 12, 10),
+              decoration: BoxDecoration(
+                border: Border(top: BorderSide(color: c.border)),
+              ),
+              child: Row(
+                spacing: 8,
+                children: [
+                  Expanded(
+                    child: Text(
+                      data.version,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: UiText.mono(12, color: c.faint),
+                    ),
                   ),
-                ),
-                if (data.about.update == SettingsUpdateState.available)
-                  UiPressable(
-                    key: const Key('settings-update-badge'),
-                    onTap: () => onOpen(SettingsPageId.about),
-                    builder: (context, _) =>
-                        UiMini(l.set_hasUpdate, tone: UiMiniTone.error),
-                  ),
-              ],
+                  if (data.about.update == SettingsUpdateState.available)
+                    UiPressable(
+                      key: const Key('settings-update-badge'),
+                      onTap: () => onOpen(SettingsPageId.about),
+                      builder: (context, _) =>
+                          UiMini(l.set_hasUpdate, tone: UiMiniTone.error),
+                    ),
+                ],
+              ),
             ),
-          ),
         ],
       ),
     );
@@ -517,12 +548,14 @@ class _Sidebar extends StatelessWidget {
 
 class _NavItem extends StatelessWidget {
   const _NavItem({
+    required this.compact,
     required this.page,
     required this.selected,
     required this.meta,
     required this.onTap,
   });
 
+  final bool compact;
   final SettingsPageId page;
   final bool selected;
   final Widget? meta;
@@ -532,7 +565,7 @@ class _NavItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.ui;
     final icon = SettingsFormat.icon(page);
-    return UiPressable(
+    final item = UiPressable(
       key: Key('settings-nav-${page.name}'),
       onTap: onTap,
       builder: (context, hover) {
@@ -563,24 +596,28 @@ class _NavItem extends StatelessWidget {
                       : UiGlyph(icon.glyph!, size: 16, color: ink),
                 ),
               ),
-              Expanded(
-                child: Text(
-                  SettingsFormat.page(context, page),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: UiText.sans(
-                    13,
-                    weight: selected ? FontWeight.w600 : FontWeight.w400,
-                    color: c.ink,
+              if (!compact)
+                Expanded(
+                  child: Text(
+                    SettingsFormat.page(context, page),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: UiText.sans(
+                      13,
+                      weight: selected ? FontWeight.w600 : FontWeight.w400,
+                      color: c.ink,
+                    ),
                   ),
                 ),
-              ),
-              ?meta,
+              if (!compact) ?meta,
             ],
           ),
         );
       },
     );
+    return compact
+        ? Tooltip(message: SettingsFormat.page(context, page), child: item)
+        : item;
   }
 }
 
@@ -726,7 +763,11 @@ class _Header extends StatelessWidget {
                   child: Row(
                     spacing: 6,
                     children: [
-                      for (final (i, t) in crumbs.indexed) ...[
+                      for (final (i, t)
+                          in (constraints.maxWidth < 500
+                                  ? [crumbs.last]
+                                  : crumbs)
+                              .indexed) ...[
                         if (i > 0)
                           UiGlyph(
                             UiGlyphs.chevronRight,
@@ -740,10 +781,10 @@ class _Header extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                             style: UiText.sans(
                               13,
-                              weight: i == crumbs.length - 1
+                              weight: t == crumbs.last
                                   ? FontWeight.w600
                                   : FontWeight.w400,
-                              color: i == crumbs.length - 1 ? c.ink : c.muted,
+                              color: t == crumbs.last ? c.ink : c.muted,
                             ),
                           ),
                         ),

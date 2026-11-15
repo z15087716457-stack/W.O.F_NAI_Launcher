@@ -17,9 +17,9 @@ The middle of the generation page is an infinitely pannable canvas, with results
 - Starting generation places a placeholder and moves to the newest batch; progress previews and final results appear in the same spot.
 - You can “Pin image” for images you like so they stay on the canvas even if history is cleared.
 - Choose a display background for transparent images (checkerboard, solid color and more). It affects only the display, not the image file.
-- “Canvas display” lets you toggle filling the view, reduced motion and locking the canvas camera.
+- “Canvas display” lets you toggle enlarging to fit the canvas, reduced motion and locking the canvas camera.
 
-Generation history uses **Linked preview** by default. Click a thumbnail to select that image on the canvas, or double-click to open its details. **Zoom to fill** is on by default and can enlarge small images when you focus on one image. Saved preferences for both settings still apply. The image viewer has a separate [Fit mode](gallery.md#local-gallery).
+Generation history uses **Linked preview** by default. Click a thumbnail to select that image on the canvas, or double-click to open its details. **Enlarge to fit canvas** is on by default. Focusing a new or historical image can enlarge it beyond 100%, preserving its proportions and keeping the whole image visible; when off, automatic fitting is capped at 100%. Saved preferences still apply. The image viewer has a separate [Fit mode](gallery.md#local-gallery).
 
 ## Visual channel
 

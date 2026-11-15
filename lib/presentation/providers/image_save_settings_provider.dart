@@ -49,6 +49,7 @@ class ImageSaveSettingsNotifier extends _$ImageSaveSettingsNotifier {
 
   /// 设置自定义保存路径
   Future<void> setCustomPath(String? path) async {
+    await GalleryFolderRepository.instance.ensureSourcesMigrated();
     final storage = ref.read(localStorageServiceProvider);
     if (path != null && path.isNotEmpty) {
       await storage.setImageSavePath(path);

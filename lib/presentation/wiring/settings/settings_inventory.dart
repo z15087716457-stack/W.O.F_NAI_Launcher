@@ -10,10 +10,11 @@ import '../../../core/cache/gallery_cache_manager.dart';
 import '../../../core/database/database_providers.dart';
 import '../../../core/database/asset_database_manager.dart';
 import '../../../core/database/dictionary_data_store.dart';
-import '../../../core/storage/local_storage_service.dart';
-import '../../../core/constants/storage_keys.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/hive_storage_helper.dart';
+import '../../../core/utils/gallery_storage_layout.dart';
+import '../../../core/utils/vibe_library_path_helper.dart';
+import '../../../core/utils/precise_ref_library_path_helper.dart';
 import '../../../data/repositories/gallery_folder_repository.dart';
 import '../../providers/image_save_settings_provider.dart';
 import '../../providers/nai_agent/nai_agent_workspace_provider.dart';
@@ -25,7 +26,7 @@ import 'settings_storage_snapshot.dart';
 
 final settingsStorageSignatureProvider = FutureProvider<String>((ref) async {
   final folders = await ref.watch(settingsFoldersProvider.future);
-  final roots = await ref.watch(settingsGalleryExtraRootsProvider.future);
+  final roots = await ref.watch(settingsGallerySourcesProvider.future);
   final support = await getApplicationSupportDirectory();
   final rag = await ref.read(ragDirectoryProvider)();
   return [
@@ -129,18 +130,14 @@ final settingsIndexBytesProvider = FutureProvider<int>((ref) async {
 final settingsFoldersProvider = FutureProvider<Map<SettingsFolder, String>>((
   ref,
 ) async {
+  ref.watch(imageSaveSettingsNotifierProvider);
   final docs = await getApplicationDocumentsDirectory();
-  final storage = ref.read(localStorageServiceProvider);
-  final save = ref.watch(imageSaveSettingsNotifierProvider);
-  final images = save.hasCustomPath
-      ? save.customPath!
-      : p.join(docs.path, 'NAI_Launcher', 'images');
-  final vibePath = storage.getSetting<String>(StorageKeys.vibeLibrarySavePath);
+  final images = (await GalleryFolderRepository.instance.getRootPath())!;
   return {
     SettingsFolder.images: images,
-    SettingsFolder.vibes: vibePath == null || vibePath.trim().isEmpty
-        ? p.join(docs.path, 'NAI_Launcher', 'vibes')
-        : vibePath,
+    SettingsFolder.vibes: await VibeLibraryPathHelper.instance.getPath(),
+    SettingsFolder.preciseRefs: await PreciseRefLibraryPathHelper.instance
+        .getPath(),
     SettingsFolder.thumbnails: p.join(images, '.thumbs'),
     SettingsFolder.appData: await HiveStorageHelper.instance.getPath(),
     SettingsFolder.logs:
@@ -247,8 +244,8 @@ final settingsDiskFreeProvider = Provider<SettingsDiskFree>(
   },
 );
 
-final settingsGalleryExtraRootsProvider = FutureProvider<List<String>>(
-  (ref) => GalleryFolderRepository.instance.getExtraRootPaths(),
+final settingsGallerySourcesProvider = FutureProvider<List<String>>(
+  (ref) => GalleryFolderRepository.instance.getSourcePaths(),
 );
 
 /// Configuration is cheap and remains available while directory walks run.
@@ -256,24 +253,21 @@ final settingsStorageLocationsProvider = FutureProvider<SettingsStorageData>((
   ref,
 ) async {
   final folders = await ref.watch(settingsFoldersProvider.future);
-  final extraRoots = await ref.watch(settingsGalleryExtraRootsProvider.future);
+  final sources = await ref.watch(settingsGallerySourcesProvider.future);
   final primary = folders[SettingsFolder.images]!;
   return SettingsStorageData(
     diskLabel: p.rootPrefix(primary),
     roots: [
-      for (final path in [primary, ...extraRoots])
-        SettingsGalleryRoot(
-          id: path,
-          path: path,
-          images: 0,
-          primary: p.equals(path, primary),
-        ),
+      for (final path in sources)
+        SettingsGalleryRoot(id: path, path: path, images: 0),
     ],
     thumbnailLimit:
         ref.watch(thumbnailCacheLimitGbProvider) * 1024 * 1024 * 1024,
     folderNames: {
       for (final entry in folders.entries) entry.key: p.basename(entry.value),
     },
+    folderPaths: folders,
+    imageSaveDirectory: galleryUncategorizedPath(primary),
   );
 });
 
@@ -289,7 +283,7 @@ final settingsStorageDataProvider = FutureProvider<SettingsStorageData>((
   final registered = locations.roots.map((root) => root.path).toList();
   final roots = <String>[];
   // Nested roots refer to the same bytes and must not inflate totals.
-  for (final path in registered) {
+  for (final path in [primary, ...registered]) {
     final normalized = p.normalize(p.absolute(path));
     if (roots.any(
       (root) =>
@@ -317,6 +311,7 @@ final settingsStorageDataProvider = FutureProvider<SettingsStorageData>((
   final categories = <SettingsStorageKind, List<String>>{
     SettingsStorageKind.upscaleModels: [p.join(support.path, 'upscale')],
     SettingsStorageKind.vibes: [folders[SettingsFolder.vibes]!],
+    SettingsStorageKind.preciseRefs: [folders[SettingsFolder.preciseRefs]!],
     SettingsStorageKind.ragIndex: [p.join(rag.path, 'indices')],
     SettingsStorageKind.dictionaries: [
       p.join(support.path, 'databases'),
@@ -339,14 +334,7 @@ final settingsStorageDataProvider = FutureProvider<SettingsStorageData>((
   for (final path in registered) {
     final normalized = p.normalize(p.absolute(path));
     final count = (measurements[normalized] ?? nested[normalized])?.images ?? 0;
-    rootRows.add(
-      SettingsGalleryRoot(
-        id: path,
-        path: path,
-        images: count,
-        primary: p.equals(path, primary),
-      ),
-    );
+    rootRows.add(SettingsGalleryRoot(id: path, path: path, images: count));
   }
   final measured = SettingsStorageData(
     configurationKey: signature,
@@ -371,6 +359,8 @@ final settingsStorageDataProvider = FutureProvider<SettingsStorageData>((
     measuredAt: DateTime.now(),
     thumbnailLimit: locations.thumbnailLimit,
     folderNames: locations.folderNames,
+    folderPaths: folders,
+    imageSaveDirectory: locations.imageSaveDirectory,
   );
   if (!measured.incomplete) {
     await ref

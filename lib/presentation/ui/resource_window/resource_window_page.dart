@@ -11,6 +11,7 @@ import '../../../core/utils/localization_extension.dart';
 import '../gallery/gallery_delete_dialog.dart';
 import '../kit/ui_block_pill.dart';
 import '../kit/ui_colors.dart';
+import '../kit/ui_scale.dart';
 import '../kit/ui_controls.dart';
 import '../kit/ui_glyph.dart';
 import '../kit/ui_inputs.dart';
@@ -424,7 +425,7 @@ class _TopBarState extends State<_TopBar> {
     Rect? rectOf(GlobalKey k) {
       final box = k.currentContext?.findRenderObject() as RenderBox?;
       if (box == null || !box.hasSize) return null;
-      return box.localToGlobal(Offset.zero) & box.size;
+      return UiScale.globalRectOf(box);
     }
 
     final blocked = [
@@ -439,7 +440,7 @@ class _TopBarState extends State<_TopBar> {
       return;
     }
     _reported = blocked;
-    cb(ResourceWindowPage.topBarHeight, blocked);
+    cb(ResourceWindowPage.topBarHeight * UiScale.factorOf(context), blocked);
   }
 
   @override
@@ -671,92 +672,109 @@ class _ToolbarState extends State<_Toolbar> {
         d.kind != FloatingResourceKind.blocks &&
         !widget.narrow;
     final sort = d.sorts.where((s) => s.id == d.sortId).firstOrNull;
+    final compact = MediaQuery.sizeOf(context).width < 480;
+    final chips = <Widget>[
+      for (final (i, chip) in d.chips.indexed)
+        if ((!widget.hideGalleryNai || chip.id != 'nai') &&
+            (!widget.narrow || i < 2))
+          UiFilterChip(
+            key: Key('rw-chip-${chip.id}'),
+            label: chip.label,
+            selected: chip.on,
+            leading: chip.glyph == null
+                ? null
+                : UiGlyph(
+                    chip.glyph!,
+                    size: 13,
+                    color: chip.on ? c.accent : c.muted,
+                  ),
+            onTap: () => widget.actions.onChip(chip.id),
+          ),
+    ];
+    final controls = Row(
+      spacing: 8,
+      children: [
+        Expanded(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: 140),
+            child: UiSearchField(
+              key: const Key('rw-search'),
+              value: d.query,
+              hint: d.queryHint,
+              height: 30,
+              focusNode: widget.focus,
+              onChanged: (q) => widget.actions.onQuery(q, submit: true),
+            ),
+          ),
+        ),
+        if (!compact) ...chips,
+        if (sort != null && !widget.narrow)
+          _SortControl(
+            sort: sort,
+            data: d,
+            actions: widget.actions,
+            anchor: _sortAt,
+            onAnchor: (v) => setState(() => _sortAt = v),
+          ),
+        if (showSize)
+          Tooltip(
+            message: d.layout == ResourceLayout.justified
+                ? l.resourceWindow_rowHeight
+                : l.resourceWindow_cardSize,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              spacing: 6,
+              children: [
+                UiGlyph(UiGlyphs.sizes, size: 13, color: c.faint),
+                SizedBox(
+                  key: const Key('rw-size'),
+                  width: 76,
+                  child: UiSlider(
+                    value: ((widget.cell - lo) / (hi - lo)).clamp(0, 1),
+                    onChanged: (v) => widget.onCell(lo + (hi - lo) * v),
+                    onChangeEnd: (v) => widget.onCellEnd(lo + (hi - lo) * v),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        if (d.layouts.length > 1)
+          UiSeg<ResourceLayout>(
+            key: const Key('rw-layout'),
+            values: d.layouts,
+            selected: d.layout,
+            onChanged: widget.actions.onLayout,
+            glyphOf: (v) => switch (v) {
+              ResourceLayout.grid => UiGlyphs.grid,
+              ResourceLayout.masonry => UiGlyphs.masonryMedium,
+              ResourceLayout.justified => _justifiedGlyph,
+              ResourceLayout.list => UiGlyphs.list,
+            },
+            tooltipOf: (v) => switch (v) {
+              ResourceLayout.grid => l.common_grid,
+              ResourceLayout.masonry => l.localGallery_masonryViewLabel,
+              ResourceLayout.justified => l.localGallery_justifiedViewLabel,
+              ResourceLayout.list => l.blocks_viewList,
+            },
+          ),
+      ],
+    );
     return Container(
-      height: 46,
+      height: compact && chips.isNotEmpty ? 80 : 46,
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: c.border)),
       ),
-      child: Row(
-        spacing: 8,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 6,
         children: [
-          Expanded(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(minWidth: 140),
-              child: UiSearchField(
-                key: const Key('rw-search'),
-                value: d.query,
-                hint: d.queryHint,
-                height: 30,
-                focusNode: widget.focus,
-                onChanged: (q) => widget.actions.onQuery(q, submit: true),
-              ),
-            ),
-          ),
-          for (final (i, chip) in d.chips.indexed)
-            if ((!widget.hideGalleryNai || chip.id != 'nai') &&
-                (!widget.narrow || i < 2))
-              UiFilterChip(
-                key: Key('rw-chip-${chip.id}'),
-                label: chip.label,
-                selected: chip.on,
-                leading: chip.glyph == null
-                    ? null
-                    : UiGlyph(
-                        chip.glyph!,
-                        size: 13,
-                        color: chip.on ? c.accent : c.muted,
-                      ),
-                onTap: () => widget.actions.onChip(chip.id),
-              ),
-          if (sort != null && !widget.narrow)
-            _SortControl(
-              sort: sort,
-              data: d,
-              actions: widget.actions,
-              anchor: _sortAt,
-              onAnchor: (v) => setState(() => _sortAt = v),
-            ),
-          if (showSize)
-            Tooltip(
-              message: d.layout == ResourceLayout.justified
-                  ? l.resourceWindow_rowHeight
-                  : l.resourceWindow_cardSize,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                spacing: 6,
-                children: [
-                  UiGlyph(UiGlyphs.sizes, size: 13, color: c.faint),
-                  SizedBox(
-                    key: const Key('rw-size'),
-                    width: 76,
-                    child: UiSlider(
-                      value: ((widget.cell - lo) / (hi - lo)).clamp(0, 1),
-                      onChanged: (v) => widget.onCell(lo + (hi - lo) * v),
-                      onChangeEnd: (v) => widget.onCellEnd(lo + (hi - lo) * v),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          if (d.layouts.length > 1)
-            UiSeg<ResourceLayout>(
-              key: const Key('rw-layout'),
-              values: d.layouts,
-              selected: d.layout,
-              onChanged: widget.actions.onLayout,
-              glyphOf: (v) => switch (v) {
-                ResourceLayout.grid => UiGlyphs.grid,
-                ResourceLayout.masonry => UiGlyphs.masonryMedium,
-                ResourceLayout.justified => _justifiedGlyph,
-                ResourceLayout.list => UiGlyphs.list,
-              },
-              tooltipOf: (v) => switch (v) {
-                ResourceLayout.grid => l.common_grid,
-                ResourceLayout.masonry => l.localGallery_masonryViewLabel,
-                ResourceLayout.justified => l.localGallery_justifiedViewLabel,
-                ResourceLayout.list => l.blocks_viewList,
-              },
+          controls,
+          if (compact && chips.isNotEmpty)
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(spacing: 8, children: chips),
             ),
         ],
       ),
@@ -1385,6 +1403,7 @@ class _DetailBar extends StatelessWidget {
     final item = data.items.where((i) => i.id == detail.itemId).firstOrNull;
     final blocks = data.kind == FloatingResourceKind.blocks;
     final tint = item?.color ?? c.accent;
+    final compact = MediaQuery.sizeOf(context).width < 480;
     final shown = narrow
         ? detail.actions.where((a) => a.primary).toList()
         : detail.actions;
@@ -1399,34 +1418,35 @@ class _DetailBar extends StatelessWidget {
       child: Row(
         spacing: 14,
         children: [
-          if (blocks)
-            Container(
-              width: 46,
-              height: 46,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: tint.withValues(alpha: .14),
-                borderRadius: BorderRadius.circular(7),
+          if (!compact)
+            if (blocks)
+              Container(
+                width: 46,
+                height: 46,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: tint.withValues(alpha: .14),
+                  borderRadius: BorderRadius.circular(7),
+                ),
+                child: UiBlockIcon(item?.iconKey, size: 20, color: tint),
+              )
+            else
+              Container(
+                width: 46,
+                height: 64,
+                decoration: BoxDecoration(
+                  color: c.control,
+                  borderRadius: BorderRadius.circular(7),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: item?.thumb == null
+                    ? null
+                    : Image(
+                        image: item!.thumb!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) => const SizedBox(),
+                      ),
               ),
-              child: UiBlockIcon(item?.iconKey, size: 20, color: tint),
-            )
-          else
-            Container(
-              width: 46,
-              height: 64,
-              decoration: BoxDecoration(
-                color: c.control,
-                borderRadius: BorderRadius.circular(7),
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: item?.thumb == null
-                  ? null
-                  : Image(
-                      image: item!.thumb!,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) => const SizedBox(),
-                    ),
-            ),
           Expanded(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -1436,13 +1456,16 @@ class _DetailBar extends StatelessWidget {
                 Row(
                   spacing: 8,
                   children: [
-                    Text(
-                      detail.title,
-                      maxLines: 1,
-                      style: UiText.sans(
-                        13,
-                        weight: FontWeight.w500,
-                        color: c.ink,
+                    Flexible(
+                      child: Text(
+                        detail.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: UiText.sans(
+                          13,
+                          weight: FontWeight.w500,
+                          color: c.ink,
+                        ),
                       ),
                     ),
                     if (detail.subtitle != null)
@@ -1493,7 +1516,7 @@ class _DetailBar extends StatelessWidget {
                         color: a.primary ? c.onBrand : c.ink,
                       ),
                     Text(a.label),
-                    if (a.primary)
+                    if (a.primary && !compact)
                       Text(
                         'Enter',
                         style: UiText.mono(
@@ -1526,7 +1549,14 @@ class _StatusRow extends StatelessWidget {
       spacing: 5,
       children: [
         UiKeycap(key, style: UiKeycapStyle.compact),
-        Text(text, style: UiText.sans(11, color: c.faint)),
+        Flexible(
+          child: Text(
+            text,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: UiText.sans(11, color: c.faint),
+          ),
+        ),
       ],
     );
     return Container(

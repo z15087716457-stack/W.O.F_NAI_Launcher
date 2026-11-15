@@ -1,4 +1,6 @@
 import 'package:nai_launcher/presentation/ui/blocks/blocks_page.dart';
+import 'package:nai_launcher/presentation/ui/refs/refs_contract.dart'
+    show RefsKind;
 import 'package:nai_launcher/presentation/providers/prompt_block_palette_provider.dart';
 import 'package:nai_launcher/presentation/ui/online/online_page.dart';
 import 'package:nai_launcher/data/models/character/character_prompt.dart'
@@ -135,7 +137,7 @@ class _Blocks extends PromptBlockLibraryNotifier {
 
 class _RefsPlatform extends RefsPlatform {
   @override
-  Future<String> libraryFolder() async => 'test-library';
+  Future<String> libraryFolder(RefsKind kind) async => 'test-library';
 }
 
 class _Vibes extends VibeLibraryNotifier {

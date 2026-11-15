@@ -9,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/utils/byte_format.dart';
 import '../../../core/constants/app_version.dart';
 import '../../../core/utils/localization_extension.dart';
+import '../../../core/utils/release_notes.dart';
 import '../../../data/models/version/version_info.dart';
 import '../../providers/update_provider.dart';
 import '../../providers/image_generation_provider.dart';
@@ -194,8 +195,7 @@ class UpdateCheckDialog extends ConsumerWidget {
             const SizedBox(height: 12),
           ],
           // 更新日志
-          if (versionInfo.releaseNotes != null &&
-              versionInfo.releaseNotes!.isNotEmpty) ...[
+          if (updateNotesMarkdown(versionInfo.releaseNotes).isNotEmpty) ...[
             Text(
               context.l10n.releaseNotes,
               style: theme.textTheme.titleSmall?.copyWith(
@@ -354,8 +354,7 @@ class UpdateCheckDialog extends ConsumerWidget {
 
   /// 构建发布说明内容
   ///
-  /// 完整渲染 GitHub Flavored Markdown：标题、嵌套列表、任务列表、
-  /// 表格、引用、分隔线、删除线、行内/围栏代码、链接与远程图片。
+  /// 只渲染更新内容章节，保留其中的 GitHub Flavored Markdown 格式。
   Widget _buildReleaseNotes(BuildContext context, VersionInfo versionInfo) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -368,7 +367,7 @@ class UpdateCheckDialog extends ConsumerWidget {
     );
 
     return MarkdownBody(
-      data: versionInfo.releaseNotes!,
+      data: updateNotesMarkdown(versionInfo.releaseNotes),
       selectable: true,
       extensionSet: md.ExtensionSet.gitHubWeb,
       imageDirectory: rawContentBase.toString(),

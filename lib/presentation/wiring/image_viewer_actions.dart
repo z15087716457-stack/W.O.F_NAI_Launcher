@@ -315,7 +315,7 @@ class ImageViewerActionHost {
     final target = pick.category;
     if (move) {
       final sourceExternal = await GalleryFolderRepository.instance
-          .isExtraRootPath(path);
+          .isExternalPath(path);
       final targetExternal = target?.isExternal ?? false;
       if (!alive() || !context.mounted) {
         return;

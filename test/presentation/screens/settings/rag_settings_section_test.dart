@@ -15,7 +15,7 @@ import 'package:nai_launcher/presentation/providers/rag_provider.dart';
 import 'package:nai_launcher/presentation/providers/rag_model_download_provider.dart';
 import 'package:nai_launcher/presentation/screens/settings/sections/rag_settings_section.dart';
 import 'package:nai_launcher/presentation/screens/settings/widgets/settings_ui_theme.dart';
-import 'package:nai_launcher/presentation/screens/settings/widgets/settings_typography_scope.dart';
+import 'package:nai_launcher/presentation/screens/settings/widgets/settings_motion_scope.dart';
 import '../../../helpers/studio_capture_fonts.dart';
 
 class _FakeRag extends RagController {
@@ -154,7 +154,7 @@ void main() {
                 home: RepaintBoundary(
                   key: key,
                   child: Scaffold(
-                    body: SettingsTypographyScope(
+                    body: SettingsMotionScope(
                       child: Padding(
                         padding: const EdgeInsets.all(16),
                         child: SingleChildScrollView(

@@ -357,7 +357,7 @@ class _HoverableState extends State<_Hoverable> {
   Widget build(BuildContext context) {
     final c = context.ui;
     final bg =
-        widget.tint?.withValues(alpha: _hover ? .16 : .08) ??
+        widget.tint?.withValues(alpha: _hover ? .16 : 0) ??
         (widget.selected
             ? c.accent.withValues(alpha: _hover ? .16 : .10)
             : _hover

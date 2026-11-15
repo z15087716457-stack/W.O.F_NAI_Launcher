@@ -2129,7 +2129,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
   @override
   Widget build(BuildContext context) {
     ref.listen(ragSettingsProvider, (previous, next) {
-      if (previous?.mode != next.mode ||
+      if (previous?.tokenBudget != next.tokenBudget ||
           previous?.connectionKey != next.connectionKey) {
         _ragCancellation?.cancel();
         if (_active) _queueSearch(immediate: true);

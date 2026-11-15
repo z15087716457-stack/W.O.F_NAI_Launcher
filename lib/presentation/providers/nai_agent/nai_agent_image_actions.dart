@@ -23,6 +23,7 @@ import '../generation/cloud_upscale_provider.dart';
 import '../image_generation_provider.dart';
 import '../subscription_provider.dart';
 import 'nai_agent_image_approvals.dart';
+import 'nai_agent_cost_policy.dart';
 
 class _ImageQuote {
   _ImageQuote(
@@ -40,17 +41,19 @@ class _ImageQuote {
   final String accountId, endpoint;
   final int cost;
   bool reserved = false;
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson({bool automatic = false}) => {
     'quote_id': id,
     'expires_at': expires.toIso8601String(),
     ...summary,
     ...params,
     'estimated_anlas': cost,
-    'authorization': 'explicit_user_button_required',
+    'authorization': automatic
+        ? 'full_access_policy'
+        : 'explicit_user_button_required',
   };
 }
 
-/// Paid operations require a live UI decision; model flags never authorize.
+/// Studio's current cost policy owns authorization; model flags never do.
 class NaiAgentImageActions {
   NaiAgentImageActions(
     this.ref,
@@ -253,16 +256,19 @@ class NaiAgentImageActions {
       _validQuote(q, token);
       q.reserved = true;
       try {
-        final accepted = await ref
-            .read(naiAgentImageApprovalsProvider)
-            .request(
-              owner!,
-              q.toJson(),
-              q.expires,
-              token,
-              () => _validQuote(q, token),
-              sourceBytes: q.source.bytes,
-            );
+        final automatic = naiAgentCanAutoApproveCost(ref, q.cost);
+        final accepted =
+            automatic ||
+            await ref
+                .read(naiAgentImageApprovalsProvider)
+                .request(
+                  owner!,
+                  q.toJson(),
+                  q.expires,
+                  token,
+                  () => _validQuote(q, token),
+                  sourceBytes: q.source.bytes,
+                );
         if (!accepted) {
           return naiAgentTextResult({
             'ok': false,
@@ -273,7 +279,9 @@ class NaiAgentImageActions {
         _validQuote(q, token);
         final backup = await files.export(
           'image-request.json',
-          Uint8List.fromList(utf8.encode(jsonEncode(q.toJson()))),
+          Uint8List.fromList(
+            utf8.encode(jsonEncode(q.toJson(automatic: automatic))),
+          ),
           () => _validQuote(q, token),
           companions: {_sourceName(q.source.bytes): q.source.bytes},
         );
@@ -396,7 +404,9 @@ class NaiAgentImageActions {
       },
     );
     _quotes[q.id] = q;
-    return naiAgentTextResult({'quote': q.toJson()});
+    return naiAgentTextResult({
+      'quote': q.toJson(automatic: naiAgentCanAutoApproveCost(ref, q.cost)),
+    });
   }
 
   String _sourceName(Uint8List b) => b[0] == 137

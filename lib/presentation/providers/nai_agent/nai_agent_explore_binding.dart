@@ -81,6 +81,7 @@ class NaiAgentExploreBinding {
           );
         },
         approve: base.approve,
+        autoApprove: base.autoApprove,
         backup: (input) =>
             _backup(_find(input.sourceImageId!), 'explore_generation'),
         start: (input) {

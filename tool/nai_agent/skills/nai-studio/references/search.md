@@ -19,7 +19,7 @@ Results contain `source`, `status` and successful `items`:
 
 `ok` with empty `items` means no matches. `partial=true` marks an incomplete index. `disabled`/`not_indexed` direct the user to Settings > Semantic Search to enable/index the source; `busy` means retry later; `error` carries `message`. Invalid inputs are tool errors.
 
-Use `gallery_query(scope=library)` for deterministic text/tag/model/favorite/date filters and newest-first listing; `tag_query` for literal names/aliases without RAG.
+Use `gallery_query(scope=library)` for deterministic text/tag/model/favorite/date filters and newest-first listing. For tag tool selection, see [lookup.md](lookup.md).
 
 ## Examples
 

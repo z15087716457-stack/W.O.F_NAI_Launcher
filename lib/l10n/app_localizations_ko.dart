@@ -476,7 +476,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get settings_extraRootsHint =>
-      '추가 갤러리 소스는 탐색하고 검색할 수 있으며, 이미지를 분류로 이동하거나 복사할 수 있습니다. 자동 저장에는 사용되지 않습니다. 새 소스는 추가하는 즉시 스캔합니다.';
+      '탐색과 검색할 폴더를 추가합니다. 상위 폴더를 추가하면 포함된 소스를 통합합니다. 목록에서 제거해도 이미지와 저장 위치는 유지됩니다.';
 
   @override
   String get settings_extraRootsEmpty => '추가한 갤러리 소스가 없습니다';
@@ -516,11 +516,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settings_extraRootsDuplicate => '이미 갤러리 소스로 추가된 폴더입니다';
 
   @override
-  String get settings_extraRootsSameAsMain => '이미지 저장 위치와 같은 폴더입니다';
-
-  @override
-  String get settings_extraRootsNested =>
-      '갤러리 소스끼리는 서로 포함할 수 없습니다. 다른 폴더를 선택하세요';
+  String get settings_extraRootsNested => '이 폴더는 기존 갤러리 소스에 이미 포함되어 있습니다.';
 
   @override
   String get settings_extraRootsNotFound => '선택한 폴더가 존재하지 않습니다';
@@ -691,7 +687,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get generation_canvasDisplaySettings => '캔버스 표시';
 
   @override
-  String get generation_canvasZoomToFill => '채우도록 확대(100% 초과 허용)';
+  String get generation_canvasZoomToFill => '캔버스에 맞게 확대(100% 초과 허용)';
 
   @override
   String get generation_canvasEmpty => '캔버스가 비어 있습니다';
@@ -988,7 +984,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get prompt_cooccurrenceRecommendationSubtitle =>
-      'Ctrl+클릭으로 로컬 태그 검색, Ctrl+드래그로 관련 태그 탐색';
+      'Ctrl(Mac은 ⌘)을 누른 채 클릭하거나 드래그로 선택하면 태그 검색과 관련 추천을 볼 수 있습니다.';
 
   @override
   String get prompt_formatted => '서식을 정리했습니다';
@@ -2185,7 +2181,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get api_error_network_hint => '서버에 연결할 수 없습니다. 네트워크를 확인하세요';
 
   @override
-  String get drop_processing => '이미지 처리 중...';
+  String get drop_processing => '이미지 준비 중';
+
+  @override
+  String get drop_processingSubtitle => '읽기가 끝나면 용도를 선택하세요';
 
   @override
   String get characterEditor_clearAll => '모두 지우기';
@@ -3689,7 +3688,10 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get drop_hint => '여기에 이미지를 놓으세요';
+  String get drop_hint => '놓아서 이미지 가져오기';
+
+  @override
+  String get drop_hintSubtitle => '다음 단계에서 이미지 용도를 선택하세요';
 
   @override
   String get drop_img2img => 'Image2Image';
@@ -4195,7 +4197,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get settings_fontScale => '글꼴 크기';
+  String get settings_fontScale => '인터페이스 배율';
 
   @override
   String get settings_fontScale_previewSmall => '빛과 그림자가 캔버스에 내려앉는다.';
@@ -5400,7 +5402,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get autocomplete_relatedTagsSubtitle =>
-      'Ctrl+클릭으로 로컬 태그 검색, Ctrl+드래그로 관련 태그 탐색';
+      'Ctrl(Mac은 ⌘)을 누른 채 클릭하거나 드래그로 선택하면 태그 검색과 관련 추천을 볼 수 있습니다.';
 
   @override
   String get tagExpansion_searchHint => '태그나 별칭 검색';
@@ -5916,7 +5918,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get tips_prompt_guide_3 =>
-      '태그를 Ctrl+클릭하면 로컬 태그에서 찾고, Ctrl+드래그로 고르면 함께 자주 쓰이는 태그를 볼 수 있습니다.';
+      'Ctrl(Mac은 ⌘)을 누른 채 클릭하거나 드래그로 선택하면 태그 확장이 열립니다. 태그를 검색하거나 관련 추천을 볼 수 있습니다.';
 
   @override
   String get tips_prompt_guide_4 =>
@@ -6990,7 +6992,8 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settings_makeReadingComfortable => '읽기 편하게 만들기';
 
   @override
-  String get settings_adjustSettingsPagesDialogsOnly => '설정 페이지와 대화 상자에만 적용';
+  String get settings_adjustSettingsPagesDialogsOnly =>
+      '앱 전체의 글자, 아이콘, 컨트롤 크기를 조절합니다. 이미지 해상도는 바뀌지 않습니다.';
 
   @override
   String get settings_motionNotifications => '움직임 및 알림';
@@ -8608,6 +8611,40 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get promptTranslation_tutorial => '사용 방법';
+
+  @override
+  String get promptReading_mode => '간편 번역';
+
+  @override
+  String get promptReading_modeSubtitle => '원문 아래에 번역 표시';
+
+  @override
+  String get promptReading_blocks => '번역 블록';
+
+  @override
+  String get promptReading_blocksSubtitle => '이중 언어 블록으로 읽고 편집';
+
+  @override
+  String get promptReading_update => '추가·수정된 내용 번역';
+
+  @override
+  String get promptReading_hide => '번역 숨기기';
+
+  @override
+  String get promptReading_show => '번역 표시';
+
+  @override
+  String get promptReading_clear => '번역 지우기';
+
+  @override
+  String get promptReading_cleared => '번역을 지웠습니다';
+
+  @override
+  String get promptReading_pending => '업데이트 필요';
+
+  @override
+  String get promptReading_guide =>
+      '쉼표로 구분된 원문마다 가중치 구문을 뺀 읽기 전용 번역을 표시합니다. 원문을 클릭하면 편집하고, 편집을 마치면 번역이 다시 표시됩니다. 원문 항목을 삭제하면 해당 번역도 사라집니다. 메뉴에서 번역을 갱신하거나 숨기거나 지울 수 있습니다. 복사와 생성에는 원문을 사용합니다.';
 
   @override
   String get promptTranslation_guideBack => '작업으로 돌아가기';
@@ -13054,9 +13091,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get blocks_changeImage => '이미지 변경';
 
   @override
-  String get blocks_clearThumb => '미리보기 삭제';
-
-  @override
   String get blocks_cropHint => '드래그 / 휠로 확대';
 
   @override
@@ -15003,10 +15037,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get gen_bdCustom => '직접 지정';
 
   @override
-  String get gen_zoomToFill => '채우도록 확대';
+  String get gen_zoomToFill => '캔버스에 맞게 확대';
 
   @override
-  String get gen_zoomToFillSub => '작은 이미지도 캔버스에 맞게 확대';
+  String get gen_zoomToFillSub => '초점을 맞출 때 100% 초과 확대를 허용하고 비율을 유지해 전체 표시';
 
   @override
   String get gen_useSeed => '이 시드 사용 (고정)';
@@ -16546,23 +16580,17 @@ class AppLocalizationsKo extends AppLocalizations {
   String get rag_auto => '자동 선택';
 
   @override
-  String get rag_tagsEnabled => '문맥 기반 태그 추천';
+  String get rag_tagsEnabled => '태그 의미 검색 및 추천';
 
   @override
-  String get rag_tagsHint => '의미·공기 관계·재정렬을 결합하며 입력란, 캐릭터, 정·부정을 분리합니다.';
+  String get rag_tagsHint => '입력 내용으로 검색하거나 커서 앞 문맥에 맞는 태그를 추천받을 수 있습니다.';
 
   @override
   String get rag_context => '추천 문맥 범위';
 
   @override
   String get rag_contextHint =>
-      '두 모드 모두 태그 경계 기준 최대 120 Gemma 토큰입니다. 전체 입력은 중복 제거에만 사용합니다.';
-
-  @override
-  String get rag_contextBefore => '커서 앞 · 120 tokens';
-
-  @override
-  String get rag_contextAround => '커서 주변 · 120 tokens';
+      '커서 앞의 완전한 태그를 사용합니다. 32~512 Gemma 토큰으로 조절할 수 있습니다.';
 
   @override
   String get rag_buildIndex => '미리 보기 및 색인 생성';
@@ -17346,7 +17374,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get set_apSystem => '시스템';
 
   @override
-  String get set_apSystemSub => 'Windows 설정을 따름';
+  String get set_apSystemSub => '시스템의 밝은 모드 또는 어두운 모드를 따름';
 
   @override
   String get set_apText => '글꼴';
@@ -17358,10 +17386,11 @@ class AppLocalizationsKo extends AppLocalizations {
   String get set_apFontSub => '숫자와 코드는 Geist Mono를 사용합니다';
 
   @override
-  String get set_apScale => '설정 및 대화 상자 글자 크기';
+  String get set_apScale => '인터페이스 배율';
 
   @override
-  String get set_apScaleSub => '설정과 대화 상자만 확대합니다';
+  String get set_apScaleSub =>
+      '앱 전체의 글자, 아이콘과 컨트롤 크기를 조절합니다. 이미지 해상도는 바뀌지 않습니다.';
 
   @override
   String get set_apSampleTitle => '제목 · 생성 완료';
@@ -17403,7 +17432,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get set_apNotify => '알림';
 
   @override
-  String get set_apNotifySub => '오른쪽 위에 나타났다가 3초 뒤 사라집니다';
+  String get set_apNotifySub => '앱 내 작업 결과 알림의 표시 방식을 미리 봅니다';
 
   @override
   String get set_apNotifyPreview => '미리 보기';
@@ -17465,10 +17494,11 @@ class AppLocalizationsKo extends AppLocalizations {
   String get set_cvLockSub => '새 이미지가 나와도 시점을 옮기지 않습니다';
 
   @override
-  String get set_cvFill => '새 이미지를 꽉 차게';
+  String get set_cvFill => '캔버스에 맞게 확대';
 
   @override
-  String get set_cvFillSub => '실제 픽셀 대신 보이는 영역에 맞춥니다';
+  String get set_cvFillSub =>
+      '이미지에 초점을 맞출 때 100% 초과 확대를 허용하고 비율을 유지해 표시 영역 안에 전체를 표시합니다. 끄면 자동 크기 맞춤의 최대 배율은 100%입니다.';
 
   @override
   String get set_cvChannel => '비주얼 채널';
@@ -17789,16 +17819,18 @@ class AppLocalizationsKo extends AppLocalizations {
   String get set_gnNoKey => '키 없음';
 
   @override
-  String get set_gnRelated => '관련 태그 제안';
+  String get set_gnRelated => 'Ctrl 태그 확장';
 
   @override
-  String get set_gnRelatedSub => '함께 자주 쓰는 태그를 제안';
+  String get set_gnRelatedSub =>
+      'Ctrl(Mac은 ⌘)을 누른 채 클릭하거나 드래그로 선택하면 태그 검색과 관련 추천을 볼 수 있습니다.';
 
   @override
   String get set_gnRag => '시맨틱 태그 제안';
 
   @override
-  String get set_gnRagSub => '시맨틱 검색이 제공하는 문맥 기반 제안';
+  String get set_gnRagSub =>
+      '태그 확장에 의미 검색과 문맥 기반 추천을 제공합니다. 시맨틱 검색에서 설정할 수 있습니다.';
 
   @override
   String get set_gnReady => '준비됨';
@@ -17880,7 +17912,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get set_stSave => '저장';
 
   @override
-  String get set_stSavePath => '이미지 저장 위치';
+  String get set_stSavePath => '생성 이미지 저장 폴더';
+
+  @override
+  String set_stSavePathSub(String path) {
+    return '자동 및 수동 저장의 실제 저장 위치:\n$path';
+  }
 
   @override
   String get set_stAutoSave => '자동 저장';
@@ -17892,7 +17929,19 @@ class AppLocalizationsKo extends AppLocalizations {
   String get set_stAssets => '소재와 표시';
 
   @override
-  String get set_stVibePath => 'Vibe 라이브러리 위치';
+  String get set_stVibePath => 'Vibe 파일 폴더';
+
+  @override
+  String get set_stVibePathSub => 'Vibe 파일을 읽고 저장합니다. 기존 파일은 원래 위치에 남습니다.';
+
+  @override
+  String get set_stPr => 'PR 라이브러리';
+
+  @override
+  String get set_stPrPath => 'PR 파일 폴더';
+
+  @override
+  String get set_stPrPathSub => '정밀 참조 원본 이미지를 저장합니다. 기존 파일은 원래 위치에 남습니다.';
 
   @override
   String get set_stQuality => '갤러리 화질';
@@ -17910,10 +17959,8 @@ class AppLocalizationsKo extends AppLocalizations {
   String get set_stRoots => '갤러리 폴더';
 
   @override
-  String get set_stRootsSub => '어떤 폴더든 갤러리에서 보고 검색할 수 있으며 자동 저장 대상은 아닙니다.';
-
-  @override
-  String get set_stPrimary => '주 폴더';
+  String get set_stRootsSub =>
+      '갤러리 탐색과 검색에 사용할 폴더입니다. 목록에서 제거해도 이미지와 저장 위치는 유지됩니다.';
 
   @override
   String set_stCount(Object n) {
@@ -18093,12 +18140,6 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get set_dcSemantics => '개인 의미 자료';
-
-  @override
-  String get set_dcSemanticsSub => '보충한 중국어 자료는 번역 캐시를 지워도 유지됩니다';
-
-  @override
   String get set_dcTranslate => '태그 번역 및 의미 보충';
 
   @override
@@ -18165,7 +18206,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get set_dcTip =>
-      '사전과 캐시는 다시 받을 수 있습니다. 개인 의미 자료는 이 페이지에서 내보내세요. 다른 개인 데이터는 저장소 → 앱 데이터 위치에 있습니다.';
+      '사전은 다시 다운로드하고 캐시는 다시 만들 수 있습니다. 보충한 중국어 자료는 번역 캐시를 지워도 유지됩니다. 데이터 위치는 저장소 및 갤러리 → 앱 데이터 위치에서 확인하세요.';
 
   @override
   String get set_mdDesc =>
@@ -18335,7 +18376,8 @@ class AppLocalizationsKo extends AppLocalizations {
   String get set_agInstr => '지침';
 
   @override
-  String get set_agInstrSub => '이 순서로 최종 프롬프트가 됩니다. 기존 채팅은 그대로, 이후 요청에 반영됩니다.';
+  String get set_agInstrSub =>
+      '확인할 범위를 선택하세요. 전역 지침과 작업 공간 AGENTS.md가 함께 적용되며, 변경 사항은 이후 요청에 반영됩니다.';
 
   @override
   String get set_agOrderBuiltin => '내장 시스템 프롬프트';
@@ -18345,9 +18387,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get set_agOrderGlobal => '전역 지침';
-
-  @override
-  String get set_agOrderWorkspace => '작업 공간 규칙';
 
   @override
   String get set_agGlobal => '전역 지침';
@@ -18497,10 +18536,10 @@ class AppLocalizationsKo extends AppLocalizations {
       '소스마다 따로 색인하고 켭니다. 일시 정지할 수 있고 끝난 부분은 바로 쓸 수 있습니다.';
 
   @override
-  String get set_rgTags => '태그 제안';
+  String get set_rgTags => '태그 의미 검색 및 추천';
 
   @override
-  String get set_rgTagsSub => '의미, 동시 출현, 재순위를 결합하고 입력 칸마다 계산';
+  String get set_rgTagsSub => '입력 내용으로 검색하거나 커서 앞 문맥에 맞는 태그를 추천받을 수 있습니다.';
 
   @override
   String get set_rgWiki => '위키 시맨틱 검색';
@@ -18560,16 +18599,11 @@ class AppLocalizationsKo extends AppLocalizations {
   String get set_rgContext => '제안 문맥';
 
   @override
-  String get set_rgContextSub => '둘 다 최대 120 Gemma 토큰, 태그 단위로 자릅니다.';
+  String get set_rgContextSub =>
+      '커서 앞의 완전한 태그를 사용합니다. 32~512 Gemma 토큰으로 조절할 수 있습니다.';
 
   @override
-  String get set_rgRange => '샘플 범위';
-
-  @override
-  String get set_rgBefore => '커서 앞';
-
-  @override
-  String get set_rgAround => '커서 앞뒤';
+  String get set_rgRange => '샘플 길이';
 
   @override
   String get set_rgRuntime => '모델과 런타임';
@@ -19545,6 +19579,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get set_agBaseSwitchTitle => '내장 시스템 프롬프트 변경을 버릴까요?';
 
   @override
+  String get set_agPrefixSwitchTitle => '앞부분 변경을 버릴까요?';
+
+  @override
+  String get set_agPrefixInheritHint => '비워 두면 전역 앞부분을 사용합니다.';
+
+  @override
   String get set_agBaseSwitchBody => '범위를 바꾸면 저장하지 않은 변경이 사라집니다.';
 
   @override
@@ -19669,10 +19709,6 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get set_agSkillManualTip =>
       '프롬프트에 들어가지 않아 Agent가 스스로 사용하지 않습니다. 채팅창에 /skill:이름을 입력하면 호출합니다.';
-
-  @override
-  String get set_agWorkspaceRulesSub =>
-      '이 작업 공간에만 적용되는 추가 규칙입니다. 작업 공간의 instructions.md에 저장되며 전역 지시 뒤에 붙습니다. \"편집\"을 누르면 시스템 편집기로 열리고, 비워 두면 추가하지 않습니다.';
 
   @override
   String get set_agSkillDescNaiPrompt =>
@@ -19921,14 +19957,15 @@ class AppLocalizationsKo extends AppLocalizations {
   String get ag_modeBypass => '전체 권한';
 
   @override
-  String get ag_modeBypassHint => '묻지 않고 모두 바로 실행합니다. Anlas 사용만 확인합니다';
+  String get ag_modeBypassHint =>
+      '모두 바로 실행합니다. 무료 작업은 확인을 생략하고 유료 작업은 Agent 설정을 따릅니다';
 
   @override
   String get ag_bypassConfirmTitle => '전체 권한으로 전환할까요?';
 
   @override
   String get ag_bypassConfirmBody =>
-      'Agent가 묻지 않고 파일 수정, 명령 실행, 알 수 없는 도구 호출을 하며 작업 공간 밖의 파일도 다룰 수 있습니다. Anlas를 쓰는 작업은 계속 먼저 확인합니다. 믿을 수 있는 작업에만 사용하세요.';
+      'Agent가 묻지 않고 파일 수정, 명령 실행, 알 수 없는 도구 호출을 하며 작업 공간 밖의 파일도 다룰 수 있습니다. 무료 생성은 자동 실행합니다. 유료 작업은 기본적으로 확인하며 Agent 설정에서 확인을 끌 수 있습니다. 믿을 수 있는 작업에만 사용하세요.';
 
   @override
   String get ag_bypassConfirmOk => '전환';
@@ -20890,9 +20927,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get ag_memoryChatPrefixHint => '현재 대화에만 적용되며 기본 시스템 프롬프트 앞에 추가됩니다.';
 
   @override
-  String get ag_memoryWorkspace => '작업 공간 규칙';
-
-  @override
   String get ag_memorySkills => '적용 중인 스킬';
 
   @override
@@ -21773,15 +21807,22 @@ class AppLocalizationsKo extends AppLocalizations {
   String get set_agNextSuggestion => '다음 메시지 제안';
 
   @override
+  String get set_agSkipPaidConfirmation => '유료 작업도 확인 없이 실행';
+
+  @override
+  String get set_agSkipPaidConfirmationSub =>
+      '전체 권한에서만 적용됩니다. 무료 작업은 자동 실행하며, 이 옵션을 켜면 Anlas를 사용하는 생성 및 이미지 작업도 확인 없이 실행합니다.';
+
+  @override
   String get set_agNextSuggestionSub =>
       '현재 대화 모델로 다음 메시지를 예측합니다. 추가 토큰을 사용하며 Tab으로 채택합니다.';
 
   @override
-  String get set_agCacheWarming => '프롬프트 캐시 예열';
+  String get set_agCacheWarming => '프롬프트 캐시 유지';
 
   @override
   String get set_agCacheWarmingSub =>
-      '프롬프트 캐시가 만료되기 직전 1토큰 요청으로 연장합니다(수명 5분, 모든 모델). 다음 단계는 전체 컨텍스트를 다시 보내지 않고 캐시를 읽습니다.';
+      '가벼운 요청으로 캐시를 연장해 이후의 문맥 처리량을 줄입니다. 캐시 적중 여부는 제공업체에 따라 달라집니다.';
 
   @override
   String get set_agCacheOff => '끄기';
@@ -21790,13 +21831,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get set_agCacheStreaming => 'Agent 실행 중에만';
 
   @override
-  String get set_agCacheIdle => '대기 중에도 예열';
+  String get set_agCacheIdle => '대기 중에도 유지';
 
   @override
-  String get set_agCacheIdleCost => '대기 중 예열(최대 30분)은 추가 모델 비용이 발생합니다.';
+  String get set_agCacheIdleCost => '대기 중 캐시 유지(최대 30분)는 추가 모델 비용이 발생합니다.';
 
   @override
-  String get ag_cacheWarmTitle => '캐시 예열';
+  String get ag_cacheWarmTitle => '캐시 유지';
 
   @override
   String get ag_cacheWarmOff => '꺼짐';
@@ -21863,17 +21904,10 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get set_workspaceFontScale => '창작 영역 글자 크기';
-
-  @override
   String get set_promptAutocomplete => '프롬프트 자동 완성';
 
   @override
   String get shortcut_action_open_resource_window => '리소스 창 열기';
-
-  @override
-  String get set_workspaceFontScaleSub =>
-      '프롬프트 칸, 캐릭터 칸, 블록, 뷰어 프롬프트의 글자. 위 인터페이스 글자 크기와 별도로 조절합니다.';
 
   @override
   String get set_promptAutocompleteSub =>
@@ -22193,4 +22227,31 @@ class AppLocalizationsKo extends AppLocalizations {
   String ag_externalNeedsAttention(String client) {
     return '$client의 작업을 확인해 주세요';
   }
+
+  @override
+  String get set_agViewScope => '보기 범위';
+
+  @override
+  String get set_agViewGlobalHint => '모든 작업 공간에서 공유하는 지침과 접두문';
+
+  @override
+  String get set_agViewWorkspaceHint => '선택한 작업 공간의 프로젝트 규칙';
+
+  @override
+  String get set_agProjectRules => '작업 공간 AGENTS.md';
+
+  @override
+  String get set_agRulesReadonly => '읽기 전용';
+
+  @override
+  String get set_agRulesView => '보기';
+
+  @override
+  String get set_agRulesMissing => '이 작업 공간에는 아직 AGENTS.md가 없습니다';
+
+  @override
+  String get set_agRulesEmpty => 'AGENTS.md가 비어 있습니다';
+
+  @override
+  String get set_agRulesLoadFailed => 'AGENTS.md를 읽을 수 없습니다. 파일 권한을 확인해 주세요.';
 }

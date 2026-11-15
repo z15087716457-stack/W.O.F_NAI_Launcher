@@ -19,7 +19,7 @@ Call `await tools.mcp__nai_studio__<name>({...})`. Serialize dependent writes; b
 - Check `isError`; results carry `content` and `structuredContent`. Display pixels with `image(result.content[i])`.
 - `image_read` accepts an `image_id` (including `selected`) or workspace-relative image path; `metadata_only=true` reads original dimensions/metadata without vision.
 - Writes use versions from the last read (`field_versions`, `expected_version`, `library_version` or `draft_version`); use the returned readback and next version. On conflict, read the affected state before retrying.
-- Quoted generation/cloud actions: prepare -> report price and balance -> `run(quote_id)`, with user confirmation in Studio.
+- Quoted generation/cloud actions: prepare -> report price and balance -> `run(quote_id)`. Studio owns confirmation: Full access skips free actions; paid confirmation is on by default and can be disabled by the user in Agent settings. Read the quote's `authorization`; model-supplied flags do not grant approval.
 - `ask_user` is a direct tool, outside codemode. Report actual outputs, partial results and unresolved status.
 
 ## Tool index

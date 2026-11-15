@@ -103,9 +103,9 @@ In “Ask” mode, this card appears before changes, deletions, moves or command
 
 <img src="../../images/readme/en/agent-card-gate.webp" alt="Price confirmation card" width="460">
 
-When Agent wants to generate images, make variations / enhance images or use cloud image tools, it first shows this price card: model and size, number of requests, unit price, reference image encoding cost, total and current balance. Studio calculates the price; the model cannot change it. **Anlas is spent only when you click “Confirm & generate”**, at every permission level. Quotes expire; if the configuration changes or the quote expires, ask Agent to prepare it again.
+When Agent wants to generate images, make variations / enhance images or use cloud image tools, it first shows this price card: model and size, number of requests, unit price, reference image encoding cost, total and current balance. Studio calculates the price; the model cannot change it. Confirmation is required by default. Full access runs actions with a zero total automatically. “Settings → NAI Agent → General → Skip paid-action confirmation” is off by default; enable it to also run paid actions directly in Full access. Quotes expire; if the configuration changes or the quote expires, ask Agent to prepare it again.
 
-The prompt-set card is a direct user control: clicking its “Generate” button authorizes one image for that item, so no additional price confirmation card appears. The confirmation requirement above still applies when the model calls generation tools itself.
+The prompt-set card is a direct user control: clicking its “Generate” button authorizes one image for that item, so no additional price confirmation card appears. Model-initiated generation follows the permission and paid-confirmation settings above.
 
 ### Outputs and summary
 
@@ -122,7 +122,7 @@ Choose a permission level at the bottom of the sidebar:
 | **Read-only** | Reads and discusses only; no changes or generation |
 | **Ask** | Asks before changes, commands and unknown tools |
 | **Auto** | Makes routine changes within the workspace directly; spending still requires confirmation |
-| **Full access** | Runs all actions without asking; spending Anlas still requires confirmation (a risk warning appears before switching) |
+| **Full access** | Free actions skip confirmation; paid actions require it by default. Agent settings can also skip paid confirmation (the permission-switch warning remains). |
 
 During generation, click Agent’s stop button or the stop button in the main interface to interrupt a pending generation.
 
@@ -147,7 +147,7 @@ Use `@` in the input field to reference files or images, and `/` to open the lis
 
 - Each workspace has its own chats, outputs and rules. Create, rename or delete workspaces (deletions can be undone from the recycle area).
 - All data lives in `agent-data/` in the program directory.
-- The “Instructions” page lets you write global instructions and workspace rules that affect later requests.
+- “View scope” on the Instructions page sits below Persistent context. Edit shared instructions in the global scope, or select a workspace to read its root `AGENTS.md` in a scrollable pane with a copy button. Both apply to later requests; edit project rules in the file.
 - Each run defaults to at most 32 model requests, adjustable in settings (1–200).
 - Use “Edit” to resend a message you have sent (the conversation after it will be replaced), or “Regenerate” on the last reply.
 

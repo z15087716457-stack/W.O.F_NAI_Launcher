@@ -12,6 +12,7 @@ import '../../l10n/app_localizations.dart';
 import '../providers/font_provider.dart';
 import '../themes/app_theme.dart';
 import '../ui/kit/ui_resource_kind.dart';
+import '../ui/kit/ui_scale.dart';
 import '../ui/resource_window/resource_window_page.dart';
 import 'resource_window_controller.dart';
 import 'resource_gallery_viewer.dart';
@@ -41,6 +42,7 @@ Future<void> runResourceWindow(
     windowId: window.windowId,
     kind: arguments.kind,
     alwaysOnTop: arguments.alwaysOnTop,
+    uiScale: arguments.uiScale,
     onKindChanged: (kind) => native.invokeMethod<void>('setTitle', title(kind)),
   );
   await window.setWindowMethodHandler((call) async {
@@ -121,6 +123,11 @@ class _ResourceWindowAppState extends State<ResourceWindowApp> {
   @override
   Widget build(BuildContext context) => MaterialApp(
     debugShowCheckedModeBanner: false,
+    builder: (context, child) => ListenableBuilder(
+      listenable: widget.controller,
+      builder: (_, _) =>
+          UiScale(scale: widget.controller.uiScale, child: child!),
+    ),
     locale: widget.locale,
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,

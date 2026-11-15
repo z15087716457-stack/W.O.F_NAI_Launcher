@@ -42,8 +42,7 @@ String settingTitle(BuildContext context, SettingKey k) {
   return switch (k) {
     SettingKey.themeMode => l.set_apTheme,
     SettingKey.fontFamily => l.set_apFont,
-    SettingKey.settingsFontScale => l.set_apScale,
-    SettingKey.workspaceFontScale => l.set_workspaceFontScale,
+    SettingKey.uiScale => l.set_apScale,
     SettingKey.promptAutocomplete => l.set_promptAutocomplete,
     SettingKey.language => l.set_apLanguage,
     SettingKey.reduceMotion => l.set_apReduceMotion,
@@ -69,6 +68,7 @@ String settingTitle(BuildContext context, SettingKey k) {
     SettingKey.imageSavePath => l.set_stSavePath,
     SettingKey.autoSave => l.set_stAutoSave,
     SettingKey.vibePath => l.set_stVibePath,
+    SettingKey.preciseRefPath => l.set_stPrPath,
     SettingKey.galleryQuality => l.set_stQuality,
     SettingKey.thumbnailCacheLimitGb => l.set_stThumbnailCacheLimit,
     SettingKey.appDataPath => l.set_stAppData,
@@ -77,9 +77,10 @@ String settingTitle(BuildContext context, SettingKey k) {
     SettingKey.agentEnterToSend => l.set_agEnter,
     SettingKey.agentMaxRequests => l.set_agMax,
     SettingKey.agentNextSuggestion => l.set_agNextSuggestion,
+    SettingKey.agentSkipPaidConfirmation => l.set_agSkipPaidConfirmation,
     SettingKey.agentCacheWarming => l.set_agCacheWarming,
     SettingKey.ragEnabled => l.set_pageRag,
-    SettingKey.ragContext => l.set_rgRange,
+    SettingKey.ragContextTokens => l.set_rgRange,
     SettingKey.ragDevice => l.set_rgDevice,
     SettingKey.ragEmbedPath => l.set_rgEmbedPath,
     SettingKey.ragRerankPath => l.set_rgRerankPath,
@@ -116,8 +117,7 @@ String settingSection(BuildContext context, SettingKey k) {
   return switch (k) {
     SettingKey.themeMode => l.set_apTheme,
     SettingKey.fontFamily ||
-    SettingKey.settingsFontScale ||
-    SettingKey.workspaceFontScale ||
+    SettingKey.uiScale ||
     SettingKey.language => l.set_apText,
     SettingKey.reduceMotion ||
     SettingKey.completionSound ||
@@ -140,7 +140,9 @@ String settingSection(BuildContext context, SettingKey k) {
     SettingKey.relatedTags ||
     SettingKey.promptAutocomplete => l.set_gnInput,
     SettingKey.imageSavePath || SettingKey.autoSave => l.set_stSave,
-    SettingKey.vibePath || SettingKey.galleryQuality => l.set_stAssets,
+    SettingKey.vibePath ||
+    SettingKey.preciseRefPath ||
+    SettingKey.galleryQuality => l.set_stAssets,
     SettingKey.appDataPath ||
     SettingKey.thumbnailCacheLimitGb => l.set_stMaintain,
     SettingKey.cacheStatsAutoRefresh => l.set_dcStats,
@@ -148,9 +150,10 @@ String settingSection(BuildContext context, SettingKey k) {
     SettingKey.agentEnterToSend ||
     SettingKey.agentMaxRequests ||
     SettingKey.agentNextSuggestion ||
+    SettingKey.agentSkipPaidConfirmation ||
     SettingKey.agentCacheWarming => l.set_agModelSec,
     SettingKey.ragEnabled => l.set_pageRag,
-    SettingKey.ragContext => l.set_rgContext,
+    SettingKey.ragContextTokens => l.set_rgContext,
     SettingKey.ragDevice ||
     SettingKey.ragEmbedPath ||
     SettingKey.ragRerankPath ||
@@ -190,10 +193,10 @@ String settingValue(BuildContext context, SettingKey k, SettingsValues v) {
     case SettingKind.number:
       final n = v.number(k);
       return switch (k) {
-        SettingKey.settingsFontScale ||
-        SettingKey.workspaceFontScale => '${(n * 100).round()}%',
+        SettingKey.uiScale => '${(n * 100).round()}%',
         SettingKey.costThreshold => '${n.round()} Anlas',
         SettingKey.thumbnailCacheLimitGb => '${n.round()} GB',
+        SettingKey.ragContextTokens => '${n.round()} tokens',
         SettingKey.intervalSeconds => '${n.round()} ${l.set_unitSeconds}',
         SettingKey.intervalJitter => '±${n.round()}%',
         SettingKey.seedInputNoise ||
@@ -217,15 +220,19 @@ const _synonyms = <SettingKey, String>{
   SettingKey.thumbnailCacheLimitGb: 'thumbnail cache global limit GB GiB',
   SettingKey.costWarning: 'anlas cost',
   SettingKey.costThreshold: 'anlas cost',
+  SettingKey.agentSkipPaidConfirmation:
+      'anlas cost paid confirmation full access bypass 付费 确认 完全权限',
   SettingKey.intervalSeconds: 'delay rate limit',
   SettingKey.themeMode: 'dark light theme',
   SettingKey.proxyEnabled: 'proxy http socks',
   SettingKey.proxyHost: 'proxy',
   SettingKey.imageSavePath: 'folder output save',
+  SettingKey.preciseRefPath: 'PR precise reference library folder path 精准参考库',
   SettingKey.stripMetadata: 'metadata exif privacy',
   SettingKey.ragEmbedPath: 'rag gemma embedding model download 下载',
   SettingKey.ragRerankPath: 'rag qwen reranker model download 下载',
   SettingKey.ragPythonPath: 'rag python exe interpreter runtime cuda 运行环境',
+  SettingKey.ragContextTokens: 'rag gemma tokens context length 上下文 长度',
 };
 
 List<SettingsHit> settingsIndex(BuildContext context) {
@@ -244,17 +251,17 @@ List<SettingsHit> settingsIndex(BuildContext context) {
     final Widget control = switch (spec.kind) {
       SettingKind.toggle => SetSwitch(k),
       SettingKind.number =>
-        k == SettingKey.settingsFontScale ||
-                k == SettingKey.workspaceFontScale ||
+        k == SettingKey.uiScale ||
                 k == SettingKey.intervalJitter ||
+                k == SettingKey.ragContextTokens ||
                 k.name.startsWith('seed')
             ? SetSlider(
                 k,
                 width: 140,
                 label: (x) => switch (k) {
-                  SettingKey.settingsFontScale ||
-                  SettingKey.workspaceFontScale => '${(x * 100).round()}%',
+                  SettingKey.uiScale => '${(x * 100).round()}%',
                   SettingKey.intervalJitter => '±${x.round()}%',
+                  SettingKey.ragContextTokens => '${x.round()} tokens',
                   SettingKey.seedCpuOffload => '${x.round()}',
                   _ => x.toStringAsFixed(2),
                 },

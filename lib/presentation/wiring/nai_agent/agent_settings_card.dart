@@ -9,8 +9,9 @@ const agentSettingRows = <String, (SettingKey?, String)>{
   'studio_theme_mode': (SettingKey.themeMode, 'appearance'),
   'font_family': (SettingKey.fontFamily, 'appearance'),
   'font_scale': (null, 'appearance'),
-  'settings_font_scale': (SettingKey.settingsFontScale, 'appearance'),
-  'workspace_font_scale': (SettingKey.workspaceFontScale, 'appearance'),
+  'ui_scale': (SettingKey.uiScale, 'appearance'),
+  'settings_font_scale': (SettingKey.uiScale, 'appearance'),
+  'workspace_font_scale': (SettingKey.uiScale, 'appearance'),
   'locale': (SettingKey.language, 'appearance'),
   'history_click_behavior': (SettingKey.historyClick, 'canvas'),
   'simple_output_viewer': (SettingKey.outputViewer, 'canvas'),
@@ -62,7 +63,7 @@ String agentSettingLabel(String storageKey) {
   return switch (agentSettingRows[storageKey]?.$1) {
     SettingKey.themeMode => l.set_apTheme,
     SettingKey.fontFamily => l.set_apFont,
-    SettingKey.settingsFontScale => l.set_apScale,
+    SettingKey.uiScale => l.set_apScale,
     SettingKey.language => l.set_apLanguage,
     SettingKey.historyClick => l.set_cvHistoryClick,
     SettingKey.outputViewer => l.set_cvViewer,
@@ -91,6 +92,7 @@ String agentSettingValue(String key, Object? value) {
   final l = currentL10n;
   if (value == null) return l.set_defaultTag;
   if (value is bool) return value ? l.set_on : l.set_off;
+  if (key == 'ui_scale' && value is num) return '${(value * 100).round()}%';
   if (key == 'font_scale' ||
       key == 'settings_font_scale' ||
       key == 'workspace_font_scale') {

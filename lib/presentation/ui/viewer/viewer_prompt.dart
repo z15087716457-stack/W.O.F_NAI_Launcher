@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/utils/weight_tier.dart';
-import '../../widgets/common/workspace_text_scale_scope.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_text.dart';
 import 'viewer_format.dart';
@@ -106,8 +105,7 @@ class ViewerPromptBox extends StatelessWidget {
   final ValueChanged<bool>? onOverflow;
 
   @override
-  Widget build(BuildContext context) =>
-      WorkspaceTextScaleScope(child: Builder(builder: _buildPrompt));
+  Widget build(BuildContext context) => _buildPrompt(context);
 
   Widget _buildPrompt(BuildContext context) {
     final c = context.ui;

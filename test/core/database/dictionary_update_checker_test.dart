@@ -9,10 +9,11 @@ import 'package:nai_launcher/core/database/dictionary_update_checker.dart';
 
 class _Metadata implements HttpClientAdapter {
   final calls = <String>[];
-  String tagName = 'danbooru_2026-10-01_pt20-ia-dd.csv';
+  String tagName = 'danbooru_2026-11-03_pt20-ia-dd.csv';
   String tagHash = dictionarySources[DictionaryKind.tags]!.gitBlobSha1;
   int tagSize = dictionarySources[DictionaryKind.tags]!.bytes;
   String wikiHash = dictionarySources[DictionaryKind.wiki]!.sha256;
+  String wikiDate = '2026-10-17T01:02:03Z';
   int status = 200;
   bool huge = false, missing = false;
   @override
@@ -51,9 +52,9 @@ class _Metadata implements HttpClientAdapter {
         {
           'type': 'file',
           'path': 'danbooru-wiki-2606.jsonl',
-          'size': 137932215,
+          'size': dictionarySources[DictionaryKind.wiki]!.bytes,
           'lfs': {'oid': wikiHash},
-          'lastCommit': {'date': '2026-10-17T01:02:03Z'},
+          'lastCommit': {'date': wikiDate},
         },
       ];
     }
@@ -126,6 +127,21 @@ void main() {
     expect(source.url, contains('/resolve/${'2' * 40}/'));
     expect(source.date, '2026-10-17');
   });
+  test('older upstream files do not downgrade curated snapshots', () async {
+    adapter.tagName = 'danbooru_2026-10-01_pt20-ia-dd.csv';
+    adapter.tagHash = 'c' * 40;
+    adapter.wikiHash = 'd' * 64;
+    adapter.wikiDate = '2026-06-03T00:00:00Z';
+    final result = await checker.check();
+    expect(
+      result.sources[DictionaryKind.tags],
+      same(dictionarySources[DictionaryKind.tags]),
+    );
+    expect(
+      result.sources[DictionaryKind.wiki],
+      same(dictionarySources[DictionaryKind.wiki]),
+    );
+  });
   for (final fault in ['hash', 'size', 'date', 'missing', 'http', 'huge']) {
     test('metadata $fault cannot produce an available source', () async {
       switch (fault) {
@@ -148,6 +164,35 @@ void main() {
   test('cancellation does not return a successful check', () async {
     checker.cancel();
     await expectLater(checker.check(), throwsA(anything));
+  });
+  test('curated mirror cache must retain its exact pinned metadata', () async {
+    final root = await Directory.systemTemp.createTemp(
+      'dictionary-mirror-cache-',
+    );
+    addTearDown(() => root.delete(recursive: true));
+    final result = await checker.check();
+    for (final field in ['sha256', 'bytes', 'date']) {
+      await DictionaryUpdateChecker.save(root, result);
+      final file = File('${root.path}/latest-check.json');
+      final data = jsonDecode(await file.readAsString());
+      data['sources'][0][field] = switch (field) {
+        'sha256' => 'f' * 64,
+        'bytes' => 1,
+        _ => '2026-11-04',
+      };
+      await file.writeAsString(jsonEncode(data));
+      expect(await DictionaryUpdateChecker.load(root), isNull);
+    }
+  });
+  test('duplicate curated entries invalidate the cache', () async {
+    final root = await Directory.systemTemp.createTemp('dictionary-duplicate-');
+    addTearDown(() => root.delete(recursive: true));
+    await DictionaryUpdateChecker.save(root, await checker.check());
+    final file = File('${root.path}/latest-check.json');
+    final data = jsonDecode(await file.readAsString());
+    data['sources'].add(data['sources'][0]);
+    await file.writeAsString(jsonEncode(data));
+    expect(await DictionaryUpdateChecker.load(root), isNull);
   });
   test(
     'successful checks persist and replace earlier metadata without changing source commits',

@@ -71,6 +71,44 @@ void main() {
       }
     });
 
+    test(
+      'removing and re-adding a source preserves files, image ID and favorites',
+      () async {
+        final file = File(p.join(galleryRoot.path, 'retained.png'));
+        await file.writeAsBytes(
+          img.encodePng(img.Image(width: 12, height: 16)),
+        );
+        final stat = await file.stat();
+        await dataSource.upsertImage(
+          filePath: file.path,
+          fileName: p.basename(file.path),
+          fileSize: stat.size,
+          width: 12,
+          height: 16,
+          createdAt: stat.modified,
+          modifiedAt: stat.modified,
+        );
+        final id = await dataSource.getImageIdByPath(file.path);
+        await service.initialize();
+        await service.toggleFavorite(file.path);
+        final settings = Hive.box(StorageKeys.settingsBox);
+        await settings.put(StorageKeys.gallerySourcePaths, <String>[]);
+        await service.refresh(scan: false);
+        expect(await service.getTimelineEntries(), isEmpty);
+        expect(await service.addNewImageImmediately(file.path), false);
+        expect(await file.exists(), true);
+        expect(await dataSource.getImageIdByPath(file.path), id);
+        expect(await service.isFavorite(file.path), true);
+        await settings.put(StorageKeys.gallerySourcePaths, [galleryRoot.path]);
+        await service.refresh(scan: false);
+        expect((await service.getTimelineEntries()).map((e) => e.path), [
+          file.path,
+        ]);
+        expect(await dataSource.getImageIdByPath(file.path), id);
+        expect(await service.isFavorite(file.path), true);
+      },
+    );
+
     test('手动刷新先发布磁盘路径，再排队同步新增、移动和修改', () async {
       await ImageMetadataService().initialize();
       final source = File(p.join(galleryRoot.path, 'source.png'));

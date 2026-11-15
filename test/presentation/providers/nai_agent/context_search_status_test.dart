@@ -127,8 +127,8 @@ void main() {
       expect(
         summary['search_hint'],
         allOf(
-          contains('tag_query for tag names or aliases'),
-          contains('tag_related for co-occurrence with known tags'),
+          contains('tag_query for known English names/aliases'),
+          contains('tag_related for complementary tags or variants'),
           isNot(contains('studio_search')),
         ),
       );

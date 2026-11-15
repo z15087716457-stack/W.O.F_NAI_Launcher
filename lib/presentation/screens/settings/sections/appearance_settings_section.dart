@@ -7,7 +7,8 @@ import '../../../../core/utils/app_language.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../providers/canvas_settings_provider.dart';
 import '../../../providers/font_provider.dart';
-import '../../../providers/settings_font_scale_provider.dart';
+import '../../../providers/ui_scale_provider.dart';
+import '../../../ui/kit/ui_scale.dart';
 import '../../../providers/history_click_behavior_provider.dart';
 import '../../../providers/locale_provider.dart';
 import '../../../providers/simple_output_viewer_provider.dart';
@@ -119,7 +120,7 @@ class _AppearanceSettingsSectionState
 
     final font = ref.watch(fontNotifierProvider);
     final locale = ref.watch(localeNotifierProvider);
-    final fontScale = ref.watch(settingsFontScaleProvider);
+    final fontScale = ref.watch(uiScaleProvider);
     return Column(
       children: [
         SettingsLabeledGroup(
@@ -333,7 +334,7 @@ class _AppearanceSettingsSectionState
                 child: MediaQuery(
                   data: MediaQuery.of(context).copyWith(
                     textScaler: TextScaler.linear(
-                      SettingsFontScaleNotifier.effectiveScale(draft),
+                      draft / UiScale.factorOf(context),
                     ),
                   ),
                   child: Column(
@@ -388,7 +389,7 @@ class _AppearanceSettingsSectionState
       ),
     );
     if (result != null && mounted) {
-      await ref.read(settingsFontScaleProvider.notifier).setFontScale(result);
+      await ref.read(uiScaleProvider.notifier).setScale(result);
     }
   }
 }

@@ -1181,7 +1181,7 @@ class AgentMemoryData {
   const AgentMemoryData({
     this.globalInstructions = '',
     this.chatPrefix = '',
-    this.workspaceRules = '',
+    this.projectRules = '',
     this.activeSkills = const [],
   });
 
@@ -1191,8 +1191,8 @@ class AgentMemoryData {
   /// 当前聊天的前置指令，放在内置提示词之前。
   final String chatPrefix;
 
-  /// 本工作区规则（`instructions.md`）。
-  final String workspaceRules;
+  /// 工作区根目录的只读项目规则（`AGENTS.md`）。
+  final String projectRules;
 
   /// 本工作区生效的 Skill 名。
   final List<String> activeSkills;

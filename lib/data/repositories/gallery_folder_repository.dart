@@ -32,7 +32,7 @@ class GalleryFolderRepository {
   /// 获取图片保存根路径
   ///
   /// 优先使用用户设置的自定义路径，如果没有设置则返回默认路径
-  /// 默认路径：Documents/NAI_Launcher/images/
+  /// 默认路径：启动器 user-data/images/。
   Future<String?> getRootPath() async {
     // 优先使用用户设置的自定义路径
     final customPath = _localStorage.getImageSavePath();
@@ -41,108 +41,104 @@ class GalleryFolderRepository {
     }
 
     // 使用默认路径
-    final appDir = await getApplicationDocumentsDirectory();
-    return p.join(appDir.path, 'NAI_Launcher', 'images');
+    return getUserAssetPath('images');
   }
 
-  // ============================================================
-  // 额外图库源（只读浏览/检索，不参与自动保存）
-  // ============================================================
+  Future<String?> _legacyDefaultPath() async {
+    if (_localStorage.getImageSavePath()?.isNotEmpty == true) return null;
+    final docs = await getApplicationDocumentsDirectory();
+    final path = p.join(docs.path, 'NAI_Launcher', 'images');
+    return await Directory(path).exists() ? path : null;
+  }
 
-  /// 获取额外图库源路径列表（规范化后去重）
-  Future<List<String>> getExtraRootPaths() async {
-    final data = _localStorage.getSetting<List<dynamic>>(
+  /// Browse sources are independent of the output folder. Missing v2 settings
+  /// retain the old coverage; an explicit empty list means no sources.
+  Future<List<String>> getSourcePaths() async {
+    final configured = _localStorage.getSetting<List<dynamic>>(
+      StorageKeys.gallerySourcePaths,
+    );
+    if (configured != null) {
+      return galleryDistinctRoots(configured.whereType<String>());
+    }
+    final legacy = _localStorage.getSetting<List<dynamic>>(
       StorageKeys.galleryExtraRoots,
     );
-    final seen = <String>{};
-    final result = <String>[];
-    for (final item in data ?? const <dynamic>[]) {
-      if (item is! String) continue;
-      final normalized = normalizeGalleryFilePath(item);
-      if (normalized.isEmpty) continue;
-      final key = galleryFilePathKey(normalized);
-      if (seen.add(key)) result.add(normalized);
-    }
-    return result;
+    return galleryDistinctRoots([
+      (await getRootPath())!,
+      if (await _legacyDefaultPath() case final legacy?) legacy,
+      ...?legacy?.whereType<String>(),
+    ]);
   }
 
-  /// 覆盖保存额外图库源路径列表
-  Future<void> setExtraRootPaths(List<String> paths) async {
-    final seen = <String>{};
-    final normalized = <String>[];
-    for (final path in paths) {
-      final item = normalizeGalleryFilePath(path);
-      if (item.isEmpty) continue;
-      final key = galleryFilePathKey(item);
-      if (seen.add(key)) normalized.add(item);
+  /// Existing relative categories and their JSON stay anchored to their original
+  /// folder, even after the user changes the output destination.
+  Future<String> getCategoryBasePath() async =>
+      _localStorage.getSetting<String>(StorageKeys.galleryCategoryBasePath) ??
+      await _legacyDefaultPath() ??
+      (await getRootPath())!;
+
+  Future<void> ensureSourcesMigrated() async {
+    final base = await getCategoryBasePath();
+    final sources = await getSourcePaths();
+    if (_localStorage.getSetting<String>(StorageKeys.galleryCategoryBasePath) ==
+        null) {
+      await _localStorage.setSetting(StorageKeys.galleryCategoryBasePath, base);
     }
-    await _localStorage.setSetting(StorageKeys.galleryExtraRoots, normalized);
+    if (_localStorage.getSetting<List<dynamic>>(
+          StorageKeys.gallerySourcePaths,
+        ) ==
+        null) {
+      await _localStorage.setSetting(StorageKeys.gallerySourcePaths, sources);
+    }
+  }
+
+  Future<void> setSourcePaths(List<String> paths) async {
+    await ensureSourcesMigrated();
+    await _localStorage.setSetting(
+      StorageKeys.gallerySourcePaths,
+      galleryDistinctRoots(paths),
+    );
     notifyRootsChanged();
   }
 
-  /// 添加额外图库源路径
-  ///
-  /// 返回是否新增（重复/与主源相同返回 false）
-  Future<bool> addExtraRootPath(String path) async {
+  Future<bool> addSourcePath(String path) async {
     final normalized = normalizeGalleryFilePath(path);
     if (normalized.isEmpty) return false;
-
-    // 与主源相同视为重复
-    final rootPath = await getRootPath();
-    if (rootPath != null && galleryFilePathsEqual(rootPath, normalized)) {
+    final current = await getSourcePaths();
+    if (current.any(
+      (root) => galleryPathIsWithin(root, p.normalize(p.absolute(normalized))),
+    )) {
       return false;
     }
-
-    final current = await getExtraRootPaths();
-    if (current.any((item) => galleryFilePathsEqual(item, normalized))) {
-      return false;
-    }
-
-    current.add(normalized);
-    await setExtraRootPaths(current);
+    await setSourcePaths([...current, normalized]);
     return true;
   }
 
-  /// 移除额外图库源路径
-  Future<bool> removeExtraRootPath(String path) async {
-    final normalized = normalizeGalleryFilePath(path);
-    final current = await getExtraRootPaths();
+  Future<bool> removeSourcePath(String path) async {
+    final current = await getSourcePaths();
     final updated = current
-        .where((item) => !galleryFilePathsEqual(item, normalized))
+        .where((root) => !galleryFilePathsEqual(root, path))
         .toList();
     if (updated.length == current.length) return false;
-    await setExtraRootPaths(updated);
+    await setSourcePaths(updated);
     return true;
   }
 
-  /// [path] 是否位于某个额外图库源之内
-  Future<bool> isExtraRootPath(String path) async {
-    final normalized = normalizeGalleryFilePath(path);
-    if (normalized.isEmpty) return false;
-    final extraRoots = await getExtraRootPaths();
-    return extraRoots.any((root) => galleryPathIsWithin(root, normalized));
+  /// Moving user-managed output images is not an external-source operation,
+  /// including when a browse source is a parent of that folder.
+  Future<bool> isExternalPath(String path) async {
+    if (galleryPathIsWithin(await getCategoryBasePath(), path)) return false;
+    return (await getSourcePaths()).any(
+      (root) => galleryPathIsWithin(root, path),
+    );
   }
 
-  /// 获取所有图库源目录（主源 + 存在的额外源）
-  ///
-  /// 额外源目录不存在时静默跳过
   Future<List<Directory>> getAllRootDirs() async {
     final dirs = <Directory>[];
-
-    final rootPath = await getRootPath();
-    if (rootPath != null && rootPath.isNotEmpty) {
-      dirs.add(Directory(rootPath));
+    for (final path in await getSourcePaths()) {
+      final dir = Directory(path);
+      if (await dir.exists()) dirs.add(dir);
     }
-
-    for (final extraPath in await getExtraRootPaths()) {
-      final dir = Directory(extraPath);
-      if (await dir.exists()) {
-        dirs.add(dir);
-      } else {
-        AppLogger.w('额外图库源目录不存在，跳过: $extraPath', 'GalleryFolderRepository');
-      }
-    }
-
     return dirs;
   }
 

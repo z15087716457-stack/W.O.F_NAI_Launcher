@@ -450,7 +450,8 @@ class GenerationParamsSummaryBar extends ConsumerWidget {
     final overlayBox =
         Overlay.of(context).context.findRenderObject() as RenderBox;
     final box = context.findRenderObject() as RenderBox;
-    final triggerRect = box.localToGlobal(Offset.zero) & box.size;
+    final triggerRect =
+        box.localToGlobal(Offset.zero, ancestor: overlayBox) & box.size;
 
     final samplers = Samplers.samplersForModel(params.model);
     final recommended = samplers

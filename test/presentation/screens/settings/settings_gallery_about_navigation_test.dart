@@ -23,6 +23,7 @@ import 'package:nai_launcher/core/utils/vibe_library_path_helper.dart';
 import 'package:nai_launcher/data/repositories/gallery_folder_repository.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/image_save_settings_provider.dart';
+import 'package:nai_launcher/presentation/providers/local_gallery_provider.dart';
 import 'package:nai_launcher/presentation/providers/tag_index_import_provider.dart';
 import 'package:nai_launcher/presentation/providers/update_provider.dart';
 import 'package:nai_launcher/presentation/screens/settings/settings_screen.dart';
@@ -40,6 +41,13 @@ class _Settings extends MemorySettings {
   String getLocaleCode() => values[StorageKeys.locale] as String? ?? 'zh';
   @override
   Future<void> deleteSetting(String key) async => values.remove(key);
+}
+
+class _Gallery extends LocalGalleryNotifier {
+  @override
+  LocalGalleryState build() => const LocalGalleryState();
+  @override
+  Future<void> refreshSources() async {}
 }
 
 class _Paths extends PathProviderPlatform {
@@ -261,6 +269,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          localGalleryNotifierProvider.overrideWith(_Gallery.new),
           localStorageServiceProvider.overrideWithValue(storage),
           updateCheckServiceReadyProvider.overrideWith((ref) async => service),
           updateStateProvider.overrideWith(() => updates),
@@ -533,20 +542,17 @@ void main() {
         ).writeAsString('original fixture'),
       ))!;
       await tester.runAsync(
-        () => GalleryFolderRepository.instance.setExtraRootPaths([folder.path]),
+        () => GalleryFolderRepository.instance.setSourcePaths([folder.path]),
       );
       await pump(tester, page: 3);
       await tap(tester, find.text('移除该图库源'));
       await tap(tester, find.text('取消').last);
-      expect(await GalleryFolderRepository.instance.getExtraRootPaths(), [
+      expect(await GalleryFolderRepository.instance.getSourcePaths(), [
         p.normalize(folder.path),
       ]);
       await tap(tester, find.text('移除该图库源'));
       await tap(tester, find.text('确定').last);
-      expect(
-        await GalleryFolderRepository.instance.getExtraRootPaths(),
-        isEmpty,
-      );
+      expect(await GalleryFolderRepository.instance.getSourcePaths(), isEmpty);
       expect(
         await tester.runAsync(() => original.readAsString()),
         'original fixture',
@@ -559,12 +565,17 @@ void main() {
     'cancelled add/import are inert and importing disables only the import action',
     (tester) async {
       await pump(tester, page: 3);
+      final originalSources = await tester.runAsync(
+        () => GalleryFolderRepository.instance.getSourcePaths(),
+      );
       await tap(tester, find.text('添加文件夹'));
       await tap(tester, find.text('导入标签索引…'));
       expect(picker.extensions, ['jsonl']);
       expect(
-        await GalleryFolderRepository.instance.getExtraRootPaths(),
-        isEmpty,
+        await tester.runAsync(
+          () => GalleryFolderRepository.instance.getSourcePaths(),
+        ),
+        originalSources,
       );
       importer.showProgress();
       await tester.pump();

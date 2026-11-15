@@ -29,6 +29,7 @@ import '../../providers/image_generation_provider.dart';
 import '../../providers/precise_ref_library_provider.dart';
 import '../../providers/vibe_library_provider.dart';
 import '../../router/app_router.dart';
+import '../../ui/kit/ui_image_drop_overlay.dart';
 import '../../utils/dropped_file_reader.dart';
 import '../../utils/internal_drag_protocol.dart' as internal_drag;
 import '../../utils/metadata_import_coordinator.dart';
@@ -97,6 +98,7 @@ class GlobalDropHandler extends ConsumerStatefulWidget {
 }
 
 class _GlobalDropHandlerState extends ConsumerState<GlobalDropHandler> {
+  final _dropOverlay = OverlayPortalController();
   bool _isDragging = false;
   bool _isProcessing = false;
   bool _isReadingClipboard = false;
@@ -176,171 +178,88 @@ class _GlobalDropHandlerState extends ConsumerState<GlobalDropHandler> {
 
   @override
   Widget build(BuildContext context) {
-    return Shortcuts(
-      shortcuts: const <ShortcutActivator, Intent>{
-        PrimaryActivator(LogicalKeyboardKey.keyV): _PasteImageIntent(),
-        SingleActivator(LogicalKeyboardKey.keyV, meta: true):
-            _PasteImageIntent(),
-      },
-      child: Actions(
-        actions: <Type, Action<Intent>>{
-          _PasteImageIntent: CallbackAction<_PasteImageIntent>(
-            onInvoke: (intent) {
-              final fallbackTextPaste = _createTextPasteFallback(
-                FocusManager.instance.primaryFocus?.context,
-              );
-              unawaited(_handlePasteShortcut(fallbackTextPaste));
-              return null;
-            },
-          ),
+    return OverlayPortal(
+      controller: _dropOverlay,
+      overlayLocation: OverlayChildLocation.rootOverlay,
+      overlayChildBuilder: (_) => UiImageDropOverlay(processing: _isProcessing),
+      child: Shortcuts(
+        shortcuts: const <ShortcutActivator, Intent>{
+          PrimaryActivator(LogicalKeyboardKey.keyV): _PasteImageIntent(),
+          SingleActivator(LogicalKeyboardKey.keyV, meta: true):
+              _PasteImageIntent(),
         },
-        child: DropRegion(
-          formats: Formats.standardFormats,
-          hitTestBehavior: HitTestBehavior.opaque,
-          onDropOver: (event) {
-            final hit = HitTestResult();
-            GestureBinding.instance.hitTestInView(
-              hit,
-              event.position.global,
-              View.of(context).viewId,
-            );
-            if (hit.path.any(
-              (e) =>
-                  e.target is RenderMetaData &&
-                  (e.target as RenderMetaData).metaData ==
-                      GlobalDropHandler.excludedRegion,
-            )) {
-              if (_isDragging) setState(() => _isDragging = false);
-              return DropOperation.none;
-            }
-            // Gallery drags have category-specific targets. History drags must
-            // continue through the global image destination flow.
-            final isGalleryInternalDrag = event.session.items.any(
-              (item) => isGalleryInternalDragLocalData(item.localData),
-            );
-
-            if (isGalleryInternalDrag) {
-              return DropOperation.none;
-            }
-
-            // 检查是否包含文件
-            if (event.session.allowedOperations.contains(DropOperation.copy)) {
-              if (!_isDragging) {
-                setState(() => _isDragging = true);
+        child: Actions(
+          actions: <Type, Action<Intent>>{
+            _PasteImageIntent: CallbackAction<_PasteImageIntent>(
+              onInvoke: (intent) {
+                final fallbackTextPaste = _createTextPasteFallback(
+                  FocusManager.instance.primaryFocus?.context,
+                );
+                unawaited(_handlePasteShortcut(fallbackTextPaste));
+                return null;
+              },
+            ),
+          },
+          child: DropRegion(
+            formats: Formats.standardFormats,
+            hitTestBehavior: HitTestBehavior.opaque,
+            onDropOver: (event) {
+              if (_isProcessing || _isReadingClipboard) {
+                if (_isDragging) _setDragging(false);
+                return DropOperation.none;
               }
-              return DropOperation.copy;
-            }
-            return DropOperation.none;
-          },
-          onDropLeave: (event) {
-            if (_isDragging) {
-              setState(() => _isDragging = false);
-            }
-          },
-          onPerformDrop: (event) async {
-            setState(() => _isDragging = false);
-            // 重要：不要等待 _handleDrop 完成，让拖放回调立即返回
-            // 否则 Windows 拖放系统会卡死，导致资源管理器无响应
-            unawaited(_handleDrop(event));
-            return;
-          },
-          child: Stack(
-            children: [
-              widget.child,
-              // 拖拽覆盖层
-              if (_isDragging) _buildDropOverlay(context),
-              // 处理中覆盖层
-              if (_isProcessing) _buildProcessingOverlay(context),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+              final hit = HitTestResult();
+              GestureBinding.instance.hitTestInView(
+                hit,
+                event.position.global,
+                View.of(context).viewId,
+              );
+              if (hit.path.any(
+                (e) =>
+                    e.target is RenderMetaData &&
+                    (e.target as RenderMetaData).metaData ==
+                        GlobalDropHandler.excludedRegion,
+              )) {
+                if (_isDragging) _setDragging(false);
+                return DropOperation.none;
+              }
+              // Gallery drags have category-specific targets. History drags must
+              // continue through the global image destination flow.
+              final isGalleryInternalDrag = event.session.items.any(
+                (item) => isGalleryInternalDragLocalData(item.localData),
+              );
 
-  Widget _buildDropOverlay(BuildContext context) {
-    final theme = Theme.of(context);
+              if (isGalleryInternalDrag) {
+                return DropOperation.none;
+              }
 
-    return Positioned.fill(
-      child: IgnorePointer(
-        child: Container(
-          color: theme.colorScheme.primary.withValues(alpha: 0.1),
-          child: Center(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surface,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: theme.colorScheme.primary, width: 2),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.2),
-                    blurRadius: 16,
-                  ),
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.add_photo_alternate_outlined,
-                    size: 48,
-                    color: theme.colorScheme.primary,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    context.l10n.drop_hint,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: theme.colorScheme.primary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// 构建处理中覆盖层
-  Widget _buildProcessingOverlay(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Positioned.fill(
-      child: Container(
-        color: Colors.black.withValues(alpha: 0.5),
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surface,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.3),
-                  blurRadius: 20,
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SizedBox(
-                  width: 48,
-                  height: 48,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 4,
-                    color: theme.colorScheme.primary,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  context.l10n.drop_processing,
-                  style: theme.textTheme.titleMedium,
-                ),
-              ],
-            ),
+              // 检查是否包含文件
+              if (event.session.allowedOperations.contains(
+                DropOperation.copy,
+              )) {
+                if (!_isDragging) {
+                  _setDragging(true);
+                }
+                return DropOperation.copy;
+              }
+              return DropOperation.none;
+            },
+            onDropLeave: (event) {
+              if (_isDragging) {
+                _setDragging(false);
+              }
+            },
+            onDropEnded: (_) {
+              if (_isDragging) _setDragging(false);
+            },
+            onPerformDrop: (event) async {
+              _setDragging(false);
+              // 重要：不要等待 _handleDrop 完成，让拖放回调立即返回
+              // 否则 Windows 拖放系统会卡死，导致资源管理器无响应
+              unawaited(_handleDrop(event));
+              return;
+            },
+            child: widget.child,
           ),
         ),
       ),
@@ -348,33 +267,41 @@ class _GlobalDropHandlerState extends ConsumerState<GlobalDropHandler> {
   }
 
   Future<void> _handleDrop(PerformDropEvent event) async {
+    if (!mounted || _isProcessing || _isReadingClipboard) return;
     // 显示处理中提示
     _showProcessingIndicator();
 
     try {
+      // Start every native read while OLE still owns the drop, then keep only
+      // independent futures. Dialogs and imports must not retain the session.
+      final pending = [
+        for (final item in List.of(event.session.items))
+          Future<DroppedFileData?>.sync(() {
+            final internal = internal_drag.resolveInternalHistoryDropPayload(
+              item.localData,
+              ref.read(imageGenerationNotifierProvider),
+            );
+            if (internal != null) return internal;
+            final reader = item.dataReader;
+            return reader == null
+                ? null
+                : DroppedFileReader.capture(
+                    reader,
+                    allowVibeFiles: true,
+                    logTag: 'DropHandler',
+                  );
+          }).onError((error, stack) {
+            AppLogger.w(
+              'Failed to capture dropped item: $error',
+              'DropHandler',
+            );
+            return null;
+          }),
+      ];
       var handledAny = false;
-      for (final item in event.session.items) {
-        final internalPayload = internal_drag.resolveInternalHistoryDropPayload(
-          item.localData,
-          ref.read(imageGenerationNotifierProvider),
-        );
-        if (internalPayload != null) {
-          handledAny = true;
-          await _processDroppedFile(
-            internalPayload.fileName,
-            internalPayload.bytes,
-          );
-          continue;
-        }
-
-        final reader = item.dataReader;
-        if (reader == null) continue;
-
-        final fileData = await DroppedFileReader.read(
-          reader,
-          allowVibeFiles: true,
-          logTag: 'DropHandler',
-        );
+      for (final read in pending) {
+        final fileData = await read;
+        if (!mounted) return;
         if (fileData != null) {
           handledAny = true;
           await _processDroppedFile(fileData.fileName, fileData.bytes);
@@ -389,16 +316,31 @@ class _GlobalDropHandlerState extends ConsumerState<GlobalDropHandler> {
     }
   }
 
+  void _setDragging(bool dragging) {
+    setState(() => _isDragging = dragging);
+    _syncDropOverlay();
+  }
+
+  void _syncDropOverlay() {
+    if (_isDragging || _isProcessing) {
+      _dropOverlay.show();
+    } else {
+      _dropOverlay.hide();
+    }
+  }
+
   /// 显示处理中指示器
   void _showProcessingIndicator() {
     if (!mounted) return;
     setState(() => _isProcessing = true);
+    _syncDropOverlay();
   }
 
   /// 隐藏处理中指示器
   void _hideProcessingIndicator() {
     if (!mounted) return;
     setState(() => _isProcessing = false);
+    _syncDropOverlay();
   }
 
   static const Set<String> _plainImageExtensions = {

@@ -33,20 +33,20 @@ class DictionarySource {
 const dictionarySources = <DictionaryKind, DictionarySource>{
   DictionaryKind.tags: DictionarySource(
     DictionaryKind.tags,
-    'https://raw.githubusercontent.com/DraconicDragon/dbr-e621-lists-archive/0d3b4e4d7e9890329a884afee4fada2b76f794eb/tag-lists/danbooru/danbooru_2026-10-01_pt20-ia-dd.csv',
-    '45afb2554525464ee49112512f6367ee004bd351afcef5f2435e99d6286884e3',
-    5602650,
-    '2026-10-01',
+    'https://raw.githubusercontent.com/z15087716457-stack/W.O.F_NAI_Launcher/main/tool/dictionary_updates/sources/tags-2026-11-03.csv',
+    '86d2829874a494391fb1e96facdfabe0f99ec4648e48b6d5d84a89464ef0bc8b',
+    5690115,
+    '2026-11-03',
     'DraconicDragon / Danbooru',
-    gitBlobSha1: 'acdc0685c5a52ac743363adfe4d6a9b4298331d0',
+    gitBlobSha1: '90aa0b57b0fd69dd211014554a46a4cd2a7625f3',
   ),
   DictionaryKind.wiki: DictionarySource(
     DictionaryKind.wiki,
-    'https://huggingface.co/datasets/patvessel/danbooru-wiki-2606/resolve/f10616722a3d4c88a4cb16747e24b08568df4afd/danbooru-wiki-2606.jsonl',
-    '0c53a96a8decce725a3fed3a7b835b5344a01012dd73b7eb3197f4fea923ed9e',
-    137932215,
-    '2026-06-01',
-    'patvessel / Danbooru Wiki',
+    'https://media.githubusercontent.com/media/z15087716457-stack/W.O.F_NAI_Launcher/main/tool/dictionary_updates/sources/wiki-2026-09-02.jsonl',
+    '0acd0b898421d866e38cc4a53d3522bf68b4c5d68526cd2fb6703e7d9e0b9e96',
+    99870880,
+    '2026-09-02',
+    'dartags / Danbooru Wiki',
   ),
 };
 

@@ -60,7 +60,11 @@ class DictionaryUpdateChecker {
     final sources = await Future.wait([_tags(), _wikiSource()]);
     if (_cancel.isCancelled) throw _cancel.cancelError!;
     return DictionaryCheckResult({
-      for (final source in sources) source.kind: source,
+      for (final source in sources)
+        source.kind:
+            source.date.compareTo(dictionarySources[source.kind]!.date) > 0
+            ? source
+            : dictionarySources[source.kind]!,
     }, DateTime.now().toUtc());
   }
 
@@ -219,7 +223,9 @@ class DictionaryUpdateChecker {
       }
       final time = DateTime.tryParse(data['checkedAt'] as String);
       if (time == null ||
-          time.isAfter(DateTime.now().toUtc().add(const Duration(minutes: 5)))) {
+          time.isAfter(
+            DateTime.now().toUtc().add(const Duration(minutes: 5)),
+          )) {
         return null;
       }
       final sources = <DictionaryKind, DictionarySource>{};
@@ -244,6 +250,17 @@ class DictionaryUpdateChecker {
             uri.hasFragment ||
             uri.userInfo.isNotEmpty) {
           return null;
+        }
+        if (sources.containsKey(kind)) return null;
+        final pinned = dictionarySources[kind]!;
+        if (value.url == pinned.url &&
+            value.sha256 == pinned.sha256 &&
+            value.gitBlobSha1 == pinned.gitBlobSha1 &&
+            value.bytes == pinned.bytes &&
+            value.date == pinned.date &&
+            value.name == pinned.name) {
+          sources[kind] = pinned;
+          continue;
         }
         if (kind == DictionaryKind.tags) {
           if (value.bytes > 64 * 1024 * 1024 ||
@@ -272,7 +289,6 @@ class DictionaryUpdateChecker {
             return null;
           }
         }
-        if (sources.containsKey(kind)) return null;
         sources[kind] = value;
       }
       return sources.length == 2 ? DictionaryCheckResult(sources, time) : null;

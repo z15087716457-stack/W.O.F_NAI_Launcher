@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/ui/kit/ui_scale.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/utils/localization_extension.dart';
@@ -411,7 +412,7 @@ class _Swatches extends StatelessWidget {
     required bool secondary,
   }) {
     final box = ctx.findRenderObject()! as RenderBox;
-    final rect = box.localToGlobal(Offset.zero) & box.size;
+    final rect = UiScale.globalRectOf(box);
     scope.controller.openPopover(
       UiPopoverAnchor(rect.bottomLeft + const Offset(0, 8)),
       (_) => _Palette(secondary: secondary, anchor: rect),

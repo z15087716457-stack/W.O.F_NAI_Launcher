@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import '../../data/models/resources/floating_window_data.dart';
+import '../settings/ui_scale_preference.dart';
 
 /// Versioned, storage-free launch contract. Empty arguments mean main engine.
 class ResourceWindowArguments {
@@ -11,6 +12,7 @@ class ResourceWindowArguments {
     this.style = 'geist',
     this.locale = 'zh',
     this.fontKey = 'bundled:HarmonyOS Sans SC',
+    this.uiScale = 1,
     this.rect,
     this.alwaysOnTop = false,
   });
@@ -18,6 +20,7 @@ class ResourceWindowArguments {
   final FloatingResourceKind kind;
   final FloatingResourceScope scope;
   final String brightness, style, locale, fontKey;
+  final double uiScale;
   final Map<String, Object?>? rect;
   final bool alwaysOnTop;
 
@@ -30,6 +33,7 @@ class ResourceWindowArguments {
     'style': style,
     'locale': locale,
     'fontKey': fontKey,
+    'uiScale': uiScale,
     'rect': rect,
     'alwaysOnTop': alwaysOnTop,
   });
@@ -44,7 +48,8 @@ class ResourceWindowArguments {
         json['brightness'] != null &&
             !const ['light', 'dark'].contains(json['brightness']) ||
         json['style'] != null && json['style'] != 'geist' ||
-        json['scope'] is! Map) {
+        json['scope'] is! Map ||
+        json['uiScale'] != null && !UiScalePreference.valid(json['uiScale'])) {
       throw const FormatException('Unsupported resource window arguments');
     }
     return ResourceWindowArguments(
@@ -53,6 +58,7 @@ class ResourceWindowArguments {
       style: json['style'] as String? ?? 'geist',
       locale: json['locale'] as String? ?? 'zh',
       fontKey: json['fontKey'] as String? ?? 'bundled:HarmonyOS Sans SC',
+      uiScale: (json['uiScale'] as num?)?.toDouble() ?? 1,
       rect: json['rect'] == null
           ? null
           : Map<String, Object?>.from(json['rect'] as Map),

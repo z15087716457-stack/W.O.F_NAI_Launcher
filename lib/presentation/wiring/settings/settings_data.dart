@@ -64,8 +64,7 @@ SettingsValueLabel settingsValueLabels(
     if (value is bool) return value ? l.set_on : l.set_off;
     if (value is num) {
       return switch (key) {
-        SettingKey.settingsFontScale ||
-        SettingKey.workspaceFontScale => '${(value * 100).round()}%',
+        SettingKey.uiScale => '${(value * 100).round()}%',
         SettingKey.costThreshold => '${value.round()} Anlas',
         SettingKey.intervalSeconds => '${value.round()} ${l.set_unitSeconds}',
         SettingKey.intervalJitter => '±${value.round()}%',
@@ -327,7 +326,6 @@ SettingsViewData settingsViewData(
                     id: root.id,
                     path: root.path,
                     images: old.images,
-                    primary: root.primary,
                   );
           }).toList() ??
           measured?.roots ??
@@ -341,6 +339,8 @@ SettingsViewData settingsViewData(
       thumbnailLimit:
           locations?.thumbnailLimit ?? measured?.thumbnailLimit ?? 0,
       folderNames: locations?.folderNames ?? measured?.folderNames ?? const {},
+      folderPaths: locations?.folderPaths ?? const {},
+      imageSaveDirectory: locations?.imageSaveDirectory ?? '',
     ),
     dictionaries: page == SettingsPageId.dictionaries
         ? SettingsDictionaryData(

@@ -1,11 +1,11 @@
 import 'dart:io';
+
+import '../../providers/gallery_category_provider.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/cache/gallery_cache_manager.dart';
-import '../../../core/tag_expansion/tag_semantics_store.dart';
-import '../../../core/wiki/auto_tag_translation_controller.dart';
 import '../../../core/database/datasources/gallery_data_source.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../core/utils/file_explorer_utils.dart';
@@ -15,7 +15,7 @@ import '../../../data/services/thumbnail_service.dart';
 import '../../providers/local_gallery_provider.dart';
 import '../../providers/thumbnail_cache_limit_provider.dart';
 import '../../ui/settings/settings_contract.dart';
-import '../../utils/gallery_extra_root_add_flow.dart';
+import '../../utils/gallery_source_add_flow.dart';
 import 'settings_dialogs.dart';
 import 'settings_inventory.dart';
 import 'settings_caches.dart';
@@ -29,38 +29,9 @@ class SettingsStorageActions {
   final BuildContext context;
   final WidgetRef ref;
 
-  Future<void> exportTagSemantics() async {
-    final raw = await ref.read(tagSemanticsStoreProvider).exportJson();
-    if (!context.mounted) return;
-    final path = await FilePicker.platform.saveFile(
-      fileName: 'tag-semantics.json',
-      type: FileType.custom,
-      allowedExtensions: ['json'],
-    );
-    if (path != null) await File(path).writeAsString(raw, flush: true);
-  }
-
-  Future<void> importTagSemantics() async {
-    final files = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['json'],
-    );
-    final path = files?.files.single.path;
-    if (path == null || !context.mounted) return;
-    final file = File(path);
-    if (await file.length() > 32 * 1024 * 1024) {
-      throw const FormatException('Semantic supplement is too large');
-    }
-    await ref
-        .read(tagSemanticsStoreProvider)
-        .importJson(await file.readAsString());
-    ref.read(autoTagTranslationProvider).routeChanged();
-    refresh();
-  }
-
   void refresh() {
     ref.invalidate(settingsFoldersProvider);
-    ref.invalidate(settingsGalleryExtraRootsProvider);
+    ref.invalidate(settingsGallerySourcesProvider);
     ref.invalidate(settingsStorageLocationsProvider);
     ref.invalidate(settingsStorageDataProvider);
     ref.invalidate(settingsStorageSignatureProvider);
@@ -87,21 +58,29 @@ class SettingsStorageActions {
   Future<void> openFolder(SettingsFolder folder) async {
     final paths = await ref.read(settingsFoldersProvider.future);
     final path = paths[folder];
-    if (path != null) await open(path);
+    if (path == null) return;
+    if (const {
+      SettingsFolder.images,
+      SettingsFolder.vibes,
+      SettingsFolder.preciseRefs,
+    }.contains(folder)) {
+      await Directory(path).create(recursive: true);
+    }
+    await open(path);
   }
 
   Future<void> addRoot() async {
-    await GalleryExtraRootAddFlow.pickAndAdd(context: context, ref: ref);
+    await GallerySourceAddFlow.pickAndAdd(context: context, ref: ref);
     refresh();
   }
 
   Future<void> removeRoot(String path) async {
-    // A forged callback must never remove the primary root.
     final repository = GalleryFolderRepository.instance;
-    final extra = await repository.getExtraRootPaths();
-    if (!extra.contains(path)) throw ArgumentError.value(path);
-    await repository.removeExtraRootPath(path);
-    ref.invalidate(localGalleryNotifierProvider);
+    final sources = await repository.getSourcePaths();
+    if (!sources.contains(path)) throw ArgumentError.value(path);
+    await repository.removeSourcePath(path);
+    ref.invalidate(galleryCategoryNotifierProvider);
+    await ref.read(localGalleryNotifierProvider.notifier).refreshSources();
     refresh();
   }
 
@@ -112,7 +91,7 @@ class SettingsStorageActions {
     );
     final path = selected?.files.single.path;
     if (path == null || !context.mounted) return;
-    await GalleryExtraRootAddFlow.importTagIndex(
+    await GallerySourceAddFlow.importTagIndex(
       context: context,
       ref: ref,
       filePath: path,
@@ -157,7 +136,7 @@ class SettingsStorageActions {
         retryFailedMetadata: true,
       );
       ref.read(settingsLastScanProvider.notifier).state = DateTime.now();
-      ref.invalidate(localGalleryNotifierProvider);
+      await ref.read(localGalleryNotifierProvider.notifier).refreshSources();
     });
   }
 

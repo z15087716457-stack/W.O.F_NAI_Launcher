@@ -474,11 +474,11 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settings_autoSaveSubtitle => '生成後に画像を自動的に保存します';
 
   @override
-  String get settings_extraRootsTitle => 'ギャラリーソース';
+  String get settings_extraRootsTitle => 'ギャラリーの参照元';
 
   @override
   String get settings_extraRootsHint =>
-      '追加のギャラリーソースは閲覧・検索でき、画像をカテゴリへ移動/コピーできます（自動保存の対象外）。追加後すぐにスキャンします。';
+      '閲覧・検索するフォルダーを追加します。親フォルダーを追加すると配下の参照元を統合します。削除しても画像や保存先は変わりません。';
 
   @override
   String get settings_extraRootsEmpty => '追加のギャラリーソースはありません';
@@ -518,11 +518,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settings_extraRootsDuplicate => 'このフォルダはすでにギャラリーソースです';
 
   @override
-  String get settings_extraRootsSameAsMain => 'このフォルダは画像保存先と同じです';
-
-  @override
-  String get settings_extraRootsNested =>
-      'ギャラリーソース同士を互いに含めることはできません。別のフォルダを選択してください';
+  String get settings_extraRootsNested => 'このフォルダーは既存の参照元に含まれています。';
 
   @override
   String get settings_extraRootsNotFound => '選択したフォルダが存在しません';
@@ -694,7 +690,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get generation_canvasDisplaySettings => 'キャンバス表示';
 
   @override
-  String get generation_canvasZoomToFill => 'ズームしてフィル（100%超を許可）';
+  String get generation_canvasZoomToFill => 'キャンバスに合わせて拡大（100%超を許可）';
 
   @override
   String get generation_canvasEmpty => 'キャンバスは空です';
@@ -990,7 +986,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get prompt_cooccurrenceRecommendationSubtitle =>
-      'Ctrl+クリックでローカル検索、Ctrl+ドラッグで関連タグを表示';
+      'Ctrl（Mac は ⌘）を押しながらクリック／ドラッグ選択して、タグ検索や関連候補を表示します。';
 
   @override
   String get prompt_formatted => 'フォーマット済み';
@@ -2190,7 +2186,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get api_error_network_hint => 'サーバーに接続できません。ネットワークを確認してください';
 
   @override
-  String get drop_processing => '画像を処理しています...';
+  String get drop_processing => '画像を準備中';
+
+  @override
+  String get drop_processingSubtitle => '読み込み後に用途を選択';
 
   @override
   String get characterEditor_clearAll => 'すべてクリア';
@@ -3691,7 +3690,10 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get drop_hint => 'ここに画像をドロップしてください';
+  String get drop_hint => '離して画像を読み込む';
+
+  @override
+  String get drop_hintSubtitle => '次に画像の用途を選択';
 
   @override
   String get drop_img2img => 'Image2Image';
@@ -4198,7 +4200,7 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get settings_fontScale => 'フォント サイズ';
+  String get settings_fontScale => 'UIの拡大率';
 
   @override
   String get settings_fontScale_previewSmall => '光影落在画布上。';
@@ -5402,7 +5404,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get autocomplete_relatedTagsSubtitle =>
-      'Ctrl+クリックでローカル検索、Ctrl+ドラッグで関連タグを表示';
+      'Ctrl（Mac は ⌘）を押しながらクリック／ドラッグ選択して、タグ検索や関連候補を表示します。';
 
   @override
   String get tagExpansion_searchHint => 'タグや別名を検索';
@@ -5917,7 +5919,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get tips_prompt_guide_3 =>
-      'タグを Ctrl+クリックするとローカルのタグで検索、Ctrl+ドラッグで選ぶと一緒によく使われるタグが見られます。';
+      'Ctrl（Mac は ⌘）を押しながらクリック／ドラッグ選択でタグ拡張を開き、タグ検索や関連候補を確認できます。';
 
   @override
   String get tips_prompt_guide_4 =>
@@ -6976,7 +6978,8 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settings_makeReadingComfortable => '読みやすさを統一';
 
   @override
-  String get settings_adjustSettingsPagesDialogsOnly => '設定画面と設定ダイアログの文字サイズ';
+  String get settings_adjustSettingsPagesDialogsOnly =>
+      'アプリ全体の文字・アイコン・操作部品の大きさを調整します。画像の解像度は変わりません。';
 
   @override
   String get settings_motionNotifications => '動きと通知';
@@ -8586,6 +8589,40 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get promptTranslation_tutorial => '使い方';
+
+  @override
+  String get promptReading_mode => '軽量翻訳';
+
+  @override
+  String get promptReading_modeSubtitle => '原文の下に訳文を表示';
+
+  @override
+  String get promptReading_blocks => '翻訳ブロック';
+
+  @override
+  String get promptReading_blocksSubtitle => '対訳ブロックで閲覧・編集';
+
+  @override
+  String get promptReading_update => '追加・変更部分を翻訳';
+
+  @override
+  String get promptReading_hide => '訳文を隠す';
+
+  @override
+  String get promptReading_show => '訳文を表示';
+
+  @override
+  String get promptReading_clear => '訳文を消去';
+
+  @override
+  String get promptReading_cleared => '訳文を消去しました';
+
+  @override
+  String get promptReading_pending => '要更新';
+
+  @override
+  String get promptReading_guide =>
+      'カンマで区切った原文ごとに、重み構文を除いた読み取り専用の訳文を表示します。原文をクリックすると編集でき、編集を終えると訳文に戻ります。原文の項目を削除すると対応する訳文も消えます。メニューから更新・非表示・消去ができます。コピーと生成には原文を使います。';
 
   @override
   String get promptTranslation_guideBack => '操作に戻る';
@@ -13023,9 +13060,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get blocks_changeImage => '画像を変更';
 
   @override
-  String get blocks_clearThumb => 'プレビューを削除';
-
-  @override
   String get blocks_cropHint => 'ドラッグ / ホイールで拡大';
 
   @override
@@ -14970,10 +15004,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get gen_bdCustom => 'カスタム';
 
   @override
-  String get gen_zoomToFill => '拡大して埋める';
+  String get gen_zoomToFill => 'キャンバスに合わせて拡大';
 
   @override
-  String get gen_zoomToFillSub => '小さい画像も拡大して表示';
+  String get gen_zoomToFillSub => 'フォーカス時に100%を超える拡大を許可し、縦横比を保って全体を表示';
 
   @override
   String get gen_useSeed => 'このシードを使う（固定）';
@@ -16503,22 +16537,16 @@ class AppLocalizationsJa extends AppLocalizations {
   String get rag_auto => '自動選択';
 
   @override
-  String get rag_tagsEnabled => '文脈に沿ったタグ候補';
+  String get rag_tagsEnabled => 'タグの意味検索と候補';
 
   @override
-  String get rag_tagsHint => '意味・共起・再順位付けを組み合わせ、入力欄・キャラクター・正負を分離します。';
+  String get rag_tagsHint => '入力内容で検索したり、カーソル前の文脈からタグ候補を取得できます。';
 
   @override
   String get rag_context => '候補の文脈範囲';
 
   @override
-  String get rag_contextHint => '両モードともタグ単位で最大 120 Gemma トークン。全文は重複除外のみに使用。';
-
-  @override
-  String get rag_contextBefore => 'カーソル前 · 120 tokens';
-
-  @override
-  String get rag_contextAround => 'カーソル前後 · 120 tokens';
+  String get rag_contextHint => 'カーソル前の完全なタグを使用します。32〜512 Gemma トークンで調整できます。';
 
   @override
   String get rag_buildIndex => '確認して索引を作成';
@@ -17297,7 +17325,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get set_apSystem => 'システム';
 
   @override
-  String get set_apSystemSub => 'Windows の設定に合わせる';
+  String get set_apSystemSub => 'システムのライト／ダーク表示に合わせる';
 
   @override
   String get set_apText => '文字';
@@ -17309,10 +17337,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get set_apFontSub => '数字とコードは Geist Mono を使います';
 
   @override
-  String get set_apScale => '設定とダイアログの文字サイズ';
+  String get set_apScale => 'UIの拡大率';
 
   @override
-  String get set_apScaleSub => '設定とダイアログだけを拡大します';
+  String get set_apScaleSub => 'アプリ全体の文字・アイコン・操作部品を拡大縮小します。画像の解像度は変わりません。';
 
   @override
   String get set_apSampleTitle => '見出し · 生成完了';
@@ -17354,7 +17382,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get set_apNotify => '通知';
 
   @override
-  String get set_apNotifySub => '右上に表示され 3 秒で消えます';
+  String get set_apNotifySub => 'アプリ内の操作結果通知の表示を確認できます';
 
   @override
   String get set_apNotifyPreview => 'プレビュー';
@@ -17416,10 +17444,11 @@ class AppLocalizationsJa extends AppLocalizations {
   String get set_cvLockSub => '新しい画像が出ても視点を動かしません';
 
   @override
-  String get set_cvFill => '新しい画像を全体表示';
+  String get set_cvFill => 'キャンバスに合わせて拡大';
 
   @override
-  String get set_cvFillSub => '実ピクセルではなく表示領域に合わせます';
+  String get set_cvFillSub =>
+      '画像にフォーカスしたとき、100%を超える拡大を許可し、縦横比を保って表示領域に全体を収めます。オフの場合、自動調整の上限は100%です。';
 
   @override
   String get set_cvChannel => 'ビジュアルチャネル';
@@ -17739,16 +17768,17 @@ class AppLocalizationsJa extends AppLocalizations {
   String get set_gnNoKey => 'キー不要';
 
   @override
-  String get set_gnRelated => '関連タグの提案';
+  String get set_gnRelated => 'Ctrl タグ拡張';
 
   @override
-  String get set_gnRelatedSub => 'よく一緒に使われるタグを提案';
+  String get set_gnRelatedSub =>
+      'Ctrl（Mac は ⌘）を押しながらクリック／ドラッグ選択して、タグ検索や関連候補を表示します。';
 
   @override
   String get set_gnRag => 'セマンティックなタグ提案';
 
   @override
-  String get set_gnRagSub => 'セマンティック検索による文脈に応じた提案';
+  String get set_gnRagSub => 'タグ拡張での意味検索と文脈に応じた候補を提供します。「セマンティック検索」で設定できます。';
 
   @override
   String get set_gnReady => '準備完了';
@@ -17830,7 +17860,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get set_stSave => '保存';
 
   @override
-  String get set_stSavePath => '画像の保存先';
+  String get set_stSavePath => '生成画像の保存先';
+
+  @override
+  String set_stSavePathSub(String path) {
+    return '自動・手動保存の実際の保存先：\n$path';
+  }
 
   @override
   String get set_stAutoSave => '自動保存';
@@ -17842,7 +17877,19 @@ class AppLocalizationsJa extends AppLocalizations {
   String get set_stAssets => '素材と表示';
 
   @override
-  String get set_stVibePath => 'Vibe ライブラリの場所';
+  String get set_stVibePath => 'Vibe ファイルの保存先';
+
+  @override
+  String get set_stVibePathSub => 'Vibeファイルを読み書きします。既存ファイルは元の場所に残ります。';
+
+  @override
+  String get set_stPr => 'PR ライブラリ';
+
+  @override
+  String get set_stPrPath => 'PR ファイルの保存先';
+
+  @override
+  String get set_stPrPathSub => '精密参照の元画像を保存します。既存ファイルは元の場所に残ります。';
 
   @override
   String get set_stQuality => 'ギャラリーの画質';
@@ -17860,10 +17907,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get set_stRoots => 'ギャラリーのフォルダー';
 
   @override
-  String get set_stRootsSub => '任意のフォルダーをギャラリーで閲覧・検索できます。自動保存の対象外です。';
-
-  @override
-  String get set_stPrimary => 'メイン';
+  String get set_stRootsSub => 'ギャラリーの閲覧・検索対象です。削除しても画像や保存先は変わりません。';
 
   @override
   String set_stCount(Object n) {
@@ -18042,12 +18086,6 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get set_dcSemantics => '個人の意味情報';
-
-  @override
-  String get set_dcSemanticsSub => '補足した中国語資料は翻訳キャッシュの削除後も保持';
-
-  @override
   String get set_dcTranslate => 'タグ翻訳・意味情報';
 
   @override
@@ -18114,7 +18152,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get set_dcTip =>
-      '辞書とキャッシュは再取得できます。個人の意味情報はこのページから書き出してください。その他の個人データは「ストレージ → アプリデータの場所」にあります。';
+      '辞書は再ダウンロード、キャッシュは再作成できます。補足した中国語資料は翻訳キャッシュを削除しても残ります。保存場所は「ストレージとギャラリー → アプリデータの場所」で確認できます。';
 
   @override
   String get set_mdDesc =>
@@ -18283,7 +18321,8 @@ class AppLocalizationsJa extends AppLocalizations {
   String get set_agInstr => '指示';
 
   @override
-  String get set_agInstrSub => 'この順で最終プロンプトになります。既存のチャットはそのまま、以降のリクエストに反映。';
+  String get set_agInstrSub =>
+      '表示範囲を選択します。グローバル指示とワークスペースの AGENTS.md は共に適用され、変更は以降のリクエストに反映されます。';
 
   @override
   String get set_agOrderBuiltin => '内蔵システムプロンプト';
@@ -18293,9 +18332,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get set_agOrderGlobal => '全体の指示';
-
-  @override
-  String get set_agOrderWorkspace => 'ワークスペースのルール';
 
   @override
   String get set_agGlobal => '全体の指示';
@@ -18441,10 +18477,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get set_rgSourcesSub => 'ソースごとに構築・切替。一時停止でき、完了分はすぐ使えます。';
 
   @override
-  String get set_rgTags => 'タグ提案';
+  String get set_rgTags => 'タグの意味検索と候補';
 
   @override
-  String get set_rgTagsSub => '意味・共起・再ランクを組み合わせ、各入力欄ごとに計算';
+  String get set_rgTagsSub => '入力内容で検索したり、カーソル前の文脈からタグ候補を取得できます。';
 
   @override
   String get set_rgWiki => '百科のセマンティック検索';
@@ -18503,16 +18539,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get set_rgContext => '提案の文脈';
 
   @override
-  String get set_rgContextSub => 'どちらも最大 120 Gemma トークン、タグ単位で切り取り。';
+  String get set_rgContextSub => 'カーソル前の完全なタグを使用します。32〜512 Gemma トークンで調整できます。';
 
   @override
-  String get set_rgRange => '取得範囲';
-
-  @override
-  String get set_rgBefore => 'カーソルの前';
-
-  @override
-  String get set_rgAround => 'カーソルの前後';
+  String get set_rgRange => '取得する長さ';
 
   @override
   String get set_rgRuntime => 'モデルと実行環境';
@@ -19480,6 +19510,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get set_agBaseSwitchTitle => '内蔵システムプロンプトの変更を破棄しますか？';
 
   @override
+  String get set_agPrefixSwitchTitle => '前置きの変更を破棄しますか？';
+
+  @override
+  String get set_agPrefixInheritHint => '空欄の場合は全体の前置きを使用します。';
+
+  @override
   String get set_agBaseSwitchBody => '範囲を切り替えると未保存の変更は失われます。';
 
   @override
@@ -19603,10 +19639,6 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get set_agSkillManualTip =>
       'プロンプトに入らないため Agent は自分では使いません。チャット欄で /skill:名前 と入力すると呼び出します。';
-
-  @override
-  String get set_agWorkspaceRulesSub =>
-      'このワークスペースだけに適用する追加ルールです。ワークスペース内の instructions.md に保存され、全体の指示の後に追加されます。「編集」でシステムのエディターが開きます。空なら何も追加しません。';
 
   @override
   String get set_agSkillDescNaiPrompt =>
@@ -19855,14 +19887,14 @@ class AppLocalizationsJa extends AppLocalizations {
   String get ag_modeBypass => 'フルアクセス';
 
   @override
-  String get ag_modeBypassHint => '確認せずすべて直接実行。Anlas を使う操作だけは確認します';
+  String get ag_modeBypassHint => 'すべて直接実行。無料操作は確認不要、有料操作は Agent 設定に従います';
 
   @override
   String get ag_bypassConfirmTitle => 'フルアクセスに切り替えますか？';
 
   @override
   String get ag_bypassConfirmBody =>
-      'Agent は確認せずにファイルの変更、コマンドの実行、未知のツールの呼び出しを行い、ワークスペース外のファイルも操作できます。Anlas を使う操作は引き続き確認します。信頼できる作業のときだけ使ってください。';
+      'Agent は確認せずにファイルの変更、コマンドの実行、未知のツールの呼び出しを行い、ワークスペース外のファイルも操作できます。無料生成は自動実行します。有料操作は既定で確認しますが、Agent 設定で確認を無効にできます。信頼できる作業のときだけ使ってください。';
 
   @override
   String get ag_bypassConfirmOk => '切り替える';
@@ -20820,9 +20852,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get ag_memoryChatPrefixHint => 'このチャットにのみ適用され、内蔵システムプロンプトの前に追加されます。';
 
   @override
-  String get ag_memoryWorkspace => 'ワークスペースのルール';
-
-  @override
   String get ag_memorySkills => '有効なスキル';
 
   @override
@@ -21702,15 +21731,22 @@ class AppLocalizationsJa extends AppLocalizations {
   String get set_agNextSuggestion => '次のメッセージ候補';
 
   @override
+  String get set_agSkipPaidConfirmation => '有料操作も確認せず実行';
+
+  @override
+  String get set_agSkipPaidConfirmationSub =>
+      '完全アクセス時のみ有効です。無料操作は自動実行されます。有効にすると、Anlas を消費する生成や画像操作も確認せず実行します。';
+
+  @override
   String get set_agNextSuggestionSub =>
       '現在の会話モデルで次のメッセージを予測します。追加のトークンを使用します。Tab で採用。';
 
   @override
-  String get set_agCacheWarming => 'プロンプトキャッシュの予熱';
+  String get set_agCacheWarming => 'プロンプトキャッシュの維持';
 
   @override
   String get set_agCacheWarmingSub =>
-      'プロンプトキャッシュが切れる直前に 1 トークンのリクエストで延長します（寿命 5 分、全モデル対象）。次のステップはコンテキスト全体を再送せずキャッシュを読みます。';
+      '軽量なリクエストでキャッシュを延長し、後続の文脈処理を減らします。キャッシュの利用可否はプロバイダーによります。';
 
   @override
   String get set_agCacheOff => 'オフ';
@@ -21719,13 +21755,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get set_agCacheStreaming => 'Agent の実行中のみ';
 
   @override
-  String get set_agCacheIdle => '待機中も予熱';
+  String get set_agCacheIdle => '待機中も維持';
 
   @override
-  String get set_agCacheIdleCost => '待機中のウォームアップ（最大 30 分）は追加のモデル料金がかかります。';
+  String get set_agCacheIdleCost => '待機中のキャッシュ維持（最大 30 分）は追加のモデル料金がかかります。';
 
   @override
-  String get ag_cacheWarmTitle => 'キャッシュのウォームアップ';
+  String get ag_cacheWarmTitle => 'キャッシュの維持';
 
   @override
   String get ag_cacheWarmOff => 'オフ';
@@ -21791,17 +21827,10 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get set_workspaceFontScale => '創作エリアの文字サイズ';
-
-  @override
   String get set_promptAutocomplete => 'プロンプトの自動補完';
 
   @override
   String get shortcut_action_open_resource_window => 'リソースウィンドウを開く';
-
-  @override
-  String get set_workspaceFontScaleSub =>
-      'プロンプト欄・キャラクター欄・ブロック・ビューアのプロンプトの文字。上のUI文字サイズとは別に調整します。';
 
   @override
   String get set_promptAutocompleteSub =>
@@ -22120,4 +22149,31 @@ class AppLocalizationsJa extends AppLocalizations {
   String ag_externalNeedsAttention(String client) {
     return '$client の操作を確認してください';
   }
+
+  @override
+  String get set_agViewScope => '表示範囲';
+
+  @override
+  String get set_agViewGlobalHint => 'すべてのワークスペースで共通の指示と前置き';
+
+  @override
+  String get set_agViewWorkspaceHint => '選択したワークスペースのプロジェクトルール';
+
+  @override
+  String get set_agProjectRules => 'ワークスペースの AGENTS.md';
+
+  @override
+  String get set_agRulesReadonly => '読み取り専用';
+
+  @override
+  String get set_agRulesView => '表示';
+
+  @override
+  String get set_agRulesMissing => 'このワークスペースにはまだ AGENTS.md がありません';
+
+  @override
+  String get set_agRulesEmpty => 'AGENTS.md は空です';
+
+  @override
+  String get set_agRulesLoadFailed => 'AGENTS.md を読み取れません。ファイルのアクセス権を確認してください。';
 }

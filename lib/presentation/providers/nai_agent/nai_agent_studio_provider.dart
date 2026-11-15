@@ -246,12 +246,14 @@ final naiAgentStudioFactoryProvider = Provider<NaiAgentStudioFactory>((ref) {
         return {
           'search': searchStatus,
           'search_hint': [
-            'When Studio tools are available, use tag_query for tag names or aliases and '
-                'tag_related for co-occurrence with known tags.',
+            'Use tag_query for known English names/aliases (contains=true for name fragments); '
+                'tag_related for complementary tags or variants with a few specific seeds. '
+                'Pass existing prompt tags in exclude. Stop when resolved.',
             if (searchStatus.containsValue('ready') ||
                 searchStatus.containsValue('partial'))
-              'Use studio_search for natural-language or similarity lookup '
-                  'in the relevant ready/partial source. Partial covers indexed items only.',
+              'Use studio_search only in ready/partial sources: source=tags for descriptions, '
+                  'unknown tag names or unresolved literal lookup; other sources for '
+                  'natural-language or similarity lookup. Partial covers indexed items only.',
           ].join(' '),
           'page': ref.exists(appRouterProvider)
               ? ref

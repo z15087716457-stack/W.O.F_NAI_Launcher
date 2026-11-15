@@ -284,7 +284,7 @@ Future<void> _expectCenteredGolden(WidgetTester t, String name) async {
     }
     for (final element in find.byType(SettingsRow).evaluate()) {
       final row = element.widget as SettingsRow;
-      if (!row.modified || row.sub) continue;
+      if (!row.modified) continue;
       final title = t.getRect(
         find.descendant(
           of: find.byWidget(row),
@@ -295,20 +295,51 @@ Future<void> _expectCenteredGolden(WidgetTester t, String name) async {
         Rect.fromLTRB(title.left - 13, title.top, title.right, title.bottom),
       );
     }
-    for (final element in find.byType(SettingsModMark).evaluate()) {
-      final mark = element.widget as SettingsModMark;
-      if (!mark.on) continue;
-      final shortcutLabel = find.ancestor(
-        of: find.byWidget(mark),
-        matching: find.byWidgetPredicate(
-          (w) =>
-              w.key is ValueKey<String> &&
-              (w.key! as ValueKey<String>).value.startsWith('shortcut-label-'),
+    // 11-14：仅排除本次改名和说明所在的标签区域，开关与周围布局继续比较。
+    final canvasFill = find.byKey(const Key('setting-canvasZoomToFill'));
+    if (canvasFill.evaluate().isNotEmpty) {
+      final row = t.widget<SettingsRow>(canvasFill);
+      final title = t.getRect(
+        find.descendant(of: canvasFill, matching: find.text(row.title)),
+      );
+      final subtitle = t.getRect(
+        find.descendant(of: canvasFill, matching: find.text(row.subtitle!)),
+      );
+      masks.add(title.expandToInclude(subtitle));
+    }
+    // 隐私卡片原有蓝点独立绘制，只排除标题后这一个 6px 标记。
+    for (final element
+        in find
+            .byWidgetPredicate(
+              (w) =>
+                  w.key is ValueKey<String> &&
+                  (w.key! as ValueKey<String>).value.startsWith('guard-'),
+            )
+            .evaluate()) {
+      final title = find
+          .descendant(
+            of: find.byWidget(element.widget),
+            matching: find.byType(Text),
+          )
+          .first;
+      final r = t.getRect(title);
+      masks.add(
+        Rect.fromCenter(
+          center: Offset(r.right + 10, r.center.dy),
+          width: 6,
+          height: 6,
         ),
       );
-      final label = t.getRect(
-        shortcutLabel.evaluate().isEmpty ? find.byWidget(mark) : shortcutLabel,
-      );
+    }
+    // 11-14：已保存的自定义快捷键不再显示蓝点，沿用原来获准的标题区域。
+    final shortcuts = t
+        .state<SettingsHostState>(find.byType(SettingsHost))
+        .data
+        .shortcuts;
+    for (final shortcut in shortcuts.shortcuts.where((x) => x.changed)) {
+      final shortcutLabel = find.byKey(Key('shortcut-label-${shortcut.id}'));
+      if (shortcutLabel.evaluate().isEmpty) continue;
+      final label = t.getRect(shortcutLabel);
       masks.add(
         Rect.fromLTRB(label.left - 13, label.top, label.right, label.bottom),
       );

@@ -13,7 +13,24 @@
   "licenseUrl": "https://github.com/SuzumiyaAkizuki/DanbooruSearchOnline/blob/4e99f95adfcd53a8cabd1eb097294b1c7af069a6/LICENSE",
   "licenseSha256": "230184f60bae2feaf244f10a8bac053c8ff33a183bcc365b4d8b876d2b7f4809",
   "coreRule": "first nonempty Chinese synonym; derived, not an upstream CSV column",
-  "expectedProfiles": 53860,
+  "expectedProfiles": 54407,
   "expectedQuarantinedRows": 3,
-  "expectedMissingSummaries": 1
+  "expectedMissingSummaries": 1,
+  "additions": [
+    {
+      "file": "additions_2026-10-30.csv",
+      "repository": "https://github.com/SuzumiyaAkizuki/DanbooruSearchOnline",
+      "commit": "dfaae36836bc690bee3338904096a4e1d98534f0",
+      "path": "origin_database/tags_enhanced.csv",
+      "url": "https://raw.githubusercontent.com/SuzumiyaAkizuki/DanbooruSearchOnline/dfaae36836bc690bee3338904096a4e1d98534f0/origin_database/tags_enhanced.csv",
+      "upstreamSha256": "3ae2c21347b57b23f4b7f62fcc78a60eb079a228d00264b0041e0edb269798a1",
+      "sha256": "19f59ee24c245a80c44e6bc6fda3c0a8ae3d2dd04fc7959518c1f8a4283b90f8",
+      "size": 95268,
+      "encoding": "gbk",
+      "expectedRows": 547,
+      "expectedProfiles": 547,
+      "expectedQuarantinedRows": 0,
+      "expectedMissingSummaries": 0
+    }
+  ]
 }

@@ -13,17 +13,17 @@ import 'package:path/path.dart' as p;
 import 'package:uuid/uuid.dart';
 import 'package:collection/collection.dart';
 
-const naiAgentDefaultPromptVersion = '2026-10-20.2';
+const naiAgentDefaultPromptVersion = '2026-11-15.1';
 const _defaultSystemPromptZh = '''
 你是 NAI Agent，运行在 W.O.F NAI Studio 里的通用助手，用用户的语言回复。
 你有一个工作区，可以读写文件、运行命令，什么任务都能做：写作、整理资料、分析问题，或者 Studio 里的生图创作。
-做 Studio 相关的事时：用 studio_context 查看当前草稿、参数和图片；业务操作通过 codemode 调用 mcp__nai_studio，用法见 nai-studio skill；写提示词前读 nai-prompt skill。生成和花费 Anlas 由用户在界面上确认。
+做 Studio 相关的事时：用 studio_context 查看当前草稿、参数和图片；业务操作通过 codemode 调用 mcp__nai_studio，用法见 nai-studio skill；写提示词前读 nai-prompt skill。生成和花费 Anlas 遵循 Studio 的确认策略：完全权限下免费操作免确认，付费默认确认，用户可在 Agent 设置中关闭付费确认。
 需要用户补充信息或做选择时，可以用 ask_user 提问。
 ''';
 const _defaultSystemPromptEn = '''
 You are NAI Agent, a general-purpose assistant running inside W.O.F NAI Studio. Reply in the user's language.
 You have a workspace where you can read and write files and run commands, so any task is fair game: writing, organizing material, analysis, or image creation in Studio.
-For Studio work: use studio_context to see the current draft, parameters and images; Studio operations go through codemode calling mcp__nai_studio, see the nai-studio skill; read the nai-prompt skill before writing prompts. Generation and Anlas spending are confirmed by the user in the UI.
+For Studio work: use studio_context to see the current draft, parameters and images; Studio operations go through codemode calling mcp__nai_studio, see the nai-studio skill; read the nai-prompt skill before writing prompts. Generation and Anlas spending follow Studio's confirmation policy: Full access skips free-action confirmation; paid actions require confirmation unless the user disables it in Agent settings.
 When you need more information or a decision from the user, you can ask with ask_user.
 ''';
 
@@ -84,6 +84,7 @@ class AgentSettings {
     this.maxRequestsPerRun = 32,
     this.permissionMode = 'auto',
     this.bypassWarned = false,
+    this.skipPaidConfirmation = false,
     this.reasoningEfforts = const {},
     this.extensions = const [],
     this.packages = const [],
@@ -104,6 +105,7 @@ class AgentSettings {
   final bool nextSuggestion;
   final String permissionMode;
   final bool bypassWarned;
+  final bool skipPaidConfirmation;
 
   AgentSettings copyWith({String? permissionMode, bool? bypassWarned}) =>
       AgentSettings.fromJson({
@@ -159,6 +161,7 @@ class AgentSettings {
     'maxRequestsPerRun': maxRequestsPerRun,
     'permissionMode': permissionMode,
     'bypassWarned': bypassWarned,
+    'skipPaidConfirmation': skipPaidConfirmation,
     'reasoningEfforts': reasoningEfforts,
     'extensions': extensions.map((extension) => extension.toJson()).toList(),
     'packages': packages.map((item) => item.toJson()).toList(),
@@ -186,6 +189,7 @@ class AgentSettings {
         ? 'auto'
         : 'ask',
     bypassWarned: value['bypassWarned'] == true,
+    skipPaidConfirmation: value['skipPaidConfirmation'] == true,
     reasoningEfforts: Map.unmodifiable({
       for (final entry in (value['reasoningEfforts'] as Map? ?? {}).entries)
         if (entry.key is String &&
@@ -275,22 +279,25 @@ class AgentWorkspace {
     required this.directory,
     required this.createdAt,
     this.customSystemPrompt,
+    this.customSystemPromptPrefix,
     this.lastSessionId,
   });
   final String id, name;
   final Directory directory;
   final DateTime createdAt;
-  final String? customSystemPrompt, lastSessionId;
+  final String? customSystemPrompt, customSystemPromptPrefix, lastSessionId;
   Directory get sessions => Directory(p.join(agentDirectory.path, 'sessions'));
   Directory get agentDirectory => agentWorkspaceData(directory);
   Directory get prompts => Directory(p.join(agentDirectory.path, 'prompts'));
   Directory get skills => Directory(p.join(agentDirectory.path, 'skills'));
   Map<String, dynamic> toJson() => {
-    'schema': 1,
+    'schema': 2,
     'id': id,
     'name': name,
     'createdAt': createdAt.toIso8601String(),
     'customSystemPrompt': customSystemPrompt,
+    if (customSystemPromptPrefix != null)
+      'customSystemPromptPrefix': customSystemPromptPrefix,
     'lastSessionId': lastSessionId,
   };
 }
@@ -551,6 +558,7 @@ class AgentWorkspaceStore {
       _layoutMigrations.putIfAbsent(id, () async {
         try {
           await _migrateWorkspaceLayout(id);
+          await _retireWorkspaceRules(id);
         } finally {
           _layoutMigrations.remove(id);
         }
@@ -731,14 +739,78 @@ class AgentWorkspaceStore {
     await _atomic(manifest, {...state, 'sha256': hashes, 'complete': true});
   }
 
-  Future<void> _atomic(File file, Map<String, dynamic> value) async {
+  /// Retire the old supplementary-rule layer once, preserving its contents in
+  /// the project's single rules file and keeping the original contents in history.
+  Future<void> _retireWorkspaceRules(String id) async {
+    final metadata = await _read(_metadata(id));
+    if (metadata['id'] != id || metadata['schema'] == 2) return;
+    final workspace = workspaceDirectory(id);
+    final project = File(p.join(workspace.path, 'AGENTS.md'));
+    await _guard(project.path);
+    final oldRules = <File, String>{};
+    for (final path in [
+      p.join(_workspaceDataDirectory(id).path, 'instructions.md'),
+      p.join(workspace.path, 'instructions.md'),
+    ]) {
+      await _guard(path);
+      final file = File(path);
+      if (await file.exists()) oldRules[file] = await file.readAsString();
+    }
+    if (oldRules.isNotEmpty) {
+      final original = await project.exists()
+          ? await project.readAsString()
+          : null;
+      var combined = original ?? '';
+      for (final text in oldRules.values) {
+        final rule = text.trim();
+        if (rule.isNotEmpty && !combined.contains(rule)) {
+          combined = combined.trimRight().isEmpty
+              ? rule
+              : '${combined.trimRight()}\n\n$rule';
+        }
+      }
+      await _atomic(
+        File(
+          p.join(
+            _workspaceDataDirectory(id).path,
+            'prompt-history',
+            '${const Uuid().v4()}-retired-rules.json',
+          ),
+        ),
+        {
+          'savedAt': DateTime.now().toIso8601String(),
+          'projectRules': original,
+          'retiredFiles': {
+            for (final entry in oldRules.entries)
+              p.relative(entry.key.path, from: workspace.path): entry.value,
+          },
+        },
+      );
+      final current = await project.exists()
+          ? await project.readAsString()
+          : null;
+      if (current != original) {
+        throw StateError('Project rules changed while migrating');
+      }
+      if (combined != (original ?? '')) await _atomicText(project, combined);
+      for (final entry in oldRules.entries) {
+        if (await entry.key.readAsString() != entry.value) {
+          throw StateError('Supplementary rules changed while migrating');
+        }
+        await entry.key.delete();
+      }
+    }
+    await _atomic(_metadata(id), {...metadata, 'schema': 2});
+  }
+
+  Future<void> _atomic(File file, Map<String, dynamic> value) =>
+      _atomicText(file, const JsonEncoder.withIndent('  ').convert(value));
+
+  Future<void> _atomicText(File file, String text) async {
     await file.parent.create(recursive: true);
     final temporary = File('${file.path}.${const Uuid().v4()}.tmp');
     try {
-      await temporary.writeAsString(
-        const JsonEncoder.withIndent('  ').convert(value),
-        flush: true,
-      );
+      await temporary.writeAsString(text, flush: true);
       await temporary.rename(file.path);
     } finally {
       if (await temporary.exists()) await temporary.delete();
@@ -888,9 +960,6 @@ class AgentWorkspaceStore {
         p.join(actual.agentDirectory.path, child),
       ).create(recursive: true);
     }
-    await File(
-      p.join(actual.agentDirectory.path, 'instructions.md'),
-    ).writeAsString('', flush: true);
     await _atomic(_metadata(actual.id), actual.toJson());
     return actual;
   });
@@ -914,6 +983,7 @@ class AgentWorkspaceStore {
       directory: directory,
       createdAt: DateTime.parse(value['createdAt'] as String),
       customSystemPrompt: value['customSystemPrompt'] as String?,
+      customSystemPromptPrefix: value['customSystemPromptPrefix'] as String?,
       lastSessionId: value['lastSessionId'] as String?,
     );
   }
@@ -936,15 +1006,22 @@ class AgentWorkspaceStore {
     String? name,
     String? customSystemPrompt,
     bool resetPrompt = false,
+    String? customSystemPromptPrefix,
+    bool resetPrefix = false,
     String? lastSessionId,
     bool clearLastSessionId = false,
     bool checkPrompt = false,
     String? expectedPrompt,
+    bool checkPrefix = false,
+    String? expectedPrefix,
     bool requireSelected = false,
   }) => _write(() async {
     final old = await getWorkspace(id);
     if (checkPrompt && old.customSystemPrompt != expectedPrompt) {
       throw StateError('Workspace prompt changed while editing');
+    }
+    if (checkPrefix && old.customSystemPromptPrefix != expectedPrefix) {
+      throw StateError('Workspace prefix changed while editing');
     }
     if (requireSelected && (await readSettings()).selectedWorkspaceId != id) {
       throw StateError('Selected workspace changed while editing');
@@ -961,11 +1038,16 @@ class AgentWorkspaceStore {
       customSystemPrompt: resetPrompt
           ? null
           : customSystemPrompt ?? old.customSystemPrompt,
+      customSystemPromptPrefix:
+          resetPrefix || customSystemPromptPrefix?.trim().isEmpty == true
+          ? null
+          : customSystemPromptPrefix ?? old.customSystemPromptPrefix,
       lastSessionId: clearLastSessionId
           ? null
           : lastSessionId ?? old.lastSessionId,
     );
-    if (value.customSystemPrompt != old.customSystemPrompt) {
+    if (value.customSystemPrompt != old.customSystemPrompt ||
+        value.customSystemPromptPrefix != old.customSystemPromptPrefix) {
       await _atomic(
         File(
           p.join(
@@ -977,6 +1059,7 @@ class AgentWorkspaceStore {
         {
           'savedAt': DateTime.now().toIso8601String(),
           'customSystemPrompt': old.customSystemPrompt,
+          'customSystemPromptPrefix': old.customSystemPromptPrefix,
         },
       );
     }
@@ -989,17 +1072,15 @@ class AgentWorkspaceStore {
   }) async {
     final workspace = await getWorkspace(workspaceId);
     final settings = await readSettings();
-    final instructions = await File(
-      p.join(workspace.agentDirectory.path, 'instructions.md'),
-    ).readAsString();
     final projectFile = File(p.join(workspace.directory.path, 'AGENTS.md'));
     final projectRules = await projectFile.exists()
         ? await projectFile.readAsString()
         : '';
     final zh = currentAppLanguage.isChinese;
+    final prefix =
+        workspace.customSystemPromptPrefix ?? settings.systemPromptPrefix;
     return [
-      if (settings.systemPromptPrefix.trim().isNotEmpty)
-        settings.systemPromptPrefix,
+      if (prefix.trim().isNotEmpty) prefix,
       if (chatPrefix.trim().isNotEmpty) chatPrefix,
       workspace.customSystemPrompt ?? settings.systemPrompt,
       if (settings.globalInstructions.trim().isNotEmpty)
@@ -1007,8 +1088,6 @@ class AgentWorkspaceStore {
             '${settings.globalInstructions}',
       if (projectRules.trim().isNotEmpty)
         'Project instructions (AGENTS.md):\n$projectRules',
-      if (instructions.trim().isNotEmpty)
-        '${zh ? '用户的工作区规则：' : 'User workspace rules:'}\n$instructions',
       zh
           ? '启动器工作区资料在 .W.O.F/；笔记在 .W.O.F/notes/，默认产物在 .W.O.F/outputs/。项目文件按用户指定的路径组织。'
           : 'Launcher workspace data lives in .W.O.F/; notes in .W.O.F/notes/ and default outputs in .W.O.F/outputs/. Organize project files at the paths requested by the user.',

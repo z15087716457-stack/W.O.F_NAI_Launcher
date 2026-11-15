@@ -19,6 +19,7 @@ import '../generation/image_workflow_snapshot.dart';
 import '../prompt_block_library_provider.dart';
 import '../krita/bridge_draft_snapshot.dart';
 import 'nai_agent_generation_approvals.dart';
+import 'nai_agent_cost_policy.dart';
 import '../style_explore/explore_run_runner.dart';
 import '../generation/local_upscale_provider.dart';
 import '../generation/cloud_upscale_provider.dart';
@@ -153,6 +154,7 @@ NaiAgentGenerationTools bindNaiAgentGeneration(
   }
 
   return NaiAgentGenerationTools(
+    autoApprove: (cost) => naiAgentCanAutoApproveCost(ref, cost),
     readInput: read,
     isAlive: alive,
     refreshBalance: () => refreshBalanceBeforeBlocking(ref),

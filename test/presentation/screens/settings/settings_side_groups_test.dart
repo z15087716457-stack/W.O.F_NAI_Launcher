@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/app_ui_scale.dart';
 import 'dart:async';
 import 'dart:io';
 import 'dart:ui' as ui;
@@ -24,7 +25,7 @@ import 'package:nai_launcher/presentation/providers/theme_provider.dart';
 import 'package:nai_launcher/presentation/screens/settings/sections/appearance_settings_section.dart';
 import 'package:nai_launcher/presentation/screens/settings/sections/shortcut_settings_section.dart';
 import 'package:nai_launcher/presentation/screens/settings/widgets/settings_tile.dart';
-import 'package:nai_launcher/presentation/screens/settings/widgets/settings_typography_scope.dart';
+import 'package:nai_launcher/presentation/screens/settings/widgets/settings_motion_scope.dart';
 import 'package:nai_launcher/presentation/screens/settings/widgets/settings_ui_theme.dart';
 import 'package:nai_launcher/presentation/screens/settings/widgets/shortcut_settings_panel.dart';
 import 'package:nai_launcher/presentation/themes/app_theme.dart';
@@ -147,8 +148,10 @@ void main() {
               fontConfig: FontConfig.defaultFont,
             ),
           ),
-          builder: (context, child) => SettingsTypographyScope(
-            child: RepaintBoundary(key: capture, child: child!),
+          builder: (context, child) => AppUiScale(
+            child: SettingsMotionScope(
+              child: RepaintBoundary(key: capture, child: child!),
+            ),
           ),
           home: Scaffold(
             body: SingleChildScrollView(
@@ -259,7 +262,7 @@ void main() {
               find.byKey(const ValueKey('studio_theme_dark')),
               findsOneWidget,
             );
-            expect(find.text('仅调整设置页面与设置弹窗的字号'), findsOneWidget);
+            expect(find.text('统一调整应用内文字、图标和控件大小，不改变图片分辨率。'), findsOneWidget);
             expect(find.text('完成提醒'), findsNothing);
           } else {
             expect(find.textContaining('自动选中与跳转不受影响'), findsOneWidget);

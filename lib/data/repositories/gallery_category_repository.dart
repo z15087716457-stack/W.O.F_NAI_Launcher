@@ -5,10 +5,8 @@ import 'dart:convert';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
-import 'package:nai_launcher/core/utils/app_support_directory.dart';
 
 import '../../core/database/datasources/gallery_data_source.dart';
-import '../../core/storage/local_storage_service.dart';
 import '../../core/utils/app_logger.dart';
 import '../../core/utils/gallery_path_utils.dart';
 import '../../core/utils/gallery_storage_layout.dart';
@@ -26,27 +24,59 @@ class GalleryCategoryRepository {
   static final GalleryCategoryRepository instance =
       GalleryCategoryRepository._();
 
-  final _localStorage = LocalStorageService();
   GalleryDataSource get _dataSource => GalleryDataSource();
 
   static const _categoriesFileName = '.gallery_categories.json';
   static const _suppressedCategoriesFileName =
       '.gallery_category_suppressed_paths.json';
 
-  /// 获取图片保存根路径
-  ///
-  /// 优先使用用户设置的自定义路径，如果没有设置则返回默认路径
-  /// 默认路径：Documents/NAI_Launcher/images/
-  Future<String?> getRootPath() async {
-    // 优先使用用户设置的自定义路径
-    final customPath = _localStorage.getImageSavePath();
-    if (customPath != null && customPath.isNotEmpty) {
-      return customPath;
-    }
+  /// 既有分类的路径基准与配置目录，不随图片保存位置变化。
+  Future<String?> getRootPath() =>
+      GalleryFolderRepository.instance.getCategoryBasePath();
 
-    // 使用默认路径
-    final appDir = await getApplicationDocumentsDirectory();
-    return p.join(appDir.path, 'NAI_Launcher', 'images');
+  String _categoryPath(String base, GalleryCategory category) =>
+      category.isExternal
+      ? category.folderPath
+      : p.join(base, category.folderPath);
+
+  bool _inSources(List<String> roots, String path) =>
+      roots.any((root) => galleryPathIsWithin(root, path));
+
+  // Old overlapping sources can contain two records for this directory. Restore
+  // the dedicated entry using an existing ID, never by inventing a replacement.
+  List<GalleryCategory> _restoreDefaultEntry(
+    List<GalleryCategory> categories,
+    String base,
+  ) {
+    final managed = categories
+        .where(
+          (c) => !c.isExternal && isGalleryUncategorizedFolder(c.folderPath),
+        )
+        .firstOrNull;
+    final existing =
+        managed ??
+        categories
+            .where(
+              (c) => galleryFilePathsEqual(
+                _categoryPath(base, c),
+                galleryUncategorizedPath(base),
+              ),
+            )
+            .firstOrNull;
+    if (existing == null || (managed != null && managed.isRoot)) {
+      return categories;
+    }
+    return [
+      for (final c in categories)
+        if (c.id == existing.id)
+          c.copyWith(
+            folderPath: galleryUncategorizedFolderName,
+            name: galleryUncategorizedFolderName,
+            parentId: null,
+          )
+        else
+          c,
+    ];
   }
 
   Future<String?> _getCategoriesFilePath() async {
@@ -82,7 +112,7 @@ class GalleryCategoryRepository {
     }
   }
 
-  Future<List<GalleryCategory>> loadCategories() async {
+  Future<List<GalleryCategory>> _readCategories() async {
     try {
       final filePath = await _getCategoriesFilePath();
       if (filePath == null) return [];
@@ -100,6 +130,15 @@ class GalleryCategoryRepository {
     }
   }
 
+  Future<List<GalleryCategory>> loadCategories() async {
+    final base = (await getRootPath())!;
+    final roots = await GalleryFolderRepository.instance.getSourcePaths();
+    final active = (await _readCategories())
+        .where((c) => _inSources(roots, _categoryPath(base, c)))
+        .toList();
+    return _restoreDefaultEntry(active, base);
+  }
+
   /// 保存所有分类
   Future<bool> saveCategories(List<GalleryCategory> categories) async {
     try {
@@ -107,7 +146,19 @@ class GalleryCategoryRepository {
       if (filePath == null) return false;
 
       final file = File(filePath);
-      final jsonList = categories.map((c) => c.toJson()).toList();
+      final folders = GalleryFolderRepository.instance;
+      await folders.ensureSourcesMigrated();
+      final base = (await getRootPath())!;
+      final roots = await folders.getSourcePaths();
+      // Removing a source only hides its records. Re-adding it restores the IDs.
+      final retained = (await _readCategories()).where(
+        (c) => !_inSources(roots, _categoryPath(base, c)),
+      );
+      final records = {
+        for (final c in retained) c.id: c,
+        for (final c in categories) c.id: c,
+      };
+      final jsonList = records.values.map((c) => c.toJson()).toList();
       await file.writeAsString(jsonEncode(jsonList));
 
       return true;
@@ -728,9 +779,18 @@ class GalleryCategoryRepository {
     final rootPath = await getRootPath();
     if (rootPath == null) return existingCategories;
 
-    // One stable destination for new images. Existing directories are scanned
-    // as before; no historical image or category is moved during this change.
-    await Directory(galleryUncategorizedPath(rootPath)).create(recursive: true);
+    final roots = await GalleryFolderRepository.instance.getSourcePaths();
+    existingCategories = {
+      for (final c in await _readCategories()) c.id: c,
+      for (final c in existingCategories) c.id: c,
+    }.values.toList();
+    final managedVisible = _inSources(roots, rootPath);
+    if (managedVisible) {
+      await Directory(
+        galleryUncategorizedPath(rootPath),
+      ).create(recursive: true);
+    }
+    existingCategories = _restoreDefaultEntry(existingCategories, rootPath);
 
     final updatedCategories = <GalleryCategory>[];
     final existingPaths = existingCategories
@@ -744,7 +804,8 @@ class GalleryCategoryRepository {
     // 检查现有分类的文件夹是否存在
     for (final category in existingCategories) {
       final folderPath = await _absoluteCategoryPath(rootPath, category);
-      if (await Directory(folderPath).exists()) {
+      if (_inSources(roots, folderPath) &&
+          await Directory(folderPath).exists()) {
         // 更新图片数量
         final imageCount = await _countImagesInFolder(folderPath);
         updatedCategories.add(category.updateImageCount(imageCount));
@@ -753,18 +814,21 @@ class GalleryCategoryRepository {
     }
 
     // 扫描主源文件系统中的新文件夹
-    await _scanAndAddNewFolders(
-      rootPath,
-      rootPath,
-      null,
-      existingPaths,
-      suppressedPaths,
-      updatedCategories,
-    );
+    if (managedVisible) {
+      await _scanAndAddNewFolders(
+        rootPath,
+        rootPath,
+        null,
+        existingPaths,
+        suppressedPaths,
+        updatedCategories,
+      );
+    }
 
     // 扫描每个额外图库源：根节点 + 子文件夹（folderPath 为绝对路径）
-    for (final extraRoot
-        in await GalleryFolderRepository.instance.getExtraRootPaths()) {
+    for (final extraRoot in roots.where(
+      (path) => !galleryFilePathsEqual(path, rootPath),
+    )) {
       if (!await Directory(extraRoot).exists()) continue;
 
       final normalizedRoot = _normalizeCategoryPath(extraRoot);
@@ -809,26 +873,38 @@ class GalleryCategoryRepository {
     GalleryFileChanges changes,
   ) async {
     final root = (await getRootPath())!;
-    final roots = [
-      root,
-      ...await GalleryFolderRepository.instance.getExtraRootPaths(),
-    ];
+    final roots = await GalleryFolderRepository.instance.getSourcePaths();
+    if (_inSources(roots, root)) {
+      await Directory(galleryUncategorizedPath(root)).create(recursive: true);
+    }
+    existing = _restoreDefaultEntry(existing, root);
     final suppressed = await _loadSuppressedFolderPaths();
-    String absolute(GalleryCategory category) => category.isExternal
-        ? category.folderPath
-        : p.join(root, category.folderPath);
-    String stored(String path) =>
-        galleryPathIsWithin(root, path) ? p.relative(path, from: root) : path;
-    final directCounts = {
-      for (final category in existing) category.id: category.imageCount,
-    };
+    String absolute(GalleryCategory category) => _categoryPath(root, category);
+    final directCounts = {for (final c in existing) c.id: c.imageCount};
     for (final category in existing) {
       final parent = category.parentId;
       if (parent != null && directCounts.containsKey(parent)) {
         directCounts[parent] = directCounts[parent]! - category.imageCount;
       }
     }
-    final byPath = <String, GalleryCategory>{};
+    final byId = <String, GalleryCategory>{};
+    final byPath = <String, List<String>>{};
+    void put(GalleryCategory category) {
+      byId[category.id] = category;
+      byPath
+          .putIfAbsent(galleryFilePathKey(absolute(category)), () => [])
+          .add(category.id);
+    }
+
+    GalleryCategory? atPath(String path, {bool? external}) {
+      final items = [
+        for (final id in byPath[galleryFilePathKey(path)] ?? <String>[])
+          byId[id]!,
+      ];
+      return items.where((c) => c.isExternal == external).firstOrNull ??
+          items.firstOrNull;
+    }
+
     for (var category in existing) {
       var path = absolute(category);
       for (final move in changes.directoryMoves.entries) {
@@ -837,26 +913,26 @@ class GalleryCategoryRepository {
             p.join(move.value, p.relative(path, from: move.key)),
           );
           category = category.copyWith(
-            folderPath: stored(path),
+            folderPath: category.isExternal
+                ? path
+                : p.relative(path, from: root),
             name: p.basename(path),
           );
         }
       }
-      byPath[galleryFilePathKey(path)] = category;
+      if (_inSources(roots, path)) put(category);
     }
     final affected = <String>{
       for (final path in changes.files) p.dirname(path),
       ...changes.directories,
     };
-    // A directory move/delete may contain known descendants. Only its own
-    // subtree needs enumeration; ancestors are updated by count aggregation.
     for (final directory in changes.directories) {
-      for (final category in byPath.values) {
+      for (final category in byId.values) {
         if (galleryPathIsWithin(directory, absolute(category))) {
           affected.add(absolute(category));
         }
       }
-      if (await Directory(directory).exists()) {
+      if (_inSources(roots, directory) && await Directory(directory).exists()) {
         await for (final entity in Directory(
           directory,
         ).list(recursive: true, followLinks: false)) {
@@ -865,61 +941,79 @@ class GalleryCategoryRepository {
       }
     }
     Future<GalleryCategory?> ensure(String path) async {
-      final key = galleryFilePathKey(path);
-      if (byPath.containsKey(key)) return byPath[key];
-      final owner = roots
-          .where((candidate) => galleryPathIsWithin(candidate, path))
-          .firstOrNull;
+      final known = atPath(path, external: !galleryPathIsWithin(root, path));
+      if (known != null) return known;
+      final owner = _inSources(roots, path) && galleryPathIsWithin(root, path)
+          ? root
+          : roots
+                .where((candidate) => galleryPathIsWithin(candidate, path))
+                .firstOrNull;
       if (owner == null || galleryFilePathsEqual(path, root)) return null;
+      final stored = galleryFilePathsEqual(owner, root)
+          ? p.relative(path, from: root)
+          : path;
       if (p
               .split(p.relative(path, from: owner))
               .any(
                 (part) =>
                     (part != '.' && part.startsWith('.')) || part == 'thumbs',
               ) ||
-          suppressed.contains(_normalizeCategoryPath(stored(path)))) {
+          suppressed.contains(_normalizeCategoryPath(stored))) {
         return null;
       }
       if (!await Directory(path).exists()) return null;
-      final parent = galleryFilePathsEqual(path, owner)
+      final parent =
+          galleryFilePathsEqual(path, owner) ||
+              galleryFilePathsEqual(p.dirname(path), root)
           ? null
           : await ensure(p.dirname(path));
-      if (!galleryFilePathsEqual(path, owner) &&
-          !galleryFilePathsEqual(p.dirname(path), root) &&
-          parent == null) {
-        return null;
-      }
       final category = GalleryCategory.create(
         name: p.basename(path),
-        folderPath: stored(path),
+        folderPath: stored,
         parentId: parent?.id,
-        sortOrder: byPath.values.where((c) => c.parentId == parent?.id).length,
+        sortOrder: byId.values.where((c) => c.parentId == parent?.id).length,
       );
-      byPath[key] = category;
+      put(category);
       directCounts[category.id] = await _countImagesInFolder(path);
       return category;
     }
 
     for (final path in affected) {
+      if (!_inSources(roots, path)) continue;
       final key = galleryFilePathKey(path);
       if (!await Directory(path).exists()) {
-        byPath.remove(key);
+        for (final id in byPath.remove(key) ?? <String>[]) {
+          byId.remove(id);
+        }
       } else {
-        final category = await ensure(path);
-        if (category != null) {
-          directCounts[category.id] = await _countImagesInFolder(path);
+        await ensure(path);
+        final count = await _countImagesInFolder(path);
+        for (final id in byPath[key] ?? <String>[]) {
+          directCounts[id] = count;
         }
       }
     }
     final direct = [
-      for (final category in byPath.values)
+      for (final category in byId.values)
         category.copyWith(
           parentId:
-              byPath[galleryFilePathKey(p.dirname(absolute(category)))]?.id,
+              !category.isExternal &&
+                  galleryFilePathsEqual(p.dirname(absolute(category)), root)
+              ? null
+              : byId[category.parentId] != null &&
+                    galleryFilePathsEqual(
+                      absolute(byId[category.parentId]!),
+                      p.dirname(absolute(category)),
+                    )
+              ? category.parentId
+              : atPath(
+                  p.dirname(absolute(category)),
+                  external: category.isExternal,
+                )?.id,
           imageCount: directCounts[category.id]!,
         ),
     ];
-    final originals = {for (final category in existing) category.id: category};
+    final originals = {for (final c in existing) c.id: c};
     return [
       for (final category in direct.withAggregatedImageCounts())
         if (originals[category.id] case final old?)

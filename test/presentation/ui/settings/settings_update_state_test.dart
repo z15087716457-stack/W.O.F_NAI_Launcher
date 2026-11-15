@@ -6,6 +6,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:nai_launcher/core/constants/app_version.dart';
+import 'package:nai_launcher/data/models/version/version_info.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/update_provider.dart';
 import 'package:nai_launcher/presentation/ui/kit/ui_lib_controls.dart';
@@ -47,6 +48,44 @@ void main() {
       expect(about.build, '61');
     }
     expect(const SettingsAboutData().update, SettingsUpdateState.unchecked);
+  });
+
+  testWidgets('about shows changes without release-page Markdown or metadata', (
+    t,
+  ) async {
+    final raw = File(
+      'test/fixtures/release_notes/v2.3.4.md',
+    ).readAsStringSync();
+    final info = VersionInfo(version: '2.3.4', releaseNotes: raw);
+    final data = _data(UpdateStatus.available, versionInfo: info);
+    expect(data.about.notes, hasLength(10));
+    await pumpSettings(t, data: data, dark: true, window: 900);
+    expect(find.textContaining('外部 Agent 收起通知'), findsOneWidget);
+    expect(find.textContaining('shields.io'), findsNothing);
+    expect(find.textContaining('checksums.txt'), findsNothing);
+    expect(find.textContaining('##'), findsNothing);
+    expect(t.takeException(), isNull);
+    final output = Platform.environment['NAI_RELEASE_NOTES_CAPTURE'];
+    if (output != null) {
+      await t.runAsync(
+        () => precacheImage(
+          const AssetImage('assets/images/wof_logo_full.png'),
+          t.element(find.byType(Scaffold)),
+        ),
+      );
+      await t.pumpAndSettle();
+      final boundary = t.renderObject<RenderRepaintBoundary>(
+        find.byKey(const Key('settings-capture')),
+      );
+      await t.runAsync(() async {
+        final image = await boundary.toImage();
+        final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+        final file = File('$output/settings-about.png');
+        await file.parent.create(recursive: true);
+        await file.writeAsBytes(bytes!.buffer.asUint8List());
+        image.dispose();
+      });
+    }
   });
 
   for (final locale in ['zh', 'zh_TW', 'en', 'ja', 'ko']) {
@@ -118,7 +157,7 @@ void main() {
   }
 }
 
-SettingsViewData _data(UpdateStatus status) {
+SettingsViewData _data(UpdateStatus status, {VersionInfo? versionInfo}) {
   final d = SettingsFixture.view(page: SettingsPageId.about);
   return SettingsViewData(
     page: d.page,
@@ -140,6 +179,9 @@ SettingsViewData _data(UpdateStatus status) {
     network: d.network,
     privacy: d.privacy,
     backup: d.backup,
-    about: settingsAboutData(UpdateState(status: status), null),
+    about: settingsAboutData(
+      UpdateState(status: status, versionInfo: versionInfo),
+      null,
+    ),
   );
 }

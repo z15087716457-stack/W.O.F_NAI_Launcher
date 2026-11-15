@@ -966,6 +966,14 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
   /// 执行增量扫描，更新文件列表和索引
   Future<void> refresh({bool scan = true}) => _refresh(scan: scan);
 
+  /// Reload browse coverage after a source is removed, keeping indexed records.
+  Future<void> refreshSources() async {
+    if (!state.isInitialized) {
+      await (await getService()).refresh(scan: false);
+    }
+    await refresh(scan: false);
+  }
+
   Future<void> refreshFromDisk() => _refresh(scan: true, publishEarly: true);
 
   Future<void> _refresh({required bool scan, bool publishEarly = false}) async {

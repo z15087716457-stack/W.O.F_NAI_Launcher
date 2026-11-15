@@ -40,7 +40,7 @@ void main() {
         final surface = find
             .ancestor(of: search, matching: find.byType(Material))
             .first;
-        final height = tester.getSize(surface).height;
+        final height = tester.getRect(surface).height;
         expect(height, closeTo(spec.$1.height * .85, 1));
         await harness.capture(tester, 'provider-expansion-catalog-${spec.$3}');
 
@@ -58,7 +58,7 @@ void main() {
 
         await tester.enterText(search, 'MiniMax');
         await tester.pumpAndSettle();
-        expect(tester.getSize(surface).height, closeTo(height, 1));
+        expect(tester.getRect(surface).height, closeTo(height, 1));
         expect(find.text('本地服务'), findsNothing);
         final card = find.byKey(
           const Key('choose-provider-minimaxChinaMessages'),

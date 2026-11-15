@@ -5,6 +5,8 @@ import 'package:flutter/widgets.dart';
 
 import '../kit/ui_resource_kind.dart';
 import '../channel/channel_contract.dart';
+import '../../../data/models/prompt_reading.dart';
+export '../../../data/models/prompt_reading.dart' show PromptTranslationMode;
 
 export '../channel/channel_contract.dart' show ChannelSettings;
 
@@ -325,6 +327,7 @@ enum GenPromptTool {
 @immutable
 class GenTranslate with _GenValue {
   const GenTranslate({
+    this.mode = PromptTranslationMode.blocks,
     this.busy = false,
     this.showing = false,
     this.hasTranslations = false,
@@ -334,6 +337,7 @@ class GenTranslate with _GenValue {
 
   /// 正在翻译：图标转圈、按钮不可点。
   final bool busy;
+  final PromptTranslationMode mode;
 
   /// 当前这一面有译文正在显示（再点一下 = 全部显示原文）。
   final bool showing;
@@ -348,6 +352,7 @@ class GenTranslate with _GenValue {
   final String? route;
   @override
   List<Object?> get _values => [
+    mode,
     busy,
     showing,
     hasTranslations,
@@ -1505,6 +1510,7 @@ class GenActions {
     required this.onTranslate,
     required this.onToggleTranslation,
     required this.onTranslationSettings,
+    this.onTranslationMode,
     this.onClearTranslations,
     this.onTranslationAdjust,
     required this.onOpenBridge,
@@ -1605,6 +1611,7 @@ class GenActions {
     onTranslate: () => log('onTranslate'),
     onToggleTranslation: () => log('onToggleTranslation'),
     onTranslationSettings: () => log('onTranslationSettings'),
+    onTranslationMode: (v) => log('onTranslationMode($v)'),
     onClearTranslations: () => log('onClearTranslations'),
     onTranslationAdjust: (_) => log('onTranslationAdjust'),
     onOpenBridge: (_) => log('onOpenBridge'),
@@ -1708,6 +1715,7 @@ class GenActions {
         onTranslate: onTranslate,
         onToggleTranslation: onToggleTranslation,
         onTranslationSettings: onTranslationSettings,
+        onTranslationMode: onTranslationMode,
         onClearTranslations: onClearTranslations,
         onTranslationAdjust: onTranslationAdjust,
         onOpenBridge: onOpenBridge,
@@ -1827,6 +1835,7 @@ class GenActions {
 
   /// 去设置里配翻译模型。
   final VoidCallback onTranslationSettings;
+  final ValueChanged<PromptTranslationMode>? onTranslationMode;
   final VoidCallback? onClearTranslations;
   final GenAnchorCallback? onTranslationAdjust;
 

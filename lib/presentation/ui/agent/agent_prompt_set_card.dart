@@ -280,10 +280,18 @@ class _AgentPromptSetCardState extends State<AgentPromptSetCard> {
 
   Future<void> _menu(AgentPromptSet data, Offset position) async {
     final l = context.l10n;
+    final overlay =
+        Overlay.of(context).context.findRenderObject()! as RenderBox;
+    final local = overlay.globalToLocal(position);
     final selected = _index, item = data.items[_index];
     final choice = await showMenu<int>(
       context: context,
-      position: RelativeRect.fromLTRB(position.dx, position.dy, 0, 0),
+      position: RelativeRect.fromLTRB(
+        local.dx,
+        local.dy,
+        overlay.size.width - local.dx,
+        overlay.size.height - local.dy,
+      ),
       items: [
         PopupMenuItem(
           value: 0,

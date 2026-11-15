@@ -125,9 +125,7 @@ void main() {
         'systemPromptPrefix': 'PREFIX_IDENTITY',
       });
       await store.updateWorkspace(b.id, customSystemPrompt: 'PROJECT_BASE');
-      await File(
-        '${b.agentDirectory.path}/instructions.md',
-      ).writeAsString('LOCAL_RULE');
+      await File('${b.directory.path}/AGENTS.md').writeAsString('LOCAL_RULE');
       final reopened = AgentWorkspaceStore(root);
       final settings = await reopened.readSettings();
       expect(settings.systemPrompt, 'GLOBAL_BASE');
@@ -162,6 +160,137 @@ void main() {
       );
       expect(AgentSettings.fromJson({}).globalInstructions, isEmpty);
       expect(AgentSettings.fromJson({}).systemPromptPrefix, isEmpty);
+    },
+  );
+
+  test(
+    'workspace prefixes inherit, override and clear without mixing layers',
+    () async {
+      final a = await store.createWorkspace('A');
+      final b = await store.createWorkspace('B');
+      await store.patchSettings({
+        'customSystemPrompt': 'BASE',
+        'systemPromptPrefix': 'GLOBAL_PREFIX',
+        'globalInstructions': 'GLOBAL_RULE',
+      });
+      final rules = File('${a.directory.path}/AGENTS.md');
+      await rules.writeAsString('PROJECT_RULE');
+      expect((await store.getWorkspace(a.id)).customSystemPromptPrefix, isNull);
+      expect(
+        await store.effectiveSystemPrompt(a.id),
+        startsWith('GLOBAL_PREFIX'),
+      );
+      await store.updateWorkspace(
+        a.id,
+        customSystemPromptPrefix: 'WORKSPACE_PREFIX',
+      );
+      await store.updateWorkspace(
+        a.id,
+        name: 'Renamed',
+        customSystemPrompt: 'WORKSPACE_BASE',
+      );
+      final reopened = AgentWorkspaceStore(root);
+      expect(
+        (await reopened.getWorkspace(a.id)).customSystemPromptPrefix,
+        'WORKSPACE_PREFIX',
+      );
+      final prompt = await reopened.effectiveSystemPrompt(
+        a.id,
+        chatPrefix: 'CHAT_PREFIX',
+      );
+      expect(
+        prompt,
+        startsWith('WORKSPACE_PREFIX\n\nCHAT_PREFIX\n\nWORKSPACE_BASE'),
+      );
+      expect(prompt, isNot(contains('GLOBAL_PREFIX')));
+      expect(
+        prompt.indexOf('GLOBAL_RULE'),
+        lessThan(prompt.indexOf('PROJECT_RULE')),
+      );
+      expect(
+        await reopened.effectiveSystemPrompt(b.id),
+        startsWith('GLOBAL_PREFIX'),
+      );
+      await reopened.updateWorkspace(a.id, customSystemPromptPrefix: '');
+      expect(
+        await reopened.effectiveSystemPrompt(a.id),
+        startsWith('GLOBAL_PREFIX\n\nWORKSPACE_BASE'),
+      );
+      expect(
+        (await reopened.getWorkspace(a.id)).customSystemPromptPrefix,
+        isNull,
+      );
+      await reopened.updateWorkspace(a.id, customSystemPromptPrefix: '  \n ');
+      expect(
+        (await reopened.getWorkspace(a.id)).customSystemPromptPrefix,
+        isNull,
+      );
+      await reopened.updateWorkspace(a.id, resetPrefix: true);
+      expect(
+        (await reopened.getWorkspace(a.id)).customSystemPromptPrefix,
+        isNull,
+      );
+      expect(
+        await reopened.effectiveSystemPrompt(a.id),
+        startsWith('GLOBAL_PREFIX'),
+      );
+      expect(
+        (await reopened.readSettings()).systemPromptPrefix,
+        'GLOBAL_PREFIX',
+      );
+      expect(await rules.readAsString(), 'PROJECT_RULE');
+      final history = await Directory(
+        '${a.agentDirectory.path}/prompt-history',
+      ).list().toList();
+      final backups = [
+        for (final entry in history)
+          jsonDecode(await File(entry.path).readAsString()) as Map,
+      ];
+      expect(
+        backups.any(
+          (entry) => entry['customSystemPromptPrefix'] == 'WORKSPACE_PREFIX',
+        ),
+        true,
+      );
+      expect(
+        backups.any((entry) => entry['customSystemPromptPrefix'] == ''),
+        false,
+      );
+    },
+  );
+
+  test(
+    'workspace prefix writes reject stale values and a changed selection',
+    () async {
+      final a = await store.createWorkspace('A');
+      final b = await store.createWorkspace('B');
+      await store.patchSettings({'selectedWorkspaceId': a.id});
+      await store.updateWorkspace(a.id, customSystemPromptPrefix: 'LATEST');
+      await expectLater(
+        store.updateWorkspace(
+          a.id,
+          customSystemPromptPrefix: 'STALE',
+          checkPrefix: true,
+          expectedPrefix: null,
+        ),
+        throwsStateError,
+      );
+      await store.patchSettings({'selectedWorkspaceId': b.id});
+      await expectLater(
+        store.updateWorkspace(
+          a.id,
+          resetPrefix: true,
+          checkPrefix: true,
+          expectedPrefix: 'LATEST',
+          requireSelected: true,
+        ),
+        throwsStateError,
+      );
+      expect(
+        (await store.getWorkspace(a.id)).customSystemPromptPrefix,
+        'LATEST',
+      );
+      expect((await store.getWorkspace(b.id)).customSystemPromptPrefix, isNull);
     },
   );
 
@@ -317,9 +446,7 @@ void main() {
       await store.saveSettings(const AgentSettings(customSystemPrompt: '全局二'));
       expect(await store.effectiveSystemPrompt(workspace.id), contains('全局二'));
       await store.updateWorkspace(workspace.id, customSystemPrompt: '工作区');
-      await File(
-        '${workspace.agentDirectory.path}/instructions.md',
-      ).writeAsString('项目规则');
+      await File('${workspace.directory.path}/AGENTS.md').writeAsString('项目规则');
       expect(await store.effectiveSystemPrompt(workspace.id), contains('工作区'));
       expect(await store.effectiveSystemPrompt(workspace.id), contains('项目规则'));
       await store.updateWorkspace(workspace.id, resetPrompt: true);

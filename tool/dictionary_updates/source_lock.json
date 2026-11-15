@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "sources": {
+    "tags": {
+      "date": "2026-11-03",
+      "name": "DraconicDragon / Danbooru",
+      "upstreamUrl": "https://github.com/DraconicDragon/dbr-e621-lists-archive/actions/runs/41648330147",
+      "upstreamSha256": "eba144821704fc26b2beaaf9f4a165fe6a671d10491d915390455c7d9223f129",
+      "file": "tool/dictionary_updates/sources/tags-2026-11-03.csv",
+      "sha256": "86d2829874a494391fb1e96facdfabe0f99ec4648e48b6d5d84a89464ef0bc8b",
+      "bytes": 5690115,
+      "gitBlobSha1": "90aa0b57b0fd69dd211014554a46a4cd2a7625f3"
+    },
+    "wiki": {
+      "date": "2026-09-02",
+      "name": "dartags / Danbooru Wiki",
+      "upstreamUrl": "https://huggingface.co/datasets/dartags/danbooru-wiki-2609/resolve/fcf861cf9c75954f4fba9d7c254724c3d9051a1c/data/train-00000-of-00001.parquet",
+      "upstreamSha256": "1efcc2ccb76280d801d104616ba94079cc18aaec8eef2a0d1129c3f36c2ebbcd",
+      "file": "tool/dictionary_updates/sources/wiki-2026-09-02.jsonl",
+      "sha256": "0acd0b898421d866e38cc4a53d3522bf68b4c5d68526cd2fb6703e7d9e0b9e96",
+      "bytes": 99870880,
+      "gitBlobSha1": "d45ef3939c8540daca081068bd21232cdd86283f"
+    }
+  }
+}

@@ -330,7 +330,10 @@ extension _ToolsEditorSessionWiring on _ImageEditorScreenState {
   Future<void> _toolsMoreColors(Rect anchor) {
     final overlay =
         Navigator.of(context).overlay!.context.findRenderObject()! as RenderBox;
-    final local = anchor.shift(-overlay.localToGlobal(Offset.zero));
+    final local = Rect.fromPoints(
+      overlay.globalToLocal(anchor.topLeft),
+      overlay.globalToLocal(anchor.bottomRight),
+    );
     return showMenu<void>(
       context: context,
       position: RelativeRect.fromRect(

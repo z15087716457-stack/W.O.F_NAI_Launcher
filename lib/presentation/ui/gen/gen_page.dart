@@ -170,7 +170,10 @@ class GenScope extends InheritedModel<GenAspect> {
 /// 组件在屏幕上的矩形（接线方自己弹现有面板时定位用）。
 Rect genRectOf(BuildContext context) {
   final box = context.findRenderObject()! as RenderBox;
-  return box.localToGlobal(Offset.zero) & box.size;
+  return Rect.fromPoints(
+    box.localToGlobal(Offset.zero),
+    box.localToGlobal(box.size.bottomRight(Offset.zero)),
+  );
 }
 
 /// 贴在组件下方（[dy] 间距）；[right] 时右边对齐。

@@ -60,23 +60,21 @@ void main() {
     'effective prompt follows the interface language; custom text kept',
     () async {
       final workspace = await store.createWorkspace('w');
-      await File(
-        '${workspace.agentDirectory.path}/instructions.md',
-      ).writeAsString('RULE');
+      await File('${workspace.directory.path}/AGENTS.md').writeAsString('RULE');
       await store.patchSettings({'globalInstructions': 'GLOBAL'});
 
       setCurrentL10nLocale(const Locale('en'));
       final en = await store.effectiveSystemPrompt(workspace.id);
       expect(en, startsWith('You are NAI Agent'));
       expect(en, contains('User global instructions:\nGLOBAL'));
-      expect(en, contains('User workspace rules:\nRULE'));
+      expect(en, contains('Project instructions (AGENTS.md):\nRULE'));
       expect(en, isNot(matches(RegExp(r'[\u4e00-\u9fff]'))));
 
       setCurrentL10nLocale(const Locale('zh'));
       final zh = await store.effectiveSystemPrompt(workspace.id);
       expect(zh, startsWith('你是 NAI Agent'));
       expect(zh, contains('用户的全局指令：\nGLOBAL'));
-      expect(zh, contains('用户的工作区规则：\nRULE'));
+      expect(zh, contains('Project instructions (AGENTS.md):\nRULE'));
 
       await store.patchSettings({'customSystemPrompt': 'MY OWN BASE'});
       setCurrentL10nLocale(const Locale('en'));

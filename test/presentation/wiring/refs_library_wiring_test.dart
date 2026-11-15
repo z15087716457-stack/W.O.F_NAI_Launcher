@@ -12,6 +12,7 @@ import 'package:nai_launcher/data/models/vibe/vibe_library_entry.dart';
 import 'package:nai_launcher/data/services/vibe_library_storage_service.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/vibe_library_provider.dart';
+import 'package:nai_launcher/presentation/providers/precise_ref_library_provider.dart';
 import 'package:nai_launcher/presentation/providers/vibe_library_category_provider.dart';
 import 'package:nai_launcher/presentation/ui/refs/refs_contract.dart';
 import 'package:nai_launcher/presentation/ui/refs/refs_page.dart';
@@ -87,8 +88,16 @@ class Storage extends VibeLibraryStorageService {
 
 class Platform extends RefsPlatform {
   final errors = <Object>[];
+  final opened = <(String, bool)>[];
+  String preciseFolder = 'temporary-pr-library';
   @override
-  Future<String> libraryFolder() async => 'temporary-library';
+  Future<String> libraryFolder(RefsKind kind) async =>
+      kind == RefsKind.vibe ? 'temporary-library' : preciseFolder;
+  @override
+  Future<void> openFolder(String path, {bool directory = false}) async {
+    opened.add((path, directory));
+  }
+
   @override
   void error(BuildContext context, Object error) {
     errors.add(error);
@@ -99,6 +108,15 @@ class Platform extends RefsPlatform {
     RefsKind kind,
     RefsImportSource source,
   ) async => [DroppedFileData(fileName: 'new.png', bytes: png)];
+}
+
+class Precise extends PreciseRefLibraryNotifier {
+  @override
+  PreciseRefLibraryState build() => const PreciseRefLibraryState();
+  @override
+  Future<void> initialize() async {}
+  @override
+  Future<void> reload({bool showLoading = false}) async {}
 }
 
 void main() {
@@ -130,6 +148,7 @@ void main() {
       overrides: [
         localStorageServiceProvider.overrideWithValue(settings),
         vibeLibraryNotifierProvider.overrideWith(() => Library(entries)),
+        preciseRefLibraryNotifierProvider.overrideWith(Precise.new),
         vibeLibraryCategoryNotifierProvider.overrideWith(Categories.new),
         vibeLibraryStorageServiceProvider.overrideWithValue(storage),
         refsPlatformProvider.overrideWithValue(platform),
@@ -160,6 +179,19 @@ void main() {
 
   RefsLibraryPage page(WidgetTester tester) =>
       tester.widget(find.byType(RefsLibraryPage));
+
+  testWidgets(
+    'PR library exposes its folder and opening resolves the latest selection',
+    (tester) async {
+      await mount(tester, child: const PreciseRefLibraryWiring());
+      expect(page(tester).data.folderPath, 'temporary-pr-library');
+      platform.preciseFolder = 'changed-pr-library';
+      page(tester).actions.onOpenFolder(null);
+      await tester.pumpAndSettle();
+      expect(platform.opened, [('changed-pr-library', true)]);
+      expect(platform.errors, isEmpty);
+    },
+  );
 
   testWidgets(
     'drop callback returns while file reads are held and preserves all readers',

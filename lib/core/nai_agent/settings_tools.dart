@@ -63,9 +63,9 @@ class NaiAgentSettingsTools {
         'Provide a nonempty changes object',
       );
     }
-    final changes = Map<String, Object?>.from(raw);
+    late final Map<String, Object?> changes;
     try {
-      service.decode(service.encode(changes));
+      changes = service.decode(service.encode(Map<String, Object?>.from(raw)));
     } on FormatException catch (error) {
       throw NaiAgentToolError('invalid_settings', error.message);
     }

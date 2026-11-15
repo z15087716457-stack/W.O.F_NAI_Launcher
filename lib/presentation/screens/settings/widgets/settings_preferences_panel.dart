@@ -9,8 +9,7 @@ import '../../../../core/storage/local_storage_service.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../providers/theme_provider.dart';
 import '../../../providers/font_provider.dart';
-import '../../../providers/font_scale_provider.dart';
-import '../../../providers/settings_font_scale_provider.dart';
+import '../../../providers/ui_scale_provider.dart';
 import '../../../providers/locale_provider.dart';
 import '../../../providers/history_click_behavior_provider.dart';
 import '../../../providers/simple_output_viewer_provider.dart';
@@ -59,8 +58,7 @@ class _SettingsPreferencesPanelState
   void refresh() {
     ref.invalidate(themeNotifierProvider);
     ref.invalidate(fontNotifierProvider);
-    ref.invalidate(fontScaleNotifierProvider);
-    ref.invalidate(settingsFontScaleProvider);
+    ref.invalidate(uiScaleProvider);
     ref.invalidate(localeNotifierProvider);
     ref.invalidate(historyClickBehaviorNotifierProvider);
     ref.invalidate(simpleOutputViewerNotifierProvider);

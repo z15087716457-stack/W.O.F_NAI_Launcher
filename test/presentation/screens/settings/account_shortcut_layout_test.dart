@@ -19,7 +19,7 @@ import 'package:nai_launcher/presentation/providers/font_provider.dart';
 import 'package:nai_launcher/presentation/providers/shortcuts_provider.dart';
 import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
 import 'package:nai_launcher/presentation/screens/settings/sections/account_settings_section.dart';
-import 'package:nai_launcher/presentation/screens/settings/widgets/settings_typography_scope.dart';
+import 'package:nai_launcher/presentation/screens/settings/widgets/settings_motion_scope.dart';
 import 'package:nai_launcher/presentation/screens/settings/widgets/settings_toggle.dart';
 import 'package:nai_launcher/presentation/screens/settings/widgets/settings_ui_theme.dart';
 import 'package:nai_launcher/presentation/screens/settings/widgets/shortcut_settings_panel.dart';
@@ -171,7 +171,7 @@ void main() {
               fontConfig: FontConfig.defaultFont,
             ),
           ),
-          builder: (context, child) => SettingsTypographyScope(
+          builder: (context, child) => SettingsMotionScope(
             child: RepaintBoundary(key: capture, child: child!),
           ),
           home: Scaffold(

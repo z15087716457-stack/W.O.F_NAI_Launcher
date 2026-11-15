@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 
 import '../../../core/utils/prompt_icon_catalog.dart';
 import '../../widgets/common/studio_icons.dart';
-import '../../widgets/common/workspace_text_scale_scope.dart';
 import 'ui_colors.dart';
 import 'ui_glyph.dart';
 import 'ui_extra_icons.dart';
@@ -95,8 +94,7 @@ class UiBlockPill extends StatelessWidget {
       color.computeLuminance() > .5 ? const Color(0xFF1A1A1A) : Colors.white;
 
   @override
-  Widget build(BuildContext context) =>
-      WorkspaceTextScaleScope(child: Builder(builder: _buildPill));
+  Widget build(BuildContext context) => _buildPill(context);
 
   Widget _buildPill(BuildContext context) {
     final c = context.ui;
@@ -268,7 +266,7 @@ class UiBlockPill extends StatelessWidget {
     );
 
     Widget pill = Container(
-      height: h * WorkspaceTextScaleScope.scaleOf(context),
+      height: h,
       padding: EdgeInsets.only(
         left: large ? 6 : 4,
         right: hazardOn ? 2 : (large ? 8 : 6),

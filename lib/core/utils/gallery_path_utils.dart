@@ -43,6 +43,20 @@ String galleryFilePathKey(String filePath) {
 bool galleryFilePathsEqual(String left, String right) =>
     galleryFilePathKey(left) == galleryFilePathKey(right);
 
+/// One recursive scan/watch per physical path range. A parent covers its children.
+List<String> galleryDistinctRoots(Iterable<String> paths) {
+  final roots = <String>[];
+  for (final path in paths) {
+    final trimmed = normalizeGalleryFilePath(path);
+    if (trimmed.isEmpty) continue;
+    final normalized = p.normalize(p.absolute(trimmed));
+    if (roots.any((root) => galleryPathIsWithin(root, normalized))) continue;
+    roots.removeWhere((root) => galleryPathIsWithin(normalized, root));
+    roots.add(normalized);
+  }
+  return roots;
+}
+
 /// [childPath] 是否位于 [rootPath] 之内（含相等）
 ///
 /// 按规范化 key 前缀匹配，Windows 大小写不敏感，避免 `p.isWithin`

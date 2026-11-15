@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:nai_launcher/data/services/nai_agent/agent_workspace_store.dart';
+import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_workspace_provider.dart';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -92,6 +94,9 @@ void main() {
     );
     container = ProviderContainer(
       overrides: [
+        naiAgentUiPreferencesProvider.overrideWith(
+          (ref) => NaiAgentUiPreferences(),
+        ),
         localStorageServiceProvider.overrideWithValue(MemoryDraftSettings()),
         characterPromptRepositoryProvider.overrideWithValue(MemoryCharacters()),
         promptBlockRepositoryProvider.overrideWithValue(
@@ -246,6 +251,23 @@ void main() {
       expect((await call('list'))['total'], 1);
     },
   );
+  test('free exploration shares Full access automatic confirmation', () async {
+    container
+        .read(naiAgentUiPreferencesProvider)
+        .replace(const AgentSettings(permissionMode: 'bypass'));
+    final id = await create(1), q = await quote(id);
+    expect(q['estimated_anlas'], 0);
+    expect(q['authorization'], 'full_access_policy');
+    final result = await call('run', {'id': id, 'quote_id': q['quote_id']});
+    expect(result['status'], 'generated');
+    expect(result['authorization']['source'], 'full_access_policy');
+    expect(generated, hasLength(1));
+    expect(
+      container.read(naiAgentGenerationApprovalsProvider).forChat('chat'),
+      isEmpty,
+    );
+  });
+
   test(
     'native candidate batch waits for real approval, persists pixels and rejects quote replay',
     () async {

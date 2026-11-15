@@ -1,6 +1,7 @@
 import 'package:nai_launcher/presentation/widgets/common/translation_icon.dart';
 import 'package:nai_launcher/presentation/utils/prompt_block_bundle_insertion.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,12 +15,14 @@ import 'package:nai_launcher/core/tag_expansion/local_tag_expansion_service.dart
 import 'package:nai_launcher/core/tag_expansion/tag_expansion_providers.dart';
 import 'package:nai_launcher/presentation/providers/workspace_text_settings_provider.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/prompt_autocomplete_binding.dart';
-import 'package:nai_launcher/presentation/widgets/common/workspace_text_scale_scope.dart';
+import 'package:nai_launcher/presentation/widgets/common/app_ui_scale.dart';
+import 'package:nai_launcher/presentation/providers/ui_scale_provider.dart';
 import '../../../../core/autocomplete/prompt_autocomplete_controller_test.dart'
     show candidates;
 import 'package:nai_launcher/data/models/character/character_prompt.dart';
 import 'package:nai_launcher/presentation/providers/character_prompt_provider.dart';
 import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
+import 'package:nai_launcher/data/models/prompt_reading.dart';
 import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
 import 'package:nai_launcher/data/models/image/image_params.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
@@ -70,6 +73,122 @@ class _TestBlocksPlatform extends BlocksPlatform {
 
 void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
+  testWidgets('block drop on a reading uses the visible source offset', (
+    tester,
+  ) async {
+    final container = await _pump(
+      tester,
+      appOffset: const Offset(240, 120),
+      libraryState: PromptBlockLibraryState(
+        blocks: [_block('style', '画风1', 'CONTENT')],
+        folders: const [],
+      ),
+    );
+    const source = 'silver hair,\n\nblue eyes';
+    final notifier = container.read(pillWorkspaceNotifierProvider.notifier);
+    notifier.restoreDocument(
+      PillDocument(
+        text: source,
+        instances: const {},
+        readings: [
+          const PromptReading(
+            start: 0,
+            end: 12,
+            source: 'silver hair,',
+            translation: '银发',
+            perSegment: true,
+          ),
+          PromptReading(
+            start: source.indexOf('blue eyes'),
+            end: source.length,
+            source: 'blue eyes',
+            translation: '蓝眼',
+            perSegment: true,
+          ),
+        ],
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+    final visible = find.byWidgetPredicate(
+      (widget) =>
+          widget is Text && widget.textSpan?.toPlainText() == 'blue eyes',
+    );
+    final point = tester.getCenter(visible);
+    final paragraph = tester.renderObject<RenderParagraph>(visible);
+    final expected =
+        source.indexOf('blue eyes') +
+        paragraph.getPositionForOffset(paragraph.globalToLocal(point)).offset;
+    _acceptDrop(
+      tester,
+      const PromptBlockDragData(blockId: 'style'),
+      offset: point,
+    );
+    await tester.pump();
+    await tester.pump();
+    final doc = container.read(pillWorkspaceNotifierProvider).document;
+    expect(doc.text.indexOf(doc.instances.keys.single), expected);
+    expect(tester.takeException(), isNull);
+  });
+  testWidgets(
+    'read-only readings coexist with existing blocks and return to native editing',
+    (tester) async {
+      final container = await _pump(
+        tester,
+        libraryState: PromptBlockLibraryState(
+          blocks: [_block('style', '画风1', 'CONTENT')],
+          folders: const [],
+        ),
+      );
+      const source = 'silver hair, \uE000 blue eyes';
+      final notifier = container.read(pillWorkspaceNotifierProvider.notifier);
+      notifier.restoreDocument(
+        PillDocument(
+          text: source,
+          instances: const {'\uE000': PillInstance(blockId: 'style')},
+          readings: [
+            const PromptReading(
+              start: 0,
+              end: 12,
+              source: 'silver hair,',
+              translation: '银发',
+              perSegment: true,
+            ),
+            PromptReading(
+              start: source.indexOf('blue eyes'),
+              end: source.length,
+              source: 'blue eyes',
+              translation: '蓝眼',
+              perSegment: true,
+            ),
+          ],
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+      expect(find.text('银发'), findsOneWidget);
+      expect(find.text('蓝眼'), findsOneWidget);
+      expect(find.byType(UiBlockPill), findsOneWidget);
+      await tester.tap(find.byType(UiBlockPill));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pumpAndSettle();
+      final sourceText = find.byWidgetPredicate(
+        (widget) =>
+            widget is Text && widget.textSpan?.toPlainText() == 'blue eyes',
+      );
+      await tester.tap(sourceText);
+      await tester.pump();
+      await tester.pump();
+      expect(find.text('银发'), findsNothing);
+      expect(
+        container.read(pillWorkspaceNotifierProvider).document.text,
+        source,
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
   for (final scope in [
     PillScopes.main,
     PillScopes.charPos('autocomplete-character'),
@@ -355,7 +474,7 @@ void main() {
     await tester.pump();
     await tester.pump();
     final before = tester.getRect(find.text('Scale chip')).height;
-    await container.read(workspaceFontScaleProvider.notifier).setFontScale(1.5);
+    await container.read(uiScaleProvider.notifier).setScale(1.5);
     await tester.pump();
     await tester.pump();
     final field = find
@@ -364,7 +483,7 @@ void main() {
           matching: find.byType(TextField),
         )
         .first;
-    expect(MediaQuery.textScalerOf(tester.element(field)).scale(10), 15);
+    expect(MediaQuery.textScalerOf(tester.element(field)).scale(10), 10);
     expect(
       tester.getRect(find.text('Scale chip')).height,
       closeTo(before * 1.5, .001),
@@ -2111,6 +2230,7 @@ Future<ProviderContainer> _pump(
       ...overrides,
     ],
     child: MaterialApp(
+      builder: (_, child) => AppUiScale(child: child!),
       locale: const Locale('zh'),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
@@ -2118,16 +2238,14 @@ Future<ProviderContainer> _pump(
         body: SizedBox(
           width: editorWidth,
           height: 360,
-          child: WorkspaceTextScaleHost(
-            child: PromptPillEditor(
-              pillScope: pillScope,
-              config: UnifiedPromptConfig(
-                enableSyntaxHighlight: false,
-                enableAutoFormat: autoFormat,
-              ),
-              allowEvolutionToggle: allowEvolutionToggle,
-              onChanged: onChanged,
+          child: PromptPillEditor(
+            pillScope: pillScope,
+            config: UnifiedPromptConfig(
+              enableSyntaxHighlight: false,
+              enableAutoFormat: autoFormat,
             ),
+            allowEvolutionToggle: allowEvolutionToggle,
+            onChanged: onChanged,
           ),
         ),
       ),

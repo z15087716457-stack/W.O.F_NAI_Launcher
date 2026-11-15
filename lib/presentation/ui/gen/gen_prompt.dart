@@ -465,9 +465,11 @@ class _Translate extends StatelessWidget {
     final tip = t.busy
         ? l.gen_translating
         : t.hasTranslations
-        ? (t.showing
-              ? l.gen_translateTapOriginal
-              : l.gen_translateTapTranslated)
+        ? t.mode == PromptTranslationMode.inline
+              ? (t.showing ? l.promptReading_hide : l.promptReading_show)
+              : (t.showing
+                    ? l.gen_translateTapOriginal
+                    : l.gen_translateTapTranslated)
         : t.route == null
         ? l.gen_translateNeedsModel
         : l.gen_translateWith(t.route!);
@@ -551,28 +553,59 @@ class _Translate extends StatelessWidget {
     scope.controller.openMenu(
       anchor,
       [
-        UiMenuItem(
-          key: const Key('gen-translate-adjust'),
-          label: l.gen_translateAdjust,
-          subtitle: l.gen_translateAdjustSub,
-          badge: uiNewBadge(context, 'translate.adjust', l.gen_menuNew),
-          glyph: UiGlyphs.chat,
-          enabled:
-              !t.busy &&
-              t.canAdjust &&
-              scope.actions.onTranslationAdjust != null,
-          onTap: () =>
-              scope.actions.onTranslationAdjust?.call(adjustmentAnchor()),
-        ),
+        if (scope.actions.onTranslationMode != null) ...[
+          UiMenuItem(
+            label: l.promptReading_mode,
+            subtitle: l.promptReading_modeSubtitle,
+            key: const Key('gen-translate-mode-inline'),
+            glyph: UiGlyphs.list,
+            checked: t.mode == PromptTranslationMode.inline,
+            enabled: !t.busy,
+            onTap: () =>
+                scope.actions.onTranslationMode!(PromptTranslationMode.inline),
+          ),
+          UiMenuItem(
+            label: l.promptReading_blocks,
+            subtitle: l.promptReading_blocksSubtitle,
+            key: const Key('gen-translate-mode-blocks'),
+            glyph: UiGlyphs.square,
+            checked: t.mode == PromptTranslationMode.blocks,
+            enabled: !t.busy,
+            onTap: () =>
+                scope.actions.onTranslationMode!(PromptTranslationMode.blocks),
+          ),
+        ],
+        if (t.mode == PromptTranslationMode.blocks)
+          UiMenuItem(
+            key: const Key('gen-translate-adjust'),
+            divider: scope.actions.onTranslationMode != null,
+            label: l.gen_translateAdjust,
+            subtitle: l.gen_translateAdjustSub,
+            badge: uiNewBadge(context, 'translate.adjust', l.gen_menuNew),
+            glyph: UiGlyphs.chat,
+            enabled:
+                !t.busy &&
+                t.canAdjust &&
+                scope.actions.onTranslationAdjust != null,
+            onTap: () =>
+                scope.actions.onTranslationAdjust?.call(adjustmentAnchor()),
+          ),
         UiMenuItem(
           key: const Key('gen-translate-new'),
-          label: l.gen_translateNew,
+          label: t.mode == PromptTranslationMode.inline
+              ? l.promptReading_update
+              : l.gen_translateNew,
+          divider:
+              t.mode == PromptTranslationMode.inline &&
+              scope.actions.onTranslationMode != null,
           glyph: UiGlyphs.retry,
           enabled: !t.busy && t.route != null,
           onTap: scope.actions.onTranslate,
         ),
         UiMenuItem(
-          label: t.showing
+          label: t.mode == PromptTranslationMode.inline
+              ? (t.showing ? l.promptReading_hide : l.promptReading_show)
+              : t.showing
               ? l.gen_translateShowOriginal
               : l.gen_translateShowTranslated,
           glyph: UiGlyphs.swap,
@@ -581,9 +614,15 @@ class _Translate extends StatelessWidget {
         ),
         UiMenuItem(
           key: const Key('gen-translate-clear'),
-          label: l.gen_translateClearRestore,
-          subtitle: l.gen_translateClearRestoreSub,
-          badge: uiNewBadge(context, 'translate.clearRestore', l.gen_menuNew),
+          label: t.mode == PromptTranslationMode.inline
+              ? l.promptReading_clear
+              : l.gen_translateClearRestore,
+          subtitle: t.mode == PromptTranslationMode.inline
+              ? null
+              : l.gen_translateClearRestoreSub,
+          badge: t.mode == PromptTranslationMode.inline
+              ? null
+              : uiNewBadge(context, 'translate.clearRestore', l.gen_menuNew),
           glyph: UiGlyphs.undo,
           enabled:
               !t.busy &&

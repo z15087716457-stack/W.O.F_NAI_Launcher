@@ -35,12 +35,7 @@ void main() {
           SettingsStorageSlice(SettingsStorageKind.thumbnails, 100),
         ],
         roots: const [
-          SettingsGalleryRoot(
-            id: 'E:/images',
-            path: 'E:/images',
-            images: 20,
-            primary: true,
-          ),
+          SettingsGalleryRoot(id: 'E:/images', path: 'E:/images', images: 20),
         ],
       );
       await SettingsStorageSnapshotStore().save('original', data);

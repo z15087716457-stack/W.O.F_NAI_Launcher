@@ -2,8 +2,68 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/presentation/ui/kit/ui_popover.dart';
+import 'package:nai_launcher/presentation/ui/kit/ui_scale.dart';
 
 void main() {
+  testWidgets(
+    'scaled popover anchors and hit targets share overlay coordinates',
+    (t) async {
+      for (final scale in [.8, 1.3, 1.5]) {
+        await t.pumpWidget(const SizedBox());
+        UiPopoverAnchor? anchor;
+        var picks = 0;
+        await t.pumpWidget(
+          MaterialApp(
+            builder: (_, child) => UiScale(scale: scale, child: child!),
+            home: Scaffold(
+              body: StatefulBuilder(
+                builder: (context, rebuild) => UiPopover(
+                  anchor: anchor,
+                  onDismiss: () => rebuild(() => anchor = null),
+                  builder: (_) => GestureDetector(
+                    key: const Key('pick'),
+                    onTap: () => picks++,
+                    child: const SizedBox(
+                      width: 100,
+                      height: 40,
+                      child: Text('Pick'),
+                    ),
+                  ),
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: Builder(
+                      builder: (button) => TextButton(
+                        key: const Key('trigger'),
+                        onPressed: () {
+                          final box = button.findRenderObject()! as RenderBox;
+                          rebuild(
+                            () => anchor = UiPopoverAnchor(
+                              box.localToGlobal(Offset(0, box.size.height)),
+                            ),
+                          );
+                        },
+                        child: const Text('Open'),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await t.tap(find.byKey(const Key('trigger')));
+        await t.pumpAndSettle();
+        final popup = t.getRect(find.byKey(const Key('pick')));
+        final trigger = t.getRect(find.byKey(const Key('trigger')));
+        expect(popup.topLeft.dx, closeTo(trigger.left, .001));
+        expect(popup.topLeft.dy, closeTo(trigger.bottom, .001));
+        expect(popup.width, closeTo(100 * scale, .001));
+        await t.tapAt(popup.center);
+        expect(picks, 1);
+        expect(t.takeException(), isNull);
+      }
+    },
+  );
   test('anchors compare by value', () {
     expect(
       const UiPopoverAnchor(Offset(10, 20), alignRight: true),

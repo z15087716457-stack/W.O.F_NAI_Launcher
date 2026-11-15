@@ -134,7 +134,7 @@ void main() {
     await t.tap(find.byKey(const Key('agent-usage')));
     await t.pumpAndSettle();
     expect(find.byKey(const Key('agent-usage-cache-warming')), findsOneWidget);
-    expect(find.text('缓存预热'), findsOneWidget);
+    expect(find.text('缓存保温'), findsOneWidget);
     expect(find.text('只在 Agent 运行时'), findsOneWidget);
     expect(find.text('待机，下次运行时开始'), findsOneWidget);
     expect(t.takeException(), isNull);

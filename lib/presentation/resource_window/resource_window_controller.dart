@@ -28,7 +28,9 @@ class ResourceWindowController extends ChangeNotifier {
     Future<void> Function(bool)? setAlwaysOnTop,
     this.onKindChanged,
     bool alwaysOnTop = false,
+    double uiScale = 1,
   }) : _kind = kind,
+       _uiScale = uiScale,
        _alwaysOnTop = alwaysOnTop,
        invoke =
            invoke ??
@@ -623,6 +625,11 @@ class ResourceWindowController extends ChangeNotifier {
   }
 
   void viewChanged(Map<String, Object?> args) {
+    if (args['uiScale'] case final num scale) {
+      _uiScale = scale.toDouble();
+      _changed();
+      return;
+    }
     if (args['kind'] != _kind.name) return;
     _layout = ResourceLayout.values.byName(args['layout'] as String);
     if (args['groupMode'] case final String mode) {
@@ -635,6 +642,9 @@ class ResourceWindowController extends ChangeNotifier {
     _connected = false;
     _changed();
   }
+
+  double _uiScale;
+  double get uiScale => _uiScale;
 
   void changed(Map<String, Object?> args) {
     if (args['kind'] == _kind.name) {

@@ -18,7 +18,6 @@ void main() {
   setUpAll(loadStudioCaptureFonts);
 
   testWidgets('长系统信息自动换行，标签不挤压，五语言宽窄与大字号不越界', (t) async {
-    addTearDown(t.platformDispatcher.clearTextScaleFactorTestValue);
     for (final locale in ['zh', 'en', 'ja', 'ko', 'zh_TW']) {
       for (final (width, scale) in [
         (1600.0, 1.0),
@@ -26,11 +25,11 @@ void main() {
         (1600.0, 1.5),
       ]) {
         await t.pumpWidget(const SizedBox.shrink());
-        t.platformDispatcher.textScaleFactorTestValue = scale;
         await pumpSettings(
           t,
           data: _longSystemData(),
           window: width,
+          uiScale: scale,
           height: 1400,
           locale: locale,
           dark: width == 900,
@@ -51,7 +50,7 @@ void main() {
             matching: find.text(value),
           );
           final valueBox = t.getRect(valueFinder);
-          expect(valueBox.left - labelBox.right, closeTo(12, .001));
+          expect(valueBox.left - labelBox.right, closeTo(12 * scale, .001));
           expect(valueBox.top, labelBox.top);
           expect(labelBox.left, greaterThan(bounds.left));
           expect(valueBox.right, lessThan(bounds.right));
@@ -64,7 +63,7 @@ void main() {
           if (previous != null) {
             expect(valueBox.top, greaterThan(previous.bottom));
           }
-          if (width == 1600 && value != '3.13.5') {
+          if (width == 1600 && scale == 1 && value != '3.13.5') {
             expect(valueBox.height, greaterThan(labelBox.height));
           }
           previous = valueBox;

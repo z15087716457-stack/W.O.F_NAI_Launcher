@@ -9,6 +9,7 @@ import 'package:window_manager/window_manager.dart';
 import '../../../core/services/titlebar_region_service.dart';
 import '../../../core/services/window_material_service.dart';
 import 'window_chrome_layout.dart';
+import '../../ui/kit/ui_scale.dart';
 
 /// Borderless window shell: page surfaces reach the top, with a fixed caption
 /// cluster. Existing headers reserve its footprint through WindowChromeScope.
@@ -185,10 +186,16 @@ class _TitleBar extends StatefulWidget {
 class _TitleBarState extends State<_TitleBar> with WindowListener {
   bool _isMaximized = false;
   (bool, bool)? _materialSettings;
+  double _uiScale = 1;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    final scale = UiScale.factorOf(context);
+    if (_uiScale != scale) {
+      _uiScale = scale;
+      _reportRegion();
+    }
     final settings = (
       Theme.of(context).brightness == Brightness.dark,
       false, // All window surfaces are now opaque, including the top edge.
@@ -256,9 +263,14 @@ class _TitleBarState extends State<_TitleBar> with WindowListener {
         : 0.0;
     unawaited(
       TitleBarRegionService.setRegion(
-        barHeight: widget.immersive ? IntegratedTitleBarShell.barHeight : 0,
+        barHeight: widget.immersive
+            ? IntegratedTitleBarShell.barHeight * _uiScale
+            : 0,
         reservedRight:
-            IntegratedTitleBarShell.reservedRight + themeExtra + languageExtra,
+            (IntegratedTitleBarShell.reservedRight +
+                themeExtra +
+                languageExtra) *
+            _uiScale,
       ),
     );
   }

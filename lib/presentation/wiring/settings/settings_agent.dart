@@ -4,7 +4,6 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/nai_agent/tool_catalog.dart';
 import '../../../core/nai_agent/mcp_config.dart';
@@ -27,9 +26,15 @@ import '../../ui/settings/settings_contract.dart';
 final settingsAgentBackendProvider = Provider(SettingsAgentBackend.new);
 
 class SettingsAgentInventory {
-  const SettingsAgentInventory(this.workspaces, this.sessions, this.selected);
+  const SettingsAgentInventory(
+    this.workspaces,
+    this.sessions,
+    this.selected,
+    this.entries,
+  );
   final int workspaces, sessions;
   final AgentWorkspace? selected;
+  final List<AgentWorkspace> entries;
 }
 
 final settingsAgentInventoryProvider = FutureProvider.autoDispose((ref) async {
@@ -48,8 +53,18 @@ final settingsAgentInventoryProvider = FutureProvider.autoDispose((ref) async {
     workspaces.length,
     sessions,
     workspaces.where((workspace) => workspace.id == selected).firstOrNull,
+    workspaces,
   );
 });
+
+final settingsAgentProjectRulesProvider = FutureProvider.autoDispose
+    .family<String?, String>((ref, id) async {
+      final workspace = await ref
+          .watch(naiAgentWorkspaceStoreProvider)
+          .getWorkspace(id);
+      final file = File(p.join(workspace.directory.path, 'AGENTS.md'));
+      return await file.exists() ? await file.readAsString() : null;
+    });
 
 /// Archived chats, workspaces and skills (the Agent "trash").
 final settingsAgentTrashProvider =
@@ -174,6 +189,7 @@ class SettingsAgentBackend {
   );
 
   Future<void> saveSystemPrompt({
+    bool prefix = false,
     required SettingsPromptScope scope,
     required String? text,
     required String workspaceId,
@@ -182,8 +198,10 @@ class SettingsAgentBackend {
   }) async {
     if (scope == SettingsPromptScope.global) {
       await update(
-        {'customSystemPrompt': text},
-        expected: {'customSystemPrompt': expectedGlobal},
+        {prefix ? 'systemPromptPrefix' : 'customSystemPrompt': text},
+        expected: {
+          prefix ? 'systemPromptPrefix' : 'customSystemPrompt': expectedGlobal,
+        },
       );
       return;
     }
@@ -193,6 +211,7 @@ class SettingsAgentBackend {
       await controller.ready;
       await controller.setWorkspacePrompt(
         text,
+        prefix: prefix,
         expectedWorkspaceId: workspaceId,
         checkPrompt: true,
         expectedPrompt: expectedWorkspace,
@@ -200,10 +219,14 @@ class SettingsAgentBackend {
     } else {
       await store.updateWorkspace(
         workspaceId,
-        customSystemPrompt: text,
-        resetPrompt: text == null,
-        checkPrompt: true,
+        customSystemPrompt: prefix ? null : text,
+        resetPrompt: !prefix && text == null,
+        checkPrompt: !prefix,
         expectedPrompt: expectedWorkspace,
+        customSystemPromptPrefix: prefix ? text : null,
+        resetPrefix: prefix && text == null,
+        checkPrefix: prefix,
+        expectedPrefix: expectedWorkspace,
         requireSelected: true,
       );
     }
@@ -389,16 +412,22 @@ class SettingsAgentBackend {
     await FileExplorerUtils.openDirectory(path);
   }
 
-  /// Opens a text file in the system editor, creating it empty if missing.
-  Future<void> openFile(String path) async {
-    final file = File(path);
-    if (!await file.exists()) {
-      await file.parent.create(recursive: true);
-      await file.writeAsString('', flush: true);
+  Future<bool> selectWorkspace(String id) async {
+    if (ref.exists(naiAgentControllerProvider)) {
+      final controller = ref.read(naiAgentControllerProvider);
+      await controller.ready;
+      if (controller.selectedWorkspace?.id != id) {
+        await controller.selectWorkspace(id);
+      }
+    } else {
+      await store.getWorkspace(id);
+      ref
+          .read(naiAgentUiPreferencesProvider)
+          .replace(await store.patchSettings({'selectedWorkspaceId': id}));
     }
-    if (!await launchUrl(Uri.file(path))) {
-      throw StateError('Unable to open file');
-    }
+    ref.invalidate(settingsAgentInventoryProvider);
+    ref.invalidate(settingsAgentProjectRulesProvider(id));
+    return true;
   }
 
   Future<List<AgentTrashItem>> trash() => store.listTrash();
@@ -730,12 +759,26 @@ SettingsAgentData settingsAgentData(
   final workspace = controller?.selectedWorkspace ?? inventory?.selected;
   final skills = ref.watch(naiAgentSkillsProvider(workspace?.id)).valueOrNull;
   final mcpStatus = inspect ? ref.watch(settingsMcpStatusProvider) : null;
+  final rules = inspect && workspace != null
+      ? ref.watch(settingsAgentProjectRulesProvider(workspace.id))
+      : null;
   return SettingsAgentData(
     globalInstructions: settings.globalInstructions,
-    workspaceRulesPath: workspace == null
+    workspaceChoices: [
+      for (final entry
+          in inventory?.entries ??
+              controller?.workspaces ??
+              const <AgentWorkspace>[])
+        SettingsOption(value: entry.id, label: entry.name),
+    ],
+    projectRulesPath: workspace == null
         ? null
-        : p.join(workspace.directory.path, 'instructions.md'),
+        : p.join(workspace.directory.path, 'AGENTS.md'),
+    projectRulesText: rules?.valueOrNull,
+    projectRulesLoading: rules?.isLoading ?? false,
+    projectRulesFailed: rules?.hasError ?? false,
     systemPrefix: settings.systemPromptPrefix,
+    workspacePrefix: workspace?.customSystemPromptPrefix,
     systemPrompt: SettingsSystemPrompt(
       builtin: naiAgentDefaultSystemPrompt,
       global: settings.customSystemPrompt,

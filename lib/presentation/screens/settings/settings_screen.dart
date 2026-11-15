@@ -6,7 +6,7 @@ import '../../providers/settings_navigation_provider.dart';
 import 'widgets/settings_search.dart';
 import 'widgets/settings_tile.dart';
 import 'widgets/settings_ui_theme.dart';
-import 'widgets/settings_typography_scope.dart';
+import 'widgets/settings_motion_scope.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../widgets/common/studio_icons.dart';
@@ -211,7 +211,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     });
     return Theme(
       data: settingsUiTheme(Theme.of(context)),
-      child: SettingsTypographyScope(child: Builder(builder: _buildSettings)),
+      child: SettingsMotionScope(child: Builder(builder: _buildSettings)),
     );
   }
 

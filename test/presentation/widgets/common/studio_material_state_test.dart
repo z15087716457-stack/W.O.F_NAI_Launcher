@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart'
     as studio;
-import 'package:nai_launcher/presentation/widgets/common/workspace_typography_scope.dart';
+import 'package:nai_launcher/presentation/ui/kit/ui_scale.dart';
 
 void main() {
   testWidgets('workspace theme changes preserve input focus and composing', (
@@ -16,7 +16,8 @@ void main() {
     fw.Widget app(bool dark) => fw.MaterialApp(
       theme: dark ? fw.ThemeData.dark() : fw.ThemeData.light(),
       home: fw.Scaffold(
-        body: WorkspaceTypographyScope(
+        body: UiScale(
+          scale: 1,
           child: studio.TextField(controller: controller, focusNode: focus),
         ),
       ),
@@ -47,7 +48,8 @@ void main() {
     await tester.pumpWidget(
       fw.MaterialApp(
         home: fw.Scaffold(
-          body: WorkspaceTypographyScope(
+          body: UiScale(
+            scale: 1,
             child: fw.Form(
               key: form,
               child: studio.TextFormField(

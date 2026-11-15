@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/app_ui_scale.dart';
 import 'dart:async';
 import 'dart:io';
 import 'dart:ui' as ui;
@@ -27,7 +28,7 @@ import 'package:nai_launcher/presentation/screens/settings/sections/integrations
 import 'package:nai_launcher/presentation/screens/settings/sections/privacy_settings_section.dart';
 import 'package:nai_launcher/presentation/screens/settings/widgets/settings_protection_tile.dart';
 import 'package:nai_launcher/presentation/screens/settings/widgets/settings_toggle.dart';
-import 'package:nai_launcher/presentation/screens/settings/widgets/settings_typography_scope.dart';
+import 'package:nai_launcher/presentation/screens/settings/widgets/settings_motion_scope.dart';
 import 'package:nai_launcher/presentation/screens/settings/widgets/settings_ui_theme.dart';
 import 'package:nai_launcher/presentation/screens/settings/widgets/workflow_import_wizard.dart';
 import 'package:nai_launcher/presentation/themes/app_theme.dart';
@@ -193,8 +194,10 @@ void main() {
               fontConfig: FontConfig.defaultFont,
             ),
           ),
-          builder: (context, child) => SettingsTypographyScope(
-            child: RepaintBoundary(key: capture, child: child!),
+          builder: (context, child) => AppUiScale(
+            child: SettingsMotionScope(
+              child: RepaintBoundary(key: capture, child: child!),
+            ),
           ),
           home: Scaffold(
             body: SingleChildScrollView(
@@ -393,9 +396,15 @@ void main() {
       expect(find.text('导入'), findsNothing);
       expect(find.byType(WorkflowImportWizard), findsNothing);
       expect(find.text('工作流管理'), findsNothing);
-      expect(find.byKey(const ValueKey('settings-workflow-fixture')), findsNothing);
+      expect(
+        find.byKey(const ValueKey('settings-workflow-fixture')),
+        findsNothing,
+      );
       expect(workflows.deletes, 0);
-      expect(container.read(comfyUIWorkflowsProvider).any((w) => w.id == 'fixture'), isTrue);
+      expect(
+        container.read(comfyUIWorkflowsProvider).any((w) => w.id == 'fixture'),
+        isTrue,
+      );
       await tester.ensureVisible(find.byType(SettingsToggle));
       await tester.tap(find.byType(SettingsToggle));
       await tester.pumpAndSettle();

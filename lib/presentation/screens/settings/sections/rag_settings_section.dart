@@ -7,6 +7,7 @@ import '../../../../core/rag/rag_settings.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../providers/rag_provider.dart';
 import '../../../providers/rag_model_download_provider.dart';
+import '../../../ui/settings/settings_kit.dart' show SettingsSlider;
 import '../widgets/settings_tile.dart';
 
 /// Uses the existing settings rows; no locked page shell or golden is changed.
@@ -613,27 +614,22 @@ class _RagSettingsSectionState extends ConsumerState<RagSettingsSection> {
         SettingsTile(
           title: Text(l.rag_context),
           subtitle: Text(l.rag_contextHint),
-          trailing: DropdownButton<RagContextMode>(
-            value: settings.mode,
-            onChanged: (v) {
-              if (v != null) {
-                _action(
-                  () => ref
-                      .read(ragSettingsProvider.notifier)
-                      .update(settings.copyWith(mode: v)),
-                );
-              }
-            },
-            items: [
-              DropdownMenuItem(
-                value: RagContextMode.before,
-                child: Text(l.rag_contextBefore),
-              ),
-              DropdownMenuItem(
-                value: RagContextMode.around,
-                child: Text(l.rag_contextAround),
-              ),
-            ],
+          trailing: SettingsSlider(
+            value: settings.tokenBudget.toDouble(),
+            min: RagSettings.minTokenBudget.toDouble(),
+            max: RagSettings.maxTokenBudget.toDouble(),
+            width: 120,
+            step: 1,
+            label: (v) => '${v.round()} tokens',
+            onChanged: (v) => _action(
+              () => ref
+                  .read(ragSettingsProvider.notifier)
+                  .update(
+                    ref
+                        .read(ragSettingsProvider)
+                        .copyWith(tokenBudget: v.round()),
+                  ),
+            ),
           ),
         ),
         Padding(

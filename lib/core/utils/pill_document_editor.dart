@@ -279,7 +279,7 @@ abstract final class PillDocumentEditor {
     if (newText == document.text) return document;
     final instances = Map<String, PillInstance>.of(document.instances);
     instances.removeWhere((marker, _) => !newText.contains(marker));
-    return PillDocument(text: newText, instances: instances);
+    return document.copyWith(text: newText, instances: instances);
   }
 
   /// 投影为最终提示词：普通字符原样；标记字符按实例展开

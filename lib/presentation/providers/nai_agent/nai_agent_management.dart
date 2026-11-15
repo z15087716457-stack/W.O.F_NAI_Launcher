@@ -600,10 +600,6 @@ class NaiAgentManagement {
             'values': values,
             'defaults': {for (final key in keys) key: defaults[key]},
             'version': naiAgentPreferencesVersion(values),
-            'workspace_instructions': p.join(
-              workspace.agentDirectory.path,
-              'instructions.md',
-            ),
             'project_rules': p.join(workspace.directory.path, 'AGENTS.md'),
           };
         } else if (action == 'update') {

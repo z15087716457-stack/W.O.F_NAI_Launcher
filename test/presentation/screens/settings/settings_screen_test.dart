@@ -1,8 +1,9 @@
+import 'package:nai_launcher/presentation/widgets/common/app_ui_scale.dart';
 import 'package:nai_launcher/presentation/providers/shortcuts_provider.dart';
 import 'package:nai_launcher/presentation/providers/settings_navigation_provider.dart';
 import 'package:nai_launcher/core/shortcuts/shortcut_config.dart';
 import 'package:nai_launcher/presentation/providers/font_provider.dart';
-import 'package:nai_launcher/presentation/providers/settings_font_scale_provider.dart';
+import 'package:nai_launcher/presentation/providers/ui_scale_provider.dart';
 import 'package:nai_launcher/presentation/widgets/settings/account_credentials_dialog.dart';
 import 'package:nai_launcher/presentation/widgets/settings/account_subscription_summary.dart';
 import 'package:nai_launcher/presentation/screens/settings/widgets/settings_toggle.dart';
@@ -59,7 +60,7 @@ class _DesignShortcuts extends ShortcutConfigNotifier {
   Future<ShortcutConfig> build() async => ShortcutConfig.createDefault();
 }
 
-class _DesignSettingsScale extends SettingsFontScaleNotifier {
+class _DesignSettingsScale extends UiScaleController {
   _DesignSettingsScale(this.scale);
   final double scale;
   @override
@@ -268,9 +269,7 @@ void main() {
       ProviderScope(
         overrides: [
           shortcutConfigNotifierProvider.overrideWith(_DesignShortcuts.new),
-          settingsFontScaleProvider.overrideWith(
-            () => _DesignSettingsScale(scale),
-          ),
+          uiScaleProvider.overrideWith(() => _DesignSettingsScale(scale)),
           themeNotifierProvider.overrideWith(() => _DesignTheme(brightness)),
           allFontsProvider.overrideWith(
             (ref) async => {
@@ -295,12 +294,7 @@ void main() {
           home: const IntegratedTitleBarShell(child: SettingsScreen()),
           builder: (context, child) => RepaintBoundary(
             key: settingsCaptureKey,
-            child: MediaQuery(
-              data: MediaQuery.of(
-                context,
-              ).copyWith(textScaler: const TextScaler.linear(1)),
-              child: child!,
-            ),
+            child: AppUiScale(child: child!),
           ),
         ),
       ),
@@ -631,9 +625,7 @@ void main() {
                 bridgeDraftVersionProvider.overrideWith(
                   (ref) => 'fixture-draft',
                 ),
-                settingsFontScaleProvider.overrideWith(
-                  () => _DesignSettingsScale(scale),
-                ),
+                uiScaleProvider.overrideWith(() => _DesignSettingsScale(scale)),
                 themeNotifierProvider.overrideWith(
                   () => _DesignTheme(brightness),
                 ),
@@ -713,12 +705,7 @@ void main() {
                 supportedLocales: AppLocalizations.supportedLocales,
                 builder: (context, child) => RepaintBoundary(
                   key: capture,
-                  child: MediaQuery(
-                    data: MediaQuery.of(
-                      context,
-                    ).copyWith(textScaler: const TextScaler.linear(1)),
-                    child: child!,
-                  ),
+                  child: AppUiScale(child: child!),
                 ),
                 home: const SettingsScreen(),
               ),
@@ -878,6 +865,7 @@ void main() {
         );
         await tester.pumpAndSettle();
         await tester.ensureVisible(find.text(label).last);
+        await tester.pumpAndSettle();
         await tester.tap(find.text(label).last);
       }
       await tester.pumpAndSettle();
@@ -1018,12 +1006,7 @@ void main() {
           ),
           builder: (context, child) => RepaintBoundary(
             key: settingsCaptureKey,
-            child: MediaQuery(
-              data: MediaQuery.of(
-                context,
-              ).copyWith(textScaler: const TextScaler.linear(1.1)),
-              child: child!,
-            ),
+            child: AppUiScale(child: child!),
           ),
           locale: const Locale('zh'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,

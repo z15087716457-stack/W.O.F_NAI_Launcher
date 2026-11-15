@@ -11,6 +11,8 @@ import 'package:super_clipboard/super_clipboard.dart';
 
 import '../../core/utils/localization_extension.dart';
 import '../../core/utils/vibe_library_path_helper.dart';
+import '../../core/utils/precise_ref_library_path_helper.dart';
+import '../../core/utils/file_explorer_utils.dart';
 import '../../core/utils/novelai_vibe_codec.dart';
 import 'refs_drop_reader.dart';
 import '../router/app_router.dart';
@@ -118,17 +120,20 @@ class RefsPlatform {
   }
 
   Future<String?> folder() => FilePicker.platform.getDirectoryPath();
-  Future<String> libraryFolder() => VibeLibraryPathHelper.instance.getPath();
+  Future<String> libraryFolder(RefsKind kind) => kind == RefsKind.vibe
+      ? VibeLibraryPathHelper.instance.getPath()
+      : PreciseRefLibraryPathHelper.instance.getPath();
   Future<void> copyImage(Uint8List bytes) =>
       writeImageBytesToClipboardAsPng(bytes);
 
-  Future<void> openFolder(String path) async {
-    final directory = await FileSystemEntity.isDirectory(path)
+  Future<void> openFolder(String path, {bool directory = false}) async {
+    final target = directory || await FileSystemEntity.isDirectory(path)
         ? path
         : p.dirname(path);
-    await Process.start('explorer.exe', [
-      directory,
-    ], mode: ProcessStartMode.detached);
+    if (directory) {
+      await Directory(target).create(recursive: true);
+    }
+    await FileExplorerUtils.openDirectory(target);
   }
 
   Future<bool> confirmEncoding(

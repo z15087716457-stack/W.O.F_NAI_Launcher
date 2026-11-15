@@ -1,5 +1,7 @@
 import 'package:nai_launcher/presentation/wiring/refs_library_wiring.dart';
 import 'dart:io';
+import 'package:nai_launcher/presentation/ui/refs/refs_contract.dart'
+    show RefsKind;
 import 'dart:ui' as ui;
 
 // ignore: depend_on_referenced_packages
@@ -132,7 +134,7 @@ class _Categories extends VibeLibraryCategoryNotifier {
 
 class _RefsPlatform extends RefsPlatform {
   @override
-  Future<String> libraryFolder() async => 'test-library';
+  Future<String> libraryFolder(RefsKind kind) async => 'test-library';
 }
 
 class _References extends PreciseRefLibraryNotifier {

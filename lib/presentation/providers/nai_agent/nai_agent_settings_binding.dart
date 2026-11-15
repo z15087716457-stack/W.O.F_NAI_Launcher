@@ -10,8 +10,7 @@ import '../../../data/services/nai_agent/agent_snapshot_files.dart';
 import '../../../core/autocomplete/autocomplete_settings.dart' as autocomplete;
 import '../theme_provider.dart';
 import '../font_provider.dart';
-import '../font_scale_provider.dart';
-import '../settings_font_scale_provider.dart';
+import '../ui_scale_provider.dart';
 import '../locale_provider.dart';
 import '../history_click_behavior_provider.dart';
 import '../simple_output_viewer_provider.dart';
@@ -56,8 +55,7 @@ NaiAgentSettingsTools bindNaiAgentSettings(
   refresh: () {
     ref.invalidate(themeNotifierProvider);
     ref.invalidate(fontNotifierProvider);
-    ref.invalidate(fontScaleNotifierProvider);
-    ref.invalidate(settingsFontScaleProvider);
+    ref.invalidate(uiScaleProvider);
     ref.invalidate(localeNotifierProvider);
     ref.invalidate(historyClickBehaviorNotifierProvider);
     ref.invalidate(simpleOutputViewerNotifierProvider);

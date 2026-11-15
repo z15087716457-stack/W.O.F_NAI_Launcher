@@ -11,7 +11,7 @@ import 'settings_scope.dart';
 
 /// 按 [SettingKey] 读写的控件：值来自 [SettingsViewData.values]，改动走 [SettingsActions.onChanged]。
 
-/// 绑定一个标量设置的行：自动画“已修改”蓝点、悬停恢复默认、“需重启”标签，并能被搜索跳转高亮。
+/// 绑定即时保存的标量设置：悬停恢复默认、“需重启”标签，以及搜索跳转高亮。
 class SettingKeyRow extends StatelessWidget {
   const SettingKeyRow(
     this.setting, {

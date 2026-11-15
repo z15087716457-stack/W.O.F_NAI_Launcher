@@ -102,6 +102,11 @@ Future<Directory> getApplicationDocumentsDirectory() {
   return Directory(p.join(sandbox, 'documents')).create(recursive: true);
 }
 
+/// User-owned assets share the prepared application data root. On Windows this
+/// is the launcher's adjacent user-data directory, independent of the cwd.
+Future<String> getUserAssetPath(String folder) async =>
+    p.join((await getApplicationSupportDirectory()).path, folder);
+
 Future<Directory> getTemporaryDirectory() async {
   if (!_usesAdjacentData && studioSandboxRoot() == null) {
     return system_paths.getTemporaryDirectory();

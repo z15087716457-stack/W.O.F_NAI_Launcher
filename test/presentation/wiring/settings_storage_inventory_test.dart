@@ -39,6 +39,45 @@ void main() {
   });
   tearDown(() async => temp.delete(recursive: true));
 
+  test('PR originals inside a gallery root count once as PR assets', () async {
+    final images = await Directory(p.join(temp.path, 'pictures')).create();
+    final precise = await Directory(p.join(images.path, 'pr')).create();
+    await File(p.join(images.path, 'generated.png')).writeAsBytes([1, 2, 3]);
+    await File(
+      p.join(precise.path, 'reference.png'),
+    ).writeAsBytes([4, 5, 6, 7]);
+    await File(p.join(precise.path, 'readme.txt')).writeAsBytes([8, 9]);
+    final container = ProviderContainer(
+      overrides: [
+        settingsFoldersProvider.overrideWith(
+          (ref) async => {
+            for (final folder in SettingsFolder.values)
+              folder: folder == SettingsFolder.images
+                  ? images.path
+                  : folder == SettingsFolder.preciseRefs
+                  ? precise.path
+                  : p.join(temp.path, folder.name),
+          },
+        ),
+        settingsGallerySourcesProvider.overrideWith(
+          (ref) async => [images.path],
+        ),
+        ragDirectoryProvider.overrideWithValue(
+          () async => Directory(p.join(temp.path, 'rag')),
+        ),
+        settingsDiskFreeProvider.overrideWithValue((_) async => null),
+      ],
+    );
+    addTearDown(container.dispose);
+    final result = await container.read(settingsStorageDataProvider.future);
+    int bytes(SettingsStorageKind kind) =>
+        result.slices.firstWhere((s) => s.kind == kind).bytes;
+    expect(bytes(SettingsStorageKind.preciseRefs), 4);
+    expect(bytes(SettingsStorageKind.images), 3);
+    expect(bytes(SettingsStorageKind.other), 2);
+    expect(result.totalBytes, 9);
+  });
+
   test(
     'cached totals resolve before traversal and survive a failed silent refresh',
     () async {
@@ -63,7 +102,7 @@ void main() {
                 folder: p.join(temp.path, folder.name),
             },
           ),
-          settingsGalleryExtraRootsProvider.overrideWith((ref) async => []),
+          settingsGallerySourcesProvider.overrideWith((ref) async => []),
           ragDirectoryProvider.overrideWithValue(
             () async => Directory(p.join(temp.path, 'rag')),
           ),
@@ -166,7 +205,7 @@ void main() {
                 folder: p.join(temp.path, folder.name),
             },
           ),
-          settingsGalleryExtraRootsProvider.overrideWith(
+          settingsGallerySourcesProvider.overrideWith(
             (ref) async => [p.join(temp.path, 'extra')],
           ),
           ragDirectoryProvider.overrideWithValue(
@@ -183,7 +222,7 @@ void main() {
       final locations = await container
           .read(settingsStorageLocationsProvider.future)
           .timeout(const Duration(seconds: 1));
-      expect(locations.roots.map((r) => r.primary), [true, false]);
+      expect(locations.roots.map((r) => r.path), [p.join(temp.path, 'extra')]);
       expect(locations.roots.last.path, p.join(temp.path, 'extra'));
       expect(locations.thumbnailLimit, 20 * 1024 * 1024 * 1024);
       expect(locations.folderNames[SettingsFolder.images], 'images');
@@ -192,7 +231,7 @@ void main() {
         const SettingsDirectoryMeasurement(bytes: 3, thumbs: 2, images: 1),
       );
       final measured = await pending.timeout(const Duration(seconds: 2));
-      expect(measured.roots, hasLength(2));
+      expect(measured.roots.map((r) => r.path), [p.join(temp.path, 'extra')]);
       expect(measured.imageCount, 0);
       expect(measured.diskFree, 456);
     },
@@ -233,7 +272,7 @@ void main() {
                     : p.join(temp.path, folder.name),
             },
           ),
-          settingsGalleryExtraRootsProvider.overrideWith(
+          settingsGallerySourcesProvider.overrideWith(
             (ref) async => [vibes.path, images.path],
           ),
           ragDirectoryProvider.overrideWithValue(
@@ -336,7 +375,7 @@ void main() {
                 folder: p.join(temp.path, folder.name),
             },
           ),
-          settingsGalleryExtraRootsProvider.overrideWith(
+          settingsGallerySourcesProvider.overrideWith(
             (ref) async => [nested.path, images.path],
           ),
           ragDirectoryProvider.overrideWithValue(
@@ -357,7 +396,7 @@ void main() {
         5,
       );
       expect(result.thumbnailBytes, 1);
-      expect(result.roots.map((r) => r.images), [2, 1, 2]);
+      expect(result.roots.map((r) => r.images), [1, 2]);
     },
   );
 }

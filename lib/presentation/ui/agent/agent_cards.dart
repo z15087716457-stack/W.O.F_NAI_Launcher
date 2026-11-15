@@ -498,7 +498,6 @@ class _AgentGateCardState extends State<AgentGateCard> {
             child: Row(
               spacing: 8,
               children: [
-                AgentIcon(AgentGlyphs.gen, size: 14, color: c.bg),
                 Expanded(
                   child: Text(
                     l.ag_gateTitle(action),

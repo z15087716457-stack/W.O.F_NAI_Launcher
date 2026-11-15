@@ -185,7 +185,9 @@ void main() {
     },
   );
 
-  testWidgets('renders GitHub Flavored Markdown release notes', (tester) async {
+  testWidgets('renders only changes with their GitHub Flavored Markdown', (
+    tester,
+  ) async {
     const asset = ReleaseAssetInfo(
       type: ReleaseAssetType.windowsPortable,
       platform: 'windows',
@@ -200,7 +202,11 @@ void main() {
       assets: [asset],
       isNewer: true,
       releaseNotes: '''
-# Major Update
+# Studio Release
+## Download
+Installer and badge links
+## 更新内容
+### Major Update
 
 - [x] Persistent notifications
 - **Safe** rollback
@@ -216,6 +222,8 @@ print('updated');
 ```
 
 [Release details](https://example.com/release)
+## 文件校验
+checksums.txt and install verification
 ''',
     );
     const state = UpdateState(
@@ -248,5 +256,8 @@ print('updated');
     expect(find.text('Important note'), findsOneWidget);
     expect(find.text("print('updated');"), findsOneWidget);
     expect(find.text('Release details'), findsOneWidget);
+    expect(find.text('Installer and badge links'), findsNothing);
+    expect(find.textContaining('checksums.txt'), findsNothing);
+    expect(find.text('Studio Release'), findsNothing);
   });
 }

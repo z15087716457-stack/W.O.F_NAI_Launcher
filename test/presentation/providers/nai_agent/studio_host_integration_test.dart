@@ -223,7 +223,7 @@ void main() {
           1 => tool('preferences', 'settings_read', {}),
           2 => tool('update-preferences', 'settings_update', {
             'expected_version': previous!['version'],
-            'changes': {StorageKeys.fontScale: 1.2},
+            'changes': {StorageKeys.uiScale: 1.2},
           }),
           3 => tool('library-tree', 'block_query', {'kind': 'tree'}),
           4 => tool('create-folder', 'block_manage', {
@@ -293,7 +293,7 @@ void main() {
         expect(
           container
               .read(localStorageServiceProvider)
-              .getSetting<double>(StorageKeys.fontScale),
+              .getSetting<double>(StorageKeys.uiScale),
           1.2,
         );
         expect(

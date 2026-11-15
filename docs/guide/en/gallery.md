@@ -22,11 +22,13 @@ Open “Local Gallery” in the left navigation (`Ctrl+2`).
 
 **Organize**
 
-- Multiple gallery folders are supported (“Settings → Gallery Sources”). New images go to “Uncategorized” in the main gallery by default.
+- Gallery sources in “Settings → Storage & Gallery” control which folders you browse; removing a source keeps its files. Set the generated image directory separately. Automatic and manual saves both use its `Uncategorized` subfolder.
 - Folders serve as categories; create, move and copy them.
 - Favorites: hearts + collections, with unlimited collection nesting.
 - Select multiple images to move, package, edit metadata or add to collections in batches.
 - Deleted images go to “Trash” first and can be restored. They are permanently deleted on the next launch.
+
+On Windows, images, Vibe files and PR (Precise Reference) originals default to `user-data/images`, `user-data/vibes` and `user-data/precise_refs` inside the launcher directory. Change or open each directory in Storage & Gallery. Existing custom paths are kept, and old files remain readable at their original locations without being moved automatically.
 
 **Reuse**
 

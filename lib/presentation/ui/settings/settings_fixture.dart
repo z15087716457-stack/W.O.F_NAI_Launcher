@@ -30,7 +30,7 @@ abstract final class SettingsFixture {
   static const values = SettingsValues({
     SettingKey.themeMode: 'light',
     SettingKey.fontFamily: 'harmony',
-    SettingKey.settingsFontScale: 1.0,
+    SettingKey.uiScale: 1.0,
     SettingKey.language: 'zh',
     SettingKey.completionSound: true,
     SettingKey.completionSoundFile: r'C:\Users\Pie\Music\chime-soft.wav',
@@ -46,6 +46,7 @@ abstract final class SettingsFixture {
     SettingKey.imageSavePath: r'E:\A.I\NovelAI\outputs',
     SettingKey.agentModel: 'claude-sonnet-4.5',
     SettingKey.agentNextSuggestion: true,
+    SettingKey.agentSkipPaidConfirmation: false,
     SettingKey.agentCacheWarming: 'streaming',
     SettingKey.upscaleDefault: 'animeQuality',
     SettingKey.seedCpuOffload: 8.0,
@@ -259,6 +260,7 @@ abstract final class SettingsFixture {
       SettingsStorageSlice(SettingsStorageKind.images, (31.4 * _gb) ~/ 1),
       SettingsStorageSlice(SettingsStorageKind.upscaleModels, (4.8 * _gb) ~/ 1),
       SettingsStorageSlice(SettingsStorageKind.vibes, (2.3 * _gb) ~/ 1),
+      SettingsStorageSlice(SettingsStorageKind.preciseRefs, 80 * _mb),
       SettingsStorageSlice(SettingsStorageKind.thumbnails, (1.2 * _gb) ~/ 1),
       SettingsStorageSlice(SettingsStorageKind.ragIndex, (1.1 * _gb) ~/ 1),
       SettingsStorageSlice(SettingsStorageKind.dictionaries, 655 * _mb),
@@ -271,7 +273,6 @@ abstract final class SettingsFixture {
         id: 'out',
         path: r'E:\A.I\NovelAI\outputs',
         images: 9840,
-        primary: true,
       ),
       SettingsGalleryRoot(id: 'pixiv', path: r'D:\Pixiv\收藏', images: 1962),
       SettingsGalleryRoot(id: 'tmp', path: r'E:\A.I\NovelAI\临时存图', images: 606),
@@ -283,10 +284,17 @@ abstract final class SettingsFixture {
     folderNames: const {
       SettingsFolder.images: 'outputs',
       SettingsFolder.vibes: 'vibes',
+      SettingsFolder.preciseRefs: 'precise_refs',
       SettingsFolder.thumbnails: '.thumbs',
       SettingsFolder.appData: 'hive',
       SettingsFolder.logs: 'logs',
     },
+    folderPaths: const {
+      SettingsFolder.images: r'E:\A.I\NovelAI\outputs',
+      SettingsFolder.vibes: r'E:\NAI Studio\user-data\vibes',
+      SettingsFolder.preciseRefs: r'E:\NAI Studio\user-data\precise_refs',
+    },
+    imageSaveDirectory: r'E:\A.I\NovelAI\outputs\Uncategorized',
   );
 
   static final _models = SettingsModelsData(
@@ -450,6 +458,12 @@ abstract final class SettingsFixture {
   );
 
   static const _agent = SettingsAgentData(
+    workspaceChoices: [
+      SettingsOption(value: 'inspire', label: '灵感'),
+      SettingsOption(value: 'study', label: '研究'),
+    ],
+    projectRulesPath: 'workspaces/inspire/AGENTS.md',
+    projectRulesText: '# 项目规则：使用中文交流，保留已确认的创作选择。',
     quick: [
       SettingsQuickMessage(
         id: 'builtin-review',

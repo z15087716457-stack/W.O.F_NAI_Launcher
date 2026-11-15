@@ -246,8 +246,6 @@ abstract final class SettingsFormat {
       (SettingKey.wheelModifier, 'none') => l.set_gnNoKey,
       (SettingKey.galleryQuality, 'high') => l.set_stHigh,
       (SettingKey.galleryQuality, 'standard') => l.set_stStandard,
-      (SettingKey.ragContext, 'beforeCursor') => l.set_rgBefore,
-      (SettingKey.ragContext, 'around') => l.set_rgAround,
       (SettingKey.ragDevice, 'auto') => l.set_rgAuto,
       (SettingKey.ragDevice, 'cuda') => 'CUDA',
       (SettingKey.ragDevice, 'cpu') => 'CPU',

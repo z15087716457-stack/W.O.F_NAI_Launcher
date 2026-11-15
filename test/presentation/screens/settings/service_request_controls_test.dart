@@ -38,7 +38,10 @@ void _expectAlignedStepper(WidgetTester tester, String name) {
     matching: find.byType(EditableText),
   );
   final painted = InputDecorator.containerOf(tester.element(editable))!;
-  final input = painted.localToGlobal(Offset.zero) & painted.size;
+  final input = Rect.fromPoints(
+    painted.localToGlobal(Offset.zero),
+    painted.localToGlobal(painted.size.bottomRight(Offset.zero)),
+  );
   for (final part in ['decrease', 'increase', 'unit']) {
     final bounds = tester.getRect(_button(name, part));
     expect(bounds.height, closeTo(input.height, .01));

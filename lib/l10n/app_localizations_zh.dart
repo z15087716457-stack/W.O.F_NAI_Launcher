@@ -465,11 +465,11 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_autoSaveSubtitle => '生成后自动保存图片';
 
   @override
-  String get settings_extraRootsTitle => '图库源管理';
+  String get settings_extraRootsTitle => '图库来源';
 
   @override
   String get settings_extraRootsHint =>
-      '额外图库源：可浏览可搜索，图片可移动/复制到分类；不参与自动保存。添加后会立即扫描。';
+      '添加的文件夹用于浏览和搜索；父文件夹会合并其下已收录的来源。移除不删除图片，也不改变保存位置。';
 
   @override
   String get settings_extraRootsEmpty => '尚未添加额外图库源';
@@ -507,10 +507,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_extraRootsDuplicate => '该文件夹已在图库源中';
 
   @override
-  String get settings_extraRootsSameAsMain => '该文件夹与图片保存位置相同';
-
-  @override
-  String get settings_extraRootsNested => '图库源之间不能互相包含，请选择其他文件夹';
+  String get settings_extraRootsNested => '这个文件夹已包含在现有图库来源中，无需重复添加';
 
   @override
   String get settings_extraRootsNotFound => '所选文件夹不存在';
@@ -680,7 +677,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get generation_canvasDisplaySettings => '画布显示';
 
   @override
-  String get generation_canvasZoomToFill => '放大填充（允许 >100%）';
+  String get generation_canvasZoomToFill => '放大适应画布（允许超过 100%）';
 
   @override
   String get generation_canvasEmpty => '画布为空';
@@ -972,7 +969,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get prompt_cooccurrenceRecommendationSubtitle =>
-      'Ctrl+单击搜索本地标签；Ctrl+拖选查看关联标签';
+      '按住 Ctrl 点击标签或拖选文字，搜索标签与相关推荐；Mac 使用 ⌘。';
 
   @override
   String get prompt_formatted => '已格式化';
@@ -2143,7 +2140,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get api_error_network_hint => '无法连接到服务器，请检查网络';
 
   @override
-  String get drop_processing => '正在解析图片...';
+  String get drop_processing => '正在准备图片';
+
+  @override
+  String get drop_processingSubtitle => '读取完成后选择用途';
 
   @override
   String get characterEditor_clearAll => '清空所有';
@@ -3632,7 +3632,10 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get drop_hint => '拖拽图片到这里';
+  String get drop_hint => '松开以导入图片';
+
+  @override
+  String get drop_hintSubtitle => '下一步选择图片用途';
 
   @override
   String get drop_img2img => '图生图';
@@ -4132,7 +4135,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get settings_fontScale => '字体大小';
+  String get settings_fontScale => '界面缩放';
 
   @override
   String get settings_fontScale_previewSmall => '光影落在画布上。';
@@ -5312,7 +5315,8 @@ class AppLocalizationsZh extends AppLocalizations {
   String get autocomplete_relatedTagsTitle => '标签扩展';
 
   @override
-  String get autocomplete_relatedTagsSubtitle => 'Ctrl+单击搜索本地标签；Ctrl+拖选查看关联标签';
+  String get autocomplete_relatedTagsSubtitle =>
+      '按住 Ctrl 点击标签或拖选文字，搜索标签与相关推荐；Mac 使用 ⌘。';
 
   @override
   String get tagExpansion_searchHint => '搜索标签或别名';
@@ -5810,7 +5814,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get tips_prompt_guide_3 =>
-      'Ctrl+单击提示词里的标签，直接在本地标签库里搜它；Ctrl+拖选一段，看看哪些标签常和它一起出现。';
+      '按住 Ctrl（Mac 用 ⌘）点击标签或拖选文字，打开标签扩展，搜索标签或查看相关推荐。';
 
   @override
   String get tips_prompt_guide_4 => '选中一段文字点右键，可以直接保存到块库。以后点一下或拖一下，它就回来了。';
@@ -6847,7 +6851,8 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_makeReadingComfortable => '统一阅读体验';
 
   @override
-  String get settings_adjustSettingsPagesDialogsOnly => '仅调整设置页面与设置弹窗的字号';
+  String get settings_adjustSettingsPagesDialogsOnly =>
+      '统一调整应用内文字、图标和控件大小，不改变图片分辨率。';
 
   @override
   String get settings_motionNotifications => '动效与提醒';
@@ -8418,6 +8423,40 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get promptTranslation_tutorial => '操作教程';
+
+  @override
+  String get promptReading_mode => '轻量翻译';
+
+  @override
+  String get promptReading_modeSubtitle => '原文下方显示译文';
+
+  @override
+  String get promptReading_blocks => '翻译块';
+
+  @override
+  String get promptReading_blocksSubtitle => '以翻译块阅读和编辑';
+
+  @override
+  String get promptReading_update => '翻译新增／改动内容';
+
+  @override
+  String get promptReading_hide => '隐藏译文';
+
+  @override
+  String get promptReading_show => '显示译文';
+
+  @override
+  String get promptReading_clear => '清除译文';
+
+  @override
+  String get promptReading_cleared => '已清除译文';
+
+  @override
+  String get promptReading_pending => '待更新';
+
+  @override
+  String get promptReading_guide =>
+      '按逗号逐项显示只读译文，不显示权重语法。点击原文进入编辑，离开后恢复译文；原文段删除后，对应译文消失。菜单可更新、隐藏或清除译文。复制与生成使用原文。';
 
   @override
   String get promptTranslation_guideBack => '返回操作';
@@ -12820,9 +12859,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get blocks_changeImage => '换图';
 
   @override
-  String get blocks_clearThumb => '清除预览图';
-
-  @override
   String get blocks_cropHint => '拖动 / 滚轮缩放';
 
   @override
@@ -14762,10 +14798,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get gen_bdCustom => '自定义';
 
   @override
-  String get gen_zoomToFill => '放大填满';
+  String get gen_zoomToFill => '放大适应画布';
 
   @override
-  String get gen_zoomToFillSub => '比画布小的图也放大到撑满';
+  String get gen_zoomToFillSub => '聚焦时允许超过 100% 放大，按比例完整显示';
 
   @override
   String get gen_useSeed => '用这个种子（并固定）';
@@ -16284,22 +16320,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get rag_auto => '自动选择';
 
   @override
-  String get rag_tagsEnabled => '标签上下文推荐';
+  String get rag_tagsEnabled => '标签语义搜索与推荐';
 
   @override
-  String get rag_tagsHint => '结合语义、共现与文字重排；各框、角色和正负面独立。';
+  String get rag_tagsHint => '支持按输入内容搜索，也可根据光标前上下文推荐标签。';
 
   @override
   String get rag_context => '推荐上下文范围';
 
   @override
-  String get rag_contextHint => '两种模式均最多 120 个 Gemma tokens，按完整标签取样；全文仅用于去重。';
-
-  @override
-  String get rag_contextBefore => '光标前 · 120 tokens';
-
-  @override
-  String get rag_contextAround => '插入点前后 · 120 tokens';
+  String get rag_contextHint => '固定取光标前，按完整标签截取。可调整为 32–512 个 Gemma token。';
 
   @override
   String get rag_buildIndex => '预览并建立索引';
@@ -17075,7 +17105,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_apSystem => '跟随系统';
 
   @override
-  String get set_apSystemSub => '按 Windows 设置自动切换';
+  String get set_apSystemSub => '跟随系统的浅色或深色外观';
 
   @override
   String get set_apText => '文字';
@@ -17087,10 +17117,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_apFontSub => '中文用 HarmonyOS Sans SC，数字与代码用 Geist Mono';
 
   @override
-  String get set_apScale => '设置与对话框字号';
+  String get set_apScale => '界面缩放';
 
   @override
-  String get set_apScaleSub => '只放大设置页和弹窗，不影响画布和图片';
+  String get set_apScaleSub => '统一调整应用内文字、图标和控件大小，不改变图片分辨率。';
 
   @override
   String get set_apSampleTitle => '标题 · 生成完成';
@@ -17129,10 +17159,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_apPreviewSound => '试听';
 
   @override
-  String get set_apNotify => '通知样式';
+  String get set_apNotify => '操作提示';
 
   @override
-  String get set_apNotifySub => '提示从窗口右上角出现，3 秒后自动消失';
+  String get set_apNotifySub => '预览应用内操作结果提示的显示效果';
 
   @override
   String get set_apNotifyPreview => '预览一条';
@@ -17194,10 +17224,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_cvLockSub => '新图出现时不自动飞过去，视角保持在你停下的位置';
 
   @override
-  String get set_cvFill => '新图缩放到填满';
+  String get set_cvFill => '放大适应画布';
 
   @override
-  String get set_cvFillSub => '聚焦单张时放大到可视区域，而不是按原始像素';
+  String get set_cvFillSub => '聚焦图片时允许超过 100% 放大，按比例完整显示在可视区域；关闭时自动适配最高为 100%。';
 
   @override
   String get set_cvChannel => '视觉通道';
@@ -17517,16 +17547,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_gnNoKey => '无需按键';
 
   @override
-  String get set_gnRelated => '相关标签扩展';
+  String get set_gnRelated => 'Ctrl 标签扩展';
 
   @override
-  String get set_gnRelatedSub => '输入标签时附带推荐常一起出现的标签';
+  String get set_gnRelatedSub => '按住 Ctrl 点击标签或拖选文字，搜索标签与相关推荐；Mac 使用 ⌘。';
 
   @override
   String get set_gnRag => '语义标签推荐';
 
   @override
-  String get set_gnRagSub => '结合上下文的智能推荐，由“语义检索”提供';
+  String get set_gnRagSub => '为标签扩展提供语义搜索与上下文推荐，可在“语义检索”中配置。';
 
   @override
   String get set_gnReady => '已就绪';
@@ -17609,7 +17639,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_stSave => '保存';
 
   @override
-  String get set_stSavePath => '图片保存位置';
+  String get set_stSavePath => '生成图片保存目录';
+
+  @override
+  String set_stSavePathSub(String path) {
+    return '自动和手动保存的实际目录：\n$path';
+  }
 
   @override
   String get set_stAutoSave => '自动保存';
@@ -17621,7 +17656,19 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_stAssets => '素材与显示';
 
   @override
-  String get set_stVibePath => 'Vibe 库位置';
+  String get set_stVibePath => 'Vibe 文件目录';
+
+  @override
+  String get set_stVibePathSub => '读取和保存 Vibe 文件；旧文件保留原位置。';
+
+  @override
+  String get set_stPr => 'PR 库';
+
+  @override
+  String get set_stPrPath => 'PR 文件目录';
+
+  @override
+  String get set_stPrPathSub => '保存精准参考原图；旧文件保留原位置。';
 
   @override
   String get set_stQuality => '本地画廊清晰度';
@@ -17639,10 +17686,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_stRoots => '图库来源';
 
   @override
-  String get set_stRootsSub => '任何文件夹都可以加入本地画廊浏览和搜索，不参与自动保存。';
-
-  @override
-  String get set_stPrimary => '主目录';
+  String get set_stRootsSub => '用于图库浏览和搜索；移除只取消收录，不删除图片，也不改变保存位置。';
 
   @override
   String set_stCount(Object n) {
@@ -17819,12 +17863,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get set_dcSemantics => '个人语义资料';
-
-  @override
-  String get set_dcSemanticsSub => '保存补充的中文资料；清理翻译缓存时保留';
-
-  @override
   String get set_dcTranslate => '标签翻译与语义补充';
 
   @override
@@ -17891,7 +17929,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get set_dcTip =>
-      '词库和缓存可以重新获取。个人语义资料请在本页单独导出；账号、历史和块库的备份位置见“存储与图库 → 应用数据位置”。';
+      '词库可重新下载，缓存可重新生成。补充的中文资料不随翻译缓存清理；数据位置见“存储与图库 → 应用数据位置”。';
 
   @override
   String get set_mdDesc =>
@@ -18060,7 +18098,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_agInstr => '指令';
 
   @override
-  String get set_agInstrSub => '按下面的顺序拼成最终提示词；已有聊天保持原样，之后的请求使用新内容。';
+  String get set_agInstrSub => '选择查看范围；全局指令与工作区 AGENTS.md 共同生效，修改用于之后的请求。';
 
   @override
   String get set_agOrderBuiltin => '内置系统提示词';
@@ -18070,9 +18108,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get set_agOrderGlobal => '全局指令';
-
-  @override
-  String get set_agOrderWorkspace => '工作区规则';
 
   @override
   String get set_agGlobal => '全局指令';
@@ -18218,10 +18253,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_rgSourcesSub => '每个来源单独建库、单独开关；建库可以暂停，已完成的部分立即可用。';
 
   @override
-  String get set_rgTags => '标签上下文推荐';
+  String get set_rgTags => '标签语义搜索与推荐';
 
   @override
-  String get set_rgTagsSub => '结合语义、共现与重排；各提示词框、角色和正负面分开计算';
+  String get set_rgTagsSub => '支持按输入内容搜索，也可根据光标前上下文推荐标签。';
 
   @override
   String get set_rgWiki => 'Wiki 语义搜索';
@@ -18280,16 +18315,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_rgContext => '推荐上下文';
 
   @override
-  String get set_rgContextSub => '两种都最多取 120 个 Gemma token，按完整标签截取。';
+  String get set_rgContextSub => '固定取光标前，按完整标签截取。可调整为 32–512 个 Gemma token。';
 
   @override
-  String get set_rgRange => '取样范围';
-
-  @override
-  String get set_rgBefore => '光标前';
-
-  @override
-  String get set_rgAround => '插入点前后';
+  String get set_rgRange => '取样长度';
 
   @override
   String get set_rgRuntime => '模型与运行环境';
@@ -19254,6 +19283,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_agBaseSwitchTitle => '放弃内置系统提示词的修改？';
 
   @override
+  String get set_agPrefixSwitchTitle => '放弃前置内容的修改？';
+
+  @override
+  String get set_agPrefixInheritHint => '留空则沿用全局前置内容。';
+
+  @override
   String get set_agBaseSwitchBody => '切换范围会丢掉还没保存的修改。';
 
   @override
@@ -19372,10 +19407,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get set_agSkillManualTip => '不进提示词，Agent 不会自己用；在聊天框输入 /skill:名称 才会调用。';
-
-  @override
-  String get set_agWorkspaceRulesSub =>
-      '只对当前工作区生效的补充要求，存为工作区里的 instructions.md，排在全局指令之后；点“编辑”用系统编辑器打开，留空就不加。';
 
   @override
   String get set_agSkillDescNaiPrompt =>
@@ -19617,14 +19648,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ag_modeBypass => '完全权限';
 
   @override
-  String get ag_modeBypassHint => '不再询问，所有操作直接执行；花 Anlas 仍要确认';
+  String get ag_modeBypassHint => '所有操作直接执行；免费免确认，付费按 Agent 设置确认';
 
   @override
   String get ag_bypassConfirmTitle => '切换到完全权限？';
 
   @override
   String get ag_bypassConfirmBody =>
-      'Agent 将不再询问，直接修改文件、运行命令、调用未知工具，也能操作工作区以外的文件。花 Anlas 的操作仍会先请你确认。只在你信任当前任务时使用。';
+      'Agent 将不再询问，直接修改文件、运行命令、调用未知工具，也能操作工作区以外的文件。免费生成自动执行；付费操作默认确认，可在 Agent 设置中关闭确认。只在你信任当前任务时使用。';
 
   @override
   String get ag_bypassConfirmOk => '切换';
@@ -20577,9 +20608,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ag_memoryChatPrefixHint => '仅当前会话生效，放在内置提示词之前。';
 
   @override
-  String get ag_memoryWorkspace => '本工作区规则';
-
-  @override
   String get ag_memorySkills => '生效的 Skill';
 
   @override
@@ -21451,15 +21479,22 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_agNextSuggestion => '下一句建议';
 
   @override
+  String get set_agSkipPaidConfirmation => '付费也无需确认';
+
+  @override
+  String get set_agSkipPaidConfirmationSub =>
+      '仅完全权限生效。免费操作自动执行；开启后，消耗 Anlas 的生成和图像操作也无需确认。';
+
+  @override
   String get set_agNextSuggestionSub =>
       '使用当前对话模型预测你的下一句消息，会额外消耗 token；按 Tab 采纳。';
 
   @override
-  String get set_agCacheWarming => '提示缓存预热';
+  String get set_agCacheWarming => '提示缓存保温';
 
   @override
   String get set_agCacheWarmingSub =>
-      '在提示缓存快过期前用 1 token 的请求续上（按 5 分钟寿命，适配所有模型），下一步读缓存而不是重发整段上下文。';
+      '通过轻量请求延长提示缓存，减少后续请求重新计算上下文的开销；是否命中缓存以服务商为准。';
 
   @override
   String get set_agCacheOff => '关闭';
@@ -21468,13 +21503,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_agCacheStreaming => '只在 Agent 运行时';
 
   @override
-  String get set_agCacheIdle => '空闲时也预热';
+  String get set_agCacheIdle => '空闲时也保温';
 
   @override
-  String get set_agCacheIdleCost => '空闲时也预热（最多 30 分钟）会产生额外模型费用。';
+  String get set_agCacheIdleCost => '空闲时也保温（最多 30 分钟）会产生额外模型费用。';
 
   @override
-  String get ag_cacheWarmTitle => '缓存预热';
+  String get ag_cacheWarmTitle => '缓存保温';
 
   @override
   String get ag_cacheWarmOff => '已关闭';
@@ -21539,16 +21574,10 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get set_workspaceFontScale => '创作区文字字号';
-
-  @override
   String get set_promptAutocomplete => '提示词自动补全';
 
   @override
   String get shortcut_action_open_resource_window => '打开资源小窗';
-
-  @override
-  String get set_workspaceFontScaleSub => '提示词框、角色框、块与大图提示词里的文字；和上面的界面字号分开调。';
 
   @override
   String get set_promptAutocompleteSub =>
@@ -21865,6 +21894,33 @@ class AppLocalizationsZh extends AppLocalizations {
   String ag_externalNeedsAttention(String client) {
     return '$client 有操作需要你处理';
   }
+
+  @override
+  String get set_agViewScope => '查看范围';
+
+  @override
+  String get set_agViewGlobalHint => '所有工作区共用的指令与前缀';
+
+  @override
+  String get set_agViewWorkspaceHint => '当前工作区的项目规则';
+
+  @override
+  String get set_agProjectRules => '工作区 AGENTS.md';
+
+  @override
+  String get set_agRulesReadonly => '只读';
+
+  @override
+  String get set_agRulesView => '查看';
+
+  @override
+  String get set_agRulesMissing => '此工作区尚未创建 AGENTS.md';
+
+  @override
+  String get set_agRulesEmpty => 'AGENTS.md 暂无内容';
+
+  @override
+  String get set_agRulesLoadFailed => '无法读取 AGENTS.md，请检查文件权限。';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -22328,11 +22384,11 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get settings_autoSaveSubtitle => '生成後自動儲存圖片';
 
   @override
-  String get settings_extraRootsTitle => '圖庫源管理';
+  String get settings_extraRootsTitle => '圖庫來源';
 
   @override
   String get settings_extraRootsHint =>
-      '額外圖庫源：可瀏覽可搜尋，圖片可移動/複製到分類；不參與自動儲存。新增後會立即掃描。';
+      '新增的資料夾用於瀏覽和搜尋；父資料夾會合並其下已收錄的來源。移除不刪除圖片，也不改變儲存位置。';
 
   @override
   String get settings_extraRootsEmpty => '尚未新增額外圖庫源';
@@ -22370,10 +22426,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get settings_extraRootsDuplicate => '該資料夾已在圖庫源中';
 
   @override
-  String get settings_extraRootsSameAsMain => '該資料夾與圖片儲存位置相同';
-
-  @override
-  String get settings_extraRootsNested => '圖庫源之間不能互相包含，請選擇其他資料夾';
+  String get settings_extraRootsNested => '這個資料夾已包含在現有圖庫來源中，無需重複新增';
 
   @override
   String get settings_extraRootsNotFound => '所選資料夾不存在';
@@ -22543,7 +22596,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get generation_canvasDisplaySettings => '畫布顯示';
 
   @override
-  String get generation_canvasZoomToFill => '放大填充（允許 >100%）';
+  String get generation_canvasZoomToFill => '放大適應畫布（允許超過 100%）';
 
   @override
   String get generation_canvasEmpty => '畫布為空';
@@ -22835,7 +22888,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get prompt_cooccurrenceRecommendationSubtitle =>
-      'Ctrl+單擊搜尋本地標籤；Ctrl+拖選檢視關聯標籤';
+      '按住 Ctrl 點選標籤或拖選文字，搜尋標籤與相關推薦；Mac 使用 ⌘。';
 
   @override
   String get prompt_formatted => '已格式化';
@@ -24006,7 +24059,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get api_error_network_hint => '無法連線到伺服器，請檢查網路';
 
   @override
-  String get drop_processing => '正在解析圖片...';
+  String get drop_processing => '正在準備圖片';
+
+  @override
+  String get drop_processingSubtitle => '讀取完成後選擇用途';
 
   @override
   String get characterEditor_clearAll => '清空所有';
@@ -25495,7 +25551,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
-  String get drop_hint => '拖曳圖片到這裡';
+  String get drop_hint => '鬆開以匯入圖片';
+
+  @override
+  String get drop_hintSubtitle => '下一步選擇圖片用途';
 
   @override
   String get drop_img2img => '圖生圖';
@@ -25995,7 +26054,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
-  String get settings_fontScale => '字型大小';
+  String get settings_fontScale => '介面縮放';
 
   @override
   String get settings_fontScale_previewSmall => '光影落在畫布上。';
@@ -27175,7 +27234,8 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get autocomplete_relatedTagsTitle => '標籤擴展';
 
   @override
-  String get autocomplete_relatedTagsSubtitle => 'Ctrl+單擊搜尋本地標籤；Ctrl+拖選檢視關聯標籤';
+  String get autocomplete_relatedTagsSubtitle =>
+      '按住 Ctrl 點選標籤或拖選文字，搜尋標籤與相關推薦；Mac 使用 ⌘。';
 
   @override
   String get tagExpansion_searchHint => '搜尋標籤或別名';
@@ -27673,7 +27733,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get tips_prompt_guide_3 =>
-      'Ctrl+單擊提示詞裡的標籤，直接在本地標籤庫裡搜它；Ctrl+拖選一段，看看哪些標籤常和它一起出現。';
+      '按住 Ctrl（Mac 用 ⌘）點選標籤或拖選文字，開啟標籤擴展，搜尋標籤或檢視相關推薦。';
 
   @override
   String get tips_prompt_guide_4 => '選中一段文字點右鍵，可以直接儲存到塊庫。以後點一下或拖一下，它就回來了。';
@@ -28710,7 +28770,8 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get settings_makeReadingComfortable => '統一閱讀體驗';
 
   @override
-  String get settings_adjustSettingsPagesDialogsOnly => '僅調整設定頁面與設定彈窗的字號';
+  String get settings_adjustSettingsPagesDialogsOnly =>
+      '統一調整應用內文字、圖示和控制元件大小，不改變圖片解析度。';
 
   @override
   String get settings_motionNotifications => '動效與提醒';
@@ -30281,6 +30342,40 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get promptTranslation_tutorial => '操作教程';
+
+  @override
+  String get promptReading_mode => '輕量翻譯';
+
+  @override
+  String get promptReading_modeSubtitle => '原文下方顯示譯文';
+
+  @override
+  String get promptReading_blocks => '翻譯塊';
+
+  @override
+  String get promptReading_blocksSubtitle => '以翻譯塊閱讀和編輯';
+
+  @override
+  String get promptReading_update => '翻譯新增／改動內容';
+
+  @override
+  String get promptReading_hide => '隱藏譯文';
+
+  @override
+  String get promptReading_show => '顯示譯文';
+
+  @override
+  String get promptReading_clear => '清除譯文';
+
+  @override
+  String get promptReading_cleared => '已清除譯文';
+
+  @override
+  String get promptReading_pending => '待更新';
+
+  @override
+  String get promptReading_guide =>
+      '按逗號逐項顯示只讀譯文，不顯示權重語法。點選原文進入編輯，離開後恢復譯文；原文段刪除後，對應譯文消失。選單可更新、隱藏或清除譯文。複製與生成使用原文。';
 
   @override
   String get promptTranslation_guideBack => '返回操作';
@@ -34683,9 +34778,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get blocks_changeImage => '換圖';
 
   @override
-  String get blocks_clearThumb => '清除預覽圖';
-
-  @override
   String get blocks_cropHint => '拖動 / 滾輪縮放';
 
   @override
@@ -36625,10 +36717,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get gen_bdCustom => '自訂';
 
   @override
-  String get gen_zoomToFill => '放大填滿';
+  String get gen_zoomToFill => '放大適應畫布';
 
   @override
-  String get gen_zoomToFillSub => '比畫布小的圖也放大到撐滿';
+  String get gen_zoomToFillSub => '聚焦時允許超過 100% 放大，按比例完整顯示';
 
   @override
   String get gen_useSeed => '用這個種子（並固定）';
@@ -38147,22 +38239,16 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get rag_auto => '自動選擇';
 
   @override
-  String get rag_tagsEnabled => '標籤上下文推薦';
+  String get rag_tagsEnabled => '標籤語義搜尋與推薦';
 
   @override
-  String get rag_tagsHint => '結合語義、共現與文字重排；各框、角色和正負面獨立。';
+  String get rag_tagsHint => '支援按輸入內容搜尋，也可根據游標前上下文推薦標籤。';
 
   @override
   String get rag_context => '推薦上下文範圍';
 
   @override
-  String get rag_contextHint => '兩種模式均最多 120 個 Gemma tokens，按完整標籤取樣；全文僅用於去重。';
-
-  @override
-  String get rag_contextBefore => '游標前 · 120 tokens';
-
-  @override
-  String get rag_contextAround => '插入點前後 · 120 tokens';
+  String get rag_contextHint => '固定取游標前，按完整標籤擷取。可調整為 32–512 個 Gemma token。';
 
   @override
   String get rag_buildIndex => '預覽並建立索引';
@@ -38938,7 +39024,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get set_apSystem => '跟隨系統';
 
   @override
-  String get set_apSystemSub => '按 Windows 設定自動切換';
+  String get set_apSystemSub => '跟隨系統的淺色或深色外觀';
 
   @override
   String get set_apText => '文字';
@@ -38950,10 +39036,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get set_apFontSub => '中文用 HarmonyOS Sans SC，數字與程式碼用 Geist Mono';
 
   @override
-  String get set_apScale => '設定與對話方塊字號';
+  String get set_apScale => '介面縮放';
 
   @override
-  String get set_apScaleSub => '只放大設定頁和彈窗，不影響畫布和圖片';
+  String get set_apScaleSub => '統一調整應用內文字、圖示和控制元件大小，不改變圖片解析度。';
 
   @override
   String get set_apSampleTitle => '標題 · 生成完成';
@@ -38992,10 +39078,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get set_apPreviewSound => '試聽';
 
   @override
-  String get set_apNotify => '通知樣式';
+  String get set_apNotify => '操作提示';
 
   @override
-  String get set_apNotifySub => '提示從視窗右上角出現，3 秒後自動消失';
+  String get set_apNotifySub => '預覽應用內操作結果提示的顯示效果';
 
   @override
   String get set_apNotifyPreview => '預覽一條';
@@ -39057,10 +39143,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get set_cvLockSub => '新圖出現時不自動飛過去，視角保持在你停下的位置';
 
   @override
-  String get set_cvFill => '新圖縮放到填滿';
+  String get set_cvFill => '放大適應畫布';
 
   @override
-  String get set_cvFillSub => '聚焦單張時放大到可視區域，而不是按原始像素';
+  String get set_cvFillSub => '聚焦圖片時允許超過 100% 放大，按比例完整顯示在可視區域；關閉時自動適配最高為 100%。';
 
   @override
   String get set_cvChannel => '視覺通道';
@@ -39380,16 +39466,16 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get set_gnNoKey => '無需按鍵';
 
   @override
-  String get set_gnRelated => '相關標籤擴展';
+  String get set_gnRelated => 'Ctrl 標籤擴展';
 
   @override
-  String get set_gnRelatedSub => '輸入標籤時附帶推薦常一起出現的標籤';
+  String get set_gnRelatedSub => '按住 Ctrl 點選標籤或拖選文字，搜尋標籤與相關推薦；Mac 使用 ⌘。';
 
   @override
   String get set_gnRag => '語義標籤推薦';
 
   @override
-  String get set_gnRagSub => '結合上下文的智慧推薦，由“語義檢索”提供';
+  String get set_gnRagSub => '為標籤擴展提供語義搜尋與上下文推薦，可在“語義檢索”中配置。';
 
   @override
   String get set_gnReady => '已就緒';
@@ -39472,7 +39558,12 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get set_stSave => '儲存';
 
   @override
-  String get set_stSavePath => '圖片儲存位置';
+  String get set_stSavePath => '生成圖片儲存目錄';
+
+  @override
+  String set_stSavePathSub(String path) {
+    return '自動和手動儲存的實際目錄：\n$path';
+  }
 
   @override
   String get set_stAutoSave => '自動儲存';
@@ -39484,7 +39575,19 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get set_stAssets => '素材與顯示';
 
   @override
-  String get set_stVibePath => 'Vibe 庫位置';
+  String get set_stVibePath => 'Vibe 檔案目錄';
+
+  @override
+  String get set_stVibePathSub => '讀取和儲存 Vibe 檔案；舊檔案保留原位置。';
+
+  @override
+  String get set_stPr => 'PR 庫';
+
+  @override
+  String get set_stPrPath => 'PR 檔案目錄';
+
+  @override
+  String get set_stPrPathSub => '儲存精準參考原圖；舊檔案保留原位置。';
 
   @override
   String get set_stQuality => '本地畫廊清晰度';
@@ -39502,10 +39605,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get set_stRoots => '圖庫來源';
 
   @override
-  String get set_stRootsSub => '任何資料夾都可以加入本地畫廊瀏覽和搜尋，不參與自動儲存。';
-
-  @override
-  String get set_stPrimary => '主目錄';
+  String get set_stRootsSub => '用於圖庫瀏覽和搜尋；移除只取消收錄，不刪除圖片，也不改變儲存位置。';
 
   @override
   String set_stCount(Object n) {
@@ -39682,12 +39782,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
-  String get set_dcSemantics => '個人語義資料';
-
-  @override
-  String get set_dcSemanticsSub => '儲存補充的中文資料；清理翻譯快取時保留';
-
-  @override
   String get set_dcTranslate => '標籤翻譯與語義補充';
 
   @override
@@ -39754,7 +39848,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get set_dcTip =>
-      '詞庫和快取可以重新取得。個人語義資料請在本頁單獨匯出；帳號、歷史和塊庫的備份位置見“儲存與圖庫 → 應用資料位置”。';
+      '詞庫可重新下載，快取可重新生成。補充的中文資料不隨翻譯快取清理；資料位置見“儲存與圖庫 → 應用資料位置”。';
 
   @override
   String get set_mdDesc =>
@@ -39923,7 +40017,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get set_agInstr => '指令';
 
   @override
-  String get set_agInstrSub => '按下面的順序拼成最終提示詞；已有聊天保持原樣，之後的請求使用新內容。';
+  String get set_agInstrSub => '選擇檢視範圍；全域指令與工作區 AGENTS.md 共同生效，修改用於之後的請求。';
 
   @override
   String get set_agOrderBuiltin => '內建系統提示詞';
@@ -39933,9 +40027,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get set_agOrderGlobal => '全域指令';
-
-  @override
-  String get set_agOrderWorkspace => '工作區規則';
 
   @override
   String get set_agGlobal => '全域指令';
@@ -40081,10 +40172,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get set_rgSourcesSub => '每個來源單獨建庫、單獨開關；建庫可以暫停，已完成的部分立即可用。';
 
   @override
-  String get set_rgTags => '標籤上下文推薦';
+  String get set_rgTags => '標籤語義搜尋與推薦';
 
   @override
-  String get set_rgTagsSub => '結合語義、共現與重排；各提示詞框、角色和正負面分開計算';
+  String get set_rgTagsSub => '支援按輸入內容搜尋，也可根據游標前上下文推薦標籤。';
 
   @override
   String get set_rgWiki => 'Wiki 語義搜尋';
@@ -40143,16 +40234,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get set_rgContext => '推薦上下文';
 
   @override
-  String get set_rgContextSub => '兩種都最多取 120 個 Gemma token，按完整標籤擷取。';
+  String get set_rgContextSub => '固定取游標前，按完整標籤擷取。可調整為 32–512 個 Gemma token。';
 
   @override
-  String get set_rgRange => '取樣範圍';
-
-  @override
-  String get set_rgBefore => '游標前';
-
-  @override
-  String get set_rgAround => '插入點前後';
+  String get set_rgRange => '取樣長度';
 
   @override
   String get set_rgRuntime => '模型與執行環境';
@@ -41117,6 +41202,12 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get set_agBaseSwitchTitle => '放棄內建系統提示詞的修改？';
 
   @override
+  String get set_agPrefixSwitchTitle => '放棄前置內容的修改？';
+
+  @override
+  String get set_agPrefixInheritHint => '留空則沿用全域前置內容。';
+
+  @override
   String get set_agBaseSwitchBody => '切換範圍會丟掉還沒儲存的修改。';
 
   @override
@@ -41235,10 +41326,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get set_agSkillManualTip => '不進提示詞，Agent 不會自己用；在聊天框輸入 /skill:名稱 才會呼叫。';
-
-  @override
-  String get set_agWorkspaceRulesSub =>
-      '只對當前工作區生效的補充要求，存為工作區裡的 instructions.md，排在全域指令之後；點“編輯”用系統編輯器開啟，留空就不加。';
 
   @override
   String get set_agSkillDescNaiPrompt =>
@@ -41480,14 +41567,14 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get ag_modeBypass => '完全權限';
 
   @override
-  String get ag_modeBypassHint => '不再詢問，所有操作直接執行；花 Anlas 仍要確認';
+  String get ag_modeBypassHint => '所有操作直接執行；免費免確認，付費按 Agent 設定確認';
 
   @override
   String get ag_bypassConfirmTitle => '切換到完全權限？';
 
   @override
   String get ag_bypassConfirmBody =>
-      'Agent 將不再詢問，直接修改檔案、執行命令、呼叫未知工具，也能操作工作區以外的檔案。花 Anlas 的操作仍會先請你確認。只在你信任當前任務時使用。';
+      'Agent 將不再詢問，直接修改檔案、執行命令、呼叫未知工具，也能操作工作區以外的檔案。免費生成自動執行；付費操作預設確認，可在 Agent 設定中關閉確認。只在你信任當前任務時使用。';
 
   @override
   String get ag_bypassConfirmOk => '切換';
@@ -42440,9 +42527,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get ag_memoryChatPrefixHint => '僅當前會話生效，放在內建提示詞之前。';
 
   @override
-  String get ag_memoryWorkspace => '本工作區規則';
-
-  @override
   String get ag_memorySkills => '生效的 Skill';
 
   @override
@@ -43314,15 +43398,22 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get set_agNextSuggestion => '下一句建議';
 
   @override
+  String get set_agSkipPaidConfirmation => '付費也無需確認';
+
+  @override
+  String get set_agSkipPaidConfirmationSub =>
+      '僅完全權限生效。免費操作自動執行；開啟後，消耗 Anlas 的生成和影像操作也無需確認。';
+
+  @override
   String get set_agNextSuggestionSub =>
       '使用當前對話模型預測你的下一句訊息，會額外消耗 token；按 Tab 採納。';
 
   @override
-  String get set_agCacheWarming => '提示快取預熱';
+  String get set_agCacheWarming => '提示快取保溫';
 
   @override
   String get set_agCacheWarmingSub =>
-      '在提示快取快過期前用 1 token 的請求續上（按 5 分鐘壽命，適配所有模型），下一步讀快取而不是重發整段上下文。';
+      '通過輕量請求延長提示快取，減少後續請求重新計算上下文的開銷；是否命中快取以服務商為準。';
 
   @override
   String get set_agCacheOff => '關閉';
@@ -43331,13 +43422,13 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get set_agCacheStreaming => '只在 Agent 執行時';
 
   @override
-  String get set_agCacheIdle => '空閒時也預熱';
+  String get set_agCacheIdle => '空閒時也保溫';
 
   @override
-  String get set_agCacheIdleCost => '空閒時也預熱（最多 30 分鐘）會產生額外模型費用。';
+  String get set_agCacheIdleCost => '空閒時也保溫（最多 30 分鐘）會產生額外模型費用。';
 
   @override
-  String get ag_cacheWarmTitle => '快取預熱';
+  String get ag_cacheWarmTitle => '快取保溫';
 
   @override
   String get ag_cacheWarmOff => '已關閉';
@@ -43402,16 +43493,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
-  String get set_workspaceFontScale => '創作區文字字號';
-
-  @override
   String get set_promptAutocomplete => '提示詞自動補全';
 
   @override
   String get shortcut_action_open_resource_window => '開啟資源小窗';
-
-  @override
-  String get set_workspaceFontScaleSub => '提示詞框、角色框、塊與大圖提示詞裡的文字；和上面的介面字號分開調。';
 
   @override
   String get set_promptAutocompleteSub =>
@@ -43728,4 +43813,31 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String ag_externalNeedsAttention(String client) {
     return '$client 有操作需要你處理';
   }
+
+  @override
+  String get set_agViewScope => '檢視範圍';
+
+  @override
+  String get set_agViewGlobalHint => '所有工作區共用的指令與字首';
+
+  @override
+  String get set_agViewWorkspaceHint => '當前工作區的專案規則';
+
+  @override
+  String get set_agProjectRules => '工作區 AGENTS.md';
+
+  @override
+  String get set_agRulesReadonly => '只讀';
+
+  @override
+  String get set_agRulesView => '檢視';
+
+  @override
+  String get set_agRulesMissing => '此工作區尚未建立 AGENTS.md';
+
+  @override
+  String get set_agRulesEmpty => 'AGENTS.md 暫無內容';
+
+  @override
+  String get set_agRulesLoadFailed => '無法讀取 AGENTS.md，請檢查檔案權限。';
 }

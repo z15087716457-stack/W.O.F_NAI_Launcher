@@ -1009,6 +1009,7 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
 
   Future<void> setWorkspacePrompt(
     String? text, {
+    bool prefix = false,
     String? workspaceId,
     String? expectedWorkspaceId,
     bool checkPrompt = false,
@@ -1021,10 +1022,14 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
     }
     await store.updateWorkspace(
       id,
-      customSystemPrompt: text,
-      resetPrompt: text == null,
-      checkPrompt: checkPrompt,
+      customSystemPrompt: prefix ? null : text,
+      resetPrompt: !prefix && text == null,
+      checkPrompt: !prefix && checkPrompt,
       expectedPrompt: expectedPrompt,
+      customSystemPromptPrefix: prefix ? text : null,
+      resetPrefix: prefix && text == null,
+      checkPrefix: prefix && checkPrompt,
+      expectedPrefix: expectedPrompt,
       requireSelected: expectedWorkspaceId != null,
     );
     final updated = await store.getWorkspace(id);

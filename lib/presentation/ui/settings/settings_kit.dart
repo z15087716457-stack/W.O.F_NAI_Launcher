@@ -32,6 +32,7 @@ extension SettingsColors on UiColors {
     SettingsStorageKind.images => accent,
     SettingsStorageKind.upscaleModels => const Color(0xFF8E4EC6),
     SettingsStorageKind.vibes => const Color(0xFF12A594),
+    SettingsStorageKind.preciseRefs => const Color(0xFFD6409F),
     SettingsStorageKind.thumbnails => const Color(0xFFD48A00),
     SettingsStorageKind.ragIndex => const Color(0xFFE5484D),
     SettingsStorageKind.dictionaries => const Color(0xFFA8A8A8),
@@ -979,7 +980,7 @@ class _SettingsSliderState extends State<SettingsSlider> {
           cursor: SystemMouseCursors.click,
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
-            onTapDown: (d) => widget.onChanged(_at(d.localPosition.dx)),
+            onTapUp: (d) => widget.onChanged(_at(d.localPosition.dx)),
             onHorizontalDragUpdate: (d) =>
                 setState(() => _drag = _at(d.localPosition.dx)),
             onHorizontalDragEnd: (_) {
@@ -1374,6 +1375,7 @@ class SettingsRow extends StatefulWidget {
     this.sub = false,
     this.disabled = false,
     this.modified = false,
+    this.unsaved = false,
     this.onReset,
     this.anchor,
     this.titleStyle,
@@ -1406,7 +1408,12 @@ class SettingsRow extends StatefulWidget {
   final List<Widget> badges;
   final bool sub;
   final bool disabled;
+
+  /// 当前值偏离默认值，仅控制恢复默认入口。
   final bool modified;
+
+  /// 尚未保存的草稿，显示蓝点。
+  final bool unsaved;
   final VoidCallback? onReset;
   final String? anchor;
   final TextStyle? titleStyle;
@@ -1457,7 +1464,7 @@ class _SettingsRowState extends State<SettingsRow> {
                     UiText.sans(13, weight: FontWeight.w500, color: c.ink),
               ),
         ),
-        if (widget.modified) const _ModDot(),
+        if (widget.unsaved) const _UnsavedDot(),
         ...widget.badges,
       ],
     );
@@ -1508,7 +1515,10 @@ class _SettingsRowState extends State<SettingsRow> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     spacing: 8,
-                    children: [?reset, widget.control!],
+                    children: [
+                      ?reset,
+                      Flexible(child: widget.control!),
+                    ],
                   ),
                 ),
               );
@@ -1592,21 +1602,27 @@ class _SettingsRowState extends State<SettingsRow> {
   }
 }
 
-class _ModDot extends StatelessWidget {
-  const _ModDot();
+class _UnsavedDot extends StatelessWidget {
+  const _UnsavedDot();
 
   @override
-  Widget build(BuildContext context) => Container(
-    key: const Key('settings-modified-dot'),
-    width: 6,
-    height: 6,
-    decoration: BoxDecoration(color: context.ui.accent, shape: BoxShape.circle),
+  Widget build(BuildContext context) => Tooltip(
+    message: context.l10n.modelSettings_unsavedChanges,
+    child: Container(
+      key: const Key('settings-unsaved-dot'),
+      width: 6,
+      height: 6,
+      decoration: BoxDecoration(
+        color: context.ui.accent,
+        shape: BoxShape.circle,
+      ),
+    ),
   );
 }
 
-/// 在标签末尾以 7px 间距显示“已修改”蓝点，空间不足时允许文字换行。
-class SettingsModMark extends StatelessWidget {
-  const SettingsModMark({super.key, required this.on, required this.child});
+/// 在标签末尾以 7px 间距显示“未保存”蓝点，空间不足时允许文字换行。
+class SettingsUnsavedMark extends StatelessWidget {
+  const SettingsUnsavedMark({super.key, required this.on, required this.child});
   final bool on;
   final Widget child;
 
@@ -1618,7 +1634,7 @@ class SettingsModMark extends StatelessWidget {
           spacing: 7,
           children: [
             Flexible(child: child),
-            const _ModDot(),
+            const _UnsavedDot(),
           ],
         );
 }

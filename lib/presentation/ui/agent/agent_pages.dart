@@ -639,8 +639,12 @@ class AgentMemory extends StatelessWidget {
                     ),
                   ),
                   AgentButton(
-                    label: l.ag_memoryEdit,
-                    glyph: AgentGlyphs.pen,
+                    label: target == AgentMemoryTarget.workspace
+                        ? l.set_agRulesView
+                        : l.ag_memoryEdit,
+                    glyph: target == AgentMemoryTarget.workspace
+                        ? AgentGlyphs.eye
+                        : AgentGlyphs.pen,
                     style: AgentButtonStyle.ghost,
                     height: 24,
                     onPressed: () => s.actions.onEditMemory(target),
@@ -724,8 +728,8 @@ class AgentMemory extends StatelessWidget {
         ),
         card(
           const Key('agent-memory-workspace'),
-          l.ag_memoryWorkspace,
-          m.workspaceRules,
+          l.set_agProjectRules,
+          m.projectRules,
           AgentMemoryTarget.workspace,
         ),
         card(

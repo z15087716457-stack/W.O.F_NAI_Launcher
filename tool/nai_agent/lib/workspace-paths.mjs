@@ -3,7 +3,7 @@ import { resolve, relative, isAbsolute, join, sep } from 'node:path';
 import { canonical } from './extensions/permissions.mjs';
 
 const managed = new Set(['attachments','outputs','notes','skills','sessions',
-  'snapshots','ui','instructions.md','workspace.json']);
+  'snapshots','ui','workspace.json']);
 
 // Only missing legacy reads fall back. Writes and existing project files keep
 // their normal cwd semantics, and saved conversation text is never rewritten.

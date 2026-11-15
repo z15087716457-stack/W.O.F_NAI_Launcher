@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_contract.dart';
@@ -15,7 +16,7 @@ void main() {
 
   for (final locale in ['zh', 'en', 'ja', 'ko', 'zh_TW']) {
     for (final width in [900.0, 1600.0]) {
-      testWidgets('$locale $width 蓝点紧跟文字、说明对齐且状态更新不挪标题', (t) async {
+      testWidgets('$locale $width 已保存的自定义值不留蓝点、恢复默认不挪标题', (t) async {
         final data = SettingsFixture.view(
           page: SettingsPageId.storage,
           dark: width == 900,
@@ -34,15 +35,7 @@ void main() {
           final title = t.getRect(
             find.descendant(of: row, matching: find.text(widget.title)),
           );
-          final dot = t.getRect(
-            find.descendant(
-              of: row,
-              matching: find.byKey(const Key('settings-modified-dot')),
-            ),
-          );
-          expect(dot.left - title.right, closeTo(7, .001));
-          expect(dot.center.dy, closeTo(title.center.dy, .001));
-          expect(dot.size, const Size(6, 6));
+          expect(widget.modified, isTrue);
           if (widget.subtitle != null) {
             final subtitle = t.getRect(
               find.descendant(of: row, matching: find.text(widget.subtitle!)),
@@ -51,12 +44,13 @@ void main() {
           }
           previousLeft[setting] = title.left;
         }
+        expect(find.byKey(const Key('settings-unsaved-dot')), findsNothing);
         expect(t.takeException(), isNull);
         await _capture(t, 'storage-$locale-${width.toInt()}');
         final host = t.state<SettingsHostState>(find.byType(SettingsHost));
         host.updateData(data.copyWith(modified: {}));
         await t.pumpAndSettle();
-        expect(find.byKey(const Key('settings-modified-dot')), findsNothing);
+        expect(find.byKey(const Key('settings-unsaved-dot')), findsNothing);
         for (final setting in previousLeft.keys) {
           final row = find.byKey(Key('setting-${setting.name}'));
           expect(
@@ -75,8 +69,9 @@ void main() {
     }
   }
 
-  testWidgets('尾部蓝点保留单项恢复默认回调', (t) async {
+  testWidgets('已保存的非默认设置不显示蓝点，仍可单项恢复默认', (t) async {
     final rec = await pumpSettings(t, page: SettingsPageId.storage);
+    expect(find.byKey(const Key('settings-unsaved-dot')), findsNothing);
     final row = find.byKey(const Key('setting-imageSavePath'));
     final mouse = await t.createGesture(kind: ui.PointerDeviceKind.mouse);
     await mouse.addPointer(location: Offset.zero);
@@ -95,27 +90,75 @@ void main() {
     expect(rec.changes, isEmpty);
   });
 
-  testWidgets('独立标签的蓝点也紧跟文字并允许长标签换行', (t) async {
-    await pumpSettings(t, page: SettingsPageId.shortcuts, window: 900);
-    final marks = find
-        .byType(SettingsModMark)
-        .evaluate()
-        .where((e) => (e.widget as SettingsModMark).on);
-    expect(marks, isNotEmpty);
-    for (final element in marks) {
-      final mark = element.widget as SettingsModMark;
-      final text = t.getRect(find.byWidget(mark.child));
-      final dot = t.getRect(
-        find.descendant(
-          of: find.byWidget(mark),
-          matching: find.byKey(const Key('settings-modified-dot')),
-        ),
-      );
-      expect(dot.left - text.right, closeTo(7, .001));
-    }
+  testWidgets('自定义快捷键不留蓝点，仍保留恢复默认', (t) async {
+    final rec = await pumpSettings(
+      t,
+      page: SettingsPageId.shortcuts,
+      window: 900,
+    );
+    expect(find.byType(SettingsUnsavedMark), findsNothing);
+    expect(find.byKey(const Key('settings-unsaved-dot')), findsNothing);
+    final reset = find.byWidgetPredicate(
+      (w) =>
+          w.key is ValueKey<String> &&
+          (w.key! as ValueKey<String>).value.startsWith('shortcut-reset-'),
+    );
+    expect(reset, findsWidgets);
+    await t.ensureVisible(reset.first);
+    await t.tap(reset.first);
+    await t.pumpAndSettle();
+    expect(rec.calls.single, startsWith('resetShortcut:'));
     expect(t.takeException(), isNull);
     await _capture(t, 'shortcuts-zh-900');
   });
+
+  testWidgets('隐私设置已保存后不保留修改蓝点', (t) async {
+    final base = SettingsFixture.view(page: SettingsPageId.privacy);
+    await pumpSettings(
+      t,
+      data: base.copyWith(modified: SettingKey.values.toSet()),
+    );
+    expect(find.byKey(const Key('settings-unsaved-dot')), findsNothing);
+    final blueDots = find.byWidgetPredicate(
+      (w) =>
+          w is Container &&
+          w.constraints?.maxWidth == 6 &&
+          w.constraints?.maxHeight == 6 &&
+          w.decoration is BoxDecoration &&
+          (w.decoration! as BoxDecoration).shape == BoxShape.circle,
+    );
+    expect(blueDots, findsNothing);
+    expect(t.takeException(), isNull);
+    await _capture(t, 'privacy-zh-1600');
+  });
+
+  for (final locale in ['zh', 'en', 'ja', 'ko', 'zh_TW']) {
+    testWidgets('放大适应画布的说明在 $locale 宽窄与 150% 缩放下完整显示', (t) async {
+      for (final width in [900.0, 1600.0]) {
+        await pumpSettings(
+          t,
+          page: SettingsPageId.canvas,
+          locale: locale,
+          window: width,
+          dark: width == 900,
+          uiScale: width == 900 ? 1.5 : 1,
+        );
+        final row = find.byKey(const Key('setting-canvasZoomToFill'));
+        await t.ensureVisible(row);
+        await t.pumpAndSettle();
+        final toggle = find.descendant(
+          of: row,
+          matching: find.byType(SettingsSwitch),
+        );
+        expect(t.widget<SettingsSwitch>(toggle).value, isTrue);
+        expect(find.byKey(const Key('settings-unsaved-dot')), findsNothing);
+        expect(t.takeException(), isNull);
+        if (locale == 'zh') {
+          await _capture(t, 'canvas-$locale-${width.toInt()}');
+        }
+      }
+    });
+  }
 }
 
 Future<void> _capture(WidgetTester t, String name) async {

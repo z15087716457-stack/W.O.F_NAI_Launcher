@@ -155,7 +155,10 @@ class _QualityTagsSelectorState extends ConsumerState<QualityTagsSelector> {
         _buttonKey.currentContext!.findRenderObject() as RenderBox;
     final RenderBox overlay =
         Overlay.of(context).context.findRenderObject() as RenderBox;
-    final Offset buttonPosition = button.localToGlobal(Offset.zero);
+    final Offset buttonPosition = button.localToGlobal(
+      Offset.zero,
+      ancestor: overlay,
+    );
     final Size buttonSize = button.size;
 
     // 菜单位置：按钮正下方，左边缘对齐

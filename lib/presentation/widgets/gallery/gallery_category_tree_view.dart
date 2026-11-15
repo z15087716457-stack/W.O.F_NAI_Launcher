@@ -296,13 +296,16 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
   }
 
   void _showEmptyAreaContextMenu(BuildContext context, Offset position) {
+    final overlay =
+        Overlay.of(context).context.findRenderObject()! as RenderBox;
+    final local = overlay.globalToLocal(position);
     showMenu(
       context: context,
       position: RelativeRect.fromLTRB(
-        position.dx,
-        position.dy,
-        position.dx + 1,
-        position.dy + 1,
+        local.dx,
+        local.dy,
+        overlay.size.width - local.dx,
+        overlay.size.height - local.dy,
       ),
       items: [
         PopupMenuItem(
@@ -1316,13 +1319,16 @@ class _CategoryItemState extends State<_CategoryItem> {
   }
 
   void _showContextMenu(BuildContext context, Offset position) {
+    final overlay =
+        Overlay.of(context).context.findRenderObject()! as RenderBox;
+    final local = overlay.globalToLocal(position);
     showMenu(
       context: context,
       position: RelativeRect.fromLTRB(
-        position.dx,
-        position.dy,
-        position.dx + 1,
-        position.dy + 1,
+        local.dx,
+        local.dy,
+        overlay.size.width - local.dx,
+        overlay.size.height - local.dy,
       ),
       items: [
         if (widget.onRename != null)

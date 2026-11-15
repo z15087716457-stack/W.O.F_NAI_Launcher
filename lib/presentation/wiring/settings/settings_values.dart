@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/storage_keys.dart';
+import 'settings_inventory.dart';
 import '../../../core/autocomplete/autocomplete_settings.dart' as autocomplete;
 import '../../../core/rag/rag_platform.dart';
 import '../../../core/rag/rag_settings.dart';
@@ -31,7 +32,7 @@ import '../../providers/nai_agent/nai_agent_workspace_provider.dart';
 import '../../providers/notification_settings_provider.dart';
 import '../../providers/online_gallery_blacklist_provider.dart';
 import '../../providers/proxy_settings_provider.dart';
-import '../../providers/settings_font_scale_provider.dart';
+import '../../providers/ui_scale_provider.dart';
 import '../../providers/workspace_text_settings_provider.dart';
 import '../../providers/share_image_settings_provider.dart';
 import '../../providers/shortcuts_provider.dart';
@@ -49,7 +50,6 @@ final settingsRefreshProvider = StateProvider<int>((ref) => 0);
 /// Small reactive projection shared by the full settings view and isolated tests.
 final workspaceTextSettingValuesProvider = Provider<Map<SettingKey, Object>>(
   (ref) => {
-    SettingKey.workspaceFontScale: ref.watch(workspaceFontScaleProvider),
     SettingKey.promptAutocomplete: ref.watch(promptAutocompleteEnabledProvider),
   },
 );
@@ -80,7 +80,7 @@ final settingsValuesProvider = Provider<SettingsValues>((ref) {
   return SettingsValues({
     SettingKey.themeMode: store.getStudioThemeMode(),
     SettingKey.fontFamily: font == FontConfig.defaultFont ? 'system' : font.key,
-    SettingKey.settingsFontScale: ref.watch(settingsFontScaleProvider),
+    SettingKey.uiScale: ref.watch(uiScaleProvider),
     ...ref.watch(workspaceTextSettingValuesProvider),
     SettingKey.language: AppLanguage.fromLocale(locale).storageCode,
     SettingKey.reduceMotion: ref.watch(canvasReducedMotionNotifierProvider),
@@ -122,6 +122,9 @@ final settingsValuesProvider = Provider<SettingsValues>((ref) {
     SettingKey.vibePath: path(
       store.getSetting<String>(StorageKeys.vibeLibrarySavePath),
     ),
+    SettingKey.preciseRefPath: path(
+      store.getSetting<String>(StorageKeys.preciseRefLibrarySavePath),
+    ),
     SettingKey.galleryQuality:
         ref.watch(
               localGalleryNotifierProvider.select((s) => s.thumbnailQuality),
@@ -136,13 +139,12 @@ final settingsValuesProvider = Provider<SettingsValues>((ref) {
         ? null
         : jsonEncode([agent.providerId, agent.modelId]),
     SettingKey.agentNextSuggestion: agent.nextSuggestion,
+    SettingKey.agentSkipPaidConfirmation: agent.skipPaidConfirmation,
     SettingKey.agentCacheWarming: agent.cacheWarming,
     SettingKey.agentEnterToSend: agent.enterToSend,
     SettingKey.agentMaxRequests: agent.maxRequestsPerRun.toDouble(),
     SettingKey.ragEnabled: rag.enabled,
-    SettingKey.ragContext: rag.mode == RagContextMode.before
-        ? 'beforeCursor'
-        : 'around',
+    SettingKey.ragContextTokens: rag.tokenBudget.toDouble(),
     SettingKey.ragDevice:
         RagPlatform.host.isMacOS && rag.device == RagDevice.cuda
         ? RagDevice.auto.name
@@ -230,10 +232,8 @@ class SettingsValueStore {
                   ? FontConfig.defaultFont
                   : FontConfig.fromKey(text!),
             );
-      case SettingKey.settingsFontScale:
-        await ref.read(settingsFontScaleProvider.notifier).setFontScale(n);
-      case SettingKey.workspaceFontScale:
-        await ref.read(workspaceFontScaleProvider.notifier).setFontScale(n);
+      case SettingKey.uiScale:
+        await ref.read(uiScaleProvider.notifier).setScale(n);
       case SettingKey.promptAutocomplete:
         await ref
             .read(promptAutocompleteEnabledProvider.notifier)
@@ -328,11 +328,16 @@ class SettingsValueStore {
             .read(imageSaveSettingsNotifierProvider.notifier)
             .setAutoSave(b);
       case SettingKey.vibePath:
+      case SettingKey.preciseRefPath:
+        final keyName = key == SettingKey.vibePath
+            ? StorageKeys.vibeLibrarySavePath
+            : StorageKeys.preciseRefLibrarySavePath;
         if (text == null) {
-          await storage.deleteSetting(StorageKeys.vibeLibrarySavePath);
+          await storage.deleteSetting(keyName);
         } else {
-          await storage.setSetting(StorageKeys.vibeLibrarySavePath, text);
+          await storage.setSetting(keyName, text);
         }
+        ref.invalidate(settingsFoldersProvider);
       case SettingKey.galleryQuality:
         await ref
             .read(localGalleryNotifierProvider.notifier)
@@ -343,6 +348,7 @@ class SettingsValueStore {
             );
       case SettingKey.appDataPath:
         await HiveStorageHelper.instance.setCustomPath(text);
+        ref.invalidate(settingsFoldersProvider);
       case SettingKey.cacheStatsAutoRefresh:
         await storage.setSetting('settings_cache_stats_auto_refresh', b);
       case SettingKey.agentModel:
@@ -360,6 +366,10 @@ class SettingsValueStore {
         await ref.read(settingsAgentBackendProvider).update({
           'nextSuggestion': b,
         });
+      case SettingKey.agentSkipPaidConfirmation:
+        await ref.read(settingsAgentBackendProvider).update({
+          'skipPaidConfirmation': b,
+        });
       case SettingKey.agentCacheWarming:
         await ref.read(settingsAgentBackendProvider).update({
           'cacheWarming': text,
@@ -371,7 +381,7 @@ class SettingsValueStore {
           'maxRequestsPerRun': n.toInt(),
         });
       case SettingKey.ragEnabled:
-      case SettingKey.ragContext:
+      case SettingKey.ragContextTokens:
       case SettingKey.ragDevice:
       case SettingKey.ragEmbedPath:
       case SettingKey.ragRerankPath:
@@ -379,10 +389,8 @@ class SettingsValueStore {
         final current = ref.read(ragSettingsProvider);
         await ref.read(ragSettingsProvider.notifier).update(switch (key) {
           SettingKey.ragEnabled => current.copyWith(enabled: b),
-          SettingKey.ragContext => current.copyWith(
-            mode: text == 'beforeCursor'
-                ? RagContextMode.before
-                : RagContextMode.around,
+          SettingKey.ragContextTokens => current.copyWith(
+            tokenBudget: n.round(),
           ),
           SettingKey.ragDevice => current.copyWith(
             device: RagDevice.values.byName(text!),

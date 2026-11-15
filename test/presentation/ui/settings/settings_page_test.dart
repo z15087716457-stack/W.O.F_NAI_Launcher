@@ -175,9 +175,9 @@ void main() {
     await t.pump(const Duration(seconds: 5));
   });
 
-  testWidgets('已修改的项有蓝点，“恢复本页默认”先确认', (t) async {
+  testWidgets('非默认值不留蓝点，“恢复本页默认”仍先确认', (t) async {
     final rec = await pumpSettings(t, page: SettingsPageId.generation);
-    expect(find.byKey(const Key('settings-modified-dot')), findsWidgets);
+    expect(find.byKey(const Key('settings-unsaved-dot')), findsNothing);
     await tap(t, 'settings-reset-page');
     expect(find.byKey(const Key('settings-confirm')), findsOneWidget);
     expect(rec.calls, isEmpty);
@@ -517,7 +517,7 @@ void main() {
       SettingKey.intervalJitter: 0.0,
       SettingKey.agentMaxRequests: 32.0,
       SettingKey.ragEnabled: false,
-      SettingKey.ragContext: 'around',
+      SettingKey.ragContextTokens: 120.0,
       SettingKey.ragDevice: 'auto',
       SettingKey.seedCpuOffload: 0.0,
       SettingKey.seedVaeTiling: true,

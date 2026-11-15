@@ -12,7 +12,6 @@ import '../kit/ui_colors.dart';
 import '../kit/ui_controls.dart';
 import '../kit/ui_glyph.dart';
 import '../kit/ui_lib_controls.dart';
-import '../kit/ui_new_badge.dart';
 import '../kit/ui_text.dart';
 import 'settings_contract.dart';
 import 'settings_controls.dart';
@@ -446,7 +445,6 @@ class SettingsAppearancePage extends StatelessWidget {
     final s = SettingsScope.of(context);
     final v = s.data.values;
     final theme = v.text(SettingKey.themeMode) ?? 'light';
-    final scale = v.number(SettingKey.settingsFontScale);
     final soundOn = v.flag(SettingKey.completionSound);
     final shownTheme = theme == 'system' ? (c.dark ? 'dark' : 'light') : theme;
     final font =
@@ -486,7 +484,7 @@ class SettingsAppearancePage extends StatelessWidget {
                           theme,
                         ),
                         font,
-                        '${(scale * 100).round()}%',
+                        '${(v.number(SettingKey.uiScale) * 100).round()}%',
                       ].where((x) => x.isNotEmpty).join(' · '),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -558,31 +556,11 @@ class SettingsAppearancePage extends StatelessWidget {
               control: const SetSelect(SettingKey.fontFamily, width: 200),
             ),
             SettingKeyRow(
-              SettingKey.settingsFontScale,
+              SettingKey.uiScale,
               title: l.set_apScale,
               subtitle: l.set_apScaleSub,
               control: SetSlider(
-                SettingKey.settingsFontScale,
-                width: 180,
-                ticks: 7,
-                label: (x) => '${(x * 100).round()}%',
-              ),
-            ),
-            SettingKeyRow(
-              SettingKey.workspaceFontScale,
-              title: l.set_workspaceFontScale,
-              subtitle: l.set_workspaceFontScaleSub,
-              badges: [
-                if (uiNewBadge(
-                      context,
-                      'settings.workspaceFontScale',
-                      l.gen_menuNew,
-                    )
-                    case final b?)
-                  UiMini(b, tone: UiMiniTone.accent),
-              ],
-              control: SetSlider(
-                SettingKey.workspaceFontScale,
+                SettingKey.uiScale,
                 width: 180,
                 ticks: 7,
                 label: (x) => '${(x * 100).round()}%',
@@ -605,18 +583,18 @@ class SettingsAppearancePage extends StatelessWidget {
                     Text(
                       l.set_apSampleTitle,
                       style: UiText.sans(
-                        15 * scale,
+                        15,
                         weight: FontWeight.w600,
                         color: c.ink,
                       ),
                     ),
                     Text(
                       l.set_apSampleBody,
-                      style: UiText.sans(13 * scale, color: c.ink),
+                      style: UiText.sans(13, color: c.ink),
                     ),
                     Text(
                       l.set_apSampleNote,
-                      style: UiText.sans(11 * scale, color: c.muted),
+                      style: UiText.sans(11, color: c.muted),
                     ),
                   ],
                 ),
@@ -626,7 +604,9 @@ class SettingsAppearancePage extends StatelessWidget {
               SettingKey.language,
               title: l.set_apLanguage,
               subtitle: l.set_apLanguageSub,
-              control: const SetSeg(SettingKey.language),
+              control: MediaQuery.sizeOf(context).width < 700
+                  ? const SetSelect(SettingKey.language, width: 200)
+                  : const SetSeg(SettingKey.language),
             ),
           ],
         ),
@@ -1839,128 +1819,133 @@ class _ShortcutTable extends StatelessWidget {
         },
       ),
     );
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        cells([
-          Text(l.set_scAction, style: head),
-          Text(l.set_scKeys, style: head),
-          Text(l.set_scDefault, style: head),
-          const SizedBox(),
-        ], pad: const EdgeInsets.fromLTRB(18, 12, 18, 8)),
-        for (final x in shortcuts) ...[
-          Container(height: 1, color: c.rowLine),
-          SettingsAnchor(
-            anchor: 'shortcut-${x.id}',
-            radius: 0,
-            child: cells(
-              key: Key('shortcut-${x.id}'),
-              bg: recording == x.id
-                  ? c.accent.withValues(alpha: .06)
-                  : x.conflictWith != null
-                  ? c.error.withValues(alpha: .05)
-                  : null,
-              [
-                Row(
-                  key: Key('shortcut-label-${x.id}'),
-                  spacing: 8,
-                  children: [
-                    Flexible(
-                      child: SettingsModMark(
-                        on: x.changed,
-                        child: Text(
-                          x.label,
-                          style: UiText.sans(12.5, color: c.ink),
-                        ),
-                      ),
-                    ),
-                    if (x.conflictWith != null)
-                      Flexible(
-                        child: UiMini(
-                          l.set_scConflict(
-                            all
-                                    .where((y) => y.id == x.conflictWith)
-                                    .firstOrNull
-                                    ?.label ??
-                                '',
+    return LayoutBuilder(
+      builder: (context, constraints) => SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: SizedBox(
+          width: math.max(680, constraints.maxWidth),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              cells([
+                Text(l.set_scAction, style: head),
+                Text(l.set_scKeys, style: head),
+                Text(l.set_scDefault, style: head),
+                const SizedBox(),
+              ], pad: const EdgeInsets.fromLTRB(18, 12, 18, 8)),
+              for (final x in shortcuts) ...[
+                Container(height: 1, color: c.rowLine),
+                SettingsAnchor(
+                  anchor: 'shortcut-${x.id}',
+                  radius: 0,
+                  child: cells(
+                    key: Key('shortcut-${x.id}'),
+                    bg: recording == x.id
+                        ? c.accent.withValues(alpha: .06)
+                        : x.conflictWith != null
+                        ? c.error.withValues(alpha: .05)
+                        : null,
+                    [
+                      Row(
+                        key: Key('shortcut-label-${x.id}'),
+                        spacing: 8,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              x.label,
+                              style: UiText.sans(12.5, color: c.ink),
+                            ),
                           ),
-                          tone: UiMiniTone.error,
-                        ),
-                      ),
-                  ],
-                ),
-                x.fixed
-                    ? Align(
-                        alignment: Alignment.centerLeft,
-                        child: Wrap(
-                          spacing: 3,
-                          runSpacing: 3,
-                          children: [
-                            for (final key in x.keys) SettingsKey(key),
-                          ],
-                        ),
-                      )
-                    : recording == x.id
-                    ? _Recorder(
-                        onKeys: (keys) {
-                          onStop();
-                          s.actions.onShortcutRecorded(x.id, keys);
-                        },
-                        onClear: () {
-                          onStop();
-                          s.actions.onShortcutCleared(x.id);
-                        },
-                        onCancel: onStop,
-                      )
-                    : Align(
-                        alignment: Alignment.centerLeft,
-                        child: UiPressable(
-                          key: Key('shortcut-keys-${x.id}'),
-                          onTap: () => onRecord(x.id),
-                          builder: (context, hover) => x.keys.isEmpty
-                              ? Text(
-                                  l.set_notSet,
-                                  style: UiText.sans(
-                                    12,
-                                    color: hover ? c.accent : c.faint,
-                                  ),
-                                )
-                              : SettingsKeys(x.keys),
-                        ),
-                      ),
-                Text(
-                  x.fixed
-                      ? l.set_scFixed
-                      : x.changed && x.defaultKeys.isNotEmpty
-                      ? l.set_scDefaultIs(x.defaultKeys.join('+'))
-                      : '',
-                  style: UiText.sans(11, color: c.faint),
-                ),
-                x.fixed
-                    ? const SizedBox.shrink()
-                    : x.changed
-                    ? SettingsIconBtn(
-                        key: Key('shortcut-reset-${x.id}'),
-                        glyph: SettingsGlyphs.undo,
-                        tooltip: l.set_resetDefault,
-                        onTap: () => s.actions.onShortcutReset(x.id),
-                      )
-                    : SettingsMoreButton(
-                        items: [
-                          (l.set_scRecord, () => onRecord(x.id), false),
-                          if (x.keys.isNotEmpty)
-                            (
-                              l.set_scClear,
-                              () => s.actions.onShortcutCleared(x.id),
-                              true,
+                          if (x.conflictWith != null)
+                            Flexible(
+                              child: UiMini(
+                                l.set_scConflict(
+                                  all
+                                          .where((y) => y.id == x.conflictWith)
+                                          .firstOrNull
+                                          ?.label ??
+                                      '',
+                                ),
+                                tone: UiMiniTone.error,
+                              ),
                             ),
                         ],
                       ),
+                      x.fixed
+                          ? Align(
+                              alignment: Alignment.centerLeft,
+                              child: Wrap(
+                                spacing: 3,
+                                runSpacing: 3,
+                                children: [
+                                  for (final key in x.keys) SettingsKey(key),
+                                ],
+                              ),
+                            )
+                          : recording == x.id
+                          ? _Recorder(
+                              onKeys: (keys) {
+                                onStop();
+                                s.actions.onShortcutRecorded(x.id, keys);
+                              },
+                              onClear: () {
+                                onStop();
+                                s.actions.onShortcutCleared(x.id);
+                              },
+                              onCancel: onStop,
+                            )
+                          : Align(
+                              alignment: Alignment.centerLeft,
+                              child: UiPressable(
+                                key: Key('shortcut-keys-${x.id}'),
+                                onTap: () => onRecord(x.id),
+                                builder: (context, hover) => x.keys.isEmpty
+                                    ? Text(
+                                        l.set_notSet,
+                                        style: UiText.sans(
+                                          12,
+                                          color: hover ? c.accent : c.faint,
+                                        ),
+                                      )
+                                    : SettingsKeys(x.keys),
+                              ),
+                            ),
+                      Text(
+                        x.fixed
+                            ? l.set_scFixed
+                            : x.changed && x.defaultKeys.isNotEmpty
+                            ? l.set_scDefaultIs(x.defaultKeys.join('+'))
+                            : '',
+                        style: UiText.sans(11, color: c.faint),
+                      ),
+                      x.fixed
+                          ? const SizedBox.shrink()
+                          : x.changed
+                          ? SettingsIconBtn(
+                              key: Key('shortcut-reset-${x.id}'),
+                              glyph: SettingsGlyphs.undo,
+                              tooltip: l.set_resetDefault,
+                              onTap: () => s.actions.onShortcutReset(x.id),
+                            )
+                          : SettingsMoreButton(
+                              items: [
+                                (l.set_scRecord, () => onRecord(x.id), false),
+                                if (x.keys.isNotEmpty)
+                                  (
+                                    l.set_scClear,
+                                    () => s.actions.onShortcutCleared(x.id),
+                                    true,
+                                  ),
+                              ],
+                            ),
+                    ],
+                  ),
+                ),
               ],
-            ),
+            ],
           ),
-        ],
-      ],
+        ),
+      ),
     );
   }
 }

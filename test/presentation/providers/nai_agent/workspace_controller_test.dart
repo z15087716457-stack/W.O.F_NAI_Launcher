@@ -1044,6 +1044,61 @@ createInterface({input:process.stdin}).on('line', line=>{
   );
 
   test(
+    'workspace prefixes refresh live Pi sessions and preserve per-workspace inheritance',
+    () async {
+      final c = controller();
+      await c.initialize();
+      final a = c.selectedWorkspace!.id;
+      await c.updateSettings({
+        'customSystemPrompt': 'BASE',
+        'systemPromptPrefix': 'GLOBAL',
+      });
+      await c.sendText('A');
+      final first = c.selected!;
+      await c.setWorkspacePrompt(
+        'OWN',
+        prefix: true,
+        checkPrompt: true,
+        expectedPrompt: null,
+        expectedWorkspaceId: a,
+      );
+      expect(
+        (await first.client!.getSystemPrompt())['text'],
+        startsWith('OWN\n\nBASE'),
+      );
+      await c.createWorkspace('B');
+      await c.sendText('B');
+      expect(
+        (await c.selected!.client!.getSystemPrompt())['text'],
+        startsWith('GLOBAL\n\nBASE'),
+      );
+      await c.updateSettings({'systemPromptPrefix': 'NEW_GLOBAL'});
+      expect(
+        (await c.selected!.client!.getSystemPrompt())['text'],
+        startsWith('NEW_GLOBAL\n\nBASE'),
+      );
+      await c.selectWorkspace(a);
+      expect(
+        (await first.client!.getSystemPrompt())['text'],
+        startsWith('OWN\n\nBASE'),
+      );
+      await c.setWorkspacePrompt(
+        '',
+        prefix: true,
+        checkPrompt: true,
+        expectedPrompt: 'OWN',
+        expectedWorkspaceId: a,
+      );
+      expect(
+        (await first.client!.getSystemPrompt())['text'],
+        startsWith('NEW_GLOBAL\n\nBASE'),
+      );
+      expect((await c.store.getWorkspace(a)).customSystemPromptPrefix, isNull);
+      expect(calls, 2);
+    },
+  );
+
+  test(
     'instruction changes refresh live and restored Pi sessions while retaining each base prompt',
     () async {
       final c = controller();

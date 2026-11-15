@@ -216,6 +216,36 @@ void main() {
   }
 
   testWidgets(
+    'changing the context length cancels and refreshes idle suggestions',
+    (tester) async {
+      final c = TextEditingController(text: 'night, ');
+      final rag = FakeRag();
+      addTearDown(c.dispose);
+      await pump(tester, c, rag);
+      final first = rag.requests.single;
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(TagExpansionWrapper)),
+      );
+      await container
+          .read(ragSettingsProvider.notifier)
+          .update(
+            container.read(ragSettingsProvider).copyWith(tokenBudget: 256),
+          );
+      await tester.pump();
+      await tester.pump();
+      expect(first.cancellation.isCancelled, isTrue);
+      expect(rag.requests.length, 2);
+      first.result.complete([tag('stale')]);
+      rag.requests.last.result.complete([tag('fresh')]);
+      await tester.pump();
+      await tester.pump();
+      expect(find.text('stale'), findsNothing);
+      expect(find.text('fresh'), findsWidgets);
+      expect(c.text, 'night, ');
+    },
+  );
+
+  testWidgets(
     'unavailable semantic results restore the full ordinary list without truncating it to the pinned group',
     (tester) async {
       final c = TextEditingController(text: 'rain, ');

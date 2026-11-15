@@ -484,11 +484,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Automatically save images after generation';
 
   @override
-  String get settings_extraRootsTitle => 'Gallery Sources';
+  String get settings_extraRootsTitle => 'Gallery sources';
 
   @override
   String get settings_extraRootsHint =>
-      'Extra gallery sources can be browsed and searched, and their images can be moved or copied to categories. They are not used for auto-save. New sources are scanned immediately.';
+      'Add folders for browsing and search. Adding a parent combines the sources it covers. Removing a source keeps its files and save location.';
 
   @override
   String get settings_extraRootsEmpty => 'No extra gallery sources added';
@@ -530,12 +530,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'This folder is already a gallery source';
 
   @override
-  String get settings_extraRootsSameAsMain =>
-      'This folder is the same as the image save location';
-
-  @override
   String get settings_extraRootsNested =>
-      'Gallery sources cannot contain each other; choose another folder';
+      'This folder is already covered by an existing gallery source.';
 
   @override
   String get settings_extraRootsNotFound =>
@@ -710,7 +706,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get generation_canvasDisplaySettings => 'Canvas Display';
 
   @override
-  String get generation_canvasZoomToFill => 'Zoom to fill (allows >100%)';
+  String get generation_canvasZoomToFill =>
+      'Enlarge to fit canvas (allows over 100%)';
 
   @override
   String get generation_canvasEmpty => 'Canvas is empty';
@@ -1012,7 +1009,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get prompt_cooccurrenceRecommendationSubtitle =>
-      'Ctrl+click to search local tags; Ctrl+drag to explore related tags';
+      'Hold Ctrl (⌘ on Mac) and click or drag-select to search tags and see related suggestions.';
 
   @override
   String get prompt_formatted => 'Formatted';
@@ -2239,7 +2236,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Cannot connect to server. Please check your network';
 
   @override
-  String get drop_processing => 'Processing image...';
+  String get drop_processing => 'Preparing image';
+
+  @override
+  String get drop_processingSubtitle => 'Choose a use after loading';
 
   @override
   String get characterEditor_clearAll => 'Clear All';
@@ -3783,7 +3783,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get drop_hint => 'Drop image here';
+  String get drop_hint => 'Release to import image';
+
+  @override
+  String get drop_hintSubtitle => 'Next, choose how to use it';
 
   @override
   String get drop_img2img => 'Image2Image';
@@ -4302,7 +4305,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get settings_fontScale => 'Font Size';
+  String get settings_fontScale => 'Interface scale';
 
   @override
   String get settings_fontScale_previewSmall => '光影落在画布上。';
@@ -5538,7 +5541,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get autocomplete_relatedTagsSubtitle =>
-      'Ctrl+click to search local tags; Ctrl+drag to explore related tags';
+      'Hold Ctrl (⌘ on Mac) and click or drag-select to search tags and see related suggestions.';
 
   @override
   String get tagExpansion_searchHint => 'Search tags or aliases';
@@ -6063,7 +6066,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tips_prompt_guide_3 =>
-      'Ctrl+click a tag to look it up in the local tag library; Ctrl+drag across a phrase to see tags that often appear with it.';
+      'Hold Ctrl (⌘ on Mac) and click or drag-select to open Tag Expansion. Search tags or see related suggestions.';
 
   @override
   String get tips_prompt_guide_4 =>
@@ -7172,7 +7175,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_adjustSettingsPagesDialogsOnly =>
-      'Adjust settings pages and dialogs only';
+      'Resize text, icons and controls throughout the app. Image resolution stays the same.';
 
   @override
   String get settings_motionNotifications => 'Motion & notifications';
@@ -8865,6 +8868,40 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get promptTranslation_tutorial => 'How it works';
+
+  @override
+  String get promptReading_mode => 'Lightweight translation';
+
+  @override
+  String get promptReading_modeSubtitle => 'Read translations below the source';
+
+  @override
+  String get promptReading_blocks => 'Translation blocks';
+
+  @override
+  String get promptReading_blocksSubtitle => 'Read and edit bilingual blocks';
+
+  @override
+  String get promptReading_update => 'Translate new / changed text';
+
+  @override
+  String get promptReading_hide => 'Hide translations';
+
+  @override
+  String get promptReading_show => 'Show translations';
+
+  @override
+  String get promptReading_clear => 'Clear translations';
+
+  @override
+  String get promptReading_cleared => 'Translations cleared';
+
+  @override
+  String get promptReading_pending => 'Needs update';
+
+  @override
+  String get promptReading_guide =>
+      'Read-only translations align with comma-delimited segments and omit weight syntax. Click the source to edit; readings return when editing ends. Deleting a source segment removes its reading. Use the menu to update, hide or clear readings. Copy and generation use the source.';
 
   @override
   String get promptTranslation_guideBack => 'Back to actions';
@@ -13418,9 +13455,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get blocks_changeImage => 'Change';
 
   @override
-  String get blocks_clearThumb => 'Remove preview';
-
-  @override
   String get blocks_cropHint => 'Drag · scroll to zoom';
 
   @override
@@ -15407,10 +15441,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gen_bdCustom => 'Custom';
 
   @override
-  String get gen_zoomToFill => 'Zoom to fill';
+  String get gen_zoomToFill => 'Enlarge to fit canvas';
 
   @override
-  String get gen_zoomToFillSub => 'Scale small images up to fill the canvas';
+  String get gen_zoomToFillSub =>
+      'Allow focused images to exceed 100% while keeping the whole image visible';
 
   @override
   String get gen_useSeed => 'Use this seed (and keep it)';
@@ -17002,24 +17037,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rag_auto => 'Automatic';
 
   @override
-  String get rag_tagsEnabled => 'Contextual tag suggestions';
+  String get rag_tagsEnabled => 'Semantic tag search & suggestions';
 
   @override
   String get rag_tagsHint =>
-      'Combine semantics, cooccurrence and reranking; keep fields, characters and polarity separate.';
+      'Search using your input, or get tag suggestions from the context before the caret.';
 
   @override
   String get rag_context => 'Suggestion context';
 
   @override
   String get rag_contextHint =>
-      'Both modes use at most 120 Gemma tokens at tag boundaries. Full field text is used only for deduplication.';
-
-  @override
-  String get rag_contextBefore => 'Before caret · 120 tokens';
-
-  @override
-  String get rag_contextAround => 'Around caret · 120 tokens';
+      'Use complete tags before the caret. Adjustable from 32 to 512 Gemma tokens.';
 
   @override
   String get rag_buildIndex => 'Preview and build index';
@@ -17811,7 +17840,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get set_apSystem => 'System';
 
   @override
-  String get set_apSystemSub => 'Follows the Windows setting';
+  String get set_apSystemSub =>
+      'Follows the system\'s light or dark appearance';
 
   @override
   String get set_apText => 'Text';
@@ -17823,11 +17853,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get set_apFontSub => 'Numbers and code always use Geist Mono';
 
   @override
-  String get set_apScale => 'Settings & dialog text size';
+  String get set_apScale => 'Interface scale';
 
   @override
   String get set_apScaleSub =>
-      'Affects settings and dialogs only, not the canvas';
+      'Scale text, icons and controls throughout the app. Image resolution stays unchanged.';
 
   @override
   String get set_apSampleTitle => 'Heading · Generation finished';
@@ -17868,11 +17898,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get set_apPreviewSound => 'Play';
 
   @override
-  String get set_apNotify => 'Notifications';
+  String get set_apNotify => 'Action notifications';
 
   @override
   String get set_apNotifySub =>
-      'Toasts appear top-right and fade after 3 seconds';
+      'Preview how in-app action notifications are displayed';
 
   @override
   String get set_apNotifyPreview => 'Preview';
@@ -17937,10 +17967,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get set_cvLockSub => 'New images do not move the view';
 
   @override
-  String get set_cvFill => 'Zoom new images to fill';
+  String get set_cvFill => 'Enlarge to fit canvas';
 
   @override
-  String get set_cvFillSub => 'Fit the visible area instead of actual pixels';
+  String get set_cvFillSub =>
+      'When focusing an image, allow enlargement beyond 100% to fit the visible area while keeping its proportions and the whole image visible. When off, automatic fitting is capped at 100%.';
 
   @override
   String get set_cvChannel => 'Visual channel';
@@ -18269,16 +18300,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get set_gnNoKey => 'No key';
 
   @override
-  String get set_gnRelated => 'Related tag suggestions';
+  String get set_gnRelated => 'Ctrl tag expansion';
 
   @override
-  String get set_gnRelatedSub => 'Suggest tags that often appear together';
+  String get set_gnRelatedSub =>
+      'Hold Ctrl (⌘ on Mac) and click or drag-select to search tags and see related suggestions.';
 
   @override
   String get set_gnRag => 'Semantic tag suggestions';
 
   @override
-  String get set_gnRagSub => 'Context-aware suggestions from Semantic search';
+  String get set_gnRagSub =>
+      'Semantic search and context-based suggestions for Tag Expansion. Configure in Semantic search.';
 
   @override
   String get set_gnReady => 'Ready';
@@ -18362,7 +18395,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get set_stSave => 'Saving';
 
   @override
-  String get set_stSavePath => 'Image folder';
+  String get set_stSavePath => 'Generated image folder';
+
+  @override
+  String set_stSavePathSub(String path) {
+    return 'Automatic and manual saves are written to:\n$path';
+  }
 
   @override
   String get set_stAutoSave => 'Auto-save';
@@ -18375,7 +18413,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get set_stAssets => 'Assets & display';
 
   @override
-  String get set_stVibePath => 'Vibe library folder';
+  String get set_stVibePath => 'Vibe files folder';
+
+  @override
+  String get set_stVibePathSub =>
+      'Read and save Vibe files here. Existing files stay in place.';
+
+  @override
+  String get set_stPr => 'PR library';
+
+  @override
+  String get set_stPrPath => 'PR files folder';
+
+  @override
+  String get set_stPrPathSub =>
+      'Save Precise Reference originals here. Existing files stay in place.';
 
   @override
   String get set_stQuality => 'Gallery thumbnail quality';
@@ -18394,10 +18446,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get set_stRootsSub =>
-      'Any folder can be browsed and searched in the gallery; auto-save does not write there.';
-
-  @override
-  String get set_stPrimary => 'Main';
+      'Folders used for browsing and search. Removing a source keeps its images and does not change the save location.';
 
   @override
   String set_stCount(Object n) {
@@ -18586,13 +18635,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get set_dcSemantics => 'Personal semantic data';
-
-  @override
-  String get set_dcSemanticsSub =>
-      'Saved Chinese supplements are preserved when translation caches are cleared';
-
-  @override
   String get set_dcTranslate => 'Tag translation & semantics';
 
   @override
@@ -18661,7 +18703,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get set_dcTip =>
-      'Dictionaries and caches can be restored. Export personal semantic supplements here; other personal data is under Storage → App data folder.';
+      'Dictionaries can be downloaded again and caches rebuilt. Saved Chinese supplements survive translation-cache clearing. Find the data under Storage & gallery → App data folder.';
 
   @override
   String get set_mdDesc =>
@@ -18837,7 +18879,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get set_agInstrSub =>
-      'Combined in this order. Existing chats keep their prompt; new requests use the new text.';
+      'Choose a scope to view. Global instructions and the workspace AGENTS.md apply together; changes affect subsequent requests.';
 
   @override
   String get set_agOrderBuiltin => 'Built-in system prompt';
@@ -18847,9 +18889,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get set_agOrderGlobal => 'Global instructions';
-
-  @override
-  String get set_agOrderWorkspace => 'Workspace rules';
 
   @override
   String get set_agGlobal => 'Global instructions';
@@ -19005,11 +19044,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Each source is indexed and toggled on its own. Indexing can pause; finished parts are usable.';
 
   @override
-  String get set_rgTags => 'Tag suggestions';
+  String get set_rgTags => 'Semantic tag search & suggestions';
 
   @override
   String get set_rgTagsSub =>
-      'Semantics, co-occurrence and rerank; computed per prompt box and character';
+      'Search using your input, or get tag suggestions from the context before the caret.';
 
   @override
   String get set_rgWiki => 'Wiki semantic search';
@@ -19073,16 +19112,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get set_rgContextSub =>
-      'Both take up to 120 Gemma tokens, cut at whole tags.';
+      'Use complete tags before the caret. Adjustable from 32 to 512 Gemma tokens.';
 
   @override
-  String get set_rgRange => 'Sample range';
-
-  @override
-  String get set_rgBefore => 'Before cursor';
-
-  @override
-  String get set_rgAround => 'Around cursor';
+  String get set_rgRange => 'Sample length';
 
   @override
   String get set_rgRuntime => 'Models & runtime';
@@ -20099,6 +20132,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get set_agBaseSwitchTitle => 'Discard built-in system prompt changes?';
 
   @override
+  String get set_agPrefixSwitchTitle => 'Discard prefix changes?';
+
+  @override
+  String get set_agPrefixInheritHint => 'Leave blank to use the global prefix.';
+
+  @override
   String get set_agBaseSwitchBody =>
       'Switching scope discards unsaved changes.';
 
@@ -20227,10 +20266,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get set_agSkillManualTip =>
       'Kept out of the prompt, so the Agent will not use it on its own; type /skill:name in the chat box to invoke it.';
-
-  @override
-  String get set_agWorkspaceRulesSub =>
-      'Extra rules for this workspace only, saved as instructions.md in the workspace and added after the global instructions. Edit opens it in your system editor; leave it empty to add nothing.';
 
   @override
   String get set_agSkillDescNaiPrompt =>
@@ -20486,14 +20521,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ag_modeBypassHint =>
-      'Never asks; everything runs directly. Spending Anlas still needs your OK';
+      'Runs actions directly; free actions skip confirmation, paid actions follow Agent settings';
 
   @override
   String get ag_bypassConfirmTitle => 'Switch to full access?';
 
   @override
   String get ag_bypassConfirmBody =>
-      'The Agent will stop asking: it edits files, runs commands, calls unknown tools and can touch files outside the workspace. Anything that spends Anlas still asks first. Use it only for tasks you trust.';
+      'The Agent will stop asking: it edits files, runs commands, calls unknown tools and can touch files outside the workspace. Free generation runs automatically. Paid actions require confirmation by default; you can disable it in Agent settings. Use it only for tasks you trust.';
 
   @override
   String get ag_bypassConfirmOk => 'Switch';
@@ -21569,9 +21604,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Applies only to this chat, before the built-in system prompt.';
 
   @override
-  String get ag_memoryWorkspace => 'Workspace rules';
-
-  @override
   String get ag_memorySkills => 'Active skills';
 
   @override
@@ -22470,15 +22502,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get set_agNextSuggestion => 'Next-message suggestions';
 
   @override
+  String get set_agSkipPaidConfirmation => 'Skip paid-action confirmation';
+
+  @override
+  String get set_agSkipPaidConfirmationSub =>
+      'Full access only. Free actions run automatically; enable this to also run generation and image actions that spend Anlas without confirmation.';
+
+  @override
   String get set_agNextSuggestionSub =>
       'Use the current conversation model to suggest your next message. Uses additional tokens; press Tab to accept.';
 
   @override
-  String get set_agCacheWarming => 'Prompt cache warming';
+  String get set_agCacheWarming => 'Prompt cache keepalive';
 
   @override
   String get set_agCacheWarmingSub =>
-      'Keeps the model\'s prompt cache warm with a 1-token request just before it expires (5-minute lifetime, all models), so the next step reads the cache instead of resending the whole context.';
+      'Uses lightweight requests to keep prompt caches alive and reduce later context processing. Cache hits depend on the provider.';
 
   @override
   String get set_agCacheOff => 'Off';
@@ -22491,10 +22530,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get set_agCacheIdleCost =>
-      'Warming while idle (up to 30 minutes) costs extra model usage.';
+      'Keeping caches alive while idle (up to 30 minutes) incurs extra model costs.';
 
   @override
-  String get ag_cacheWarmTitle => 'Cache warming';
+  String get ag_cacheWarmTitle => 'Cache keepalive';
 
   @override
   String get ag_cacheWarmOff => 'Off';
@@ -22565,17 +22604,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get set_workspaceFontScale => 'Creative text size';
-
-  @override
   String get set_promptAutocomplete => 'Prompt autocomplete';
 
   @override
   String get shortcut_action_open_resource_window => 'Open resource window';
-
-  @override
-  String get set_workspaceFontScaleSub =>
-      'Text in prompt boxes, character boxes, blocks and the viewer prompt. Independent of the interface size above.';
 
   @override
   String get set_promptAutocompleteSub =>
@@ -22900,4 +22932,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String ag_externalNeedsAttention(String client) {
     return '$client needs your attention';
   }
+
+  @override
+  String get set_agViewScope => 'View scope';
+
+  @override
+  String get set_agViewGlobalHint =>
+      'Instructions and prefix shared by all workspaces';
+
+  @override
+  String get set_agViewWorkspaceHint =>
+      'Project rules for the selected workspace';
+
+  @override
+  String get set_agProjectRules => 'Workspace AGENTS.md';
+
+  @override
+  String get set_agRulesReadonly => 'Read-only';
+
+  @override
+  String get set_agRulesView => 'View';
+
+  @override
+  String get set_agRulesMissing => 'This workspace has no AGENTS.md yet';
+
+  @override
+  String get set_agRulesEmpty => 'AGENTS.md is empty';
+
+  @override
+  String get set_agRulesLoadFailed =>
+      'Unable to read AGENTS.md. Check file permissions.';
 }

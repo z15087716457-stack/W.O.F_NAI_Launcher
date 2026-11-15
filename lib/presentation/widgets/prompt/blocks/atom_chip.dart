@@ -1,7 +1,6 @@
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 
 import '../../common/dashed_rounded_border.dart';
-import '../../common/workspace_text_scale_scope.dart';
 
 /// 紧凑描边 chip：无图标、无内部填充色，描边跟主题色。
 /// 编辑器内联使用；详情面板正文原子化渲染同件复用。
@@ -42,8 +41,7 @@ class AtomChip extends StatelessWidget {
   static const double _textSlack = 4;
 
   @override
-  Widget build(BuildContext context) =>
-      WorkspaceTextScaleScope(child: Builder(builder: _buildChip));
+  Widget build(BuildContext context) => _buildChip(context);
 
   Widget _buildChip(BuildContext context) {
     final style =

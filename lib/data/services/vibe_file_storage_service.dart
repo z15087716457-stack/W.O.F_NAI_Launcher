@@ -564,9 +564,22 @@ class VibeFileStorageService {
     };
 
     final currentPathSet = <String>{};
-    final directoryPath = await VibeLibraryPathHelper.instance.getPath();
-    final files = await _listVibeFiles(directoryPath);
-    final root = _normalizePath(directoryPath);
+    final helper = VibeLibraryPathHelper.instance;
+    final directories = await helper.getReadPaths();
+    final currentRoot = _normalizePath(directories.first);
+    // A never-used default need not exist yet. A missing directory referenced
+    // by stored entries remains a read failure, never an empty-library deletion.
+    if (!helper.hasCustomPath &&
+        !await Directory(directories.first).exists() &&
+        !existingPathMap.keys.any(
+          (path) => _normalizePath(p.dirname(path)) == currentRoot,
+        )) {
+      directories.removeAt(0);
+    }
+    final files = [
+      for (final path in directories) ...await _listVibeFiles(path),
+    ];
+    final roots = directories.map(_normalizePath).toSet();
 
     // 分批并行处理文件，避免同时打开太多文件句柄
     const batchSize = 4;
@@ -627,7 +640,7 @@ class VibeFileStorageService {
       for (final entry in existingEntries) {
         final filePath = entry.filePath;
         if (filePath == null || filePath.isEmpty) continue;
-        if (_normalizePath(p.dirname(filePath)) != root) continue;
+        if (!roots.contains(_normalizePath(p.dirname(filePath)))) continue;
 
         final normalizedPath = _normalizePath(filePath);
         if (currentPathSet.contains(normalizedPath)) continue;

@@ -533,7 +533,7 @@ abstract final class AgentFixture {
 
   static const memory = AgentMemoryData(
     globalInstructions: '回答用中文。改提示词前先列出要改的地方；花 Anlas 前一定先问我。',
-    workspaceRules: '这个工作区专门研究画风：每次只改一个变量，产物按「画风-日期」命名。',
+    projectRules: '这个工作区专门研究画风：每次只改一个变量，产物按「画风-日期」命名。',
     activeSkills: ['nai-prompt', 'nai-studio', 'style-replica'],
   );
 

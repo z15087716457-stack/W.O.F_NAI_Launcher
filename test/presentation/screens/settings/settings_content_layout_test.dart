@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/app_ui_scale.dart';
 import 'dart:io';
 import 'dart:ui' as ui;
 
@@ -24,7 +25,7 @@ import 'package:nai_launcher/presentation/screens/settings/sections/storage_sett
 import 'package:nai_launcher/presentation/screens/settings/widgets/cache_statistics_tile.dart';
 import 'package:nai_launcher/presentation/screens/settings/widgets/settings_tile.dart';
 import 'package:nai_launcher/presentation/screens/settings/widgets/settings_number_dialog.dart';
-import 'package:nai_launcher/presentation/screens/settings/widgets/settings_typography_scope.dart';
+import 'package:nai_launcher/presentation/screens/settings/widgets/settings_motion_scope.dart';
 import 'package:nai_launcher/presentation/screens/settings/widgets/settings_ui_theme.dart';
 import 'package:nai_launcher/presentation/themes/app_theme.dart';
 
@@ -144,10 +145,12 @@ void main() {
             data: MediaQuery.of(
               context,
             ).copyWith(disableAnimations: systemReducedMotion),
-            child: SettingsTypographyScope(
-              child: TickerMode(
-                enabled: tickerEnabled,
-                child: RepaintBoundary(key: capture, child: child!),
+            child: AppUiScale(
+              child: SettingsMotionScope(
+                child: TickerMode(
+                  enabled: tickerEnabled,
+                  child: RepaintBoundary(key: capture, child: child!),
+                ),
               ),
             ),
           ),

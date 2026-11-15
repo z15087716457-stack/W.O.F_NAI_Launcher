@@ -101,7 +101,7 @@ class PreciseRefLibraryStorageService {
   Future<String> _resolveImageDirectory() async {
     final dir =
         _overrideDirectory ??
-        await PreciseRefLibraryPathHelper.instance.getDefaultPath();
+        await PreciseRefLibraryPathHelper.instance.getPath();
     await PreciseRefLibraryPathHelper.instance.ensurePathExists(dir);
     return dir;
   }
@@ -408,9 +408,14 @@ class PreciseRefLibraryStorageService {
         await _thumbnailCacheBox!.deleteAll(orphanCacheKeys);
       }
 
-      await for (final entity in _fileSystem.list(directory)) {
-        if (entity is! File) continue;
-        await _reconcileFile(entity.path, referencedPaths);
+      final directories = _overrideDirectory != null
+          ? [directory]
+          : await PreciseRefLibraryPathHelper.instance.getReadPaths();
+      for (final path in directories) {
+        await for (final entity in _fileSystem.list(path)) {
+          if (entity is! File) continue;
+          await _reconcileFile(entity.path, referencedPaths);
+        }
       }
     } catch (e, s) {
       AppLogger.e('精准参考库存储对账失败', e, s, _tag);

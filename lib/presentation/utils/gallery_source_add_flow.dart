@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/utils/app_logger.dart';
 import '../../core/utils/localization_extension.dart';
 import '../../data/repositories/gallery_folder_repository.dart';
-import '../../data/services/gallery/gallery_extra_root_validator.dart';
+import '../../data/services/gallery/gallery_source_validator.dart';
 import '../../data/services/gallery/scan_state_manager.dart';
 import '../../data/services/gallery/tag_index_import_service.dart';
 import '../providers/gallery_category_provider.dart';
@@ -14,8 +14,8 @@ import '../providers/tag_index_import_provider.dart';
 import '../widgets/common/app_toast.dart';
 
 /// Shared folder-picker and registration flow for Settings and Local Gallery.
-class GalleryExtraRootAddFlow {
-  GalleryExtraRootAddFlow._();
+class GallerySourceAddFlow {
+  GallerySourceAddFlow._();
 
   static bool _isAdding = false;
 
@@ -41,27 +41,24 @@ class GalleryExtraRootAddFlow {
       if (!context.mounted) return null;
 
       final repository = GalleryFolderRepository.instance;
-      final error = await validateGalleryExtraRoot(
+      final error = await validateGallerySource(
         selectedPath: selected,
-        mainRoot: await repository.getRootPath(),
-        existingRoots: await repository.getExtraRootPaths(),
+        existingRoots: await repository.getSourcePaths(),
       );
       if (!context.mounted) return null;
       if (error != null) {
         switch (error) {
-          case GalleryExtraRootValidationError.notFound:
+          case GallerySourceValidationError.notFound:
             AppToast.error(context, l10n.settings_extraRootsNotFound);
-          case GalleryExtraRootValidationError.sameAsMain:
-            AppToast.warning(context, l10n.settings_extraRootsSameAsMain);
-          case GalleryExtraRootValidationError.duplicate:
+          case GallerySourceValidationError.duplicate:
             AppToast.warning(context, l10n.settings_extraRootsDuplicate);
-          case GalleryExtraRootValidationError.nested:
+          case GallerySourceValidationError.covered:
             AppToast.warning(context, l10n.settings_extraRootsNested);
         }
         return null;
       }
 
-      final added = await repository.addExtraRootPath(selected);
+      final added = await repository.addSourcePath(selected);
       if (!context.mounted) return added ? selected : null;
       if (!added) {
         AppToast.warning(context, l10n.settings_extraRootsDuplicate);
@@ -88,9 +85,7 @@ class GalleryExtraRootAddFlow {
             builder: (dialogContext) => AlertDialog(
               icon: const Icon(Icons.upload_file_outlined),
               title: Text(l10n.settings_extraRootsIndexImportTitle),
-              content: Text(
-                l10n.settings_extraRootsIndexImportContent(selected),
-              ),
+              content: Text(l10n.settings_extraRootsIndexImportContent(selected)),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(dialogContext).pop(false),

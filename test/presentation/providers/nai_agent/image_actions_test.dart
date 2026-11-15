@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:nai_launcher/data/services/nai_agent/agent_workspace_store.dart';
+import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_workspace_provider.dart';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:dio/dio.dart';
@@ -178,6 +180,9 @@ void main() {
     api = _Api();
     container = ProviderContainer(
       overrides: [
+        naiAgentUiPreferencesProvider.overrideWith(
+          (ref) => NaiAgentUiPreferences(),
+        ),
         localStorageServiceProvider.overrideWithValue(MemoryDraftSettings()),
         generationParamsNotifierProvider.overrideWith(_Params.new),
         imageGenerationNotifierProvider.overrideWith(() => _Images(source)),
@@ -198,6 +203,26 @@ void main() {
     assert(workspace.path.contains('nai-agent-image-actions-'));
     await workspace.delete(recursive: true);
   });
+  test('paid cloud actions use the current Full access setting', () async {
+    final preferences = container.read(naiAgentUiPreferencesProvider);
+    preferences.replace(const AgentSettings(permissionMode: 'bypass'));
+    final q = await quote('cloud_upscale');
+    expect(q['estimated_anlas'], greaterThan(0));
+    expect(q['authorization'], 'explicit_user_button_required');
+    preferences.replace(
+      const AgentSettings(permissionMode: 'bypass', skipPaidConfirmation: true),
+    );
+    final future = run({'action': 'run', 'quote_id': q['quote_id']});
+    await called();
+    expect(
+      container.read(naiAgentImageApprovalsProvider).forChat('chat'),
+      isEmpty,
+    );
+    final result = await future;
+    expect(result['ok'], true);
+    expect(api.calls, hasLength(1));
+  });
+
   test(
     'native quote is offline; model authorization flags and decline cannot spend',
     () async {
