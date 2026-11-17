@@ -56,7 +56,10 @@ class _CaptureApi extends PromptAssistantApiClient {
   final String output;
   final requests = <PromptAssistantRequest>[];
   @override
-  Stream<StreamingChunk> complete({required PromptAssistantRequest request}) {
+  Stream<StreamingChunk> complete({
+    required PromptAssistantRequest request,
+    void Function(String)? validateOutput,
+  }) {
     requests.add(request);
     return Stream.value(StreamingChunk(delta: output));
   }

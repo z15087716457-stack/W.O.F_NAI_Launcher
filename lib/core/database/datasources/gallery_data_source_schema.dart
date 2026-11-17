@@ -256,17 +256,16 @@ mixin GalleryDataSourceSchema on EnhancedBaseDataSource {
     }
   }
 
-  /// 迁移：补 positive_prompt_text 列并把 FTS 重建为「仅正向」口径。
+  /// 迁移：补齐派生检索列，统一正向文字与查询的权重／空白表示。
   ///
   /// 历史原因：搜索框命中源里混入主/角色负面提示词，搜画面词会带出
   /// UC 常驻词（worst quality、watermark 等）匹配的无关图。此迁移后
   /// FTS 索引与 LIKE 可搜列统一走 positive_prompt_text（主提示词 +
   /// 角色正向 + model/sampler/software/source/version），
-  /// full_prompt_text 维持全量口径供标签精确匹配使用。
+  /// prompt、raw_json、full_prompt_text 等原始字段保持。
   ///
-  /// 回填两段式：先用列合成全覆盖（角色框行此步缺角色正向，第二步
-  /// 按 raw_json 里的 char_captions 重新解析补齐），随后整体重建 FTS。
-  /// 幂等：gallery_meta 有标记即整体跳过；中途失败不落标记下次重试。
+  /// 分批读取原始列与角色 JSON，复用新写入的检索文本构建器，再重建 FTS。
+  /// v2 标记支持旧库升级一次；中途失败不落标记，下次启动重试。
   Future<void> _migratePositiveOnlySearchText(Database db) async {
     try {
       await db.execute('''
@@ -277,7 +276,7 @@ mixin GalleryDataSourceSchema on EnhancedBaseDataSource {
       ''');
       final done = await db.rawQuery(
         "SELECT value FROM ${GalleryDataSource._galleryMetaTable} "
-        "WHERE key = 'positive_search_text_v1'",
+        "WHERE key = 'positive_search_text_v2'",
       );
       if (done.isNotEmpty) return;
 
@@ -299,45 +298,61 @@ mixin GalleryDataSourceSchema on EnhancedBaseDataSource {
         );
       }
 
-      // 2. 全量回填：列合成（主提示词 + 生成参数；角色框行下一步补齐）
-      await db.execute('''
-        UPDATE ${GalleryDataSource._metadataTable}
-        SET positive_prompt_text = TRIM(
-          COALESCE(prompt, '') || ' ' ||
-          COALESCE(model, '') || ' ' ||
-          COALESCE(sampler, '') || ' ' ||
-          COALESCE(software, '') || ' ' ||
-          COALESCE(source, '') || ' ' ||
-          COALESCE(version, '')
-        )
-      ''');
-
-      // 3. 角色框行：raw_json 里有 char_captions 的重新解析，覆盖为
-      // 与 _buildSearchablePromptText 完全一致的口径（含角色正向）
-      final charRows = await db.rawQuery(
-        'SELECT image_id, raw_json FROM ${GalleryDataSource._metadataTable} '
-        "WHERE raw_json LIKE '%char_captions%'",
-      );
+      // Reuse the writer's text builder for legacy and new rows alike. Pages
+      // keep this one-time repair bounded for a large existing library.
+      final source = this as GalleryDataSource;
+      int? afterId;
       var charPatched = 0;
-      if (charRows.isNotEmpty) {
-        final source = this as GalleryDataSource;
+      while (true) {
+        final rows = await db.query(
+          GalleryDataSource._metadataTable,
+          columns: [
+            'image_id',
+            'prompt',
+            'raw_json',
+            'model',
+            'sampler',
+            'software',
+            'source',
+            'version',
+          ],
+          where: afterId == null ? null : 'image_id > ?',
+          whereArgs: afterId == null ? null : [afterId],
+          orderBy: 'image_id',
+          limit: 500,
+        );
+        if (rows.isEmpty) break;
         final batch = db.batch();
-        for (final row in charRows) {
-          final rawJson = row['raw_json'] as String?;
-          if (rawJson == null || rawJson.isEmpty) continue;
-          final parsed = NovelAiParser().parse({'Comment': rawJson});
-          if (parsed == null || !parsed.hasCharacters) continue;
+        for (final row in rows) {
+          var metadata = NaiImageMetadata(
+            prompt: row['prompt'] as String? ?? '',
+            model: row['model'] as String?,
+            sampler: row['sampler'] as String?,
+            software: row['software'] as String?,
+            source: row['source'] as String?,
+            version: row['version'] as String?,
+          );
+          final raw = row['raw_json'] as String?;
+          if (raw != null && raw.contains('char_captions')) {
+            final parsed = NovelAiParser().parse({'Comment': raw});
+            if (parsed != null && parsed.hasCharacters) {
+              metadata = parsed;
+              charPatched++;
+            }
+          }
           batch.update(
             GalleryDataSource._metadataTable,
-            {'positive_prompt_text': source._buildSearchablePromptText(parsed)},
+            {
+              'positive_prompt_text': source._buildSearchablePromptText(
+                metadata,
+              ),
+            },
             where: 'image_id = ?',
-            whereArgs: [(row['image_id'] as num).toInt()],
+            whereArgs: [row['image_id']],
           );
-          charPatched++;
         }
-        if (charPatched > 0) {
-          await batch.commit(noResult: true);
-        }
+        await batch.commit(noResult: true);
+        afterId = rows.last['image_id'] as int;
       }
 
       // 4. 整体重建 FTS 为正向口径
@@ -350,7 +365,7 @@ mixin GalleryDataSourceSchema on EnhancedBaseDataSource {
       ''');
 
       await db.insert(GalleryDataSource._galleryMetaTable, {
-        'key': 'positive_search_text_v1',
+        'key': 'positive_search_text_v2',
         'value': '${DateTime.now().millisecondsSinceEpoch}',
       });
       (this as GalleryDataSource)._markDataChanged();

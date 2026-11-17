@@ -184,7 +184,7 @@ export const domainTools = [
     }),
   },
   { name: 'studio_search',
-    description: 'Local semantic search over gallery, blocks, wiki or tags. Give query (≤500 chars) and/or one image_id/path (gallery only). Gallery mode defaults to visual with an image, else mixed; favorites/date filters apply first. Gallery items return gallery:<ID>; block IDs work with block_query(id); wiki IDs are tags for wiki_query. Default limit 20. Statuses: disabled, not_indexed, busy; partial=true for incomplete indexes.',
+    description: 'Search existing gallery/blocks/wiki/tags vectors by meaning. query≤500; one image_id/path for gallery only. Gallery mode defaults to visual with an image, else mixed; filters apply first. Gallery IDs are gallery:<ID>; block/wiki IDs work with block_query/wiki_query. limit 1–50, default 20. Tags accept per-call tag_options: budget, layers, categories, segmentation, popularity. disabled=global RAG off; not_indexed=build required; busy=loading/resources; partial=true=indexed content only. No per-source switches. Details: references/search.md.',
     parameters: Type.Object({
       source: E(['gallery', 'blocks', 'wiki', 'tags']),
       query: Type.Optional(Type.String({maxLength: 500})),
@@ -195,6 +195,13 @@ export const domainTools = [
       date_start: Type.Optional(Type.String({pattern: '^\\d{4}-\\d{2}-\\d{2}$'})),
       date_end: Type.Optional(Type.String({pattern: '^\\d{4}-\\d{2}-\\d{2}$'})),
       limit: Type.Optional(Type.Integer({minimum: 1, maximum: 50})),
+      tag_options: Type.Optional(Type.Object({
+        top_k: Type.Optional(Type.Integer({minimum: 1, maximum: 80})),
+        popularity_weight: Type.Optional(Type.Number({minimum: 0, maximum: 1})),
+        use_segmentation: Type.Optional(Type.Boolean()),
+        target_layers: Type.Optional(Type.Array(E(['name', 'synonyms', 'meaning', 'core']), {minItems: 1, maxItems: 4})),
+        target_categories: Type.Optional(Type.Array(E(['General', 'Artist', 'Copyright', 'Character', 'Meta', 'Other']), {minItems: 1, maxItems: 6})),
+      }, {additionalProperties: false})),
     }),
   },
   { name: 'gallery_manage',

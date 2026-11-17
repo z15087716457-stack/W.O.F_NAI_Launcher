@@ -18,16 +18,13 @@ class SettingsCaches {
   final Ref ref;
 
   Future<Map<SettingsCacheKind, CacheFootprint>> footprint() async {
-    final db = ref.read(autocompleteCacheDatabaseProvider);
+    final db = ref.read(legacyAutocompleteCacheProvider);
     final counts = await db.statistics();
     final bytes = await db.contentBytes();
     var danbooru = CacheFootprint(
       counts['danbooruCache']!,
       bytes['danbooruCache']!,
     );
-    if (ref.exists(danbooruCompletionSourceProvider)) {
-      danbooru += ref.read(danbooruCompletionSourceProvider).footprint;
-    }
     if (ref.exists(onlineGalleryNotifierProvider)) {
       danbooru += ref
           .read(onlineGalleryNotifierProvider.notifier)
@@ -48,12 +45,9 @@ class SettingsCaches {
   }
 
   Future<void> clear(SettingsCacheKind kind) async {
-    final db = ref.read(autocompleteCacheDatabaseProvider);
+    final db = ref.read(legacyAutocompleteCacheProvider);
     switch (kind) {
       case SettingsCacheKind.danbooru:
-        if (ref.exists(danbooruCompletionSourceProvider)) {
-          ref.read(danbooruCompletionSourceProvider).clearMemoryCache();
-        }
         if (ref.exists(onlineGalleryNotifierProvider)) {
           ref.read(onlineGalleryNotifierProvider.notifier).clearDanbooruCache();
         }

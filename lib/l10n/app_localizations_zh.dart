@@ -290,11 +290,11 @@ class AppLocalizationsZh extends AppLocalizations {
   String get auth_thirdPartyNicknameHint => '例如：自建站点 / 镜像站点';
 
   @override
-  String get auth_thirdPartyTokenHint => '请输入第三方站点提供的 API Token';
+  String get auth_thirdPartyTokenHint => '请输入 API Token，或粘贴 New API 连接 JSON';
 
   @override
   String get auth_thirdPartyCompatibilityHint =>
-      '第三方站点需兼容 NovelAI 的 /user/subscription 与图像生成相关 API；Token 将按 Bearer 方式发送。';
+      '支持 NovelAI 兼容接口，登录时识别常见的 /v1 和 /v1/novelai 路径。第三方价格与余额单位以站点为准，不套用官网 Opus 免费规则。';
 
   @override
   String get auth_thirdPartyApiSiteRequired => '请输入第三方 API 站点地址';
@@ -364,6 +364,14 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get auth_error_serverError => '服务器错误';
+
+  @override
+  String get auth_error_incompatibleApi =>
+      '该地址未返回 NovelAI 账户接口，请检查站点的 API 基础路径（例如 /v1 或 /v1/novelai）。';
+
+  @override
+  String get auth_connectionImportInvalid =>
+      'New API 连接 JSON 无效，需包含 _type、url 和 key。';
 
   @override
   String get auth_error_unknown => '未知错误';
@@ -6557,6 +6565,32 @@ class AppLocalizationsZh extends AppLocalizations {
   String get wiki_withArticle => '有释义';
 
   @override
+  String get tagMeaning_synonyms => '同义词';
+
+  @override
+  String get wiki_imagePanelTitle => '词条配图';
+
+  @override
+  String get wiki_imagePreviewTitle => '配图预览';
+
+  @override
+  String get wiki_imageOtherGroup => '配图';
+
+  @override
+  String get wiki_imageShow => '显示词条配图';
+
+  @override
+  String get wiki_imageHide => '收起词条配图';
+
+  @override
+  String get wiki_imageLoadFailed => '配图暂时无法读取';
+
+  @override
+  String wiki_imageMore(int loaded, int total) {
+    return '加载更多（$loaded/$total）';
+  }
+
+  @override
   String get wiki_withoutArticle => '暂无释义';
 
   @override
@@ -8426,6 +8460,24 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get promptReading_mode => '轻量翻译';
+
+  @override
+  String get promptReading_automatic => '自动补译';
+
+  @override
+  String get promptReading_automaticSubtitle => '停笔后补译新增或改动内容';
+
+  @override
+  String get promptReading_automaticInlineOnly => '仅轻量翻译模式可用';
+
+  @override
+  String get promptReading_automaticFailed => '补译失败，可手动重试';
+
+  @override
+  String get promptReading_automaticPaused => '已暂停';
+
+  @override
+  String get promptReading_automaticOff => '关闭';
 
   @override
   String get promptReading_modeSubtitle => '原文下方显示译文';
@@ -16274,9 +16326,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get rag_embeddingPath => 'EmbeddingGemma 2 权重目录';
 
   @override
-  String get rag_rerankerPath => 'Qwen3-Reranker-0.6B 权重目录';
-
-  @override
   String get rag_notConfigured => '尚未配置';
 
   @override
@@ -16286,7 +16335,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get rag_modelMode => '模型能力';
 
   @override
-  String get rag_modelModeHint => 'Gemma 用于文字与图片，音频关闭；Qwen 仅用于文字重排。';
+  String get rag_modelModeHint => 'Gemma 2 用于文字与图片检索，音频关闭。';
 
   @override
   String get rag_discover => '检测本地权重';
@@ -16323,13 +16372,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get rag_tagsEnabled => '标签语义搜索与推荐';
 
   @override
-  String get rag_tagsHint => '支持按输入内容搜索，也可根据光标前上下文推荐标签。';
-
-  @override
-  String get rag_context => '推荐上下文范围';
-
-  @override
-  String get rag_contextHint => '固定取光标前，按完整标签截取。可调整为 32–512 个 Gemma token。';
+  String get rag_tagsHint => '按输入的名称或描述检索标签，空框使用本地共现推荐。';
 
   @override
   String get rag_buildIndex => '预览并建立索引';
@@ -18241,22 +18284,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_rgStepEmbed => '嵌入';
 
   @override
-  String get set_rgStepRerank => '重排';
-
-  @override
   String get set_rgStepDevice => '设备';
 
   @override
   String get set_rgSources => '来源';
 
   @override
-  String get set_rgSourcesSub => '每个来源单独建库、单独开关；建库可以暂停，已完成的部分立即可用。';
+  String get set_rgSourcesSub => '每个来源单独建库，已建内容直接用于检索；建库可以暂停。';
 
   @override
   String get set_rgTags => '标签语义搜索与推荐';
-
-  @override
-  String get set_rgTagsSub => '支持按输入内容搜索，也可根据光标前上下文推荐标签。';
 
   @override
   String get set_rgWiki => 'Wiki 语义搜索';
@@ -18312,22 +18349,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_rgClearBody => '只删除派生索引，原始内容和模型都保留。';
 
   @override
-  String get set_rgContext => '推荐上下文';
-
-  @override
-  String get set_rgContextSub => '固定取光标前，按完整标签截取。可调整为 32–512 个 Gemma token。';
-
-  @override
-  String get set_rgRange => '取样长度';
-
-  @override
   String get set_rgRuntime => '模型与运行环境';
 
   @override
   String get set_rgEmbedPath => '嵌入模型目录';
-
-  @override
-  String get set_rgRerankPath => '重排模型目录';
 
   @override
   String get set_rgDevice => '运行设备';
@@ -18372,7 +18397,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_rgNotReady => '语义检索还不能用';
 
   @override
-  String get set_rgNotReadySub => '先安装运行环境，再选好两个模型目录。';
+  String get set_rgNotReadySub => '先安装运行环境，再选择 Gemma 2 模型目录。';
 
   @override
   String get set_rgEmpty => '未建立';
@@ -18437,7 +18462,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String set_rgPlanTags(Object n) {
-    return '将收录 $n 项标签、别名与已有本地释义。';
+    return '将处理 $n 个标签，按名称、已有中文资料与释义建立索引。';
   }
 
   @override
@@ -18449,6 +18474,40 @@ class AppLocalizationsZh extends AppLocalizations {
   String set_rgPlanGallery(Object images, Object n) {
     return '将收录 $images 张图片和 $n 段 NAI 参数，画面与参数分开索引。';
   }
+
+  @override
+  String get set_rgUpgrade => '升级标签索引';
+
+  @override
+  String get set_rgCleanupLegacy => '清理旧标签索引';
+
+  @override
+  String get set_rgUpgradeNotice => '标签检索方案已升级，需要按新方案建立索引。Wiki、提示词块和图库索引可继续使用。';
+
+  @override
+  String set_rgUpgradePlan(String size) {
+    return '确认后按新版方案建立标签索引，完成并校验后清理旧标签索引（约 $size）。升级期间临时占用更多空间，可暂停续建；其他来源及翻译资料保留。';
+  }
+
+  @override
+  String set_rgCleanupPlan(String size) {
+    return '清理旧标签索引（约 $size），保留新版标签索引、其他来源及翻译资料。';
+  }
+
+  @override
+  String get set_rgUpgradeCleaning => '新版标签索引已就绪，正在清理旧标签索引…';
+
+  @override
+  String get set_rgUpgradeCleanupFailed => '新版检索可用，旧索引清理未完成，请重试清理。';
+
+  @override
+  String get set_rgUpgradeBadge => '需升级';
+
+  @override
+  String get set_rgCleanupPending => '待清理';
+
+  @override
+  String get set_rgUpgradeCleanupNotice => '新版标签索引已就绪，旧标签索引仍占用空间，可以清理。';
 
   @override
   String get set_rgPlanNote => '首次处理可能较久，可以随时暂停，已完成的部分立即可用。';
@@ -18480,7 +18539,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get set_rgDiscoverSub =>
-      '在工作区 04_工具/models 里找 EmbeddingGemma 2 和 Qwen3-Reranker 0.6B，找到后自动填好上面两个目录。';
+      '在工作区 04_工具/models 中查找 EmbeddingGemma 2，并填入模型目录。';
 
   @override
   String get set_rgFind => '查找';
@@ -18511,6 +18570,30 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get set_rgEnvMissing => '还没有安装';
+
+  @override
+  String get set_rgEnvNeedsUpdate => '需要更新';
+
+  @override
+  String get set_rgEnvUpdate => '更新环境';
+
+  @override
+  String set_rgEnvDependencies(String packages) {
+    return '需要补齐或更新依赖：$packages。现有索引会保留。';
+  }
+
+  @override
+  String get set_rgEnvPythonVersion =>
+      '需要 Python 3.12，请更新运行环境或选择兼容的解释器。现有索引会保留。';
+
+  @override
+  String get set_rgEnvCheckFailed => '检测失败';
+
+  @override
+  String get set_rgEnvImportFailed => '依赖加载失败，请重新检测或修复运行环境。现有索引会保留。';
+
+  @override
+  String get set_rgEnvCheckTimeout => '环境检测超时，可重新检测。无需删除或重建索引。';
 
   @override
   String get set_rgInstall => '安装';
@@ -22209,11 +22292,11 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get auth_thirdPartyNicknameHint => '例如：自建站點 / 鏡像站點';
 
   @override
-  String get auth_thirdPartyTokenHint => '請輸入第三方站點提供的 API Token';
+  String get auth_thirdPartyTokenHint => '請輸入 API Token，或貼上 New API 連線 JSON';
 
   @override
   String get auth_thirdPartyCompatibilityHint =>
-      '第三方站點需相容 NovelAI 的 /user/subscription 與影像生成相關 API；Token 將按 Bearer 方式傳送。';
+      '支援 NovelAI 相容介面，登入時識別常見的 /v1 和 /v1/novelai 路徑。第三方價格與餘額單位以站點為準，不套用官網 Opus 免費規則。';
 
   @override
   String get auth_thirdPartyApiSiteRequired => '請輸入第三方 API 站點地址';
@@ -22283,6 +22366,14 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get auth_error_serverError => '伺服器錯誤';
+
+  @override
+  String get auth_error_incompatibleApi =>
+      '該地址未返回 NovelAI 帳戶介面，請檢查站點的 API 基礎路徑（例如 /v1 或 /v1/novelai）。';
+
+  @override
+  String get auth_connectionImportInvalid =>
+      'New API 連線 JSON 無效，需包含 _type、url 和 key。';
 
   @override
   String get auth_error_unknown => '未知錯誤';
@@ -28476,6 +28567,32 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get wiki_withArticle => '有釋義';
 
   @override
+  String get tagMeaning_synonyms => '同義詞';
+
+  @override
+  String get wiki_imagePanelTitle => '詞條配圖';
+
+  @override
+  String get wiki_imagePreviewTitle => '配圖預覽';
+
+  @override
+  String get wiki_imageOtherGroup => '配圖';
+
+  @override
+  String get wiki_imageShow => '顯示詞條配圖';
+
+  @override
+  String get wiki_imageHide => '收起詞條配圖';
+
+  @override
+  String get wiki_imageLoadFailed => '配圖暫時無法讀取';
+
+  @override
+  String wiki_imageMore(int loaded, int total) {
+    return '載入更多（$loaded/$total）';
+  }
+
+  @override
   String get wiki_withoutArticle => '暫無釋義';
 
   @override
@@ -30345,6 +30462,24 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get promptReading_mode => '輕量翻譯';
+
+  @override
+  String get promptReading_automatic => '自動補譯';
+
+  @override
+  String get promptReading_automaticSubtitle => '停筆後補譯新增或改動內容';
+
+  @override
+  String get promptReading_automaticInlineOnly => '僅輕量翻譯模式可用';
+
+  @override
+  String get promptReading_automaticFailed => '補譯失敗，可手動重試';
+
+  @override
+  String get promptReading_automaticPaused => '已暫停';
+
+  @override
+  String get promptReading_automaticOff => '關閉';
 
   @override
   String get promptReading_modeSubtitle => '原文下方顯示譯文';
@@ -38193,9 +38328,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get rag_embeddingPath => 'EmbeddingGemma 2 權重目錄';
 
   @override
-  String get rag_rerankerPath => 'Qwen3-Reranker-0.6B 權重目錄';
-
-  @override
   String get rag_notConfigured => '尚未配置';
 
   @override
@@ -38205,7 +38337,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get rag_modelMode => '模型能力';
 
   @override
-  String get rag_modelModeHint => 'Gemma 用於文字與圖片，音訊關閉；Qwen 僅用於文字重排。';
+  String get rag_modelModeHint => 'Gemma 2 用於文字與圖片檢索，音訊關閉。';
 
   @override
   String get rag_discover => '檢測本地權重';
@@ -38242,13 +38374,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get rag_tagsEnabled => '標籤語義搜尋與推薦';
 
   @override
-  String get rag_tagsHint => '支援按輸入內容搜尋，也可根據游標前上下文推薦標籤。';
-
-  @override
-  String get rag_context => '推薦上下文範圍';
-
-  @override
-  String get rag_contextHint => '固定取游標前，按完整標籤擷取。可調整為 32–512 個 Gemma token。';
+  String get rag_tagsHint => '按輸入的名稱或描述檢索標籤，空框使用本地共現推薦。';
 
   @override
   String get rag_buildIndex => '預覽並建立索引';
@@ -40160,22 +40286,16 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get set_rgStepEmbed => '嵌入';
 
   @override
-  String get set_rgStepRerank => '重排';
-
-  @override
   String get set_rgStepDevice => '裝置';
 
   @override
   String get set_rgSources => '來源';
 
   @override
-  String get set_rgSourcesSub => '每個來源單獨建庫、單獨開關；建庫可以暫停，已完成的部分立即可用。';
+  String get set_rgSourcesSub => '每個來源單獨建庫，已建內容直接用於檢索；建庫可以暫停。';
 
   @override
   String get set_rgTags => '標籤語義搜尋與推薦';
-
-  @override
-  String get set_rgTagsSub => '支援按輸入內容搜尋，也可根據游標前上下文推薦標籤。';
 
   @override
   String get set_rgWiki => 'Wiki 語義搜尋';
@@ -40231,22 +40351,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get set_rgClearBody => '只刪除派生索引，原始內容和模型都保留。';
 
   @override
-  String get set_rgContext => '推薦上下文';
-
-  @override
-  String get set_rgContextSub => '固定取游標前，按完整標籤擷取。可調整為 32–512 個 Gemma token。';
-
-  @override
-  String get set_rgRange => '取樣長度';
-
-  @override
   String get set_rgRuntime => '模型與執行環境';
 
   @override
   String get set_rgEmbedPath => '嵌入模型目錄';
-
-  @override
-  String get set_rgRerankPath => '重排模型目錄';
 
   @override
   String get set_rgDevice => '執行裝置';
@@ -40291,7 +40399,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get set_rgNotReady => '語義檢索還不能用';
 
   @override
-  String get set_rgNotReadySub => '先安裝執行環境，再選好兩個模型目錄。';
+  String get set_rgNotReadySub => '先安裝執行環境，再選擇 Gemma 2 模型目錄。';
 
   @override
   String get set_rgEmpty => '未建立';
@@ -40356,7 +40464,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String set_rgPlanTags(Object n) {
-    return '將收錄 $n 項標籤、別名與已有本地釋義。';
+    return '將處理 $n 個標籤，按名稱、已有中文資料與釋義建立索引。';
   }
 
   @override
@@ -40368,6 +40476,40 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String set_rgPlanGallery(Object images, Object n) {
     return '將收錄 $images 張圖片和 $n 段 NAI 參數，畫面與參數分開索引。';
   }
+
+  @override
+  String get set_rgUpgrade => '升級標籤索引';
+
+  @override
+  String get set_rgCleanupLegacy => '清理舊標籤索引';
+
+  @override
+  String get set_rgUpgradeNotice => '標籤檢索方案已升級，需要按新方案建立索引。Wiki、提示詞塊和圖庫索引可繼續使用。';
+
+  @override
+  String set_rgUpgradePlan(String size) {
+    return '確認後按新版方案建立標籤索引，完成並校驗後清理舊標籤索引（約 $size）。升級期間臨時佔用更多空間，可暫停續建；其他來源及翻譯資料保留。';
+  }
+
+  @override
+  String set_rgCleanupPlan(String size) {
+    return '清理舊標籤索引（約 $size），保留新版標籤索引、其他來源及翻譯資料。';
+  }
+
+  @override
+  String get set_rgUpgradeCleaning => '新版標籤索引已就緒，正在清理舊標籤索引…';
+
+  @override
+  String get set_rgUpgradeCleanupFailed => '新版檢索可用，舊索引清理未完成，請重試清理。';
+
+  @override
+  String get set_rgUpgradeBadge => '需升級';
+
+  @override
+  String get set_rgCleanupPending => '待清理';
+
+  @override
+  String get set_rgUpgradeCleanupNotice => '新版標籤索引已就緒，舊標籤索引仍佔用空間，可以清理。';
 
   @override
   String get set_rgPlanNote => '首次處理可能較久，可以隨時暫停，已完成的部分立即可用。';
@@ -40399,7 +40541,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get set_rgDiscoverSub =>
-      '在工作區 04_工具/models 裡找 EmbeddingGemma 2 和 Qwen3-Reranker 0.6B，找到後自動填好上面兩個目錄。';
+      '在工作區 04_工具/models 中查詢 EmbeddingGemma 2，並填入模型目錄。';
 
   @override
   String get set_rgFind => '查詢';
@@ -40430,6 +40572,30 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get set_rgEnvMissing => '還沒有安裝';
+
+  @override
+  String get set_rgEnvNeedsUpdate => '需要更新';
+
+  @override
+  String get set_rgEnvUpdate => '更新環境';
+
+  @override
+  String set_rgEnvDependencies(String packages) {
+    return '需要補齊或更新依賴：$packages。現有索引會保留。';
+  }
+
+  @override
+  String get set_rgEnvPythonVersion =>
+      '需要 Python 3.12，請更新執行環境或選擇相容的直譯器。現有索引會保留。';
+
+  @override
+  String get set_rgEnvCheckFailed => '檢測失敗';
+
+  @override
+  String get set_rgEnvImportFailed => '依賴載入失敗，請重新檢測或修復執行環境。現有索引會保留。';
+
+  @override
+  String get set_rgEnvCheckTimeout => '環境檢測逾時，可重新檢測。無需刪除或重建索引。';
 
   @override
   String get set_rgInstall => '安裝';

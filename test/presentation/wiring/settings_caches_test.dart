@@ -1,18 +1,15 @@
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
-import 'package:dio/dio.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:nai_launcher/core/cache/gallery_cache_manager.dart';
 import 'package:nai_launcher/presentation/wiring/settings/settings_inventory.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:nai_launcher/core/autocomplete/autocomplete_cache_database.dart';
+import 'package:nai_launcher/core/autocomplete/legacy_autocomplete_cache.dart';
 import 'package:nai_launcher/core/autocomplete/autocomplete_providers.dart';
-import 'package:nai_launcher/core/autocomplete/completion_models.dart';
-import 'package:nai_launcher/core/autocomplete/danbooru_completion_source.dart';
 import 'package:nai_launcher/core/wiki/visible_tag_translation_cache.dart';
 import 'package:nai_launcher/core/wiki/wiki_example_repository.dart';
 import 'package:nai_launcher/data/models/online_gallery/gallery_item.dart';
@@ -36,65 +33,23 @@ class _Gallery extends OnlineGalleryNotifier {
   }
 }
 
-class _Api implements HttpClientAdapter {
-  int requests = 0;
-  Completer<ResponseBody>? blocked;
-  @override
-  Future<ResponseBody> fetch(
-    RequestOptions options,
-    Stream<Uint8List>? requestStream,
-    Future<void>? cancelFuture,
-  ) async {
-    requests++;
-    return blocked?.future ??
-        ResponseBody.fromString(
-          '[{"name":"blue_eyes","category":0,"post_count":100}]',
-          200,
-          headers: {
-            Headers.contentTypeHeader: [Headers.jsonContentType],
-          },
-        );
-  }
-
-  @override
-  void close({bool force = false}) {}
-}
-
-CompletionQuery _query() => const CompletionQuery(
-  token: 'blue',
-  fullText: 'blue',
-  cursorPosition: 4,
-  replacementRange: TextReplacementRange(start: 0, end: 4),
-  existingTags: {},
-  limit: 10,
-  locale: 'en',
-);
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUpAll(AppLoggerTestIsolation.setUp);
   tearDownAll(AppLoggerTestIsolation.tearDown);
   late Directory temp;
-  late AutocompleteCacheDatabase legacy;
+  late LegacyAutocompleteCache legacy;
   late VisibleTagTranslationCache visible;
   late ProviderContainer container;
-  late DanbooruCompletionSource completion;
   late WikiExampleRepository examples;
-  late _Api api;
   late SettingsCaches caches;
   setUp(() async {
     temp = await Directory.systemTemp.createTemp('settings_caches_');
-    legacy = AutocompleteCacheDatabase(
+    legacy = LegacyAutocompleteCache(
       databasePath: () async => p.join(temp.path, 'legacy.db'),
     );
     visible = VisibleTagTranslationCache(
       databasePath: () async => p.join(temp.path, 'visible.db'),
-    );
-    api = _Api();
-    completion = DanbooruCompletionSource(
-      cache: legacy,
-      dio: Dio(BaseOptions(baseUrl: 'https://synthetic.invalid'))
-        ..httpClientAdapter = api,
     );
     examples = WikiExampleRepository(
       fetchWiki: (tag, {cancelToken}) async => {
@@ -126,9 +81,8 @@ void main() {
     );
     container = ProviderContainer(
       overrides: [
-        autocompleteCacheDatabaseProvider.overrideWithValue(legacy),
+        legacyAutocompleteCacheProvider.overrideWithValue(legacy),
         visibleTagTranslationCacheProvider.overrideWithValue(visible),
-        danbooruCompletionSourceProvider.overrideWithValue(completion),
         wikiExampleRepositoryProvider.overrideWithValue(examples),
         onlineGalleryNotifierProvider.overrideWith(() => _Gallery(initial)),
       ],
@@ -137,18 +91,27 @@ void main() {
   });
   tearDown(() async {
     container.dispose();
-    await legacy.dispose();
     await visible.close();
     await temp.delete(recursive: true);
   });
 
   Future<void> seedTranslations() async {
-    await legacy.putAiTranslations(
-      translations: {'old_tag': '旧译文'},
-      locale: 'zh',
-      routeFingerprint: 'fixture',
-      promptVersion: 1,
+    final db = await databaseFactoryFfi.openDatabase(
+      p.join(temp.path, 'legacy.db'),
     );
+    await db.execute(
+      'CREATE TABLE IF NOT EXISTS remote_queries(query_key TEXT PRIMARY KEY,payload TEXT,fetched_at INTEGER)',
+    );
+    await db.execute(
+      'CREATE TABLE IF NOT EXISTS ai_translations(canonical_tag TEXT PRIMARY KEY,translation TEXT)',
+    );
+    await db.rawInsert(
+      "INSERT OR REPLACE INTO ai_translations VALUES('old_tag','旧译文')",
+    );
+    await db.rawInsert(
+      "INSERT OR REPLACE INTO remote_queries VALUES('fixture','[]',1)",
+    );
+    await db.close();
     await visible.put(
       tag: 'blue_eyes',
       route: 'fixture',
@@ -219,9 +182,7 @@ void main() {
     'counts current translations in UTF-8 and clears each category independently',
     () async {
       await seedTranslations();
-      await completion.search(_query());
       // Instantiate only the caches actually used, as happens in the app.
-      container.read(danbooruCompletionSourceProvider);
       container.read(onlineGalleryNotifierProvider);
       await container.read(wikiExampleRepositoryProvider).forTag('blue_eyes');
       final before = await caches.footprint();
@@ -233,7 +194,7 @@ void main() {
       expect(
         before[SettingsCacheKind.danbooru]!.entries,
         4,
-      ); // SQL + completion RAM + gallery + Wiki
+      ); // Existing SQL + gallery + Wiki page results + shared media URLs
       expect(before[SettingsCacheKind.danbooru]!.bytes, greaterThan(0));
       await caches.clear(SettingsCacheKind.danbooru);
       final after = await caches.footprint();
@@ -245,79 +206,40 @@ void main() {
       expect(gallery.favoritedPostKeys, {'danbooru:1', 'ai_tag:2'});
       expect(gallery.caches['search:ai_tag:fixture']!.posts.single.id, 2);
       expect(gallery.caches.containsKey('search:danbooru:fixture'), isFalse);
-      // A fresh lookup must go to the stub again, not the old five-minute RAM hit.
-      await completion.search(_query());
-      expect(api.requests, 2);
       await caches.clear(SettingsCacheKind.translation);
       expect(
         (await caches.footprint())[SettingsCacheKind.translation]!.entries,
         0,
       );
       expect(await visible.chineseTerms(['blue_eyes']), isEmpty);
-      expect((await legacy.statistics())['danbooruCache'], 1);
-    },
-  );
-
-  test(
-    'clear rejects old database writers and permits new generations',
-    () async {
-      final oldRemote = legacy.remoteGeneration;
-      final oldTranslation = legacy.translationGeneration;
-      final oldVisible = visible.generation;
-      await caches.clear(SettingsCacheKind.danbooru);
-      await caches.clear(SettingsCacheKind.translation);
-      await legacy.putRemote('late', [
-        {'tag': 'late'},
-      ], expectedGeneration: oldRemote);
-      await legacy.putAiTranslations(
-        translations: {'late': '迟到'},
-        locale: 'zh',
-        routeFingerprint: 'fixture',
-        promptVersion: 1,
-        expectedGeneration: oldTranslation,
-      );
-      await visible.put(
-        tag: 'late',
-        route: 'fixture',
-        promptVersion: 1,
-        wikiHash: 'hash',
-        nameZh: '迟到',
-        expectedGeneration: oldVisible,
-      );
-      final empty = await caches.footprint();
-      expect(empty.values.map((v) => v.entries), everyElement(0));
-      await seedTranslations();
-      expect(
-        (await caches.footprint())[SettingsCacheKind.translation]!.entries,
-        2,
-      );
-    },
-  );
-
-  test(
-    'a pre-clear completion request cannot resurrect disk or RAM entries',
-    () async {
-      api.blocked = Completer<ResponseBody>();
-      container.read(danbooruCompletionSourceProvider);
-      final pending = completion.search(_query());
-      while (api.requests == 0) {
-        await Future<void>.delayed(const Duration(milliseconds: 1));
-      }
-      await caches.clear(SettingsCacheKind.danbooru);
-      api.blocked!.complete(
-        ResponseBody.fromString(
-          '[]',
-          200,
-          headers: {
-            Headers.contentTypeHeader: [Headers.jsonContentType],
-          },
-        ),
-      );
-      expect(await pending, isEmpty);
-      expect(completion.footprint.entries, 0);
       expect((await legacy.statistics())['danbooruCache'], 0);
     },
   );
+
+  test('opening settings does not create a retired cache database', () async {
+    expect(
+      (await caches.footprint()).values.map((v) => v.entries),
+      everyElement(0),
+    );
+    expect(await File(p.join(temp.path, 'legacy.db')).exists(), false);
+  });
+
+  test('clearing translations rejects a late current-cache writer', () async {
+    final generation = visible.generation;
+    await caches.clear(SettingsCacheKind.translation);
+    await visible.put(
+      tag: 'late',
+      route: 'fixture',
+      promptVersion: 1,
+      wikiHash: 'hash',
+      nameZh: '迟到',
+      expectedGeneration: generation,
+    );
+    expect(
+      (await caches.footprint())[SettingsCacheKind.translation]!.entries,
+      0,
+    );
+  });
 
   test('Wiki results finishing after clear are not retained', () async {
     final blocked = Completer<Map<String, dynamic>?>();

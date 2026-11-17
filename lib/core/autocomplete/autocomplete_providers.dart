@@ -2,71 +2,20 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../data/services/alias_resolver_service.dart';
-import '../../presentation/prompt_assistant/services/prompt_assistant_service.dart';
 import '../database/services/service_providers.dart';
-import 'autocomplete_cache_database.dart';
-import 'autocomplete_settings.dart';
+import 'legacy_autocomplete_cache.dart';
 import 'cooccurrence_completion_source.dart';
-import 'completion_models.dart';
-import 'completion_orchestrator.dart';
-import 'danbooru_completion_source.dart';
-import 'llm_translation_resolver.dart';
 import 'tag_catalog_repository.dart';
-import 'prompt_block_completion_source.dart';
 
-final autocompleteCacheDatabaseProvider = Provider<AutocompleteCacheDatabase>((
-  ref,
-) {
-  final cache = AutocompleteCacheDatabase();
-  unawaited(cache.initialize().then((_) => cache.prune()));
-  ref.onDispose(() => unawaited(cache.dispose()));
-  return cache;
-});
+final legacyAutocompleteCacheProvider = Provider(
+  (ref) => LegacyAutocompleteCache(),
+);
 
 final tagCatalogRepositoryProvider = Provider<TagCatalogRepository>((ref) {
   final repository = TagCatalogRepository();
   ref.onDispose(() => unawaited(repository.dispose()));
   return repository;
 });
-
-final danbooruCompletionSourceProvider = Provider<DanbooruCompletionSource>((
-  ref,
-) {
-  return DanbooruCompletionSource(
-    cache: ref.watch(autocompleteCacheDatabaseProvider),
-  );
-});
-
-final llmTranslationResolverProvider = Provider<LlmTranslationResolver>((ref) {
-  return LlmTranslationResolver(
-    service: ref.watch(promptAssistantServiceProvider),
-    cache: ref.watch(autocompleteCacheDatabaseProvider),
-    isEnabled: () =>
-        ref.read(autocompleteSettingsProvider).llmTranslationEnabled,
-  );
-});
-
-class AutocompleteServices {
-  const AutocompleteServices({
-    required this.localSources,
-    required this.llmTranslations,
-    required this.danbooru,
-    this.libraryAliases,
-  });
-
-  final List<CompletionSource> localSources;
-  final TranslationResolver llmTranslations;
-  final DanbooruCompletionSource danbooru;
-  final CompletionSource? libraryAliases;
-
-  CompletionOrchestrator createOrchestrator() => CompletionOrchestrator(
-    localSources: localSources,
-    llmTranslations: llmTranslations,
-    danbooru: danbooru,
-    libraryAliases: libraryAliases,
-  );
-}
 
 final cooccurrenceCompletionSourceProvider =
     Provider<CooccurrenceCompletionSource>((ref) {
@@ -76,38 +25,3 @@ final cooccurrenceCompletionSourceProvider =
         catalog: ref.watch(tagCatalogRepositoryProvider),
       );
     });
-
-final autocompleteLocalSourcesProvider = Provider<List<CompletionSource>>((
-  ref,
-) {
-  return <CompletionSource>[
-    ref.watch(tagCatalogRepositoryProvider),
-    ref.watch(cooccurrenceCompletionSourceProvider),
-  ];
-});
-
-final promptBlockCompletionSourceProvider =
-    Provider<PromptBlockCompletionSource>(
-      (ref) => PromptBlockCompletionSource(
-        searchEntries: (query, limit) => ref
-            .read(aliasResolverServiceProvider.notifier)
-            .searchEntries(query, limit: limit)
-            .map(
-              (entry) => LibraryCompletionEntry(
-                name: entry.title,
-                contentPreview: entry.contentPreview,
-                useCount: entry.useCount,
-              ),
-            )
-            .toList(growable: false),
-      ),
-    );
-
-final autocompleteServicesProvider = Provider<AutocompleteServices>((ref) {
-  return AutocompleteServices(
-    localSources: ref.watch(autocompleteLocalSourcesProvider),
-    llmTranslations: ref.watch(llmTranslationResolverProvider),
-    danbooru: ref.watch(danbooruCompletionSourceProvider),
-    libraryAliases: ref.watch(promptBlockCompletionSourceProvider),
-  );
-});

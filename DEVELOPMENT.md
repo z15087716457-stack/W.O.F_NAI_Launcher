@@ -86,7 +86,7 @@ flutter gen-l10n
 
 通用台湾用语写 `tool/l10n/zh_tw_terms.dart`，单条完整句子覆盖写 `tool/l10n/zh_tw_overrides.json`。有 context 使用 `context.l10n`，无 context 使用 `currentL10n`；不在代码内临时写中文或语言三元分支。
 
-`assets/databases/*.db` 经 Git LFS 管理，发布前确认是真 SQLite 而非 pointer。CSV 建库源不随应用打包；`github_chening233.csv` 用于 `tag_wiki.db`，co-occurrence 独立构建器以来源 lock 为准。当前不分发 ffdkj 中文词库与已删除的旧 translation.db 建库链，不能重新恢复旧预构建包。资源增删与 `pubspec.yaml`、许可、清单和本次交付必须一致。
+`assets/databases/*.db` 经 Git LFS 管理，发布前确认是真 SQLite 而非 pointer。CSV 建库源通常不随应用打包；`github_chening233.csv`用于`tag_wiki.db`，co-occurrence独立构建器以来源lock为准。标签检索运行时直接读取的`tool/rag/danbooru_tags.csv`是例外：固定原始UTF-8字节随包交付，来源JSON与GPL许可同时登记，`RagClient`复制CSV及`tag_search.py`／`tag_corpus.py`／`tag_query.py`到同一worker目录。当前不分发ffdkj中文词库与已删除的旧translation.db建库链，不能重新恢复旧预构建包。资源增删与`pubspec.yaml`、许可、清单和本次交付必须一致。
 
 ### 小贴士与彩蛋
 

@@ -1,7 +1,7 @@
 """Local gallery: independent visual vectors and NAI-only text passages.
 
-Source DB and original images are read-only. No metadata extractor, URLs,
-captions, audio, or image bytes are sent to the text reranker.
+Source DB and original images are read-only. Visual and NAI parameter passages
+use Gemma embeddings; no metadata extractor, URL fetcher or audio inference.
 """
 import hashlib
 import heapq
@@ -273,6 +273,7 @@ class GalleryIndex:
         with self.db:
             self.db.executemany('INSERT OR REPLACE INTO metadata VALUES(?,?)',
                                 [('consented', '1'), ('paused', '0')])
+            self.db.execute("DELETE FROM metadata WHERE key='build_error'")
         try:
             for plans, pending in self._batches(owners, records):
                 if cancelled():
@@ -385,9 +386,10 @@ class GalleryEngine:
         visual = self.visual.status();text = self.text.status()
         complete = visual['complete'] and text['complete']
         return {'indexed':visual['indexed']+text['indexed'],'total':visual['total']+text['total'],
+            'error':visual['error'] or text['error'],
             'complete':complete,'partial':bool(visual['indexed']+text['indexed']) and not complete,
             'bytes':visual['bytes']+text['bytes'],'paused':visual['paused'] or text['paused'],
-            'auto_update_allowed':(visual['auto_update_allowed'] or text['auto_update_allowed']) and not(visual['paused'] or text['paused']),
+            'auto_update_allowed':(visual['auto_update_allowed'] or text['auto_update_allowed']) and not(visual['paused'] or text['paused'] or visual['error'] or text['error']),
             'building':visual['building'] or text['building'],'skipped':visual['skipped'],
             'images':visual['total'],'visual_indexed':visual['indexed'],'parameter_chunks':text['total'],'parameters_indexed':text['indexed']}
 
@@ -442,6 +444,9 @@ class GalleryEngine:
     def set_paused(self,paused):
         self.visual.set_paused(paused);self.text.set_paused(paused)
 
+    def set_build_error(self,code):
+        self.visual.set_build_error(code);self.text.set_build_error(code)
+
     def clear(self):
         self.visual.clear();self.text.clear()
 
@@ -473,7 +478,7 @@ class GalleryEngine:
                     if item['id'] in records and Path(records[item['id']]['path']).is_file()
                     and self.text.sources.contains(records[item['id']]['path'],physical=True)]
         if cancelled(): raise ValueError('cancelled')
-        # Rank fusion, never compare raw cross-modal similarity to Qwen scores.
+        # Fuse channel ranks instead of comparing cross-modal raw scores.
         scores = {};items = {}
         for matches in (visual,text):
             for rank,item in enumerate(matches):

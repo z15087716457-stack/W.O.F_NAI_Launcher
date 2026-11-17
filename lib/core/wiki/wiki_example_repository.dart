@@ -4,70 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/datasources/remote/danbooru_api_service.dart';
 import '../utils/tag_normalizer.dart';
 import '../cache/cache_footprint.dart';
+import 'wiki_image_document.dart';
 
-bool isWikiExampleHeading(String title) => RegExp(
-  r'^(examples?|示例|范例|範例|例子|示范|示範|用例|使用例|实例|實例|事例|作例|サンプル|例|예시|예제)(?:\s|[:：]|$)',
-  caseSensitive: false,
-).hasMatch(title.trim());
-
-class WikiExampleReference {
-  const WikiExampleReference(this.postId, this.caption);
-  final int postId;
-  final String caption;
-
-  /// Read only explicit image embeds in example sections, not ordinary links.
-  static List<WikiExampleReference> parse(String body) {
-    final found = <int, WikiExampleReference>{};
-    int? level;
-    for (final line in body.split(RegExp(r'\r?\n'))) {
-      final heading = RegExp(r'^h([1-6])\.\s*(.*)$').firstMatch(line.trim());
-      if (heading != null) {
-        final next = int.parse(heading[1]!);
-        if (isWikiExampleHeading(heading[2]!)) {
-          level = next;
-        } else if (level != null && next <= level) {
-          level = null;
-        }
-        continue;
-      }
-      if (level == null) continue;
-      final embeds = RegExp(r'!post\s+#(\d+)\b').allMatches(line).toList();
-      for (var index = 0; index < embeds.length; index++) {
-        final match = embeds[index];
-        final id = int.tryParse(match[1]!);
-        if (id == null || id <= 0) continue;
-        final end = index + 1 < embeds.length
-            ? embeds[index + 1].start
-            : line.length;
-        final caption = line
-            .substring(match.end, end)
-            .replaceFirst(RegExp(r'^\s*:\s*'), '')
-            .trim();
-        found.putIfAbsent(
-          id,
-          () => WikiExampleReference(
-            id,
-            String.fromCharCodes(caption.runes.take(240)),
-          ),
-        );
-      }
-    }
-    return found.values.toList(growable: false);
-  }
-
-  String get captionMarkdown => caption.replaceAllMapped(
-    RegExp(r'\[\[([^\]\r\n]+)\]\]'),
-    (match) {
-      final parts = match[1]!.split('|');
-      final tag = TagNormalizer.normalize(parts.first);
-      final label = parts.length > 1 && parts.last.isNotEmpty
-          ? parts.last
-          : TagNormalizer.toDisplay(tag);
-      final safeLabel = label.replaceAll('[', r'\[').replaceAll(']', r'\]');
-      return '[$safeLabel](https://danbooru.donmai.us/wiki_pages/${Uri.encodeComponent(tag)})';
-    },
-  );
-}
+export 'wiki_image_document.dart';
 
 class WikiExample {
   const WikiExample({
@@ -79,7 +18,7 @@ class WikiExample {
   final String? thumbnailUrl;
   final String? largeUrl;
   int get postId => reference.postId;
-  String get sourceUrl => 'https://danbooru.donmai.us/posts/$postId';
+  String get sourceUrl => reference.sourceUrl;
 }
 
 class WikiExampleSet {
@@ -105,18 +44,21 @@ class WikiExampleRepository {
   WikiExampleRepository({
     required this.fetchWiki,
     required this.fetchPosts,
+    this.fetchAssets,
     DateTime Function()? now,
   }) : _now = now ?? DateTime.now;
   final WikiPageFetch fetchWiki;
   final WikiPostFetch fetchPosts;
+  final WikiPostFetch? fetchAssets;
   final DateTime Function() _now;
   final _cache = <String, ({DateTime at, WikiExampleSet value})>{};
+  final _media = <String, ({DateTime at, String? thumbnail, String? large})>{};
 
   int _cacheGeneration = 0;
 
-  CacheFootprint get footprint => CacheFootprint.json(
-    _cache.values.map(
-      (entry) => [
+  CacheFootprint get footprint => CacheFootprint.json([
+    for (final entry in _cache.values)
+      [
         for (final item in entry.value.items)
           [
             item.postId,
@@ -125,12 +67,14 @@ class WikiExampleRepository {
             item.largeUrl,
           ],
       ],
-    ),
-  );
+    for (final MapEntry(key: key, value: urls) in _media.entries)
+      [key, urls.thumbnail, urls.large],
+  ]);
 
   void clearCache() {
     _cacheGeneration++;
     _cache.clear();
+    _media.clear();
   }
 
   Future<WikiExampleSet> forTag(String tag, {CancelToken? cancelToken}) async {
@@ -153,20 +97,11 @@ class WikiExampleRepository {
     }
     final references = WikiExampleReference.parse(body is String ? body : '');
     final selected = references.take(64).toList(growable: false);
-    final posts = selected.isEmpty
-        ? const <Map<String, dynamic>>[]
-        : await fetchPosts(
-            selected.map((r) => r.postId).toList(),
-            cancelToken: cancelToken,
-          );
-    if (cancelToken?.isCancelled == true) {
-      throw cancelToken!.cancelError!;
-    }
-    final byId = {for (final post in posts) post['id']: post};
-    final result = WikiExampleSet([
-      for (final reference in selected)
-        _image(reference, byId[reference.postId]),
-    ], truncated: references.length > selected.length);
+    final items = await forReferences(selected, cancelToken: cancelToken);
+    final result = WikiExampleSet(
+      items,
+      truncated: references.length > selected.length,
+    );
     if (generation != _cacheGeneration) return result;
     _cache[name] = (at: _now(), value: result);
     while (_cache.length > 32) {
@@ -187,14 +122,77 @@ class WikiExampleRepository {
     return value;
   }
 
-  WikiExample _image(
-    WikiExampleReference reference,
-    Map<String, dynamic>? post,
-  ) {
-    if (post == null || post['is_deleted'] == true) {
-      return WikiExample(reference: reference);
+  /// Cache metadata by typed identity, keeping captions and section occurrences
+  /// article-owned. The batch size bounds requests, never the article's size.
+  Future<List<WikiExample>> forReferences(
+    List<WikiExampleReference> references, {
+    CancelToken? cancelToken,
+  }) async {
+    if (cancelToken?.isCancelled == true) throw cancelToken!.cancelError!;
+    final generation = _cacheGeneration;
+    final missing = <String, WikiExampleReference>{};
+    for (final ref in references) {
+      final cached = _media[ref.key];
+      if (cached == null ||
+          _now().difference(cached.at) >= const Duration(hours: 6)) {
+        missing[ref.key] = ref;
+      }
     }
-    final asset = post['media_asset'];
+    final resolved =
+        <String, ({DateTime at, String? thumbnail, String? large})>{};
+    final values = missing.values.toList();
+    for (var start = 0; start < values.length; start += 64) {
+      final batch = values.skip(start).take(64).toList();
+      final posts = batch
+          .where((r) => r.kind == WikiImageKind.post)
+          .map((r) => r.id)
+          .toList();
+      final assets = batch
+          .where((r) => r.kind == WikiImageKind.asset)
+          .map((r) => r.id)
+          .toList();
+      final responses = await Future.wait([
+        posts.isEmpty
+            ? Future.value(<Map<String, dynamic>>[])
+            : fetchPosts(posts, cancelToken: cancelToken),
+        assets.isEmpty || fetchAssets == null
+            ? Future.value(<Map<String, dynamic>>[])
+            : fetchAssets!(assets, cancelToken: cancelToken),
+      ]);
+      if (cancelToken?.isCancelled == true) throw cancelToken!.cancelError!;
+      final postMap = {for (final post in responses[0]) post['id']: post};
+      final assetMap = {for (final asset in responses[1]) asset['id']: asset};
+      for (final ref in batch) {
+        final raw = ref.kind == WikiImageKind.post
+            ? postMap[ref.id]
+            : assetMap[ref.id];
+        final urls = _urls(raw, ref.kind);
+        resolved[ref.key] = (at: _now(), thumbnail: urls.$1, large: urls.$2);
+      }
+    }
+    if (generation == _cacheGeneration) {
+      _media.addAll(resolved);
+      while (_media.length > 2048) {
+        _media.remove(_media.keys.first);
+      }
+    }
+    return [
+      for (final ref in references)
+        WikiExample(
+          reference: ref,
+          thumbnailUrl: (resolved[ref.key] ?? _media[ref.key])?.thumbnail,
+          largeUrl: (resolved[ref.key] ?? _media[ref.key])?.large,
+        ),
+    ];
+  }
+
+  (String?, String?) _urls(Map<String, dynamic>? item, WikiImageKind kind) {
+    if (item == null ||
+        item['is_deleted'] == true ||
+        (kind == WikiImageKind.asset && item['status'] != 'active')) {
+      return (null, null);
+    }
+    final asset = kind == WikiImageKind.asset ? item : item['media_asset'];
     final raw = asset is Map ? asset['variants'] : null;
     final variants = raw is List ? raw.whereType<Map>() : const <Map>[];
     String? variant(String type) => variants
@@ -202,13 +200,8 @@ class WikiExampleRepository {
         .map((v) => _url(v['url']))
         .whereType<String>()
         .firstOrNull;
-    final thumbnail = variant('360x360') ?? _url(post['preview_file_url']);
-    return WikiExample(
-      reference: reference,
-      thumbnailUrl: thumbnail,
-      // A static preview is bounded even when the original is a huge animation.
-      largeUrl: variant('720x720') ?? thumbnail,
-    );
+    final thumbnail = variant('360x360') ?? _url(item['preview_file_url']);
+    return (thumbnail, variant('720x720') ?? thumbnail);
   }
 }
 
@@ -217,5 +210,6 @@ final wikiExampleRepositoryProvider = Provider<WikiExampleRepository>((ref) {
   return WikiExampleRepository(
     fetchWiki: api.getWikiPage,
     fetchPosts: api.getWikiExamplePosts,
+    fetchAssets: api.getWikiExampleAssets,
   );
 });

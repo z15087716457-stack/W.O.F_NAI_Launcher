@@ -8,8 +8,14 @@ import '../../../presentation/providers/proxy_settings_provider.dart';
 import '../../../core/network/nai_api_endpoint.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/localization_extension.dart';
+import 'nai_subscription_response.dart';
 
 part 'nai_auth_api_service.g.dart';
+
+typedef NaiApiConnection = ({
+  NaiApiEndpointConfig endpoint,
+  Map<String, dynamic> subscription,
+});
 
 /// NovelAI Authentication API 服务
 class NAIAuthApiService {
@@ -29,6 +35,53 @@ class NAIAuthApiService {
       _dio = null;
 
   final NaiAuthTransport? _transport;
+
+  /// Probe account endpoints only. Never retry an image submission to discover
+  /// a route, and never send a key to another host.
+  Future<NaiApiConnection> validateConnection(
+    String token, {
+    NaiApiEndpointConfig endpoint = NaiApiEndpointConfig.official,
+    bool allowAnyTokenFormat = false,
+    CancelToken? cancelToken,
+  }) async {
+    final main = Uri.parse(endpoint.mainBaseUrl);
+    final candidates = <NaiApiEndpointConfig>[endpoint];
+    if (endpoint.isThirdParty && (main.path.isEmpty || main.path == '/v1')) {
+      for (final path in [if (main.path.isEmpty) '/v1', '/v1/novelai']) {
+        final base = main.replace(path: path).toString();
+        candidates.add(
+          NaiApiEndpointConfig.fromInput(
+            mainBaseUrl: base,
+            imageBaseUrl: endpoint.imageBaseUrl == endpoint.mainBaseUrl
+                ? base
+                : endpoint.imageBaseUrl,
+          ),
+        );
+      }
+    }
+    for (final candidate in candidates) {
+      try {
+        final subscription = await validateToken(
+          token,
+          endpoint: candidate,
+          allowAnyTokenFormat: allowAnyTokenFormat,
+          cancelToken: cancelToken,
+        );
+        return (endpoint: candidate, subscription: subscription);
+      } on NaiApiCompatibilityException {
+        if (candidate == candidates.last) rethrow;
+      } on DioException catch (error) {
+        if (!const [404, 405].contains(error.response?.statusCode)) {
+          rethrow;
+        }
+        if (candidate == candidates.last) {
+          throw const NaiApiCompatibilityException();
+        }
+      }
+    }
+    throw const NaiApiCompatibilityException();
+  }
+
   Future<T> _send<T>(
     CancelToken? cancel,
     Future<T> Function(Dio) request,
@@ -89,8 +142,12 @@ class NAIAuthApiService {
         ),
       );
 
+      final subscription = readNaiSubscriptionResponse(
+        response,
+        isThirdParty: endpoint.isThirdParty,
+      );
       AppLogger.i('Token validation successful', 'NAIAuth');
-      return response.data as Map<String, dynamic>;
+      return subscription;
     } on DioException catch (e) {
       if (e.response?.statusCode == 400) {
         final responseData = e.response?.data;

@@ -1,3 +1,5 @@
+import 'nai_prompt_syntax.dart';
+
 /// 标签标准化工具函数
 ///
 /// 统一处理标签的存储格式和显示格式转换
@@ -5,8 +7,13 @@
 class TagNormalizer {
   TagNormalizer._();
 
-  static final RegExp weightPrefixPattern = RegExp(r'^-?(?:\d+\.?\d*|\.\d+)::');
-  static final RegExp weightPattern = RegExp(r'-?(?:\d+\.?\d*|\.\d+)::');
+  static final RegExp weightPrefixPattern = RegExp(
+    r'^[-+]?(?:\d+\.?\d*|\.\d+)::',
+  );
+  static final RegExp weightPattern = RegExp(r'[-+]?(?:\d+\.?\d*|\.\d+)::');
+  static final RegExp _galleryClosurePattern = RegExp(
+    r'::(?=$|[\s,，;；{}\[\]()<>])',
+  );
   static final RegExp _leadingBracketPattern = RegExp(r'^[\{\[\(]+');
   static final RegExp _commaSeparatorPattern = RegExp(r'[,，]+');
   static final RegExp _searchSeparatorPattern = RegExp(r'[_/\\|,，;；\n\r\t]+');
@@ -85,18 +92,50 @@ class TagNormalizer {
 
   /// Gallery query identity: preserve literal punctuation except NAI weights.
   static String normalizeGalleryQuery(String value) {
-    var text = value.toLowerCase();
-    if (weightPattern.hasMatch(text)) {
-      text = text.replaceAll(weightPattern, '').replaceAll('::', '');
+    return _galleryContent(value).replaceAll(_whitespacePattern, ' ').trim();
+  }
+
+  static String _galleryContent(String value) {
+    return value
+        .toLowerCase()
+        .replaceAll(weightPattern, '')
+        .replaceAll(_galleryClosurePattern, '')
+        .replaceAll(RegExp(r'[{}\[\]]'), '')
+        .replaceAll('_', ' ');
+  }
+
+  /// Gallery text terms are ANDed; spaces retain phrase meaning. Literal
+  /// commas inside parentheses or quotes remain part of that phrase.
+  static List<String> parseGalleryQuery(String value) {
+    final text = _galleryContent(value);
+    final terms = <String>{};
+    var start = 0;
+    void collect(int end) {
+      final term = text
+          .substring(start, end)
+          .replaceAll(_whitespacePattern, ' ')
+          .trim();
+      if (term.isNotEmpty) terms.add(term);
     }
-    return text.replaceAll(RegExp(r'[{}\[\]]'), '').replaceAll('_', ' ').trim();
+
+    for (final token in NaiPromptSyntax.scan(text, protectXml: false)) {
+      if (token.kind == NaiPromptTokenKind.comma) {
+        collect(token.start);
+        start = token.end;
+      } else if (token.kind == NaiPromptTokenKind.text) {
+        for (final line in RegExp(r'[\r\n]+').allMatches(token.source(text))) {
+          collect(token.start + line.start);
+          start = token.start + line.end;
+        }
+      }
+    }
+    collect(text.length);
+    return terms.toList(growable: false);
   }
 
   /// Match a whole positive tag, not a prefix such as `blue eyes shadow`.
   static bool containsGalleryTag(String text, String tag) {
-    return text
-        .split(RegExp(r'[,，\n\r|]+'))
-        .any((part) => normalizeGalleryQuery(part) == tag);
+    return parseGalleryQuery(text.replaceAll('|', ',')).contains(tag);
   }
 
   /// 标准化画廊搜索文本；下划线按空格处理以便包含匹配。

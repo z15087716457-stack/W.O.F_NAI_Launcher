@@ -308,7 +308,12 @@ test('invalid and legacy SSE configurations fail before starting any server', ()
     { 'a-b': {command:'node'}, 'a_b': {command:'node'} },
     { a: {type:'sse', url:'http://localhost'} },
     { a: {url:'http://localhost', auth:{provider:'studio'}} },
+    { a: {command:'node', exposure:'invalid'} },
+    { a: {command:'node', toolExposure:{'*':'invalid'}} },
+    { a: {url:'http://localhost', oauth:{clientRegistration:'cimd',callbackUrl:'http://localhost/not-callback'}} },
   ]) assert.throws(() => validateStudioMcp({mcpServers}));
+  const legacy = validateStudioMcp({mcpServers:{a:{command:'node',exposure:'codemode-deferred'}}});
+  assert.equal(legacy.entries[0].config.exposure,'codemode');
 });
 
 test('Stop propagates through CodeMode and MCP to the original Studio cancellation token', async () => {

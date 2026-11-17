@@ -40,6 +40,29 @@ void main() {
   });
 
   group('estimatedCostProvider', () {
+    test(
+      'virtual gateway Opus does not turn a paid image into a free estimate',
+      () {
+        const params = ImageParams(
+          model: 'nai-diffusion-4-5-full',
+          width: 832,
+          height: 1216,
+          steps: 28,
+        );
+        const workflow = ImageWorkflowState();
+        const official = UserSubscription(tier: 3, active: true);
+        expect(generationRequestCost(params, workflow, official, 1), 0);
+        expect(
+          generationRequestCost(
+            params,
+            workflow,
+            official.copyWith(usesExternalBilling: true),
+            1,
+          ),
+          greaterThan(0),
+        );
+      },
+    );
     late ProviderContainer container;
 
     setUp(() async {
@@ -75,8 +98,8 @@ void main() {
         expect(container.read(generationParamsNotifierProvider), same(before));
         final request = container.read(generationRequestParamsProvider);
         final expected = AnlasCalculator.calculateRequestCost(
-          width: 1248,
-          height: 1824,
+          width: 1280,
+          height: 1856,
           strength: .7,
           steps: request.steps,
           batchCount: request.nSamples,

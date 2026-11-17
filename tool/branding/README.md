@@ -65,7 +65,7 @@ GenerationWelcome 固定 Logo 尺寸 / 位置，长段落在下方，短窗口�
 
 - `test/presentation/widgets/common/studio_visual_system_test.dart`：字体与视觉角色。
 - `test/presentation/widgets/navigation/integrated_title_bar_test.dart`：窗口和页面命中。
-- `test/presentation/screens/settings/settings_screen_test.dart`：设置入口及布局。
+- `test/presentation/ui/settings/settings_about_brand_test.dart`：当前关于页 Logo；`test/presentation/ui/settings/settings_layout_test.dart`：当前设置布局。
 - `test/presentation/widgets/gallery/local_gallery_toolbar_test.dart`：视图图标、搜索与拖动。
 - `test/presentation/screens/local_gallery/local_gallery_screen_layout_test.dart`：三栏实际部件实绘。
 - `test/presentation/tips/tip_layout_test.dart`：小贴士五语布局。

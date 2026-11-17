@@ -462,25 +462,7 @@ class GalleryFilterService {
       List<File> filtered;
 
       if (criteria.searchQuery.isNotEmpty) {
-        if (_hasDelimitedSearchQuery(criteria.searchQuery)) {
-          // Segments remain AND; each resolves to a known tag or a phrase.
-          filtered = allFiles;
-          if (_hasDatabasePreSearchFilters(criteria)) {
-            filtered = await _searchInDatabase(
-              allFiles,
-              criteria.copyWith(searchQuery: ''),
-              cancelToken,
-            );
-          }
-          filtered = await _filterByDelimitedSearchQuery(
-            filtered,
-            criteria.searchQuery,
-            cancelToken,
-          );
-        } else {
-          // 有普通搜索关键词：使用数据库搜索
-          filtered = await _searchInDatabase(allFiles, criteria, cancelToken);
-        }
+        filtered = await _searchInDatabase(allFiles, criteria, cancelToken);
         filtered = await _applyPostSearchFilters(
           filtered,
           criteria,
@@ -734,40 +716,6 @@ class GalleryFilterService {
     return filtered;
   }
 
-  /// 按逗号分隔的搜索片段做 AND（完整标签或整段短语）。
-  Future<List<File>> _filterByDelimitedSearchQuery(
-    List<File> files,
-    String searchQuery,
-    CancelToken cancelToken,
-  ) async {
-    final segments = _parseDelimitedSearchSegments(searchQuery);
-    if (segments.isEmpty || files.isEmpty) return files;
-
-    try {
-      final imageIds = await _dataSource.searchByDelimitedTextSegments(
-        segments,
-        limit: max(1, files.length),
-        candidatePaths: files.map((file) => file.path).toList(),
-      );
-
-      if (cancelToken.isCancelled) return [];
-
-      final images = await _dataSource.getImagesByIds(imageIds);
-      final validPaths = images.map((image) => image.filePath).toSet();
-
-      return files.where((file) {
-        if (cancelToken.isCancelled) return false;
-        return validPaths.contains(file.path);
-      }).toList();
-    } catch (e) {
-      AppLogger.w(
-        'Failed to filter by delimited search query: $e',
-        'GalleryFilterService',
-      );
-      rethrow;
-    }
-  }
-
   /// 按标签过滤
   Future<List<File>> _filterByTags(
     List<File> files,
@@ -790,27 +738,6 @@ class GalleryFilterService {
       AppLogger.w('Failed to filter by tags: $e', 'GalleryFilterService');
       rethrow;
     }
-  }
-
-  bool _hasDelimitedSearchQuery(String value) {
-    return value.contains(',') || value.contains('，');
-  }
-
-  bool _hasDatabasePreSearchFilters(FilterCriteria criteria) {
-    return criteria.dateStart != null ||
-        criteria.dateEnd != null ||
-        criteria.showFavoritesOnly ||
-        criteria.naiOnly ||
-        criteria.hasAdvancedFilters ||
-        criteria.hasMetadataFilters;
-  }
-
-  List<String> _parseDelimitedSearchSegments(String value) {
-    return value
-        .split(RegExp(r'[,，]+'))
-        .map(TagNormalizer.normalizeGalleryQuery)
-        .where((s) => s.isNotEmpty)
-        .toList();
   }
 
   /// 按日期范围过滤

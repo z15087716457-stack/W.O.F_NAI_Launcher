@@ -8,10 +8,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:nai_launcher/presentation/widgets/autocomplete/tag_meaning.dart';
 import 'package:nai_launcher/core/autocomplete/completion_models.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/core/rag/rag_client.dart';
 import 'package:nai_launcher/core/rag/rag_settings.dart';
+import 'package:nai_launcher/core/rag/rag_tag_search.dart';
 import 'package:nai_launcher/core/tag_expansion/local_tag_expansion_service.dart';
 import 'package:nai_launcher/core/tag_expansion/tag_expansion_providers.dart';
 import 'package:nai_launcher/core/wiki/tag_wiki_repository.dart';
@@ -30,14 +32,27 @@ CompletionCandidate tag(String name) => CompletionCandidate(
 );
 
 class Source implements CompletionSource {
-  Source({this.empty = false, this.count = 2});
+  Source({
+    this.empty = false,
+    this.count = 2,
+    this.exact = false,
+    this.prefixName,
+  });
   final bool empty;
   final int count;
+  final bool exact;
+  final String? prefixName;
   @override
   Future<List<CompletionCandidate>> search(CompletionQuery q) async => empty
       ? []
       : [
-          tag('blue_hair'),
+          prefixName != null
+              ? tag(prefixName!)
+              : exact
+              ? tag(
+                  'blue_hair',
+                ).copyWith(matchKind: CompletionMatchKind.englishExact)
+              : tag('blue_hair'),
           tag('red_hair'),
           for (var i = 2; i < count; i++) tag('fixture_$i'),
         ];
@@ -52,11 +67,9 @@ class FakeRag extends RagController {
   final requests =
       <
         ({
-          String text,
-          String keyword,
-          int cursor,
+          String query,
+          int limit,
           Set<String> existing,
-          bool negative,
           RagCancellation cancellation,
           Completer<List<CompletionCandidate>> result,
         })
@@ -65,23 +78,18 @@ class FakeRag extends RagController {
   RagStatus build() =>
       const RagStatus(phase: 'partial', indexed: 20, total: 100, partial: true);
   @override
-  Future<List<CompletionCandidate>> recommend({
-    required String text,
-    required int cursor,
+  Future<List<CompletionCandidate>> searchTags({
+    required String query,
     required Set<String> existing,
-    required List<CompletionCandidate> lexical,
     required RagCancellation cancellation,
-    bool negative = false,
-    String keyword = '',
     int limit = 40,
+    RagTagSearchOptions tagOptions = const RagTagSearchOptions(),
   }) {
     final result = Completer<List<CompletionCandidate>>();
     requests.add((
-      text: text,
-      keyword: keyword,
-      cursor: cursor,
+      query: query,
+      limit: limit,
       existing: Set.of(existing),
-      negative: negative,
       cancellation: cancellation,
       result: result,
     ));
@@ -137,15 +145,22 @@ void main() {
     WidgetTester tester,
     TextEditingController controller,
     FakeRag rag, {
-    bool negative = false,
     bool emptyLexical = false,
-    bool ragContext = true,
+    bool relatedFromPrompt = true,
     int idleCount = 2,
+    bool exactLexical = false,
+    String? prefixName,
   }) async {
-    final source = Source(empty: emptyLexical, count: idleCount);
+    final source = Source(
+      empty: emptyLexical,
+      count: idleCount,
+      exact: exactLexical,
+      prefixName: prefixName,
+    );
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          tagMeaningProfileProvider.overrideWith((_, tag) async => null),
           ragControllerProvider.overrideWith(() => rag),
           ragSettingsProvider.overrideWith(EnabledSettings.new),
           localTagExpansionServiceProvider.overrideWithValue(
@@ -183,8 +198,7 @@ void main() {
                   width: 400,
                   height: 80,
                   child: TagExpansionWrapper(
-                    ragContext: ragContext,
-                    ragNegative: negative,
+                    relatedFromPrompt: relatedFromPrompt,
                     controller: controller,
                     child: TextField(
                       key: const Key('editor'),
@@ -216,45 +230,13 @@ void main() {
   }
 
   testWidgets(
-    'changing the context length cancels and refreshes idle suggestions',
-    (tester) async {
-      final c = TextEditingController(text: 'night, ');
-      final rag = FakeRag();
-      addTearDown(c.dispose);
-      await pump(tester, c, rag);
-      final first = rag.requests.single;
-      final container = ProviderScope.containerOf(
-        tester.element(find.byType(TagExpansionWrapper)),
-      );
-      await container
-          .read(ragSettingsProvider.notifier)
-          .update(
-            container.read(ragSettingsProvider).copyWith(tokenBudget: 256),
-          );
-      await tester.pump();
-      await tester.pump();
-      expect(first.cancellation.isCancelled, isTrue);
-      expect(rag.requests.length, 2);
-      first.result.complete([tag('stale')]);
-      rag.requests.last.result.complete([tag('fresh')]);
-      await tester.pump();
-      await tester.pump();
-      expect(find.text('stale'), findsNothing);
-      expect(find.text('fresh'), findsWidgets);
-      expect(c.text, 'night, ');
-    },
-  );
-
-  testWidgets(
-    'unavailable semantic results restore the full ordinary list without truncating it to the pinned group',
+    'idle keeps the full local list without starting semantic search',
     (tester) async {
       final c = TextEditingController(text: 'rain, ');
       final rag = FakeRag();
       addTearDown(c.dispose);
       await pump(tester, c, rag, idleCount: 40);
-      rag.requests.single.result.complete([]);
-      await tester.pump();
-      await tester.pump();
+      expect(rag.requests, isEmpty);
       await tester.drag(
         find.byKey(const ValueKey('tag-expansion-results')),
         const Offset(0, -2000),
@@ -264,78 +246,104 @@ void main() {
       expect(c.text, 'rain, ');
     },
   );
+
   testWidgets(
-    'idle cooccurrence remains in place when semantic suggestions finish',
+    'local matches appear immediately; the core owns final ordering',
     (tester) async {
-      final c = TextEditingController(text: 'green_theme, ');
+      final c = TextEditingController(text: 'rain, ');
       final rag = FakeRag();
       addTearDown(c.dispose);
       await pump(tester, c, rag);
+      await typeQuery(tester, 'hair');
       expect(find.text('blue hair'), findsWidgets);
-      rag.requests.single.result.complete([tag('grass'), tag('forest')]);
+      expect(find.byType(CircularProgressIndicator), findsWidgets);
+      rag.requests.single.result.complete([tag('grass')]);
       await tester.pump();
       await tester.pump();
-      expect(find.text('blue hair'), findsWidgets);
-      expect(find.text('red hair'), findsWidgets);
       expect(find.text('grass'), findsWidgets);
-      expect(find.text('forest'), findsWidgets);
-      expect(c.text, 'green_theme, ');
+      expect(find.text('blue hair'), findsNothing);
+      expect(c.text, 'rain, ');
+      await capture(tester, 'stable-manual-results');
     },
   );
 
-  testWidgets('manual search publishes nonexact results once after reranking', (
+  testWidgets('a genuine local name prefix remains with semantic results', (
     tester,
   ) async {
     final c = TextEditingController(text: 'rain, ');
     final rag = FakeRag();
     addTearDown(c.dispose);
-    await pump(tester, c, rag);
-    rag.requests.single.result.complete([]);
+    await pump(tester, c, rag, prefixName: 'watercolor_effect');
+    await typeQuery(tester, 'watercolor');
+    rag.requests.single.result.complete([tag('grass')]);
     await tester.pump();
+    await tester.pump();
+    expect(find.text('watercolor effect'), findsWidgets);
+    expect(find.text('grass'), findsWidgets);
+    expect(find.text('red hair'), findsNothing);
+    expect(c.text, 'rain, ');
+    await capture(tester, 'name-prefix-with-semantic-results');
+  });
+
+  testWidgets('saved result count reaches semantic retrieval', (tester) async {
+    await Hive.box(
+      StorageKeys.settingsBox,
+    ).put(StorageKeys.tagExpansionResultLimit, 80);
+    final c = TextEditingController(text: 'rain, ');
+    final rag = FakeRag();
+    addTearDown(c.dispose);
+    await pump(tester, c, rag);
+    await typeQuery(tester, '独立袖子');
+    expect(rag.requests.single.limit, 80);
+    rag.requests.single.result.complete([tag('detached_sleeves')]);
+    await tester.pump();
+  });
+
+  testWidgets('ordinary fields use explicit queries without prompt context', (
+    tester,
+  ) async {
+    final c = TextEditingController(text: 'unrelated_query');
+    final rag = FakeRag();
+    addTearDown(c.dispose);
+    await pump(tester, c, rag, relatedFromPrompt: false);
+    expect(rag.requests, isEmpty);
     await typeQuery(tester, '绿色的植被');
-    expect(find.text('blue hair'), findsNothing);
-    expect(find.byType(CircularProgressIndicator), findsWidgets);
-    rag.requests.last.result.complete([tag('grass')]);
+    expect(rag.requests.single.query, '绿色的植被');
+    rag.requests.single.result.complete([tag('grass')]);
     await tester.pump();
     await tester.pump();
     expect(find.text('grass'), findsWidgets);
-    expect(c.text, 'rain, ');
-    await capture(tester, 'stable-manual-results');
   });
 
   testWidgets(
-    'ordinary fields use explicit RAG queries without prompt context',
+    'an exact local name survives semantic completion without duplicates',
     (tester) async {
-      final c = TextEditingController(text: 'unrelated_query');
+      final c = TextEditingController(text: 'rain, ');
       final rag = FakeRag();
       addTearDown(c.dispose);
-      await pump(tester, c, rag, ragContext: false);
-      expect(rag.requests, isEmpty);
-      await typeQuery(tester, '绿色的植被');
-      expect(rag.requests.single.keyword, '绿色的植被');
-      expect(rag.requests.single.text, isEmpty);
-      expect(rag.requests.single.cursor, 0);
-      rag.requests.single.result.complete([tag('grass')]);
+      await pump(tester, c, rag, exactLexical: true);
+      await typeQuery(tester, 'blue_hair');
+      rag.requests.single.result.complete([tag('grass'), tag('blue_hair')]);
       await tester.pump();
       await tester.pump();
+      expect(find.text('blue hair'), findsWidgets);
       expect(find.text('grass'), findsWidgets);
+      expect(find.text('red hair'), findsNothing);
+      expect(c.text, 'rain, ');
+      await capture(tester, 'exact-name-with-semantic-results');
     },
   );
 
   testWidgets(
-    'manual natural-language search excludes prompt context but retains existing-tag dedup',
+    'natural-language queries preserve existing-tag exclusion and the draft',
     (tester) async {
       final c = TextEditingController(text: '1girl, blue_hair, ');
       final rag = FakeRag();
       addTearDown(c.dispose);
       await pump(tester, c, rag, emptyLexical: true);
-      rag.requests.single.result.complete([]);
-      await tester.pump();
       await typeQuery(tester, '在阳光下奔跑');
-      final query = rag.requests.last;
-      expect(query.keyword, '在阳光下奔跑');
-      expect(query.text, isEmpty);
-      expect(query.cursor, 0);
+      final query = rag.requests.single;
+      expect(query.query, '在阳光下奔跑');
       expect(query.existing, contains('blue_hair'));
       expect(find.text('No local tags found'), findsNothing);
       expect(find.byType(CircularProgressIndicator), findsWidgets);
@@ -352,18 +360,16 @@ void main() {
   );
 
   testWidgets(
-    'a manual query can start from an empty editor; empty result appears only after RAG finishes',
+    'an empty result appears only after explicit semantic search finishes',
     (tester) async {
       final c = TextEditingController();
       final rag = FakeRag();
       addTearDown(c.dispose);
       await pump(tester, c, rag, emptyLexical: true);
-      rag.requests.single.result.complete([]);
-      await tester.pump();
       await typeQuery(tester, '在阳光下奔跑');
-      expect(rag.requests.last.keyword, '在阳光下奔跑');
+      expect(rag.requests.single.query, '在阳光下奔跑');
       expect(find.text('No local tags found'), findsNothing);
-      rag.requests.last.result.complete([]);
+      rag.requests.single.result.complete([]);
       await tester.pump();
       await tester.pump();
       expect(find.text('No local tags found'), findsOneWidget);
@@ -372,76 +378,75 @@ void main() {
     },
   );
 
-  testWidgets(
-    'late cancelled search cannot overwrite a new query or clear its loading state',
-    (tester) async {
-      final c = TextEditingController(text: 'night, ');
-      final rag = FakeRag();
-      addTearDown(c.dispose);
-      await pump(tester, c, rag, emptyLexical: true);
-      rag.requests.single.result.complete([]);
-      await tester.pump();
-      await typeQuery(tester, '在阳光下奔跑');
-      final old = rag.requests.last;
-      await typeQuery(tester, '在雨中跳舞');
-      final current = rag.requests.last;
-      expect(old.cancellation.isCancelled, isTrue);
-      old.result.complete([tag('old_result')]);
-      await tester.pump();
-      await tester.pump();
-      expect(find.text('old result'), findsNothing);
-      expect(find.byType(CircularProgressIndicator), findsWidgets);
-      current.result.complete([tag('dancing')]);
-      await tester.pump();
-      await tester.pump();
-      expect(find.text('dancing'), findsWidgets);
-      expect(find.byType(CircularProgressIndicator), findsNothing);
-    },
-  );
-
-  testWidgets('clearing a manual query restores the original prompt context', (
+  testWidgets('late cancelled results cannot overwrite a newer query', (
     tester,
   ) async {
-    final c = TextEditingController(text: 'rain, ');
+    final c = TextEditingController(text: 'night, ');
     final rag = FakeRag();
     addTearDown(c.dispose);
-    await pump(tester, c, rag, emptyLexical: true, negative: true);
-    rag.requests.single.result.complete([]);
-    await tester.pump();
+    await pump(tester, c, rag, emptyLexical: true);
     await typeQuery(tester, '在阳光下奔跑');
-    rag.requests.last.result.complete([]);
+    final old = rag.requests.single;
+    await typeQuery(tester, '在雨中跳舞');
+    final current = rag.requests.last;
+    expect(old.cancellation.isCancelled, isTrue);
+    old.result.complete([tag('old_result')]);
     await tester.pump();
-    await typeQuery(tester, '');
-    expect(rag.requests.last.keyword, isEmpty);
-    expect(rag.requests.last.text, c.text);
-    expect(rag.requests.last.negative, isTrue);
-    rag.requests.last.result.complete([]);
     await tester.pump();
+    expect(find.text('old result'), findsNothing);
+    expect(find.byType(CircularProgressIndicator), findsWidgets);
+    current.result.complete([tag('dancing')]);
+    await tester.pump();
+    await tester.pump();
+    expect(find.text('dancing'), findsWidgets);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
   });
 
   testWidgets(
-    'semantic results replace idle candidates; queries stay in their own negative field',
-    (tester) async {
-      final c = TextEditingController(text: 'lowres, blurry, ');
-      final rag = FakeRag();
-      addTearDown(c.dispose);
-      await pump(tester, c, rag, negative: true);
-      expect(rag.requests.single.text, c.text);
-      expect(rag.requests.single.negative, isTrue);
-      rag.requests.single.result.complete([tag('jpeg_artifacts')]);
-      await tester.pump();
-      await tester.pump();
-      expect(find.text('jpeg artifacts'), findsWidgets);
-      expect(find.text('RAG'), findsOneWidget);
-    },
-  );
-  testWidgets(
-    'keyboard selection freezes a late rerank and insertion refreshes the next query',
+    'clearing a query returns to local cooccurrence without another model call',
     (tester) async {
       final c = TextEditingController(text: 'rain, ');
       final rag = FakeRag();
       addTearDown(c.dispose);
       await pump(tester, c, rag);
+      await typeQuery(tester, '在阳光下奔跑');
+      final pending = rag.requests.single;
+      await typeQuery(tester, '');
+      expect(pending.cancellation.isCancelled, isTrue);
+      expect(rag.requests.length, 1);
+      pending.result.complete([tag('running')]);
+      await tester.pump();
+      await tester.pump();
+      expect(find.text('blue hair'), findsWidgets);
+      expect(find.text('running'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'negative fields keep their own exclusions during explicit search',
+    (tester) async {
+      final c = TextEditingController(text: 'lowres, blurry, ');
+      final rag = FakeRag();
+      addTearDown(c.dispose);
+      await pump(tester, c, rag);
+      expect(rag.requests, isEmpty);
+      await typeQuery(tester, '压缩失真');
+      expect(rag.requests.single.existing, contains('blurry'));
+      rag.requests.single.result.complete([tag('jpeg_artifacts')]);
+      await tester.pump();
+      await tester.pump();
+      expect(find.text('jpeg artifacts'), findsWidgets);
+    },
+  );
+
+  testWidgets(
+    'keyboard selection stays stable when semantic results arrive late',
+    (tester) async {
+      final c = TextEditingController(text: 'rain, ');
+      final rag = FakeRag();
+      addTearDown(c.dispose);
+      await pump(tester, c, rag);
+      await typeQuery(tester, 'hair');
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
       rag.requests.single.result.complete([tag('umbrella')]);
       await tester.pump();
@@ -452,28 +457,26 @@ void main() {
       await tester.pump();
       expect(c.text, contains('red hair'));
       expect(find.byKey(const ValueKey('tag-expansion-popup')), findsOneWidget);
-      expect(rag.requests.length, 2);
-      expect(rag.requests.last.text, c.text);
-      rag.requests.last.result.complete([]);
-      await tester.pump();
+      expect(rag.requests.length, 1);
     },
   );
-  testWidgets(
-    'closing an editor cancels its own query and discards late results',
-    (tester) async {
-      final c = TextEditingController(text: 'night, ');
-      final rag = FakeRag();
-      addTearDown(c.dispose);
-      await pump(tester, c, rag);
-      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
-      await tester.pump();
-      expect(rag.requests.single.cancellation.isCancelled, isTrue);
-      rag.requests.single.result.complete([tag('umbrella')]);
-      await tester.pump();
-      expect(find.text('umbrella'), findsNothing);
-      expect(c.text, 'night, ');
-    },
-  );
+
+  testWidgets('closing the popup cancels its query and discards late results', (
+    tester,
+  ) async {
+    final c = TextEditingController(text: 'night, ');
+    final rag = FakeRag();
+    addTearDown(c.dispose);
+    await pump(tester, c, rag);
+    await typeQuery(tester, '伞');
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pump();
+    expect(rag.requests.single.cancellation.isCancelled, isTrue);
+    rag.requests.single.result.complete([tag('umbrella')]);
+    await tester.pump();
+    expect(find.text('umbrella'), findsNothing);
+    expect(c.text, 'night, ');
+  });
 }
 
 class EnabledSettings extends RagSettingsController {

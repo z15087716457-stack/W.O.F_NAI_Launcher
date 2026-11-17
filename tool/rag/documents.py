@@ -184,8 +184,7 @@ class TextEngine(Engine):
         query = query.strip()
         if not query or not len(self.ann) or allowed == [] or categories == []: return {'items':[]}
         if cancelled(): raise ValueError('cancelled')
-        # Search queries have their own bounded budget; the 120-token modes
-        # apply only to prompt-editor recommendations, never whole articles.
+        # Bound query length independently of article/chunk length.
         if self.models.count(query) > 256:
             low, high = 0, len(query)
             while low < high:
@@ -214,20 +213,16 @@ class TextEngine(Engine):
             rows.sort(reverse=True); rows = rows[:160]
         else:
             matches = self.ann.search(vector,min(160,len(self.ann)))
-            for rank, item in enumerate(matches.keys):
+            for item, distance in zip(matches.keys, matches.distances):
                 row = self.db.execute('SELECT name,digest FROM documents WHERE id=?',(int(item),)).fetchone()
-                if row: rows.append((-rank,*row))
+                if row: rows.append((1-float(distance),*row))
         live = {r['name']:r for r in self.sources.rows(names=[r[1] for r in rows],limit=160)}
-        candidates = {}; rank = {}
-        for index,(_,name,digest) in enumerate(rows):
+        candidates = {}
+        for _,name,digest in rows:
             item = live.get(name)
             if not item or item['digest'] != digest or item['owner'] in candidates: continue
-            candidates[item['owner']] = item; rank[item['owner']] = index
-            if len(candidates) == 32: break
+            candidates[item['owner']] = item
         if cancelled(): raise ValueError('cancelled')
         values = list(candidates.values())
-        scores = self.models.rerank(query,[item['text'] for item in values],purpose='retrieval')
-        if cancelled(): raise ValueError('cancelled')
-        order = sorted(range(len(values)),key=lambda i:(-scores[i],rank[values[i]['owner']]))
-        return {'items':[{'id':values[i]['owner'],'title':values[i]['title'],'snippet':values[i]['snippet'],
-                          'section':values[i]['section']} for i in order[:max(1,min(80,limit))]]}
+        return {'items':[{'id':item['owner'],'title':item['title'],'snippet':item['snippet'],
+                          'section':item['section']} for item in values[:max(1,min(80,limit))]]}

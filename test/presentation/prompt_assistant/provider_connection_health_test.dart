@@ -5,6 +5,9 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nai_launcher/core/utils/prompt_translation_document.dart';
+import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
+import 'package:nai_launcher/data/models/prompt_reading.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/core/storage/secure_storage_service.dart';
@@ -213,6 +216,79 @@ Future<ProviderContainer> _container(
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  for (final valid in [false, true]) {
+    test('translation history follows source validation: valid=$valid', () async {
+      const source = '1.3::blue eyes:: and soft light';
+      final batch = PromptTranslationBatch.prepare({
+        'main': const PillDocument(text: source, instances: {}),
+      }, mode: PromptTranslationMode.inline);
+      final raw = jsonEncode({
+        'fields': [
+          {
+            'id': 'main',
+            'groups': [
+              {
+                'ids': batch.segments['main']!.map((s) => s.id).toList(),
+                'readings': [
+                  {
+                    'source': valid
+                        ? 'blue eyes and soft light'
+                        : 'green eyes and soft light',
+                    'zh': '蓝眼睛与柔光',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+      final adapter = _OfflineAdapter(
+        (_, _) => ResponseBody.fromString(
+          jsonEncode({
+            'choices': [
+              {
+                'message': {'content': raw},
+              },
+            ],
+          }),
+          200,
+          headers: {
+            Headers.contentTypeHeader: ['application/json'],
+          },
+        ),
+      );
+      final container = await _container(_Memory(), _Secrets(), adapter);
+      final history = container.read(modelRequestHistoryProvider);
+      final states = <ModelRequestStatus>[];
+      history.addListener(() => states.add(history.records.single.status));
+      final result = container
+          .read(promptAssistantServiceProvider)
+          .translatePromptGroup(
+            batch.requestJson(const []),
+            sessionId: 'validation',
+            validateOutput: (output) => batch.parseGroups(output),
+          );
+      if (valid) {
+        expect(await result, raw);
+      } else {
+        await expectLater(result, throwsFormatException);
+        expect(states, isNot(contains(ModelRequestStatus.success)));
+      }
+      // A rejected response stays failed; parsing never starts another request.
+      await Future<void>.delayed(Duration.zero);
+      final record = history.records.single;
+      expect(
+        record.status,
+        valid ? ModelRequestStatus.success : ModelRequestStatus.failed,
+      );
+      expect(record.output, raw);
+      expect(record.exchanges.single.statusCode, 200);
+      expect(record.error, valid ? isNull : contains('do not align'));
+      expect(record.attempts, 1);
+      expect(adapter.requests, hasLength(1));
+    });
+  }
   setUpAll(ModelCatalogRepository.load);
 
   for (final protocol in [

@@ -25,8 +25,7 @@ import 'generation_reference_imports_test.dart' show ImportStorage;
 import 'package:nai_launcher/data/services/vibe_library_storage_service.dart';
 import 'package:nai_launcher/presentation/providers/generation/image_workflow_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../screens/generation/widgets/reference_module_test.dart'
-    show prepareGenerationDropTestPlatform;
+import '../../helpers/generation_drop_platform.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/data/repositories/character_prompt_repository.dart';

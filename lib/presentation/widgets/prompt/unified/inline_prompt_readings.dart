@@ -187,6 +187,7 @@ class ReadingEditingController extends TextEditingController {
   double _width = 1;
   bool _enabled = false, _updating = false, _disposed = false;
   TextEditingValue? _pendingSource, _pendingDisplay;
+  ({TextEditingValue source, TextEditingValue display})? _composition;
 
   @override
   TextEditingValue get value => _viewValue;
@@ -196,11 +197,23 @@ class ReadingEditingController extends TextEditingController {
     final raw = next == _pendingDisplay
         ? _pendingSource!
         : projection.sourceEdit(_viewValue, next);
+    final composingProjection = next.composing.isValid
+        ? projection.retainDisplayEdit(_viewValue, next, raw.text)
+        : null;
     _pendingSource = _pendingDisplay = null;
     _updating = true;
     source.value = raw;
     _updating = false;
-    _refresh();
+    _composition = composingProjection == null
+        ? null
+        : (source: raw, display: next);
+    if (composingProjection != null) {
+      projection = composingProjection;
+      _viewValue = next;
+      _layoutText = null;
+    } else {
+      _refresh();
+    }
     notifyListeners();
   }
 
@@ -293,6 +306,14 @@ class ReadingEditingController extends TextEditingController {
   )..layout(maxWidth: maxWidth);
 
   void _refresh() {
+    if (_composition case final composition?) {
+      if (source.value == composition.source) {
+        _viewValue = composition.display;
+        return;
+      }
+      _composition = null;
+      _layoutText = null;
+    }
     final text = source.text;
     // Selection movement reuses the measured pairs and their offset mapping.
     if (_layoutText == text && _layoutComposing == source.value.composing) {

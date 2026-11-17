@@ -1,11 +1,4 @@
-// Pi 1.5.0 does not export getCacheWarmingDelayMs through its package exports.
-// Mirror its delay for status projection. The live-mode compatibility bridge
-// rearms Pi's first timer using its existing run, replay checks and deadlines;
-// later refreshes and the 30-minute / one-hour safety limits remain Pi-owned.
-function warmingDelayMs(ttlSeconds) {
-  const ttlMs = ttlSeconds * 1000;
-  return ttlMs <= 10_000 ? undefined : Math.max(1, Math.floor(Math.min(ttlMs * 0.9, ttlMs - 10_000)));
-}
+import { getCacheWarmingDelayMs } from '@earendil-works/pi-ai';
 
 function priceUnknown(model) {
   return model.provider.startsWith('studio/') && !Object.values(model.cost).some(price => price > 0);
@@ -37,7 +30,7 @@ export class StudioCacheWarming {
 
   attach(session) {
     this.session = session;
-    // Pi 1.5.0's public mode setter only reconciles an existing warmer. Keep
+    // Pi 1.5.2's public mode setter only reconciles an existing warmer. Keep
     // this compatibility bridge here: reuse Pi's request validity, replay
     // checks, timers and safety limits when enabling an off-started run.
     const warmer = session._cacheWarmer;
@@ -59,7 +52,7 @@ export class StudioCacheWarming {
       const result = stream(...args);
       // Pi schedules from the main request's START, not its completion. Observing
       // here also handles a long first request before any assistant message ends.
-      const delay = warmingDelayMs(this.model.promptCache.short);
+      const delay = getCacheWarmingDelayMs(this.model.promptCache.short * 1000);
       this.nextWarmAt = delay === undefined ? undefined : Date.now() + delay;
       this.onChange?.();
       return result;
@@ -94,7 +87,7 @@ export class StudioCacheWarming {
     if (entry.type !== 'usage' || entry.kind !== 'cache_warm') return;
     this.warmCount++;
     this.lastWarmAt = Date.parse(entry.timestamp);
-    const delay = warmingDelayMs(this.model.promptCache.short);
+    const delay = getCacheWarmingDelayMs(this.model.promptCache.short * 1000);
     this.nextWarmAt = delay === undefined ? undefined : this.lastWarmAt + delay;
   }
 

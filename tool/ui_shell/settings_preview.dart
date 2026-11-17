@@ -249,16 +249,6 @@ class SettingsPreviewSim extends ChangeNotifier {
             'onAssign(${task.name}, $providerId, $modelId, $presetId, '
             '$reasoningEffort, clearReasoningEffort: $clearReasoningEffort)',
           ),
-      onRagSourceEnabled: (k, v) => _source(
-        k,
-        (x) => _src(
-          x,
-          enabled: v,
-          state: !v
-              ? SettingsRagState.off
-              : (x.done > 0 ? SettingsRagState.ready : SettingsRagState.empty),
-        ),
-      ),
       onRagPause: (k) {
         _build.remove(k)?.cancel();
         _source(k, (x) => _src(x, state: SettingsRagState.paused));
@@ -304,15 +294,10 @@ class SettingsPreviewSim extends ChangeNotifier {
         // 第一次演示“没找到”，再点一次演示找到。
         if (!_data.rag.modelsMissing) return _setRag(modelsMissing: true);
         _data = _data.copyWith(
-          values: _data.values
-              .copyWith(
-                SettingKey.ragEmbedPath,
-                r'E:\A.I\NovelAI\04_工具\models\embeddinggemma-2',
-              )
-              .copyWith(
-                SettingKey.ragRerankPath,
-                r'E:\A.I\NovelAI\04_工具\models\Qwen3-Reranker-0.6B',
-              ),
+          values: _data.values.copyWith(
+            SettingKey.ragEmbedPath,
+            r'E:\A.I\NovelAI\04_工具\models\embeddinggemma-2',
+          ),
         );
         _setRag(modelsMissing: false);
       },
@@ -406,7 +391,6 @@ class SettingsPreviewSim extends ChangeNotifier {
     bool? modelsMissing,
     SettingsRagStep? runtime,
     SettingsRagStep? embedder,
-    SettingsRagStep? reranker,
     List<SettingsRagSource>? sources,
   }) {
     final r = _data.rag;
@@ -414,7 +398,6 @@ class SettingsPreviewSim extends ChangeNotifier {
       rag: SettingsRagData(
         runtime: runtime ?? r.runtime,
         embedder: embedder ?? r.embedder,
-        reranker: reranker ?? r.reranker,
         device: r.device,
         sources: sources ?? r.sources,
         indexBytes: r.indexBytes,
@@ -442,14 +425,12 @@ class SettingsPreviewSim extends ChangeNotifier {
   SettingsRagSource _src(
     SettingsRagSource x, {
     SettingsRagState? state,
-    bool? enabled,
     int? done,
     int? total,
     Object? error = _keep,
   }) => SettingsRagSource(
     kind: x.kind,
     state: state ?? x.state,
-    enabled: enabled ?? x.enabled,
     done: done ?? x.done,
     total: total ?? x.total,
     secondary: x.secondary,
@@ -599,29 +580,17 @@ class SettingsPreviewSim extends ChangeNotifier {
         return;
       }
       t.cancel();
-      final embed = m == SettingsRagModel.embedder;
       _data = _data.copyWith(
         values: _data.values.copyWith(
-          embed ? SettingKey.ragEmbedPath : SettingKey.ragRerankPath,
-          embed
-              ? r'%APPDATA%\nai_launcher\rag\models\embeddinggemma-2'
-              : r'%APPDATA%\nai_launcher\rag\models\Qwen3-Reranker-0.6B',
+          SettingKey.ragEmbedPath,
+          '%APPDATA%/nai_launcher/rag/models/embeddinggemma-2',
         ),
       );
       const embedStep = SettingsRagStep(
         value: 'EmbeddingGemma 2',
         detail: '文字 + 图片',
       );
-      const rerankStep = SettingsRagStep(
-        value: 'Qwen3-Reranker 0.6B',
-        detail: '仅文字',
-      );
-      _setRag(
-        download: null,
-        modelsMissing: false,
-        embedder: embed ? embedStep : null,
-        reranker: embed ? null : rerankStep,
-      );
+      _setRag(download: null, modelsMissing: false, embedder: embedStep);
     });
   }
 }

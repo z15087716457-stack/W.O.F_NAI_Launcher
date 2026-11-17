@@ -535,9 +535,7 @@ class _Translate extends StatelessWidget {
   }
 
   static void _openMenu(BuildContext context, UiPopoverAnchor anchor) {
-    final scope = GenScope.of(context, GenAspect.prompt);
-    final t = scope.data.prompt.translate;
-    final l = context.l10n;
+    final controller = GenScope.of(context, GenAspect.prompt).controller;
     Rect adjustmentAnchor() {
       var rect = genRectOf(context);
       context.visitAncestorElements((element) {
@@ -550,117 +548,149 @@ class _Translate extends StatelessWidget {
       return rect;
     }
 
-    scope.controller.openMenu(
-      anchor,
-      [
-        if (scope.actions.onTranslationMode != null) ...[
+    controller.openPopover(anchor, (menuContext) {
+      final scope = GenScope.of(menuContext, GenAspect.prompt);
+      final t = scope.data.prompt.translate;
+      final l = menuContext.l10n;
+      return UiMenu(
+        items: [
+          if (scope.actions.onTranslationMode != null) ...[
+            UiMenuItem(
+              label: l.promptReading_mode,
+              subtitle: l.promptReading_modeSubtitle,
+              key: const Key('gen-translate-mode-inline'),
+              glyph: UiGlyphs.list,
+              checked: t.mode == PromptTranslationMode.inline,
+              enabled: !t.busy,
+              onTap: () => scope.actions.onTranslationMode!(
+                PromptTranslationMode.inline,
+              ),
+            ),
+            UiMenuItem(
+              label: l.promptReading_blocks,
+              subtitle: l.promptReading_blocksSubtitle,
+              key: const Key('gen-translate-mode-blocks'),
+              glyph: UiGlyphs.square,
+              checked: t.mode == PromptTranslationMode.blocks,
+              enabled: !t.busy,
+              onTap: () => scope.actions.onTranslationMode!(
+                PromptTranslationMode.blocks,
+              ),
+            ),
+          ],
+          if (scope.actions.onAutomaticTranslation != null)
+            UiMenuItem(
+              key: const Key('gen-translate-auto'),
+              divider: scope.actions.onTranslationMode != null,
+              label: l.promptReading_automatic,
+              subtitle: t.mode != PromptTranslationMode.inline
+                  ? l.promptReading_automaticInlineOnly
+                  : t.automaticFailed
+                  ? l.promptReading_automaticFailed
+                  : l.promptReading_automaticSubtitle,
+              glyph: UiGlyphs.bolt,
+              checked: t.automatic,
+              keepOpen: true,
+              trailing: t.mode != PromptTranslationMode.inline && t.automatic
+                  ? l.promptReading_automaticPaused
+                  : !t.automatic
+                  ? l.promptReading_automaticOff
+                  : null,
+              enabled:
+                  t.mode == PromptTranslationMode.inline &&
+                  (t.route != null || t.automatic),
+              onTap: () => scope.actions.onAutomaticTranslation!(!t.automatic),
+            ),
+          if (t.mode == PromptTranslationMode.blocks)
+            UiMenuItem(
+              key: const Key('gen-translate-adjust'),
+              divider:
+                  scope.actions.onTranslationMode != null &&
+                  scope.actions.onAutomaticTranslation == null,
+              label: l.gen_translateAdjust,
+              subtitle: l.gen_translateAdjustSub,
+              badge: uiNewBadge(context, 'translate.adjust', l.gen_menuNew),
+              glyph: UiGlyphs.chat,
+              enabled:
+                  !t.busy &&
+                  t.canAdjust &&
+                  scope.actions.onTranslationAdjust != null,
+              onTap: () =>
+                  scope.actions.onTranslationAdjust?.call(adjustmentAnchor()),
+            ),
           UiMenuItem(
-            label: l.promptReading_mode,
-            subtitle: l.promptReading_modeSubtitle,
-            key: const Key('gen-translate-mode-inline'),
-            glyph: UiGlyphs.list,
-            checked: t.mode == PromptTranslationMode.inline,
-            enabled: !t.busy,
-            onTap: () =>
-                scope.actions.onTranslationMode!(PromptTranslationMode.inline),
+            key: const Key('gen-translate-new'),
+            label: t.mode == PromptTranslationMode.inline
+                ? l.promptReading_update
+                : l.gen_translateNew,
+            divider:
+                t.mode == PromptTranslationMode.inline &&
+                scope.actions.onTranslationMode != null &&
+                scope.actions.onAutomaticTranslation == null,
+            glyph: UiGlyphs.retry,
+            enabled: !t.busy && t.route != null,
+            onTap: scope.actions.onTranslate,
           ),
           UiMenuItem(
-            label: l.promptReading_blocks,
-            subtitle: l.promptReading_blocksSubtitle,
-            key: const Key('gen-translate-mode-blocks'),
-            glyph: UiGlyphs.square,
-            checked: t.mode == PromptTranslationMode.blocks,
-            enabled: !t.busy,
-            onTap: () =>
-                scope.actions.onTranslationMode!(PromptTranslationMode.blocks),
+            label: t.mode == PromptTranslationMode.inline
+                ? (t.showing ? l.promptReading_hide : l.promptReading_show)
+                : t.showing
+                ? l.gen_translateShowOriginal
+                : l.gen_translateShowTranslated,
+            glyph: UiGlyphs.swap,
+            enabled: !t.busy && t.hasTranslations,
+            onTap: scope.actions.onToggleTranslation,
           ),
-        ],
-        if (t.mode == PromptTranslationMode.blocks)
           UiMenuItem(
-            key: const Key('gen-translate-adjust'),
-            divider: scope.actions.onTranslationMode != null,
-            label: l.gen_translateAdjust,
-            subtitle: l.gen_translateAdjustSub,
-            badge: uiNewBadge(context, 'translate.adjust', l.gen_menuNew),
-            glyph: UiGlyphs.chat,
+            key: const Key('gen-translate-clear'),
+            label: t.mode == PromptTranslationMode.inline
+                ? l.promptReading_clear
+                : l.gen_translateClearRestore,
+            subtitle: t.mode == PromptTranslationMode.inline
+                ? null
+                : l.gen_translateClearRestoreSub,
+            badge: t.mode == PromptTranslationMode.inline
+                ? null
+                : uiNewBadge(context, 'translate.clearRestore', l.gen_menuNew),
+            glyph: UiGlyphs.undo,
             enabled:
                 !t.busy &&
-                t.canAdjust &&
-                scope.actions.onTranslationAdjust != null,
-            onTap: () =>
-                scope.actions.onTranslationAdjust?.call(adjustmentAnchor()),
+                t.hasTranslations &&
+                scope.actions.onClearTranslations != null,
+            onTap: () => scope.actions.onClearTranslations?.call(),
           ),
-        UiMenuItem(
-          key: const Key('gen-translate-new'),
-          label: t.mode == PromptTranslationMode.inline
-              ? l.promptReading_update
-              : l.gen_translateNew,
-          divider:
-              t.mode == PromptTranslationMode.inline &&
-              scope.actions.onTranslationMode != null,
-          glyph: UiGlyphs.retry,
-          enabled: !t.busy && t.route != null,
-          onTap: scope.actions.onTranslate,
-        ),
-        UiMenuItem(
-          label: t.mode == PromptTranslationMode.inline
-              ? (t.showing ? l.promptReading_hide : l.promptReading_show)
-              : t.showing
-              ? l.gen_translateShowOriginal
-              : l.gen_translateShowTranslated,
-          glyph: UiGlyphs.swap,
-          enabled: !t.busy && t.hasTranslations,
-          onTap: scope.actions.onToggleTranslation,
-        ),
-        UiMenuItem(
-          key: const Key('gen-translate-clear'),
-          label: t.mode == PromptTranslationMode.inline
-              ? l.promptReading_clear
-              : l.gen_translateClearRestore,
-          subtitle: t.mode == PromptTranslationMode.inline
-              ? null
-              : l.gen_translateClearRestoreSub,
-          badge: t.mode == PromptTranslationMode.inline
-              ? null
-              : uiNewBadge(context, 'translate.clearRestore', l.gen_menuNew),
-          glyph: UiGlyphs.undo,
-          enabled:
-              !t.busy &&
-              t.hasTranslations &&
-              scope.actions.onClearTranslations != null,
-          onTap: () => scope.actions.onClearTranslations?.call(),
-        ),
-        UiMenuItem(
-          label: l.gen_translateSettings,
-          glyph: UiGlyphs.external,
-          divider: true,
-          trailing: t.route,
-          onTap: scope.actions.onTranslationSettings,
-        ),
-        if (scope.slots.translationGuide != null)
           UiMenuItem(
-            key: const Key('gen-translation-tutorial'),
-            label: l.promptTranslation_tutorial,
-            glyph: UiGlyphs.infoCircle,
+            label: l.gen_translateSettings,
+            glyph: UiGlyphs.external,
             divider: true,
-            onTap: () => scope.controller.openPopover(
-              anchor,
-              (guideContext) => UiPopoverSurface(
-                key: const Key('gen-translation-guide'),
-                width: 300,
-                padding: const EdgeInsets.all(10),
-                child: scope.slots.translationGuide!(
-                  guideContext,
-                  () => _openMenu(context, anchor),
-                ),
-              ),
-              tag: #translate,
-            ),
+            trailing: t.route,
+            onTap: scope.actions.onTranslationSettings,
           ),
-      ],
-      tag: #translate,
-      width: 280,
-    );
+          if (scope.slots.translationGuide != null)
+            UiMenuItem(
+              key: const Key('gen-translation-tutorial'),
+              label: l.promptTranslation_tutorial,
+              glyph: UiGlyphs.infoCircle,
+              divider: true,
+              onTap: () => scope.controller.openPopover(
+                anchor,
+                (guideContext) => UiPopoverSurface(
+                  key: const Key('gen-translation-guide'),
+                  width: 300,
+                  padding: const EdgeInsets.all(10),
+                  child: scope.slots.translationGuide!(
+                    guideContext,
+                    () => _openMenu(context, anchor),
+                  ),
+                ),
+                tag: #translate,
+              ),
+            ),
+        ],
+        onClose: controller.closePopover,
+        width: 280,
+      );
+    }, tag: #translate);
   }
 }
 

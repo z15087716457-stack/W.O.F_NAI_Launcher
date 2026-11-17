@@ -652,13 +652,13 @@ abstract class AppLocalizations {
   /// No description provided for @auth_thirdPartyTokenHint.
   ///
   /// In en, this message translates to:
-  /// **'Enter the API token from the third-party site'**
+  /// **'Enter an API token or paste New API connection JSON'**
   String get auth_thirdPartyTokenHint;
 
   /// No description provided for @auth_thirdPartyCompatibilityHint.
   ///
   /// In en, this message translates to:
-  /// **'The third-party site must be compatible with NovelAI subscription and image-generation APIs. The token will be sent as a Bearer token.'**
+  /// **'Supports NovelAI-compatible APIs. Common /v1 and /v1/novelai paths are detected at login. Third-party prices and balance units follow the provider; official Opus free rules do not apply.'**
   String get auth_thirdPartyCompatibilityHint;
 
   /// No description provided for @auth_thirdPartyApiSiteRequired.
@@ -786,6 +786,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Server error'**
   String get auth_error_serverError;
+
+  /// No description provided for @auth_error_incompatibleApi.
+  ///
+  /// In en, this message translates to:
+  /// **'This address did not return a NovelAI account API. Check the site’s API base path (for example /v1 or /v1/novelai).'**
+  String get auth_error_incompatibleApi;
+
+  /// No description provided for @auth_connectionImportInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid New API connection JSON. It must contain _type, url and key.'**
+  String get auth_connectionImportInvalid;
 
   /// No description provided for @auth_error_unknown.
   ///
@@ -11872,6 +11884,54 @@ abstract class AppLocalizations {
   /// **'Has description'**
   String get wiki_withArticle;
 
+  /// No description provided for @tagMeaning_synonyms.
+  ///
+  /// In en, this message translates to:
+  /// **'Synonyms'**
+  String get tagMeaning_synonyms;
+
+  /// No description provided for @wiki_imagePanelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Article images'**
+  String get wiki_imagePanelTitle;
+
+  /// No description provided for @wiki_imagePreviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Image preview'**
+  String get wiki_imagePreviewTitle;
+
+  /// No description provided for @wiki_imageOtherGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Illustrations'**
+  String get wiki_imageOtherGroup;
+
+  /// No description provided for @wiki_imageShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Show article images'**
+  String get wiki_imageShow;
+
+  /// No description provided for @wiki_imageHide.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide article images'**
+  String get wiki_imageHide;
+
+  /// No description provided for @wiki_imageLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Images are unavailable'**
+  String get wiki_imageLoadFailed;
+
+  /// No description provided for @wiki_imageMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Load more ({loaded}/{total})'**
+  String wiki_imageMore(int loaded, int total);
+
   /// No description provided for @wiki_withoutArticle.
   ///
   /// In en, this message translates to:
@@ -15427,6 +15487,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Lightweight translation'**
   String get promptReading_mode;
+
+  /// No description provided for @promptReading_automatic.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-translate changes'**
+  String get promptReading_automatic;
+
+  /// No description provided for @promptReading_automaticSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Translate changes after typing pauses'**
+  String get promptReading_automaticSubtitle;
+
+  /// No description provided for @promptReading_automaticInlineOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Available in lightweight mode only'**
+  String get promptReading_automaticInlineOnly;
+
+  /// No description provided for @promptReading_automaticFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Translation failed; retry manually'**
+  String get promptReading_automaticFailed;
+
+  /// No description provided for @promptReading_automaticPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused'**
+  String get promptReading_automaticPaused;
+
+  /// No description provided for @promptReading_automaticOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get promptReading_automaticOff;
 
   /// No description provided for @promptReading_modeSubtitle.
   ///
@@ -29609,12 +29705,6 @@ abstract class AppLocalizations {
   /// **'EmbeddingGemma 2 model directory'**
   String get rag_embeddingPath;
 
-  /// No description provided for @rag_rerankerPath.
-  ///
-  /// In en, this message translates to:
-  /// **'Qwen3-Reranker-0.6B model directory'**
-  String get rag_rerankerPath;
-
   /// No description provided for @rag_notConfigured.
   ///
   /// In en, this message translates to:
@@ -29636,7 +29726,7 @@ abstract class AppLocalizations {
   /// No description provided for @rag_modelModeHint.
   ///
   /// In en, this message translates to:
-  /// **'Gemma handles text and images with audio disabled. Qwen reranks text only.'**
+  /// **'Gemma 2 handles text and image retrieval. Audio is disabled.'**
   String get rag_modelModeHint;
 
   /// No description provided for @rag_discover.
@@ -29708,20 +29798,8 @@ abstract class AppLocalizations {
   /// No description provided for @rag_tagsHint.
   ///
   /// In en, this message translates to:
-  /// **'Search using your input, or get tag suggestions from the context before the caret.'**
+  /// **'Search tags by name or description. Empty queries use local cooccurrence suggestions.'**
   String get rag_tagsHint;
-
-  /// No description provided for @rag_context.
-  ///
-  /// In en, this message translates to:
-  /// **'Suggestion context'**
-  String get rag_context;
-
-  /// No description provided for @rag_contextHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Use complete tags before the caret. Adjustable from 32 to 512 Gemma tokens.'**
-  String get rag_contextHint;
 
   /// No description provided for @rag_buildIndex.
   ///
@@ -33166,12 +33244,6 @@ abstract class AppLocalizations {
   /// **'Embedding'**
   String get set_rgStepEmbed;
 
-  /// No description provided for @set_rgStepRerank.
-  ///
-  /// In en, this message translates to:
-  /// **'Rerank'**
-  String get set_rgStepRerank;
-
   /// No description provided for @set_rgStepDevice.
   ///
   /// In en, this message translates to:
@@ -33187,7 +33259,7 @@ abstract class AppLocalizations {
   /// No description provided for @set_rgSourcesSub.
   ///
   /// In en, this message translates to:
-  /// **'Each source is indexed and toggled on its own. Indexing can pause; finished parts are usable.'**
+  /// **'Each source has its own index. Indexed content is ready to search; indexing can be paused.'**
   String get set_rgSourcesSub;
 
   /// No description provided for @set_rgTags.
@@ -33195,12 +33267,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Semantic tag search & suggestions'**
   String get set_rgTags;
-
-  /// No description provided for @set_rgTagsSub.
-  ///
-  /// In en, this message translates to:
-  /// **'Search using your input, or get tag suggestions from the context before the caret.'**
-  String get set_rgTagsSub;
 
   /// No description provided for @set_rgWiki.
   ///
@@ -33292,24 +33358,6 @@ abstract class AppLocalizations {
   /// **'Only the derived index is removed; content and models stay.'**
   String get set_rgClearBody;
 
-  /// No description provided for @set_rgContext.
-  ///
-  /// In en, this message translates to:
-  /// **'Suggestion context'**
-  String get set_rgContext;
-
-  /// No description provided for @set_rgContextSub.
-  ///
-  /// In en, this message translates to:
-  /// **'Use complete tags before the caret. Adjustable from 32 to 512 Gemma tokens.'**
-  String get set_rgContextSub;
-
-  /// No description provided for @set_rgRange.
-  ///
-  /// In en, this message translates to:
-  /// **'Sample length'**
-  String get set_rgRange;
-
   /// No description provided for @set_rgRuntime.
   ///
   /// In en, this message translates to:
@@ -33321,12 +33369,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Embedding model folder'**
   String get set_rgEmbedPath;
-
-  /// No description provided for @set_rgRerankPath.
-  ///
-  /// In en, this message translates to:
-  /// **'Rerank model folder'**
-  String get set_rgRerankPath;
 
   /// No description provided for @set_rgDevice.
   ///
@@ -33415,7 +33457,7 @@ abstract class AppLocalizations {
   /// No description provided for @set_rgNotReadySub.
   ///
   /// In en, this message translates to:
-  /// **'Install the runtime, then set both model folders.'**
+  /// **'Install the runtime, then select the Gemma 2 model folder.'**
   String get set_rgNotReadySub;
 
   /// No description provided for @set_rgEmpty.
@@ -33535,7 +33577,7 @@ abstract class AppLocalizations {
   /// No description provided for @set_rgPlanTags.
   ///
   /// In en, this message translates to:
-  /// **'Will index {n} tags with aliases and local descriptions.'**
+  /// **'Index {n} tags using names and available Chinese text and descriptions.'**
   String set_rgPlanTags(Object n);
 
   /// No description provided for @set_rgPlanText.
@@ -33549,6 +33591,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Will index {images} images and {n} NAI parameter chunks, separately.'**
   String set_rgPlanGallery(Object images, Object n);
+
+  /// No description provided for @set_rgUpgrade.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade tag index'**
+  String get set_rgUpgrade;
+
+  /// No description provided for @set_rgCleanupLegacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Clean up old tags'**
+  String get set_rgCleanupLegacy;
+
+  /// No description provided for @set_rgUpgradeNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Tag search has changed and needs a new index. Wiki, prompt blocks and gallery indexes remain usable.'**
+  String get set_rgUpgradeNotice;
+
+  /// No description provided for @set_rgUpgradePlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Build the new tag index, validate it, then remove the old tag index (about {size}). This temporarily uses more disk space; pause and resume any time. Other sources and translations are kept.'**
+  String set_rgUpgradePlan(String size);
+
+  /// No description provided for @set_rgCleanupPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove the old tag index (about {size}). Keep the new tag index, other sources and translations.'**
+  String set_rgCleanupPlan(String size);
+
+  /// No description provided for @set_rgUpgradeCleaning.
+  ///
+  /// In en, this message translates to:
+  /// **'The new tag index is ready. Cleaning up the old index…'**
+  String get set_rgUpgradeCleaning;
+
+  /// No description provided for @set_rgUpgradeCleanupFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'New search is available. Old index cleanup failed; retry cleanup.'**
+  String get set_rgUpgradeCleanupFailed;
+
+  /// No description provided for @set_rgUpgradeBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade needed'**
+  String get set_rgUpgradeBadge;
+
+  /// No description provided for @set_rgCleanupPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleanup pending'**
+  String get set_rgCleanupPending;
+
+  /// No description provided for @set_rgUpgradeCleanupNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'The new tag index is ready. You can remove the old tag index to free space.'**
+  String get set_rgUpgradeCleanupNotice;
 
   /// No description provided for @set_rgPlanNote.
   ///
@@ -33601,7 +33703,7 @@ abstract class AppLocalizations {
   /// No description provided for @set_rgDiscoverSub.
   ///
   /// In en, this message translates to:
-  /// **'Looks in the workspace models folder for EmbeddingGemma 2 and Qwen3-Reranker 0.6B and fills both folders.'**
+  /// **'Finds EmbeddingGemma 2 in the workspace models folder and fills its path.'**
   String get set_rgDiscoverSub;
 
   /// No description provided for @set_rgFind.
@@ -33663,6 +33765,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Not installed'**
   String get set_rgEnvMissing;
+
+  /// No description provided for @set_rgEnvNeedsUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Update needed'**
+  String get set_rgEnvNeedsUpdate;
+
+  /// No description provided for @set_rgEnvUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Update environment'**
+  String get set_rgEnvUpdate;
+
+  /// No description provided for @set_rgEnvDependencies.
+  ///
+  /// In en, this message translates to:
+  /// **'Install or update dependencies: {packages}. Existing indexes will be kept.'**
+  String set_rgEnvDependencies(String packages);
+
+  /// No description provided for @set_rgEnvPythonVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Python 3.12 is required. Update the environment or select a compatible interpreter. Existing indexes will be kept.'**
+  String get set_rgEnvPythonVersion;
+
+  /// No description provided for @set_rgEnvCheckFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Check failed'**
+  String get set_rgEnvCheckFailed;
+
+  /// No description provided for @set_rgEnvImportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Dependencies failed to load. Check again or repair the environment. Existing indexes will be kept.'**
+  String get set_rgEnvImportFailed;
+
+  /// No description provided for @set_rgEnvCheckTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'Environment check timed out. You can check again without deleting or rebuilding indexes.'**
+  String get set_rgEnvCheckTimeout;
 
   /// No description provided for @set_rgInstall.
   ///

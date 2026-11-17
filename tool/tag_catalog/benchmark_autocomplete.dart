@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:nai_launcher/core/autocomplete/completion_models.dart';
-import 'package:nai_launcher/core/autocomplete/completion_ranker.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 Future<void> main(List<String> arguments) async {
@@ -104,47 +103,6 @@ Future<void> main(List<String> arguments) async {
     }
   }
 
-  final sample = <CompletionCandidate>[
-    const CompletionCandidate(
-      canonicalTag: 'long_hair',
-      category: TagCategory.general,
-      postCount: 5000000,
-      matchKind: CompletionMatchKind.englishPrefix,
-      sources: {CompletionSourceKind.base},
-    ),
-    const CompletionCandidate(
-      canonicalTag: 'long_hair',
-      category: TagCategory.general,
-      postCount: 5000100,
-      translation: '长发',
-      matchKind: CompletionMatchKind.chineseExact,
-      sources: {CompletionSourceKind.ai},
-    ),
-    const CompletionCandidate(
-      canonicalTag: 'long_skirt',
-      category: TagCategory.general,
-      postCount: 200000,
-      matchKind: CompletionMatchKind.englishPrefix,
-      sources: {CompletionSourceKind.danbooruApi},
-    ),
-  ];
-  const mergeQuery = CompletionQuery(
-    fullText: 'long',
-    cursorPosition: 4,
-    token: 'long',
-    replacementRange: TextReplacementRange(start: 0, end: 4),
-    existingTags: {},
-    limit: 20,
-    locale: 'zh-CN',
-  );
-  final mergeTimes = <int>[];
-  for (var iteration = 0; iteration < 10000; iteration++) {
-    final stopwatch = Stopwatch()..start();
-    CompletionRanker.mergeAndSort(sample, query: mergeQuery);
-    stopwatch.stop();
-    mergeTimes.add(stopwatch.elapsedMicroseconds);
-  }
-
   stdout.writeln('catalog=$catalogPath');
   stdout.writeln(
     'queries=${queries.length * iterations} averageRowsScanned='
@@ -167,10 +125,6 @@ Future<void> main(List<String> arguments) async {
       'averageRows=${(relatedRows / relatedTimes.length).toStringAsFixed(1)}',
     );
   }
-  stdout.writeln(
-    'mergeLatency p50=${_percentile(mergeTimes, 0.50)}us '
-    'p95=${_percentile(mergeTimes, 0.95)}us',
-  );
   stdout.writeln(
     'rss=${(ProcessInfo.currentRss / 1024 / 1024).toStringAsFixed(1)}MiB',
   );

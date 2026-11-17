@@ -8,6 +8,84 @@ import 'inline_prompt_readings_test.dart' as fixture;
 void main() {
   setUpAll(loadStudioCaptureFonts);
   setUp(() => SharedPreferences.setMockInitialValues({}));
+  for (final caret in [0, 5, 11]) {
+    testWidgets(
+      'IME inside a translated fragment keeps its buffer caret=$caret',
+      (t) async {
+        final c = TextEditingController(text: 'silver hair, ');
+        final focus = FocusNode();
+        await fixture.pumpReadingEditor(t, c, [
+          const PromptReading(
+            start: 0,
+            end: 11,
+            source: 'silver hair',
+            translation: '银发',
+            perSegment: true,
+          ),
+        ], focusNode: focus);
+        await t.showKeyboard(find.byType(TextField));
+        c.selection = TextSelection.collapsed(offset: caret);
+        await t.pump();
+        final view = t
+            .widget<EditableText>(find.byType(EditableText))
+            .controller;
+        final original = view.text;
+        final start = view.selection.extentOffset;
+        t.testTextInput.log.clear();
+        for (final letters in [
+          '',
+          'a',
+          'as',
+          "a's",
+          "a's'd",
+          "a's",
+          "a's'd",
+          '阿斯顿',
+        ]) {
+          final value = TextEditingValue(
+            text: original.replaceRange(start, start, letters),
+            selection: TextSelection.collapsed(offset: start + letters.length),
+            composing: TextRange(start: start, end: start + letters.length),
+          );
+          t.testTextInput.updateEditingValue(value);
+          await t.pump();
+          expect(view.value, value);
+          expect(c.text, 'silver hair, '.replaceRange(caret, caret, letters));
+          expect(
+            t.testTextInput.log.where(
+              (call) => call.method == 'TextInput.setEditingState',
+            ),
+            isEmpty,
+          );
+        }
+        final commit = view.value.copyWith(
+          composing: TextRange(start: start + 3, end: start + 3),
+        );
+        t.testTextInput.updateEditingValue(commit);
+        await t.pump();
+        expect(view.value, commit);
+        expect(
+          t.testTextInput.log.where(
+            (call) => call.method == 'TextInput.setEditingState',
+          ),
+          isEmpty,
+        );
+        t.testTextInput.updateEditingValue(
+          commit.copyWith(composing: TextRange.empty),
+        );
+        await t.pump();
+        expect(c.text, 'silver hair, '.replaceRange(caret, caret, '阿斯顿'));
+        expect(c.value.composing, TextRange.empty);
+        expect(view.value.composing, TextRange.empty);
+        expect(fixture.readingLabels(), findsWidgets);
+        await t.pumpWidget(const SizedBox());
+        c.dispose();
+        focus.dispose();
+        await t.binding.setSurfaceSize(null);
+      },
+      variant: const TargetPlatformVariant({TargetPlatform.windows}),
+    );
+  }
   for (final annotated in [false, true]) {
     testWidgets(
       'IME lifecycle preserves empty composition ranges annotated=$annotated',

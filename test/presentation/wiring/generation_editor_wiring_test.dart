@@ -1,3 +1,4 @@
+import '../../helpers/empty_tag_expansion.dart';
 import 'dart:async';
 import 'dart:io';
 import 'dart:ui' as ui;
@@ -46,6 +47,7 @@ void main() {
     epochs = StreamController<int>.broadcast();
     container = ProviderContainer(
       overrides: [
+        emptyTagExpansionOverride,
         localStorageServiceProvider.overrideWithValue(MemoryDraftSettings()),
         characterPromptRepositoryProvider.overrideWithValue(MemoryCharacters()),
         promptBlockLibraryNotifierProvider.overrideWith(EmptyBlocks.new),

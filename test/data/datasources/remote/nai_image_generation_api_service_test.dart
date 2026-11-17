@@ -20,6 +20,71 @@ import 'package:nai_launcher/data/models/vibe/vibe_reference.dart';
 import 'package:nai_launcher/presentation/providers/generation/image_workflow_controller.dart';
 
 void main() {
+  for (final prefix in ['/v1', '/v1/novelai']) {
+    for (final streamed in [false, true]) {
+      test(
+        'native gateway $prefix retains request and decodes image, stream=$streamed',
+        () async {
+          final adapter = _PendingDioAdapter();
+          final dio = Dio()..httpClientAdapter = adapter;
+          final endpoints = NaiApiEndpointService()
+            ..setCurrent(
+              NaiApiEndpointConfig.fromInput(
+                mainBaseUrl: 'https://gateway.invalid$prefix',
+              ),
+            );
+          final service = NAIImageGenerationApiService(
+            dio,
+            NAIImageEnhancementApiService(dio, endpoints),
+            endpoints,
+          );
+          const params = ImageParams(
+            model: 'nai-diffusion-5-full',
+            prompt: 'blue ceramic cup',
+            negativePrompt: 'blurry',
+            seed: 42,
+          );
+          final png = _solidPng(width: 4, height: 4, r: 20, g: 50, b: 90);
+          final operation = streamed
+              ? service
+                    .generateImageStream(params)
+                    .toList()
+                    .then((chunks) => chunks.last.finalImage)
+              : service
+                    .generateImage(params)
+                    .then((result) => result.$1.single);
+          await _waitForRequestCount(adapter, 1);
+          final request = adapter.requests.single;
+          expect(
+            request.options.uri.toString(),
+            'https://gateway.invalid$prefix/ai/generate-image${streamed ? '-stream' : ''}',
+          );
+          final body = request.options.data as Map<String, dynamic>;
+          expect(body['model'], params.model);
+          final parameters = body['parameters'] as Map<String, dynamic>;
+          expect(parameters['n_samples'], 1);
+          expect(
+            parameters['v4_prompt']['caption']['base_caption'],
+            contains('blue ceramic cup'),
+          );
+          expect(
+            parameters['v4_negative_prompt']['caption']['base_caption'],
+            contains('blurry'),
+          );
+          if (streamed) {
+            request.completeWithMsgpackMessages([
+              {'event_type': 'final', 'samp_ix': 0, 'image': png},
+            ]);
+          } else {
+            request.completeWithZipImage(png);
+          }
+          expect(await operation, orderedEquals(png));
+          expect(adapter.requests, hasLength(1));
+        },
+      );
+    }
+  }
+
   test(
     'stream concurrency error preserves the HTTP Retry-After header',
     () async {

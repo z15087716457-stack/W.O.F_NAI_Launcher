@@ -21,14 +21,15 @@ import 'package:nai_launcher/data/repositories/character_prompt_repository.dart'
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/character_prompt_provider.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
-import 'package:nai_launcher/presentation/providers/layout_state_provider.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/providers/prompt_token_counter_provider.dart';
 import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
 import 'package:nai_launcher/presentation/providers/tips_provider.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/generation_welcome.dart';
-import 'package:nai_launcher/presentation/screens/generation/widgets/prompt_input.dart';
-import 'package:nai_launcher/presentation/widgets/character/inline_character_section.dart';
+import 'package:nai_launcher/presentation/wiring/generation_editor_wiring.dart';
+import 'package:nai_launcher/presentation/ui/gen/gen_contract.dart';
+import 'package:nai_launcher/presentation/providers/pill_workspace_provider.dart';
+import 'package:nai_launcher/presentation/widgets/prompt/pills/prompt_pill_editor.dart';
 import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
 import 'package:nai_launcher/presentation/themes/studio_typography.dart';
 import 'package:nai_launcher/presentation/widgets/branding/brand_entry_scene.dart';
@@ -207,11 +208,6 @@ void main() {
       ],
     );
     addTearDown(container.dispose);
-    await container
-        .read(layoutStateNotifierProvider.notifier)
-        .setWebLeftPanelWidth(400);
-    final mode = ValueNotifier(false);
-    addTearDown(mode.dispose);
     final locale = StateProvider((ref) => const Locale('zh'));
 
     await tester.pumpWidget(
@@ -225,19 +221,17 @@ void main() {
             supportedLocales: AppLocalizations.supportedLocales,
             home: RepaintBoundary(
               key: _captureKey,
-              child: Scaffold(
+              child: const Scaffold(
                 body: Align(
                   alignment: Alignment.topLeft,
                   child: SingleChildScrollView(
                     child: Column(
                       children: [
-                        PromptInputWidget(
-                          autoGrow: true,
-                          showMaximizeButton: false,
-                          negativeModeNotifier: mode,
+                        GenerationEditorWiring(target: GenEditorTarget.base()),
+                        SizedBox(height: 12),
+                        GenerationEditorWiring(
+                          target: GenEditorTarget.character(0),
                         ),
-                        const SizedBox(height: 12),
-                        const InlineCharacterSection(),
                       ],
                     ),
                   ),
@@ -250,18 +244,14 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final card = find.byKey(const ValueKey('main-prompt-card'));
+    final card = find.byWidgetPredicate(
+      (widget) =>
+          widget is PromptPillEditor && widget.pillScope == PillScopes.main,
+    );
     final cardSize = tester.getSize(card);
-    // 一体式布局：提示词卡接近方框（截图口径高 ≈ 0.7 × 宽）
-    expect(cardSize.height / cardSize.width, inInclusiveRange(.62, .8));
-
     final characterField = find.byWidgetPredicate(
       (widget) =>
-          widget.key is ValueKey<String> &&
-          (widget.key! as ValueKey<String>).value.startsWith(
-            'character-pill-char:',
-          ) &&
-          (widget.key! as ValueKey<String>).value.endsWith(':pos'),
+          widget is PromptPillEditor && widget.pillScope.startsWith('char:'),
     );
     expect(characterField, findsOneWidget);
 

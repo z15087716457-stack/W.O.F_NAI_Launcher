@@ -126,7 +126,7 @@ class _Auto extends ChangeNotifier implements AutoTagTranslationController {
 
 class _RagSettings extends RagSettingsController {
   @override
-  RagSettings build() => const RagSettings(enabled: true, wikiEnabled: true);
+  RagSettings build() => const RagSettings(enabled: true);
 }
 
 class _Rag extends RagController {

@@ -18,6 +18,9 @@ class DraftHistory<T> {
   bool get canUndo => _index > 0;
   bool get canRedo => _index + 1 < _values.length;
 
+  /// Background annotations belong to this snapshot, not a new user action.
+  void updateCurrent(T value) => _values[_index] = value;
+
   void record(T value, {bool merge = false}) {
     if (!merge) closeGroup();
     if (_sameContent(value, _values[_index])) {

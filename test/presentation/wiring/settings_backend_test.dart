@@ -49,30 +49,6 @@ class _SystemBrightness extends StudioSystemBrightness {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  test('RAG context length saves through settings and resets to 120', () async {
-    final storage = MemoryStorage();
-    final container = ProviderContainer(
-      overrides: [localStorageServiceProvider.overrideWithValue(storage)],
-    );
-    final store = container.read(settingsValueStoreProvider);
-    expect(container.read(ragSettingsProvider).tokenBudget, 120);
-    for (final value in [32.0, 121.0, 512.0, 120.0]) {
-      await store.write(SettingKey.ragContextTokens, value);
-      expect(container.read(ragSettingsProvider).tokenBudget, value.toInt());
-    }
-    for (final value in [31.0, 513.0, double.nan, '120']) {
-      await expectLater(
-        store.write(SettingKey.ragContextTokens, value),
-        throwsArgumentError,
-      );
-    }
-    container.dispose();
-    final fresh = ProviderContainer(
-      overrides: [localStorageServiceProvider.overrideWithValue(storage)],
-    );
-    addTearDown(fresh.dispose);
-    expect(fresh.read(ragSettingsProvider).tokenBudget, 120);
-  });
   test(
     'thumbnail limit persists, clamps and applies capacity/file budget',
     () async {
@@ -274,10 +250,10 @@ void main() {
   );
 
   test(
-    'RAG projection keeps disabled sources, paused jobs and unread runtime honest',
+    'RAG projection keeps unread sources, paused jobs and runtime honest',
     () {
       final data = settingsRagData(
-        const RagSettings(enabled: true, galleryEnabled: true),
+        const RagSettings(enabled: true),
         const RagStatus(
           indexed: 2,
           total: 8,
@@ -306,7 +282,7 @@ void main() {
       expect(data.runtimeReady, isFalse);
       expect(data.runtime.tone, SettingsTone.idle);
       expect(data.sources.first.state, SettingsRagState.paused);
-      expect(data.sources[1].state, SettingsRagState.off);
+      expect(data.sources[1].state, SettingsRagState.loading);
       expect(data.sources.last.done, 3);
       expect(data.sources.last.secondary, 6);
       expect(data.sources.last.skipped, 1);
@@ -315,6 +291,60 @@ void main() {
     },
   );
 
+  test('RAG cleanup failure preserves a ready source and a targeted retry', () {
+    final data = settingsRagData(
+      const RagSettings(enabled: true),
+      const RagStatus(
+        complete: true,
+        indexed: 96,
+        total: 96,
+        upgradeAvailable: true,
+        upgradeFailed: true,
+        cleanupOnly: true,
+      ),
+      const AsyncData(RagRuntimeInfo(python: 'fixture', ready: true)),
+      const RagModelDownloadState(),
+      const SettingsRagSessionState(),
+      true,
+    );
+    final tags = data.sources.first;
+    expect(tags.state, SettingsRagState.ready);
+    expect(tags.cleanupOnly, true);
+    expect(tags.upgradeFailed, true);
+    expect(tags.error, isNull);
+    expect(
+      data.sources.skip(1).every((source) => !source.upgradeAvailable),
+      true,
+    );
+  });
+
+  test('RAG compatibility state does not reuse a stale worker-ready flag', () {
+    SettingsRagData project(AsyncValue<RagRuntimeInfo> runtime) =>
+        settingsRagData(
+          const RagSettings(enabled: true),
+          const RagStatus(runtimeReady: true),
+          runtime,
+          const RagModelDownloadState(),
+          const SettingsRagSessionState(),
+          null,
+        );
+    final checking = project(const AsyncLoading());
+    expect(checking.checking, isTrue);
+    expect(checking.runtimeReady, isFalse);
+    final update = project(
+      const AsyncData(
+        RagRuntimeInfo(
+          python: 'existing',
+          ready: false,
+          issue: RagRuntimeIssue.dependencies,
+          packages: ['jieba'],
+        ),
+      ),
+    );
+    expect(update.runtimeReady, isFalse);
+    expect(update.runtimeIssue, SettingsRagRuntimeIssue.dependencies);
+    expect(update.runtimePackages, ['jieba']);
+  });
   test(
     'RAG verification is ready at full progress, real writes stay building',
     () {

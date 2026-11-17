@@ -120,6 +120,7 @@ class PromptAssistantApiClient {
 
   Stream<StreamingChunk> complete({
     required PromptAssistantRequest request,
+    void Function(String)? validateOutput,
   }) async* {
     _cancelTokens.remove(request.sessionId)?.cancel('replaced by new request');
     final cancelToken = CancelToken();
@@ -145,6 +146,7 @@ class PromptAssistantApiClient {
     var acquired = false;
     var attempts = 0;
     var requested = false;
+    String? output;
     try {
       final parameters = request.modelConfig;
       if (parameters != null) {
@@ -198,6 +200,8 @@ class PromptAssistantApiClient {
       if (trimmed.isEmpty) {
         throw StateError(currentL10n.modelRequest_emptyResponse);
       }
+      output = redactor.text(trimmed);
+      validateOutput?.call(trimmed);
       AppLogger.d(
         'response done provider=${request.provider.id} model=${request.model} outputLen=${trimmed.length}',
         'PromptAssistant',
@@ -208,7 +212,7 @@ class PromptAssistantApiClient {
           ModelRequestStatus.success,
           elapsedMs: watch.elapsedMilliseconds,
           attempts: attempts,
-          output: redactor.text(trimmed),
+          output: output,
         );
       }
       if (!cancelToken.isCancelled) connectionHealth?.succeeded(probe);
@@ -229,6 +233,7 @@ class PromptAssistantApiClient {
           error: error.response?.statusCode == null
               ? error.type.name
               : 'HTTP ${error.response!.statusCode}',
+          output: output,
         );
       }
       throw StateError(_formatDioException(error, request));
@@ -243,6 +248,7 @@ class PromptAssistantApiClient {
           elapsedMs: watch.elapsedMilliseconds,
           attempts: attempts,
           error: redactor.text(error.toString()),
+          output: output,
         );
       }
       rethrow;

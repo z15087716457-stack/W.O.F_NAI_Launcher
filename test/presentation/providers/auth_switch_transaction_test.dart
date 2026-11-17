@@ -53,7 +53,27 @@ class _Api extends NAIAuthApiService {
   final automaticStarted = Completer<void>();
   final automaticResponse = Completer<Map<String, dynamic>>();
   NaiApiEndpointConfig? requestedEndpoint;
+  NaiApiEndpointConfig? resolvedEndpoint;
   final cancels = <CancelToken?>[];
+  @override
+  Future<NaiApiConnection> validateConnection(
+    String token, {
+    NaiApiEndpointConfig endpoint = NaiApiEndpointConfig.official,
+    bool allowAnyTokenFormat = false,
+    CancelToken? cancelToken,
+  }) async {
+    final result = await super.validateConnection(
+      token,
+      endpoint: endpoint,
+      allowAnyTokenFormat: allowAnyTokenFormat,
+      cancelToken: cancelToken,
+    );
+    return (
+      endpoint: resolvedEndpoint ?? result.endpoint,
+      subscription: result.subscription,
+    );
+  }
+
   @override
   Future<Map<String, dynamic>> validateToken(
     String token, {
@@ -504,6 +524,36 @@ void main() {
       },
     );
   }
+  test(
+    'third-party discovery can exceed five seconds and commits its resolved route',
+    () async {
+      await loginA(false);
+      api.resolvedEndpoint = NaiApiEndpointConfig.fromInput(
+        mainBaseUrl: 'https://fixture.invalid/v1/novelai',
+      );
+      final operation = auth.loginWithThirdPartyToken(
+        tokenB,
+        apiEndpoint: customEndpoint,
+        accountId: 'B',
+      );
+      await api.started.future;
+      await Future<void>.delayed(const Duration(milliseconds: 5100));
+      expect(container.read(authNotifierProvider).isLoading, isTrue);
+      expect(await storage.getAccessToken(), tokenA);
+      api.response.complete({
+        'tier': 0,
+        'active': false,
+        'trainingStepsLeft': null,
+      });
+      expect(await operation, isTrue);
+      expect(
+        container.read(naiApiEndpointServiceProvider).current,
+        api.resolvedEndpoint,
+      );
+      expect(await storage.getAccessToken(), tokenB);
+    },
+  );
+
   test('invalid token syntax keeps the existing session untouched', () async {
     await loginA(true);
     final revision = storage.authRevision;

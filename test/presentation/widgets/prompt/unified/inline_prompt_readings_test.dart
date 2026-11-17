@@ -385,6 +385,151 @@ void main() {
       await t.binding.setSurfaceSize(null);
     },
   );
+  for (final width in [320.0, 440.0]) {
+    for (final scale in [1.0, 1.5]) {
+      testWidgets(
+        'artist weight leaves row tails clear width=$width scale=$scale',
+        (t) async {
+          const source =
+              '0.8::artist:ciloranko,\n'
+              'artist:ningen mame, artist:min_(120716),\n'
+              '::, artist:rella,\n'
+              'artist:konya_karasue, 1.2::artist(chen_bin),\n'
+              '::, -2::water,';
+          final readings = [
+            for (final anchor in [
+              'artist:ciloranko',
+              'artist:ningen mame',
+              'artist:min_(120716)',
+              'artist:rella',
+              'artist:konya_karasue',
+              'artist(chen_bin)',
+              'water',
+            ])
+              PromptReading(
+                start: source.indexOf(anchor),
+                end: source.indexOf(anchor) + anchor.length,
+                source: anchor,
+                translation: '画师：${anchor.replaceAll('artist:', '')}',
+                perSegment: true,
+              ),
+          ];
+          final controller = TextEditingController(text: source);
+          await pumpReadingEditor(
+            t,
+            controller,
+            readings,
+            width: width,
+            scale: scale,
+          );
+          final editable = t
+              .state<EditableTextState>(find.byType(EditableText))
+              .renderEditable;
+          final boundary = t.renderObject<RenderRepaintBoundary>(
+            find.byType(RepaintBoundary).first,
+          );
+          final transform = editable.getTransformTo(boundary);
+          final projection = (editable.text as SourceMappedTextSpan).projection;
+          final rightEdges = <double, double>{};
+          for (var offset = 0; offset < source.length; offset++) {
+            if (source[offset].trim().isEmpty) continue;
+            final caret = editable.getLocalRectForCaret(
+              TextPosition(
+                offset: projection.toDisplay(
+                  offset + 1,
+                  affinity: TextAffinity.upstream,
+                ),
+                affinity: TextAffinity.upstream,
+              ),
+            );
+            final physical = MatrixUtils.transformRect(transform, caret);
+            rightEdges.update(
+              physical.top,
+              (right) => math.max(right, physical.left),
+              ifAbsent: () => physical.left,
+            );
+          }
+          final theme = Theme.of(t.element(find.byType(TextField)));
+          final syntax = NaiSyntaxController(text: source);
+          final colors = <Color>{};
+          void collect(InlineSpan span) {
+            if (span is! TextSpan) return;
+            if (span.style?.backgroundColor case final color?
+                when color.a > 0) {
+              colors.add(
+                Color.alphaBlend(color, theme.scaffoldBackgroundColor),
+              );
+            }
+            for (final child in span.children ?? const <InlineSpan>[]) {
+              collect(child);
+            }
+          }
+
+          collect(
+            syntax.buildTextSpan(
+              context: t.element(find.byType(TextField)),
+              style: editable.text!.style,
+              withComposing: false,
+            ),
+          );
+          syntax.dispose();
+          expect(colors, isNotEmpty);
+          await t.runAsync(() async {
+            final image = await boundary.toImage();
+            final bytes = (await image.toByteData(
+              format: ui.ImageByteFormat.rawRgba,
+            ))!.buffer.asUint8List();
+            var outside = 0;
+            final editorRight = MatrixUtils.transformRect(
+              transform,
+              Offset.zero & editable.size,
+            ).right;
+            for (final row in rightEdges.entries) {
+              final y = (row.key + 2 * scale).ceil();
+              for (
+                var x = (row.value + 3 * scale).ceil();
+                x < (editorRight - scale).floor();
+                x++
+              ) {
+                final at = (y * image.width + x) * 4;
+                if (colors.any(
+                  (color) =>
+                      (bytes[at] - (color.r * 255).round()).abs() <= 1 &&
+                      (bytes[at + 1] - (color.g * 255).round()).abs() <= 1 &&
+                      (bytes[at + 2] - (color.b * 255).round()).abs() <= 1,
+                )) {
+                  outside++;
+                }
+              }
+            }
+            final capture = Platform.environment['WEIGHT_TRAILING_CAPTURE'];
+            if (capture != null) {
+              await Directory(capture).create(recursive: true);
+              final png = await image.toByteData(
+                format: ui.ImageByteFormat.png,
+              );
+              await File(
+                '$capture/artist-$width-$scale.png',
+              ).writeAsBytes(png!.buffer.asUint8List());
+            }
+            image.dispose();
+            expect(
+              outside,
+              0,
+              reason:
+                  'Weight backgrounds stop at the last source glyph, before blank row tails',
+            );
+          });
+          expect(controller.text, source);
+          expect(t.takeException(), isNull);
+          await t.pumpWidget(const SizedBox());
+          controller.dispose();
+          await t.binding.setSurfaceSize(null);
+        },
+      );
+    }
+  }
+
   for (final weighted in ['2::soft lighting::', '2::soft lighting']) {
     for (final scale in [1.0, 1.5]) {
       for (final suffix in ['\n', '\n\n', '\nnew text']) {

@@ -2,7 +2,7 @@
 
 # NAI Agent runtime host
 
-This is the production business host using official Pi 1.5.0 directly. The adjacent nai_agent_sdk_probe retains stage A mock verification. Keep the exact npm lockfile and PI-LICENSE with the source.
+This is the production business host using official Pi 1.5.2 directly. The adjacent nai_agent_sdk_probe retains stage A mock verification. Keep the exact npm lockfile and PI-LICENSE with the source.
 
 Run npm ci --ignore-scripts --no-audit --no-fund, then npm test in this directory. Node >=22.19.0 is required. Release packages bundle Node 24.18.0, pinned dependencies, licenses and built-in skills (skills/nai-studio, skills/nai-prompt) under Studio's tools/nai-agent. Production uses only its bundled Node and host.mjs; users do not need to install Node or Pi.
 
@@ -26,6 +26,6 @@ MCP Settings and deferred agent_manage share configuration services. agent_manag
 
 CodeMode runs official QuickJS; no replacement executor was added. MCP calls retain Studio backups, version checks, confirmations and cancellation. A Pi tool_result extension preserves native image metadata in official session details, aggregates CodeMode artifact paths and restores image previews with chat history. Built-in MCP uses a 24-hour deadline so user confirmation/long upscales are not cut off by the external-server default of 60 seconds; an explicit CodeMode timeout_ms remains a deadline for the whole script.
 
-MCP reconnection restores available tools from the official transcript while respecting hidden/disabled tools and later unloads. The existing JSONL passes agent_settled.aborted and tool durationMs. Pi 1.5.0 uses the same host protocol, MCP helper interfaces and cache-warming adapter; 1.3.0 session compatibility has been verified. Tool declarations still use typebox directly to produce JSON Schema; Pi's pi-schema owns runtime argument validation and coercion.
+MCP reconnection restores available tools from the official transcript while respecting hidden/disabled tools and later unloads. The existing JSONL passes agent_settled.aborted and tool durationMs. Pi 1.5.2 retains the host protocol. MCP configuration uses the full SDK validator, including exposure modes, legacy aliases and OAuth callback rules. Cache warming keeps Studio's explicit mode, defaulting to streaming, and uses the official delay helper; the live enablement and unknown-price status adapters remain necessary. Restoring and continuing 1.5.0 sessions has been verified; see the [upgrade report](../../docs/pi-1.5.2-upgrade-2026-11-17.md). Tool declarations still use typebox directly to produce JSON Schema; Pi's pi-schema owns runtime argument validation and coercion.
 
 Skills (2026-10-18): the host enables Pi's native skills with sources chosen by Studio — built-in `skills/` (read-only, updated with the app), global `agent-data/skills/` and the current workspace `.W.O.F/skills/`; on a name conflict workspace > global > built-in. Workspace `.agents/skills` or `.pi` folders are not read. `lib/skills.mjs` parses with Pi's loader and applies switches and manual-only mode; Pi formats the catalog and expands `/skill:`. `list-skills.mjs` gives Settings the same result. The system prompt keeps only an entry map; business tool usage lives in `nai-studio`.

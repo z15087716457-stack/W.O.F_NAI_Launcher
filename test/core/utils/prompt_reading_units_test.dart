@@ -252,6 +252,71 @@ void main() {
     },
   );
 
+  for (final source in [
+    'blue  eyes\tand soft light',
+    '1.3::blue eyes:: and soft light',
+  ]) {
+    test('inline anchors tolerate source formatting: $source', () {
+      final before = PillDocument(text: source, instances: const {});
+      final batch = PromptTranslationBatch.prepare({
+        'main': before,
+      }, mode: PromptTranslationMode.inline);
+      final raw = jsonEncode({
+        'fields': [
+          {
+            'id': 'main',
+            'groups': [
+              {
+                'ids': batch.segments['main']!.map((s) => s.id).toList(),
+                'readings': [
+                  {'source': 'blue eyes and soft light', 'zh': '蓝眼睛与柔光'},
+                ],
+              },
+            ],
+          },
+        ],
+      });
+      final after = batch.buildFromGroups(
+        batch.parseGroups(raw),
+        mode: PromptTranslationMode.inline,
+      )['main']!;
+      expect(after.text, source);
+      expect(after.instances, before.instances);
+      final reading = after.readings.single;
+      expect(reading.translation, '蓝眼睛与柔光');
+      expect(reading.source, source.substring(source.indexOf('blue')));
+    });
+  }
+
+  test('normalized repeated anchors stay on their own source occurrence', () {
+    const source = 'blue  eyes, blue eyes';
+    final batch = PromptTranslationBatch.prepare({
+      'main': const PillDocument(text: source, instances: {}),
+    }, mode: PromptTranslationMode.inline);
+    final groups = batch.parseGroups(
+      jsonEncode({
+        'fields': [
+          {
+            'id': 'main',
+            'groups': [
+              {
+                'ids': batch.segments['main']!.map((s) => s.id).toList(),
+                'readings': [
+                  {'source': 'blue eyes', 'zh': '蓝眼'},
+                  {'source': 'blue eyes', 'zh': '蓝眼'},
+                ],
+              },
+            ],
+          },
+        ],
+      }),
+    )['main']!;
+    expect(groups.map((g) => source.substring(g.start, g.end)), [
+      'blue  eyes',
+      'blue eyes',
+    ]);
+  });
+
   for (final anchors in [
     ['blue eyes'], // Omitted meaningful source.
     ['green hair', 'blue eyes'], // Invented source.

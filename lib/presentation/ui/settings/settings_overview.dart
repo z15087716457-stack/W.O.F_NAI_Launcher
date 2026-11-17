@@ -219,10 +219,10 @@ class SettingsOverviewPage extends StatelessWidget {
     final rg = d.rag;
     final ragOn = v.flag(SettingKey.ragEnabled);
     final done = rg.sources
-        .where((x) => x.enabled && x.state == SettingsRagState.ready)
+        .where((x) => x.state == SettingsRagState.ready)
         .toList();
     final pending = rg.sources
-        .where((x) => x.enabled && x.state != SettingsRagState.ready)
+        .where((x) => x.state != SettingsRagState.ready)
         .toList();
     final rag = _Tile(
       page: SettingsPageId.rag,

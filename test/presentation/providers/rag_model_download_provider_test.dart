@@ -10,8 +10,7 @@ import 'package:nai_launcher/presentation/providers/rag_provider.dart';
 
 class MemoryRagSettings extends RagSettingsController {
   @override
-  RagSettings build() =>
-      const RagSettings(embedding: 'old-embedding', reranker: 'old-reranker');
+  RagSettings build() => const RagSettings(embedding: 'old-embedding');
   @override
   Future<void> update(RagSettings next) async {
     state = next;
@@ -73,14 +72,12 @@ void main() {
       final settings = container.read(ragSettingsProvider);
       await container
           .read(ragSettingsProvider.notifier)
-          .update(settings.copyWith(tokenBudget: 256, wikiEnabled: true));
+          .update(settings.copyWith(device: RagDevice.cpu));
       download.result.complete('verified-embedding');
       await future;
       final finalSettings = container.read(ragSettingsProvider);
       expect(finalSettings.embedding, 'verified-embedding');
-      expect(finalSettings.reranker, 'old-reranker');
-      expect(finalSettings.tokenBudget, 256);
-      expect(finalSettings.wikiEnabled, isTrue);
+      expect(finalSettings.device, RagDevice.cpu);
       expect(container.read(ragModelDownloadProvider).active, isFalse);
     },
   );
@@ -90,7 +87,7 @@ void main() {
       final controller = container.read(ragModelDownloadProvider.notifier);
       final future = controller.download('embedding');
       await Future<void>.delayed(Duration.zero);
-      await controller.download('reranker');
+      await controller.download('embedding');
       expect(download.starts, 1);
       controller.cancel();
       await future;

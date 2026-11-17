@@ -1,3 +1,4 @@
+import '../../helpers/empty_tag_expansion.dart';
 import '../../helpers/grouped_canvas_batches.dart';
 import 'dart:async';
 import 'dart:io';
@@ -60,8 +61,7 @@ import '../providers/krita/agent_bridge_draft_test.dart'
     show MemoryCharacters, MemoryDraftSettings, EmptyBlocks, OfflineAuth;
 import 'generation_data_wiring_test.dart'
     show DataGeneration, DataSubscription, DataShortcuts, DataRecents;
-import '../screens/generation/widgets/reference_module_test.dart'
-    show prepareGenerationDropTestPlatform;
+import '../../helpers/generation_drop_platform.dart';
 import '../../helpers/uiux_frontend_capture.dart';
 
 class _CountingTipDeck extends TipDeck {
@@ -156,6 +156,7 @@ void main() {
     storage.values[StorageKeys.canvasReducedMotion] = true;
     container = ProviderContainer(
       overrides: [
+        emptyTagExpansionOverride,
         groupedCanvasBatchesOverride,
         tipDeckProvider.overrideWithValue(deck),
         tipEpochProvider.overrideWith((ref) => Stream.value(0)),

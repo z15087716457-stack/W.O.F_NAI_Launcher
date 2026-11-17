@@ -231,7 +231,7 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('wiki-example-open-11')));
       await _settleImages(tester);
       expect(
-        find.byKey(const ValueKey('wiki-example-large-11')),
+        find.byKey(const ValueKey('wiki-example-large-post:11:0')),
         findsOneWidget,
       );
       expect(cache.fetched.where((u) => u.contains('720x720')), hasLength(1));
@@ -246,10 +246,10 @@ void main() {
       await _settleImages(tester);
       expect(find.text('2 / 3'), findsOneWidget);
       expect(
-        find.byKey(const ValueKey('wiki-example-large-22')),
+        find.byKey(const ValueKey('wiki-example-large-post:22:1')),
         findsOneWidget,
       );
-      await tester.tap(find.byKey(const Key('wiki-viewer-thumb-33')));
+      await tester.tap(find.byKey(const Key('wiki-viewer-thumb-post:33:2')));
       await _settleImages(tester);
       expect(find.text('3 / 3'), findsOneWidget);
       await tester.tap(find.byKey(const Key('wiki-viewer-next')));

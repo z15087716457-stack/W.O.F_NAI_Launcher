@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart' show PointerScrollEvent;
+import 'package:nai_launcher/presentation/widgets/autocomplete/tag_meaning.dart';
 import 'package:nai_launcher/presentation/ui/blocks/blocks_edit.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -334,6 +335,7 @@ Future<void> _pump(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
+        tagMeaningProfileProvider.overrideWith((_, tag) async => null),
         wikiExampleRepositoryProvider.overrideWithValue(
           exampleRepository ??
               WikiExampleRepository(

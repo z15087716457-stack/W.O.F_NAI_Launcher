@@ -24,9 +24,7 @@ class GalleryModels(FakeModels):
         return result
     def rerank(self,query,documents,negative=False,purpose='tags'):
         self.reranked.extend(documents)
-        assert all(isinstance(item,str) for item in documents)
-        assert purpose=='retrieval'
-        return [float('umbrella' in item) for item in documents]
+        raise AssertionError('Retired reranker must not be called')
 
 
 class GalleryTests(unittest.TestCase):
@@ -89,7 +87,7 @@ class GalleryTests(unittest.TestCase):
     def test_parameter_search_indexes_only_nai_and_never_raw_json(self):
         self.build();hits=self.search('parameters')
         self.assertEqual({item['id'] for item in hits},{'1','2'})
-        self.assertTrue(self.models.reranked)
+        self.assertEqual(self.models.reranked,[])
         self.assertFalse(any('private_raw_never_export' in text for text in self.models.reranked))
     def test_scope_is_enforced_before_visual_and_parameter_ranking(self):
         self.build();path=str(self.library/'2.png')

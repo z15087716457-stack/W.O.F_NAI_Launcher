@@ -1096,7 +1096,9 @@ class GalleryDataSource extends EnhancedBaseDataSource
     final buffer = StringBuffer();
 
     void append(String? value) {
-      final text = value?.trim();
+      final text = value == null
+          ? null
+          : TagNormalizer.normalizeGalleryQuery(value);
       if (text == null || text.isEmpty) return;
       if (buffer.isNotEmpty) {
         buffer.write(' ');
@@ -1674,13 +1676,7 @@ class GalleryDataSource extends EnhancedBaseDataSource
   // ============================================================
 
   List<String> _extractSearchTerms(String query) {
-    return query
-        .toLowerCase()
-        .trim()
-        .split(RegExp(r'[,，]+'))
-        .map(TagNormalizer.normalizeGalleryQuery)
-        .where((term) => term.isNotEmpty)
-        .toList(growable: false);
+    return TagNormalizer.parseGalleryQuery(query);
   }
 
   String _escapeLikePattern(String input) {
@@ -1888,38 +1884,9 @@ class GalleryDataSource extends EnhancedBaseDataSource
     }, details: 'query="$query"');
   }
 
-  Future<List<int>> searchByDelimitedTextSegments(
-    List<String> segments, {
-    int limit = 100,
-    List<String>? candidatePaths,
-  }) async {
-    if (!segments.any(
-      (s) => TagNormalizer.normalizeGalleryQuery(s).isNotEmpty,
-    )) {
-      return [];
-    }
-    return (await advancedSearchResult(
-      textQuery: segments.join(','),
-      candidatePaths: candidatePaths,
-      limit: limit,
-    )).ids;
-  }
-
   // ============================================================
   // 标签操作
   // ============================================================
-
-  Future<Set<String>> _knownSearchTags(DatabaseExecutor db) async {
-    const key = _QueryCacheKey('knownSearchTags', {});
-    final cached = _queryCache.get(key);
-    if (cached != null) return cached.cast<String>().toSet();
-    final rows = await db.query(_tagsTable, columns: ['name']);
-    final tags = rows
-        .map((r) => TagNormalizer.normalizeGalleryQuery(r['name'] as String))
-        .toSet();
-    _queryCache.put(key, tags.toList());
-    return tags;
-  }
 
   Future<List<int>> _exactTagImageIds(
     DatabaseExecutor db,
@@ -1972,7 +1939,7 @@ class GalleryDataSource extends EnhancedBaseDataSource
         .toList();
   }
 
-  /// Shared whole-tag semantics for typed known tags and selected tag chips.
+  /// Whole-tag identity for explicit selected tag chips.
   Future<List<int>> searchByExactTags(
     List<String> tags, {
     required List<String> candidatePaths,

@@ -80,10 +80,8 @@ String settingTitle(BuildContext context, SettingKey k) {
     SettingKey.agentSkipPaidConfirmation => l.set_agSkipPaidConfirmation,
     SettingKey.agentCacheWarming => l.set_agCacheWarming,
     SettingKey.ragEnabled => l.set_pageRag,
-    SettingKey.ragContextTokens => l.set_rgRange,
     SettingKey.ragDevice => l.set_rgDevice,
     SettingKey.ragEmbedPath => l.set_rgEmbedPath,
-    SettingKey.ragRerankPath => l.set_rgRerankPath,
     SettingKey.ragPythonPath => l.set_rgPython,
     SettingKey.upscaleDefault => l.set_upDefault,
     SettingKey.seedVramMode => l.set_upVramMode,
@@ -153,10 +151,8 @@ String settingSection(BuildContext context, SettingKey k) {
     SettingKey.agentSkipPaidConfirmation ||
     SettingKey.agentCacheWarming => l.set_agModelSec,
     SettingKey.ragEnabled => l.set_pageRag,
-    SettingKey.ragContextTokens => l.set_rgContext,
     SettingKey.ragDevice ||
     SettingKey.ragEmbedPath ||
-    SettingKey.ragRerankPath ||
     SettingKey.ragPythonPath => l.set_rgRuntime,
     SettingKey.upscaleDefault => l.set_upDefault,
     SettingKey.seedVramMode ||
@@ -196,7 +192,6 @@ String settingValue(BuildContext context, SettingKey k, SettingsValues v) {
         SettingKey.uiScale => '${(n * 100).round()}%',
         SettingKey.costThreshold => '${n.round()} Anlas',
         SettingKey.thumbnailCacheLimitGb => '${n.round()} GB',
-        SettingKey.ragContextTokens => '${n.round()} tokens',
         SettingKey.intervalSeconds => '${n.round()} ${l.set_unitSeconds}',
         SettingKey.intervalJitter => '±${n.round()}%',
         SettingKey.seedInputNoise ||
@@ -230,9 +225,7 @@ const _synonyms = <SettingKey, String>{
   SettingKey.preciseRefPath: 'PR precise reference library folder path 精准参考库',
   SettingKey.stripMetadata: 'metadata exif privacy',
   SettingKey.ragEmbedPath: 'rag gemma embedding model download 下载',
-  SettingKey.ragRerankPath: 'rag qwen reranker model download 下载',
   SettingKey.ragPythonPath: 'rag python exe interpreter runtime cuda 运行环境',
-  SettingKey.ragContextTokens: 'rag gemma tokens context length 上下文 长度',
 };
 
 List<SettingsHit> settingsIndex(BuildContext context) {
@@ -253,7 +246,6 @@ List<SettingsHit> settingsIndex(BuildContext context) {
       SettingKind.number =>
         k == SettingKey.uiScale ||
                 k == SettingKey.intervalJitter ||
-                k == SettingKey.ragContextTokens ||
                 k.name.startsWith('seed')
             ? SetSlider(
                 k,
@@ -261,7 +253,6 @@ List<SettingsHit> settingsIndex(BuildContext context) {
                 label: (x) => switch (k) {
                   SettingKey.uiScale => '${(x * 100).round()}%',
                   SettingKey.intervalJitter => '±${x.round()}%',
-                  SettingKey.ragContextTokens => '${x.round()} tokens',
                   SettingKey.seedCpuOffload => '${x.round()}',
                   _ => x.toStringAsFixed(2),
                 },
@@ -368,10 +359,6 @@ List<SettingsHit> settingsIndex(BuildContext context) {
         },
         keywords: 'rag ${x.kind.name}',
         anchor: 'rag-${x.kind.name}',
-        control: SettingsSwitch(
-          value: x.enabled,
-          onChanged: (v) => s.actions.onRagSourceEnabled(x.kind, v),
-        ),
       ),
     );
   }

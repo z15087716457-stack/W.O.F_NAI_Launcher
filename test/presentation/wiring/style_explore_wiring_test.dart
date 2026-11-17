@@ -1,3 +1,4 @@
+import '../../helpers/empty_tag_expansion.dart';
 import 'dart:async';
 import 'dart:io';
 import 'dart:ui' as ui;
@@ -57,8 +58,7 @@ import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layou
 import 'package:nai_launcher/presentation/wiring/generation_wiring.dart';
 import 'package:nai_launcher/presentation/wiring/nai_agent_generation_host.dart';
 import '../../helpers/studio_capture_fonts.dart';
-import '../screens/generation/widgets/reference_module_test.dart'
-    show prepareGenerationDropTestPlatform;
+import '../../helpers/generation_drop_platform.dart';
 import 'generation_data_wiring_test.dart' show DataShortcuts;
 import 'generation_reference_imports_test.dart' show ImportStorage;
 
@@ -375,6 +375,7 @@ void main() {
       UncontrolledProviderScope(
         container: mountedContainer = ProviderContainer(
           overrides: [
+            emptyTagExpansionOverride,
             localStorageServiceProvider.overrideWithValue(settings),
             pillWorkspaceStorageProvider.overrideWithValue(pills),
             styleExploreRunStorageProvider.overrideWithValue(storage),

@@ -9,7 +9,7 @@ class RagSearchBadge extends ConsumerWidget {
   final RagSource source;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (!ref.watch(ragSettingsProvider).enabledFor(source)) {
+    if (!ref.watch(ragSettingsProvider).enabled) {
       return const SizedBox.shrink();
     }
     final status = ref.watch(ragControllerProvider).forSource(source);

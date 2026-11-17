@@ -306,8 +306,7 @@ SettingsViewData settingsViewData(
       warningsToday: metrics?.warnings ?? 0,
       maxSingleToday: metrics?.maxDeduction ?? 0,
       translationModel: translation.isConfigured ? translation.model : null,
-      ragTagsReady:
-          ragSettings.enabledFor(RagSource.tags) && ragStatus.available,
+      ragTagsReady: ragSettings.enabled && ragStatus.available,
     ),
     storage: SettingsStorageData(
       slices: measured?.slices ?? const [],

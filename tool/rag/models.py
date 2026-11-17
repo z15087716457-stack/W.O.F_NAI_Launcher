@@ -32,13 +32,12 @@ def model_fingerprint(folder):
 
 
 class Models:
-    def __init__(self, embedding, reranker, device='auto'):
+    def __init__(self, embedding, device='auto'):
         if device not in ('auto', 'cpu', 'cuda'):
             raise ValueError('invalid_device')
         self.embedding_path = str(Path(embedding).resolve(strict=True))
-        self.reranker_path = str(Path(reranker).resolve(strict=True))
         self.requested_device = device
-        self.encoder = self.scorer = self.tokenizer = None
+        self.encoder = self.tokenizer = None
         self.vision = False
         self.fingerprint = model_fingerprint(embedding)
 
@@ -71,7 +70,7 @@ class Models:
     def embed(self, texts, *, query=False):
         import numpy as np
         self._encoder()
-        vectors = self.encoder.encode(texts, prompt_name='SearchQuery' if query else 'Document',
+        vectors = self.encoder.encode([{'text': text} for text in texts], prompt_name='SearchQuery' if query else 'Document',
             normalize_embeddings=True, convert_to_numpy=True, show_progress_bar=False,
             batch_size=8)
         return self._vectors(vectors)
@@ -112,29 +111,8 @@ class Models:
         if (norms<1e-8).any(): raise RuntimeError('invalid_embeddings')
         return result/norms
 
-    def rerank(self, query, documents, negative=False, purpose='tags'):
-        if not documents:
-            return []
-        import numpy as np
-        if self.scorer is None:
-            from sentence_transformers import CrossEncoder
-            self.scorer = CrossEncoder(self.reranker_path, device=self._device(),
-                local_files_only=True, trust_remote_code=False, max_length=1024,
-                model_kwargs={'torch_dtype': self._dtype()},
-                prompts={'positive': 'Retrieve real image tags that complement the existing visual prompt; prefer useful additional concepts over repeated synonyms.',
-                         'negative': 'Retrieve real image tags that can complement the existing exclusion tags in a negative prompt.',
-                         'retrieval': 'Retrieve text passages relevant to the search query or useful for answering it.',
-                         'tag_search': "Retrieve actual image tags that directly describe the query's subject, action, attributes, or setting. Judge the tag's own meaning, not incidental words in its wiki. Respect its category: an artist, character, or work name is relevant only when the query asks for that entity. A tag may express one part of a compound description."},
-                default_prompt_name='positive')
-        scores = np.asarray(self.scorer.predict([(query, d) for d in documents],
-            prompt_name=purpose if purpose in ('retrieval','tag_search') else ('negative' if negative else 'positive'),
-            batch_size=8, show_progress_bar=False), dtype=float).reshape(-1)
-        if len(scores) != len(documents) or not np.isfinite(scores).all():
-            raise RuntimeError('invalid_rerank_scores')
-        return scores.tolist()
-
     def unload(self):
-        self.encoder = self.scorer = None
+        self.encoder = self.tokenizer = None
         self.vision = False
         gc.collect()
         self._empty_cache()
@@ -142,6 +120,6 @@ class Models:
     def status(self):
         import torch
         return {'device': self._device(), 'cuda_available': torch.cuda.is_available(),
-                'loaded': self.encoder is not None or self.scorer is not None,
+                'loaded': self.encoder is not None,
                 'audio_enabled': False, 'dimension': 768,
                 'image_capable': True, 'active_modalities': ['text', 'image'] if self.vision else ['text']}

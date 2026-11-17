@@ -594,7 +594,7 @@ class _TagWikiScreenState extends ConsumerState<_TagWikiContents> {
     List<CompletionCandidate> ordinary,
   ) async {
     try {
-      if (!ref.read(ragSettingsProvider).enabledFor(RagSource.wiki)) return;
+      if (!ref.read(ragSettingsProvider).enabled) return;
       final cancellation = _ragCancellation = RagCancellation();
       final category = _category;
       final hits = await ref
@@ -1001,8 +1001,7 @@ class _TagWikiScreenState extends ConsumerState<_TagWikiContents> {
       });
     });
     ref.listen(ragSettingsProvider, (previous, next) {
-      if (previous?.enabledFor(RagSource.wiki) !=
-              next.enabledFor(RagSource.wiki) ||
+      if (previous?.enabled != next.enabled ||
           previous?.connectionKey != next.connectionKey) {
         _ragCancellation?.cancel();
         if (_search.text.trim().isNotEmpty) {
@@ -1198,7 +1197,7 @@ class _TagWikiScreenState extends ConsumerState<_TagWikiContents> {
           prefixIcon: const Icon(Icons.search, size: 17),
           hintText: context.l10n.wiki_searchHint,
           hintStyle: const TextStyle(fontSize: 12.5),
-          suffixIcon: ref.watch(ragSettingsProvider).enabledFor(RagSource.wiki)
+          suffixIcon: ref.watch(ragSettingsProvider).enabled
               ? Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [

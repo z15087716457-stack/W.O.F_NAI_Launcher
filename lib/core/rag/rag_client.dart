@@ -104,9 +104,12 @@ class RagClient {
     for (final name in [
       'worker.py',
       'engine.py',
+      'tag_search.py',
+      'tag_corpus.py',
+      'tag_query.py',
+      'danbooru_tags.csv',
       'pool.py',
       'models.py',
-      'context.py',
       'documents.py',
       'gallery.py',
     ]) {
@@ -161,6 +164,8 @@ class RagClient {
             _ready.complete();
           }
         }
+      } else if (message['event'] == 'fatal') {
+        _lost('executor_failed');
       } else if (message.containsKey('event')) {
         if (message['event'] == 'initialization') {
           _progress[message['request_id']]?.call(message);

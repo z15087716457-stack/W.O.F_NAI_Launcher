@@ -6,8 +6,9 @@ import { createMcpExtension } from '@earendil-works/pi-coding-agent';
 import { createInMemoryTransportPair } from '@earendil-works/pi-mcp/testing';
 import { redactor } from './model.mjs';
 
-// These adapter helpers are not re-exported at the SDK root (checked through 1.5.0).
-// Keep this version-specific surface here; never copy Pi's connector or OAuth.
+// Pi's validator also owns exposure aliases and its OAuth callback rules;
+// the public pi-mcp validator only checks the shared transport fields.
+// Keep SDK internals together; Pi owns the connector and OAuth lifecycle.
 const sdkRoot = new URL('.', import.meta.resolve('@earendil-works/pi-coding-agent'));
 const { validateMcpServerConfig } = await import(new URL('core/mcp-servers.js', sdkRoot));
 const { createDefaultTransport, McpOAuthCredentialStore, McpServerConnection, signInMcpServer } =

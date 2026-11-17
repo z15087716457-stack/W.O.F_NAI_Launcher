@@ -1,3 +1,4 @@
+import '../../helpers/empty_tag_expansion.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -42,6 +43,7 @@ void main() {
     await Hive.openBox(StorageKeys.settingsBox);
     container = ProviderContainer(
       overrides: [
+        emptyTagExpansionOverride,
         localStorageServiceProvider.overrideWithValue(MemoryDraftSettings()),
         characterPromptRepositoryProvider.overrideWithValue(MemoryCharacters()),
         promptBlockLibraryNotifierProvider.overrideWith(EmptyBlocks.new),

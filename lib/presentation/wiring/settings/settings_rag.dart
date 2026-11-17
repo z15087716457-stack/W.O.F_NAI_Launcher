@@ -14,21 +14,17 @@ import '../../ui/settings/settings_contract.dart';
 RagSource settingsRagSource(SettingsRagSourceKind kind) =>
     RagSource.values.byName(kind.name);
 
-final settingsRagWeightsProvider =
-    FutureProvider<({bool embedding, bool reranker})>((ref) async {
-      final settings = ref.watch(ragSettingsProvider);
-      Future<bool> exists(String directory) async =>
-          directory.isNotEmpty &&
-          await File(p.join(directory, 'config.json')).exists() &&
-          (await File(p.join(directory, 'model.safetensors')).exists() ||
-              await File(
-                p.join(directory, 'model.safetensors.index.json'),
-              ).exists());
-      return (
-        embedding: await exists(settings.embedding),
-        reranker: await exists(settings.reranker),
-      );
-    });
+final settingsRagWeightsProvider = FutureProvider<bool>((ref) async {
+  final settings = ref.watch(ragSettingsProvider);
+  Future<bool> exists(String directory) async =>
+      directory.isNotEmpty &&
+      await File(p.join(directory, 'config.json')).exists() &&
+      (await File(p.join(directory, 'model.safetensors')).exists() ||
+          await File(
+            p.join(directory, 'model.safetensors.index.json'),
+          ).exists());
+  return exists(settings.embedding);
+});
 
 SettingsRagData settingsRagData(
   RagSettings settings,
@@ -36,14 +32,12 @@ SettingsRagData settingsRagData(
   AsyncValue<RagRuntimeInfo> runtime,
   RagModelDownloadState download,
   SettingsRagSessionState session,
-  ({bool embedding, bool reranker})? weights, {
+  bool? weights, {
   int indexBytes = 0,
   SettingsRagSourceKind? preparing,
 }) {
   final environment = runtime.valueOrNull;
-  final ready =
-      environment?.ready == true ||
-      (runtime.isLoading && environment == null && status.runtimeReady);
+  final ready = !runtime.isLoading && environment?.ready == true;
   final python = environment?.python ?? settings.python;
   SettingsRagStep model(String name, String path, bool? available) =>
       SettingsRagStep(
@@ -55,12 +49,6 @@ SettingsRagData settingsRagData(
             ? SettingsTone.ok
             : SettingsTone.warn,
       );
-  bool sourceSelected(RagSource source) => switch (source) {
-    RagSource.tags => settings.tagsEnabled,
-    RagSource.wiki => settings.wikiEnabled,
-    RagSource.blocks => settings.blocksEnabled,
-    RagSource.gallery => settings.galleryEnabled,
-  };
   return SettingsRagData(
     indexBusy: status.anyBusy,
     initializing:
@@ -68,7 +56,6 @@ SettingsRagData settingsRagData(
         (status.initializing ||
             RagSource.values.any(
               (source) =>
-                  settings.enabledFor(source) &&
                   !status.forSource(source).hasIndexStatus &&
                   status.forSource(source).error == null,
             )),
@@ -79,12 +66,7 @@ SettingsRagData settingsRagData(
       value: python,
       tone: ready ? SettingsTone.ok : SettingsTone.idle,
     ),
-    embedder: model('EmbeddingGemma 2', settings.embedding, weights?.embedding),
-    reranker: model(
-      'Qwen3-Reranker-0.6B',
-      settings.reranker,
-      weights?.reranker,
-    ),
+    embedder: model('EmbeddingGemma 2', settings.embedding, weights),
     device: SettingsRagStep(
       value: settings.device.name,
       tone: status.suspended ? SettingsTone.warn : SettingsTone.idle,
@@ -97,8 +79,7 @@ SettingsRagData settingsRagData(
           final gallery = source == RagSource.gallery;
           return SettingsRagSource(
             kind: kind,
-            enabled: sourceSelected(source),
-            state: !settings.enabledFor(source)
+            state: !settings.enabled
                 ? SettingsRagState.off
                 : status.initializing ||
                       (!item.hasIndexStatus && item.error == null)
@@ -124,6 +105,10 @@ SettingsRagData settingsRagData(
             secondary: gallery ? item.details['parameters_indexed'] ?? 0 : null,
             skipped: item.details['skipped'] ?? 0,
             error: item.error,
+            upgradeAvailable: item.upgradeAvailable,
+            upgradeFailed: item.upgradeFailed,
+            upgradeCleaning: item.upgradeCleaning,
+            cleanupOnly: item.cleanupOnly,
           );
         }(),
     ],
@@ -133,6 +118,12 @@ SettingsRagData settingsRagData(
     runtimeReady: ready,
     runtimeCuda: environment?.cuda == true,
     runtimePython: python,
+    runtimeIssue: runtime.hasError
+        ? SettingsRagRuntimeIssue.importFailed
+        : environment?.issue == null
+        ? null
+        : SettingsRagRuntimeIssue.values.byName(environment!.issue!.name),
+    runtimePackages: environment?.packages ?? const [],
     pythonPending:
         settings.python.isNotEmpty &&
         environment != null &&
@@ -154,9 +145,7 @@ SettingsRagData settingsRagData(
     download: !download.active
         ? null
         : SettingsRagDownload(
-            model: download.kind == 'embedding'
-                ? SettingsRagModel.embedder
-                : SettingsRagModel.reranker,
+            model: SettingsRagModel.embedder,
             received: download.progress?.received ?? 0,
             total: download.progress?.total ?? 0,
             verifying: download.progress?.checking ?? false,
@@ -239,10 +228,15 @@ class SettingsRagSession extends Notifier<SettingsRagSessionState> {
           rebuild: rebuild,
           total: kind == SettingsRagSourceKind.gallery
               ? count('parameter_chunks')
+              : kind == SettingsRagSourceKind.tags
+              ? count('tags')
               : count('total'),
           documents: count('documents'),
           images: count('images'),
           roots: roots,
+          upgrade: plan['upgrade_available'] == true,
+          cleanupOnly: !rebuild && plan['cleanup_only'] == true,
+          legacyBytes: count('legacy_bytes'),
         ),
       );
     } catch (_) {
@@ -270,18 +264,6 @@ class SettingsRagSession extends Notifier<SettingsRagSessionState> {
         );
   }
 
-  Future<void> sourceEnabled(SettingsRagSourceKind kind, bool enabled) async {
-    final current = ref.read(ragSettingsProvider);
-    await ref.read(ragSettingsProvider.notifier).update(switch (kind) {
-      SettingsRagSourceKind.tags => current.copyWith(tagsEnabled: enabled),
-      SettingsRagSourceKind.wiki => current.copyWith(wikiEnabled: enabled),
-      SettingsRagSourceKind.blocks => current.copyWith(blocksEnabled: enabled),
-      SettingsRagSourceKind.gallery => current.copyWith(
-        galleryEnabled: enabled,
-      ),
-    });
-  }
-
   Future<void> discover() async {
     final before = ref.read(ragSettingsProvider);
     for (final start in [
@@ -292,9 +274,7 @@ class SettingsRagSession extends Notifier<SettingsRagSessionState> {
       for (var depth = 0; depth < 9; depth++) {
         final base = p.join(cursor, '04_工具', 'models');
         final embedding = p.join(base, 'embeddinggemma-2');
-        final reranker = p.join(base, 'Qwen3-Reranker-0.6B');
-        if (await File(p.join(embedding, 'model.safetensors')).exists() &&
-            await File(p.join(reranker, 'model.safetensors')).exists()) {
+        if (await File(p.join(embedding, 'model.safetensors')).exists()) {
           if (_disposed) return;
           final latest = ref.read(ragSettingsProvider);
           // Directory discovery cannot overwrite a selection made while waiting.
@@ -305,9 +285,6 @@ class SettingsRagSession extends Notifier<SettingsRagSessionState> {
                   embedding: latest.embedding == before.embedding
                       ? embedding
                       : latest.embedding,
-                  reranker: latest.reranker == before.reranker
-                      ? reranker
-                      : latest.reranker,
                 ),
               );
           if (!_disposed) state = const SettingsRagSessionState();

@@ -1,7 +1,7 @@
 """One persistent vector pool for every source encoded by the same model.
 
 Collection views enforce source boundaries inside a shared SQLite database.
-There is one derived ANN, never a second index per language or source.
+One derived ANN serves approximate sources; exact tags use persisted rows.
 """
 import json
 import os
@@ -11,6 +11,9 @@ import sqlite3
 import time
 from types import SimpleNamespace
 
+EXACT_TAG_COLLECTION = 'danbooru-search-v1'
+ANN_SCOPE = 'non-tag-v1'
+
 
 class VectorPool:
     def __init__(self, directory, fingerprint, *, progress=None, cancelled=lambda: False):
@@ -19,7 +22,7 @@ class VectorPool:
         self.path = self.folder / 'pool.sqlite'
         self.db = sqlite3.connect(self.path)
         self.db.execute('PRAGMA journal_mode=WAL')
-        self.db.executescript('''
+        self.db.executescript(f'''
             CREATE TABLE IF NOT EXISTS pool_documents(
                 id INTEGER PRIMARY KEY, collection TEXT NOT NULL, name TEXT NOT NULL,
                 category INTEGER, post_count INTEGER, aliases TEXT, text TEXT,
@@ -32,20 +35,28 @@ class VectorPool:
             CREATE TABLE IF NOT EXISTS pool_sizes(collection TEXT PRIMARY KEY,bytes INTEGER NOT NULL);
             CREATE TABLE IF NOT EXISTS pool_changes(
                 generation INTEGER PRIMARY KEY,old_id INTEGER,new_id INTEGER);
+            CREATE TEMP VIEW ann_documents AS SELECT id,vector FROM pool_documents
+                WHERE collection!='{EXACT_TAG_COLLECTION}';
             INSERT OR IGNORE INTO pool_state VALUES('generation',0);
             BEGIN IMMEDIATE;
             DROP TRIGGER IF EXISTS pool_insert;
             DROP TRIGGER IF EXISTS pool_update;
             DROP TRIGGER IF EXISTS pool_delete;
-            CREATE TRIGGER pool_insert AFTER INSERT ON pool_documents BEGIN
+            CREATE TRIGGER pool_insert AFTER INSERT ON pool_documents
+                WHEN NEW.collection!='{EXACT_TAG_COLLECTION}' BEGIN
                 UPDATE pool_state SET value=value+1 WHERE key='generation';
                 INSERT INTO pool_changes SELECT value,NULL,NEW.id FROM pool_state WHERE key='generation'; END;
             CREATE TRIGGER pool_update AFTER UPDATE ON pool_documents
-                WHEN OLD.id IS NOT NEW.id OR OLD.vector IS NOT NEW.vector
-                     OR OLD.collection IS NOT NEW.collection BEGIN
+                WHEN (OLD.collection!='{EXACT_TAG_COLLECTION}' OR NEW.collection!='{EXACT_TAG_COLLECTION}')
+                     AND (OLD.id IS NOT NEW.id OR OLD.vector IS NOT NEW.vector
+                          OR OLD.collection IS NOT NEW.collection) BEGIN
                 UPDATE pool_state SET value=value+1 WHERE key='generation';
-                INSERT INTO pool_changes SELECT value,OLD.id,NEW.id FROM pool_state WHERE key='generation'; END;
-            CREATE TRIGGER pool_delete AFTER DELETE ON pool_documents BEGIN
+                INSERT INTO pool_changes SELECT value,
+                    CASE WHEN OLD.collection!='{EXACT_TAG_COLLECTION}' THEN OLD.id END,
+                    CASE WHEN NEW.collection!='{EXACT_TAG_COLLECTION}' THEN NEW.id END
+                    FROM pool_state WHERE key='generation'; END;
+            CREATE TRIGGER pool_delete AFTER DELETE ON pool_documents
+                WHEN OLD.collection!='{EXACT_TAG_COLLECTION}' BEGIN
                 UPDATE pool_state SET value=value+1 WHERE key='generation';
                 INSERT INTO pool_changes SELECT value,OLD.id,NULL FROM pool_state WHERE key='generation'; END;
             CREATE TRIGGER IF NOT EXISTS pool_size_insert AFTER INSERT ON pool_documents BEGIN
@@ -119,13 +130,14 @@ class VectorPool:
         check()
         ann = Index(ndim=768, metric='cos', dtype='f32')
         generation = self.db.execute("SELECT value FROM pool_state WHERE key='generation'").fetchone()[0]
-        total = self.db.execute('SELECT COUNT(*) FROM pool_documents').fetchone()[0]
+        total = self.db.execute('SELECT COUNT(*) FROM ann_documents').fetchone()[0]
         if progress: progress('loading', 0, total)
         rebuilt = False; mapped = False
         try:
             try:
                 saved = json.loads((self.folder / 'ann.json').read_text('utf-8'))
-                if not isinstance(saved, dict) or type(saved.get('generation')) is not int:
+                if (not isinstance(saved, dict) or type(saved.get('generation')) is not int
+                        or saved.get('scope') != ANN_SCOPE):
                     raise ValueError('invalid_ann')
                 if saved['generation'] == generation:
                     try:
@@ -153,7 +165,7 @@ class VectorPool:
                 ann = Index(ndim=768, metric='cos', dtype='f32')
                 if progress: progress('restoring', 0, total)
                 processed = 0; last_report = time.monotonic()
-                cursor=self.db.execute('SELECT id,vector FROM pool_documents')
+                cursor=self.db.execute('SELECT id,vector FROM ann_documents')
                 while batch:=cursor.fetchmany(256):
                     check()
                     ann.add(np.array([r[0] for r in batch],dtype=np.uint64),
@@ -196,7 +208,7 @@ class VectorPool:
                 if key in ann:
                     ann.remove(key)
             rows = self.db.execute(
-                'SELECT id,vector FROM pool_documents WHERE id IN (' +
+                'SELECT id,vector FROM ann_documents WHERE id IN (' +
                 ','.join('?' for _ in batch) + ')', batch).fetchall()
             if rows:
                 ann.add(np.array([r[0] for r in rows], dtype=np.uint64),
@@ -235,7 +247,8 @@ class VectorPool:
             self.ann.save(str(temporary))
             if cancelled(): raise ValueError('cancelled')
             os.replace(temporary, self.folder/'vectors.usearch')
-            metadata.write_text(json.dumps({'generation': generation, 'count': count, 'journal': 1}), 'utf-8')
+            metadata.write_text(json.dumps({'generation': generation, 'count': count,
+                                            'journal': 1, 'scope': ANN_SCOPE}), 'utf-8')
             os.replace(metadata, self.folder/'ann.json')
         finally:
             for path in (temporary, metadata):
@@ -261,6 +274,18 @@ class VectorPool:
                     FROM pool_documents WHERE collection=?''',(name,name))
             row = self.db.execute('SELECT bytes FROM pool_sizes WHERE collection=?',(name,)).fetchone()
         return row[0]
+
+    def retire_collections(self, names):
+        """Retire only named collections; SQLite remains the recovery authority."""
+        placeholders = ','.join('?' for _ in names)
+        with self.db:
+            for table in ('pool_documents', 'pool_metadata', 'pool_sizes'):
+                self.db.execute(f'DELETE FROM {table} WHERE collection IN ({placeholders})', names)
+            # Keep migration tombstones so an old per-source file cannot be
+            # imported again if deletion is interrupted or the app restarts.
+            self.db.executemany('INSERT OR IGNORE INTO pool_migrations VALUES(?)', [(name,) for name in names])
+        self.reload()
+        self.checkpoint()
 
     def collection(self, name, legacy):
         if not re.fullmatch(r'[a-z0-9:_-]{1,120}',name): raise ValueError('invalid_source')
@@ -309,10 +334,11 @@ class VectorPool:
                     for key,value in old.execute('SELECT key,value FROM metadata'):
                         self.db.execute('INSERT OR IGNORE INTO pool_metadata VALUES(?,?,?)',(name,key,value))
             finally: old.close()
-            cursor=self.db.execute('SELECT id,vector FROM pool_documents WHERE collection=?',(name,))
-            while batch:=cursor.fetchmany(256):
-                batch=[r for r in batch if r[0] not in self.ann]
-                if batch:self.writable().add(np.array([r[0] for r in batch],dtype=np.uint64),np.stack([np.frombuffer(r[1],dtype=np.float32) for r in batch]))
+            if name != EXACT_TAG_COLLECTION:
+                cursor=self.db.execute('SELECT id,vector FROM pool_documents WHERE collection=?',(name,))
+                while batch:=cursor.fetchmany(256):
+                    batch=[r for r in batch if r[0] not in self.ann]
+                    if batch:self.writable().add(np.array([r[0] for r in batch],dtype=np.uint64),np.stack([np.frombuffer(r[1],dtype=np.float32) for r in batch]))
             self.checkpoint()
         with self.db:
             self.db.execute("INSERT OR REPLACE INTO pool_metadata VALUES(?,'pool_migrated','1')",(name,))
@@ -330,9 +356,10 @@ class VectorPool:
 
 
 class CollectionAnn:
-    """A source-filtered view of one ANN; small scopes use exact pool rows."""
+    """Collection vector keys; approximate sources share one derived ANN."""
     def __init__(self,pool,name):
         self.pool=pool;self.name=name;self.keys=set()
+        self.uses_ann = name != EXACT_TAG_COLLECTION
         self._categories = {}; self._category_version = None
     def refresh(self):
         self.keys={r[0] for r in self.pool.db.execute('SELECT id FROM pool_documents WHERE collection=?',(self.name,))}
@@ -340,9 +367,11 @@ class CollectionAnn:
     def __len__(self): return len(self.keys)
     def __contains__(self,key): return key in self.keys
     def add(self,key,vector):
-        self.pool.writable().add(key,vector);self.keys.add(key);self._categories.clear()
+        if self.uses_ann: self.pool.writable().add(key,vector)
+        self.keys.add(key);self._categories.clear()
     def remove(self,key):
-        self.pool.writable().remove(key);self.keys.discard(key);self._categories.clear()
+        if self.uses_ann: self.pool.writable().remove(key)
+        self.keys.discard(key);self._categories.clear()
     def search(self,vector,count,*,categories=None,min_count=None):
         import numpy as np
         eligible = self.keys
@@ -360,7 +389,7 @@ class CollectionAnn:
         count=min(count,len(eligible))
         if not count:return SimpleNamespace(keys=[],distances=[])
         minimum=count if min_count is None else min(count,min_count)
-        if len(eligible)>16384:
+        if self.uses_ann and len(eligible)>16384:
             overfetch=min(len(self.pool.ann),max(count,int(count*len(self.pool.ann)/len(eligible)*2)))
             # Category membership is correlated with the query, not uniform.
             # Enlarge the global recall before paying for an exact scope scan.

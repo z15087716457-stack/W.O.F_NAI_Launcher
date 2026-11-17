@@ -126,6 +126,28 @@ class PromptReadingUnit {
     ].join().trim().replaceFirst(RegExp(r'[,，]+\s*$'), '');
   }
 
+  /// Match model echoes without requiring whitespace or weighting syntax to
+  /// be copied verbatim. Offsets always point into the unchanged source.
+  static ({String text, List<int> offsets}) alignmentText(
+    String source, {
+    required bool structuralMarkup,
+  }) {
+    final removed = <int>{};
+    _scan(source, 0, removed, <int>{}, <int>{}, structuralMarkup);
+    final text = StringBuffer();
+    final offsets = <int>[];
+    var space = false;
+    for (var i = 0; i < source.length; i++) {
+      if (removed.contains(i)) continue;
+      final whitespace = source[i].trim().isEmpty;
+      if (whitespace && space) continue;
+      text.write(whitespace ? ' ' : source[i]);
+      offsets.add(i);
+      space = whitespace;
+    }
+    return (text: text.toString(), offsets: offsets);
+  }
+
   static void _scan(
     String source,
     int offset,

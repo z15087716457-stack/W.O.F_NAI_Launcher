@@ -36,6 +36,9 @@ class PromptTranslationSegment {
   final int end;
   final String source;
   final String? reading;
+
+  String? get tagCandidate =>
+      PromptTranslationBatch._candidateTag(reading ?? source);
 }
 
 class PromptTranslationBatch {
@@ -388,6 +391,10 @@ class PromptTranslationBatch {
     final result = <PromptTranslationGroup>[];
     final original = source.substring(start, end);
     final structuralMarkup = NaiPromptSyntax.isXml(source);
+    late final projection = PromptReadingUnit.alignmentText(
+      original,
+      structuralMarkup: structuralMarkup,
+    );
     var cursor = 0;
     for (final item in raw) {
       if (item is! Map || item['source'] is! String || item['zh'] is! String) {
@@ -395,8 +402,28 @@ class PromptTranslationBatch {
       }
       final anchor = item['source'] as String;
       final zh = PromptReadingUnit.clean(item['zh'] as String);
-      final index = original.indexOf(anchor, cursor);
-      final anchorEnd = index + anchor.length;
+      var index = original.indexOf(anchor, cursor);
+      var anchorEnd = index + anchor.length;
+      if (index < 0 ||
+          !PromptReadingUnit.isSyntaxOnly(
+            original.substring(cursor, index),
+            structuralMarkup: structuralMarkup,
+          )) {
+        final normalized = PromptReadingUnit.alignmentText(
+          anchor,
+          structuralMarkup: structuralMarkup,
+        ).text.trim();
+        final from = projection.offsets.indexWhere(
+          (offset) => offset >= cursor,
+        );
+        final match = normalized.isEmpty || from < 0
+            ? -1
+            : projection.text.indexOf(normalized, from);
+        if (match >= 0) {
+          index = projection.offsets[match];
+          anchorEnd = projection.offsets[match + normalized.length - 1] + 1;
+        }
+      }
       if (anchor.isEmpty ||
           zh.isEmpty ||
           zh.length > 20000 ||
@@ -408,7 +435,7 @@ class PromptTranslationBatch {
           !PillDocumentEditor.isUtf16Boundary(original, index) ||
           !PillDocumentEditor.isUtf16Boundary(original, anchorEnd) ||
           !PromptReadingUnit.isSingleSection(
-            anchor,
+            original.substring(index, anchorEnd),
             structuralMarkup: structuralMarkup,
           )) {
         throw const FormatException('Inline source readings do not align');

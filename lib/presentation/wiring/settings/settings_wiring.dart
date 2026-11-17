@@ -416,8 +416,6 @@ class _SettingsWiringState extends ConsumerState<SettingsWiring> {
         }
         if (mounted) context.go('/generation');
       }),
-      onRagSourceEnabled: (kind, value) =>
-          _run(() => plans.sourceEnabled(kind, value)),
       onRagPause: (kind) =>
           _run(() => rag.pause(source: settingsRagSource(kind))),
       onRagResume: (kind) => _run(
@@ -466,11 +464,7 @@ class _SettingsWiringState extends ConsumerState<SettingsWiring> {
         await rag.installRuntime(cuda: environment.cuda);
       }),
       onRagDownload: (model) => _run(
-        () => ref
-            .read(ragModelDownloadProvider.notifier)
-            .download(
-              model == SettingsRagModel.embedder ? 'embedding' : 'reranker',
-            ),
+        () => ref.read(ragModelDownloadProvider.notifier).download('embedding'),
       ),
       onRagCancelDownload: () =>
           ref.read(ragModelDownloadProvider.notifier).cancel(),

@@ -144,13 +144,11 @@ final settingsValuesProvider = Provider<SettingsValues>((ref) {
     SettingKey.agentEnterToSend: agent.enterToSend,
     SettingKey.agentMaxRequests: agent.maxRequestsPerRun.toDouble(),
     SettingKey.ragEnabled: rag.enabled,
-    SettingKey.ragContextTokens: rag.tokenBudget.toDouble(),
     SettingKey.ragDevice:
         RagPlatform.host.isMacOS && rag.device == RagDevice.cuda
         ? RagDevice.auto.name
         : rag.device.name,
     SettingKey.ragEmbedPath: path(rag.embedding),
-    SettingKey.ragRerankPath: path(rag.reranker),
     SettingKey.ragPythonPath: path(rag.python),
     SettingKey.upscaleDefault: upscale.backend == UpscaleBackend.local
         ? 'local:${upscale.localModel}'
@@ -381,22 +379,16 @@ class SettingsValueStore {
           'maxRequestsPerRun': n.toInt(),
         });
       case SettingKey.ragEnabled:
-      case SettingKey.ragContextTokens:
       case SettingKey.ragDevice:
       case SettingKey.ragEmbedPath:
-      case SettingKey.ragRerankPath:
       case SettingKey.ragPythonPath:
         final current = ref.read(ragSettingsProvider);
         await ref.read(ragSettingsProvider.notifier).update(switch (key) {
           SettingKey.ragEnabled => current.copyWith(enabled: b),
-          SettingKey.ragContextTokens => current.copyWith(
-            tokenBudget: n.round(),
-          ),
           SettingKey.ragDevice => current.copyWith(
             device: RagDevice.values.byName(text!),
           ),
           SettingKey.ragEmbedPath => current.copyWith(embedding: text ?? ''),
-          SettingKey.ragRerankPath => current.copyWith(reranker: text ?? ''),
           _ => current.copyWith(python: text ?? ''),
         });
       case SettingKey.upscaleDefault:

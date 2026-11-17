@@ -17,6 +17,7 @@ import '../../ui/kit/ui_glyph.dart';
 import '../../ui/kit/ui_popover.dart';
 import '../../ui/kit/ui_text.dart';
 import '../autocomplete/tag_category_visuals.dart';
+import '../autocomplete/tag_meaning.dart';
 
 /// B06 输入补全候选层：跟在当前词下方，不抢焦点。
 ///
@@ -45,6 +46,7 @@ class PromptAutocompletePopup extends ConsumerStatefulWidget {
 
   static const width = 300.0;
   static const relatedWidth = 240.0;
+  static const meaningWidth = 260.0;
   static const maxListHeight = 240.0;
 
   final PromptAutocompleteController controller;
@@ -65,11 +67,13 @@ class _PromptAutocompletePopupState
   final _childKey = GlobalKey();
   final _scroll = ScrollController();
   final _relatedScroll = ScrollController();
+  final _meaningScroll = ScrollController();
   final _selectedRow = GlobalKey();
   final _selectedRelatedRow = GlobalKey();
   late final String _surface = 'prompt-autocomplete-${identityHashCode(this)}';
   late final AutoTagTranslationController _translation;
   Set<String> _observed = const {};
+  CompletionCandidate? _hoveredMeaning;
 
   @override
   void initState() {
@@ -95,6 +99,7 @@ class _PromptAutocompletePopupState
     _translation.clearSurface(_surface);
     _scroll.dispose();
     _relatedScroll.dispose();
+    _meaningScroll.dispose();
     super.dispose();
   }
 
@@ -108,6 +113,8 @@ class _PromptAutocompletePopupState
       return;
     }
     final state = widget.controller.value;
+    _hoveredMeaning = null;
+    if (_meaningScroll.hasClients) _meaningScroll.jumpTo(0);
     if (state.visible && !_portal.isShowing) {
       _portal.show();
     } else if (!state.visible && _portal.isShowing) {
@@ -145,6 +152,12 @@ class _PromptAutocompletePopupState
       );
     }
     _observed = next;
+  }
+
+  void _previewMeaning(CompletionCandidate candidate) {
+    if (_hoveredMeaning?.canonicalTag == candidate.canonicalTag) return;
+    setState(() => _hoveredMeaning = candidate);
+    if (_meaningScroll.hasClients) _meaningScroll.jumpTo(0);
   }
 
   void _keepVisible(ScrollController scroll, GlobalKey selected) {
@@ -268,15 +281,22 @@ class _PromptAutocompletePopupState
               _Footer.padding.horizontal)
           .ceilToDouble(),
     );
-    final desiredWidth =
+    final listWidth =
         mainWidth +
         (related == null ? 0 : PromptAutocompletePopup.relatedWidth + 1) +
         2;
-    final width = math.min(desiredWidth, viewport.width - 16);
+    final desiredWidth = listWidth + PromptAutocompletePopup.meaningWidth + 1;
+    final meaningBelow = desiredWidth > viewport.width - 16;
+    final width = math.min(
+      meaningBelow ? listWidth : desiredWidth,
+      viewport.width - 16,
+    );
     final stacked = related != null && width - 2 <= 420;
     final placement = _placement(overlay, viewport, width);
-    _keepVisible(_scroll, _selectedRow);
-    if (related != null) _keepVisible(_relatedScroll, _selectedRelatedRow);
+    if (_hoveredMeaning == null) {
+      _keepVisible(_scroll, _selectedRow);
+      if (related != null) _keepVisible(_relatedScroll, _selectedRelatedRow);
+    }
 
     Widget column({
       required Key key,
@@ -335,6 +355,7 @@ class _PromptAutocompletePopupState
             count: cand.postCount > 0 ? _count(cand.postCount) : null,
             leading: _Dot(TagCategoryVisuals.color(context, cand.category)),
             selected: selected,
+            onHover: () => _previewMeaning(cand),
             // 关联栏开着时主栏选中项退成描边：键盘焦点在右边。
             dim: related != null && related.index != i,
             source: related?.index == i,
@@ -384,9 +405,12 @@ class _PromptAutocompletePopupState
                       width: 12,
                       child: added
                           ? UiGlyph(UiGlyphs.check, size: 12, color: c.ok)
-                          : null,
+                          : _Dot(
+                              TagCategoryVisuals.color(context, cand.category),
+                            ),
                     ),
                     selected: i == state.relatedSelected,
+                    onHover: () => _previewMeaning(cand),
                     muted: added,
                     onTap: () => widget.onAccept(i),
                   ),
@@ -408,6 +432,85 @@ class _PromptAutocompletePopupState
       );
     }
 
+    final activeCandidate =
+        _hoveredMeaning ??
+        (related != null && state.related.isNotEmpty
+            ? state.related[state.relatedSelected]
+            : state.candidates[state.selectedIndex]);
+    final meaning = ConstrainedBox(
+      key: const Key('prompt-autocomplete-meaning'),
+      constraints: const BoxConstraints(
+        maxHeight: PromptAutocompletePopup.maxListHeight + 30,
+      ),
+      child: _List(
+        controller: _meaningScroll,
+        count: 1,
+        row: (_) => TagMeaning(
+          key: ValueKey(activeCandidate.canonicalTag),
+          candidate: activeCandidate,
+        ),
+      ),
+    );
+    final lists = Flex(
+      direction: stacked ? Axis.vertical : Axis.horizontal,
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: stacked
+          ? CrossAxisAlignment.stretch
+          : CrossAxisAlignment.start,
+      children: [
+        Flexible(
+          flex: related == null || stacked ? 1 : mainWidth.round(),
+          child: column(
+            key: const Key('prompt-autocomplete-main'),
+            title: l.prompt_autocompleteTitle,
+            tail: '${state.candidates.length}',
+            body: main,
+          ),
+        ),
+        if (side != null)
+          Flexible(
+            flex: stacked
+                ? 1
+                : (PromptAutocompletePopup.relatedWidth + 1).round(),
+            child: side,
+          ),
+      ],
+    );
+    final content = meaningBelow
+        ? Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Flexible(child: lists),
+              Divider(height: 1, color: c.border),
+              Flexible(child: meaning),
+            ],
+          )
+        : Stack(
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(child: lists),
+                  SizedBox(
+                    width: PromptAutocompletePopup.meaningWidth + 1,
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 1),
+                      child: meaning,
+                    ),
+                  ),
+                ],
+              ),
+              Positioned(
+                top: 0,
+                bottom: 0,
+                right: PromptAutocompletePopup.meaningWidth,
+                width: 1,
+                child: ColoredBox(color: c.border),
+              ),
+            ],
+          );
+
     return CompositedTransformFollower(
       link: _link,
       offset: placement.offset,
@@ -427,36 +530,7 @@ class _PromptAutocompletePopupState
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Flexible(
-                  child: Flex(
-                    direction: stacked ? Axis.vertical : Axis.horizontal,
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: stacked
-                        ? CrossAxisAlignment.stretch
-                        : CrossAxisAlignment.start,
-                    children: [
-                      Flexible(
-                        flex: related == null || stacked
-                            ? 1
-                            : mainWidth.round(),
-                        child: column(
-                          key: const Key('prompt-autocomplete-main'),
-                          title: l.prompt_autocompleteTitle,
-                          tail: '${state.candidates.length}',
-                          body: main,
-                        ),
-                      ),
-                      if (side != null)
-                        Flexible(
-                          flex: stacked
-                              ? 1
-                              : (PromptAutocompletePopup.relatedWidth + 1)
-                                    .round(),
-                          child: side,
-                        ),
-                    ],
-                  ),
-                ),
+                Flexible(child: content),
                 _Footer(related: related != null),
               ],
             ),
@@ -520,6 +594,7 @@ class _Row extends StatelessWidget {
     required this.leading,
     required this.selected,
     required this.onTap,
+    required this.onHover,
     this.onSecondaryTap,
     this.dim = false,
     this.source = false,
@@ -530,6 +605,7 @@ class _Row extends StatelessWidget {
   final Widget leading;
   final bool selected, dim, source, muted;
   final VoidCallback onTap;
+  final VoidCallback onHover;
   final VoidCallback? onSecondaryTap;
 
   @override
@@ -537,6 +613,7 @@ class _Row extends StatelessWidget {
     final c = context.ui;
     final active = selected && !dim;
     return MouseRegion(
+      onEnter: (_) => onHover(),
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,

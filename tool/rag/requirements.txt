@@ -4,3 +4,6 @@ sentence-transformers==6.1.0
 numpy==2.5.4
 usearch==2.26.4
 Pillow==12.2.0
+jieba==0.42.1
+# jieba imports pkg_resources from the verified runtime version.
+setuptools==78.1.0

@@ -6,7 +6,8 @@ import unittest
 from unittest.mock import patch
 
 import test_rag as fixtures
-from engine import Engine, Sources
+from engine import Engine
+from test_rag import Sources
 
 
 class SourceSignatureTests(unittest.TestCase):

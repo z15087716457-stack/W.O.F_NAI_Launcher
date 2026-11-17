@@ -227,6 +227,34 @@ void main() {
     },
   );
 
+  testWidgets('request lifecycle reaches the current settings row intact', (
+    t,
+  ) async {
+    final id = seed('lifecycle', task: LauncherInterface.translate);
+    await mount(t);
+    await t.tap(find.byKey(const Key('models-tab-requests')));
+    await t.pumpAndSettle();
+    for (final (recordStatus, uiStatus, label) in [
+      (ModelRequestStatus.pending, SettingsRequestStatus.pending, '等待中'),
+      (ModelRequestStatus.running, SettingsRequestStatus.running, '请求中'),
+      (ModelRequestStatus.success, SettingsRequestStatus.success, '成功'),
+      (ModelRequestStatus.failed, SettingsRequestStatus.failed, '失败'),
+      (ModelRequestStatus.cancelled, SettingsRequestStatus.cancelled, '已取消'),
+    ]) {
+      history.update(id, recordStatus);
+      await t.pumpAndSettle();
+      expect(view.requests.single.status, uiStatus);
+      expect(
+        find.descendant(
+          of: find.byKey(ValueKey(id)),
+          matching: find.text(label),
+        ),
+        findsOneWidget,
+      );
+    }
+    expect(t.takeException(), isNull);
+  });
+
   testWidgets('an expired id opens the missing-record state', (t) async {
     await mount(t);
     final dialog = actions.requestDetails('already-evicted');

@@ -272,6 +272,8 @@ semantic phrases. XML containers are structure; preserve standalone library alia
 For each group return
 readings:[{"source":"exact contiguous input fragment","zh":"concise translation"}]
 in source order, covering all content; omit weights and separators from translations.
+Copy source fragments literally from the input, including internal whitespace,
+punctuation, underscores and weighting syntax. Do not paraphrase source anchors.
 Each group may split or combine segments. Otherwise return zh and optional parts,
 preserving weights and prompt punctuation. Glossary hints apply to complete tags,
 not ordinary words inside sentences.
@@ -297,6 +299,7 @@ Markdown, code fences or comments.
   Future<String> translatePromptGroup(
     String requestJson, {
     required String sessionId,
+    void Function(String)? validateOutput,
   }) async {
     final execution = await _resolveInterfaceExecution(
       LauncherInterface.translate,
@@ -322,6 +325,7 @@ Markdown, code fences or comments.
         userParts: [PromptAssistantContentPart.text(request)],
         apiKey: execution.apiKey,
       ),
+      validateOutput: validateOutput,
     )) {
       output.write(chunk.delta);
     }

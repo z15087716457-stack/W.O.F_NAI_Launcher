@@ -6,7 +6,8 @@ import tempfile
 import unittest
 from types import SimpleNamespace
 
-from engine import Engine,Sources
+from engine import Engine
+from test_rag import Sources
 from documents import TextEngine,WikiSources
 from pool import VectorPool,CollectionAnn
 from test_rag import fixture

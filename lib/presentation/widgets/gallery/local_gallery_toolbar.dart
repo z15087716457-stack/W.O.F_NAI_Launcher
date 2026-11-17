@@ -567,8 +567,7 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
               color: colors.onSurfaceVariant,
             ),
             prefixIconConstraints: const BoxConstraints(minWidth: 36),
-            suffixIcon:
-                ref.watch(ragSettingsProvider).enabledFor(RagSource.gallery)
+            suffixIcon: ref.watch(ragSettingsProvider).enabled
                 ? Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [

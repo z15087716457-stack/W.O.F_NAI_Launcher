@@ -27,6 +27,8 @@ W.O.F NAI Studio 是 Windows 桌面上的 NovelAI 第三方用戶端。它不只
 
 > 這是非官方專案，與 NovelAI 無關。請使用你自己的 NovelAI 帳號，並遵守 NovelAI 的服務條款。
 
+**2.4.2** 重構本機標籤語義搜尋，結合 DanbooruSearch 規則與完整本機標籤；舊索引支援明確升級、暫停續建和錯誤重試。新增預設關閉的輕量翻譯自動補譯，修正第三方 API 連線、整段提示詞搜尋及輸入法問題；Agent 升級至 Pi 1.5.2。
+
 ## 下載
 
 到 [Releases](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/latest) 下載最新版本，二選一：
@@ -92,6 +94,8 @@ W.O.F NAI Studio 是 Windows 桌面上的 NovelAI 第三方用戶端。它不只
 ### 本機語義檢索（RAG）：用意思找東西
 
 <img src="docs/images/readme/zh/settings-rag.webp" alt="語義檢索設定" width="100%">
+
+<sub>截圖來自較早版本；目前只有一個嵌入模型和一個 RAG 總開關，請以下列說明及實際介面為準。</sub>
 
 這是選用元件。啟用後，標籤推薦、標籤百科、積木庫和本地畫廊都能依「意思」搜尋：輸入「下雨的街道」也能找到相關的英文標籤、積木，以及你以前畫過的圖片，還能以圖找相似圖片。全部在你的電腦上執行，不會上傳任何內容。→ [語義檢索教學](docs/guide/zh-TW/rag.md)
 

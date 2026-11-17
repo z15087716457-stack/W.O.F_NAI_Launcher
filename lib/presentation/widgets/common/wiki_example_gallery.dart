@@ -139,33 +139,23 @@ class _WikiExampleGalleryState extends ConsumerState<WikiExampleGallery> {
           ),
   );
 
-  Widget _gallery(
-    BuildContext context,
-    WikiExampleSet examples,
-  ) => LayoutBuilder(
-    builder: (context, constraints) {
-      final columns = (constraints.maxWidth / 200).floor().clamp(1, 3);
-      final width = (constraints.maxWidth - (columns - 1) * 10) / columns;
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
+  Widget _gallery(BuildContext context, WikiExampleSet examples) =>
+      LayoutBuilder(
+        builder: (context, constraints) {
+          final columns = (constraints.maxWidth / 200).floor().clamp(1, 3);
+          final width = (constraints.maxWidth - (columns - 1) * 10) / columns;
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              for (final (index, example) in examples.items.indexed)
-                Container(
-                  key: ValueKey('wiki-example-card-${example.postId}'),
-                  width: width,
-                  clipBehavior: Clip.antiAlias,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Theme.of(context).dividerColor),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _WikiExampleImage(
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: [
+                  for (final (index, example) in examples.items.indexed)
+                    SizedBox(
+                      key: ValueKey('wiki-example-card-${example.postId}'),
+                      width: width,
+                      child: WikiExampleCard(
                         example: example,
                         onOpen: () => showWikiExampleViewer(
                           context,
@@ -173,37 +163,97 @@ class _WikiExampleGalleryState extends ConsumerState<WikiExampleGallery> {
                           initial: index,
                           cache: ref.read(wikiExampleImageCacheProvider),
                         ),
+                        caption: example.reference.caption.isEmpty
+                            ? null
+                            : widget.captionBuilder(
+                                example.reference.captionMarkdown,
+                              ),
                       ),
-                      if (example.reference.caption.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
-                          child: widget.captionBuilder(
-                            example.reference.captionMarkdown,
-                          ),
-                        ),
-                    ],
+                    ),
+                ],
+              ),
+              if (examples.truncated)
+                TextButton.icon(
+                  onPressed: () => launchUrl(
+                    Uri.https(
+                      'danbooru.donmai.us',
+                      '/wiki_pages/${widget.tag}',
+                    ),
                   ),
+                  icon: const Icon(Icons.open_in_new, size: 14),
+                  label: Text(context.l10n.wiki_source),
                 ),
             ],
-          ),
-          if (examples.truncated)
-            TextButton.icon(
-              onPressed: () => launchUrl(
-                Uri.https('danbooru.donmai.us', '/wiki_pages/${widget.tag}'),
-              ),
-              icon: const Icon(Icons.open_in_new, size: 14),
-              label: Text(context.l10n.wiki_source),
-            ),
-        ],
+          );
+        },
       );
-    },
+}
+
+/// The full article and compact image pane share thumbnails, retry and cache.
+class WikiExampleCard extends StatelessWidget {
+  const WikiExampleCard({
+    super.key,
+    required this.example,
+    required this.onOpen,
+    this.caption,
+    this.source,
+    this.imageHeight = 180,
+    this.loading = false,
+    this.selected = false,
+  });
+  final WikiExample example;
+  final VoidCallback onOpen;
+  final Widget? caption, source;
+  final double imageHeight;
+  final bool loading;
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    clipBehavior: Clip.antiAlias,
+    decoration: BoxDecoration(
+      border: Border.all(
+        color: selected
+            ? Theme.of(context).colorScheme.primary
+            : Theme.of(context).dividerColor,
+      ),
+      borderRadius: BorderRadius.circular(8),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _WikiExampleImage(
+          example: example,
+          onOpen: onOpen,
+          height: imageHeight,
+          loading: loading,
+        ),
+        if (caption != null)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+            child: caption,
+          ),
+        if (source != null)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(10, 0, 10, 8),
+            child: source,
+          ),
+      ],
+    ),
   );
 }
 
 class _WikiExampleImage extends ConsumerStatefulWidget {
-  const _WikiExampleImage({required this.example, required this.onOpen});
+  const _WikiExampleImage({
+    required this.example,
+    required this.onOpen,
+    required this.height,
+    required this.loading,
+  });
   final WikiExample example;
   final VoidCallback onOpen;
+  final double height;
+  final bool loading;
   @override
   ConsumerState<_WikiExampleImage> createState() => _WikiExampleImageState();
 }
@@ -246,9 +296,16 @@ class _WikiExampleImageState extends ConsumerState<_WikiExampleImage> {
           key: ValueKey('wiki-example-open-${example.postId}'),
           onTap: url == null || example.largeUrl == null ? null : widget.onOpen,
           child: SizedBox(
-            height: 180,
+            height: widget.height,
             child: url == null
-                ? missing()
+                ? widget.loading
+                      ? const Center(
+                          child: SizedBox.square(
+                            dimension: 18,
+                            child: CircularProgressIndicator(strokeWidth: 1.5),
+                          ),
+                        )
+                      : missing()
                 : !_visible
                 ? const SizedBox.shrink()
                 : Padding(

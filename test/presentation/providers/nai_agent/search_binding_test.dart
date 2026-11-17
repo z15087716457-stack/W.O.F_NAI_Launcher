@@ -15,13 +15,16 @@ import 'package:nai_launcher/core/rag/rag_client.dart';
 import 'package:nai_launcher/core/rag/rag_gallery_search.dart';
 import 'package:nai_launcher/core/rag/rag_settings.dart';
 import 'package:nai_launcher/core/rag/rag_text_search.dart';
+import 'package:nai_launcher/core/rag/rag_tag_search.dart';
 import 'package:nai_launcher/data/models/gallery/local_image_record.dart';
 import 'package:nai_launcher/data/models/gallery/nai_image_metadata.dart';
 import 'package:nai_launcher/data/services/gallery/unified_gallery_service.dart';
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_gallery_binding.dart';
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_search_binding.dart';
 import 'package:nai_launcher/presentation/providers/rag_provider.dart';
+import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import '../../../helpers/fake_local_gallery_service.dart';
+import '../../../helpers/rag_test_sources.dart';
 
 class _Source extends Mock implements GalleryDataSource {}
 
@@ -29,14 +32,7 @@ class _Settings extends RagSettingsController {
   _Settings([this.initial]);
   final RagSettings? initial;
   @override
-  RagSettings build() =>
-      initial ??
-      const RagSettings(
-        enabled: true,
-        wikiEnabled: true,
-        blocksEnabled: true,
-        galleryEnabled: true,
-      );
+  RagSettings build() => initial ?? const RagSettings(enabled: true);
   @override
   Future<void> update(RagSettings value) async => state = value;
 }
@@ -44,6 +40,7 @@ class _Settings extends RagSettingsController {
 /// No Python process or model: exercise the real controller's wire mapping.
 class _Client extends Fake implements RagClient {
   bool fallback = true;
+  Map<String, dynamic>? lastSearch;
   @override
   bool isClosed = false;
   @override
@@ -72,6 +69,7 @@ class _Client extends Fake implements RagClient {
     if (op != 'search' && op != 'text_search') {
       throw StateError('Unexpected operation: $op');
     }
+    if (op == 'search') lastSearch = params;
     return {'items': [], if (fallback) 'fallback': 'resource_busy'};
   }
 
@@ -85,6 +83,7 @@ class _Rag extends RagController {
   List<String>? allowed;
   RagGalleryMode? mode;
   RagTextQuery? textQuery;
+  RagTagSearchOptions? tagOptions;
   RagCancellation? cancellation;
   Object? failure;
   Future<void> Function()? onSearch;
@@ -142,21 +141,16 @@ class _Rag extends RagController {
   }
 
   @override
-  Future<List<CompletionCandidate>> recommend({
-    required String text,
-    required int cursor,
+  Future<List<CompletionCandidate>> searchTags({
+    required String query,
     required Set<String> existing,
-    required List<CompletionCandidate> lexical,
     required RagCancellation cancellation,
-    bool negative = false,
-    String keyword = '',
     int limit = 40,
+    RagTagSearchOptions tagOptions = const RagTagSearchOptions(),
   }) async {
-    expect(text, '');
-    expect(cursor, 0);
     expect(existing, isEmpty);
-    expect(lexical, isEmpty);
-    query = keyword;
+    this.query = query;
+    this.tagOptions = tagOptions;
     await _search(cancellation);
     return const [
       CompletionCandidate(
@@ -355,6 +349,35 @@ void main() {
     );
   });
 
+  test(
+    'tag controls are per-call and independent of the returned count',
+    () async {
+      final settings = container.read(ragSettingsProvider);
+      await search({
+        'source': 'tags',
+        'query': 'watercolor',
+        'limit': 12,
+        'tag_options': {
+          'top_k': 60,
+          'popularity_weight': 0,
+          'use_segmentation': false,
+          'target_layers': ['name', 'meaning'],
+          'target_categories': ['General'],
+        },
+      });
+      expect(rag.tagOptions!.toJson(limit: 12), {
+        'top_k': 60,
+        'popularity_weight': 0.0,
+        'use_segmentation': false,
+        'target_layers': ['name', 'meaning'],
+        'target_categories': ['General'],
+      });
+      expect(container.read(ragSettingsProvider), same(settings));
+      await search({'source': 'tags', 'query': 'rain', 'limit': 8});
+      expect(rag.tagOptions!.toJson(limit: 8), {'top_k': 8});
+    },
+  );
+
   test('attachment uses original safe disk path and explicit mode', () async {
     final file = await File(
       p.join(root.path, 'attachment.png'),
@@ -434,17 +457,10 @@ void main() {
     },
   );
 
-  test('source disabled and zero vectors both return not_indexed', () async {
+  test('a known index with zero vectors returns not_indexed', () async {
     await container
         .read(ragSettingsProvider.notifier)
         .update(const RagSettings(enabled: true));
-    expect(
-      (await search({'source': 'wiki', 'query': 'rain'}))['status'],
-      'not_indexed',
-    );
-    await container
-        .read(ragSettingsProvider.notifier)
-        .update(const RagSettings(enabled: true, wikiEnabled: true));
     container.read(ragControllerProvider);
     rag.status(
       const RagStatus(sources: {RagSource.wiki: RagStatus(indexKnown: true)}),
@@ -584,13 +600,13 @@ void main() {
         );
         container = ProviderContainer(
           overrides: [
+            promptBlockLibraryNotifierProvider.overrideWith(EmptyRagBlocks.new),
+            ragGalleryRootsProvider.overrideWithValue(() async => []),
             ragSettingsProvider.overrideWith(
               () => _Settings(
                 RagSettings(
                   enabled: true,
-                  wikiEnabled: true,
                   embedding: 'injected',
-                  reranker: 'injected',
                   python: python.path,
                 ),
               ),
@@ -625,11 +641,104 @@ void main() {
         );
         client.fallback = false;
         expect((await search({'source': s, 'query': 'rain'}))['status'], 'ok');
+        if (s == 'tags') {
+          expect(client.lastSearch!['top_k'], 20);
+          expect(
+            client.lastSearch!.keys,
+            isNot(
+              anyOf(
+                contains('text'),
+                contains('cursor'),
+                contains('mode'),
+                contains('budget'),
+                contains('lexical'),
+                contains('negative'),
+              ),
+            ),
+          );
+          await search({
+            'source': 'tags',
+            'query': 'rain',
+            'limit': 12,
+            'tag_options': {
+              'top_k': 60,
+              'target_categories': ['General'],
+              'popularity_weight': 0,
+            },
+          });
+          expect(client.lastSearch!['limit'], 12);
+          expect(client.lastSearch!['top_k'], 60);
+          expect(client.lastSearch!['target_categories'], ['General']);
+          expect(client.lastSearch!['popularity_weight'], 0);
+        }
       },
     );
   }
 
   for (final params in <Map<String, dynamic>>[
+    {'source': 'wiki', 'query': 'rain', 'tag_options': {}},
+    {'source': 'tags', 'query': 'rain', 'tag_options': []},
+    {
+      'source': 'tags',
+      'query': 'rain',
+      'tag_options': {'top_k': 81},
+    },
+    {
+      'source': 'tags',
+      'query': 'rain',
+      'tag_options': {'top_k': 0},
+    },
+    {
+      'source': 'tags',
+      'query': 'rain',
+      'tag_options': {'top_k': 1.5},
+    },
+    {
+      'source': 'tags',
+      'query': 'rain',
+      'tag_options': {'use_segmentation': null},
+    },
+    {
+      'source': 'tags',
+      'query': 'rain',
+      'tag_options': {'popularity_weight': double.nan},
+    },
+    {
+      'source': 'tags',
+      'query': 'rain',
+      'tag_options': {'popularity_weight': 1.1},
+    },
+    {
+      'source': 'tags',
+      'query': 'rain',
+      'tag_options': {'target_layers': []},
+    },
+    {
+      'source': 'tags',
+      'query': 'rain',
+      'tag_options': {
+        'target_layers': ['bogus'],
+      },
+    },
+    {
+      'source': 'tags',
+      'query': 'rain',
+      'tag_options': {
+        'target_categories': [4],
+      },
+    },
+    {
+      'source': 'tags',
+      'query': 'rain',
+      'tag_options': {
+        'target_categories': ['bogus'],
+      },
+    },
+    {
+      'source': 'tags',
+      'query': 'rain',
+      'tag_options': {'unknown': true},
+    },
     {'source': 'gallery'},
     {'source': 'gallery', 'query': '   '},
     {'source': 'blocks', 'image_id': 'selected'},

@@ -2,6 +2,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_contract.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_fixture.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_kit.dart';
@@ -16,6 +17,97 @@ void main() {
   Future<void> requests(WidgetTester t) async {
     await t.tap(find.byKey(const Key('models-tab-requests')));
     await t.pumpAndSettle();
+  }
+
+  for (final (status, label, tone) in [
+    (SettingsRequestStatus.pending, '等待中', SettingsTone.idle),
+    (SettingsRequestStatus.running, '请求中', SettingsTone.warn),
+    (SettingsRequestStatus.success, '成功', SettingsTone.ok),
+    (SettingsRequestStatus.failed, '失败', SettingsTone.error),
+    (SettingsRequestStatus.cancelled, '已取消', SettingsTone.idle),
+  ]) {
+    testWidgets('request history renders $status without false failure', (
+      t,
+    ) async {
+      final data = SettingsFixture.view(page: SettingsPageId.models);
+      await pumpSettings(
+        t,
+        data: data.copyWith(
+          models: SettingsModelsData(
+            requests: [
+              SettingsRequestLog(
+                id: 'state',
+                at: data.now,
+                task: SettingsModelTask.promptTranslate,
+                provider: 'Fixture',
+                model: 'fixture',
+                status: status,
+              ),
+            ],
+            requestTotal: 1,
+          ),
+        ),
+      );
+      await requests(t);
+      final row = find.byKey(const ValueKey('state'));
+      expect(
+        find.descendant(of: row, matching: find.text(label)),
+        findsOneWidget,
+      );
+      expect(
+        t
+            .widget<SettingsDot>(
+              find.descendant(of: row, matching: find.byType(SettingsDot)),
+            )
+            .tone,
+        tone,
+      );
+      expect(t.takeException(), isNull);
+    });
+  }
+
+  for (final (locale, language) in [
+    ('zh', const Locale('zh')),
+    ('zh_TW', const Locale('zh', 'TW')),
+    ('en', const Locale('en')),
+    ('ja', const Locale('ja')),
+    ('ko', const Locale('ko')),
+  ]) {
+    for (final scale in [1.0, 1.5]) {
+      testWidgets('running request fits $locale at scale=$scale', (t) async {
+        final data = SettingsFixture.view(page: SettingsPageId.models);
+        await pumpSettings(
+          t,
+          locale: locale,
+          window: 900,
+          data: data.copyWith(
+            models: SettingsModelsData(
+              requests: [
+                SettingsRequestLog(
+                  id: 'running',
+                  at: data.now,
+                  task: SettingsModelTask.promptTranslate,
+                  provider: 'Fixture',
+                  model: 'fixture',
+                  status: SettingsRequestStatus.running,
+                ),
+              ],
+              requestTotal: 1,
+            ),
+          ),
+        );
+        t.platformDispatcher.textScaleFactorTestValue = scale;
+        addTearDown(t.platformDispatcher.clearTextScaleFactorTestValue);
+        await requests(t);
+        expect(
+          find.text(
+            lookupAppLocalizations(language).modelRequest_statusRunning,
+          ),
+          findsOneWidget,
+        );
+        expect(t.takeException(), isNull);
+      });
+    }
   }
 
   testWidgets('only the hovered row exposes its own stable record id', (
@@ -66,7 +158,7 @@ void main() {
                 task: SettingsModelTask.promptTranslate,
                 provider: 'Fixture',
                 model: 'fixture',
-                ok: false,
+                status: SettingsRequestStatus.failed,
               ),
             ],
             requestTotal: 1,

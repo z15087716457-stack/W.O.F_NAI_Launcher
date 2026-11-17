@@ -1760,15 +1760,13 @@ class SettingsRagPage extends StatelessWidget {
     final usable = on && rg.runtimeReady;
     final loading = on && rg.initializing;
     final building = rg.sources.any(
-      (x) => x.enabled && x.state != SettingsRagState.ready,
+      (x) => x.state == SettingsRagState.building,
     );
     final allDone =
-        rg.sources.any((x) => x.enabled) &&
-        rg.sources
-            .where((x) => x.enabled)
-            .every(
-              (x) => x.state == SettingsRagState.ready && x.done >= x.total,
-            );
+        rg.sources.isNotEmpty &&
+        rg.sources.every(
+          (x) => x.state == SettingsRagState.ready && x.done >= x.total,
+        );
     String? errorText(String? value) =>
         value == 'initialization_timeout' ? l.set_rgLoadingTimeout : value;
     final loadingHint = switch (rg.initializationPhase) {
@@ -1844,13 +1842,12 @@ class SettingsRagPage extends StatelessWidget {
       ),
     };
     String sub(SettingsRagSourceKind k) => switch (k) {
-      SettingsRagSourceKind.tags => l.set_rgTagsSub,
+      SettingsRagSourceKind.tags => l.rag_tagsHint,
       SettingsRagSourceKind.wiki => l.set_rgWikiSub,
       SettingsRagSourceKind.blocks => l.set_rgBlocksSub,
       SettingsRagSourceKind.gallery => l.set_rgGallerySub,
     };
     Widget? below(SettingsRagSource x) {
-      if (!x.enabled) return null;
       final plan = rg.plan?.kind == x.kind ? rg.plan : null;
       final parts = [
         if (rg.preparing == x.kind)
@@ -1894,6 +1891,18 @@ class SettingsRagPage extends StatelessWidget {
           Text(
             l.set_rgSkipped(SettingsFormat.count(x.skipped)),
             style: UiText.sans(11.5, color: c.faint),
+          ),
+        if (x.upgradeAvailable)
+          Text(
+            x.upgradeCleaning
+                ? l.set_rgUpgradeCleaning
+                : x.upgradeFailed
+                ? l.set_rgUpgradeCleanupFailed
+                : x.cleanupOnly
+                ? l.set_rgUpgradeCleanupNotice
+                : l.set_rgUpgradeNotice,
+            key: const Key('rag-upgrade-notice'),
+            style: UiText.sans(11.5, color: c.muted, height: 1.5),
           ),
         if (x.error != null)
           Text(
@@ -1941,7 +1950,7 @@ class SettingsRagPage extends StatelessWidget {
                   ),
                 ],
               ),
-              for (final x in rg.sources.where((x) => x.enabled))
+              for (final x in rg.sources)
                 Padding(
                   padding: const EdgeInsets.only(top: 9),
                   child: Row(
@@ -2071,8 +2080,7 @@ class SettingsRagPage extends StatelessWidget {
                   children: [
                     step('01 · ${l.set_rgStepRuntime}', rg.runtime, true),
                     step('02 · ${l.set_rgStepEmbed}', rg.embedder, false),
-                    step('03 · ${l.set_rgStepRerank}', rg.reranker, false),
-                    step('04 · ${l.set_rgStepDevice}', rg.device, false),
+                    step('03 · ${l.set_rgStepDevice}', rg.device, false),
                   ],
                 ),
               ],
@@ -2093,18 +2101,25 @@ class SettingsRagPage extends StatelessWidget {
                 title: SettingsFormat.ragSource(context, x.kind),
                 subtitle: sub(x.kind),
                 badges: [
-                  if (x.enabled && x.state == SettingsRagState.loading)
+                  if (x.state == SettingsRagState.loading)
                     UiMini(l.set_rgLoading, tone: UiMiniTone.accent)
                   else if (rg.preparing == x.kind)
                     UiMini(l.set_rgPreparing, tone: UiMiniTone.accent)
                   else ...[
-                    if (x.enabled && x.state == SettingsRagState.empty)
+                    if (x.upgradeAvailable)
+                      UiMini(
+                        x.cleanupOnly
+                            ? l.set_rgCleanupPending
+                            : l.set_rgUpgradeBadge,
+                        tone: UiMiniTone.warn,
+                      ),
+                    if (x.state == SettingsRagState.empty)
                       UiMini(l.set_rgEmpty),
-                    if (x.enabled && x.state == SettingsRagState.paused)
+                    if (x.state == SettingsRagState.paused)
                       UiMini(l.set_rgPaused, tone: UiMiniTone.warn),
-                    if (x.enabled && x.state == SettingsRagState.building)
+                    if (x.state == SettingsRagState.building)
                       UiMini(l.set_rgBuilding, tone: UiMiniTone.accent),
-                    if (x.enabled && x.state == SettingsRagState.error)
+                    if (x.state == SettingsRagState.error)
                       UiMini(l.set_rgError, tone: UiMiniTone.error),
                   ],
                 ],
@@ -2115,9 +2130,7 @@ class SettingsRagPage extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     spacing: 8,
                     children: [
-                      if (!x.enabled)
-                        const SizedBox.shrink()
-                      else if (x.state == SettingsRagState.loading)
+                      if (x.state == SettingsRagState.loading)
                         const UiSpinner()
                       else if (x.state == SettingsRagState.paused)
                         SettingsBtn(
@@ -2149,9 +2162,21 @@ class SettingsRagPage extends StatelessWidget {
                                       x.error == 'worker_closed') {
                                     a.onRagRefresh();
                                   } else {
-                                    a.onRagRebuild(x.kind);
+                                    a.onRagBuild(x.kind);
                                   }
                                 },
+                        )
+                      else if (x.upgradeAvailable)
+                        SettingsBtn(
+                          key: const Key('rag-upgrade-tags'),
+                          label: x.cleanupOnly
+                              ? l.set_rgCleanupLegacy
+                              : l.set_rgUpgrade,
+                          small: true,
+                          tone: SettingsBtnTone.primary,
+                          onTap: rg.busy || !rg.runtimeReady || rg.plan != null
+                              ? null
+                              : () => a.onRagBuild(x.kind),
                         )
                       else if (x.state == SettingsRagState.empty ||
                           (x.state == SettingsRagState.ready &&
@@ -2167,8 +2192,7 @@ class SettingsRagPage extends StatelessWidget {
                               ? null
                               : () => a.onRagBuild(x.kind),
                         ),
-                      if (x.enabled &&
-                          x.known &&
+                      if (x.known &&
                           x.state != SettingsRagState.empty &&
                           x.state != SettingsRagState.loading &&
                           x.state != SettingsRagState.building)
@@ -2202,39 +2226,16 @@ class SettingsRagPage extends StatelessWidget {
                             ),
                           ],
                         ),
-                      SettingsSwitch(
-                        key: Key('rag-switch-${x.kind.name}'),
-                        value: x.enabled,
-                        onChanged: (v) => a.onRagSourceEnabled(x.kind, v),
-                      ),
                     ],
                   ),
                 ),
               ),
           ],
         ),
-        LayoutBuilder(
-          builder: (context, constraints) => SettingsSection(
-            title: l.set_rgContext,
-            subtitle: l.set_rgContextSub,
-            children: [
-              SettingKeyRow(
-                SettingKey.ragContextTokens,
-                title: l.set_rgRange,
-                control: SetSlider(
-                  SettingKey.ragContextTokens,
-                  width: (constraints.maxWidth - 180).clamp(60, 220),
-                  label: (v) => '${v.round()} tokens',
-                ),
-              ),
-            ],
-          ),
-        ),
         SettingsSection(
           title: l.set_rgRuntime,
           children: [
             const _RagModelRow(SettingsRagModel.embedder),
-            const _RagModelRow(SettingsRagModel.reranker),
             SettingsRow(
               key: const Key('rag-discover'),
               sub: true,
@@ -2317,15 +2318,11 @@ class _RagModelRow extends StatelessWidget {
     final s = SettingsScope.of(context);
     final rg = s.data.rag;
     final a = s.actions;
-    final key = model == SettingsRagModel.embedder
-        ? SettingKey.ragEmbedPath
-        : SettingKey.ragRerankPath;
+    const key = SettingKey.ragEmbedPath;
     final dl = rg.download?.model == model ? rg.download : null;
     return SettingKeyRow(
       key,
-      title: model == SettingsRagModel.embedder
-          ? l.set_rgEmbedPath
-          : l.set_rgRerankPath,
+      title: l.set_rgEmbedPath,
       below: dl == null
           ? null
           : Row(
@@ -2383,7 +2380,7 @@ class _RagModelRow extends StatelessWidget {
                   : SettingsBtnTone.ghost,
               onTap: rg.busy ? null : () => a.onRagDownload(model),
             ),
-          SetPath(key, width: 280, open: false),
+          const SetPath(key, width: 280, open: false),
         ],
       ),
     );
@@ -2459,6 +2456,9 @@ class _RagRuntimeRowState extends State<_RagRuntimeRow> {
     }
     final locked = rg.busy || rg.checking;
     final platform = RagPlatform.host;
+    final needsUpdate =
+        rg.runtimeIssue == SettingsRagRuntimeIssue.dependencies ||
+        rg.runtimeIssue == SettingsRagRuntimeIssue.pythonVersion;
     void installRuntime() {
       if (platform == RagPlatform.macOSArm64) {
         a.onRagInstallRuntime(cuda: false);
@@ -2471,18 +2471,31 @@ class _RagRuntimeRowState extends State<_RagRuntimeRow> {
       key: const Key('rag-runtime'),
       anchor: 'rag-runtime',
       title: l.set_rgEnv,
-      subtitle: l.set_rgEnvSub,
+      subtitle: switch (rg.runtimeIssue) {
+        SettingsRagRuntimeIssue.dependencies => l.set_rgEnvDependencies(
+          rg.runtimePackages.join(', '),
+        ),
+        SettingsRagRuntimeIssue.pythonVersion => l.set_rgEnvPythonVersion,
+        SettingsRagRuntimeIssue.importFailed => l.set_rgEnvImportFailed,
+        SettingsRagRuntimeIssue.timedOut => l.set_rgEnvCheckTimeout,
+        _ => l.set_rgEnvSub,
+      },
       badges: [
         UiMini(
-          rg.runtimeReady
-              ? l.set_rgEnvReady
-              : rg.checking
+          rg.checking
               ? l.set_testing
+              : rg.runtimeReady
+              ? l.set_rgEnvReady
+              : needsUpdate
+              ? l.set_rgEnvNeedsUpdate
+              : rg.runtimeIssue != null &&
+                    rg.runtimeIssue != SettingsRagRuntimeIssue.missing
+              ? l.set_rgEnvCheckFailed
               : l.set_rgEnvMissing,
-          tone: rg.runtimeReady
-              ? UiMiniTone.ok
-              : rg.checking
+          tone: rg.checking
               ? UiMiniTone.plain
+              : rg.runtimeReady
+              ? UiMiniTone.ok
               : UiMiniTone.warn,
         ),
       ],
@@ -2541,13 +2554,12 @@ class _RagRuntimeRowState extends State<_RagRuntimeRow> {
         mainAxisSize: MainAxisSize.min,
         spacing: 8,
         children: [
-          if (rg.runtimeReady || platform == RagPlatform.macOSX64)
-            SettingsBtn(
-              key: const Key('rag-check'),
-              label: rg.checking ? l.set_testing : l.set_rgCheck,
-              small: true,
-              onTap: locked ? null : a.onRagCheckRuntime,
-            ),
+          SettingsBtn(
+            key: const Key('rag-check'),
+            label: rg.checking ? l.set_testing : l.set_rgCheck,
+            small: true,
+            onTap: locked ? null : a.onRagCheckRuntime,
+          ),
           if (rg.runtimeReady && platform != RagPlatform.macOSX64)
             SettingsBtn(
               key: const Key('rag-reinstall'),
@@ -2559,7 +2571,11 @@ class _RagRuntimeRowState extends State<_RagRuntimeRow> {
           if (!rg.runtimeReady && platform != RagPlatform.macOSX64)
             SettingsBtn(
               key: const Key('rag-install'),
-              label: rg.checking ? l.set_testing : l.set_rgInstall,
+              label: rg.checking
+                  ? l.set_testing
+                  : needsUpdate
+                  ? l.set_rgEnvUpdate
+                  : l.set_rgInstall,
               small: true,
               tone: SettingsBtnTone.primary,
               onTap: locked ? null : installRuntime,
@@ -2585,6 +2601,8 @@ class _RagPlanCard extends StatelessWidget {
     final n = SettingsFormat.count(plan.total);
     final text = plan.loading
         ? l.set_rgPlanLoading
+        : plan.cleanupOnly
+        ? l.set_rgCleanupLegacy
         : switch (plan.kind) {
             SettingsRagSourceKind.tags => l.set_rgPlanTags(n),
             SettingsRagSourceKind.gallery => l.set_rgPlanGallery(
@@ -2622,8 +2640,24 @@ class _RagPlanCard extends StatelessWidget {
                 style: UiText.mono(11, color: c.muted),
               ),
           if (!plan.loading)
+            if (plan.upgrade && plan.rebuild)
+              Text(
+                l.set_rgPlanRebuild,
+                style: UiText.sans(11.5, color: c.warn, height: 1.5),
+              ),
+          if (!plan.loading)
             Text(
-              plan.rebuild ? l.set_rgPlanRebuild : l.set_rgPlanNote,
+              plan.upgrade
+                  ? plan.cleanupOnly
+                        ? l.set_rgCleanupPlan(
+                            SettingsFormat.bytes(plan.legacyBytes),
+                          )
+                        : l.set_rgUpgradePlan(
+                            SettingsFormat.bytes(plan.legacyBytes),
+                          )
+                  : plan.rebuild
+                  ? l.set_rgPlanRebuild
+                  : l.set_rgPlanNote,
               style: UiText.sans(
                 11.5,
                 color: plan.rebuild ? c.warn : c.faint,
@@ -2643,7 +2677,13 @@ class _RagPlanCard extends StatelessWidget {
               ),
               SettingsBtn(
                 key: const Key('rag-plan-start'),
-                label: plan.rebuild ? l.set_rebuild : l.set_rgStart,
+                label: plan.cleanupOnly
+                    ? l.set_rgCleanupLegacy
+                    : plan.upgrade
+                    ? l.set_rgUpgrade
+                    : plan.rebuild
+                    ? l.set_rebuild
+                    : l.set_rgStart,
                 small: true,
                 tone: plan.rebuild
                     ? SettingsBtnTone.danger
@@ -2991,7 +3031,9 @@ class _SettingsUpscalePageState extends State<SettingsUpscalePage> {
                   ),
                 ),
                 Flexible(
+                  fit: FlexFit.tight,
                   child: Wrap(
+                    alignment: WrapAlignment.end,
                     spacing: 6,
                     runSpacing: 6,
                     children: [

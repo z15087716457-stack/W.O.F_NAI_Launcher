@@ -53,7 +53,6 @@ abstract final class SettingsFixture {
     SettingKey.seedVaeTiling: true,
     SettingKey.ragEnabled: true,
     SettingKey.ragEmbedPath: r'E:\models\embeddinggemma-2',
-    SettingKey.ragRerankPath: r'E:\models\Qwen3-Reranker-0.6B',
     SettingKey.kritaBridge: true,
     SettingKey.comfyEnabled: true,
     SettingKey.proxyEnabled: true,
@@ -450,7 +449,9 @@ abstract final class SettingsFixture {
           task: SettingsModelTask.values[i % 3],
           provider: i % 3 == 1 ? 'OpenAI' : 'DeepSeek',
           model: i % 3 == 1 ? 'gpt-4.1' : 'deepseek-chat',
-          ok: i != 4,
+          status: i == 4
+              ? SettingsRequestStatus.failed
+              : SettingsRequestStatus.success,
           latencyMs: i == 4 ? null : 620 + i * 113,
           tokens: i == 4 ? null : 412 + i * 57,
         ),
@@ -599,7 +600,6 @@ abstract final class SettingsFixture {
   static const _rag = SettingsRagData(
     runtime: SettingsRagStep(value: 'CUDA 12.4', detail: '独立 Python · 不影响放大组件'),
     embedder: SettingsRagStep(value: 'EmbeddingGemma 2', detail: '文字 + 图片'),
-    reranker: SettingsRagStep(value: 'Qwen3-Reranker 0.6B', detail: '仅文字'),
     device: SettingsRagStep(value: 'RTX 4070', detail: '自动选择'),
     indexBytes: 812 * _mb,
     runtimeReady: true,
@@ -790,7 +790,6 @@ abstract final class SettingsFixture {
   static const ragBusy = SettingsRagData(
     runtime: SettingsRagStep(value: 'CUDA 12.4', detail: '独立 Python · 不影响放大组件'),
     embedder: SettingsRagStep(value: '下载中 41%', tone: SettingsTone.warn),
-    reranker: SettingsRagStep(value: 'Qwen3-Reranker 0.6B', detail: '仅文字'),
     device: SettingsRagStep(value: 'RTX 4070', detail: '自动选择'),
     indexBytes: 812 * _mb,
     runtimeReady: true,
@@ -842,7 +841,6 @@ abstract final class SettingsFixture {
   static const ragInstalling = SettingsRagData(
     runtime: SettingsRagStep(value: '安装中', tone: SettingsTone.warn),
     embedder: SettingsRagStep(value: 'EmbeddingGemma 2', detail: '文字 + 图片'),
-    reranker: SettingsRagStep(value: 'Qwen3-Reranker 0.6B', detail: '仅文字'),
     device: SettingsRagStep(value: 'RTX 4070', detail: '自动选择'),
     install: SettingsRagInstall(
       phase: SettingsRagInstallPhase.cuda,
@@ -862,13 +860,11 @@ abstract final class SettingsFixture {
       ),
       SettingsRagSource(
         kind: SettingsRagSourceKind.wiki,
-        state: SettingsRagState.off,
-        enabled: false,
+        state: SettingsRagState.empty,
       ),
       SettingsRagSource(
         kind: SettingsRagSourceKind.blocks,
-        state: SettingsRagState.off,
-        enabled: false,
+        state: SettingsRagState.empty,
       ),
       SettingsRagSource(
         kind: SettingsRagSourceKind.gallery,
@@ -936,7 +932,6 @@ abstract final class SettingsFixture {
         rag: const SettingsRagData(
           runtime: SettingsRagStep(value: '未安装', tone: SettingsTone.idle),
           embedder: SettingsRagStep(value: '未选择', tone: SettingsTone.idle),
-          reranker: SettingsRagStep(value: '未选择', tone: SettingsTone.idle),
           device: SettingsRagStep(value: '自动', tone: SettingsTone.idle),
           sources: [
             SettingsRagSource(
@@ -945,18 +940,15 @@ abstract final class SettingsFixture {
             ),
             SettingsRagSource(
               kind: SettingsRagSourceKind.wiki,
-              state: SettingsRagState.off,
-              enabled: false,
+              state: SettingsRagState.empty,
             ),
             SettingsRagSource(
               kind: SettingsRagSourceKind.blocks,
-              state: SettingsRagState.off,
-              enabled: false,
+              state: SettingsRagState.empty,
             ),
             SettingsRagSource(
               kind: SettingsRagSourceKind.gallery,
-              state: SettingsRagState.off,
-              enabled: false,
+              state: SettingsRagState.empty,
             ),
           ],
         ),

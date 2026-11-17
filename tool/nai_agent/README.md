@@ -2,7 +2,7 @@
 
 # NAI Agent 运行宿主
 
-直接使用官方 Pi 1.5.0。此目录是生产业务宿主；阶段 A 的模拟验证保留在相邻 nai_agent_sdk_probe。固定的 npm lockfile 和 PI-LICENSE 随源码保留，不能直接换成其他版本的示例。
+直接使用官方 Pi 1.5.2。此目录是生产业务宿主；阶段 A 的模拟验证保留在相邻 nai_agent_sdk_probe。固定的 npm lockfile 和 PI-LICENSE 随源码保留，不能直接换成其他版本的示例。
 
 在本目录运行 npm ci --ignore-scripts --no-audit --no-fund 和 npm test。Node 需要 >=22.19.0。发布包将 Node 24.18.0、固定依赖、许可与内置 Skill（skills/nai-studio、skills/nai-prompt）放在 Studio 的 tools/nai-agent；调用方只使用包内 Node 和 host.mjs，不依赖用户安装 Node 或 Pi。
 
@@ -26,6 +26,6 @@ MCP 设置与按需 agent_manage 共用配置服务；agent_manage 还复用 Pi 
 
 CodeMode 使用官方 QuickJS，没有另造执行器。MCP 调用继续走原 Studio 的备份、版本校验、确认及取消；原生图片结果元数据通过 Pi 的 tool_result 扩展保存在官方会话 details，CodeMode 聚合图片路径，恢复聊天仍显示结果。内置 MCP 等待期限为 24 小时，避免把用户确认／长时间超分按外部服务器默认 60 秒超时处理；CodeMode 的显式 timeout_ms 仍是整个脚本的截止时间。
 
-MCP 重连时从官方会话恢复仍可用的工具，隐藏／禁用与后续卸载保持有效。agent_settled 的 aborted 和工具 durationMs 经原 JSONL 直接传递。Pi 1.5.0 沿用现有宿主协议、MCP 辅助接口和缓存保温接线；1.3.0 会话兼容已验证。工具声明继续直接使用 typebox 生成 JSON Schema，实际参数交给 Pi 的 pi-schema 验证与转换。
+MCP 重连时从官方会话恢复仍可用的工具，隐藏／禁用与后续卸载保持有效。agent_settled 的 aborted 和工具 durationMs 经原 JSONL 直接传递。Pi 1.5.2 沿用现有宿主协议；配置使用 SDK 完整校验，覆盖暴露模式、旧别名与 OAuth 回调规则。缓存保温沿用 Studio 显式模式，默认 streaming，延时使用官方共享函数；关闭后运行中再开启及未知计费状态的兼容处理仍保留。1.5.0 会话恢复及续聊已验证，见[升级核验](../../docs/pi-1.5.2-upgrade-2026-11-17.md)。工具声明继续直接使用 typebox 生成 JSON Schema，实际参数交给 Pi 的 pi-schema 验证与转换。
 
 Skill（2026-10-18）：宿主启用 Pi 原生 Skill，来源由 Studio 决定——内置 `skills/`（只读，随版本更新）、全局 `agent-data/skills/`、当前工作区 `.W.O.F/skills/`，同名时工作区 > 全局 > 内置；不读取工作区内 `.agents/skills` 或 `.pi`。`lib/skills.mjs` 用 Pi 的加载器解析并应用开关／“仅手动”，Pi 负责目录格式与 `/skill:` 展开；`list-skills.mjs` 供设置页列出同一结果。系统提示词只留入口地图，业务工具用法在 `nai-studio`。

@@ -976,6 +976,15 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
     return true;
   }
 
+  /// Automatic readings decorate the current source without adding an undo step.
+  bool updateReadingsIfCurrent(PillDocument expected, PillDocument translated) {
+    if (state.document != expected) return false;
+    final replacement = expected.copyWith(readings: translated.readings);
+    _history.updateCurrent(replacement);
+    _apply(replacement, recordHistory: false);
+    return true;
+  }
+
   void showAllTranslations({required bool original}) {
     final instances = Map<String, PillInstance>.of(state.document.instances);
     var changed = false;

@@ -146,7 +146,9 @@ class _SelectionPainter extends RenderEditablePainter {
     canvas.clipRect(Offset.zero & size);
     var offset = 0;
     final backgrounds = <Color, Path>{};
-    final sourceLines = <double, ({double left, double right})>{};
+    final plainText = editable.text?.toPlainText() ?? '';
+    bool padding(int index) =>
+        plainText[index].trim().isEmpty || plainText[index] == '\u2060';
     void paintBackground(InlineSpan span) {
       if (span is TextLineBackgroundSpan) {
         // Newlines have no glyph; their selection boxes include trailing and
@@ -157,29 +159,42 @@ class _SelectionPainter extends RenderEditablePainter {
             extentOffset: offset + run.end,
           );
           for (final box in editable.getBoxesForSelection(range)) {
-            final edges = sourceLines.putIfAbsent(box.top, () {
-              double caretEdge(double x) {
-                final position = editable.getPositionForPoint(
-                  editable.localToGlobal(Offset(x, (box.top + box.bottom) / 2)),
-                );
-                return editable.getLocalRectForCaret(position).left -
-                    editable.cursorOffset.dx;
-              }
-
-              final a = caretEdge(0), b = caretEdge(size.width);
-              return (left: math.min(a, b), right: math.max(a, b));
-            });
-            // BoxWidthStyle.max adds selection fillers beyond the actual line.
-            // Drop those boxes without changing native selection geometry.
-            final snap = 1 / editable.devicePixelRatio;
-            if (box.right <= edges.left + snap ||
-                box.left >= edges.right - snap) {
-              continue;
+            final position = editable.getPositionForPoint(
+              editable.localToGlobal(
+                Offset(box.left, (box.top + box.bottom) / 2),
+              ),
+            );
+            final line = editable.getLineAtOffset(position);
+            var start = math.max(range.start, line.start);
+            var end = math.min(range.end, line.end);
+            while (start < end && padding(start)) {
+              start++;
             }
+            while (end > start && padding(end - 1)) {
+              end--;
+            }
+            if (start == end) continue;
+            final first =
+                editable
+                    .getLocalRectForCaret(TextPosition(offset: start))
+                    .left -
+                editable.cursorOffset.dx;
+            final last =
+                editable
+                    .getLocalRectForCaret(
+                      TextPosition(
+                        offset: end,
+                        affinity: TextAffinity.upstream,
+                      ),
+                    )
+                    .left -
+                editable.cursorOffset.dx;
+            // Native selection may extend to the paragraph edge or include an
+            // annotation's reserve. Clip fills to this run's source glyphs.
             final rect = Rect.fromLTRB(
-              box.left + span.horizontalInset,
+              math.max(box.left, math.min(first, last)) + span.horizontalInset,
               box.top,
-              box.right - span.horizontalInset,
+              math.min(box.right, math.max(first, last)) - span.horizontalInset,
               box.bottom,
             );
             if (!rect.isEmpty) {

@@ -517,7 +517,6 @@ void main() {
       SettingKey.intervalJitter: 0.0,
       SettingKey.agentMaxRequests: 32.0,
       SettingKey.ragEnabled: false,
-      SettingKey.ragContextTokens: 120.0,
       SettingKey.ragDevice: 'auto',
       SettingKey.seedCpuOffload: 0.0,
       SettingKey.seedVaeTiling: true,
@@ -534,6 +533,31 @@ void main() {
   });
 
   group('语义检索', () {
+    for (final locale in ['zh', 'en', 'ja']) {
+      testWidgets(
+        'RAG uses one Gemma model with no retired controls: $locale',
+        (t) async {
+          await pumpSettings(
+            t,
+            page: SettingsPageId.rag,
+            locale: locale,
+            window: 1200,
+            height: 1000,
+            dark: true,
+          );
+          expect(find.byKey(const Key('path-ragEmbedPath')), findsOneWidget);
+          expect(find.textContaining('Qwen'), findsNothing);
+          expect(find.byKey(const Key('path-ragRerankPath')), findsNothing);
+          expect(t.takeException(), isNull);
+          await captureUiuxRegion(
+            t,
+            find.byKey(const Key('settings-capture')),
+            'rag-single-model-$locale',
+            const Rect.fromLTWH(0, 0, 1152, 1000),
+          );
+        },
+      );
+    }
     Future<SettingsRecorder> rag(WidgetTester t, SettingsRagData d) =>
         pumpSettings(
           t,
@@ -553,7 +577,7 @@ void main() {
 
     testWidgets('下载模型、查找本地模型、选解释器', (t) async {
       final rec = await pumpSettings(t, page: SettingsPageId.rag);
-      await tap(t, 'rag-download-btn-reranker');
+      await tap(t, 'rag-download-btn-embedder');
       await tap(t, 'rag-discover-btn');
       final py = find.byKey(const Key('path-ragPythonPath'));
       await t.ensureVisible(py);
@@ -566,7 +590,7 @@ void main() {
       await t.tap(find.descendant(of: py, matching: find.byTooltip('更改')));
       await t.pumpAndSettle();
       expect(rec.calls, [
-        'ragDownload:reranker',
+        'ragDownload:embedder',
         'ragDiscover',
         'pickPath:ragPythonPath',
       ]);
@@ -577,7 +601,7 @@ void main() {
       expect(find.byKey(const Key('rag-download-embedder')), findsOneWidget);
       expect(find.byKey(const Key('rag-error')), findsOneWidget);
       expect(find.byKey(const Key('rag-models-missing')), findsOneWidget);
-      await tap(t, 'rag-download-btn-reranker');
+      expect(find.byKey(const Key('rag-download-btn-embedder')), findsNothing);
       await tap(t, 'rag-use-python');
       expect(rec.calls, isEmpty, reason: '下载中不能再开别的重活');
       await tap(t, 'rag-download-cancel-embedder');

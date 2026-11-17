@@ -532,10 +532,31 @@ class _SettingsModelsPageState extends State<SettingsModelsPage> {
               Row(
                 spacing: 6,
                 children: [
-                  SettingsDot(r.ok ? SettingsTone.ok : SettingsTone.error),
-                  Text(
-                    r.ok ? l.set_mdOk : l.set_mdFailed,
-                    style: UiText.sans(12, color: r.ok ? c.muted : c.error),
+                  SettingsDot(switch (r.status) {
+                    SettingsRequestStatus.success => SettingsTone.ok,
+                    SettingsRequestStatus.failed => SettingsTone.error,
+                    SettingsRequestStatus.running => SettingsTone.warn,
+                    _ => SettingsTone.idle,
+                  }),
+                  Flexible(
+                    child: Text(
+                      switch (r.status) {
+                        SettingsRequestStatus.pending =>
+                          l.modelRequest_statusPending,
+                        SettingsRequestStatus.running =>
+                          l.modelRequest_statusRunning,
+                        SettingsRequestStatus.success => l.set_mdOk,
+                        SettingsRequestStatus.failed => l.set_mdFailed,
+                        SettingsRequestStatus.cancelled =>
+                          l.modelRequest_statusCancelled,
+                      },
+                      style: UiText.sans(
+                        12,
+                        color: r.status == SettingsRequestStatus.failed
+                            ? c.error
+                            : c.muted,
+                      ),
+                    ),
                   ),
                 ],
               ),

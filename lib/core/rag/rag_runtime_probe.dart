@@ -4,14 +4,26 @@ import 'dart:io';
 import 'rag_platform.dart';
 import 'rag_process.dart';
 
+enum RagRuntimeIssue {
+  missing,
+  dependencies,
+  pythonVersion,
+  importFailed,
+  timedOut,
+}
+
 class RagRuntimeInfo {
   const RagRuntimeInfo({
     required this.python,
     required this.ready,
     this.cuda = false,
+    this.issue,
+    this.packages = const [],
   });
   final String python;
   final bool ready, cuda;
+  final RagRuntimeIssue? issue;
+  final List<String> packages;
 }
 
 typedef RagProbeRunner =
@@ -48,16 +60,39 @@ class RagRuntimeProbe {
   bool _cancelled = false;
   static const code = '''
 import sys,json,importlib.metadata as m
-import torch,torchvision,transformers,sentence_transformers,usearch.index,numpy,PIL
-from transformers.models.embedding_gemma2 import EmbeddingGemma2Model
-expected={'torch':'2.10.0','torchvision':'0.25.0','transformers':'5.19.0','sentence-transformers':'6.1.0','usearch':'2.26.4','numpy':'2.5.4','Pillow':'12.2.0'}
-ok=sys.version_info[:2]==(3,12) and all(m.version(k).split('+')[0]==v for k,v in expected.items())
-print(json.dumps({'ready':ok,'cuda':torch.version.cuda is not None}),flush=True)
+expected={'torch':'2.10.0','torchvision':'0.25.0','transformers':'5.19.0','sentence-transformers':'6.1.0','usearch':'2.26.4','numpy':'2.5.4','Pillow':'12.2.0','jieba':'0.42.1','setuptools':'78.1.0'}
+packages=[]
+for name,version in expected.items():
+    try: compatible=m.version(name).split('+')[0]==version
+    except m.PackageNotFoundError: compatible=False
+    if not compatible: packages.append(name)
+if sys.version_info[:2]!=(3,12):
+    result={'ready':False,'issue':'pythonVersion'}
+elif packages:
+    result={'ready':False,'issue':'dependencies','packages':packages}
+else:
+    try:
+        import torch,torchvision,transformers,sentence_transformers,jieba,usearch.index,numpy,PIL
+        from transformers.models.embedding_gemma2 import EmbeddingGemma2Model
+        result={'ready':True,'cuda':torch.version.cuda is not None}
+    except Exception:
+        result={'ready':False,'issue':'importFailed'}
+print(json.dumps(result),flush=True)
 ''';
   Future<RagRuntimeInfo> inspect(Directory root, String preferred) async {
     final managed = platform.managedPython(root.path);
+    var failure = RagRuntimeInfo(
+      python: preferred.isEmpty ? managed : preferred,
+      ready: false,
+      issue: RagRuntimeIssue.missing,
+    );
     for (final python in {if (preferred.isNotEmpty) preferred, managed}) {
       if (_cancelled || !await File(python).exists()) continue;
+      var candidate = RagRuntimeInfo(
+        python: python,
+        ready: false,
+        issue: RagRuntimeIssue.importFailed,
+      );
       Process? process;
       try {
         process = await _runner(root, python, code);
@@ -94,6 +129,19 @@ print(json.dumps({'ready':ok,'cuda':torch.version.cuda is not None}),flush=True)
                     cuda: value['cuda'] == true,
                   );
                 }
+                candidate = RagRuntimeInfo(
+                  python: python,
+                  ready: false,
+                  issue:
+                      RagRuntimeIssue.values
+                          .where((issue) => issue.name == value['issue'])
+                          .firstOrNull ??
+                      RagRuntimeIssue.importFailed,
+                  packages: (value['packages'] as List? ?? const [])
+                      .whereType<String>()
+                      .toList(),
+                );
+                break;
               } catch (_) {}
             }
           }
@@ -101,6 +149,12 @@ print(json.dumps({'ready':ok,'cuda':torch.version.cuda is not None}),flush=True)
           await output.cancel();
           await errors.cancel();
         }
+      } on TimeoutException {
+        candidate = RagRuntimeInfo(
+          python: python,
+          ready: false,
+          issue: RagRuntimeIssue.timedOut,
+        );
       } catch (_) {
         // A broken manually selected environment may still have a compatible
         // managed installation; report it for explicit reuse instead of repair.
@@ -110,11 +164,9 @@ print(json.dumps({'ready':ok,'cuda':torch.version.cuda is not None}),flush=True)
           _processes.remove(process);
         }
       }
+      if (failure.issue == RagRuntimeIssue.missing) failure = candidate;
     }
-    return RagRuntimeInfo(
-      python: preferred.isEmpty ? managed : preferred,
-      ready: false,
-    );
+    return failure;
   }
 
   void cancel() {

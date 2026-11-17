@@ -127,10 +127,9 @@ void main() {
       final ftsIds = await dataSource.searchFullText('masterpiece', limit: 10);
       expect(ftsIds, contains(imageId));
 
-      // tag chips 过滤链路（gallery_tags ∪ full_prompt_text）
-      final tagFilterIds = await dataSource.searchByDelimitedTextSegments(
+      // tag chips 过滤链路（手动标签与完整正向标签）
+      final tagFilterIds = await dataSource.searchByExactTags(
         ['1girl'],
-        limit: 10,
         candidatePaths: [pngPath],
       );
       expect(tagFilterIds, contains(imageId));

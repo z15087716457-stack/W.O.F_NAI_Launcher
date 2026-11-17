@@ -128,7 +128,7 @@ os._exit(0)
 
     def test_executor_waits_without_polling_and_counts_idle_from_last_build(self):
         worker = Worker()
-        worker.models = SimpleNamespace(encoder=None, scorer=None, unload=Mock())
+        worker.models = SimpleNamespace(encoder=None, unload=Mock())
         with patch.object(worker.queue, 'get', side_effect=lambda *, timeout: stop(timeout)) as get:
             def stop(timeout):
                 self.assertIsNone(timeout)
@@ -139,7 +139,7 @@ os._exit(0)
             get.assert_called_once_with(timeout=None)
 
         worker = Worker()
-        worker.models = SimpleNamespace(encoder=object(), scorer=None)
+        worker.models = SimpleNamespace(encoder=object())
         self.build(self.tags)
         worker.engines = {'tags': self.tags}
         worker.jobs['check'] = {'id': 'check', 'source': 'tags', 'paused': False,

@@ -227,6 +227,7 @@ dist/checksums.txt
 .kimi/
 
 # Local NAI Agent dependencies and synthetic test sessions.
+/.runs/
 /tool/nai_agent/node_modules/
 /tool/nai_agent/.runs/
 

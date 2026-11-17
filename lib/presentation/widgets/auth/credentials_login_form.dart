@@ -168,6 +168,8 @@ class _CredentialsLoginFormState extends ConsumerState<CredentialsLoginForm> {
         return context.l10n.auth_error_authFailed;
       case AuthErrorCode.credentialsLoginUnavailable:
         return context.l10n.auth_error_credentialsLoginUnavailable;
+      case AuthErrorCode.incompatibleApi:
+        return context.l10n.auth_error_incompatibleApi;
       case AuthErrorCode.serverError:
         return context.l10n.auth_error_serverError;
       case AuthErrorCode.unknown:
@@ -192,6 +194,8 @@ class _CredentialsLoginFormState extends ConsumerState<CredentialsLoginForm> {
         return context.l10n.api_error_401_hint;
       case AuthErrorCode.credentialsLoginUnavailable:
         return context.l10n.auth_error_credentialsLoginUnavailable_hint;
+      case AuthErrorCode.incompatibleApi:
+        return context.l10n.auth_error_incompatibleApi;
       case AuthErrorCode.serverError:
         if (httpStatusCode == 503) {
           return context.l10n.api_error_503_hint;

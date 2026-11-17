@@ -23,7 +23,7 @@ def models(requested):
     # Skip __init__: it resolves model folders and fingerprints the weights.
     value = Models.__new__(Models)
     value.requested_device = requested
-    value.encoder = value.scorer = value.tokenizer = None
+    value.encoder = value.tokenizer = None
     value.vision = False
     return value
 

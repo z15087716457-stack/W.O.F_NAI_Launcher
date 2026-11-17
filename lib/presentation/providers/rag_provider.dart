@@ -14,6 +14,7 @@ import '../../core/rag/rag_settings.dart';
 import '../../core/rag/rag_runtime.dart';
 import '../../core/rag/rag_runtime_probe.dart';
 import '../../core/rag/rag_text_search.dart';
+import '../../core/rag/rag_tag_search.dart';
 import '../../core/rag/rag_block_snapshot.dart';
 import '../../core/rag/rag_platform.dart';
 import '../../core/rag/rag_gallery_search.dart';
@@ -47,6 +48,10 @@ class RagStatus {
     this.initializationProcessed = 0,
     this.initializationTotal = 0,
     this.degraded = const [],
+    this.upgradeAvailable = false,
+    this.upgradeFailed = false,
+    this.upgradeCleaning = false,
+    this.cleanupOnly = false,
   });
   final String phase;
   final int indexed, processed, total, bytes, searching;
@@ -58,6 +63,7 @@ class RagStatus {
   final Map<RagSource, RagStatus> sources;
   final Map<String, int> details;
   final List<String> degraded;
+  final bool upgradeAvailable, upgradeFailed, upgradeCleaning, cleanupOnly;
   final bool indexKnown, initializing;
   final String initializationPhase;
   final int initializationProcessed, initializationTotal;
@@ -96,6 +102,10 @@ class RagStatus {
     int? initializationProcessed,
     int? initializationTotal,
     List<String>? degraded,
+    bool? upgradeAvailable,
+    bool? upgradeFailed,
+    bool? upgradeCleaning,
+    bool? cleanupOnly,
   }) => RagStatus(
     phase: phase ?? this.phase,
     indexed: indexed ?? this.indexed,
@@ -122,6 +132,10 @@ class RagStatus {
         initializationProcessed ?? this.initializationProcessed,
     initializationTotal: initializationTotal ?? this.initializationTotal,
     degraded: degraded ?? this.degraded,
+    upgradeAvailable: upgradeAvailable ?? this.upgradeAvailable,
+    upgradeFailed: upgradeFailed ?? this.upgradeFailed,
+    upgradeCleaning: upgradeCleaning ?? this.upgradeCleaning,
+    cleanupOnly: cleanupOnly ?? this.cleanupOnly,
   );
 }
 
@@ -290,10 +304,7 @@ class RagController extends Notifier<RagStatus> {
     return const RagStatus();
   }
 
-  bool get _enabled {
-    final s = ref.read(ragSettingsProvider);
-    return RagSource.values.any(s.enabledFor);
-  }
+  bool get _enabled => ref.read(ragSettingsProvider).enabled;
 
   Future<void> _reset() async {
     final epoch = ++_epoch;
@@ -366,11 +377,11 @@ class RagController extends Notifier<RagStatus> {
       if (!await File(python).exists()) {
         throw const RagException('runtime_missing');
       }
-      if (settings.embedding.isEmpty || settings.reranker.isEmpty) {
+      if (settings.embedding.isEmpty) {
         throw const RagException('models_missing');
       }
       if (!_disposed && epoch == _epoch) {
-        for (final source in RagSource.values.where(settings.enabledFor)) {
+        for (final source in RagSource.values) {
           _change(
             source,
             (s) => s.copyWith(phase: 'loading', clearError: true),
@@ -378,15 +389,9 @@ class RagController extends Notifier<RagStatus> {
         }
       }
       final paths = await ref.read(ragSourcePathsProvider)();
-      final snapshot = settings.blocksEnabled
-          ? await _writeBlockSnapshot(root)
-          : '';
-      final galleryRoots = settings.galleryEnabled
-          ? await _writeGalleryRoots(root)
-          : '';
-      final tagPaths = settings.tagsEnabled
-          ? await ref.read(ragTagSemanticsPathsProvider)()
-          : null;
+      final snapshot = await _writeBlockSnapshot(root);
+      final galleryRoots = await _writeGalleryRoots(root);
+      final tagPaths = await ref.read(ragTagSemanticsPathsProvider)();
       final client = await ref.read(ragClientStarterProvider)(
         python: python,
         directory: root,
@@ -400,7 +405,6 @@ class RagController extends Notifier<RagStatus> {
         final result = await client.configure(
           {
             'embedding': settings.embedding,
-            'reranker': settings.reranker,
             'device': settings
                 .deviceOn(
                   RagPlatform.host,
@@ -411,16 +415,13 @@ class RagController extends Notifier<RagStatus> {
             'catalog': paths.catalog,
             'runtime': paths.runtime,
             'wiki': paths.wiki,
-            if (tagPaths != null) 'tag_semantics': tagPaths.base,
-            if (tagPaths != null && await File(tagPaths.supplements).exists())
+            'tag_semantics': tagPaths.base,
+            if (await File(tagPaths.supplements).exists())
               'tag_supplements': tagPaths.supplements,
             'translations': await ref.read(ragWikiTranslationsPathProvider)(),
             'blocks': snapshot,
             'gallery_roots': galleryRoots,
-            'sources': [
-              for (final source in RagSource.values)
-                if (settings.enabledFor(source)) source.name,
-            ],
+            'sources': [for (final source in RagSource.values) source.name],
           },
           cancellation: cancellation,
           timeout: ref.read(ragInitializationTimeoutProvider),
@@ -571,6 +572,11 @@ class RagController extends Notifier<RagStatus> {
         bytes: (result['bytes'] as num?)?.toInt(),
         complete: result['complete'] as bool?,
         partial: result['partial'] as bool?,
+        upgradeAvailable: result['upgrade_available'] == true,
+        upgradeFailed: result['upgrade_failed'] == true,
+        upgradeCleaning: result['upgrade_cleaning'] == true,
+        cleanupOnly: result['cleanup_only'] == true,
+        error: result['error'] as String?,
         busy: result['building'] == true || result['checking'] == true,
         details: {
           for (final key in [
@@ -579,10 +585,13 @@ class RagController extends Notifier<RagStatus> {
             'parameter_chunks',
             'parameters_indexed',
             'skipped',
+            'legacy_bytes',
           ])
             if (result[key] is num) key: (result[key] as num).toInt(),
         },
-        phase: result['paused'] == true
+        phase: result['error'] != null
+            ? 'error'
+            : result['paused'] == true
             ? 'paused'
             : result['building'] == true
             ? 'building'
@@ -593,7 +602,7 @@ class RagController extends Notifier<RagStatus> {
             : (result['indexed'] as num? ?? 0) > 0
             ? 'partial'
             : 'empty',
-        clearError: true,
+        clearError: result['error'] == null,
       ),
     );
     if (result['paused'] == true) {
@@ -638,11 +647,10 @@ class RagController extends Notifier<RagStatus> {
       if (configured != null) {
         status = configured;
       } else {
-        if (ref.read(ragSettingsProvider).enabledFor(RagSource.blocks)) {
-          await _writeBlockSnapshot(await ref.read(ragDirectoryProvider)());
-        }
-        if (ref.read(ragSettingsProvider).enabledFor(RagSource.gallery)) {
-          await _writeGalleryRoots(await ref.read(ragDirectoryProvider)());
+        if (ref.read(ragSettingsProvider).enabled) {
+          final root = await ref.read(ragDirectoryProvider)();
+          await _writeBlockSnapshot(root);
+          await _writeGalleryRoots(root);
         }
         status = await c.request(
           'status',
@@ -659,11 +667,11 @@ class RagController extends Notifier<RagStatus> {
         if (autoUpdate &&
             !state.anyBusy &&
             value?['auto_update_allowed'] == true &&
-            value?['complete'] != true &&
+            (value?['complete'] != true || value?['upgrade_pending'] == true) &&
             state.forSource(source).jobId == null &&
             !state.suspended &&
             _gpuHolds == 0 &&
-            ref.read(ragSettingsProvider).enabledFor(source)) {
+            ref.read(ragSettingsProvider).enabled) {
           final plan = await preview(source: source, verify: false);
           await start(plan['plan_id'] as String, source: source);
         }
@@ -679,7 +687,7 @@ class RagController extends Notifier<RagStatus> {
       }
       if (epoch == _epoch) {
         for (final source in RagSource.values) {
-          if (ref.read(ragSettingsProvider).enabledFor(source)) {
+          if (ref.read(ragSettingsProvider).enabled) {
             _fail(error, source: source);
           }
         }
@@ -745,7 +753,7 @@ class RagController extends Notifier<RagStatus> {
       final c = await _connect();
       if (_disposed ||
           epoch != _epoch ||
-          !ref.read(ragSettingsProvider).enabledFor(source)) {
+          !ref.read(ragSettingsProvider).enabled) {
         throw const RagException('cancelled');
       }
       _plans.remove(planId);
@@ -794,21 +802,26 @@ class RagController extends Notifier<RagStatus> {
   Future<void> _resume(RagSource source) async {
     final epoch = _epoch;
     final id = state.forSource(source).jobId;
-    if (id == null) {
-      final p = await _preview(source);
-      await _start(p['plan_id'] as String, rebuild: false, source: source);
-      return;
+    if (id != null) {
+      final client = await _connect();
+      if (_disposed ||
+          epoch != _epoch ||
+          !ref.read(ragSettingsProvider).enabled) {
+        throw const RagException('cancelled');
+      }
+      try {
+        await client.request('resume', {'job_id': id, 'source': source.name});
+        if (!_disposed && epoch == _epoch && !_finishedJobs.contains(id)) {
+          _change(source, (s) => s.copyWith(phase: 'checking', busy: true));
+        }
+        return;
+      } on RagException catch (error) {
+        if (error.code != 'job_missing') rethrow;
+      }
     }
-    final client = await _connect();
-    if (_disposed ||
-        epoch != _epoch ||
-        !ref.read(ragSettingsProvider).enabledFor(source)) {
-      throw const RagException('cancelled');
-    }
-    await client.request('resume', {'job_id': id, 'source': source.name});
-    if (!_disposed && epoch == _epoch) {
-      _change(source, (s) => s.copyWith(phase: 'checking', busy: true));
-    }
+    if (_disposed || epoch != _epoch) throw const RagException('cancelled');
+    final plan = await _preview(source);
+    await _start(plan['plan_id'] as String, rebuild: false, source: source);
   }
 
   Future<void> clear({RagSource source = RagSource.tags}) =>
@@ -819,7 +832,7 @@ class RagController extends Notifier<RagStatus> {
     final c = await _connect();
     if (_disposed ||
         epoch != _epoch ||
-        !ref.read(ragSettingsProvider).enabledFor(source)) {
+        !ref.read(ragSettingsProvider).enabled) {
       throw const RagException('cancelled');
     }
     final result = await c.request('clear', {'source': source.name});
@@ -909,7 +922,7 @@ class RagController extends Notifier<RagStatus> {
   }) async {
     if ((query.source != RagSource.wiki && query.source != RagSource.blocks) ||
         query.query.trim().isEmpty ||
-        !ref.read(ragSettingsProvider).enabledFor(query.source) ||
+        !ref.read(ragSettingsProvider).enabled ||
         _gpuHolds > 0) {
       return const [];
     }
@@ -981,7 +994,7 @@ class RagController extends Notifier<RagStatus> {
     RagGalleryMode mode = RagGalleryMode.mixed,
   }) async {
     if (_gpuHolds > 0) throw const RagException('resource_busy');
-    if (!ref.read(ragSettingsProvider).enabledFor(RagSource.gallery) ||
+    if (!ref.read(ragSettingsProvider).enabled ||
         (query.trim().isEmpty && image.isEmpty) ||
         allowed.isEmpty) {
       return const [];
@@ -1062,18 +1075,14 @@ class RagController extends Notifier<RagStatus> {
     }
   }
 
-  Future<List<CompletionCandidate>> recommend({
-    required String text,
-    required int cursor,
+  Future<List<CompletionCandidate>> searchTags({
+    required String query,
     required Set<String> existing,
-    required List<CompletionCandidate> lexical,
     required RagCancellation cancellation,
-    bool negative = false,
-    String keyword = '',
     int limit = 40,
+    RagTagSearchOptions tagOptions = const RagTagSearchOptions(),
   }) async {
-    if (!ref.read(ragSettingsProvider).enabledFor(RagSource.tags) ||
-        _gpuHolds > 0) {
+    if (!ref.read(ragSettingsProvider).enabled || _gpuHolds > 0) {
       return const [];
     }
     final epoch = _epoch;
@@ -1086,15 +1095,10 @@ class RagController extends Notifier<RagStatus> {
         state = state.copyWith(searching: state.searching + 1);
       }
       final result = await c.request('search', {
-        'text': text,
-        'cursor': cursor,
-        'mode': 'before',
-        'budget': ref.read(ragSettingsProvider).tokenBudget,
+        'query': query,
         'existing': existing.toList(),
-        'lexical': lexical.map((e) => e.canonicalTag).toList(),
-        'negative': negative,
-        'keyword': keyword,
         'limit': limit,
+        ...tagOptions.toJson(limit: limit),
       }, cancellation);
       if (result['fallback'] == 'resource_busy') {
         throw const RagException('resource_busy');
@@ -1216,7 +1220,7 @@ class RagController extends Notifier<RagStatus> {
 final ragTextSearchProvider = FutureProvider.autoDispose
     .family<List<RagSearchHit>, RagTextQuery>((ref, query) async {
       final settings = ref.watch(ragSettingsProvider);
-      if (!settings.enabledFor(query.source) || query.query.trim().isEmpty) {
+      if (!settings.enabled || query.query.trim().isEmpty) {
         return const [];
       }
       ref.watch(

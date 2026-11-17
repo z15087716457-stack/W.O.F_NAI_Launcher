@@ -58,6 +58,7 @@ abstract final class AccountSwitchHelper {
       AuthErrorCode.tokenInvalid => context.l10n.auth_error_authFailed,
       AuthErrorCode.credentialsLoginUnavailable =>
         context.l10n.auth_error_credentialsLoginUnavailable,
+      AuthErrorCode.incompatibleApi => context.l10n.auth_error_incompatibleApi,
       AuthErrorCode.serverError => context.l10n.auth_error_serverError,
       _ => context.l10n.auth_loginFailed,
     };
@@ -86,9 +87,7 @@ abstract final class AccountSwitchHelper {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text(context.l10n.auth_switchAccount),
-        content: Text(
-          message ?? context.l10n.auth_switchFailedDeletePrompt,
-        ),
+        content: Text(message ?? context.l10n.auth_switchFailedDeletePrompt),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
@@ -116,8 +115,7 @@ abstract final class AccountSwitchHelper {
     WidgetRef ref,
     SavedAccount account,
   ) async {
-    final isCurrent =
-        ref.read(authNotifierProvider).accountId == account.id;
+    final isCurrent = ref.read(authNotifierProvider).accountId == account.id;
 
     final confirm = await showDialog<bool>(
       context: context,

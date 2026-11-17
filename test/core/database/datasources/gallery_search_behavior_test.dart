@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -113,6 +114,275 @@ void main() {
 
       expect(result, contains(imageId));
     });
+
+    for (final (name, prompt, queries) in [
+      (
+        'weighted tags',
+        '-1.5::chibi, dolls, comic, reference_sheet, 4koma, 2koma::, 1girl',
+        [
+          '-1.5::chibi, dolls, comic, reference sheet, 4koma, 2koma',
+          'chibi, dolls, comic, reference_sheet, 4koma, 2koma::',
+          'chibi\ndolls\nreference sheet\n2koma',
+        ],
+      ),
+      (
+        'weighted prose',
+        'A girl with 1.3::silver hair:: holds a book.',
+        [
+          'A girl with 1.3::silver hair:: holds a book.',
+          'A girl with silver hair holds a book.',
+          'with 1.3::silver hair:: holds',
+        ],
+      ),
+      (
+        'literal phrases',
+        'hero_(game, version), said "warm\nlight"',
+        [
+          'hero_(game, version), said "warm\nlight"',
+          'hero (game, version)',
+          'said "warm light"',
+        ],
+      ),
+    ]) {
+      test(
+        'copied $name finds its source regardless of other image tags',
+        () async {
+          final now = DateTime.now();
+          final file = File('/test/copy_${name.replaceAll(' ', '_')}.png');
+          final id = await dataSource.upsertImage(
+            filePath: file.path,
+            fileName: file.uri.pathSegments.last,
+            fileSize: 1,
+            createdAt: now,
+            modifiedAt: now,
+          );
+          await dataSource.upsertMetadata(
+            id,
+            NaiImageMetadata(prompt: prompt, negativePrompt: 'secret_negative'),
+          );
+          final other = await dataSource.upsertImage(
+            filePath: '/test/other.png',
+            fileName: 'other.png',
+            fileSize: 1,
+            createdAt: now,
+            modifiedAt: now,
+          );
+          await dataSource.upsertMetadata(
+            other,
+            const NaiImageMetadata(prompt: 'landscape'),
+          );
+          final service = GalleryFilterService(dataSource);
+          for (final addTags in [false, true]) {
+            if (addTags) {
+              await dataSource.addTag(other, '2koma');
+              await dataSource.addTag(other, 'silver_hair');
+            }
+            for (final query in queries) {
+              expect(
+                await dataSource.searchFullText(query),
+                contains(id),
+                reason: query,
+              );
+              expect(
+                await dataSource.searchByMetadataText(query),
+                contains(id),
+                reason: query,
+              );
+              expect(
+                await dataSource.advancedSearch(textQuery: query),
+                contains(id),
+                reason: query,
+              );
+              final filtered = await service.applyFilters([
+                file,
+              ], FilterCriteria(searchQuery: query));
+              expect(filtered.files.map((f) => f.path), [
+                file.path,
+              ], reason: query);
+            }
+          }
+          expect(
+            await dataSource.advancedSearch(textQuery: 'secret_negative'),
+            isEmpty,
+          );
+          if (name == 'weighted tags') {
+            expect(
+              await dataSource.searchByExactTags(
+                ['2koma'],
+                candidatePaths: [file.path],
+              ),
+              [id],
+            );
+          }
+        },
+      );
+    }
+
+    test(
+      'old derived search text upgrades once and preserves raw character metadata',
+      () async {
+        final now = DateTime.now();
+        final id = await dataSource.upsertImage(
+          filePath: '/test/legacy.png',
+          fileName: 'legacy.png',
+          fileSize: 1,
+          createdAt: now,
+          modifiedAt: now,
+        );
+        final raw = jsonEncode({
+          'prompt': 'A girl with 1.3::silver hair:: holds a book.',
+          'uc': 'base_negative_only',
+          'v4_prompt': {
+            'caption': {
+              'base_caption': 'A girl with 1.3::silver hair:: holds a book.',
+              'char_captions': [
+                {'char_caption': '0.8::blue_eyes, solo::'},
+              ],
+            },
+          },
+          'v4_negative_prompt': {
+            'caption': {
+              'base_caption': 'base_negative_only',
+              'char_captions': [
+                {'char_caption': 'character_negative_only'},
+              ],
+            },
+          },
+        });
+        final parsed = NovelAiParser().parse({'Comment': raw})!;
+        expect(parsed.characterPrompts, isNotEmpty);
+        await dataSource.upsertMetadata(id, parsed);
+        final pageIds = await dataSource.batchUpsertImages([
+          for (var i = 0; i < 501; i++)
+            GalleryImageRecord(
+              filePath: '/test/legacy_page_$i.png',
+              fileName: 'legacy_page_$i.png',
+              fileSize: 1,
+              createdAt: now,
+              modifiedAt: now,
+              indexedAt: now,
+              dateYmd: 20261117,
+            ),
+        ]);
+        await dataSource.batchUpsertMetadata([
+          for (final pageId in pageIds)
+            MapEntry(
+              pageId,
+              const NaiImageMetadata(prompt: 'paged 1.2::migration text::'),
+            ),
+        ]);
+        final original = await dataSource.execute(
+          'snapshotRaw',
+          (db) => db.query(
+            'gallery_metadata',
+            columns: ['prompt', 'negative_prompt', 'raw_json'],
+            where: 'image_id = ?',
+            whereArgs: [id],
+          ),
+        );
+        await dataSource.execute('legacySearchFixture', (db) async {
+          await db.delete(
+            'gallery_meta',
+            where: 'key = ?',
+            whereArgs: ['positive_search_text_v2'],
+          );
+          await db.insert('gallery_meta', {
+            'key': 'positive_search_text_v1',
+            'value': 'legacy',
+          }, conflictAlgorithm: ConflictAlgorithm.replace);
+          await db.update('gallery_metadata', {
+            'positive_prompt_text': 'stale derived text',
+          });
+          await db.update(
+            'gallery_metadata',
+            {
+              'positive_prompt_text':
+                  '${parsed.prompt} base_negative_only character_negative_only',
+            },
+            where: 'image_id = ?',
+            whereArgs: [id],
+          );
+          await db.delete('gallery_fts_index');
+          await db.insert('gallery_fts_index', {
+            'image_id': id,
+            'prompt_text':
+                '${parsed.prompt} base_negative_only character_negative_only',
+          });
+        });
+        await dataSource.dispose();
+        await dataSource.initialize();
+        final upgraded = await dataSource.execute(
+          'upgradedSearch',
+          (db) => db.query(
+            'gallery_metadata',
+            where: 'image_id = ?',
+            whereArgs: [id],
+          ),
+        );
+        expect(
+          upgraded.single['positive_prompt_text'],
+          contains('a girl with silver hair holds a book.'),
+        );
+        expect(
+          upgraded.single['positive_prompt_text'],
+          contains('blue eyes, solo'),
+        );
+        expect(await dataSource.searchFullText(parsed.prompt), contains(id));
+        expect(
+          await dataSource.searchByMetadataText('blue_eyes, solo'),
+          contains(id),
+        );
+        expect(
+          await dataSource.advancedSearch(textQuery: '0.8::blue_eyes, solo::'),
+          contains(id),
+        );
+        expect(
+          await dataSource.searchFullText('paged migration text', limit: 600),
+          unorderedEquals(pageIds),
+        );
+        for (final negative in [
+          'base_negative_only',
+          'character_negative_only',
+        ]) {
+          expect(await dataSource.searchFullText(negative), isEmpty);
+          expect(await dataSource.advancedSearch(textQuery: negative), isEmpty);
+        }
+        expect(
+          await dataSource.execute(
+            'retainedRaw',
+            (db) => db.query(
+              'gallery_metadata',
+              columns: ['prompt', 'negative_prompt', 'raw_json'],
+              where: 'image_id = ?',
+              whereArgs: [id],
+            ),
+          ),
+          original,
+        );
+        final marker = await dataSource.execute(
+          'readMarker',
+          (db) => db.query(
+            'gallery_meta',
+            where: 'key = ?',
+            whereArgs: ['positive_search_text_v2'],
+          ),
+        );
+        expect(marker, hasLength(1));
+        await dataSource.dispose();
+        await dataSource.initialize();
+        expect(
+          await dataSource.execute(
+            'markerAfterReopen',
+            (db) => db.query(
+              'gallery_meta',
+              where: 'key = ?',
+              whereArgs: ['positive_search_text_v2'],
+            ),
+          ),
+          marker,
+        );
+      },
+    );
 
     test('negative prompt text should not be searchable', () async {
       final now = DateTime.now();
@@ -239,17 +509,15 @@ void main() {
 
       // 正向片段命中
       expect(
-        await dataSource.searchByDelimitedTextSegments([
-          '1girl',
-          'blue_eyes',
-        ], limit: 10),
+        await dataSource.advancedSearch(
+          textQuery: '1girl, blue_eyes',
+          limit: 10,
+        ),
         contains(imageId),
       );
       // 负面片段不命中（旧口径在 negative_prompt 列上会误中）
       expect(
-        await dataSource.searchByDelimitedTextSegments([
-          'monochrome',
-        ], limit: 10),
+        await dataSource.advancedSearch(textQuery: 'monochrome', limit: 10),
         isEmpty,
       );
     });
@@ -280,7 +548,7 @@ void main() {
           await db.delete(
             'gallery_meta',
             where: 'key = ?',
-            whereArgs: ['positive_search_text_v1'],
+            whereArgs: ['positive_search_text_v2'],
           );
           await db.delete('gallery_fts_index');
           await db.insert('gallery_fts_index', {
@@ -381,6 +649,17 @@ void main() {
           isEmpty,
         );
         expect(await dataSource.advancedSearch(textQuery: 'aokumo, rin'), [id]);
+        final hits =
+            (dataSource.getCacheStatistics()['queryCache'] as Map)['hitCount']
+                as int;
+        expect(
+          await dataSource.advancedSearch(textQuery: ' 1.3::AOKUMO::, rin:: '),
+          [id],
+        );
+        expect(
+          (dataSource.getCacheStatistics()['queryCache'] as Map)['hitCount'],
+          hits + 1,
+        );
         expect(await dataSource.searchByMetadataText('aokumo rin'), isEmpty);
         expect(await dataSource.searchByMetadataText('aokumo,rin'), [id]);
         expect(
@@ -395,16 +674,10 @@ void main() {
       },
     );
 
-    test(
-      'empty delimited segments stay empty rather than becoming an unfiltered database query',
-      () async {
-        expect(await dataSource.searchByDelimitedTextSegments([]), isEmpty);
-        expect(
-          await dataSource.searchByDelimitedTextSegments([' ', '']),
-          isEmpty,
-        );
-      },
-    );
+    test('empty text queries have no hits in standalone text search', () async {
+      expect(await dataSource.searchFullText(',,, ::'), isEmpty);
+      expect(await dataSource.searchByMetadataText(',,, ::'), isEmpty);
+    });
 
     test('whole phrases do not OR words or prefix tokens', () async {
       final now = DateTime.now();
@@ -444,7 +717,7 @@ void main() {
     });
 
     test(
-      'known tags use full tag boundaries, retain parentheses and refresh mode cache',
+      'typed content stays stable after tag edits while tag chips retain full identity',
       () async {
         final now = DateTime.now();
         final files = <File>[];
@@ -476,11 +749,11 @@ void main() {
         await dataSource.addTag(ids.last, 'hero (game)');
         expect(
           await dataSource.advancedSearch(textQuery: 'blue eyes'),
-          unorderedEquals([ids[0], ids[2], ids[4]]),
+          unorderedEquals([ids[0], ids[1], ids[2], ids[4]]),
         );
         expect(
           await dataSource.advancedSearch(textQuery: '1.2::BLUE_EYES::, solo'),
-          unorderedEquals([ids[0], ids[4]]),
+          unorderedEquals([ids[0], ids[1], ids[4]]),
         );
         expect(
           await dataSource.advancedSearch(textQuery: 'hero (game)'),

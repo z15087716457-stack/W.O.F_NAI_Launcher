@@ -332,12 +332,15 @@ class GenTranslate with _GenValue {
     this.showing = false,
     this.hasTranslations = false,
     this.canAdjust = false,
+    this.automatic = false,
+    this.automaticFailed = false,
     this.route,
   });
 
   /// 正在翻译：图标转圈、按钮不可点。
   final bool busy;
   final PromptTranslationMode mode;
+  final bool automatic, automaticFailed;
 
   /// 当前这一面有译文正在显示（再点一下 = 全部显示原文）。
   final bool showing;
@@ -357,6 +360,8 @@ class GenTranslate with _GenValue {
     showing,
     hasTranslations,
     canAdjust,
+    automatic,
+    automaticFailed,
     route,
   ];
 }
@@ -1511,6 +1516,7 @@ class GenActions {
     required this.onToggleTranslation,
     required this.onTranslationSettings,
     this.onTranslationMode,
+    this.onAutomaticTranslation,
     this.onClearTranslations,
     this.onTranslationAdjust,
     required this.onOpenBridge,
@@ -1612,6 +1618,7 @@ class GenActions {
     onToggleTranslation: () => log('onToggleTranslation'),
     onTranslationSettings: () => log('onTranslationSettings'),
     onTranslationMode: (v) => log('onTranslationMode($v)'),
+    onAutomaticTranslation: (v) => log('onAutomaticTranslation($v)'),
     onClearTranslations: () => log('onClearTranslations'),
     onTranslationAdjust: (_) => log('onTranslationAdjust'),
     onOpenBridge: (_) => log('onOpenBridge'),
@@ -1716,6 +1723,7 @@ class GenActions {
         onToggleTranslation: onToggleTranslation,
         onTranslationSettings: onTranslationSettings,
         onTranslationMode: onTranslationMode,
+        onAutomaticTranslation: onAutomaticTranslation,
         onClearTranslations: onClearTranslations,
         onTranslationAdjust: onTranslationAdjust,
         onOpenBridge: onOpenBridge,
@@ -1836,6 +1844,7 @@ class GenActions {
   /// 去设置里配翻译模型。
   final VoidCallback onTranslationSettings;
   final ValueChanged<PromptTranslationMode>? onTranslationMode;
+  final ValueChanged<bool>? onAutomaticTranslation;
   final VoidCallback? onClearTranslations;
   final GenAnchorCallback? onTranslationAdjust;
 

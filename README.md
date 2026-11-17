@@ -35,7 +35,7 @@ W.O.F NAI Studio 是一个 Windows 桌面上的 NovelAI 第三方客户端。它
 | --- | --- |
 | `WOF_NAI_Studio_Windows_<版本>_Setup.exe` | **大多数人选这个。** 装到当前用户目录，不需要管理员权限，有开始菜单和桌面快捷方式。 |
 | `WOF_NAI_Studio_Windows_<版本>_Portable.zip` | 想放在自己指定的文件夹、U 盘或多台电脑之间带着走。解压后运行 `nai_launcher.exe`。 |
-| `WOF_NAI_Studio_macOS_<版本>_Portable.zip` | macOS 13.5 及以上的 Apple 芯片和 Intel Mac 通用。[下载 2.4.1 通用包](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/download/v2.4.1/WOF_NAI_Studio_macOS_2.4.1_Portable.zip)。 |
+| `WOF_NAI_Studio_macOS_<版本>_Portable.zip` | macOS 13.5 及以上的 Apple 芯片和 Intel Mac 通用。[下载 2.4.2 通用包](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/download/v2.4.2/WOF_NAI_Studio_macOS_2.4.2_Portable.zip)。 |
 
 Windows 两个版本都支持应用内更新，设置、图库数据库和 Agent 数据放在程序旁边的 `user-data/` 和 `agent-data/`。Mac 数据在用户的 Application Support 目录，更新下载并校验后用 Finder 替换应用。
 
@@ -55,9 +55,11 @@ Windows 两个版本都支持应用内更新，设置、图库数据库和 Agent
 
 **2.3.0 更新**带来大图自动适应、画布按显示尺寸解码、图库 RAG 增量索引、Agent 空闲回收，以及生图报价和重试修复。Windows 应用内更新显示安装进度，macOS 通用测试包由 GitHub Actions 构建。
 
+**2.4.2** 重构本地标签语义检索，结合 DanbooruSearch 规则与完整本地标签；旧索引支持明确升级、暂停续建和错误重试。新增默认关闭的轻量翻译自动补译，修复第三方 API 连接、整段提示词检索和输入法问题；Agent 升级至 Pi 1.5.2。
+
 **2.4.1 修复**轻量翻译对 V5 XML 分区、字段及混合散文的错位，继续共用现有模型和术语表。短标签保持紧凑双行，长原文与完整译文依次换行，不再省略或互相覆盖；保留原文直接编辑、输入法、框选、复制／剪切／撤销及待更新。同步修复权重底色越界、行尾绿块、接缝与手动换行光标。 修复中文输入法重复组词和纯原文选区细缝；补全候选完整换行、键盘选框正常滚动，仅实际键入触发。提示词补全与 Ctrl 标签扩展默认开启，保留已有关闭偏好；底部快捷提示与热度数字不再异常拆行。
 
-详细功能、修复与升级说明见 [2.4.1 更新日志](CHANGELOG.md#241---2026-11-15) 和 [正式版下载](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/tag/v2.4.1)。Agent 建议、缓存保温及翻译调整使用你自己的模型服务，可在设置中调整相关功能。
+详细功能、修复与升级说明见 [2.4.2 更新日志](CHANGELOG.md#242---2026-11-17) 和 [正式版下载](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/tag/v2.4.2)。Agent 建议、缓存保温及翻译调整使用你自己的模型服务，可在设置中调整相关功能。
 
 ## 三步上手
 
@@ -111,6 +113,8 @@ Windows 两个版本都支持应用内更新，设置、图库数据库和 Agent
 ### 本地语义检索（RAG）：用意思找东西
 
 <img src="docs/images/readme/zh/settings-rag.webp" alt="语义检索设置" width="100%">
+
+<sub>截图为较早版本；当前版本只有一个嵌入模型和一个 RAG 总开关，以以下说明及实际界面为准。</sub>
 
 可选组件。开启后，标签推荐、标签百科、积木库和本地画廊都能按“意思”搜索：输入“下雨的街道”也能找到相关的英文标签、积木和你以前画过的图，还能用一张图找相似的图。全部在你的电脑上运行，不上传任何内容。→ [语义检索教程](docs/guide/zh-CN/rag.md)
 

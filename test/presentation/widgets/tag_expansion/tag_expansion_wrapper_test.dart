@@ -6,24 +6,36 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:nai_launcher/presentation/widgets/autocomplete/tag_meaning.dart';
 import 'package:nai_launcher/core/autocomplete/cooccurrence_completion_source.dart';
 import 'package:nai_launcher/core/autocomplete/completion_models.dart';
 import 'package:nai_launcher/core/autocomplete/tag_catalog_repository.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/core/database/datasources/cooccurrence_data_source.dart';
 import 'package:nai_launcher/core/tag_expansion/local_tag_expansion_service.dart';
+import 'package:nai_launcher/core/tag_expansion/tag_semantics_repository.dart';
 import 'package:nai_launcher/core/tag_expansion/tag_expansion_providers.dart';
 import 'package:nai_launcher/core/utils/prompt_input_normalization.dart';
 import 'package:nai_launcher/core/wiki/tag_wiki_repository.dart';
+import 'package:nai_launcher/core/wiki/wiki_example_repository.dart';
+import 'package:nai_launcher/core/wiki/auto_tag_translation_controller.dart';
 import 'package:nai_launcher/core/wiki/wiki_tag_links.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
+import 'package:nai_launcher/presentation/themes/app_theme.dart';
 import 'package:nai_launcher/presentation/widgets/common/weight_adjust_toolbar.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/unified/unified_prompt_config.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/unified/unified_prompt_input.dart';
 import 'package:nai_launcher/presentation/widgets/tag_expansion/tag_expansion_wrapper.dart';
 import 'package:nai_launcher/presentation/widgets/common/wiki_linked_body.dart';
+import 'package:nai_launcher/presentation/widgets/common/wiki_example_gallery.dart';
+import 'package:visibility_detector/visibility_detector.dart';
+
+import '../../../helpers/studio_capture_fonts.dart';
+import '../../../helpers/tag_meaning_fixtures.dart';
+import '../../../helpers/wiki_image_fixtures.dart';
 
 void main() {
+  setUpAll(loadStudioCaptureFonts);
   setUp(() async {
     await Hive.openBox(StorageKeys.settingsBox, bytes: Uint8List(0));
     await Hive.openBox(StorageKeys.historyBox, bytes: Uint8List(0));
@@ -910,6 +922,430 @@ void main() {
     },
   );
 
+  for (final (brightness, long) in [
+    (Brightness.dark, false),
+    (Brightness.light, false),
+    (Brightness.dark, true),
+  ]) {
+    testWidgets(
+      'compact meaning above Wiki body ${brightness.name} long=$long',
+      (tester) async {
+        tester.view.devicePixelRatio = 1;
+        tester.view.physicalSize = Size(1100, long ? 600 : 800);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        addTearDown(tester.view.resetPhysicalSize);
+        final controller = TextEditingController(text: 'underwear');
+        final focus = FocusNode();
+        addTearDown(controller.dispose);
+        addTearDown(focus.dispose);
+        await _pumpEditor(
+          tester,
+          controller,
+          focus,
+          _Source([_tag('underwear')]),
+          brightness: brightness,
+          scale: long ? 1.5 : 1,
+          meaning: (tag) async =>
+              meaningFixture(tag, summary: long ? '完整显示的长释义。' * 60 : null),
+          wiki: _Wiki({'underwear': 'Full article with examples and links.'}),
+        );
+        await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+        await tester.tap(find.byKey(const Key('prompt-editor')));
+        await tester.pump();
+        await tester.pump();
+        await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+        await tester.enterText(
+          find.byKey(const Key('tag-expansion-search')),
+          'under',
+        );
+        await tester.pump(const Duration(milliseconds: 170));
+        await tester.pump();
+        await tester.tap(
+          find.descendant(
+            of: find.byKey(const Key('tag-expansion-results')),
+            matching: find.text('underwear'),
+          ),
+        );
+        await tester.pump();
+        await tester.pump();
+        await tester.pump();
+        final panel = find.byKey(const Key('tag-expansion-wiki-panel'));
+        expect(panel, findsOneWidget);
+        final compact = find.descendant(
+          of: panel,
+          matching: find.byType(TagMeaning),
+        );
+        final body = find.text('Full article with examples and links.');
+        expect(compact, findsOneWidget);
+        expect(
+          find.descendant(of: compact, matching: find.byType(Icon)),
+          findsNothing,
+        );
+        expect(find.text('Synonyms'), findsNothing);
+        expect(
+          tester.getRect(body).top,
+          greaterThan(tester.getRect(compact).bottom),
+        );
+        expect(tester.getSize(panel).height, lessThanOrEqualTo(280));
+        if (long) {
+          final scroll = tester
+              .widget<SingleChildScrollView>(
+                find.byKey(const Key('tag-expansion-wiki-scroll')),
+              )
+              .controller!;
+          expect(scroll.position.maxScrollExtent, greaterThan(0));
+          await tester.drag(
+            find.byKey(const Key('tag-expansion-wiki-scroll')),
+            const Offset(0, -70),
+          );
+          await tester.pump();
+          expect(scroll.offset, greaterThan(0));
+          expect(tester.getRect(panel).bottom, lessThanOrEqualTo(600));
+        }
+        expect(controller.text, 'underwear');
+        expect(tester.takeException(), isNull);
+        await captureTagMeaning(
+          tester,
+          'wiki-compact-${brightness.name}${long ? '-long' : ''}',
+        );
+      },
+    );
+  }
+
+  testWidgets(
+    'Ctrl image preview toggles, switches in place, and closes with its owner',
+    (tester) async {
+      final interval = VisibilityDetectorController.instance.updateInterval;
+      VisibilityDetectorController.instance.updateInterval = Duration.zero;
+      addTearDown(
+        () => VisibilityDetectorController.instance.updateInterval = interval,
+      );
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(1100, 850);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.view.resetPhysicalSize);
+      final controller = TextEditingController(text: 'keep this draft'),
+          focus = FocusNode();
+      addTearDown(controller.dispose);
+      addTearDown(focus.dispose);
+      await _pumpEditor(
+        tester,
+        controller,
+        focus,
+        _Source([_tag('solo'), _tag('other')]),
+        wiki: _Wiki({'solo': wikiImageSource, 'other': wikiImageSource}),
+        images: WikiExampleRepository(
+          fetchWiki: (_, {cancelToken}) async => null,
+          fetchPosts: (ids, {cancelToken}) async =>
+              ids.map((id) => wikiImageMetadata(id)).toList(),
+          fetchAssets: (ids, {cancelToken}) async =>
+              ids.map((id) => wikiImageMetadata(id, asset: true)).toList(),
+        ),
+        imageCache: await WikiImageFixtureCache.load(),
+        translation: wikiImageTranslation,
+      );
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.tap(find.byKey(const Key('prompt-editor')));
+      await tester.pump();
+      await tester.pump();
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.enterText(
+        find.byKey(const Key('tag-expansion-search')),
+        'solo',
+      );
+      await tester.pump(const Duration(milliseconds: 170));
+      await tester.pump();
+      await tester.tap(
+        find.descendant(
+          of: find.byKey(const Key('tag-expansion-results')),
+          matching: find.text('solo'),
+        ),
+      );
+      await settleWikiImageFixtures(tester);
+      final thumbnail = find.byKey(const Key('wiki-example-open-11'));
+      final preview = find.byKey(const Key('wiki-image-preview-panel'));
+      final pane = find.byKey(const Key('tag-expansion-image-panel'));
+      final root = find.byKey(const Key('tag-expansion-popup'));
+      await tester.tap(thumbnail);
+      await settleWikiImageFixtures(tester);
+      expect(preview, findsOneWidget);
+      expect(
+        find.byKey(const Key('wiki-viewer'), skipOffstage: false),
+        findsNothing,
+      );
+      expect(tester.getRect(preview).left, tester.getRect(pane).right + 3);
+      expect(tester.getRect(preview).top, tester.getRect(root).top);
+      expect(tester.getRect(preview).bottom, tester.getRect(pane).bottom);
+      expect(
+        tester
+            .widget<TextField>(find.byKey(const Key('tag-expansion-search')))
+            .focusNode!
+            .hasFocus,
+        isTrue,
+      );
+      for (final width in [736.0, 540.0, 1100.0]) {
+        tester.view.physicalSize = Size(width, 850);
+        await settleWikiImageFixtures(tester);
+        expect(preview, findsOneWidget);
+        expect(
+          find.byKey(const Key('wiki-example-large-post:11:0')),
+          findsOneWidget,
+        );
+        expect(tester.getRect(preview).right, lessThanOrEqualTo(width - 8));
+        expect(tester.takeException(), isNull);
+      }
+      for (var i = 0; i < 6; i++) {
+        await tester.tap(thumbnail);
+        await settleWikiImageFixtures(tester);
+        expect(preview, i.isEven ? findsNothing : findsOneWidget);
+      }
+      // Navigation uses this same pane and highlights the corresponding card.
+      await tester.tap(find.byKey(const Key('wiki-viewer-next')));
+      await settleWikiImageFixtures(tester);
+      expect(
+        find.byKey(const Key('wiki-example-large-asset:12:1')),
+        findsOneWidget,
+      );
+      expect(
+        tester
+            .widget<WikiExampleCard>(
+              find.byKey(const Key('wiki-image-card-asset:12:1')),
+            )
+            .selected,
+        isTrue,
+      );
+      // Clicking another thumbnail replaces the current picture, never stacks.
+      await tester.tap(thumbnail);
+      await settleWikiImageFixtures(tester);
+      expect(preview, findsOneWidget);
+      expect(
+        find.byKey(const Key('wiki-example-large-post:11:0')),
+        findsOneWidget,
+      );
+      await tester.tap(thumbnail);
+      await settleWikiImageFixtures(tester);
+      expect(preview, findsNothing);
+      await tester.tap(thumbnail);
+      await settleWikiImageFixtures(tester);
+      await tester.enterText(
+        find.byKey(const Key('tag-expansion-search')),
+        'other',
+      );
+      await tester.pump(const Duration(milliseconds: 170));
+      await tester.pump();
+      expect(preview, findsNothing);
+      expect(root, findsOneWidget);
+      await tester.tap(
+        find.descendant(
+          of: find.byKey(const Key('tag-expansion-results')),
+          matching: find.text('other'),
+        ),
+      );
+      await settleWikiImageFixtures(tester);
+      expect(preview, findsNothing);
+      await tester.tap(thumbnail);
+      await settleWikiImageFixtures(tester);
+      await tester.tap(find.byKey(const Key('wiki-images-toggle')));
+      await tester.pumpAndSettle();
+      expect(preview, findsNothing);
+      expect(pane, findsNothing);
+      await tester.tap(find.byKey(const Key('wiki-images-toggle')));
+      await settleWikiImageFixtures(tester);
+      await tester.tap(thumbnail);
+      await settleWikiImageFixtures(tester);
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pumpAndSettle();
+      expect(preview, findsNothing);
+      expect(root, findsOneWidget);
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pumpAndSettle();
+      expect(root, findsNothing);
+      expect(controller.text, 'keep this draft');
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  for (final brightness in Brightness.values) {
+    for (final (width, screenHeight, locale, scale) in [
+      (1300.0, 850.0, const Locale('zh'), 1.0),
+      (1100.0, 850.0, const Locale('zh'), 1.0),
+      (900.0, 600.0, const Locale('en'), 1.5),
+      (736.0, 600.0, const Locale('zh'), 1.0),
+      (540.0, 850.0, const Locale('en'), 1.5),
+      (320.0, 850.0, const Locale('ja'), 1.0),
+    ]) {
+      testWidgets(
+        'native image pane ${brightness.name} $width ${locale.languageCode}',
+        (tester) async {
+          // Deliver visibility before awaiting image IO; the fake test clock
+          // cannot decode a newly visible thumbnail inside pumpAndSettle.
+          final interval = VisibilityDetectorController.instance.updateInterval;
+          VisibilityDetectorController.instance.updateInterval = Duration.zero;
+          addTearDown(
+            () =>
+                VisibilityDetectorController.instance.updateInterval = interval,
+          );
+          tester.view.devicePixelRatio = 1;
+          tester.view.physicalSize = Size(width, screenHeight);
+          addTearDown(tester.view.resetDevicePixelRatio);
+          addTearDown(tester.view.resetPhysicalSize);
+          final controller = TextEditingController(text: 'keep this draft'),
+              focus = FocusNode();
+          addTearDown(controller.dispose);
+          addTearDown(focus.dispose);
+          final images = WikiExampleRepository(
+            fetchWiki: (_, {cancelToken}) async =>
+                throw StateError('no online Wiki request'),
+            fetchPosts: (ids, {cancelToken}) async =>
+                ids.map((id) => wikiImageMetadata(id)).toList(),
+            fetchAssets: (ids, {cancelToken}) async =>
+                ids.map((id) => wikiImageMetadata(id, asset: true)).toList(),
+          );
+          await _pumpEditor(
+            tester,
+            controller,
+            focus,
+            _Source([_tag('solo')]),
+            related: _Source([_tag('landscape')]),
+            wiki: _Wiki({'solo': wikiImageSource}),
+            images: images,
+            imageCache: await WikiImageFixtureCache.load(),
+            translation: wikiImageTranslation,
+            brightness: brightness,
+            locale: locale,
+            scale: scale,
+          );
+          await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+          await tester.tap(find.byKey(const Key('prompt-editor')));
+          await tester.pump();
+          await tester.pump();
+          await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+          await tester.enterText(
+            find.byKey(const Key('tag-expansion-search')),
+            'solo',
+          );
+          await tester.pump(const Duration(milliseconds: 170));
+          await tester.pump();
+          await tester.tap(
+            find.descendant(
+              of: find.byKey(const Key('tag-expansion-results')),
+              matching: find.text('solo'),
+            ),
+          );
+          await settleWikiImageFixtures(tester);
+          final wiki = find.byKey(const Key('tag-expansion-wiki-panel'));
+          final pane = find.byKey(const Key('tag-expansion-image-panel'));
+          expect(pane, findsOneWidget);
+          final body = tester
+              .widget<WikiLinkedBody>(
+                find
+                    .descendant(of: wiki, matching: find.byType(WikiLinkedBody))
+                    .first,
+              )
+              .body;
+          expect(body, contains('保留这段判定说明'));
+          expect(body, isNot(contains('post #11')));
+          if (width >= 640) {
+            expect(
+              tester.getRect(pane).top,
+              closeTo(tester.getRect(wiki).top, 1),
+            );
+            expect(
+              tester.getRect(pane).left,
+              greaterThan(tester.getRect(wiki).right),
+            );
+            expect(tester.getRect(pane).bottom, lessThanOrEqualTo(850));
+          } else {
+            expect(find.descendant(of: wiki, matching: pane), findsOneWidget);
+            await tester.ensureVisible(pane);
+            await settleWikiImageFixtures(tester);
+            final viewport = find.byKey(const Key('tag-expansion-wiki-scroll'));
+            expect(
+              tester.getRect(pane).height,
+              lessThanOrEqualTo(tester.getRect(viewport).height + 1),
+            );
+            expect(tester.getRect(pane).left, greaterThanOrEqualTo(0));
+            expect(tester.getRect(pane).right, lessThanOrEqualTo(width));
+          }
+          expect(controller.text, 'keep this draft');
+          expect(tester.takeException(), isNull);
+          await captureWikiImageLayout(
+            tester,
+            tagMeaningBoundary,
+            '${brightness.name}-${width.toInt()}-${locale.languageCode}',
+          );
+          if (width >= 640) {
+            final mouse = await _hover(
+              tester,
+              find.descendant(
+                of: find.byKey(const Key('tag-expansion-results')),
+                matching: find.text('solo'),
+              ),
+            );
+            final l = AppLocalizations.of(tester.element(wiki))!;
+            await tester.tap(find.byTooltip(l.tagExpansion_showRelated).first);
+            await settleWikiImageFixtures(tester);
+            final related = find.byKey(
+              const Key('tag-expansion-related-panel'),
+            );
+            expect(tester.getRect(related).left, tester.getRect(pane).left);
+            expect(
+              tester.getRect(related).bottom,
+              lessThan(tester.getRect(pane).top),
+            );
+            expect(controller.text, 'keep this draft');
+            await captureWikiImageLayout(
+              tester,
+              tagMeaningBoundary,
+              '${brightness.name}-1100-related',
+            );
+            await mouse.removePointer();
+          }
+          final firstImage = find.byKey(const Key('wiki-example-open-11'));
+          await tester.ensureVisible(firstImage);
+          await settleWikiImageFixtures(tester);
+          await tester.tap(firstImage);
+          await settleWikiImageFixtures(tester);
+          final preview = find.byKey(const Key('wiki-image-preview-panel'));
+          expect(preview, findsOneWidget);
+          expect(find.byKey(const Key('wiki-viewer')), findsNothing);
+          final previewRect = tester.getRect(preview);
+          expect(previewRect.left, greaterThanOrEqualTo(8));
+          expect(previewRect.right, lessThanOrEqualTo(width - 8));
+          expect(previewRect.top, greaterThanOrEqualTo(8));
+          expect(previewRect.bottom, lessThanOrEqualTo(screenHeight - 8));
+          if (width >= 882) {
+            expect(previewRect.left, tester.getRect(pane).right + 3);
+            expect(previewRect.bottom, tester.getRect(wiki).bottom);
+          } else {
+            expect(previewRect.top, greaterThan(tester.getRect(wiki).bottom));
+          }
+          expect(tester.takeException(), isNull);
+          await captureWikiImageLayout(
+            tester,
+            tagMeaningBoundary,
+            '${brightness.name}-${width.toInt()}-${locale.languageCode}-preview',
+          );
+          // Closing pictures restores their text; reopening reuses metadata.
+          await tester.tap(find.byKey(const Key('wiki-images-toggle')));
+          await tester.pumpAndSettle();
+          expect(pane, findsNothing);
+          expect(preview, findsNothing);
+          final restored = tester
+              .widget<WikiLinkedBody>(
+                find
+                    .descendant(of: wiki, matching: find.byType(WikiLinkedBody))
+                    .first,
+              )
+              .body;
+          expect(restored, contains('post #11'));
+          expect(controller.text, 'keep this draft');
+          expect(tester.takeException(), isNull);
+        },
+      );
+    }
+  }
+
   testWidgets('Ctrl+drag sends selected text to local related search', (
     tester,
   ) async {
@@ -1163,6 +1599,8 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          autoTagTranslationProvider.overrideWith((_) => _LocalReadings()),
+          tagMeaningProfileProvider.overrideWith((_, tag) async => null),
           localTagExpansionServiceProvider.overrideWithValue(
             _service(_Source([_tag('blue_hair')])),
           ),
@@ -1212,6 +1650,13 @@ Future<void> _pumpEditor(
   bool includeWeightToolbar = false,
   ValueChanged<bool>? onActiveChanged,
   ValueChanged<String>? onTagSelected,
+  Future<TagSemanticProfile?> Function(String)? meaning,
+  Brightness? brightness,
+  double scale = 1,
+  WikiExampleRepository? images,
+  WikiImageFixtureCache? imageCache,
+  String? translation,
+  Locale locale = const Locale('en'),
 }) async {
   final service = _service(catalog, related: related);
   Widget editor = TagExpansionWrapper(
@@ -1238,6 +1683,21 @@ Future<void> _pumpEditor(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
+        autoTagTranslationProvider.overrideWith(
+          (_) => _LocalReadings(translation),
+        ),
+        wikiExampleRepositoryProvider.overrideWithValue(
+          images ??
+              WikiExampleRepository(
+                fetchWiki: (_, {cancelToken}) async => null,
+                fetchPosts: (ids, {cancelToken}) async => [],
+              ),
+        ),
+        if (imageCache != null)
+          wikiExampleImageCacheProvider.overrideWithValue(imageCache),
+        tagMeaningProfileProvider.overrideWith(
+          (_, tag) async => meaning == null ? null : meaning(tag),
+        ),
         localTagExpansionServiceProvider.overrideWithValue(service),
         tagWikiRepositoryProvider.overrideWithValue(wiki ?? _Wiki()),
         wikiTagLinksProvider.overrideWithValue(
@@ -1245,7 +1705,16 @@ Future<void> _pumpEditor(
         ),
       ],
       child: MaterialApp(
-        locale: const Locale('en'),
+        theme: brightness == null
+            ? null
+            : AppTheme.getTheme(AppStyle.geist, brightness),
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(
+            context,
+          ).copyWith(textScaler: TextScaler.linear(scale)),
+          child: RepaintBoundary(key: tagMeaningBoundary, child: child!),
+        ),
+        locale: locale,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
@@ -1333,6 +1802,24 @@ class _Wiki implements TagWikiRepository {
     body: bodies[tag] ?? 'A local description for ${tag.replaceAll('_', ' ')}.',
     sourceUrl: '',
   );
+}
+
+class _LocalReadings extends ChangeNotifier
+    implements AutoTagTranslationController {
+  _LocalReadings([this.translation]);
+  final String? translation;
+  @override
+  String? wikiFor(String tag) => translation;
+  @override
+  bool get enabled => false;
+  @override
+  int get activeRequests => 0;
+  @override
+  bool isTranslating(String tag) => false;
+  @override
+  bool isWikiTranslating(String tag) => false;
+  @override
+  dynamic noSuchMethod(Invocation invocation) => null;
 }
 
 Future<TestGesture> _hover(WidgetTester tester, Finder target) async {

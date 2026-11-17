@@ -22,6 +22,7 @@ import '../providers/image_save_settings_provider.dart';
 import '../providers/krita/krita_bridge_notifier.dart';
 import '../providers/prompt_translation_provider.dart';
 import '../providers/prompt_translation_mode_provider.dart';
+import '../providers/prompt_auto_translation_provider.dart';
 import '../widgets/common/undo_snack_bar.dart';
 import '../providers/subscription_provider.dart';
 import '../router/app_router.dart';
@@ -337,6 +338,10 @@ class _GenerationWiringState extends ConsumerState<GenerationWiring> {
         onOpenResourceWindow: (kind) =>
             run(() => ref.read(resourceWindowOpenerProvider).open(kind)),
         onTranslate: () => run(() async {
+          if (ref.exists(promptAutoTranslationProvider)) {
+            ref.read(promptAutoTranslationProvider).suspend();
+          }
+          ref.read(promptAutoTranslationFailuresProvider.notifier).state = {};
           await ref
               .read(promptTranslationCoordinatorProvider)
               .translate(
@@ -353,12 +358,25 @@ class _GenerationWiringState extends ConsumerState<GenerationWiring> {
         onTranslationMode: (mode) => run(
           () => ref.read(promptTranslationModeProvider.notifier).select(mode),
         ),
+        onAutomaticTranslation: (enabled) => run(() async {
+          if (enabled) {
+            await ref
+                .read(promptTranslationModeProvider.notifier)
+                .select(PromptTranslationMode.inline);
+          }
+          await ref
+              .read(promptAutoTranslationEnabledProvider.notifier)
+              .setEnabled(enabled);
+        }),
         onTranslationAdjust: (rect) => _translationAdjustment.toggle(
           context,
           rect,
           currentData().prompt.negative,
         ),
         onClearTranslations: () {
+          if (ref.exists(promptAutoTranslationProvider)) {
+            ref.read(promptAutoTranslationProvider).suspend();
+          }
           final negative = currentData().prompt.negative;
           final coordinator = ref.read(promptTranslationCoordinatorProvider);
           if (coordinator.clearTranslations(

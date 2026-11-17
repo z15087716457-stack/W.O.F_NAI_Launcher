@@ -13,6 +13,7 @@ import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/core/rag/rag_client.dart';
 import 'package:nai_launcher/core/rag/rag_settings.dart';
 import 'package:nai_launcher/core/rag/rag_text_search.dart';
+import 'package:nai_launcher/core/rag/rag_tag_search.dart';
 import 'package:nai_launcher/core/tag_expansion/local_tag_expansion_service.dart';
 import 'package:nai_launcher/core/tag_expansion/tag_expansion_providers.dart';
 import 'package:nai_launcher/core/wiki/auto_tag_translation_controller.dart';
@@ -126,7 +127,7 @@ class Auto extends ChangeNotifier implements AutoTagTranslationController {
 
 class EnabledSettings extends RagSettingsController {
   @override
-  RagSettings build() => const RagSettings(enabled: true, wikiEnabled: true);
+  RagSettings build() => const RagSettings(enabled: true);
 }
 
 class FakeRag extends RagController {
@@ -152,15 +153,12 @@ class FakeRag extends RagController {
     ),
   ];
   @override
-  Future<List<CompletionCandidate>> recommend({
-    required String text,
-    required int cursor,
+  Future<List<CompletionCandidate>> searchTags({
+    required String query,
     required Set<String> existing,
-    required List<CompletionCandidate> lexical,
     required RagCancellation cancellation,
-    bool negative = false,
-    String keyword = '',
     int limit = 40,
+    RagTagSearchOptions tagOptions = const RagTagSearchOptions(),
   }) async => [
     for (final t in genericTags.skip(2))
       tag(t).copyWith(retrievalOrigins: const ['rag:semantic'], score: .92),
@@ -276,7 +274,7 @@ class _ExpansionHostState extends State<ExpansionHost> {
             const SizedBox(height: 20),
             TagExpansionWrapper(
               controller: controller,
-              ragContext: true,
+              relatedFromPrompt: true,
               child: TextField(
                 key: const Key('sample-editor'),
                 controller: controller,

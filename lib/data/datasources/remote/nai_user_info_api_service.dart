@@ -6,6 +6,7 @@ import '../../../core/constants/api_constants.dart';
 import '../../../core/network/dio_client.dart';
 import '../../../core/network/nai_api_endpoint_service.dart';
 import '../../../core/utils/app_logger.dart';
+import 'nai_subscription_response.dart';
 
 part 'nai_user_info_api_service.g.dart';
 
@@ -23,16 +24,20 @@ class NAIUserInfoApiService {
     Duration? receiveTimeout,
     Duration? sendTimeout,
   }) async {
+    final endpoint = _endpointService.current;
     try {
       final response = await _dio.get(
-        _endpointService.userUrl(ApiConstants.userSubscriptionEndpoint),
+        endpoint.userUrl(ApiConstants.userSubscriptionEndpoint),
         options: Options(
           receiveTimeout: receiveTimeout ?? _timeout,
           sendTimeout: sendTimeout ?? _timeout,
         ),
       );
 
-      return response.data as Map<String, dynamic>;
+      return readNaiSubscriptionResponse(
+        response,
+        isThirdParty: endpoint.isThirdParty,
+      );
     } on DioException catch (e) {
       AppLogger.w('Get user subscription failed: ${e.message}', 'NAIUserInfo');
       rethrow;

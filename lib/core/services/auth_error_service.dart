@@ -51,6 +51,8 @@ class AuthErrorService {
       case AuthErrorCode.credentialsLoginUnavailable:
         AppLogger.d('Credentials login unavailable', 'AuthErrorService');
         return l10n.auth_error_credentialsLoginUnavailable;
+      case AuthErrorCode.incompatibleApi:
+        return l10n.auth_error_incompatibleApi;
       case AuthErrorCode.serverError:
         AppLogger.d('Server error', 'AuthErrorService');
         if (httpStatusCode == 503) {
@@ -74,6 +76,8 @@ class AuthErrorService {
     int? httpStatusCode,
   ) {
     switch (errorCode) {
+      case AuthErrorCode.incompatibleApi:
+        return null;
       case AuthErrorCode.networkTimeout:
         AppLogger.d('Providing timeout recovery hint', 'AuthErrorService');
         return l10n.api_error_timeout_hint;

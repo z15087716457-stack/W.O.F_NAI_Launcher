@@ -9,9 +9,8 @@ typedef PopularTagSearch =
     Future<List<CompletionCandidate>> Function({int limit});
 
 /// The explicit tag picker reads only local tag and semantic databases.
-/// It deliberately does not depend on the autocomplete orchestrator, whose
-/// optional Danbooru and AI branches can make network requests. Chinese names
-/// come from local semantics; missing readings remain the visible-tag queue's job.
+/// Names come from the active catalog and local semantics; missing readings
+/// remain the visible-tag queue's job.
 class LocalTagExpansionService {
   const LocalTagExpansionService({
     required this.catalog,

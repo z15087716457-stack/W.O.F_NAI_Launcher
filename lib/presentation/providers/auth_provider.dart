@@ -12,6 +12,7 @@ import '../../core/storage/secure_storage_service.dart';
 import '../../core/utils/app_logger.dart';
 import '../../data/datasources/remote/nai_auth_api_service.dart';
 import '../../data/datasources/remote/nai_user_info_api_service.dart';
+import '../../data/datasources/remote/nai_subscription_response.dart';
 import '../../data/models/auth/saved_account.dart';
 import 'account_manager_provider.dart';
 import 'guest_session_provider.dart';
@@ -29,6 +30,7 @@ enum AuthErrorCode {
   authFailed,
   tokenInvalid,
   credentialsLoginUnavailable,
+  incompatibleApi,
   serverError,
   unknown,
 }
@@ -81,6 +83,9 @@ class AuthState {
 
   /// 从异常解析错误码
   static (AuthErrorCode, int?) parseError(Object e) {
+    if (e is NaiApiCompatibilityException) {
+      return (AuthErrorCode.incompatibleApi, null);
+    }
     if (e is DioException) {
       final statusCode = e.response?.statusCode;
 
@@ -187,7 +192,7 @@ class AuthNotifier extends _$AuthNotifier {
     return ++_sessionRequest;
   }
 
-  Future<Map<String, dynamic>> _validateSessionToken(
+  Future<NaiApiConnection> _validateSessionToken(
     String token, {
     NaiApiEndpointConfig endpoint = NaiApiEndpointConfig.official,
     bool allowAnyTokenFormat = false,
@@ -195,14 +200,14 @@ class AuthNotifier extends _$AuthNotifier {
     final cancel = _loginCancel!;
     return ref
         .read(naiAuthApiServiceProvider)
-        .validateToken(
+        .validateConnection(
           token,
           endpoint: endpoint,
           allowAnyTokenFormat: allowAnyTokenFormat,
           cancelToken: cancel,
         )
         .timeout(
-          const Duration(seconds: 5),
+          Duration(seconds: endpoint.isThirdParty ? 30 : 5),
           onTimeout: () {
             cancel.cancel('login validation timeout');
             throw DioException(
@@ -331,13 +336,13 @@ class AuthNotifier extends _$AuthNotifier {
           );
           if (!_ownsSession(request)) return;
 
-          endpointService.setCurrent(endpoint);
+          endpointService.setCurrent(subscriptionInfo.endpoint);
           accountManagerNotifier.updateLastUsed(matchedAccount.id);
           state = AuthState(
             status: AuthStatus.authenticated,
             accountId: matchedAccount.id,
             displayName: matchedAccount.displayName,
-            subscriptionInfo: subscriptionInfo,
+            subscriptionInfo: subscriptionInfo.subscription,
           );
           AppLogger.auth(
             'Token validation successful, account: ${matchedAccount.displayName}',
@@ -350,7 +355,7 @@ class AuthNotifier extends _$AuthNotifier {
         endpointService.resetToOfficial();
         state = AuthState(
           status: AuthStatus.authenticated,
-          subscriptionInfo: subscriptionInfo,
+          subscriptionInfo: subscriptionInfo.subscription,
         );
         return;
       } catch (e) {
@@ -395,7 +400,7 @@ class AuthNotifier extends _$AuthNotifier {
 
       if (accountToken != null && accountToken.isNotEmpty) {
         try {
-          Map<String, dynamic> subscriptionInfo;
+          NaiApiConnection subscriptionInfo;
 
           // 根据账号类型选择验证方式
           // 使用较短超时（5秒），在网络不可用时快速失败
@@ -432,13 +437,13 @@ class AuthNotifier extends _$AuthNotifier {
             email: lastUsedAccount.displayName,
           );
           if (!_ownsSession(request)) return;
-          endpointService.setCurrent(accountEndpoint);
+          endpointService.setCurrent(subscriptionInfo.endpoint);
 
           state = AuthState(
             status: AuthStatus.authenticated,
             accountId: lastUsedAccount.id,
             displayName: lastUsedAccount.displayName,
-            subscriptionInfo: subscriptionInfo,
+            subscriptionInfo: subscriptionInfo.subscription,
           );
 
           // 更新最后使用时间
@@ -663,12 +668,12 @@ class AuthNotifier extends _$AuthNotifier {
             email: displayName ?? fallbackEmail,
           );
       if (!_ownsSession(request)) return false;
-      endpointService.setCurrent(endpoint);
+      endpointService.setCurrent(subscription.endpoint);
       state = AuthState(
         status: AuthStatus.authenticated,
         accountId: accountId,
         displayName: displayName,
-        subscriptionInfo: subscription,
+        subscriptionInfo: subscription.subscription,
       );
       ref.read(guestSessionNotifierProvider.notifier).clear();
       return true;
@@ -760,7 +765,7 @@ class AuthNotifier extends _$AuthNotifier {
         status: AuthStatus.authenticated,
         accountId: accountId,
         displayName: effectiveDisplayName,
-        subscriptionInfo: subscriptionInfo,
+        subscriptionInfo: subscriptionInfo.subscription,
       );
 
       ref.read(guestSessionNotifierProvider.notifier).clear();
@@ -869,7 +874,7 @@ class AuthNotifier extends _$AuthNotifier {
         status: AuthStatus.authenticated,
         accountId: accountId,
         displayName: effectiveDisplayName,
-        subscriptionInfo: subscriptionInfo,
+        subscriptionInfo: subscriptionInfo.subscription,
       );
 
       ref.read(guestSessionNotifierProvider.notifier).clear();

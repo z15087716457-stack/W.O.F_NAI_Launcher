@@ -14,7 +14,7 @@ from test_rag import FakeModels, fixture
 class TextModels(FakeModels):
     def rerank(self,query,documents,negative=False,purpose='tags'):
         self.purpose=purpose
-        return [float('umbrella' in d) for d in documents]
+        raise AssertionError('Retired reranker must not be called')
 
 
 class DocumentTests(unittest.TestCase):
@@ -53,7 +53,7 @@ class DocumentTests(unittest.TestCase):
         wiki=self.engines[0].search_text('rain')['items'];blocks=self.engines[1].search_text('rain')['items']
         self.assertEqual({r['id'] for r in wiki},{'tag_0','tag_1'})
         self.assertEqual({r['id'] for r in blocks},{'雨:[0]','beach'})
-        self.assertEqual(self.models.purpose,'retrieval')
+        self.assertFalse(hasattr(self.models,'purpose'))
     def test_long_article_deduplicates_to_one_search_result(self):
         self.build(self.engines[0]);result=self.engines[0].search_text('rain')['items']
         self.assertEqual(sum(r['id']=='tag_0' for r in result),1)

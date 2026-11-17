@@ -166,8 +166,8 @@
   "auth_imageApiSiteOptional": "影像 API 站點（可選）",
   "auth_imageApiSiteHint": "留空則使用同一個第三方 API 站點",
   "auth_thirdPartyNicknameHint": "例如：自建站點 / 鏡像站點",
-  "auth_thirdPartyTokenHint": "請輸入第三方站點提供的 API Token",
-  "auth_thirdPartyCompatibilityHint": "第三方站點需相容 NovelAI 的 /user/subscription 與影像生成相關 API；Token 將按 Bearer 方式傳送。",
+  "auth_thirdPartyTokenHint": "請輸入 API Token，或貼上 New API 連線 JSON",
+  "auth_thirdPartyCompatibilityHint": "支援 NovelAI 相容介面，登入時識別常見的 /v1 和 /v1/novelai 路徑。第三方價格與餘額單位以站點為準，不套用官網 Opus 免費規則。",
   "auth_thirdPartyApiSiteRequired": "請輸入第三方 API 站點地址",
   "auth_validateAndLogin": "驗證並登入",
   "auth_tokenGuide": "從 NovelAI 帳戶設定取得 Token",
@@ -199,6 +199,8 @@
   "auth_error_credentialsLoginUnavailable": "帳號密碼登入當前不可用",
   "auth_error_credentialsLoginUnavailable_hint": "NovelAI 官網帳號密碼登入需要網頁安全驗證，客戶端無法完成，請改用 Persistent API Token。",
   "auth_error_serverError": "伺服器錯誤",
+  "auth_error_incompatibleApi": "該地址未返回 NovelAI 帳戶介面，請檢查站點的 API 基礎路徑（例如 /v1 或 /v1/novelai）。",
+  "auth_connectionImportInvalid": "New API 連線 JSON 無效，需包含 _type、url 和 key。",
   "auth_error_unknown": "未知錯誤",
   "auth_autoLogin": "自動登入",
   "auth_forgotPassword": "忘記密碼？",
@@ -3997,6 +3999,24 @@
   "wiki_typeAllShort": "全部",
   "wiki_coverageAll": "全部釋義",
   "wiki_withArticle": "有釋義",
+  "tagMeaning_synonyms": "同義詞",
+  "wiki_imagePanelTitle": "詞條配圖",
+  "wiki_imagePreviewTitle": "配圖預覽",
+  "wiki_imageOtherGroup": "配圖",
+  "wiki_imageShow": "顯示詞條配圖",
+  "wiki_imageHide": "收起詞條配圖",
+  "wiki_imageLoadFailed": "配圖暫時無法讀取",
+  "wiki_imageMore": "載入更多（{loaded}/{total}）",
+  "@wiki_imageMore": {
+    "placeholders": {
+      "loaded": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "wiki_withoutArticle": "暫無釋義",
   "wiki_sortPopular": "按熱度",
   "wiki_sortName": "按名稱",
@@ -4772,6 +4792,12 @@
   "promptTranslation_restoreAll": "全部翻譯塊還原為原文文本",
   "promptTranslation_tutorial": "操作教程",
   "promptReading_mode": "輕量翻譯",
+  "promptReading_automatic": "自動補譯",
+  "promptReading_automaticSubtitle": "停筆後補譯新增或改動內容",
+  "promptReading_automaticInlineOnly": "僅輕量翻譯模式可用",
+  "promptReading_automaticFailed": "補譯失敗，可手動重試",
+  "promptReading_automaticPaused": "已暫停",
+  "promptReading_automaticOff": "關閉",
   "promptReading_modeSubtitle": "原文下方顯示譯文",
   "promptReading_blocks": "翻譯塊",
   "promptReading_blocksSubtitle": "以翻譯塊閱讀和編輯",
@@ -9091,11 +9117,10 @@
   },
   "rag_refresh": "重新整理狀態",
   "rag_embeddingPath": "EmbeddingGemma 2 權重目錄",
-  "rag_rerankerPath": "Qwen3-Reranker-0.6B 權重目錄",
   "rag_notConfigured": "尚未配置",
   "rag_choose": "選擇",
   "rag_modelMode": "模型能力",
-  "rag_modelModeHint": "Gemma 用於文字與圖片，音訊關閉；Qwen 僅用於文字重排。",
+  "rag_modelModeHint": "Gemma 2 用於文字與圖片檢索，音訊關閉。",
   "rag_discover": "檢測本地權重",
   "rag_modelsMissing": "未找到模型，請選擇已下載的權重目錄",
   "rag_pythonPath": "獨立 Python 執行環境",
@@ -9107,9 +9132,7 @@
   "rag_device": "執行裝置",
   "rag_auto": "自動選擇",
   "rag_tagsEnabled": "標籤語義搜尋與推薦",
-  "rag_tagsHint": "支援按輸入內容搜尋，也可根據游標前上下文推薦標籤。",
-  "rag_context": "推薦上下文範圍",
-  "rag_contextHint": "固定取游標前，按完整標籤擷取。可調整為 32–512 個 Gemma token。",
+  "rag_tagsHint": "按輸入的名稱或描述檢索標籤，空框使用本地共現推薦。",
   "rag_buildIndex": "預覽並建立索引",
   "rag_plan": "將收錄當前標籤目錄的 {total} 項標籤、別名與已有本地釋義。首次處理可能較久；可暫停，已完成部分可提前使用。",
   "@rag_plan": {
@@ -10186,12 +10209,10 @@
   "set_rgPool": "所有來源共用一個本地向量池，新增內容自動增量更新。",
   "set_rgStepRuntime": "執行環境",
   "set_rgStepEmbed": "嵌入",
-  "set_rgStepRerank": "重排",
   "set_rgStepDevice": "裝置",
   "set_rgSources": "來源",
-  "set_rgSourcesSub": "每個來源單獨建庫、單獨開關；建庫可以暫停，已完成的部分立即可用。",
+  "set_rgSourcesSub": "每個來源單獨建庫，已建內容直接用於檢索；建庫可以暫停。",
   "set_rgTags": "標籤語義搜尋與推薦",
-  "set_rgTagsSub": "支援按輸入內容搜尋，也可根據游標前上下文推薦標籤。",
   "set_rgWiki": "Wiki 語義搜尋",
   "set_rgWikiSub": "本地百科正文，名稱精確匹配優先，語義結果補充",
   "set_rgBlocks": "提示詞塊",
@@ -10231,12 +10252,8 @@
     }
   },
   "set_rgClearBody": "只刪除派生索引，原始內容和模型都保留。",
-  "set_rgContext": "推薦上下文",
-  "set_rgContextSub": "固定取游標前，按完整標籤擷取。可調整為 32–512 個 Gemma token。",
-  "set_rgRange": "取樣長度",
   "set_rgRuntime": "模型與執行環境",
   "set_rgEmbedPath": "嵌入模型目錄",
-  "set_rgRerankPath": "重排模型目錄",
   "set_rgDevice": "執行裝置",
   "set_rgAuto": "自動",
   "set_rgEnv": "執行環境",
@@ -10251,7 +10268,7 @@
   "set_rgShortGallery": "圖庫",
   "set_rgTip": "清除某個來源只刪除它的派生索引，原始內容和模型都保留。",
   "set_rgNotReady": "語義檢索還不能用",
-  "set_rgNotReadySub": "先安裝執行環境，再選好兩個模型目錄。",
+  "set_rgNotReadySub": "先安裝執行環境，再選擇 Gemma 2 模型目錄。",
   "set_rgEmpty": "未建立",
   "set_rgBuild": "建立索引",
   "set_rgContinue": "繼續建立",
@@ -10287,7 +10304,7 @@
   "set_rgPreparing": "正在準備索引",
   "set_rgPreparingHint": "正在準備或檢查索引，資料較多時請耐心等待；進度數字可能暫時不變。",
   "set_rgPlanLoading": "正在統計要收錄的內容…",
-  "set_rgPlanTags": "將收錄 {n} 項標籤、別名與已有本地釋義。",
+  "set_rgPlanTags": "將處理 {n} 個標籤，按名稱、已有中文資料與釋義建立索引。",
   "@set_rgPlanTags": {
     "placeholders": {
       "n": {}
@@ -10307,6 +10324,30 @@
       "n": {}
     }
   },
+  "set_rgUpgrade": "升級標籤索引",
+  "set_rgCleanupLegacy": "清理舊標籤索引",
+  "set_rgUpgradeNotice": "標籤檢索方案已升級，需要按新方案建立索引。Wiki、提示詞塊和圖庫索引可繼續使用。",
+  "set_rgUpgradePlan": "確認後按新版方案建立標籤索引，完成並校驗後清理舊標籤索引（約 {size}）。升級期間臨時佔用更多空間，可暫停續建；其他來源及翻譯資料保留。",
+  "@set_rgUpgradePlan": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "set_rgCleanupPlan": "清理舊標籤索引（約 {size}），保留新版標籤索引、其他來源及翻譯資料。",
+  "@set_rgCleanupPlan": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "set_rgUpgradeCleaning": "新版標籤索引已就緒，正在清理舊標籤索引…",
+  "set_rgUpgradeCleanupFailed": "新版檢索可用，舊索引清理未完成，請重試清理。",
+  "set_rgUpgradeBadge": "需升級",
+  "set_rgCleanupPending": "待清理",
+  "set_rgUpgradeCleanupNotice": "新版標籤索引已就緒，舊標籤索引仍佔用空間，可以清理。",
   "set_rgPlanNote": "首次處理可能較久，可以隨時暫停，已完成的部分立即可用。",
   "set_rgPlanRebuild": "重建會先清掉這個來源的現有索引。",
   "set_rgStart": "開始",
@@ -10326,7 +10367,7 @@
   },
   "set_rgVerifying": "正在校驗檔案…",
   "set_rgDiscover": "查詢本地模型",
-  "set_rgDiscoverSub": "在工作區 04_工具/models 裡找 EmbeddingGemma 2 和 Qwen3-Reranker 0.6B，找到後自動填好上面兩個目錄。",
+  "set_rgDiscoverSub": "在工作區 04_工具/models 中查詢 EmbeddingGemma 2，並填入模型目錄。",
   "set_rgFind": "查詢",
   "set_rgModelsMissing": "沒找到。可以點“下載”，或手動選擇已下載的權重目錄。",
   "set_rgPython": "Python 直譯器",
@@ -10337,6 +10378,20 @@
   "set_rgUsePython": "使用此直譯器",
   "set_rgEnvReady": "已就緒",
   "set_rgEnvMissing": "還沒有安裝",
+  "set_rgEnvNeedsUpdate": "需要更新",
+  "set_rgEnvUpdate": "更新環境",
+  "set_rgEnvDependencies": "需要補齊或更新依賴：{packages}。現有索引會保留。",
+  "@set_rgEnvDependencies": {
+    "placeholders": {
+      "packages": {
+        "type": "String"
+      }
+    }
+  },
+  "set_rgEnvPythonVersion": "需要 Python 3.12，請更新執行環境或選擇相容的直譯器。現有索引會保留。",
+  "set_rgEnvCheckFailed": "檢測失敗",
+  "set_rgEnvImportFailed": "依賴載入失敗，請重新檢測或修復執行環境。現有索引會保留。",
+  "set_rgEnvCheckTimeout": "環境檢測逾時，可重新檢測。無需刪除或重建索引。",
   "set_rgInstall": "安裝",
   "set_rgInstallHint": "下載 Python 與推理依賴，不下載模型權重。NVIDIA 顯示卡選 CUDA（約需數 GB）；其他選 CPU，下載較小。",
   "set_rgInstallCuda": "CUDA · NVIDIA",

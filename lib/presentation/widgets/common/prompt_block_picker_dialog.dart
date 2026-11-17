@@ -147,8 +147,7 @@ class _PromptBlockPickerDialogState
             decoration: InputDecoration(
               hintText: watchTipHint(ref, context.l10n, TipSurface.blockSearch),
               prefixIcon: const Icon(Icons.search, size: 20),
-              suffixIcon:
-                  ref.watch(ragSettingsProvider).enabledFor(RagSource.blocks)
+              suffixIcon: ref.watch(ragSettingsProvider).enabled
                   ? const Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [RagSearchBadge(source: RagSource.blocks)],

@@ -22,6 +22,7 @@ import '../../../providers/pill_workspace_provider.dart';
 import '../../common/text_editing_shortcuts.dart';
 import '../../../providers/prompt_translation_provider.dart';
 import '../../../providers/prompt_translation_mode_provider.dart';
+import '../../../providers/prompt_auto_translation_provider.dart';
 import '../../../../data/models/prompt_reading.dart';
 import '../../../providers/translation_adjustment_provider.dart';
 import '../../../providers/prompt_block_library_provider.dart';
@@ -63,6 +64,7 @@ class PromptPillEditor extends ConsumerStatefulWidget {
     this.maxLines,
     this.allowEvolutionToggle = false,
     this.enableBlurredUndo = false,
+    this.enableAutomaticTranslation = false,
     this.onChanged,
     this.onComfyuiImport,
     this.beginComfyuiImport,
@@ -99,6 +101,9 @@ class PromptPillEditor extends ConsumerStatefulWidget {
   /// Only generation-page editors register for application-level fallback.
   final bool enableBlurredUndo;
 
+  /// Opt in only for the live generation/exploration prompt editors.
+  final bool enableAutomaticTranslation;
+
   /// 投影（块已展开的完整提示词）变化回调，接旧生成参数链路。
   final ValueChanged<String>? onChanged;
   final void Function(String globalPrompt, List<CharacterPrompt> characters)?
@@ -117,6 +122,9 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
   PromptAutocompleteController? _ownedAutocomplete;
   TextEditingShortcutsState? _undoRouter;
   bool _applyingExternal = false;
+  PromptAutoTranslation? _autoTranslation;
+  late TextEditingValue _lastAutoValue;
+  bool _autoVisible = true;
   int _lastValidOffset = 0;
   String? _lastEmittedProjection;
 
@@ -136,6 +144,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
     _controller = TextEditingController(text: document.text)
       ..addListener(_handleControllerChanged);
     _focusNode = FocusNode()..addListener(_handleFocusChanged);
+    _lastAutoValue = _controller.value;
     _lastValidOffset = document.text.length;
     _armSeedIfFresh(document);
     // 挂载即对齐一次投影（库内容可能在停机构间被编辑过）；
@@ -151,6 +160,8 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _undoRouter = TextEditingShortcuts.maybeOf(context);
+    _autoVisible = TickerMode.valuesOf(context).enabled;
+    if (!_autoVisible) _autoTranslation?.forget(this);
   }
 
   void _restoreHistory({required bool redo}) {
@@ -177,11 +188,16 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
   @override
   void didUpdateWidget(PromptPillEditor oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.enableAutomaticTranslation &&
+        !widget.enableAutomaticTranslation) {
+      _autoTranslation?.forget(this);
+    }
     // scope 切换（角色编辑面板 State 复用、切换编辑目标）：重绑文档
     if (oldWidget.enableBlurredUndo && !widget.enableBlurredUndo) {
       _undoRouter?.forgetPrompt(context);
     }
     if (oldWidget.pillScope != widget.pillScope) {
+      _autoTranslation?.forget(this);
       _ownedAutocomplete?.dismiss();
       widget.autocomplete?.dismiss();
       ref
@@ -238,12 +254,15 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
 
   @override
   void deactivate() {
+    _autoVisible = false;
+    _autoTranslation?.forget(this);
     ref.read(_workspace.notifier).closeTypingGroup();
     super.deactivate();
   }
 
   @override
   void dispose() {
+    _autoTranslation?.forget(this);
     _ownedAutocomplete?.dispose();
     _undoRouter?.forgetPrompt(context);
     _dismissInstanceCard(refresh: false);
@@ -937,6 +956,8 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
   // ==================== 文本与投影同步 ====================
 
   void _handleControllerChanged() {
+    final previous = _lastAutoValue;
+    _lastAutoValue = _controller.value;
     final selection = _controller.selection;
     if (selection.isValid && selection.extentOffset >= 0) {
       _lastValidOffset = selection.extentOffset.clamp(
@@ -947,6 +968,29 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
     }
     if (_applyingExternal) return;
     ref.read(_workspace.notifier).setText(_controller.text);
+    if (widget.enableAutomaticTranslation &&
+        !widget.config.readOnly &&
+        _focusNode.hasPrimaryFocus &&
+        _autoVisible &&
+        (previous.text != _controller.text ||
+            previous.composing != _controller.value.composing) &&
+        ref.read(promptAutoTranslationEnabledProvider)) {
+      final scope = widget.pillScope;
+      final PromptAutoTranslation automatic =
+          _autoTranslation ?? ref.read(promptAutoTranslationProvider);
+      _autoTranslation = automatic;
+      automatic.edited(
+        editor: this,
+        scope: scope,
+        value: _controller.value,
+        isActive: () =>
+            mounted &&
+            _autoVisible &&
+            widget.enableAutomaticTranslation &&
+            widget.pillScope == scope &&
+            !widget.config.readOnly,
+      );
+    }
   }
 
   /// 把本框的 scope+最近光标位置同步为块库面板的点击插入目标。

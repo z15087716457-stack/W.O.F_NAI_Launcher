@@ -34,6 +34,9 @@ test('studio_search schema exposes only supported sources and bounded inputs', (
   }
   assert.equal(Value.Check(schema, { source: 'gallery', image_id: 'selected', mode: 'visual' }), true);
   assert.equal(Value.Check(schema, { source: 'gallery', path: 'attachments/chat/a.png', date_start: '2026-10-01' }), true);
+  assert.equal(Value.Check(schema, { source: 'tags', query: 'watercolor', limit: 12,
+    tag_options: {top_k:60, popularity_weight:0, use_segmentation:false,
+      target_layers:['name','meaning'], target_categories:['General']} }), true);
   for (const params of [
     { source: 'other', query: 'rain' },
     { source: 'tags', query: 'x'.repeat(501) },
@@ -42,6 +45,9 @@ test('studio_search schema exposes only supported sources and bounded inputs', (
     { source: 'tags', query: 'rain', limit: 1.5 },
     { source: 'gallery', query: 'rain', mode: 'unknown' },
     { source: 'gallery', query: 'rain', date_start: '2026/10/01' },
+    ...[{top_k:81}, {top_k:0}, {top_k:1.5}, {popularity_weight:1.1},
+      {use_segmentation:'yes'}, {target_layers:[]}, {target_layers:['bogus']},
+      {target_categories:['bogus']}, {unknown:true}].map(tag_options => ({source:'tags',query:'rain',tag_options})),
   ]) assert.equal(Value.Check(schema, params), false, JSON.stringify(params));
   // Cross-field constraints (query/image, gallery-only options and real calendar
   // dates) are additionally enforced by the production Dart binding.

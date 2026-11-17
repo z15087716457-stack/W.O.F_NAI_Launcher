@@ -12,6 +12,34 @@ import '../../../helpers/studio_capture_fonts.dart';
 import 'settings_test_harness.dart';
 
 void main() {
+  testWidgets(
+    'retrying a partial build keeps vectors and opens a continuation plan',
+    (t) async {
+      final base = SettingsFixture.view(page: SettingsPageId.rag);
+      final rec = await pumpSettings(
+        t,
+        data: base.copyWith(
+          rag: const SettingsRagData(
+            runtimeReady: true,
+            sources: [
+              SettingsRagSource(
+                kind: SettingsRagSourceKind.tags,
+                state: SettingsRagState.error,
+                done: 254816,
+                total: 1004466,
+                error: 'rag_runtime_error',
+              ),
+            ],
+          ),
+        ),
+      );
+      final l = AppLocalizations.of(t.element(find.byType(SettingsHost)))!;
+      await t.tap(find.widgetWithText(SettingsBtn, l.set_retry));
+      expect(rec.calls, ['ragBuild:tags']);
+      expect(find.textContaining('254,816'), findsOneWidget);
+    },
+  );
+
   setUpAll(loadStudioCaptureFonts);
   testWidgets(
     'finished verification has ready controls, no build badge or pause',
@@ -37,6 +65,14 @@ void main() {
                 done: 727,
                 total: 727,
               ),
+              SettingsRagSource(
+                kind: SettingsRagSourceKind.wiki,
+                state: SettingsRagState.empty,
+              ),
+              SettingsRagSource(
+                kind: SettingsRagSourceKind.gallery,
+                state: SettingsRagState.empty,
+              ),
             ],
           ),
         ),
@@ -45,6 +81,7 @@ void main() {
       expect(find.text(l.set_rgBuilding), findsNothing);
       expect(find.text(l.set_rgPartial), findsNothing);
       expect(find.text(l.set_pause), findsNothing);
+      expect(find.byType(SettingsSwitch), findsOneWidget);
       for (final kind in [
         SettingsRagSourceKind.tags,
         SettingsRagSourceKind.blocks,

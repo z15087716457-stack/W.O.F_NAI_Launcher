@@ -437,37 +437,81 @@ class PromptTranslationCoordinator {
     if (_ref.read(promptTranslationBusyProvider)) {
       return const PromptTranslationResult(0, 0);
     }
+    final snapshots = <String, PillDocument>{};
+    for (final scope in _scopes(negative)) {
+      _seedIfNeeded(scope);
+      snapshots[scope] = _ref.read(pillWorkspaceProvider(scope)).document;
+    }
+    return _translateSnapshots(
+      negative,
+      snapshots,
+      mode: mode,
+      sessionId: 'prompt-translation-${negative ? 'neg' : 'pos'}',
+    );
+  }
+
+  Future<PromptTranslationResult> translateInlineScope(
+    String scope, {
+    required bool Function() canApply,
+  }) => _translateSnapshots(
+    scope == PillScopes.negative || scope.endsWith(':neg'),
+    {scope: _ref.read(pillWorkspaceProvider(scope)).document},
+    mode: PromptTranslationMode.inline,
+    sessionId: 'prompt-auto-$scope',
+    automatic: true,
+    canApply: canApply,
+  );
+
+  Future<PromptTranslationResult> _translateSnapshots(
+    bool negative,
+    Map<String, PillDocument> snapshots, {
+    required PromptTranslationMode mode,
+    required String sessionId,
+    bool automatic = false,
+    bool Function()? canApply,
+  }) async {
+    if (_ref.read(promptTranslationBusyProvider) || canApply?.call() == false) {
+      return const PromptTranslationResult(0, 0);
+    }
     _ref.read(promptTranslationBusyProvider.notifier).state = true;
     try {
-      final snapshots = <String, PillDocument>{};
-      for (final scope in _scopes(negative)) {
-        _seedIfNeeded(scope);
-        snapshots[scope] = _ref.read(pillWorkspaceProvider(scope)).document;
-      }
-      final batch = PromptTranslationBatch.prepare(
+      var batch = PromptTranslationBatch.prepare(
         snapshots,
         skipReadings: mode == PromptTranslationMode.inline,
         mode: mode,
       );
       if (batch.isEmpty) return const PromptTranslationResult(0, 0);
       final language = _interfaceReadingLanguage();
+      final languageCode = language.code;
+      final cached = automatic
+          ? await _cachedInlineReadings(batch, languageCode)
+          : const <String, PillDocument>{};
+      if (cached.isNotEmpty) {
+        batch = PromptTranslationBatch.prepare(
+          {...snapshots, ...cached},
+          skipReadings: true,
+          mode: mode,
+        );
+      }
 
       final groups = <String, List<PromptTranslationGroup>>{};
-      final languageCode = language.code;
       final exchanges = <TranslationExchange>[];
       for (final part in batch.partitions()) {
         final glossary = await _glossaryFor(part);
+        if (canApply?.call() == false) {
+          return const PromptTranslationResult(0, 0);
+        }
         final raw = await _ref
             .read(promptAssistantServiceProvider)
             .translatePromptGroup(
               part.requestJson(glossary, languageCode: languageCode),
-              sessionId: 'prompt-translation-${negative ? 'neg' : 'pos'}',
+              sessionId: sessionId,
+              validateOutput: (raw) =>
+                  part.parseGroups(raw, glossary: glossary),
             );
         final exchange = _ref
             .read(promptAssistantServiceProvider)
-            .takeTranslationExchange(
-              'prompt-translation-${negative ? 'neg' : 'pos'}',
-            );
+            .takeTranslationExchange(sessionId);
         if (exchange != null) exchanges.add(exchange);
         final parsed = part.parseGroups(
           raw,
@@ -478,12 +522,16 @@ class PromptTranslationCoordinator {
           groups.putIfAbsent(entry.key, () => []).addAll(entry.value);
         }
       }
-      final replacements = batch.buildFromGroups(
-        groups,
-        autoFormat: _ref.read(autoFormatPromptSettingsProvider),
-        languageCode: languageCode,
-        mode: mode,
-      );
+      if (canApply?.call() == false) return const PromptTranslationResult(0, 0);
+      final replacements = {
+        ...cached,
+        ...batch.buildFromGroups(
+          groups,
+          autoFormat: _ref.read(autoFormatPromptSettingsProvider),
+          languageCode: languageCode,
+          mode: mode,
+        ),
+      };
       var converted = 0;
       var changed = 0;
       final undo = <String, ({PillDocument before, PillDocument after})>{};
@@ -495,16 +543,17 @@ class PromptTranslationCoordinator {
           continue;
         }
         final before = snapshots[scope]!;
-        if (_ref
-            .read(pillWorkspaceProvider(scope).notifier)
-            .replaceIfCurrent(before, entry.value)) {
+        final notifier = _ref.read(pillWorkspaceProvider(scope).notifier);
+        if (automatic
+            ? notifier.updateReadingsIfCurrent(before, entry.value)
+            : notifier.replaceIfCurrent(before, entry.value)) {
           undo[scope] = (before: before, after: entry.value);
           converted++;
         } else {
           changed++;
         }
       }
-      _lastUndo = undo;
+      if (!automatic) _lastUndo = undo;
       if (mode == PromptTranslationMode.blocks &&
           converted > 0 &&
           exchanges.isNotEmpty) {
@@ -519,6 +568,46 @@ class PromptTranslationCoordinator {
       return PromptTranslationResult(converted, changed);
     } finally {
       _ref.read(promptTranslationBusyProvider.notifier).state = false;
+    }
+  }
+
+  /// Reuse exact, verified tag readings only in their saved language. Sentences
+  /// and unknown names still use the shared prompt translation service.
+  Future<Map<String, PillDocument>> _cachedInlineReadings(
+    PromptTranslationBatch batch,
+    String language,
+  ) async {
+    if (language != 'zh' && language != 'zh-TW') return const {};
+    final glossary = await _glossaryFor(batch);
+    final names = {for (final term in glossary) term['tag']!};
+    if (names.isEmpty) return const {};
+    try {
+      final saved = await _ref
+          .read(tagTranslationGlossaryProvider)
+          .cache
+          .chineseTerms(names);
+      return batch.buildFromGroups(
+        {
+          for (final entry in batch.segments.entries)
+            entry.key: [
+              for (final item in entry.value)
+                if (saved[item.tagCandidate] case final reading?)
+                  if (reading.nameLanguage == language &&
+                      reading.nameZh.trim().isNotEmpty)
+                    (
+                      start: item.start,
+                      end: item.end,
+                      zh: reading.nameZh,
+                      marks: const <TranslationTagMark>[],
+                    ),
+            ],
+        },
+        languageCode: language,
+        mode: PromptTranslationMode.inline,
+      );
+    } catch (_) {
+      // A missing optional cache must not prevent ordinary translation.
+      return const {};
     }
   }
 
@@ -539,6 +628,7 @@ class PromptTranslationCoordinator {
           .translatePromptGroup(
             part.requestJson(glossary, languageCode: language),
             sessionId: sessionId,
+            validateOutput: (raw) => part.parseGroups(raw, glossary: glossary),
           );
       final parsed = part.parseGroups(
         raw,
@@ -579,6 +669,7 @@ class PromptTranslationCoordinator {
           .translatePromptGroup(
             batch.requestJson(glossary, languageCode: languageCode),
             sessionId: 'prompt-translation-single',
+            validateOutput: (raw) => batch.parseGroups(raw, glossary: glossary),
           );
       final rebuilt = batch.parseAndBuild(
         raw,

@@ -3,6 +3,25 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/storage/local_storage_service.dart';
 import '../../data/models/prompt_reading.dart';
 
+final promptAutoTranslationEnabledProvider =
+    NotifierProvider<PromptAutoTranslationEnabled, bool>(
+      PromptAutoTranslationEnabled.new,
+    );
+
+class PromptAutoTranslationEnabled extends Notifier<bool> {
+  static const storageKey = 'prompt_auto_translation_enabled';
+
+  @override
+  bool build() =>
+      ref.watch(localStorageServiceProvider).getSetting<bool>(storageKey) ??
+      false;
+
+  Future<void> setEnabled(bool enabled) async {
+    await ref.read(localStorageServiceProvider).setSetting(storageKey, enabled);
+    state = enabled;
+  }
+}
+
 final promptTranslationModeProvider =
     NotifierProvider<PromptTranslationModeController, PromptTranslationMode?>(
       PromptTranslationModeController.new,

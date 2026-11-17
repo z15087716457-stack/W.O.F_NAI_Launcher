@@ -64,10 +64,11 @@ extension GalleryDataSourceAdvancedSearch on GalleryDataSource {
       return AdvancedSearchResult.empty;
     }
 
+    final searchTerms = _extractSearchTerms(textQuery ?? '');
     // 缓存键（候选路径按 长度+逐元素 hash 组合做指纹，避免 Object.hashAll
     // 的单一 32 位碰撞风险；数据变更时 _markDataChanged 会整体清缓存）
     final cacheKey = _QueryCacheKey('advancedSearch', {
-      'textQuery': textQuery,
+      'textQuery': jsonEncode(searchTerms),
       'dateStart': dateStart?.millisecondsSinceEpoch,
       'dateEnd': dateEnd?.millisecondsSinceEpoch,
       'indexedDate': indexedDate,
@@ -109,42 +110,19 @@ extension GalleryDataSourceAdvancedSearch on GalleryDataSource {
     }
 
     return _trackQuery('advancedSearch', () async {
-      final searchTerms = _extractSearchTerms(textQuery ?? '');
-
       return await execute('advancedSearch', (db) async {
-        // Materialize exact-tag ID sets before the outer query. An IN subquery
-        // over json_each can be correlated by SQLite and reparsed per row.
-        Set<int>? exactIds;
-        if (searchTerms.isNotEmpty) {
-          final knownTags = await _knownSearchTags(db);
-          for (final term in searchTerms.where(knownTags.contains)) {
-            final ids = (await _exactTagImageIds(
-              db,
-              term,
-              candidatePathList,
-            )).toSet();
-            exactIds = exactIds == null ? ids : exactIds.intersection(ids);
-          }
-          if (exactIds != null && exactIds.isEmpty) {
-            return AdvancedSearchResult.empty;
-          }
-        }
-        // 2. 构建查询条件
+        // Typed text always uses content matching. Whole-tag identity belongs
+        // to the explicit tag filters, regardless of the global tag catalog.
         final conditions = <String>['i.is_deleted = 0'];
         final args = <dynamic>[];
 
-        // Exact IDs have already been intersected with candidate paths.
-        if (candidatePathList != null && exactIds == null) {
+        if (candidatePathList != null) {
           conditions.add('i.file_path IN (SELECT value FROM json_each(?))');
           args.add(jsonEncode(candidatePathList));
         }
 
         if (searchTerms.isNotEmpty) {
-          final knownTags = await _knownSearchTags(db);
           for (final term in searchTerms) {
-            if (knownTags.contains(term)) {
-              continue;
-            }
             final textConditions = <String>[];
             for (final variant in {term, term.replaceAll(' ', '_')}) {
               textConditions.add(
@@ -153,17 +131,21 @@ extension GalleryDataSourceAdvancedSearch on GalleryDataSource {
               );
               final pattern = '%${_escapeLikePattern(variant)}%';
               args.addAll([pattern, pattern]);
-              // Delimited search historically includes folder paths as well.
-              if ((textQuery ?? '').contains(RegExp(r'[,，]'))) {
-                textConditions.add(r"LOWER(i.file_path) LIKE ? ESCAPE '\'");
-                args.add(pattern);
-              }
+              textConditions.add(r"LOWER(i.file_path) LIKE ? ESCAPE '\'");
+              args.add(pattern);
             }
             textConditions.add(
               'i.id IN (SELECT image_id FROM ${GalleryDataSource._ftsIndexTable} '
               'WHERE ${GalleryDataSource._ftsIndexTable} MATCH ?)',
             );
             args.add('"${term.replaceAll('"', '""')}"');
+            textConditions.add(
+              'EXISTS (SELECT 1 FROM ${GalleryDataSource._imageTagsTable} it '
+              'JOIN ${GalleryDataSource._tagsTable} t ON t.id = it.tag_id '
+              "WHERE it.image_id = i.id AND LOWER(REPLACE(t.name, '_', ' ')) "
+              r"LIKE ? ESCAPE '\')",
+            );
+            args.add('%${_escapeLikePattern(term)}%');
             conditions.add('(${textConditions.join(' OR ')})');
           }
         }
@@ -347,42 +329,15 @@ extension GalleryDataSourceAdvancedSearch on GalleryDataSource {
               ''';
 
         // 范围、文本和属性筛选在同一查询中完成，最后排序和限制数量。
-        Future<List<Map<String, Object?>>> query({List<int>? ids}) =>
-            db.rawQuery(
-              '''
+        final results = await db.rawQuery(
+          '''
             $selectPrefix
             WHERE $whereClause
-            ${ids == null ? '' : 'AND i.id IN (${List.filled(ids.length, '?').join(',')})'}
             ORDER BY $sortColumn $orderDirection, i.id
             LIMIT ?
           ''',
-              [...args, if (ids != null) ...ids, limit],
-            );
-        final results = <Map<String, Object?>>[];
-        if (exactIds == null) {
-          results.addAll(await query());
-        } else {
-          for (final ids in chunk(exactIds.toList(), 800)) {
-            results.addAll(await query(ids: ids));
-          }
-          // Chunks each retain their own SQL ordering; merge using the same
-          // sort keys before applying the global limit.
-          if (results.length > 1) {
-            final ordered = await db.rawQuery(
-              '''
-              SELECT i.id FROM ${GalleryDataSource._imagesTable} i
-              WHERE i.id IN (SELECT value FROM json_each(?))
-              ORDER BY $sortColumn $orderDirection, i.id
-              LIMIT ?
-            ''',
-              [jsonEncode(results.map((r) => r['id']).toList()), limit],
-            );
-            final byId = {for (final row in results) row['id']: row};
-            results
-              ..clear()
-              ..addAll(ordered.map((row) => byId[row['id']]!));
-          }
-        }
+          [...args, limit],
+        );
         final resultIds = results
             .map((row) => (row['id'] as num).toInt())
             .toList(growable: false);

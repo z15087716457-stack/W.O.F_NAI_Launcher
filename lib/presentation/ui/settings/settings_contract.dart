@@ -112,10 +112,8 @@ enum SettingKey {
   agentSkipPaidConfirmation,
   // 语义检索
   ragEnabled,
-  ragContextTokens, // 32–512 Gemma tokens before the caret
   ragDevice, // auto / cuda / cpu
   ragEmbedPath,
-  ragRerankPath,
   ragPythonPath, // python.exe；null = 自动安装的独立环境
   // 本地放大
   upscaleDefault, // 新增：工具条“本地放大”的默认方式；选项由 options 给
@@ -331,13 +329,6 @@ class SettingSpec {
       defaultValue: 32.0,
     ),
     SettingKey.ragEnabled: SettingSpec._(_t, _rg, defaultValue: false),
-    SettingKey.ragContextTokens: SettingSpec._(
-      _n,
-      _rg,
-      min: 32,
-      max: 512,
-      defaultValue: 120.0,
-    ),
     SettingKey.ragDevice: SettingSpec._(
       _c,
       _rg,
@@ -345,7 +336,6 @@ class SettingSpec {
       defaultValue: 'auto',
     ),
     SettingKey.ragEmbedPath: SettingSpec._(_p, _rg),
-    SettingKey.ragRerankPath: SettingSpec._(_p, _rg),
     SettingKey.ragPythonPath: SettingSpec._(_p, _rg),
     SettingKey.upscaleDefault: SettingSpec._(_c, _up),
     SettingKey.seedVramMode: SettingSpec._(
@@ -1185,6 +1175,8 @@ class SettingsPreset {
   final bool builtin;
 }
 
+enum SettingsRequestStatus { pending, running, success, failed, cancelled }
+
 @immutable
 class SettingsRequestLog {
   const SettingsRequestLog({
@@ -1193,7 +1185,7 @@ class SettingsRequestLog {
     required this.task,
     required this.provider,
     required this.model,
-    required this.ok,
+    required this.status,
     this.latencyMs,
     this.tokens,
   });
@@ -1204,7 +1196,7 @@ class SettingsRequestLog {
   final SettingsModelTask task;
   final String provider;
   final String model;
-  final bool ok;
+  final SettingsRequestStatus status;
   final int? latencyMs;
   final int? tokens;
 }
@@ -1512,18 +1504,29 @@ enum SettingsRagSourceKind { tags, wiki, blocks, gallery }
 /// [empty] = 还没建过库（出“建立索引”）；[ready] 且 done < total = 部分完成（出“继续建立”）。
 enum SettingsRagState { empty, ready, building, paused, error, off, loading }
 
+enum SettingsRagRuntimeIssue {
+  missing,
+  dependencies,
+  pythonVersion,
+  importFailed,
+  timedOut,
+}
+
 @immutable
 class SettingsRagSource {
   const SettingsRagSource({
     required this.kind,
     required this.state,
-    this.enabled = true,
     this.done = 0,
     this.total = 0,
     this.secondary,
     this.known = true,
     this.skipped = 0,
     this.error,
+    this.upgradeAvailable = false,
+    this.upgradeFailed = false,
+    this.upgradeCleaning = false,
+    this.cleanupOnly = false,
   });
 
   final SettingsRagSourceKind kind;
@@ -1531,7 +1534,6 @@ class SettingsRagSource {
 
   /// False until the worker has returned an authoritative index status.
   final bool known;
-  final bool enabled;
   final int done;
   final int total;
 
@@ -1544,11 +1546,13 @@ class SettingsRagSource {
   /// 这个来源最近一次失败的原因（原样显示，一行）。
   final String? error;
 
+  final bool upgradeAvailable, upgradeFailed, upgradeCleaning, cleanupOnly;
+
   double get fraction => total == 0 ? 0 : done / total;
 }
 
 /// 两个模型权重（下载 / 选目录）。
-enum SettingsRagModel { embedder, reranker }
+enum SettingsRagModel { embedder }
 
 /// 模型下载进度（同一时间只下一个）。
 @immutable
@@ -1608,10 +1612,15 @@ class SettingsRagPlan {
     this.documents = 0,
     this.images = 0,
     this.roots = const [],
+    this.upgrade = false,
+    this.cleanupOnly = false,
+    this.legacyBytes = 0,
   });
 
   final SettingsRagSourceKind kind;
   final bool rebuild;
+  final bool upgrade, cleanupOnly;
+  final int legacyBytes;
 
   /// 还在统计（显示“正在统计…”，“开始”不可点）。
   final bool loading;
@@ -1648,7 +1657,6 @@ class SettingsRagData {
   const SettingsRagData({
     this.runtime = const SettingsRagStep(value: ''),
     this.embedder = const SettingsRagStep(value: ''),
-    this.reranker = const SettingsRagStep(value: ''),
     this.device = const SettingsRagStep(value: ''),
     this.sources = const [],
     this.indexBytes = 0,
@@ -1656,6 +1664,8 @@ class SettingsRagData {
     this.runtimeReady = false,
     this.runtimeCuda = false,
     this.runtimePython = '',
+    this.runtimeIssue,
+    this.runtimePackages = const [],
     this.pythonPending = false,
     this.install,
     this.download,
@@ -1672,7 +1682,6 @@ class SettingsRagData {
 
   final SettingsRagStep runtime;
   final SettingsRagStep embedder;
-  final SettingsRagStep reranker;
   final SettingsRagStep device;
   final List<SettingsRagSource> sources;
   final int indexBytes;
@@ -1680,8 +1689,10 @@ class SettingsRagData {
   /// 正在检测运行环境。
   final bool checking;
 
-  /// 运行环境可用（false = 显示“安装”）。
+  /// 运行环境的导入与版本检查均通过。
   final bool runtimeReady;
+  final SettingsRagRuntimeIssue? runtimeIssue;
+  final List<String> runtimePackages;
 
   /// 当前环境是 CUDA 版（“使用此解释器”重装时沿用）。
   final bool runtimeCuda;
@@ -1712,8 +1723,7 @@ class SettingsRagData {
 
   /// Includes read-only index verification without presenting it as a build.
   final bool indexBusy;
-  bool get progressKnown =>
-      sources.where((s) => s.enabled).every((s) => s.known);
+  bool get progressKnown => sources.every((s) => s.known);
 
   /// 最近一次安装 / 下载失败的原因（原样显示在状态卡里）。
   final String? error;
@@ -1727,9 +1737,9 @@ class SettingsRagData {
       download != null ||
       sources.any((s) => s.state == SettingsRagState.building);
 
-  /// 0–1，按来源条数平均（未启用的不算）。
+  /// 0–1，按有内容的来源平均。
   double get overall {
-    final on = sources.where((s) => s.enabled && s.total > 0).toList();
+    final on = sources.where((s) => s.total > 0).toList();
     if (on.isEmpty) return 0;
     return on.fold<double>(0, (s, e) => s + e.fraction) / on.length;
   }
@@ -2093,7 +2103,6 @@ class SettingsActions {
     this.onMoveQuick = _noMove,
     this.onRestoreQuick = _none,
     // 语义检索
-    this.onRagSourceEnabled = _noRagBool,
     this.onRagPause = _noRag,
     this.onRagResume = _noRag,
     this.onRagBuild = _noRag,
@@ -2306,8 +2315,6 @@ class SettingsActions {
   /// 打开回收区管理窗（恢复、彻底删除、清空）。
   final VoidCallback onOpenTrash;
 
-  final void Function(SettingsRagSourceKind kind, bool enabled)
-  onRagSourceEnabled;
   final ValueChanged<SettingsRagSourceKind> onRagPause;
   final ValueChanged<SettingsRagSourceKind> onRagResume;
 
@@ -2423,7 +2430,6 @@ class SettingsActions {
   }) async => false;
   static void _noMcpMode(String _, SettingsMcpMode _) {}
   static void _noRag(SettingsRagSourceKind _) {}
-  static void _noRagBool(SettingsRagSourceKind _, bool _) {}
   static void _noRagModel(SettingsRagModel _) {}
   static void _noRagInstall({required bool cuda}) {}
   static void _noScopes(Set<SettingsResetScope> _) {}

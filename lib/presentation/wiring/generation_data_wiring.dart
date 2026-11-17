@@ -17,6 +17,8 @@ import '../../l10n/app_localizations.dart';
 import '../prompt_assistant/providers/prompt_assistant_config_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/prompt_translation_mode_provider.dart';
+import '../providers/prompt_auto_translation_provider.dart';
+import '../providers/pill_workspace_provider.dart';
 import '../providers/canvas_settings_provider.dart';
 import '../providers/canvas_channel_provider.dart';
 import '../providers/canvas_channel_feed_provider.dart';
@@ -532,6 +534,14 @@ final generationViewDataProvider = Provider.autoDispose
           ),
           translate: GenTranslate(
             mode: translationMode,
+            automatic: ref.watch(promptAutoTranslationEnabledProvider),
+            automaticFailed: ref
+                .watch(promptAutoTranslationFailuresProvider)
+                .any(
+                  (scope) => negative
+                      ? scope == PillScopes.negative || scope.endsWith(':neg')
+                      : scope == PillScopes.main || scope.endsWith(':pos'),
+                ),
             busy: translating,
             showing: translationMode == PromptTranslationMode.inline
                 ? translationDocuments.any(

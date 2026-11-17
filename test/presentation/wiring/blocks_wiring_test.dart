@@ -1,3 +1,4 @@
+import '../../helpers/empty_tag_expansion.dart';
 import 'package:nai_launcher/data/models/prompt_block/prompt_block_palette_entry.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -46,7 +47,7 @@ class MemoryCharacters extends CharacterPromptNotifier {
 
 class MemoryRagSettings extends RagSettingsController {
   @override
-  RagSettings build() => const RagSettings(blocksEnabled: true);
+  RagSettings build() => const RagSettings();
   @override
   Future<void> update(RagSettings value) async {
     state = value;
@@ -312,6 +313,7 @@ void main() {
     platform = TestPlatform();
     container = ProviderContainer(
       overrides: [
+        emptyTagExpansionOverride,
         promptBlockStorageProvider.overrideWithValue(storage),
         localStorageServiceProvider.overrideWithValue(MemorySettings()),
         characterPromptNotifierProvider.overrideWith(MemoryCharacters.new),
@@ -599,13 +601,7 @@ void main() {
           )).id;
           await container
               .read(ragSettingsProvider.notifier)
-              .update(
-                const RagSettings(
-                  enabled: true,
-                  tagsEnabled: false,
-                  blocksEnabled: true,
-                ),
-              );
+              .update(const RagSettings(enabled: true));
         });
         final rag = container.read(ragControllerProvider.notifier) as MemoryRag;
         rag.ids.addAll([semanticId, 'deleted']);
@@ -678,13 +674,7 @@ void main() {
       )).id;
       await container
           .read(ragSettingsProvider.notifier)
-          .update(
-            const RagSettings(
-              enabled: true,
-              tagsEnabled: false,
-              blocksEnabled: true,
-            ),
-          );
+          .update(const RagSettings(enabled: true));
     });
     final rag = container.read(ragControllerProvider.notifier) as MemoryRag;
     rag.ids.add(semanticId);

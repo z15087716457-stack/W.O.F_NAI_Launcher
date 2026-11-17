@@ -201,7 +201,10 @@ class _Api extends PromptAssistantApiClient {
   final canceled = <String?>[];
   String response = '{"text":"green eyes"}';
   @override
-  Stream<StreamingChunk> complete({required PromptAssistantRequest request}) {
+  Stream<StreamingChunk> complete({
+    required PromptAssistantRequest request,
+    void Function(String)? validateOutput,
+  }) {
     requests.add(request);
     return Stream.value(StreamingChunk(delta: response));
   }

@@ -7,8 +7,15 @@ import 'package:nai_launcher/core/rag/rag_runtime_probe.dart';
 import 'package:nai_launcher/core/rag/rag_runtime.dart';
 
 class ProbeProcess implements Process {
-  ProbeProcess({this.hanging = false, this.ready = true});
+  ProbeProcess({
+    this.hanging = false,
+    this.ready = true,
+    this.issue,
+    this.packages = const [],
+  });
   final bool hanging, ready;
+  final String? issue;
+  final List<String> packages;
   bool killed = false;
   @override
   int get pid => 42;
@@ -16,7 +23,9 @@ class ProbeProcess implements Process {
   final IOSink stdin = IOSink(StreamController<List<int>>().sink);
   @override
   Stream<List<int>> get stdout => Stream.value(
-    utf8.encode('${jsonEncode({'ready': ready, 'cuda': true})}\n'),
+    utf8.encode(
+      '${jsonEncode({'ready': ready, 'cuda': true, 'issue': issue, 'packages': packages})}\n',
+    ),
   );
   @override
   Stream<List<int>> get stderr => const Stream.empty();
@@ -77,7 +86,9 @@ void main() {
         timeout: const Duration(milliseconds: 15),
         runner: (root, python, code) async => process,
       );
-      expect((await probe.inspect(root, exe.path)).ready, isFalse);
+      final result = await probe.inspect(root, exe.path);
+      expect(result.ready, isFalse);
+      expect(result.issue, RagRuntimeIssue.timedOut);
       expect(process.killed, isTrue);
     },
   );
@@ -105,4 +116,61 @@ void main() {
       }
     },
   );
+  test(
+    'missing dependencies remain distinguishable from an absent interpreter',
+    () async {
+      final exe = File(p.join(root.path, 'existing.exe'));
+      await exe.writeAsString('fixture');
+      final probe = RagRuntimeProbe(
+        runner: (root, python, code) async => ProbeProcess(
+          ready: false,
+          issue: 'dependencies',
+          packages: ['jieba'],
+        ),
+      );
+      final result = await probe.inspect(root, exe.path);
+      expect(result.issue, RagRuntimeIssue.dependencies);
+      expect(result.packages, ['jieba']);
+      expect(result.python, exe.path);
+      expect(
+        (await probe.inspect(root, 'missing.exe')).issue,
+        RagRuntimeIssue.missing,
+      );
+    },
+  );
+  test(
+    'a failed preferred probe can reuse a compatible managed environment',
+    () async {
+      final exe = File(p.join(root.path, 'selected.exe'));
+      final managed = File(RagRuntimeProbe().platform.managedPython(root.path));
+      await exe.writeAsString('fixture');
+      await managed.parent.create(recursive: true);
+      await managed.writeAsString('fixture');
+      final probe = RagRuntimeProbe(
+        runner: (root, python, code) async => ProbeProcess(
+          ready: python == managed.path,
+          issue: 'dependencies',
+          packages: ['jieba'],
+        ),
+      );
+      final result = await probe.inspect(root, exe.path);
+      expect(result.ready, isTrue);
+      expect(result.python, managed.path);
+      expect(result.issue, isNull);
+    },
+  );
+  for (final issue in ['pythonVersion', 'importFailed']) {
+    test(
+      'probe preserves $issue without claiming the environment is missing',
+      () async {
+        final exe = File(p.join(root.path, 'existing.exe'));
+        await exe.writeAsString('fixture');
+        final probe = RagRuntimeProbe(
+          runner: (root, python, code) async =>
+              ProbeProcess(ready: false, issue: issue),
+        );
+        expect((await probe.inspect(root, exe.path)).issue?.name, issue);
+      },
+    );
+  }
 }

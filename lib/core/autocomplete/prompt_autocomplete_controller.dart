@@ -85,11 +85,13 @@ class PromptAutocompleteState {
 /// and applies the values returned by accept/acceptRelated; this never edits a draft.
 class PromptAutocompleteController
     extends ValueNotifier<PromptAutocompleteState> {
+  static const int defaultLimit = 80;
+
   PromptAutocompleteController({
     required PromptAutocompleteSearch search,
     PromptAutocompleteRelatedSearch? relatedSearch,
     this.debounce = const Duration(milliseconds: 120),
-    this.limit = 12,
+    this.limit = defaultLimit,
     bool enabled = false,
   }) : _search = search,
        _relatedSearch = relatedSearch,
@@ -108,7 +110,12 @@ class PromptAutocompleteController
       limit: query.limit,
     ),
     relatedSearch: (sourceTag, {required locale, required existingTags}) =>
-        service.related(sourceTag, locale: locale, existingTags: existingTags),
+        service.related(
+          sourceTag,
+          locale: locale,
+          existingTags: existingTags,
+          limit: defaultLimit,
+        ),
   );
 
   final PromptAutocompleteSearch _search;

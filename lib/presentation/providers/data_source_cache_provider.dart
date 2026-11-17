@@ -226,10 +226,8 @@ class DanbooruTagsCacheNotifier extends _$DanbooruTagsCacheNotifier {
 
     while (statsRetryCount < maxStatsRetries) {
       try {
-        final completionService = await ref.read(
-          completionServiceProvider.future,
-        );
-        count = await completionService.getTagCount();
+        final tags = await ref.read(danbooruTagDataSourceProvider.future);
+        count = await tags.getCount();
 
         // 获取分类统计
         final stats = await _service!.getCategoryStats();
@@ -270,10 +268,8 @@ class DanbooruTagsCacheNotifier extends _$DanbooruTagsCacheNotifier {
     // 获取共现数据数量（预构建数据库）
     var cooccurrenceCount = 0;
     try {
-      final cooccurrenceService = await ref.read(
-        cooccurrenceServiceProvider.future,
-      );
-      cooccurrenceCount = await cooccurrenceService.getCount();
+      final graph = await ref.read(cooccurrenceDataSourceProvider.future);
+      cooccurrenceCount = await graph.getCount();
 
       AppLogger.i(
         '[ProviderLifecycle] Database stats - cooccurrences: $cooccurrenceCount',
@@ -352,10 +348,8 @@ class DanbooruTagsCacheNotifier extends _$DanbooruTagsCacheNotifier {
       await _requireService.refresh();
 
       // 刷新完成后重新加载标签数量
-      final completionService = await ref.read(
-        completionServiceProvider.future,
-      );
-      final count = await completionService.getTagCount();
+      final tags = await ref.read(danbooruTagDataSourceProvider.future);
+      final count = await tags.getCount();
 
       state = AsyncValue.data(
         currentState.copyWith(

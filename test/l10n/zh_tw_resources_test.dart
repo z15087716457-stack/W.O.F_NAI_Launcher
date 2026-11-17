@@ -3,8 +3,6 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/core/wiki/wiki_directory_labels.dart';
-import 'package:nai_launcher/data/models/prompt/tag_category.dart';
-import 'package:nai_launcher/data/models/prompt/tag_group.dart';
 import 'package:nai_launcher/l10n/zh_tw_labels.dart';
 
 import '../../tool/l10n/opencc_engine.dart';
@@ -12,11 +10,7 @@ import '../../tool/l10n/zh_tw_resources.dart';
 import '../helpers/chinese_script_test_support.dart';
 
 /// Simplified labels kept in code whose Traditional forms are generated.
-Iterable<String> _curatedLabels() => [
-  ...WikiDirectoryLabels.chinese.values,
-  ...TagGroup.chineseNames.values,
-  ...TagSubCategoryHelper.chineseNames.values,
-];
+Iterable<String> _curatedLabels() => [...WikiDirectoryLabels.chinese.values];
 
 void main() {
   final update = Platform.environment['UPDATE_ZH_TW'] == '1';

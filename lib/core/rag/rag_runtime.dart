@@ -241,7 +241,7 @@ class RagRuntimeInstaller {
       phase('check');
       await _run(python, [
         '-c',
-        'import torch, torchvision, transformers, sentence_transformers, usearch; from transformers.models.embedding_gemma2 import EmbeddingGemma2Model',
+        'import torch, torchvision, transformers, sentence_transformers, jieba, usearch; from transformers.models.embedding_gemma2 import EmbeddingGemma2Model',
       ]);
       await File(p.join(root.path, 'runtime-receipt.json')).writeAsString(
         jsonEncode({

@@ -6,27 +6,6 @@ import 'package:nai_launcher/core/rag/rag_text_search.dart';
 import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
 
 void main() {
-  test('legacy preferences leave new collections opt-in', () {
-    final settings = RagSettings.fromJson({
-      'version': 1,
-      'enabled': true,
-      'tagsEnabled': false,
-    });
-    expect(settings.enabledFor(RagSource.tags), isFalse);
-    expect(settings.wikiEnabled, isFalse);
-    expect(settings.blocksEnabled, isFalse);
-    expect(settings.galleryEnabled, isFalse);
-    final updated = settings.copyWith(
-      wikiEnabled: true,
-      blocksEnabled: true,
-      galleryEnabled: true,
-    );
-    final restored = RagSettings.fromJson(updated.toJson());
-    expect(restored.enabledFor(RagSource.wiki), isTrue);
-    expect(restored.enabledFor(RagSource.blocks), isTrue);
-    expect(restored.enabledFor(RagSource.gallery), isTrue);
-    expect(settings.connectionKey, isNot(updated.connectionKey));
-  });
   test('query identity includes the source and the actual scope', () {
     final a = RagTextQuery(
       source: RagSource.blocks,

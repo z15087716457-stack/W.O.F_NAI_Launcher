@@ -10,7 +10,7 @@ import threading
 import time
 import uuid
 
-from engine import Engine, Sources
+from tag_search import TagEngine, TagSources, SearchOptions
 from pool import VectorPool
 from models import Models
 from documents import TextEngine, WikiSources, BlockSources
@@ -95,7 +95,13 @@ class Worker:
                 else:
                     self._settle_pool()
             except Exception as error:
-                self._event(source=job['source'],job_id=job_id,phase='error',code=self.error_code(error),**engine.status())
+                status = engine.status()
+                if job['source'] == 'tags' and status['complete'] and status.get('upgrade_failed'):
+                    self._event(source='tags',job_id=job_id,phase='complete',**status)
+                else:
+                    code = self.error_code(error)
+                    engine.set_build_error(code)
+                    self._event(source=job['source'],job_id=job_id,phase='error',code=code,**engine.status())
                 return
             self._event(source=job['source'],job_id=job_id, phase='paused' if job['cancel'].is_set() else 'complete', **engine.status())
         except Exception as error:
@@ -103,7 +109,9 @@ class Worker:
             job['generator'].close()
             if gallery:
                 self._defer_checkpoint(job)
-            self._event(source=job['source'],job_id=job_id, phase='error', code=self.error_code(error), **engine.status())
+            code = self.error_code(error)
+            engine.set_build_error(code)
+            self._event(source=job['source'],job_id=job_id, phase='error', code=code, **engine.status())
         finally:
             self.last_use = time.monotonic()
 
@@ -120,8 +128,8 @@ class Worker:
             return 'database_locked'
         # Never expose paths, query text, URLs, or raw backend exceptions.
         allowed = {'cancelled','source_changed','invalid_plan','index_busy','cuda_unavailable',
-                   'invalid_embeddings','invalid_rerank_scores','invalid_context_mode','invalid_context_budget','disabled_source',
-                   'invalid_source','source_too_large','invalid_snapshot'}
+                   'invalid_embeddings','disabled_source',
+                   'invalid_source','source_too_large','invalid_snapshot','job_missing'}
         code = str(error)
         return code if code in allowed else 'rag_runtime_error'
 
@@ -149,7 +157,7 @@ class Worker:
             if token.is_set(): raise ValueError('cancelled')
             if progress: progress('opening', 0, 0)
             self.close()
-            models = Models(p['embedding'], p['reranker'], p.get('device','auto'))
+            models = Models(p['embedding'], p.get('device','auto'))
             self.models = models
             enabled = p.get('sources',['tags'])
             if not isinstance(enabled,list) or any(s not in ('tags','wiki','blocks','gallery') for s in enabled): raise ValueError('invalid_source')
@@ -157,7 +165,7 @@ class Worker:
             self.pool = VectorPool(root,models.fingerprint,progress=progress,cancelled=token.is_set)
             if progress: progress('sources', 0, 0)
             if 'tags' in enabled:
-                self.engine = self.engines['tags'] = Engine(root,models,Sources(p['catalog'],p.get('runtime',''),p.get('wiki',''),p.get('tag_semantics',''),p.get('tag_supplements','')),pool=self.pool,collection='tags')
+                self.engine = self.engines['tags'] = TagEngine(os.path.join(root,'danbooru-search-v1'),models,TagSources(p.get('tag_corpus'),catalog=p.get('catalog',''),runtime=p.get('runtime',''),wiki=p.get('wiki',''),semantics=p.get('tag_semantics',''),supplements=p.get('tag_supplements','')),pool=self.pool)
             if 'wiki' in enabled:
                 self.engines['wiki'] = TextEngine(os.path.join(root,'wiki-v1'),models,WikiSources(p['wiki'],p['catalog'],p.get('translations','')),pool=self.pool,collection='wiki')
             if 'blocks' in enabled:
@@ -212,6 +220,7 @@ class Worker:
             return {'job_id':job_id}
         if op in ('pause','resume'):
             job = self.jobs.get(p['job_id'])
+            if op == 'resume' and job is None: raise ValueError('job_missing')
             if job and job['source'] != source: raise ValueError('invalid_source')
             if job and job['source'] == source:
                 if op == 'resume' and job['signature'] != self._source_signature(engine):
@@ -254,11 +263,11 @@ class Worker:
         if op == 'search':
             if source != 'tags': raise ValueError('invalid_source')
             if self.suspended: return {'items':[],'fallback':'resource_busy'}
-            if len(p['text']) > 262144: raise ValueError('input_too_large')
+            query = p['query']
+            if not isinstance(query,str): raise ValueError('invalid_source')
             self.last_use = time.monotonic()
-            return engine.search(p['text'],p['cursor'],p.get('mode','before'),
-                p.get('existing',[])[:20000],p.get('lexical',[])[:80],p.get('negative',False),
-                min(80,max(1,p.get('limit',40))),token.is_set,p.get('keyword',''),p.get('budget',120))
+            return engine.search(query,p.get('existing',[])[:20000],
+                min(80,max(1,p.get('limit',40))),token.is_set,SearchOptions.parse(p))
         raise ValueError('unknown_operation')
 
     def status(self, progress=None, cancelled=lambda: False):
@@ -271,6 +280,7 @@ class Worker:
             paused = status['paused'] or bool(jobs and all(j['paused'] for j in jobs))
             running = bool(jobs and not paused and not self.suspended)
             sources[name] = {**status,'paused':paused,
+                'error':None if running else status.get('error'),
                 'building':running and status['building'],
                 'checking':running and not status['building']}
         tags = sources.get('tags',{'indexed':0,'total':0,'bytes':0,'complete':False,'partial':False,'building':False,'paused':False})
@@ -279,12 +289,27 @@ class Worker:
 
     def _unload_in(self):
         if (self.models is None or
-                (self.models.encoder is None and self.models.scorer is None) or
+                self.models.encoder is None or
                 self._has_active_builds()):
             return None
         return max(0, self.last_use + IDLE_UNLOAD_SECONDS - time.monotonic())
 
     def run(self):
+        try:
+            self._run()
+        finally:
+            try: self.close()
+            except Exception:
+                emit({'event':'shutdown','phase':'failed'})
+                raise
+            finally:
+                if self.running:
+                    # The transport can remain alive after its executor dies.
+                    # Publish only after owners have finished their checkpoint.
+                    emit({'event':'fatal','code':'worker_failed'})
+            if not self.running: emit({'event':'shutdown','phase':'complete'})
+
+    def _run(self):
         while self.running:
             checkpoint_in = self._checkpoint_in()
             if checkpoint_in == 0:
@@ -312,12 +337,6 @@ class Worker:
             except Exception as error:
                 emit({'id':request_id,'error':{'code':self.error_code(error)}})
             finally: self.tokens.pop(request_id,None)
-        try: self.close()
-        except Exception:
-            emit({'event':'shutdown','phase':'failed'})
-            raise
-        emit({'event':'shutdown','phase':'complete'})
-
     def main(self):
         # Libraries may print progress to stdout. Keep the strict JSON pipe
         # isolated, including imports and prints from the inference thread.
@@ -330,6 +349,7 @@ class Worker:
         # while the CRT is reading a pipe can deadlock inside DLL initialization.
         import numpy
         import torch
+        torch.set_num_threads(3)
         import sentence_transformers
         import usearch.index
         thread = threading.Thread(target=self.run,daemon=True); thread.start()

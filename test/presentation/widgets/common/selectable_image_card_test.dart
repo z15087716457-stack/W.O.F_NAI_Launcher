@@ -13,8 +13,6 @@ import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/data/models/image/image_stream_chunk.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
-import 'package:nai_launcher/presentation/providers/simple_output_viewer_provider.dart';
-import 'package:nai_launcher/presentation/providers/simple_viewer_group_batches_provider.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_history.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_page.dart';
 import 'package:nai_launcher/presentation/wiring/generation_wiring.dart';
@@ -30,8 +28,6 @@ import '../../providers/krita/agent_bridge_draft_test.dart'
 import '../../wiring/generation_data_wiring_test.dart'
     show DataGeneration, DataSubscription, DataShortcuts;
 import '../../wiring/generation_reference_imports_test.dart' show ImportStorage;
-import 'package:nai_launcher/presentation/screens/generation/widgets/image_preview.dart';
-import 'package:nai_launcher/presentation/widgets/common/draggable_memory_image.dart';
 import 'package:nai_launcher/presentation/widgets/common/selectable_image_card.dart';
 import 'package:nai_launcher/presentation/themes/app_theme.dart';
 import '../../../helpers/studio_capture_fonts.dart';
@@ -346,97 +342,6 @@ void main() {
     expect(find.text('精准参考'), findsOneWidget);
   });
 
-  testWidgets(
-    'generation preview hover hides shortcuts without disabling its context menu',
-    (tester) async {
-      final container = _createContainerWithPreviewImage();
-      addTearDown(container.dispose);
-
-      await tester.pumpWidget(_buildPreviewApp(container));
-      await tester.pumpAndSettle();
-
-      final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-      addTearDown(gesture.removePointer);
-      await gesture.addPointer();
-      await gesture.moveTo(tester.getCenter(find.byType(SelectableImageCard)));
-      await tester.pumpAndSettle();
-
-      expect(find.byTooltip('图生图'), findsNothing);
-      expect(find.byTooltip('风格迁移'), findsNothing);
-      expect(find.byTooltip('精准参考'), findsNothing);
-      await _openImageContextMenu(tester);
-      expect(find.text('图生图'), findsOneWidget);
-      expect(find.text('风格迁移'), findsOneWidget);
-      expect(find.text('精准参考'), findsOneWidget);
-    },
-  );
-
-  testWidgets(
-    'generation preview context menu exposes history destination shortcuts',
-    (tester) async {
-      final container = _createContainerWithPreviewImage();
-      addTearDown(container.dispose);
-
-      await tester.pumpWidget(_buildPreviewApp(container));
-      await tester.pumpAndSettle();
-
-      final center = tester.getCenter(find.byType(SelectableImageCard));
-      final gesture = await tester.startGesture(
-        center,
-        kind: PointerDeviceKind.mouse,
-        buttons: kSecondaryMouseButton,
-      );
-      addTearDown(gesture.removePointer);
-      await tester.pumpAndSettle();
-      await gesture.up();
-      await tester.pumpAndSettle();
-
-      expect(find.text('图生图'), findsOneWidget);
-      expect(find.text('风格迁移'), findsOneWidget);
-      expect(find.text('精准参考'), findsOneWidget);
-    },
-  );
-
-  testWidgets(
-    'generation preview right-click copy writes the displayed image',
-    (tester) async {
-      Uint8List? copiedBytes;
-      bool? menuVisibleWhenCopyStarted;
-      final container = _createContainerWithPreviewImage(
-        clipboardWriter: (bytes) async {
-          menuVisibleWhenCopyStarted = find
-              .byKey(const Key('image-action-menu'))
-              .evaluate()
-              .isNotEmpty;
-          copiedBytes = bytes;
-        },
-      );
-      addTearDown(container.dispose);
-      final expectedBytes = container
-          .read(imageGenerationNotifierProvider)
-          .displayImages
-          .single
-          .bytes;
-
-      await tester.pumpWidget(_buildPreviewApp(container));
-      await tester.pumpAndSettle();
-      await _openImageContextMenu(tester);
-
-      await tester.tap(find.text('复制图像'));
-      await tester.pumpAndSettle();
-
-      expect(copiedBytes, orderedEquals(expectedBytes));
-      expect(menuVisibleWhenCopyStarted, isFalse);
-      expect(find.byKey(const Key('image-action-menu')), findsNothing);
-      await tester.pumpAndSettle();
-
-      expect(find.byKey(const Key('image-action-menu')), findsNothing);
-      await tester.pump(const Duration(seconds: 4));
-      await tester.pumpAndSettle();
-      expect(tester.takeException(), isNull);
-    },
-  );
-
   testWidgets('generation history right-click copy writes the history image', (
     tester,
   ) async {
@@ -493,110 +398,6 @@ void main() {
     expect(find.text(l.gen_copyImage), findsNothing);
     await tester.pump(const Duration(seconds: 4));
     await tester.pumpAndSettle();
-  });
-
-  testWidgets(
-    'generation preview makes completed single and grid images draggable',
-    (tester) async {
-      // 网格只在“按批次分组”开启时出现；默认逐张显示。
-      final container = _createContainerWithPreviewImage(grouped: true);
-      addTearDown(container.dispose);
-
-      await tester.pumpWidget(_buildPreviewApp(container));
-      await tester.pumpAndSettle();
-
-      expect(find.byType(DraggableMemoryImage), findsOneWidget);
-
-      final bytes = Uint8List.fromList(
-        img.encodePng(img.Image(width: 32, height: 32)),
-      );
-      container
-          .read(imageGenerationNotifierProvider.notifier)
-          .updateDisplayImages([
-            GeneratedImage(id: 'grid-1', bytes: bytes, width: 32, height: 32),
-            GeneratedImage(id: 'grid-2', bytes: bytes, width: 32, height: 32),
-          ]);
-      await tester.pumpAndSettle();
-
-      expect(find.byType(DraggableMemoryImage), findsNWidgets(2));
-    },
-  );
-
-  testWidgets('generation preview keeps failed snapshots non-draggable', (
-    tester,
-  ) async {
-    final container = ProviderContainer();
-    addTearDown(container.dispose);
-    final bytes = Uint8List.fromList(
-      img.encodePng(img.Image(width: 32, height: 32)),
-    );
-    container
-        .read(imageGenerationNotifierProvider.notifier)
-        .updateDisplayImages([
-          GeneratedImage(
-            id: 'failed-preview',
-            bytes: bytes,
-            width: 32,
-            height: 32,
-            kind: GeneratedImageKind.failedStreamSnapshot,
-          ),
-        ]);
-
-    await tester.pumpWidget(_buildPreviewApp(container));
-    await tester.pumpAndSettle();
-
-    expect(find.byType(SelectableImageCard), findsOneWidget);
-    expect(find.byType(DraggableMemoryImage), findsNothing);
-  });
-
-  testWidgets('generation preview renders multiple stream preview slots', (
-    tester,
-  ) async {
-    final container = ProviderContainer(
-      overrides: [
-        simpleOutputViewerNotifierProvider.overrideWith(
-          _SimpleViewerNotifier.new,
-        ),
-      ],
-    );
-    addTearDown(container.dispose);
-
-    final firstPreview = Uint8List.fromList(
-      img.encodePng(img.Image(width: 32, height: 32)),
-    );
-    final secondPreview = Uint8List.fromList(
-      img.encodePng(img.Image(width: 48, height: 32)),
-    );
-    final notifier = container.read(imageGenerationNotifierProvider.notifier);
-    notifier.state = notifier.state.copyWith(
-      status: GenerationStatus.generating,
-      currentImage: 1,
-      totalImages: 2,
-      batchWidth: 32,
-      batchHeight: 32,
-      streamPreviewSlots: [
-        StreamPreviewSlot(
-          imageNumber: 1,
-          totalImages: 2,
-          progress: 0.25,
-          previewBytes: firstPreview,
-        ),
-        StreamPreviewSlot(
-          imageNumber: 2,
-          totalImages: 2,
-          progress: 0.35,
-          previewBytes: secondPreview,
-        ),
-      ],
-      clearStreamPreview: true,
-    );
-
-    await tester.pumpWidget(_buildPreviewApp(container));
-    await tester.pump(const Duration(milliseconds: 100));
-
-    expect(find.byType(SelectableImageCard), findsNWidgets(2));
-    expect(find.text('1/2'), findsOneWidget);
-    expect(find.text('2/2'), findsOneWidget);
   });
 
   testWidgets('inpaint stream preview with mask uses masked preview path', (
@@ -730,59 +531,6 @@ void main() {
 }
 
 void _noop() {}
-
-/// 画布（G11）是默认预览实现；这些用例断言经典网格/单卡语义，
-/// 一律强制 simpleOutputViewer=true 走回退档。
-class _GroupedBatches extends SimpleViewerGroupBatches {
-  @override
-  bool build() => true;
-}
-
-class _SimpleViewerNotifier extends SimpleOutputViewerNotifier {
-  @override
-  bool build() => true;
-}
-
-ProviderContainer _createContainerWithPreviewImage({
-  ImageClipboardWriter? clipboardWriter,
-  bool grouped = false,
-}) {
-  final container = ProviderContainer(
-    overrides: [
-      // 经典预览档：画布接管后 SelectableImageCard 由画布 tile 复用，断言要钉回旧实现
-      simpleOutputViewerNotifierProvider.overrideWith(
-        _SimpleViewerNotifier.new,
-      ),
-      if (clipboardWriter != null)
-        imageClipboardWriterProvider.overrideWithValue(clipboardWriter),
-      if (grouped)
-        simpleViewerGroupBatchesProvider.overrideWith(_GroupedBatches.new),
-    ],
-  );
-  final bytes = Uint8List.fromList(
-    img.encodePng(img.Image(width: 32, height: 32)),
-  );
-
-  container.read(imageGenerationNotifierProvider.notifier).updateDisplayImages([
-    GeneratedImage(id: 'preview-image', bytes: bytes, width: 32, height: 32),
-  ]);
-
-  return container;
-}
-
-Widget _buildPreviewApp(ProviderContainer container) {
-  return UncontrolledProviderScope(
-    container: container,
-    child: const MaterialApp(
-      locale: Locale('zh'),
-      supportedLocales: AppLocalizations.supportedLocales,
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      home: Scaffold(
-        body: SizedBox(width: 480, height: 480, child: ImagePreviewWidget()),
-      ),
-    ),
-  );
-}
 
 Widget _buildHistoryApp(ProviderContainer container) {
   return UncontrolledProviderScope(

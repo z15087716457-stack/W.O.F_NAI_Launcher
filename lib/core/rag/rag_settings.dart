@@ -10,27 +10,12 @@ enum RagSource { tags, wiki, blocks, gallery }
 class RagSettings {
   const RagSettings({
     this.enabled = false,
-    this.tagsEnabled = true,
-    this.wikiEnabled = false,
-    this.blocksEnabled = false,
-    this.galleryEnabled = false,
     this.embedding = '',
-    this.reranker = '',
     this.python = '',
-    this.tokenBudget = defaultTokenBudget,
     this.device = RagDevice.auto,
-  }) : assert(tokenBudget >= minTokenBudget && tokenBudget <= maxTokenBudget);
-  final bool enabled, tagsEnabled, wikiEnabled, blocksEnabled, galleryEnabled;
-  bool enabledFor(RagSource source) =>
-      enabled &&
-      switch (source) {
-        RagSource.tags => tagsEnabled,
-        RagSource.wiki => wikiEnabled,
-        RagSource.blocks => blocksEnabled,
-        RagSource.gallery => galleryEnabled,
-      };
-  final String embedding, reranker, python;
-  final int tokenBudget;
+  });
+  final bool enabled;
+  final String embedding, python;
   final RagDevice device;
   RagDevice deviceOn(RagPlatform platform, {int? memoryBytes}) {
     if (platform.isMacOS) {
@@ -44,72 +29,34 @@ class RagSettings {
         : device;
   }
 
-  static const defaultTokenBudget = 120;
-  static const minTokenBudget = 32;
-  static const maxTokenBudget = 512;
   Map<String, Object> toJson() => {
     'version': 1,
     'enabled': enabled,
-    'tagsEnabled': tagsEnabled,
-    'wikiEnabled': wikiEnabled,
-    'blocksEnabled': blocksEnabled,
-    'galleryEnabled': galleryEnabled,
     'embedding': embedding,
-    'reranker': reranker,
     'python': python,
-    'tokenBudget': tokenBudget,
     'device': device.name,
   };
   factory RagSettings.fromJson(Map<String, dynamic> json) => RagSettings(
     enabled: json['version'] == 1 && json['enabled'] == true,
-    tagsEnabled: json['tagsEnabled'] != false,
-    wikiEnabled: json['wikiEnabled'] == true,
-    blocksEnabled: json['blocksEnabled'] == true,
-    galleryEnabled: json['galleryEnabled'] == true,
     embedding: json['embedding'] is String ? json['embedding'] : '',
-    reranker: json['reranker'] is String ? json['reranker'] : '',
     python: json['python'] is String ? json['python'] : '',
-    tokenBudget: json['tokenBudget'] is int
-        ? (json['tokenBudget'] as int).clamp(minTokenBudget, maxTokenBudget)
-        : defaultTokenBudget,
     device:
         RagDevice.values.where((e) => e.name == json['device']).firstOrNull ??
         RagDevice.auto,
   );
   RagSettings copyWith({
     bool? enabled,
-    bool? tagsEnabled,
-    bool? wikiEnabled,
-    bool? blocksEnabled,
-    bool? galleryEnabled,
     String? embedding,
-    String? reranker,
     String? python,
-    int? tokenBudget,
     RagDevice? device,
   }) => RagSettings(
     enabled: enabled ?? this.enabled,
-    tagsEnabled: tagsEnabled ?? this.tagsEnabled,
-    wikiEnabled: wikiEnabled ?? this.wikiEnabled,
-    blocksEnabled: blocksEnabled ?? this.blocksEnabled,
-    galleryEnabled: galleryEnabled ?? this.galleryEnabled,
     embedding: embedding ?? this.embedding,
-    reranker: reranker ?? this.reranker,
     python: python ?? this.python,
-    tokenBudget: tokenBudget ?? this.tokenBudget,
     device: device ?? this.device,
   );
-  String get connectionKey => jsonEncode([
-    enabled,
-    tagsEnabled,
-    wikiEnabled,
-    blocksEnabled,
-    galleryEnabled,
-    embedding,
-    reranker,
-    python,
-    device.name,
-  ]);
+  String get connectionKey =>
+      jsonEncode([enabled, embedding, python, device.name]);
 }
 
 final ragSettingsProvider =

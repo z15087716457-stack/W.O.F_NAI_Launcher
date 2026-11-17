@@ -39,6 +39,7 @@ void main() {
         () => service.translatePromptGroup(
           any(),
           sessionId: any(named: 'sessionId'),
+          validateOutput: any(named: 'validateOutput'),
         ),
       ).thenAnswer((call) async {
         final request =
@@ -161,6 +162,7 @@ void main() {
         () => service.translatePromptGroup(
           any(),
           sessionId: any(named: 'sessionId'),
+          validateOutput: any(named: 'validateOutput'),
         ),
       ).thenAnswer((call) async {
         final request =
@@ -266,6 +268,7 @@ void main() {
         () => service.translatePromptGroup(
           any(),
           sessionId: any(named: 'sessionId'),
+          validateOutput: any(named: 'validateOutput'),
         ),
       ).thenAnswer((_) => response.future);
       final container = ProviderContainer(
@@ -334,6 +337,7 @@ void main() {
         () => service.translatePromptGroup(
           any(),
           sessionId: any(named: 'sessionId'),
+          validateOutput: any(named: 'validateOutput'),
         ),
       ).thenAnswer((call) async {
         final request =
@@ -633,6 +637,7 @@ A ruined city, (floating towers:1.2) ''';
         () => service.translatePromptGroup(
           any(),
           sessionId: any(named: 'sessionId'),
+          validateOutput: any(named: 'validateOutput'),
         ),
       ).thenAnswer((call) async {
         final request =
@@ -698,6 +703,7 @@ A ruined city, (floating towers:1.2) ''';
         () => service.translatePromptGroup(
           any(),
           sessionId: 'detail-offline-test',
+          validateOutput: any(named: 'validateOutput'),
         ),
       ).called(1);
     },
@@ -721,6 +727,7 @@ A ruined city, (floating towers:1.2) ''';
           () => service.translatePromptGroup(
             any(),
             sessionId: any(named: 'sessionId'),
+            validateOutput: any(named: 'validateOutput'),
           ),
         ).thenAnswer((call) {
           sent = call.positionalArguments.single as String;
@@ -805,6 +812,7 @@ A ruined city, (floating towers:1.2) ''';
           () => service.translatePromptGroup(
             any(),
             sessionId: any(named: 'sessionId'),
+            validateOutput: any(named: 'validateOutput'),
           ),
         ).thenAnswer((call) async {
           sent = call.positionalArguments.single as String;
@@ -928,6 +936,7 @@ A ruined city, (floating towers:1.2) ''';
           () => service.translatePromptGroup(
             any(),
             sessionId: any(named: 'sessionId'),
+            validateOutput: any(named: 'validateOutput'),
           ),
         );
       },
@@ -1030,6 +1039,7 @@ A ruined city, (floating towers:1.2) ''';
           () => service.translatePromptGroup(
             any(),
             sessionId: any(named: 'sessionId'),
+            validateOutput: any(named: 'validateOutput'),
           ),
         ).thenAnswer((_) => response.future);
         final container = ProviderContainer(
@@ -1109,6 +1119,7 @@ A ruined city, (floating towers:1.2) ''';
       () => service.translatePromptGroup(
         any(),
         sessionId: any(named: 'sessionId'),
+        validateOutput: any(named: 'validateOutput'),
       ),
     ).thenThrow(StateError('offline'));
     final container = ProviderContainer(
@@ -1156,6 +1167,7 @@ A ruined city, (floating towers:1.2) ''';
         () => service.translatePromptGroup(
           any(),
           sessionId: any(named: 'sessionId'),
+          validateOutput: any(named: 'validateOutput'),
         ),
       ).thenAnswer(
         (_) async => jsonEncode({

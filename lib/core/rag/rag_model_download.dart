@@ -59,7 +59,7 @@ class RagModelDownloader {
     String kind,
     void Function(RagModelDownloadProgress) progress,
   ) async {
-    if (kind != 'embedding' && kind != 'reranker') {
+    if (kind != 'embedding') {
       throw const RagException('models_missing');
     }
     final manifest = jsonDecode(await _manifestLoader()) as Map;
@@ -69,10 +69,7 @@ class RagModelDownloader {
     );
     final repo = spec['repository'] as String,
         revision = spec['revision'] as String;
-    if (!{
-          'google/embeddinggemma-2',
-          'Qwen/Qwen3-Reranker-0.6B',
-        }.contains(repo) ||
+    if (!{'google/embeddinggemma-2'}.contains(repo) ||
         !RegExp(r'^[0-9a-f]{40}$').hasMatch(revision)) {
       throw const RagException('model_integrity');
     }

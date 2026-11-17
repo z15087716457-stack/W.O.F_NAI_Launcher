@@ -1,7 +1,7 @@
 name: nai_launcher
 description: W.O.F NAI Studio - NovelAI Windows 与 macOS 桌面客户端（Aaalice_NAI_Launcher 分支）
 publish_to: "none"
-version: 2.4.1+115
+version: 2.4.2+121
 
 environment:
   sdk: ">=3.10.7 <4.0.0"
@@ -148,11 +148,15 @@ flutter:
   assets:
     - tool/rag/worker.py
     - tool/rag/engine.py
+    - tool/rag/tag_search.py
+    - tool/rag/tag_corpus.py
+    - tool/rag/tag_query.py
+    - tool/rag/danbooru_tags.csv
+    - tool/rag/danbooru_tags.source.json
     - tool/rag/pool.py
     - tool/rag/documents.py
     - tool/rag/gallery.py
     - tool/rag/models.py
-    - tool/rag/context.py
     - tool/rag/requirements.txt
     - assets/rag/windows/stdio_host.exe
     - assets/rag/model_manifest.json

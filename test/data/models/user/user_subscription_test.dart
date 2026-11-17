@@ -1,7 +1,42 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/data/models/user/user_subscription.dart';
 
 void main() {
+  test('unknown gateway balance stays unknown instead of becoming zero', () {
+    final subscription = UserSubscription.fromJson({
+      'tier': 0,
+      'active': false,
+      'trainingStepsLeft': null,
+      'usesExternalBilling': true,
+    });
+    expect(SubscriptionState.loaded(subscription).balance, isNull);
+    expect(
+      const SubscriptionState.loaded(
+        UserSubscription(trainingStepsLeft: TrainingStepsInfo()),
+      ).balance,
+      0,
+    );
+  });
+  test('gateway virtual Opus never enables official free generation', () {
+    final subscription = UserSubscription.fromJson({
+      'tier': 3,
+      'active': true,
+      'trainingStepsLeft': {'purchasedTrainingSteps': 1000},
+      'usesExternalBilling': true,
+    });
+    expect(subscription.isOpus, isFalse);
+    expect(SubscriptionState.loaded(subscription).balance, 1000);
+    expect(
+      UserSubscription.fromJson(
+        jsonDecode(jsonEncode(subscription)) as Map<String, dynamic>,
+      ),
+      subscription,
+    );
+    expect(const UserSubscription(tier: 3, active: true).isOpus, isTrue);
+  });
+
   group('Opus quota pools', () {
     test(
       'parses activated backup quota and retains legacy response defaults',

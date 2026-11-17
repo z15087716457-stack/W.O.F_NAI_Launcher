@@ -15,11 +15,7 @@ import '../../helpers/fake_local_gallery_service.dart';
 
 class _Settings extends RagSettingsController {
   @override
-  RagSettings build() => const RagSettings(
-    enabled: true,
-    tagsEnabled: false,
-    galleryEnabled: true,
-  );
+  RagSettings build() => const RagSettings(enabled: true);
   @override
   Future<void> update(RagSettings value) async {
     state = value;

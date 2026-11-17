@@ -30,6 +30,7 @@ class ProtocolOutputTests(unittest.TestCase):
         protocol, diagnostics = io.StringIO(), io.StringIO()
         fake_modules = {name: types.ModuleType(name) for name in
                         ('numpy', 'torch', 'sentence_transformers', 'usearch', 'usearch.index')}
+        fake_modules['torch'].set_num_threads = lambda _: None
         instance = worker.Worker()
         def inference():
             print('library inference progress')

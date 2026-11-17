@@ -6,7 +6,7 @@ import '../providers/rag_provider.dart';
 import '../ui/blocks/blocks_contract.dart';
 
 BlocksRagStatus blocksRagStatus(WidgetRef ref, BuildContext context) {
-  if (!ref.watch(ragSettingsProvider).enabledFor(RagSource.blocks)) {
+  if (!ref.watch(ragSettingsProvider).enabled) {
     return const BlocksRagStatus();
   }
   final status = ref.watch(

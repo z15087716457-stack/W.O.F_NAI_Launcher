@@ -217,7 +217,7 @@ final naiAgentStudioFactoryProvider = Provider<NaiAgentStudioFactory>((ref) {
         ]) {
           if (settings == null) {
             searchStatus[source.name] = 'unknown';
-          } else if (!settings.enabledFor(source)) {
+          } else if (!settings.enabled) {
             searchStatus[source.name] = 'disabled';
           } else if (rag == null) {
             searchStatus[source.name] = 'unknown';

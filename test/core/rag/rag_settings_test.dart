@@ -11,67 +11,63 @@ void main() {
     await Hive.openBox(StorageKeys.settingsBox, bytes: Uint8List(0));
   });
   tearDown(Hive.close);
-  test('disabled by default with a 120-token recommendation budget', () {
+  test('disabled by default with one embedding model', () {
     final c = ProviderContainer();
     addTearDown(c.dispose);
     expect(c.read(ragSettingsProvider).enabled, isFalse);
-    expect(c.read(ragSettingsProvider).tokenBudget, 120);
     expect(
       RagSettings.fromJson({'version': 99, 'enabled': true}).enabled,
       isFalse,
     );
   });
-  test('old context modes migrate without losing other preferences', () {
-    for (final mode in ['before', 'around', 'all']) {
-      final settings = RagSettings.fromJson({
-        'version': 1,
-        'enabled': true,
-        'mode': mode,
-        'embedding': 'saved-model',
-        'wikiEnabled': true,
-      });
-      expect(settings.tokenBudget, 120);
-      expect(settings.enabled, isTrue);
-      expect(settings.wikiEnabled, isTrue);
-      expect(settings.embedding, 'saved-model');
-      expect(settings.toJson().containsKey('mode'), isFalse);
-    }
-  });
-  test('persisted budget is bounded and changes do not reconnect models', () {
-    for (final (value, expected) in [
-      (null, 120),
-      ('512', 120),
-      (128.5, 120),
-      (0, 32),
-      (32, 32),
-      (121, 121),
-      (512, 512),
-      (999, 512),
-    ]) {
-      expect(
-        RagSettings.fromJson({'tokenBudget': value}).tokenBudget,
-        expected,
-      );
-    }
-    const settings = RagSettings(enabled: true, embedding: 'saved-model');
-    final changed = settings.copyWith(tokenBudget: 512);
-    expect(RagSettings.fromJson(changed.toJson()).tokenBudget, 512);
-    expect(changed.connectionKey, settings.connectionKey);
-  });
+  test(
+    'retired source flags and context modes preserve active preferences',
+    () {
+      for (final mode in ['before', 'around', 'all']) {
+        final settings = RagSettings.fromJson({
+          'version': 1,
+          'enabled': true,
+          'mode': mode,
+          'embedding': 'saved-model',
+          'tagsEnabled': false,
+          'wikiEnabled': false,
+          'blocksEnabled': false,
+          'galleryEnabled': false,
+          'python': 'saved-python',
+          'device': 'cpu',
+        });
+        expect(settings.enabled, isTrue);
+        expect(settings.embedding, 'saved-model');
+        expect(settings.python, 'saved-python');
+        expect(settings.device, RagDevice.cpu);
+        for (final key in [
+          'tagsEnabled',
+          'wikiEnabled',
+          'blocksEnabled',
+          'galleryEnabled',
+        ]) {
+          expect(settings.toJson().containsKey(key), isFalse);
+        }
+        expect(
+          RagSettings.fromJson(settings.toJson()).connectionKey,
+          settings.connectionKey,
+        );
+        expect(settings.toJson().containsKey('mode'), isFalse);
+        expect(settings.toJson().containsKey('reranker'), isFalse);
+        expect(settings.toJson().containsKey('tokenBudget'), isFalse);
+      }
+    },
+  );
   test(
     'ordered preference writes retain the latest values on a fresh scope',
     () async {
       final c = ProviderContainer();
       final controller = c.read(ragSettingsProvider.notifier);
       final a = controller.update(
-        const RagSettings(enabled: true, tokenBudget: 32, embedding: 'first'),
+        const RagSettings(enabled: true, embedding: 'first'),
       );
       final b = controller.update(
-        const RagSettings(
-          enabled: false,
-          tokenBudget: 512,
-          embedding: 'latest',
-        ),
+        const RagSettings(enabled: false, embedding: 'latest'),
       );
       await Future.wait([a, b]);
       c.dispose();
@@ -79,7 +75,6 @@ void main() {
       addTearDown(next.dispose);
       expect(next.read(ragSettingsProvider).embedding, 'latest');
       expect(next.read(ragSettingsProvider).enabled, isFalse);
-      expect(next.read(ragSettingsProvider).tokenBudget, 512);
     },
   );
   test('invalid persisted data cannot enable indexing', () async {

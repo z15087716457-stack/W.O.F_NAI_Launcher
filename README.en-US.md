@@ -35,7 +35,7 @@ Get the package for your operating system from [Releases](https://github.com/z15
 | --- | --- |
 | `WOF_NAI_Studio_Windows_<version>_Setup.exe` | **The choice for most people.** Installs to your user directory without administrator rights, with Start menu and desktop shortcuts. |
 | `WOF_NAI_Studio_Windows_<version>_Portable.zip` | For keeping the app in a folder of your choice, on a USB drive, or taking it between computers. Extract it and run `nai_launcher.exe`. |
-| `WOF_NAI_Studio_macOS_<version>_Portable.zip` | For Apple silicon and Intel Macs on macOS 13.5 or later. [Download the 2.4.1 universal package](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/download/v2.4.1/WOF_NAI_Studio_macOS_2.4.1_Portable.zip). |
+| `WOF_NAI_Studio_macOS_<version>_Portable.zip` | For Apple silicon and Intel Macs on macOS 13.5 or later. [Download the 2.4.2 universal package](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/download/v2.4.2/WOF_NAI_Studio_macOS_2.4.2_Portable.zip). |
 
 Both Windows packages support in-app updates. Settings, the gallery database and Agent data live in `user-data/` and `agent-data/` beside the program. On Mac, data lives in your Application Support directory. The app downloads and verifies updates, then opens Finder for you to replace the app.
 
@@ -55,9 +55,11 @@ Both Windows packages support in-app updates. Settings, the gallery database and
 
 **2.3.0** brings automatic fit in the image viewer, canvas decoding at display size, incremental gallery RAG indexing, idle Agent host cleanup, and fixes to generation quotes and retries. Windows in-app updates show installation progress, and GitHub Actions builds the macOS universal test package.
 
+**2.4.2** rebuilds local tag semantic search around DanbooruSearch rules and the full local catalog, with explicit legacy-index upgrades, resumable indexing and error retries. Lightweight translation gains optional automatic follow-up translation, off by default. Third-party API connections, full-prompt search and IME editing are fixed; the Agent runtime is now Pi 1.5.2.
+
 **2.4.1** fixes lightweight translation alignment for V5 XML sections, fields and mixed prose using the existing model route and glossary. Short tags stay compact; longer source passages and their complete translations wrap in sequence without truncation or overlap. Direct source editing, IME input, selection, copy/cut/undo and pending-update indicators remain available. Weight-fill overflow, trailing green blocks, seams and manual-newline caret issues are also fixed. This release also fixes duplicate IME composition and gaps in plain-text selections. Autocomplete wraps full candidate names, scrolls keyboard selection naturally and opens only while typing. Autocomplete and Ctrl tag expansion default to enabled while preserving saved choices; shortcut hints and popularity counts no longer break unexpectedly.
 
-See the [complete 2.4.1 changelog](CHANGELOG.md#241---2026-11-15) and [release downloads](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/tag/v2.4.1). Agent suggestions, cache warming and translation adjustments use your own model service. Their settings are configurable.
+See the [complete 2.4.2 changelog](CHANGELOG.md#242---2026-11-17) and [release downloads](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/tag/v2.4.2). Agent suggestions, cache warming and translation adjustments use your own model service. Their settings are configurable.
 
 ## Get started in three steps
 
@@ -111,6 +113,8 @@ Not sure which artists mix well? Add a random artist pool in Style Explore and d
 ### Local semantic search (RAG): search by meaning
 
 <img src="docs/images/readme/en/settings-rag.webp" alt="Semantic search settings" width="100%">
+
+<sub>This screenshot is from an earlier version. The current version has one embedding model and one global RAG switch; follow the instructions below and the current interface.</sub>
 
 An optional component. Once enabled, tag suggestions, Tag Wiki, the block library and Local Gallery can search by “meaning.” Enter “a rainy street” to find related English tags, blocks and images you have made before, or use an image to find similar images. Everything runs on your computer; nothing is uploaded. → [Semantic search guide](docs/guide/en/rag.md)
 

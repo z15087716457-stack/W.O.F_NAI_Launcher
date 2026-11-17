@@ -10,15 +10,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/core/autocomplete/completion_models.dart';
 import 'package:nai_launcher/core/autocomplete/prompt_autocomplete_controller.dart';
+import 'package:nai_launcher/core/tag_expansion/tag_semantics_repository.dart';
 import 'package:nai_launcher/core/utils/tag_normalizer.dart';
 import 'package:nai_launcher/core/wiki/auto_tag_translation_controller.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/themes/app_theme.dart';
 import 'package:nai_launcher/presentation/ui/kit/ui_scale.dart';
+import 'package:nai_launcher/presentation/widgets/autocomplete/tag_meaning.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/prompt_autocomplete_binding.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/prompt_autocomplete_popup.dart';
 
 import '../../../helpers/studio_capture_fonts.dart';
+import '../../../helpers/tag_meaning_fixtures.dart';
 
 CompletionCandidate _tag(
   String name, [
@@ -100,6 +103,7 @@ Future<_Editor> _pumpEditor(
   List<CompletionCandidate>? candidates,
   Completer<List<CompletionCandidate>>? related,
   bool openRelated = false,
+  Future<TagSemanticProfile?> Function(String)? meaning,
 }) async {
   t.view.devicePixelRatio = 1;
   t.view.physicalSize = size;
@@ -111,13 +115,19 @@ Future<_Editor> _pumpEditor(
     ProviderScope(
       overrides: [
         autoTagTranslationProvider.overrideWith((_) => editor.readings),
+        tagMeaningProfileProvider.overrideWith(
+          (_, tag) async => meaning == null ? null : meaning(tag),
+        ),
       ],
       child: MaterialApp(
         locale: locale,
         supportedLocales: AppLocalizations.supportedLocales,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         theme: AppTheme.getTheme(AppStyle.geist, brightness),
-        builder: (_, child) => UiScale(scale: scale, child: child!),
+        builder: (_, child) => UiScale(
+          scale: scale,
+          child: RepaintBoundary(key: tagMeaningBoundary, child: child!),
+        ),
         home: Scaffold(
           body: Padding(
             padding: const EdgeInsets.all(16),
@@ -641,6 +651,153 @@ void main() {
     await t.pump();
     await t.pump();
     _checkRows(t);
+  });
+
+  for (final brightness in Brightness.values) {
+    for (final width in [1100.0, 320.0]) {
+      testWidgets('meaning layout ${brightness.name} $width', (t) async {
+        final editor = await _pumpEditor(
+          t,
+          size: Size(width, 700),
+          brightness: brightness,
+          meaning: (tag) async => meaningFixture(tag),
+        );
+        await t.pump();
+        final main = find.byKey(const Key('prompt-autocomplete-main'));
+        final meaning = find.byKey(const Key('prompt-autocomplete-meaning'));
+        final mainRect = t.getRect(main), meaningRect = t.getRect(meaning);
+        expect(find.text('同义词'), findsOneWidget);
+        if (width == 1100) {
+          expect(meaningRect.left, greaterThan(mainRect.right));
+          expect(meaningRect.top, closeTo(mainRect.top, 1));
+        } else {
+          expect(meaningRect.top, greaterThan(mainRect.bottom));
+        }
+        await captureTagMeaning(t, 'autocomplete-${brightness.name}-$width');
+        await editor.completion.openRelated(1);
+        await t.pump();
+        await t.pump();
+        final related = find.byKey(const Key('prompt-autocomplete-related'));
+        if (width == 1100) {
+          expect(
+            t.getRect(meaning).left,
+            greaterThan(t.getRect(related).right),
+          );
+        } else {
+          expect(
+            t.getRect(meaning).top,
+            greaterThan(t.getRect(related).bottom),
+          );
+        }
+        _checkRows(t);
+        expect(editor.text.text, 'ke');
+        expect(editor.focus.hasPrimaryFocus, true);
+        expect(t.takeException(), isNull);
+        await captureTagMeaning(t, 'related-${brightness.name}-$width');
+      });
+    }
+  }
+
+  testWidgets('hover, keyboard, and late meanings keep the correct tag', (
+    t,
+  ) async {
+    final pending = Completer<TagSemanticProfile?>();
+    final editor = await _pumpEditor(
+      t,
+      size: const Size(1100, 850),
+      meaning: (tag) => tag == _samples.first.canonicalTag
+          ? pending.future
+          : Future.value(meaningFixture(tag, summary: '释义：$tag')),
+    );
+    editor.completion.move(1);
+    await t.pump();
+    await t.pump();
+    final selected = '释义：${_samples[1].canonicalTag}';
+    expect(find.text(selected), findsOneWidget);
+    pending.complete(
+      meaningFixture(_samples.first.canonicalTag, summary: '过时结果'),
+    );
+    await t.pump();
+    expect(find.text('过时结果'), findsNothing);
+    final mouse = await t.createGesture(kind: PointerDeviceKind.mouse);
+    await mouse.addPointer(location: Offset.zero);
+    addTearDown(mouse.removePointer);
+    await mouse.moveTo(t.getCenter(_row(2)));
+    await t.pump();
+    await t.pump();
+    final hovered = '释义：${_samples[2].canonicalTag}';
+    expect(find.text(hovered), findsOneWidget);
+    await mouse.moveTo(t.getCenter(find.byType(TagMeaning)));
+    await t.pump();
+    expect(find.text(hovered), findsOneWidget);
+    await t.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await t.pump();
+    await t.pump();
+    await t.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await t.pump();
+    await t.pump();
+    expect(find.text('释义：${_samples[3].canonicalTag}'), findsOneWidget);
+    expect(editor.text.text, 'ke');
+    expect(editor.focus.hasPrimaryFocus, true);
+    expect(t.takeException(), isNull);
+  });
+
+  testWidgets('meaning fits a short scaled Japanese window', (t) async {
+    final editor = await _pumpEditor(
+      t,
+      size: const Size(540, 420),
+      scale: 1.5,
+      locale: const Locale('ja'),
+      openRelated: true,
+      meaning: (tag) async => meaningFixture(tag, summary: '完整显示的长释义。' * 30),
+    );
+    await t.pump();
+    final rect = t.getRect(find.byKey(const Key('prompt-autocomplete')));
+    expect(rect.top, greaterThanOrEqualTo(7));
+    expect(rect.bottom, lessThanOrEqualTo(413));
+    expect(rect.left, greaterThanOrEqualTo(7));
+    expect(rect.right, lessThanOrEqualTo(533));
+    expect(find.text('同義語'), findsOneWidget);
+    expect(editor.focus.hasPrimaryFocus, true);
+    expect(t.takeException(), isNull);
+    await captureTagMeaning(t, 'related-ja-scaled-short');
+  });
+
+  testWidgets('long meaning wraps and wheel stays inside its own scroll', (
+    t,
+  ) async {
+    final editor = await _pumpEditor(
+      t,
+      size: const Size(1100, 500),
+      meaning: (tag) async => meaningFixture(
+        tag,
+        summary: '完整显示的长释义。' * 90,
+        synonyms: List.generate(25, (i) => '完整同义词$i'),
+      ),
+    );
+    await t.pump();
+    final meaning = find.byKey(const Key('prompt-autocomplete-meaning'));
+    final scroll = t
+        .widget<SingleChildScrollView>(
+          find.descendant(
+            of: meaning,
+            matching: find.byType(SingleChildScrollView),
+          ),
+        )
+        .controller!;
+    final before = editor.text.value;
+    final rowY = t.getTopLeft(_row(0)).dy;
+    final pointer = TestPointer(1, PointerDeviceKind.mouse);
+    await t.sendEventToBinding(pointer.hover(t.getCenter(meaning)));
+    await t.sendEventToBinding(pointer.scroll(const Offset(0, 110)));
+    await t.pump();
+    expect(scroll.offset, greaterThan(0));
+    expect(t.getTopLeft(_row(0)).dy, rowY);
+    expect(editor.text.value, before);
+    expect(editor.focus.hasPrimaryFocus, true);
+    _checkRows(t);
+    expect(t.takeException(), isNull);
+    await captureTagMeaning(t, 'long-meaning-scroll');
   });
 
   testWidgets(

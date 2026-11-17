@@ -46,7 +46,7 @@ class RagModelDownloads extends Notifier<RagModelDownloadState> {
 
   Future<void> download(String kind) async {
     if (state.active) return;
-    if (!const ['embedding', 'reranker'].contains(kind)) {
+    if (kind != 'embedding') {
       throw const RagException('invalid_model');
     }
     final status = ref.read(ragControllerProvider);
@@ -54,9 +54,7 @@ class RagModelDownloads extends Notifier<RagModelDownloadState> {
         .read(ragMaintenanceProvider)
         .claim(indexBusy: status.anyBusy || status.installPhase != null);
     final selected = ref.read(ragSettingsProvider);
-    final previousPath = kind == 'embedding'
-        ? selected.embedding
-        : selected.reranker;
+    final previousPath = selected.embedding;
     _cancelRequested = false;
     state = RagModelDownloadState(kind: kind);
     try {
@@ -74,17 +72,11 @@ class RagModelDownloads extends Notifier<RagModelDownloadState> {
       });
       if (!_disposed) {
         final latest = ref.read(ragSettingsProvider);
-        final currentPath = kind == 'embedding'
-            ? latest.embedding
-            : latest.reranker;
+        final currentPath = latest.embedding;
         if (currentPath == previousPath) {
           await ref
               .read(ragSettingsProvider.notifier)
-              .update(
-                kind == 'embedding'
-                    ? latest.copyWith(embedding: path)
-                    : latest.copyWith(reranker: path),
-              );
+              .update(latest.copyWith(embedding: path));
         }
         state = const RagModelDownloadState();
       }

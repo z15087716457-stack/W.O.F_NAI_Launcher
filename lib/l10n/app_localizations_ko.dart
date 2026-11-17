@@ -293,11 +293,11 @@ class AppLocalizationsKo extends AppLocalizations {
   String get auth_thirdPartyNicknameHint => '예: 자체 호스팅 사이트 / 미러 사이트';
 
   @override
-  String get auth_thirdPartyTokenHint => '서드파티 사이트에서 발급한 API 토큰을 입력하세요';
+  String get auth_thirdPartyTokenHint => 'API 토큰 또는 New API 연결 JSON 입력';
 
   @override
   String get auth_thirdPartyCompatibilityHint =>
-      '서드파티 사이트는 NovelAI 구독 및 이미지 생성 API와 호환되어야 합니다. 토큰은 Bearer 토큰으로 전송됩니다.';
+      'NovelAI 호환 API를 지원하며 로그인 시 /v1 및 /v1/novelai 경로를 감지합니다. 요금과 잔액 단위는 제공업체 기준이며 공식 Opus 무료 규칙은 적용되지 않습니다.';
 
   @override
   String get auth_thirdPartyApiSiteRequired => '서드파티 API 사이트 주소를 입력하세요';
@@ -369,6 +369,14 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get auth_error_serverError => '서버 오류';
+
+  @override
+  String get auth_error_incompatibleApi =>
+      'NovelAI 계정 API 응답이 아닙니다. API 기본 경로(/v1 또는 /v1/novelai 등)를 확인하세요.';
+
+  @override
+  String get auth_connectionImportInvalid =>
+      'New API 연결 JSON이 올바르지 않습니다. _type, url, key가 필요합니다.';
 
   @override
   String get auth_error_unknown => '알 수 없는 오류';
@@ -6693,6 +6701,32 @@ class AppLocalizationsKo extends AppLocalizations {
   String get wiki_withArticle => '설명 있음';
 
   @override
+  String get tagMeaning_synonyms => '동의어';
+
+  @override
+  String get wiki_imagePanelTitle => '문서 이미지';
+
+  @override
+  String get wiki_imagePreviewTitle => '이미지 미리보기';
+
+  @override
+  String get wiki_imageOtherGroup => '이미지';
+
+  @override
+  String get wiki_imageShow => '문서 이미지 표시';
+
+  @override
+  String get wiki_imageHide => '문서 이미지 닫기';
+
+  @override
+  String get wiki_imageLoadFailed => '이미지를 불러올 수 없습니다';
+
+  @override
+  String wiki_imageMore(int loaded, int total) {
+    return '더 불러오기 ($loaded/$total)';
+  }
+
+  @override
   String get wiki_withoutArticle => '아직 설명 없음';
 
   @override
@@ -8614,6 +8648,24 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get promptReading_mode => '간편 번역';
+
+  @override
+  String get promptReading_automatic => '변경 내용 자동 번역';
+
+  @override
+  String get promptReading_automaticSubtitle => '입력 후 추가·수정 부분 자동 번역';
+
+  @override
+  String get promptReading_automaticInlineOnly => '간편 번역 모드에서만 사용 가능';
+
+  @override
+  String get promptReading_automaticFailed => '번역 실패 · 수동으로 재시도';
+
+  @override
+  String get promptReading_automaticPaused => '일시 중지';
+
+  @override
+  String get promptReading_automaticOff => '꺼짐';
 
   @override
   String get promptReading_modeSubtitle => '원문 아래에 번역 표시';
@@ -16533,9 +16585,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get rag_embeddingPath => 'EmbeddingGemma 2 모델 폴더';
 
   @override
-  String get rag_rerankerPath => 'Qwen3-Reranker-0.6B 모델 폴더';
-
-  @override
   String get rag_notConfigured => '설정되지 않음';
 
   @override
@@ -16545,8 +16594,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get rag_modelMode => '모델 기능';
 
   @override
-  String get rag_modelModeHint =>
-      'Gemma는 텍스트와 이미지에 사용하며 오디오는 비활성화합니다. Qwen은 텍스트 재정렬에만 사용합니다.';
+  String get rag_modelModeHint => 'Gemma 2로 텍스트와 이미지를 검색합니다. 오디오는 비활성화됩니다.';
 
   @override
   String get rag_discover => '로컬 모델 찾기';
@@ -16583,14 +16631,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get rag_tagsEnabled => '태그 의미 검색 및 추천';
 
   @override
-  String get rag_tagsHint => '입력 내용으로 검색하거나 커서 앞 문맥에 맞는 태그를 추천받을 수 있습니다.';
-
-  @override
-  String get rag_context => '추천 문맥 범위';
-
-  @override
-  String get rag_contextHint =>
-      '커서 앞의 완전한 태그를 사용합니다. 32~512 Gemma 토큰으로 조절할 수 있습니다.';
+  String get rag_tagsHint => '이름이나 설명으로 태그를 검색합니다. 빈 검색은 로컬 동시 출현 후보를 표시합니다.';
 
   @override
   String get rag_buildIndex => '미리 보기 및 색인 생성';
@@ -18523,9 +18564,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get set_rgStepEmbed => '임베딩';
 
   @override
-  String get set_rgStepRerank => '재순위';
-
-  @override
   String get set_rgStepDevice => '장치';
 
   @override
@@ -18533,13 +18571,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get set_rgSourcesSub =>
-      '소스마다 따로 색인하고 켭니다. 일시 정지할 수 있고 끝난 부분은 바로 쓸 수 있습니다.';
+      '소스마다 독립적으로 색인합니다. 색인된 내용은 바로 검색할 수 있으며 색인 작업은 일시 정지할 수 있습니다.';
 
   @override
   String get set_rgTags => '태그 의미 검색 및 추천';
-
-  @override
-  String get set_rgTagsSub => '입력 내용으로 검색하거나 커서 앞 문맥에 맞는 태그를 추천받을 수 있습니다.';
 
   @override
   String get set_rgWiki => '위키 시맨틱 검색';
@@ -18596,23 +18631,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get set_rgClearBody => '파생 색인만 지우며 원본 내용과 모델은 남습니다.';
 
   @override
-  String get set_rgContext => '제안 문맥';
-
-  @override
-  String get set_rgContextSub =>
-      '커서 앞의 완전한 태그를 사용합니다. 32~512 Gemma 토큰으로 조절할 수 있습니다.';
-
-  @override
-  String get set_rgRange => '샘플 길이';
-
-  @override
   String get set_rgRuntime => '모델과 런타임';
 
   @override
   String get set_rgEmbedPath => '임베딩 모델 폴더';
-
-  @override
-  String get set_rgRerankPath => '재순위 모델 폴더';
 
   @override
   String get set_rgDevice => '실행 장치';
@@ -18657,7 +18679,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get set_rgNotReady => '시맨틱 검색을 아직 쓸 수 없음';
 
   @override
-  String get set_rgNotReadySub => '런타임을 설치하고 두 모델 폴더를 지정하세요.';
+  String get set_rgNotReadySub => '실행 환경을 설치한 후 Gemma 2 모델 폴더를 선택하세요.';
 
   @override
   String get set_rgEmpty => '색인 없음';
@@ -18726,7 +18748,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String set_rgPlanTags(Object n) {
-    return '태그 $n개와 별칭, 로컬 설명을 색인합니다.';
+    return '태그 $n개의 이름과 기존 중국어 자료 및 설명을 색인합니다.';
   }
 
   @override
@@ -18738,6 +18760,43 @@ class AppLocalizationsKo extends AppLocalizations {
   String set_rgPlanGallery(Object images, Object n) {
     return '이미지 $images장과 NAI 매개변수 $n조각을 따로 색인합니다.';
   }
+
+  @override
+  String get set_rgUpgrade => '태그 인덱스 업그레이드';
+
+  @override
+  String get set_rgCleanupLegacy => '이전 태그 인덱스 정리';
+
+  @override
+  String get set_rgUpgradeNotice =>
+      '태그 검색 방식이 변경되어 새 인덱스가 필요합니다. Wiki, 프롬프트 블록과 갤러리 인덱스는 계속 사용할 수 있습니다.';
+
+  @override
+  String set_rgUpgradePlan(String size) {
+    return '새 태그 인덱스를 구축하고 검증한 뒤 이전 태그 인덱스(약 $size)를 삭제합니다. 일시적으로 추가 공간이 필요하며 중지 후 이어서 구축할 수 있습니다. 다른 소스와 번역 자료는 유지됩니다.';
+  }
+
+  @override
+  String set_rgCleanupPlan(String size) {
+    return '이전 태그 인덱스(약 $size)를 삭제합니다. 새 태그 인덱스, 다른 소스와 번역 자료는 유지됩니다.';
+  }
+
+  @override
+  String get set_rgUpgradeCleaning => '새 태그 인덱스가 준비되었습니다. 이전 인덱스 정리 중…';
+
+  @override
+  String get set_rgUpgradeCleanupFailed =>
+      '새 검색은 사용할 수 있습니다. 이전 인덱스 정리를 다시 시도하세요.';
+
+  @override
+  String get set_rgUpgradeBadge => '업그레이드 필요';
+
+  @override
+  String get set_rgCleanupPending => '정리 대기';
+
+  @override
+  String get set_rgUpgradeCleanupNotice =>
+      '새 태그 인덱스가 준비되었습니다. 이전 태그 인덱스를 삭제하여 공간을 확보할 수 있습니다.';
 
   @override
   String get set_rgPlanNote =>
@@ -18770,7 +18829,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get set_rgDiscoverSub =>
-      '작업 공간의 models 폴더에서 EmbeddingGemma 2와 Qwen3-Reranker 0.6B를 찾아 두 폴더를 채웁니다.';
+      '작업 공간의 models 폴더에서 EmbeddingGemma 2를 찾아 경로를 채웁니다.';
 
   @override
   String get set_rgFind => '찾기';
@@ -18802,6 +18861,32 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get set_rgEnvMissing => '설치 안 됨';
+
+  @override
+  String get set_rgEnvNeedsUpdate => '업데이트 필요';
+
+  @override
+  String get set_rgEnvUpdate => '환경 업데이트';
+
+  @override
+  String set_rgEnvDependencies(String packages) {
+    return '의존성을 설치하거나 업데이트하세요: $packages. 기존 인덱스는 유지됩니다.';
+  }
+
+  @override
+  String get set_rgEnvPythonVersion =>
+      'Python 3.12가 필요합니다. 환경을 업데이트하거나 호환되는 인터프리터를 선택하세요. 기존 인덱스는 유지됩니다.';
+
+  @override
+  String get set_rgEnvCheckFailed => '확인 실패';
+
+  @override
+  String get set_rgEnvImportFailed =>
+      '의존성을 불러오지 못했습니다. 다시 확인하거나 환경을 복구하세요. 기존 인덱스는 유지됩니다.';
+
+  @override
+  String get set_rgEnvCheckTimeout =>
+      '환경 확인 시간이 초과되었습니다. 인덱스를 삭제하거나 다시 만들지 않고 재확인할 수 있습니다.';
 
   @override
   String get set_rgInstall => '설치';

@@ -638,7 +638,6 @@ class ReadmeData {
         SettingKey.imageSavePath: r'D:\NAI Studio\outputs',
         SettingKey.ragEnabled: true,
         SettingKey.ragEmbedPath: r'D:\NAI Studio\models\embeddinggemma-2',
-        SettingKey.ragRerankPath: r'D:\NAI Studio\models\Qwen3-Reranker-0.6B',
         SettingKey.agentModel: 'claude-sonnet-4.5',
       }),
       dictionaries: const SettingsDictionaryData(
@@ -694,7 +693,6 @@ class ReadmeData {
           value: 'EmbeddingGemma 2',
           detail: tr('文字 + 图片', 'Text + images'),
         ),
-        reranker: const SettingsRagStep(value: 'Qwen3-Reranker 0.6B'),
         device: const SettingsRagStep(value: 'NVIDIA GPU'),
         indexBytes: 320 * 1024 * 1024,
         sources: [

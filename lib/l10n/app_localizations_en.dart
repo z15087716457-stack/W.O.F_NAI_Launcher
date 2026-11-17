@@ -301,11 +301,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get auth_thirdPartyTokenHint =>
-      'Enter the API token from the third-party site';
+      'Enter an API token or paste New API connection JSON';
 
   @override
   String get auth_thirdPartyCompatibilityHint =>
-      'The third-party site must be compatible with NovelAI subscription and image-generation APIs. The token will be sent as a Bearer token.';
+      'Supports NovelAI-compatible APIs. Common /v1 and /v1/novelai paths are detected at login. Third-party prices and balance units follow the provider; official Opus free rules do not apply.';
 
   @override
   String get auth_thirdPartyApiSiteRequired => 'Enter third-party API site URL';
@@ -377,6 +377,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get auth_error_serverError => 'Server error';
+
+  @override
+  String get auth_error_incompatibleApi =>
+      'This address did not return a NovelAI account API. Check the site’s API base path (for example /v1 or /v1/novelai).';
+
+  @override
+  String get auth_connectionImportInvalid =>
+      'Invalid New API connection JSON. It must contain _type, url and key.';
 
   @override
   String get auth_error_unknown => 'Unknown error';
@@ -6866,6 +6874,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get wiki_withArticle => 'Has description';
 
   @override
+  String get tagMeaning_synonyms => 'Synonyms';
+
+  @override
+  String get wiki_imagePanelTitle => 'Article images';
+
+  @override
+  String get wiki_imagePreviewTitle => 'Image preview';
+
+  @override
+  String get wiki_imageOtherGroup => 'Illustrations';
+
+  @override
+  String get wiki_imageShow => 'Show article images';
+
+  @override
+  String get wiki_imageHide => 'Hide article images';
+
+  @override
+  String get wiki_imageLoadFailed => 'Images are unavailable';
+
+  @override
+  String wiki_imageMore(int loaded, int total) {
+    return 'Load more ($loaded/$total)';
+  }
+
+  @override
   String get wiki_withoutArticle => 'No description yet';
 
   @override
@@ -8871,6 +8905,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get promptReading_mode => 'Lightweight translation';
+
+  @override
+  String get promptReading_automatic => 'Auto-translate changes';
+
+  @override
+  String get promptReading_automaticSubtitle =>
+      'Translate changes after typing pauses';
+
+  @override
+  String get promptReading_automaticInlineOnly =>
+      'Available in lightweight mode only';
+
+  @override
+  String get promptReading_automaticFailed =>
+      'Translation failed; retry manually';
+
+  @override
+  String get promptReading_automaticPaused => 'Paused';
+
+  @override
+  String get promptReading_automaticOff => 'Off';
 
   @override
   String get promptReading_modeSubtitle => 'Read translations below the source';
@@ -16988,9 +17043,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rag_embeddingPath => 'EmbeddingGemma 2 model directory';
 
   @override
-  String get rag_rerankerPath => 'Qwen3-Reranker-0.6B model directory';
-
-  @override
   String get rag_notConfigured => 'Not configured';
 
   @override
@@ -17001,7 +17053,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rag_modelModeHint =>
-      'Gemma handles text and images with audio disabled. Qwen reranks text only.';
+      'Gemma 2 handles text and image retrieval. Audio is disabled.';
 
   @override
   String get rag_discover => 'Find local models';
@@ -17041,14 +17093,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rag_tagsHint =>
-      'Search using your input, or get tag suggestions from the context before the caret.';
-
-  @override
-  String get rag_context => 'Suggestion context';
-
-  @override
-  String get rag_contextHint =>
-      'Use complete tags before the caret. Adjustable from 32 to 512 Gemma tokens.';
+      'Search tags by name or description. Empty queries use local cooccurrence suggestions.';
 
   @override
   String get rag_buildIndex => 'Preview and build index';
@@ -19031,9 +19076,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get set_rgStepEmbed => 'Embedding';
 
   @override
-  String get set_rgStepRerank => 'Rerank';
-
-  @override
   String get set_rgStepDevice => 'Device';
 
   @override
@@ -19041,14 +19083,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get set_rgSourcesSub =>
-      'Each source is indexed and toggled on its own. Indexing can pause; finished parts are usable.';
+      'Each source has its own index. Indexed content is ready to search; indexing can be paused.';
 
   @override
   String get set_rgTags => 'Semantic tag search & suggestions';
-
-  @override
-  String get set_rgTagsSub =>
-      'Search using your input, or get tag suggestions from the context before the caret.';
 
   @override
   String get set_rgWiki => 'Wiki semantic search';
@@ -19108,23 +19146,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Only the derived index is removed; content and models stay.';
 
   @override
-  String get set_rgContext => 'Suggestion context';
-
-  @override
-  String get set_rgContextSub =>
-      'Use complete tags before the caret. Adjustable from 32 to 512 Gemma tokens.';
-
-  @override
-  String get set_rgRange => 'Sample length';
-
-  @override
   String get set_rgRuntime => 'Models & runtime';
 
   @override
   String get set_rgEmbedPath => 'Embedding model folder';
-
-  @override
-  String get set_rgRerankPath => 'Rerank model folder';
 
   @override
   String get set_rgDevice => 'Device';
@@ -19172,7 +19197,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get set_rgNotReadySub =>
-      'Install the runtime, then set both model folders.';
+      'Install the runtime, then select the Gemma 2 model folder.';
 
   @override
   String get set_rgEmpty => 'Not indexed';
@@ -19242,7 +19267,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String set_rgPlanTags(Object n) {
-    return 'Will index $n tags with aliases and local descriptions.';
+    return 'Index $n tags using names and available Chinese text and descriptions.';
   }
 
   @override
@@ -19254,6 +19279,44 @@ class AppLocalizationsEn extends AppLocalizations {
   String set_rgPlanGallery(Object images, Object n) {
     return 'Will index $images images and $n NAI parameter chunks, separately.';
   }
+
+  @override
+  String get set_rgUpgrade => 'Upgrade tag index';
+
+  @override
+  String get set_rgCleanupLegacy => 'Clean up old tags';
+
+  @override
+  String get set_rgUpgradeNotice =>
+      'Tag search has changed and needs a new index. Wiki, prompt blocks and gallery indexes remain usable.';
+
+  @override
+  String set_rgUpgradePlan(String size) {
+    return 'Build the new tag index, validate it, then remove the old tag index (about $size). This temporarily uses more disk space; pause and resume any time. Other sources and translations are kept.';
+  }
+
+  @override
+  String set_rgCleanupPlan(String size) {
+    return 'Remove the old tag index (about $size). Keep the new tag index, other sources and translations.';
+  }
+
+  @override
+  String get set_rgUpgradeCleaning =>
+      'The new tag index is ready. Cleaning up the old index…';
+
+  @override
+  String get set_rgUpgradeCleanupFailed =>
+      'New search is available. Old index cleanup failed; retry cleanup.';
+
+  @override
+  String get set_rgUpgradeBadge => 'Upgrade needed';
+
+  @override
+  String get set_rgCleanupPending => 'Cleanup pending';
+
+  @override
+  String get set_rgUpgradeCleanupNotice =>
+      'The new tag index is ready. You can remove the old tag index to free space.';
 
   @override
   String get set_rgPlanNote =>
@@ -19287,7 +19350,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get set_rgDiscoverSub =>
-      'Looks in the workspace models folder for EmbeddingGemma 2 and Qwen3-Reranker 0.6B and fills both folders.';
+      'Finds EmbeddingGemma 2 in the workspace models folder and fills its path.';
 
   @override
   String get set_rgFind => 'Find';
@@ -19321,6 +19384,32 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get set_rgEnvMissing => 'Not installed';
+
+  @override
+  String get set_rgEnvNeedsUpdate => 'Update needed';
+
+  @override
+  String get set_rgEnvUpdate => 'Update environment';
+
+  @override
+  String set_rgEnvDependencies(String packages) {
+    return 'Install or update dependencies: $packages. Existing indexes will be kept.';
+  }
+
+  @override
+  String get set_rgEnvPythonVersion =>
+      'Python 3.12 is required. Update the environment or select a compatible interpreter. Existing indexes will be kept.';
+
+  @override
+  String get set_rgEnvCheckFailed => 'Check failed';
+
+  @override
+  String get set_rgEnvImportFailed =>
+      'Dependencies failed to load. Check again or repair the environment. Existing indexes will be kept.';
+
+  @override
+  String get set_rgEnvCheckTimeout =>
+      'Environment check timed out. You can check again without deleting or rebuilding indexes.';
 
   @override
   String get set_rgInstall => 'Install';

@@ -5,7 +5,9 @@ import 'package:nai_launcher/core/rag/rag_client.dart';
 import 'package:nai_launcher/core/rag/rag_settings.dart';
 import 'package:nai_launcher/core/services/desktop_app_shutdown_service.dart';
 import 'package:nai_launcher/presentation/providers/rag_provider.dart';
+import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import '../../helpers/rag_test_python.dart';
+import '../../helpers/rag_test_sources.dart';
 
 const _worker = r'''
 import sys,json,time
@@ -19,6 +21,8 @@ for line in sys.stdin:
   if shutdown.get('marker'):Path(shutdown['marker']).write_text('saved')
   break
  if op=='exit':break
+ if op=='fatal':
+  print(json.dumps({'event':'fatal','code':'worker_failed'}),flush=True);continue
  if op=='cancel':continue
  if op in counts:counts[op]+=1
  if op=='configure':
@@ -37,9 +41,7 @@ class _Settings extends RagSettingsController {
   @override
   RagSettings build() => RagSettings(
     enabled: true,
-    wikiEnabled: true,
     embedding: 'fixture',
-    reranker: 'fixture',
     python: ragTestPython()!,
   );
   @override
@@ -71,6 +73,8 @@ void main() {
   Future<void> open({bool silent = false}) async {
     container = ProviderContainer(
       overrides: [
+        promptBlockLibraryNotifierProvider.overrideWith(EmptyRagBlocks.new),
+        ragGalleryRootsProvider.overrideWithValue(() async => []),
         ragSettingsProvider.overrideWith(
           silent ? _SilentSettings.new : _Settings.new,
         ),
@@ -126,6 +130,29 @@ void main() {
   group(
     'startup with isolated JSON worker',
     () {
+      test(
+        'executor failure preserves counts and refresh starts a new worker',
+        () async {
+          await open();
+          final c = container!;
+          await waitFor(() => c.read(ragControllerProvider).runtimeReady);
+          final first = clients.single;
+          await expectLater(
+            first.request('fatal'),
+            throwsA(isA<RagException>()),
+          );
+          await waitFor(
+            () => c.read(ragControllerProvider).error == 'worker_closed',
+          );
+          expect(first.isClosed, isTrue);
+          expect(c.read(ragControllerProvider).indexed, 8);
+          await c.read(ragControllerProvider.notifier).refresh();
+          expect(clients, hasLength(2));
+          expect(c.read(ragControllerProvider).runtimeReady, isTrue);
+          expect(c.read(ragControllerProvider).error, isNull);
+          expect(c.read(ragControllerProvider).indexed, 8);
+        },
+      );
       test(
         'application shutdown waits for a retiring worker and starts no replacement',
         () async {

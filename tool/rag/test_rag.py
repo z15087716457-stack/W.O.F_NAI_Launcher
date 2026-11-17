@@ -5,13 +5,12 @@ import sqlite3
 import tempfile
 import unittest
 
-from context import context_window, cursor_index, clean_tag
-from engine import Engine, Sources
+from engine import Engine, Sources as CatalogSources
 
 
 class FakeModels:
     fingerprint = 'fixture-model-v1'
-    def __init__(self): self.embedded = []; self.queries = []; self.negative = None
+    def __init__(self): self.embedded = []; self.queries = []
     def count(self, value): return len(value.replace(',', ' ').split())
     def embed(self, texts, query=False):
         import numpy as np
@@ -22,9 +21,6 @@ class FakeModels:
             vectors[i,1] = int(hashlib.sha256(text.encode()).hexdigest()[:4],16)/65536
             vectors[i] /= np.linalg.norm(vectors[i])
         return vectors
-    def rerank(self, query, documents, negative=False, purpose='tags'):
-        self.negative = negative
-        return [float('rain' in d) for d in documents]
 
 
 def fixture(path, total=70):
@@ -34,52 +30,14 @@ def fixture(path, total=70):
     db.execute('INSERT INTO aliases VALUES(1,?)',('known_alias',));db.commit();db.close()
 
 
-class ContextTests(unittest.TestCase):
-    def setUp(self): self.count = FakeModels().count
-    def test_before_does_not_read_future_tags(self):
-        text='rain, night, future'
-        result=context_window(text,len('rain, night,'),'before',self.count)
-        self.assertEqual(result['text'],'rain, night')
-    def test_around_uses_both_sides(self):
-        result=context_window('rain, night, city',6,'around',self.count)
-        self.assertEqual(result['text'],'rain, night, city')
-    def test_both_modes_respect_120_and_stay_local(self):
-        text=', '.join(f'word{i}' for i in range(400));cursor=len(text)//2
-        for mode in ('before','around'):
-            result=context_window(text,cursor,mode,self.count)
-            self.assertLessEqual(result['tokens'],120)
-            self.assertNotIn('word0,',result['text'])
-    def test_selected_budget_keeps_complete_local_tags_before_the_cursor(self):
-        before=', '.join(f'word{i}' for i in range(700))
-        text=before+', future'
-        for budget in (32,120,121,512):
-            result=context_window(text,len(before),'before',self.count,budget)
-            expected=', '.join(f'word{i}' for i in range(700-budget,700))
-            self.assertEqual(result['text'],expected)
-            self.assertEqual(result['tokens'],budget)
-            self.assertEqual(result['budget'],budget)
-    def test_budget_does_not_split_or_skip_an_adjacent_long_tag(self):
-        text='far, '+('long '*40)+', near'
-        self.assertEqual(context_window(text,len(text),'before',self.count,32)['text'],'near')
-    def test_invalid_budgets_are_rejected(self):
-        for budget in (0,31,513,120.5,'120',None,True):
-            with self.subTest(budget=budget), self.assertRaisesRegex(ValueError,'invalid_context_budget'):
-                context_window('rain',4,'before',self.count,budget)
-    def test_utf16_cursor_is_not_python_codepoint_offset(self):
-        self.assertEqual(cursor_index('🌧, rain, city',4),3)
-        self.assertEqual(context_window('🌧, rain, city',4,'before',self.count)['text'],'🌧')
-    def test_weight_syntax_preserves_input(self):
-        text='1.4::white_hair::, {rain}, [night]'
-        self.assertEqual(clean_tag('1.4::white_hair::'),'white hair')
-        self.assertIn('white hair',context_window(text,len(text),'before',self.count)['text'])
-        self.assertEqual(text,'1.4::white_hair::, {rain}, [night]')
-    def test_incomplete_tag_and_alias_are_not_index_instructions(self):
-        self.assertEqual(context_window('<private-block>, rain, unfinished',23,'before',self.count)['text'],'rain')
-    def test_whole_prompt_mode_is_rejected(self):
-        with self.assertRaises(ValueError): context_window('rain',4,'all',self.count)
-    def test_pill_instance_markers_are_not_sent_to_the_model(self):
-        result=context_window('rain, \ue001night, \ue002',16,'around',self.count)
-        self.assertEqual(result['text'],'rain, night')
+class Sources(CatalogSources):
+    """Synthetic documents for persistence tests, independent of tag retrieval."""
+    def rows(self, *args, **kwargs):
+        result = super().rows(*args, **kwargs)
+        for row in result:
+            text = json.dumps({key:value for key,value in row.items() if key!='post_count'},ensure_ascii=False,sort_keys=True)
+            row.update(text=text,digest=hashlib.sha256(text.encode()).hexdigest())
+        return result
 
 
 class IndexTests(unittest.TestCase):
@@ -138,28 +96,11 @@ class IndexTests(unittest.TestCase):
         self.build();self.models.embedded.clear()
         db=sqlite3.connect(self.source);db.execute('UPDATE tags SET post_count=post_count+1');db.commit();db.close()
         self.build();self.assertEqual(self.models.embedded,[])
-    def test_deleted_sources_are_not_returned_from_old_vectors(self):
-        self.build();db=sqlite3.connect(self.source);db.execute('DELETE FROM tags WHERE id=1');db.commit();db.close()
-        result=self.engine.search('rain',4,'before',[],['tag_0'],False)
-        self.assertNotIn('tag_0',[r['name'] for r in result['items']])
-    def test_alias_dedup_and_negative_intent(self):
-        self.build();result=self.engine.search('rain',4,'before',['known_alias'],['tag_0'],True)
-        self.assertNotIn('tag_0',[r['name'] for r in result['items']])
-        self.assertTrue(self.models.negative)
-    def test_query_never_becomes_a_document(self):
-        self.build();secret='private_unique_prompt_content'
-        self.engine.search(secret,len(secret),'before',[],[],False)
-        self.assertFalse(self.engine.db.execute('SELECT 1 FROM documents WHERE text LIKE ?',('%'+secret+'%',)).fetchone())
     def test_clear_only_removes_derived_data(self):
         self.build();before=hashlib.sha256(self.source.read_bytes()).hexdigest()
         self.engine.clear();self.assertEqual(self.engine.status()['indexed'],0)
         self.assertFalse(self.engine.status()['auto_update_allowed'])
         self.assertEqual(hashlib.sha256(self.source.read_bytes()).hexdigest(),before)
-    def test_cancelled_query_does_not_embed(self):
-        self.build();self.models.queries.clear()
-        with self.assertRaisesRegex(ValueError,'cancelled'):
-            self.engine.search('rain',4,'before',[],[],False,cancelled=lambda:True)
-        self.assertEqual(self.models.queries,[])
     def test_changed_description_only_updates_changed_document(self):
         self.build();self.models.embedded.clear()
         db=sqlite3.connect(self.source);db.execute("INSERT INTO aliases VALUES(2,'new_alias')");db.commit();db.close()
@@ -177,7 +118,7 @@ class IndexTests(unittest.TestCase):
         (self.engine.folder/'vectors.usearch').write_bytes(b'corrupted')
         self.engine=Engine(self.root/'index',FakeModels(),Sources(self.source))
         self.assertEqual(self.engine.status()['indexed'],70)
-        self.assertTrue(self.engine.search('rain',4,'before',[],[],False)['items'])
+        self.assertTrue(len(self.engine.ann.search(self.models.embed(['rain'],query=True)[0],5).keys))
 
     def test_source_ordering_is_done_once_per_build_not_per_batch(self):
         from unittest.mock import patch

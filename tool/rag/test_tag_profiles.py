@@ -5,8 +5,7 @@ import sqlite3
 import unittest
 from unittest.mock import patch
 
-from engine import Sources
-from context import clean_tag
+from test_rag import Sources
 import test_rag as fixtures
 
 
@@ -35,47 +34,16 @@ class TagProfileTests(unittest.TestCase):
             db.execute('INSERT OR REPLACE INTO semantic_changes VALUES(?,?)',(tag,revision))
         db.commit();db.close()
 
-    def test_one_vector_per_live_tag_with_chinese_profile_and_live_category(self):
+    def test_catalog_profile_reads_fields_without_building_an_old_tag_representation(self):
         self.profile(self.semantic,'tag_0','草地','植物覆盖的地面')
-        self.build()
-        self.assertEqual(len(self.engine.ann),70)
-        text=self.engine.db.execute("SELECT text FROM documents WHERE name='tag_0'").fetchone()[0]
-        for part in ('草地','植物覆盖的地面','general visual tag','known_alias'):self.assertIn(part,text)
-        self.assertEqual(self.source_impl.exact_names('草地'),['tag_0'])
-        self.assertEqual(self.source_impl.exact_names('known alias'),['tag_0'])
-
-    def test_canonical_parentheses_and_english_phrases_survive_weight_parsing(self):
-        self.assertEqual(clean_tag('character_(work)'), 'character (work)')
-        self.assertEqual(clean_tag('(character)_(work)'), '(character) (work)')
-        self.assertEqual(clean_tag('(white dress:1.2)'), 'white dress')
-        self.assertEqual(clean_tag('1.2::white dress::'), 'white dress')
-        db=sqlite3.connect(self.source);db.execute("UPDATE tags SET name='character_(work)',category=4 WHERE id=1");db.commit();db.close()
-        self.assertEqual(self.source_impl.exact_names('character_(work)'), ['character_(work)'])
-
-    def test_compound_concepts_use_actual_core_names_not_broad_expansions(self):
-        self.profile(self.semantic,'tag_0','雨','下雨的天气')
-        self.profile(self.semantic,'tag_1','夜晚','日落后的时间')
-        db=sqlite3.connect(self.semantic);db.execute('UPDATE tag_semantics SET synonyms_zh=? WHERE tag=?',
-            (json.dumps(['雨','下雨','天气']),'tag_0'));db.commit();db.close()
-        self.assertEqual(self.source_impl.core_concepts('下雨的夜晚'),[['tag_0'],['tag_1']])
-        self.assertEqual(self.source_impl.core_concepts('天气'),[])
-        self.assertEqual(self.source_impl.core_concepts('没有下雨的夜晚'),[['tag_1']])
-        self.build()
-        result=self.engine.search('',0,'around',[],[],False,keyword='下雨的夜晚')
-        self.assertEqual([r['name'] for r in result['items'][:2]],['tag_0','tag_1'])
-        self.assertTrue(all('concept' in r['origins'] for r in result['items'][:2]))
-
-    def test_nested_shorter_core_and_absent_live_names_are_not_pinned(self):
-        self.profile(self.semantic,'tag_0','树下')
-        self.profile(self.semantic,'tag_1','大树下')
-        self.profile(self.semantic,'not_in_catalog','绿色')
-        self.assertEqual(self.source_impl.core_concepts('绿色的大树下'),[['tag_1']])
-
-    def test_old_bundle_core_cannot_override_a_corrected_supplement(self):
-        self.profile(self.semantic,'tag_0','旧名称')
-        self.profile(self.overlay,'tag_0','新名称',revision=1)
-        self.assertEqual(self.source_impl.core_concepts('旧名称在这里'),[])
-        self.assertEqual(self.source_impl.core_concepts('新名称在这里'),[['tag_0']])
+        row=self.source_impl.rows(names=['tag_0'])[0]
+        self.assertEqual(row['core_zh'],'草地')
+        self.assertEqual(row['summary_zh'],'植物覆盖的地面')
+        self.assertEqual(row['aliases'],['known_alias'])
+        from engine import Sources as CatalogSources
+        raw=CatalogSources(self.source,semantics=self.semantic).rows(names=['tag_0'])[0]
+        self.assertNotIn('text',raw)
+        self.assertNotIn('digest',raw)
 
     def test_overlay_priority_missing_fields_and_stale_summary(self):
         self.profile(self.semantic,'tag_0','草地','原始释义')
@@ -165,51 +133,8 @@ class TagProfileTests(unittest.TestCase):
         db=sqlite3.connect(self.overlay);db.execute("CREATE TABLE attempts(tag TEXT)");db.execute("INSERT INTO attempts VALUES('tag_5')");db.commit();db.close()
         self.assertEqual(signature,self.source_impl.signature())
 
-    def test_locked_overlay_degrades_only_this_search_and_retains_saved_vectors(self):
-        self.profile(self.overlay,'tag_5','补充名称',revision=1)
-        self.build()
-        original_paths=list(self.source_impl.paths)
-        before=self.engine.db.execute('SELECT id,digest,vector FROM documents ORDER BY id').fetchall()
-        writer=sqlite3.connect(self.overlay)
-        try:
-            writer.execute('BEGIN EXCLUSIVE')
-            writer.execute("UPDATE tag_semantics SET core_zh='not committed'")
-            result=self.engine.search('',0,'around',[],[],False,keyword='visual subject')
-            self.assertTrue(result['items'])
-            self.assertEqual(self.engine.status()['indexed'],70)
-            self.assertTrue(self.engine.status()['partial'])
-            self.assertEqual(result['degraded'],['supplements_unavailable'])
-            self.assertIs(self.engine.sources,self.source_impl)
-            self.assertEqual(self.source_impl.paths,original_paths)
-            self.assertEqual(self.engine.db.execute('SELECT id,digest,vector FROM documents ORDER BY id').fetchall(),before)
-        finally: writer.rollback();writer.close()
-        self.assertNotIn('degraded',self.engine.search('',0,'around',[],[],False,keyword='visual subject'))
-        self.assertTrue(self.engine.status()['complete'])
 
-    def test_invalid_overlay_schema_is_not_silently_treated_as_a_lock(self):
-        self.build()
-        db=sqlite3.connect(self.overlay)
-        db.execute('DROP TABLE tag_semantics');db.commit();db.close()
-        with self.assertRaises(sqlite3.OperationalError):
-            self.engine.search('',0,'around',[],[],False,keyword='visual subject')
-        self.assertIs(self.engine.sources,self.source_impl)
 
-    def test_manual_popularity_uses_danbooru_counts_and_preserves_other_sources(self):
-        runtime=self.root/'runtime.db'
-        db=sqlite3.connect(runtime)
-        db.execute('CREATE TABLE danbooru_tags(tag TEXT PRIMARY KEY,category INTEGER,post_count INTEGER)')
-        db.execute("INSERT INTO danbooru_tags VALUES('tag_0',0,100000)")
-        db.commit();db.close()
-        db=sqlite3.connect(self.source)
-        db.execute("UPDATE tags SET post_count=100000000,category=7 WHERE name='tag_1'")
-        db.commit();db.close()
-        self.engine.sources=Sources(self.source,runtime=runtime,semantics=self.semantic,supplements=self.overlay)
-        self.build()
-        result=self.engine.search('',0,'around',[],[],False,limit=80,keyword='an unnamed visual scene')
-        self.assertEqual(result['items'][0]['name'],'tag_0')
-        self.assertGreater(result['items'][0]['score'],0.2)
-        self.assertLess(result['items'][0]['score'],1.4)
-        self.assertTrue(any(row['name']=='tag_1' and row['post_count']==100000000 for row in result['items']))
 
     def test_catalog_change_falls_back_to_full_verification_and_deletes_stale(self):
         self.build()
@@ -217,36 +142,9 @@ class TagProfileTests(unittest.TestCase):
         self.build();self.assertEqual(len(self.engine.ann),69)
         self.assertFalse(self.engine.db.execute("SELECT 1 FROM documents WHERE name='tag_1'").fetchone())
 
-    def test_visual_category_scope_is_inside_recall_not_post_filtering(self):
-        db=sqlite3.connect(self.source);db.execute('UPDATE tags SET category=1 WHERE id>4');db.execute('UPDATE tags SET category=7 WHERE id=4');db.commit();db.close()
-        self.build()
-        query=self.models.embed(['植物'],query=True)[0]
-        keys=self.engine.ann.search(query,80,categories=(0,7)).keys
-        self.assertEqual(len(keys),4)
-        categories=[self.engine.db.execute('SELECT category FROM documents WHERE id=?',(k,)).fetchone()[0]for k in keys]
-        self.assertEqual(set(categories),{0,7})
 
-    def test_descriptive_query_keeps_a_reserved_entity_lane_without_exact_name(self):
-        db=sqlite3.connect(self.source);db.execute('UPDATE tags SET category=4 WHERE id>35');db.commit();db.close()
-        self.build()
-        result=self.engine.search('scene',5,'around',[],[],False,limit=80)
-        self.assertTrue(any(r['category']==4 for r in result['items']))
-        self.assertTrue(any(r['category']==0 for r in result['items']))
 
-    def test_rerank_has_category_and_can_return_more_than_32_results(self):
-        self.build()
-        with patch.object(self.models,'rerank',wraps=self.models.rerank) as rerank:
-            result=self.engine.search('rain',4,'around',[],[],False,limit=80)
-        self.assertEqual(len(result['items']),70)
-        self.assertTrue(all('Category: general visual tag' in text for text in rerank.call_args.args[1]))
-        self.assertTrue(all('origins' in row and 'score' in row for row in result['items']))
 
-    def test_requested_80_results_are_not_truncated_to_32(self):
-        db=sqlite3.connect(self.source)
-        for i in range(70,110): db.execute('INSERT INTO tags VALUES(?,?,?,?)',(i+1,f'tag_{i}',0,110-i))
-        db.commit();db.close();self.build()
-        result=self.engine.search('rain',4,'around',[],[],False,limit=80)
-        self.assertEqual(len(result['items']),80)
 
     def test_clear_removes_incremental_metadata_and_next_build_restores_every_tag(self):
         self.build();self.engine.clear();self.build();self.assertEqual(len(self.engine.ann),70)

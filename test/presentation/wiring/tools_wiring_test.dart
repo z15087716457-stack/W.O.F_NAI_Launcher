@@ -1,3 +1,4 @@
+import '../../helpers/empty_tag_expansion.dart';
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
@@ -44,8 +45,7 @@ import 'package:nai_launcher/presentation/wiring/tools_generation_wiring.dart';
 
 import '../providers/krita/agent_bridge_draft_test.dart'
     show MemoryCharacters, MemoryDraftSettings, EmptyBlocks;
-import '../screens/generation/widgets/reference_module_test.dart'
-    show prepareGenerationDropTestPlatform;
+import '../../helpers/generation_drop_platform.dart';
 import 'generation_backend_test.dart'
     show MemoryGenerationPlatform, SwitchingAuth;
 import 'generation_data_wiring_test.dart'
@@ -85,6 +85,7 @@ void main() {
     approval = (_) async => true;
     container = ProviderContainer(
       overrides: [
+        emptyTagExpansionOverride,
         localStorageServiceProvider.overrideWithValue(MemoryDraftSettings()),
         characterPromptRepositoryProvider.overrideWithValue(MemoryCharacters()),
         promptBlockLibraryNotifierProvider.overrideWith(EmptyBlocks.new),

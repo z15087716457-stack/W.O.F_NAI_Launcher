@@ -69,6 +69,13 @@ Three anomalous source rows are preserved in a review table instead of
 being used as canonical tags. No upstream application implementation is copied.
 See `tool/tag_semantics/README.md` for the conversion and coverage boundaries.
 
+The tag-search reference corpus in `tool/rag/danbooru_tags.csv` is a separate,
+unchanged UTF-8 snapshot from the DanbooruSearch Hugging Face Space, revision
+`f50d563d8b40f126e1509c1291977afd73b173dc` (48,308 rows). Its checksum and source
+are recorded in `tool/rag/danbooru_tags.source.json`. This data retains the same
+upstream GPL-3.0 notice and bundled license; the application's independently
+written retrieval implementation is not copied from the upstream engine.
+
 ## Danbooru Co-occurrence Data
 
 The bundled `assets/databases/cooccurrence.db` is generated only from

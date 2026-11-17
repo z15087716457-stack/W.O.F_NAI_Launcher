@@ -38,10 +38,6 @@ import 'package:irondash_message_channel/irondash_message_channel.dart';
 // ignore: implementation_imports, depend_on_referenced_packages
 import 'package:super_native_extensions/src/native/context.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
-import 'package:nai_launcher/core/autocomplete/autocomplete_providers.dart';
-import 'package:nai_launcher/core/autocomplete/autocomplete_cache_database.dart';
-import 'package:nai_launcher/core/autocomplete/completion_models.dart';
-import 'package:nai_launcher/core/autocomplete/danbooru_completion_source.dart';
 import 'package:nai_launcher/core/shortcuts/shortcut_config.dart';
 import 'package:nai_launcher/presentation/providers/shortcuts_provider.dart';
 
@@ -73,21 +69,6 @@ class _Palette extends PromptBlockPaletteNotifier {
 class _Shortcuts extends ShortcutConfigNotifier {
   @override
   Future<ShortcutConfig> build() async => ShortcutConfig.createDefault();
-}
-
-class _NoTranslations implements TranslationResolver {
-  const _NoTranslations();
-  @override
-  Future<Map<String, String>> resolve(
-    List<String> tags, {
-    required String locale,
-  }) async => {};
-}
-
-class _NoRemote extends DanbooruCompletionSource {
-  _NoRemote() : super(cache: AutocompleteCacheDatabase());
-  @override
-  Future<List<CompletionCandidate>> search(CompletionQuery query) async => [];
 }
 
 class _Gallery extends LocalGalleryNotifier {
@@ -281,13 +262,6 @@ void main() {
               ),
               localStorageServiceProvider.overrideWithValue(storage),
               shortcutConfigNotifierProvider.overrideWith(_Shortcuts.new),
-              autocompleteServicesProvider.overrideWithValue(
-                AutocompleteServices(
-                  localSources: [],
-                  llmTranslations: const _NoTranslations(),
-                  danbooru: _NoRemote(),
-                ),
-              ),
               localGalleryNotifierProvider.overrideWith(_Gallery.new),
               galleryCategoryNotifierProvider.overrideWith(_Categories.new),
               collectionNotifierProvider.overrideWith(_Collections.new),

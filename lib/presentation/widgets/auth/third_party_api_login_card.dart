@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/nai_api_endpoint.dart';
+import '../../../core/network/nai_api_endpoint_service.dart';
+import '../../../core/network/third_party_api_input.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../providers/account_manager_provider.dart';
 import '../../providers/auth_provider.dart';
@@ -27,6 +29,7 @@ class _ThirdPartyApiLoginCardState
   final _tokenController = TextEditingController();
   final _nicknameController = TextEditingController();
   bool _obscureToken = true;
+  String? _inputError;
 
   @override
   void initState() {
@@ -114,6 +117,7 @@ class _ThirdPartyApiLoginCardState
               ),
             ],
             validator: (value) {
+              if (_inputError != null) return _inputError;
               if (value == null || value.trim().isEmpty) {
                 return l10n.auth_tokenRequired;
               }
@@ -179,12 +183,31 @@ class _ThirdPartyApiLoginCardState
 
   Future<void> _pasteFromClipboard() async {
     final data = await Clipboard.getData(Clipboard.kTextPlain);
-    if (data?.text != null) {
+    if (mounted && data?.text != null) {
       _tokenController.text = data!.text!.trim();
+      _importConnectionInput();
+    }
+  }
+
+  bool _importConnectionInput() {
+    _inputError = null;
+    try {
+      final input = parseThirdPartyApiInput(_tokenController.text);
+      _tokenController.text = input.token;
+      if (input.endpoint case final endpoint?) {
+        _mainApiController.text = endpoint.mainBaseUrl;
+        _imageApiController.clear();
+      }
+      return true;
+    } on ArgumentError catch (error) {
+      _inputError = error.message.toString();
+      _formKey.currentState!.validate();
+      return false;
     }
   }
 
   Future<void> _handleLogin() async {
+    if (!_importConnectionInput()) return;
     if (!_formKey.currentState!.validate()) return;
 
     final endpoint = NaiApiEndpointConfig.fromInput(
@@ -205,22 +228,23 @@ class _ThirdPartyApiLoginCardState
 
     if (!success) return;
 
+    final resolvedEndpoint = ref.read(naiApiEndpointServiceProvider).current;
     final account = await accountNotifier.addAccount(
-      identifier: endpoint.mainBaseUrl,
+      identifier: resolvedEndpoint.mainBaseUrl,
       token: token,
       nickname: nickname,
       setAsDefault: true,
-      apiEndpoint: endpoint,
+      apiEndpoint: resolvedEndpoint,
     );
 
-    await authNotifier.loginWithThirdPartyToken(
+    final attached = await authNotifier.loginWithThirdPartyToken(
       token,
-      apiEndpoint: endpoint,
+      apiEndpoint: resolvedEndpoint,
       accountId: account.id,
       displayName: account.displayName,
     );
 
-    if (mounted) {
+    if (attached && mounted) {
       widget.onLoginSuccess?.call();
     }
   }
@@ -233,6 +257,7 @@ class _ThirdPartyApiLoginCardState
       AuthErrorCode.tokenInvalid => context.l10n.auth_tokenInvalid,
       AuthErrorCode.credentialsLoginUnavailable =>
         context.l10n.auth_error_credentialsLoginUnavailable,
+      AuthErrorCode.incompatibleApi => context.l10n.auth_error_incompatibleApi,
       AuthErrorCode.serverError => context.l10n.auth_error_serverError,
       AuthErrorCode.unknown || null => context.l10n.auth_error_unknown,
     };

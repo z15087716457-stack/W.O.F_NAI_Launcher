@@ -40,6 +40,7 @@ for line in sys.stdin:
  elif op=='cancelled': emit({'id':i,'result':{'count':len(cancelled)}})
  elif op=='exit': break
  elif op=='broken': print('invalid-json',flush=True)
+ elif op=='fatal': emit({'event':'fatal','code':'worker_failed'})
  else: emit({'id':i,'result':p})
 ''';
 
@@ -260,7 +261,7 @@ void main() {
           expect(await client.request('echo'), isEmpty);
         },
       );
-      for (final op in ['exit', 'broken']) {
+      for (final op in ['exit', 'broken', 'fatal']) {
         test('$op completes pending requests and can be closed', () async {
           await expectLater(
             client.request(op),

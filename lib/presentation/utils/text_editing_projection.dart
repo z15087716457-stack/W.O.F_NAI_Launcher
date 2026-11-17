@@ -172,39 +172,10 @@ class EditingTextProjection {
             : TextRange.empty,
       );
     }
-    var prefix = 0;
-    final limit = before.selection.isValid
-        ? before.selection.start
-        : before.text.length;
-    while (prefix < before.text.length &&
-        prefix < after.text.length &&
-        prefix < limit &&
-        before.text.codeUnitAt(prefix) == after.text.codeUnitAt(prefix)) {
-      prefix++;
-    }
-    var suffix = 0;
-    while (suffix < before.text.length - prefix &&
-        suffix < after.text.length - prefix &&
-        before.text.codeUnitAt(before.text.length - 1 - suffix) ==
-            after.text.codeUnitAt(after.text.length - 1 - suffix)) {
-      suffix++;
-    }
-    var oldEnd = before.text.length - suffix;
-    var newEnd = after.text.length - suffix;
+    final change = _changedRange(before, after);
+    final prefix = change.start;
+    final oldEnd = change.oldEnd, newEnd = change.newEnd;
     final removed = before.text.length - after.text.length;
-    if (removed > 0 &&
-        before.selection.isCollapsed &&
-        after.selection.isCollapsed) {
-      final candidate = after.selection.extentOffset;
-      if (candidate >= 0 &&
-          candidate + removed <= before.text.length &&
-          before.text.replaceRange(candidate, candidate + removed, '') ==
-              after.text) {
-        prefix = candidate;
-        oldEnd = candidate + removed;
-        newEnd = candidate;
-      }
-    }
     var start = toSource(prefix), end = toSource(oldEnd);
     final inserted = after.text.substring(prefix, newEnd);
     if (start == end && inserted.isEmpty && removed > 0) {
@@ -241,6 +212,95 @@ class EditingTextProjection {
             )
           : TextRange.empty,
     );
+  }
+
+  /// Keep the native IME buffer unchanged, including existing annotation
+  /// placeholders. Reflowing it sends setEditingState to Windows, whose
+  /// SetText resets the active composition even when its range is preserved.
+  EditingTextProjection retainDisplayEdit(
+    TextEditingValue before,
+    TextEditingValue after,
+    String updatedSource,
+  ) {
+    if (before.text == after.text) return this;
+    final change = _changedRange(before, after);
+    final inserted = after.text.substring(change.start, change.newEnd);
+    final start = toSource(change.start);
+    return EditingTextProjection(updatedSource, [
+      ..._displaySlice(0, change.start),
+      if (inserted.isNotEmpty)
+        EditingProjectionPart(
+          start: start,
+          end: start + inserted.length,
+          text: inserted,
+        ),
+      ..._displaySlice(
+        change.oldEnd,
+        text.length,
+        delta: updatedSource.length - source.length,
+      ),
+    ]);
+  }
+
+  Iterable<EditingProjectionPart> _displaySlice(
+    int start,
+    int end, {
+    int delta = 0,
+  }) sync* {
+    var offset = 0;
+    for (final part in parts) {
+      final from = start.clamp(offset, offset + part.text.length);
+      final to = end.clamp(offset, offset + part.text.length);
+      if (from < to) {
+        yield EditingProjectionPart(
+          start: toSource(from) + delta,
+          end: toSource(to) + delta,
+          text: part.text.substring(from - offset, to - offset),
+          annotation: part.annotation,
+        );
+      }
+      offset += part.text.length;
+    }
+  }
+
+  static ({int start, int oldEnd, int newEnd}) _changedRange(
+    TextEditingValue before,
+    TextEditingValue after,
+  ) {
+    var prefix = 0;
+    final limit = before.selection.isValid
+        ? before.selection.start
+        : before.text.length;
+    while (prefix < before.text.length &&
+        prefix < after.text.length &&
+        prefix < limit &&
+        before.text.codeUnitAt(prefix) == after.text.codeUnitAt(prefix)) {
+      prefix++;
+    }
+    var suffix = 0;
+    while (suffix < before.text.length - prefix &&
+        suffix < after.text.length - prefix &&
+        before.text.codeUnitAt(before.text.length - 1 - suffix) ==
+            after.text.codeUnitAt(after.text.length - 1 - suffix)) {
+      suffix++;
+    }
+    var oldEnd = before.text.length - suffix;
+    var newEnd = after.text.length - suffix;
+    final removed = before.text.length - after.text.length;
+    if (removed > 0 &&
+        before.selection.isCollapsed &&
+        after.selection.isCollapsed) {
+      final candidate = after.selection.extentOffset;
+      if (candidate >= 0 &&
+          candidate + removed <= before.text.length &&
+          before.text.replaceRange(candidate, candidate + removed, '') ==
+              after.text) {
+        prefix = candidate;
+        oldEnd = candidate + removed;
+        newEnd = candidate;
+      }
+    }
+    return (start: prefix, oldEnd: oldEnd, newEnd: newEnd);
   }
 }
 

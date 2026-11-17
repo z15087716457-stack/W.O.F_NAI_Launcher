@@ -707,6 +707,35 @@ class DanbooruApiService {
         .toList();
   }
 
+  /// Wiki media assets have a separate identity from posts.
+  Future<List<Map<String, dynamic>>> getWikiExampleAssets(
+    List<int> ids, {
+    CancelToken? cancelToken,
+  }) async {
+    if (ids.isEmpty) return const [];
+    final response = await _dio.get(
+      '$_baseUrl/media_assets.json',
+      cancelToken: cancelToken,
+      queryParameters: {
+        'search[id]': ids.take(64).join(','),
+        'limit': ids.length.clamp(1, 64),
+        'only': 'id,status,is_public,variants',
+      },
+      options: Options(
+        receiveTimeout: _timeout,
+        sendTimeout: _timeout,
+        headers: _getHeaders(),
+      ),
+    );
+    if (response.data is! List) {
+      throw const FormatException('Invalid media asset list');
+    }
+    return (response.data as List)
+        .whereType<Map>()
+        .map((item) => Map<String, dynamic>.from(item))
+        .toList();
+  }
+
   Future<List<Map<String, dynamic>>> searchWikiPages({
     String? titlePattern,
     int limit = 100,

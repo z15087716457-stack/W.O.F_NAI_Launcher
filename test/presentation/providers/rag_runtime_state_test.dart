@@ -57,7 +57,7 @@ void main() {
   );
 
   test(
-    'pending probe preserves an active worker and selected path, but an explicit failed probe stays failed',
+    'pending probe keeps the selected path without reporting cached worker readiness as a completed check',
     () {
       const settings = RagSettings(python: 'selected-python.exe');
       const status = RagStatus(runtimeReady: true);
@@ -70,7 +70,7 @@ void main() {
         null,
       );
       expect(pending.checking, isTrue);
-      expect(pending.runtimeReady, isTrue);
+      expect(pending.runtimeReady, isFalse);
       expect(pending.runtime.value, 'selected-python.exe');
       final failed = settingsRagData(
         settings,
@@ -88,7 +88,7 @@ void main() {
   test(
     'startup projection distinguishes unread, empty, reconnecting and failed indexes',
     () {
-      const settings = RagSettings(enabled: true, wikiEnabled: true);
+      const settings = RagSettings(enabled: true);
       SettingsRagData project(RagStatus status) => settingsRagData(
         settings,
         status,
@@ -105,7 +105,11 @@ void main() {
       final empty = project(
         const RagStatus(
           indexKnown: true,
-          sources: {RagSource.wiki: RagStatus(indexKnown: true)},
+          sources: {
+            RagSource.wiki: RagStatus(indexKnown: true),
+            RagSource.blocks: RagStatus(indexKnown: true),
+            RagSource.gallery: RagStatus(indexKnown: true),
+          },
         ),
       );
       expect(empty.initializing, isFalse);
@@ -128,6 +132,14 @@ void main() {
           error: 'initialization_timeout',
           sources: {
             RagSource.wiki: RagStatus(
+              phase: 'error',
+              error: 'initialization_timeout',
+            ),
+            RagSource.blocks: RagStatus(
+              phase: 'error',
+              error: 'initialization_timeout',
+            ),
+            RagSource.gallery: RagStatus(
               phase: 'error',
               error: 'initialization_timeout',
             ),

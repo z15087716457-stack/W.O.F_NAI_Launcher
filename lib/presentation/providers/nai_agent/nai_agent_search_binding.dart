@@ -13,6 +13,7 @@ import '../../../core/rag/rag_client.dart';
 import '../../../core/rag/rag_gallery_search.dart';
 import '../../../core/rag/rag_settings.dart';
 import '../../../core/rag/rag_text_search.dart';
+import '../../../core/rag/rag_tag_search.dart';
 import '../../../data/services/gallery/gallery_filter_service.dart';
 import '../../../data/services/gallery/unified_gallery_service.dart';
 import '../rag_provider.dart';
@@ -45,13 +46,6 @@ class NaiAgentSearchBinding {
         'status': 'disabled',
         'message':
             'Local semantic search is off. Enable it in Settings > Semantic Search.',
-      };
-    }
-    if (!settings.enabledFor(source)) {
-      return {
-        'status': 'not_indexed',
-        'message':
-            'This source is not enabled in Settings > Semantic Search. No index was created.',
       };
     }
     final controller = ref.read(ragControllerProvider.notifier);
@@ -133,13 +127,11 @@ class NaiAgentSearchBinding {
               },
           ];
         case RagSource.tags:
-          final hits = await controller.recommend(
-            text: '',
-            cursor: 0,
-            keyword: request.query,
+          final hits = await controller.searchTags(
+            query: request.query,
             existing: const {},
-            lexical: const [],
             limit: request.limit,
+            tagOptions: request.tagOptions,
             cancellation: cancellation,
           );
           items = [
@@ -409,6 +401,7 @@ class _SearchRequest {
     this.start,
     this.end,
     this.limit,
+    this.tagOptions,
   );
   final RagSource source;
   final String query;
@@ -417,6 +410,7 @@ class _SearchRequest {
   final bool favorites;
   final DateTime? start, end;
   final int limit;
+  final RagTagSearchOptions tagOptions;
 
   static _SearchRequest parse(Map<String, dynamic> params) {
     Never invalid(String message) =>
@@ -431,6 +425,7 @@ class _SearchRequest {
       'date_start',
       'date_end',
       'limit',
+      'tag_options',
     };
     if (params.keys.any((key) => !keys.contains(key))) {
       invalid('Unknown search field');
@@ -504,6 +499,14 @@ class _SearchRequest {
     if (limit is! int || limit < 1 || limit > 50) {
       invalid('Expected limit 1..50');
     }
+    var tagOptions = const RagTagSearchOptions();
+    if (params.containsKey('tag_options')) {
+      final options = params['tag_options'];
+      if (source != RagSource.tags || options is! Map<String, dynamic>) {
+        invalid('tag_options requires source=tags and an object');
+      }
+      tagOptions = RagTagSearchOptions.parse(options, invalid);
+    }
     return _SearchRequest(
       source,
       query.trim(),
@@ -513,6 +516,7 @@ class _SearchRequest {
       start,
       end,
       limit,
+      tagOptions,
     );
   }
 }

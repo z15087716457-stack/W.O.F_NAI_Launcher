@@ -351,7 +351,7 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
     }
 
     ref.listen(
-      ragSettingsProvider.select((s) => s.enabledFor(RagSource.gallery)),
+      ragSettingsProvider.select((s) => s.enabled),
       (_, __) => refreshRag(),
     );
     ref.listen(galleryRagQueryProvider, (_, __) => refreshRag());
@@ -653,7 +653,7 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
         );
       }
       if (scope == GalleryBrowseScope.library &&
-          ref.read(ragSettingsProvider).enabledFor(RagSource.gallery)) {
+          ref.read(ragSettingsProvider).enabled) {
         unawaited(
           _loadGalleryRag(
             serial,
@@ -727,7 +727,7 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
       if (cancellation.isCancelled ||
           serial != _timelineSerial ||
           state.filterCriteria != criteria ||
-          !ref.read(ragSettingsProvider).enabledFor(RagSource.gallery)) {
+          !ref.read(ragSettingsProvider).enabled) {
         return;
       }
       final allowed = {

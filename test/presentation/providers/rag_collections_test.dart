@@ -9,11 +9,13 @@ import 'package:nai_launcher/core/services/desktop_app_shutdown_service.dart';
 import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/providers/rag_provider.dart';
+import 'package:nai_launcher/presentation/ui/settings/settings_contract.dart';
+import 'package:nai_launcher/presentation/wiring/settings/settings_rag.dart';
 import '../../helpers/rag_test_python.dart';
 
 const _worker = r'''
 import sys,json,threading
-lock=threading.Lock();sources={};suspended=False;slow=False;configures=0
+lock=threading.Lock();sources={};suspended=False;slow=False;configures=0;starts=0
 def emit(v):
  with lock:print(json.dumps(v),flush=True)
 def status():
@@ -34,8 +36,21 @@ for line in sys.stdin:
  elif op=='verification':
   sources[source].update(checking=p['active'],building=False)
   emit({'event':'index','source':source,'job_id':'check','phase':'checking' if p['active'] else 'complete',**sources[source]});result={}
- elif op=='preview':result={'plan_id':source,'documents':2,'total':8,'verify':p.get('verify')}
+ elif op=='upgrade_state':
+  sources[source].update(upgrade_available=True,cleanup_only=True,legacy_bytes=1234,
+   upgrade_pending=p['pending'],upgrade_failed=p.get('failed',False),auto_update_allowed=p['consented']);result={}
+ elif op=='starts':result={'total':starts}
+ elif op=='source_failed':
+  sources[source].update(indexed=2,complete=False,error='rag_runtime_error',auto_update_allowed=False)
+  emit({'event':'index','source':source,'job_id':'failed','phase':'error','code':'rag_runtime_error',**sources[source]});result={}
+ elif op=='orphan_job':
+  emit({'event':'index','source':source,'job_id':'gone','phase':'paused',**sources[source]});result={}
+ elif op=='resume':emit({'id':i,'error':{'code':'job_missing'}});continue
+ elif op=='preview':result={**sources[source],'plan_id':source,'documents':2,'tags':2,'total':8,'verify':p.get('verify')}
  elif op=='start':
+  starts+=1
+  sources[source].pop('error',None)
+  if source=='tags':sources[source].update(upgrade_available=False,upgrade_pending=False,upgrade_failed=False,cleanup_only=False)
   if p.get('rebuild'):
    sources[source]['building']=True;slow=True;result={'job_id':source}
   else:
@@ -48,7 +63,7 @@ for line in sys.stdin:
   result={'items':[{'id':source+'-hit','title':'Saved','snippet':'rain','section':'article'}]}
   if p['query']=='delay':threading.Timer(.2,emit,args=[{'id':i,'result':result}]).start();continue
  elif op=='search':
-  result={'items':[{'name':p['mode']+':'+str(p['budget']),'category':0,'post_count':configures,'aliases':p['existing']}]}
+  result={'items':[{'name':p['query'],'category':0,'post_count':configures,'aliases':p['existing']}]}
  elif op=='gallery_search':
   if p['query']=='fail':emit({'id':i,'error':{'code':'rag_runtime_error'}});continue
   with open(p['scope'],encoding='utf-8') as f:paths=json.load(f)
@@ -60,15 +75,16 @@ for line in sys.stdin:
 
 class _Settings extends RagSettingsController {
   @override
-  RagSettings build() => RagSettings(
-    enabled: true,
-    tagsEnabled: false,
-    wikiEnabled: true,
-    blocksEnabled: true,
-    embedding: 'fixture',
-    reranker: 'fixture',
-    python: ragTestPython()!,
-  );
+  RagSettings build() => RagSettings.fromJson({
+    'version': 1,
+    'enabled': true,
+    'tagsEnabled': false,
+    'wikiEnabled': false,
+    'blocksEnabled': false,
+    'galleryEnabled': false,
+    'embedding': 'fixture',
+    'python': ragTestPython()!,
+  });
   @override
   Future<void> update(RagSettings value) async {
     state = value;
@@ -137,36 +153,109 @@ void main() {
     'collection routing with a real JSON child',
     () {
       test(
-        'recommendations send the latest budget before the caret without reconnecting',
+        'a failed build survives heartbeats and retry keeps existing records',
         () async {
-          await container
-              .read(ragSettingsProvider.notifier)
-              .update(
-                container.read(ragSettingsProvider).copyWith(tagsEnabled: true),
-              );
-          int? configurations;
-          for (final budget in [32, 121, 512]) {
-            await container
-                .read(ragSettingsProvider.notifier)
-                .update(
-                  container
-                      .read(ragSettingsProvider)
-                      .copyWith(tokenBudget: budget),
-                );
-            final items = await controller.recommend(
-              text: 'rain, future',
-              cursor: 5,
-              existing: {'rain', 'future'},
-              lexical: [],
-              cancellation: RagCancellation(),
-            );
-            expect(items.single.canonicalTag, 'before:$budget');
-            expect(items.single.aliases, containsAll(['rain', 'future']));
-            configurations ??= items.single.postCount;
-            expect(items.single.postCount, configurations);
-          }
+          await client.request('source_failed', {'source': 'wiki'});
+          await controller.refresh(autoUpdate: true);
+          final failed = container
+              .read(ragControllerProvider)
+              .forSource(RagSource.wiki);
+          expect(failed.error, 'rag_runtime_error');
+          expect(failed.phase, 'error');
+          expect(failed.indexed, 2);
+          expect((await client.request('starts'))['total'], 0);
+          await controller.resume(source: RagSource.wiki);
+          await Future<void>.delayed(Duration.zero);
+          final resumed = container
+              .read(ragControllerProvider)
+              .forSource(RagSource.wiki);
+          expect(resumed.error, isNull);
+          expect(resumed.busy, false);
+          expect(resumed.indexed, 2);
+          expect((await client.request('starts'))['total'], 1);
         },
       );
+
+      test(
+        'a stale paused job creates a continuation instead of staying busy forever',
+        () async {
+          await client.request('orphan_job', {'source': 'wiki'});
+          await Future<void>.delayed(Duration.zero);
+          expect(
+            container
+                .read(ragControllerProvider)
+                .forSource(RagSource.wiki)
+                .jobId,
+            'gone',
+          );
+          await controller.resume(source: RagSource.wiki);
+          await Future<void>.delayed(Duration.zero);
+          final resumed = container
+              .read(ragControllerProvider)
+              .forSource(RagSource.wiki);
+          expect(resumed.indexed, 8);
+          expect(resumed.busy, false);
+          expect(resumed.error, isNull);
+          expect((await client.request('starts'))['total'], 1);
+        },
+      );
+
+      test(
+        'old tag cleanup resumes only after consent and stops retrying a failure',
+        () async {
+          await controller.refresh();
+          await client.request('upgrade_state', {
+            'pending': false,
+            'consented': false,
+          });
+          await controller.refresh(autoUpdate: true);
+          expect((await client.request('starts'))['total'], 0);
+          var tags = container.read(ragControllerProvider);
+          expect(tags.upgradeAvailable, true);
+          expect(tags.cleanupOnly, true);
+          expect(tags.details['legacy_bytes'], 1234);
+          expect(tags.available, true);
+          final plan = await controller.preview();
+          expect(plan['cleanup_only'], true);
+          controller.discardPlan(plan['plan_id'] as String);
+          final session = container.read(settingsRagSessionProvider.notifier);
+          await session.preview(SettingsRagSourceKind.tags);
+          final confirmation = container.read(settingsRagSessionProvider).plan!;
+          expect(confirmation.total, 2);
+          expect(confirmation.upgrade, true);
+          expect(confirmation.cleanupOnly, true);
+          expect(confirmation.legacyBytes, 1234);
+          session.cancelPlan();
+          await session.preview(SettingsRagSourceKind.tags, rebuild: true);
+          expect(
+            container.read(settingsRagSessionProvider).plan!.cleanupOnly,
+            false,
+          );
+          session.cancelPlan();
+
+          await client.request('upgrade_state', {
+            'pending': true,
+            'consented': true,
+          });
+          await controller.refresh(autoUpdate: true);
+          await Future<void>.delayed(Duration.zero);
+          expect((await client.request('starts'))['total'], 1);
+          expect(container.read(ragControllerProvider).upgradeAvailable, false);
+          await client.request('upgrade_state', {
+            'pending': false,
+            'consented': true,
+            'failed': true,
+          });
+          await controller.refresh(autoUpdate: true);
+          expect((await client.request('starts'))['total'], 1);
+          tags = container.read(ragControllerProvider);
+          expect(tags.upgradeFailed, true);
+          expect(tags.available, true);
+          expect(tags.error, isNull);
+          expect(tags.forSource(RagSource.wiki).upgradeAvailable, false);
+        },
+      );
+
       test(
         'verification stays busy across heartbeat, completion clears it',
         () async {
@@ -277,13 +366,6 @@ void main() {
       test(
         'gallery transport uses an ephemeral scope and independent status',
         () async {
-          await container
-              .read(ragSettingsProvider.notifier)
-              .update(
-                container
-                    .read(ragSettingsProvider)
-                    .copyWith(galleryEnabled: true),
-              );
           final manual = await controller.preview(source: RagSource.gallery);
           expect(manual['verify'], isTrue);
           final incremental = await controller.preview(
@@ -325,13 +407,15 @@ void main() {
         },
       );
       test(
-        'Wiki and blocks are usable with tag recommendations disabled',
+        'retired off flags cannot hide built indexes or start new builds',
         () async {
           final state = container.read(ragControllerProvider);
           expect(state.runtimeReady, isTrue);
-          expect(state.indexed, 0);
-          expect(state.forSource(RagSource.wiki).available, isTrue);
-          expect(state.forSource(RagSource.blocks).available, isTrue);
+          for (final source in RagSource.values) {
+            expect(state.forSource(source).available, isTrue);
+          }
+          await controller.refresh(autoUpdate: true);
+          expect((await client.request('starts'))['total'], 0);
           final result = await controller.searchText(
             RagTextQuery(source: RagSource.blocks, query: 'storm'),
             cancellation: RagCancellation(),
@@ -347,13 +431,6 @@ void main() {
       test(
         'a queued heartbeat timeout cannot fail an active gallery search',
         () async {
-          await container
-              .read(ragSettingsProvider.notifier)
-              .update(
-                container
-                    .read(ragSettingsProvider)
-                    .copyWith(galleryEnabled: true),
-              );
           await controller.preview(source: RagSource.gallery);
           final search = controller.searchGallery(
             query: 'delay',
@@ -400,13 +477,6 @@ void main() {
       test(
         'gallery failures stay errors instead of pretending to be empty successful results',
         () async {
-          await container
-              .read(ragSettingsProvider.notifier)
-              .update(
-                container
-                    .read(ragSettingsProvider)
-                    .copyWith(galleryEnabled: true),
-              );
           await controller.preview(source: RagSource.gallery);
           await expectLater(
             controller.searchGallery(
@@ -510,14 +580,12 @@ void main() {
         },
       );
       test(
-        'disabling a source stops queries and retains its saved snapshot',
+        'disabling semantic search stops queries and retains saved snapshots',
         () async {
           await container
               .read(ragSettingsProvider.notifier)
               .update(
-                container
-                    .read(ragSettingsProvider)
-                    .copyWith(blocksEnabled: false),
+                container.read(ragSettingsProvider).copyWith(enabled: false),
               );
           expect(
             await controller.searchText(

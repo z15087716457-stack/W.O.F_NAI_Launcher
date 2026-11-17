@@ -783,11 +783,7 @@ class _ToolbarRagSettings extends RagSettingsController {
   _ToolbarRagSettings(this.enabled);
   final bool enabled;
   @override
-  RagSettings build() => RagSettings(
-    enabled: enabled,
-    tagsEnabled: false,
-    galleryEnabled: enabled,
-  );
+  RagSettings build() => RagSettings(enabled: enabled);
 }
 
 class _ToolbarRag extends RagController {

@@ -1,0 +1,13 @@
+{
+  "repository": "https://huggingface.co/spaces/SAkizuki/DanbooruSearch",
+  "revision": "f50d563d8b40f126e1509c1291977afd73b173dc",
+  "path": "origin_database/tags_enhanced.csv",
+  "sha256": "1ca0999176a1e2ad42c365ae61a235d9ed5131e6a47923130556385b7cea14fb",
+  "bytes": 6616792,
+  "encoding": "utf-8",
+  "rows": 48308,
+  "tagsAfterDuplicateRemoval": 48304,
+  "license": "GPL-3.0",
+  "licenseFile": "assets/licenses/DanbooruSearchOnline-GPL-3.0.txt",
+  "notice": "Pinned upstream tag data, distributed unchanged. The application's retrieval implementation is independently written. No model weights are included."
+}

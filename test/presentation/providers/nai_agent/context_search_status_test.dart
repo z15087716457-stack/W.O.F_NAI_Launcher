@@ -30,13 +30,7 @@ class _Settings extends RagSettingsController {
   @override
   RagSettings build() {
     builds++;
-    return const RagSettings(
-      enabled: true,
-      galleryEnabled: true,
-      tagsEnabled: true,
-      wikiEnabled: true,
-      blocksEnabled: true,
-    );
+    return const RagSettings(enabled: true);
   }
 
   void publish(RagSettings value) => state = value;
@@ -143,7 +137,7 @@ void main() {
   );
 
   test(
-    'enabled but unread index stays unknown; a disabled source never starts RAG',
+    'enabled but unread index stays unknown; global off never starts RAG',
     () async {
       container.read(ragSettingsProvider);
       expect((await context())['search'], all('unknown'));
@@ -267,7 +261,7 @@ void main() {
   );
 
   test(
-    'disabled and resource busy states override old ready counts independently',
+    'source errors remain independent; global off overrides saved counts',
     () async {
       container.read(ragSettingsProvider);
       container.read(ragControllerProvider);
@@ -280,21 +274,15 @@ void main() {
           },
         ),
       );
-      settings.publish(
-        const RagSettings(
-          enabled: true,
-          galleryEnabled: true,
-          tagsEnabled: true,
-          wikiEnabled: true,
-          blocksEnabled: false,
-        ),
-      );
+      settings.publish(const RagSettings(enabled: true));
       expect((await context())['search'], {
         'gallery': 'busy',
         'tags': 'ready',
         'wiki': 'error',
-        'blocks': 'disabled',
+        'blocks': 'ready',
       });
+      settings.publish(const RagSettings());
+      expect((await context())['search'], all('disabled'));
     },
   );
 }
