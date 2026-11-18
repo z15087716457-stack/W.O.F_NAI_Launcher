@@ -264,6 +264,7 @@ class GenPromptTools with _GenValue {
   const GenPromptTools({
     this.palettePinned = false,
     this.resourceWindowsPinned = false,
+    this.resourceWindowVisibility = ResourceWindowVisibility.closed,
     this.dockPinned = true,
     this.translatePinned = true,
     this.agentPinned = true,
@@ -276,6 +277,7 @@ class GenPromptTools with _GenValue {
   /// 积木板按钮钉在头部。
   final bool palettePinned;
   final bool resourceWindowsPinned;
+  final ResourceWindowVisibility resourceWindowVisibility;
 
   /// 块库侧栏按钮钉在头部。
   final bool dockPinned;
@@ -301,6 +303,7 @@ class GenPromptTools with _GenValue {
   List<Object?> get _values => [
     palettePinned,
     resourceWindowsPinned,
+    resourceWindowVisibility,
     dockPinned,
     translatePinned,
     agentPinned,
@@ -1511,7 +1514,7 @@ class GenActions {
     required this.onTransparentChanged,
     required this.onPromptTool,
     required this.onOpenPalette,
-    this.onOpenResourceWindow,
+    this.onToggleResourceWindow,
     required this.onTranslate,
     required this.onToggleTranslation,
     required this.onTranslationSettings,
@@ -1613,7 +1616,8 @@ class GenActions {
     onTransparentChanged: (v) => log('onTransparentChanged($v)'),
     onPromptTool: (tool, value) => log('onPromptTool($tool, $value)'),
     onOpenPalette: (_) => log('onOpenPalette'),
-    onOpenResourceWindow: (kind) => log('onOpenResourceWindow($kind)'),
+    onToggleResourceWindow: (pointer) =>
+        log('onToggleResourceWindow($pointer)'),
     onTranslate: () => log('onTranslate'),
     onToggleTranslation: () => log('onToggleTranslation'),
     onTranslationSettings: () => log('onTranslationSettings'),
@@ -1718,7 +1722,7 @@ class GenActions {
         onTransparentChanged: onTransparentChanged,
         onPromptTool: onPromptTool,
         onOpenPalette: onOpenPalette,
-        onOpenResourceWindow: onOpenResourceWindow,
+        onToggleResourceWindow: onToggleResourceWindow,
         onTranslate: onTranslate,
         onToggleTranslation: onToggleTranslation,
         onTranslationSettings: onTranslationSettings,
@@ -1832,8 +1836,9 @@ class GenActions {
   /// 积木板按钮（现有 `PromptBlockPalette` 弹层由接线方贴着 [Rect] 弹）。
   final GenAnchorCallback onOpenPalette;
 
-  /// Resource opener contract only; header visuals are owned by the main agent.
-  final ValueChanged<FloatingResourceKind>? onOpenResourceWindow;
+  /// True only for a pointer gesture; native code preserves its pre-activation
+  /// window order so a direct click from the resource window can close it.
+  final ValueChanged<bool>? onToggleResourceWindow;
 
   /// 翻译当前这一面（`coordinator.translate`）。
   final VoidCallback onTranslate;

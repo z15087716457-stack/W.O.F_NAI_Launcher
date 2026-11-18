@@ -55,7 +55,7 @@ class PreciseRefLibraryStorageService {
   }) : _overrideDirectory = overrideDirectory,
        _fileSystem = fileSystem;
 
-  static const String _entriesBoxName = 'precise_ref_library_entries';
+  static const String entriesBoxName = 'precise_ref_library_entries';
   static const String _thumbnailCacheBoxName =
       'precise_ref_library_thumbnails_v2';
   static const String _legacyThumbnailCacheBoxName =
@@ -86,11 +86,15 @@ class PreciseRefLibraryStorageService {
     });
   }
 
-  Future<void> _doInit() async {
+  static void registerEntryAdapter() {
     if (!Hive.isAdapterRegistered(26)) {
       Hive.registerAdapter(PreciseRefLibraryEntryAdapter());
     }
-    _entriesBox ??= await Hive.openBox<PreciseRefLibraryEntry>(_entriesBoxName);
+  }
+
+  Future<void> _doInit() async {
+    registerEntryAdapter();
+    _entriesBox ??= await Hive.openBox<PreciseRefLibraryEntry>(entriesBoxName);
     _thumbnailCacheBox ??= await Hive.openLazyBox<Uint8List>(
       _thumbnailCacheBoxName,
     );
@@ -155,6 +159,30 @@ class PreciseRefLibraryStorageService {
   Future<List<PreciseRefLibraryEntry>> getAllEntries() async {
     await init();
     return _entriesBox!.values.toList();
+  }
+
+  /// Link managed originals under the folder confirmed in the migration preview.
+  Future<void> linkExistingEntries(
+    Iterable<PreciseRefLibraryEntry> entries,
+    String sourceFolder,
+    String targetFolder,
+  ) async {
+    await init();
+    final linked = <String, PreciseRefLibraryEntry>{};
+    for (final entry in entries) {
+      final name = p.basename(entry.imagePath);
+      if (_pathKey(p.dirname(entry.imagePath)) != _pathKey(sourceFolder) ||
+          !_managedImageFileName.hasMatch(name) ||
+          p.basenameWithoutExtension(name) != entry.id) {
+        continue;
+      }
+      final target = p.join(targetFolder, name);
+      if (await _fileSystem.exists(target)) {
+        linked[entry.id] = entry.copyWith(imagePath: target);
+      }
+    }
+    linked.removeWhere((id, _) => _entriesBox!.containsKey(id));
+    if (linked.isNotEmpty) await _entriesBox!.putAll(linked);
   }
 
   /// 从图片字节导入新条目。
@@ -411,10 +439,15 @@ class PreciseRefLibraryStorageService {
       final directories = _overrideDirectory != null
           ? [directory]
           : await PreciseRefLibraryPathHelper.instance.getReadPaths();
+      // Only this installation's private directory owns unclaimed staging files.
+      final privatePath =
+          _overrideDirectory ??
+          await PreciseRefLibraryPathHelper.instance.getDefaultPath();
       for (final path in directories) {
+        final private = _pathKey(path) == _pathKey(privatePath);
         await for (final entity in _fileSystem.list(path)) {
           if (entity is! File) continue;
-          await _reconcileFile(entity.path, referencedPaths);
+          await _reconcileFile(entity.path, referencedPaths, private);
         }
       }
     } catch (e, s) {
@@ -425,23 +458,21 @@ class PreciseRefLibraryStorageService {
   Future<void> _reconcileFile(
     String filePath,
     Set<String> referencedPaths,
+    bool private,
   ) async {
     try {
-      final markerIndex = _stagingMarkerIndex(filePath);
-      if (markerIndex >= 0) {
-        final originalPath = filePath.substring(0, markerIndex);
-        final isReferenced = referencedPaths.contains(_pathKey(originalPath));
-        final originalExists = await _fileSystem.exists(originalPath);
-        if (isReferenced && !originalExists) {
-          await _fileSystem.rename(filePath, originalPath);
-        } else {
-          await _fileSystem.delete(filePath);
-        }
-        return;
-      }
-
-      if (_managedImageFileName.hasMatch(p.basename(filePath)) &&
-          !referencedPaths.contains(_pathKey(filePath))) {
+      // A completed original may have been moved here before its catalog.
+      final name = p.basename(filePath);
+      final markerIndex = _stagingMarkerIndex(name);
+      if (markerIndex < 0) return;
+      final original = name.substring(0, markerIndex);
+      if (!_managedImageFileName.hasMatch(original)) return;
+      final originalPath = p.join(p.dirname(filePath), original);
+      final isReferenced = referencedPaths.contains(_pathKey(originalPath));
+      if (!private && !isReferenced) return;
+      if (isReferenced && !await _fileSystem.exists(originalPath)) {
+        await _fileSystem.rename(filePath, originalPath);
+      } else {
         await _fileSystem.delete(filePath);
       }
     } catch (e) {

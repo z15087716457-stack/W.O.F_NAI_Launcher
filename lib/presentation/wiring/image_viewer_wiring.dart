@@ -158,15 +158,15 @@ class _ImageViewerWiringState extends ConsumerState<ImageViewerWiring> {
     final key = source.identifier;
     try {
       final path = viewerSourcePath(source);
+      final file = path == null ? null : File(path);
       final dimensions = widget.session.dimensions[key];
       final metadata = source.metadata;
-      final memorySize = source is GeneratedImageDetailData
+      final missing = file != null && !await file.exists();
+      final encodedSize = source is GeneratedImageDetailData
           ? NaiResolutionAdapter.readImageSize(source.imageBytes)
+          : file != null && !missing && dimensions == null
+          ? await NaiResolutionAdapter.readImageFileSize(file)
           : null;
-      var width = memorySize?.$1 ?? dimensions?.width ?? metadata?.width ?? 0;
-      var height =
-          memorySize?.$2 ?? dimensions?.height ?? metadata?.height ?? 0;
-      final missing = path != null && !await File(path).exists();
       if (!mounted || _closing) {
         return;
       }
@@ -174,22 +174,22 @@ class _ImageViewerWiringState extends ConsumerState<ImageViewerWiring> {
       final ratio = MediaQuery.devicePixelRatioOf(context);
       final image = missing
           ? null
-          : path == null
+          : file == null
           ? source.getImageProvider()
           : ResizeImage(
-              FileImage(File(path)),
+              FileImage(file),
               width: math.max(1, (screen.width * ratio * 2).ceil()),
               height: math.max(1, (screen.height * ratio * 2).ceil()),
               policy: ResizeImagePolicy.fit,
             );
-      final stat = path == null || missing ? null : await File(path).stat();
+      final stat = missing ? null : await file?.stat();
       if (!mounted || _closing) {
         return;
       }
       _media[key] = ViewerItem(
         key: key,
-        width: width,
-        height: height,
+        width: encodedSize?.$1 ?? dimensions?.width ?? metadata?.width ?? 0,
+        height: encodedSize?.$2 ?? dimensions?.height ?? metadata?.height ?? 0,
         image: image,
         thumb: path == null ? source.getImageProvider() : null,
         missing: missing,
@@ -215,23 +215,11 @@ class _ImageViewerWiringState extends ConsumerState<ImageViewerWiring> {
         if (!mounted || _closing || thumbnail == null) {
           return;
         }
-        if (width <= 0 || height <= 0) {
-          final size = NaiResolutionAdapter.readImageSize(
-            await File(thumbnail).readAsBytes(),
-          );
-          width =
-              size?.$1 ??
-              math.max(1, ((source.aspectRatio ?? 1) * 100).round());
-          height = size?.$2 ?? 100;
-        }
-        if (!mounted || _closing) {
-          return;
-        }
         final current = _media[key]!;
         _media[key] = ViewerItem(
           key: key,
-          width: width,
-          height: height,
+          width: current.width,
+          height: current.height,
           image: current.image,
           thumb: FileImage(File(thumbnail)),
           missing: current.missing,

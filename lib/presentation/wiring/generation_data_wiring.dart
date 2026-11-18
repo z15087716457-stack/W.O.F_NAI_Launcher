@@ -58,6 +58,7 @@ import 'generation_references.dart';
 import 'generation_settings.dart';
 import 'generation_view_mapping.dart';
 import 'tools_generation_wiring.dart';
+import 'resource_window_wiring.dart';
 
 final generationTranslationRouteLabelProvider = Provider<String?>((ref) {
   final route = ref.watch(promptAssistantConfigProvider).promptTranslationRoute;
@@ -524,6 +525,9 @@ final generationViewDataProvider = Provider.autoDispose
           tools: GenPromptTools(
             palettePinned: layout.blockPaletteToolPinned,
             resourceWindowsPinned: layout.resourceWindowsPinned,
+            resourceWindowVisibility: ref.watch(
+              resourceWindowVisibilityProvider,
+            ),
             dockPinned: layout.blockLibraryPanelToolPinned,
             translatePinned: layout.translationToolPinned,
             agentPinned: layout.naiAgentToolPinned,

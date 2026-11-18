@@ -8,6 +8,7 @@
 // storage/media plugins, and the primary runner's clipboard/titlebar subclasses.
 void RegisterResourceWindowPlugins(flutter::FlutterViewController* controller,
                                    HWND owner);
-void RegisterResourceWindowHost(flutter::FlutterEngine* engine, HWND owner);
+void RegisterResourceWindowHost(flutter::FlutterEngine* engine, HWND owner,
+                                HWND view);
 
 #endif  // RUNNER_RESOURCE_WINDOW_H_

@@ -9,6 +9,40 @@ class AppLocalizationsKo extends AppLocalizations {
   AppLocalizationsKo([String locale = 'ko']) : super(locale);
 
   @override
+  String get set_importInstallation => '이전 설치 폴더에서 가져오기';
+
+  @override
+  String get set_importInstallationHelp =>
+      '이 PC의 계정, 환경설정, 단축키, 자료 폴더를 복원합니다. 이전 설치 폴더 또는 user-data를 선택하세요.';
+
+  @override
+  String get set_importInstallationInvalid =>
+      '다른 Studio 설치 폴더 또는 hive/settings.hive가 있는 user-data 폴더를 선택하세요.';
+
+  @override
+  String set_importInstallationPreview(int accounts, int prefs) {
+    return '계정 $accounts개와 설정 $prefs개를 찾았습니다. 기존 계정은 건너뛰고 아래 설정을 적용합니다. 자료는 계속 표시된 폴더에서 읽으므로 해당 폴더를 유지하세요.';
+  }
+
+  @override
+  String get set_importMissingFolder => '폴더를 찾을 수 없습니다. 새 위치를 선택하거나 건너뛰세요.';
+
+  @override
+  String get set_importCategoryBase => '갤러리 분류 폴더';
+
+  @override
+  String get set_importEmptyGallery => '이전 갤러리 소스가 비어 있어 현재 소스 목록도 비워집니다.';
+
+  @override
+  String get set_importInstallationChanged =>
+      '미리보기 중 폴더 설정이 변경됐습니다. 이전 설치 폴더를 다시 선택하세요.';
+
+  @override
+  String set_importInstallationDone(int added, int missing) {
+    return '가져오기를 완료했습니다. 계정 $added개를 추가했고 그중 $missing개는 로그인 정보를 복원할 수 없습니다. 필요한 경우 계정 페이지에서 다시 로그인하세요.';
+  }
+
+  @override
   String get app_title => 'W.O.F NAI Studio';
 
   @override
@@ -22037,6 +22071,21 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get prompt_autocompleteHintRelated =>
       '↑↓ 선택 · ← 돌아가기 · Tab / Enter 추가 · Esc 연관 닫기';
+
+  @override
+  String get resourceWindow_show => '리소스 창 열기';
+
+  @override
+  String get resourceWindow_hide => '리소스 창 숨기기';
+
+  @override
+  String get resourceWindow_recall => '리소스 창을 앞으로 가져오기';
+
+  @override
+  String get resourceWindow_inBackground => '뒤쪽';
+
+  @override
+  String get resourceWindow_opened => '열림';
 
   @override
   String get resourceWindow_pin => '항상 위에';

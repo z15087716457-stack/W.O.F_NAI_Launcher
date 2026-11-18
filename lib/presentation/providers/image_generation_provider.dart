@@ -5,7 +5,7 @@ import 'dart:math';
 import 'dart:typed_data';
 import '../../data/models/image/image_operation.dart';
 
-import 'package:flutter/foundation.dart' show listEquals;
+import 'package:flutter/foundation.dart' show listEquals, mapEquals;
 import 'package:image/image.dart' as img;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -966,6 +966,31 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
           : Uint8List.fromList(params.maskImage!),
     );
 
+    // Automatic rolls may update an untouched draft between batches. Once the
+    // user edits it, leave that next-request draft alone and finish this run
+    // with its already prepared prompts (including characters and presets).
+    Map<String, PillWorkspaceState> readPromptLanes() => {
+      for (final scope in PillWorkspaceNotifier.activeScopes)
+        if (ref.exists(pillWorkspaceProvider(scope)))
+          scope: ref.read(pillWorkspaceProvider(scope)),
+    };
+    var promptCharacters = ref.read(characterPromptNotifierProvider);
+    var promptLanes = readPromptLanes();
+    var draftEdited = false;
+    Map<String, String> rollPromptDraft() {
+      draftEdited =
+          draftEdited ||
+          ref.read(characterPromptNotifierProvider) != promptCharacters ||
+          !mapEquals(readPromptLanes(), promptLanes);
+      if (draftEdited) return const {};
+      final rolled = ref
+          .read(pillRollCoordinatorProvider)
+          .rollAllLanesAndSync();
+      promptCharacters = ref.read(characterPromptNotifierProvider);
+      promptLanes = readPromptLanes();
+      return rolled;
+    }
+
     // 在参数准备/网络请求的首次 await 前发布完整占位信息。
     // nSamples 是请求次数，batchSize 是每次请求的图片数。
     final batchCount = effectiveParams.nSamples;
@@ -1073,7 +1098,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
       // P2.5：入队后即刻重 roll 随机块实例——本张用入队前的投影，
       // UI 随即显示下一张的内容（roll 时机 4）。
       if (!preserveSnapshot && operation != ImageOperation.variations) {
-        ref.read(pillRollCoordinatorProvider).rollAllLanesAndSync();
+        rollPromptDraft();
       }
       await singleFuture;
       stopwatch.stop();
@@ -1313,9 +1338,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
       // P2.5 逐张重抽：本批已结束（成功或失败），重 roll 随机块实例并把
       // 新投影重跑提示词管线，下一批生效。请求内重试不消耗 roll。
       if (!preserveSnapshot && batch + 1 < batchCount) {
-        final rolled = ref
-            .read(pillRollCoordinatorProvider)
-            .rollAllLanesAndSync();
+        final rolled = rollPromptDraft();
         if (rolled.isNotEmpty) {
           final freshParams = ref.read(generationParamsNotifierProvider);
           currentParams =
@@ -1706,27 +1729,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
         await saveDir.create(recursive: true);
       }
 
-      // 使用已解析别名的角色提示词（来自 params.characters）
-      final characterConfig = ref.read(characterPromptNotifierProvider);
-
-      // 构建 V4 多角色提示词结构（直接使用已解析的 params.characters）
-      final charCaptions = <Map<String, dynamic>>[];
-      final charNegCaptions = <Map<String, dynamic>>[];
-
-      for (final char in params.characters) {
-        charCaptions.add({
-          'char_caption': char.prompt,
-          'centers': [
-            {'x': 0.5, 'y': 0.5},
-          ],
-        });
-        charNegCaptions.add({
-          'char_caption': char.negativePrompt,
-          'centers': [
-            {'x': 0.5, 'y': 0.5},
-          ],
-        });
-      }
+      final (charCaptions, charNegCaptions) = _buildCharacterCaptions(params);
 
       int savedCount = 0;
       final savedFilePaths = <String>[];
@@ -1766,7 +1769,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
                     actualSeed: actualSeed,
                     charCaptions: charCaptions,
                     charNegCaptions: charNegCaptions,
-                    useCoords: !characterConfig.globalAiChoice,
+                    useCoords: params.useCoords,
                     useStealth: false,
                   ),
             seed: actualSeed,

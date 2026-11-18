@@ -29,8 +29,13 @@ import 'package:nai_launcher/presentation/widgets/prompt/pills/prompt_pill_edito
 import 'package:nai_launcher/presentation/widgets/common/text_editing_shortcuts.dart';
 import 'package:nai_launcher/presentation/wiring/generation_editor_wiring.dart';
 import '../providers/krita/agent_bridge_draft_test.dart'
-    show MemoryCharacters, MemoryDraftSettings, EmptyBlocks;
+    show MemoryCharacters, MemoryDraftSettings, EmptyBlocks, IdleGeneration;
 import '../../helpers/studio_capture_fonts.dart';
+
+class _EditorGeneration extends IdleGeneration {
+  void start() =>
+      state = const ImageGenerationState(status: GenerationStatus.generating);
+}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -48,6 +53,7 @@ void main() {
     container = ProviderContainer(
       overrides: [
         emptyTagExpansionOverride,
+        imageGenerationNotifierProvider.overrideWith(_EditorGeneration.new),
         localStorageServiceProvider.overrideWithValue(MemoryDraftSettings()),
         characterPromptRepositoryProvider.overrideWithValue(MemoryCharacters()),
         promptBlockLibraryNotifierProvider.overrideWith(EmptyBlocks.new),
@@ -169,6 +175,39 @@ void main() {
     const GenEditorTarget.character(0, negative: true),
     const GenEditorTarget.base(fullscreen: true),
   ]) {
+    testWidgets('generating editor $target saves the next draft', (
+      tester,
+    ) async {
+      (container.read(imageGenerationNotifierProvider.notifier)
+              as _EditorGeneration)
+          .start();
+      await pump(tester, target, characterId: target.isBase ? null : 'kept');
+      final field = find.byType(EditableText).first;
+      expect(tester.widget<EditableText>(field).readOnly, isFalse);
+      await tester.enterText(field, 'next request draft');
+      await tester.pump();
+      final params = container.read(generationParamsNotifierProvider);
+      final character = container
+          .read(characterPromptNotifierProvider)
+          .characters
+          .single;
+      expect(
+        target.isBase
+            ? target.negative
+                  ? params.negativePrompt
+                  : params.prompt
+            : target.negative
+            ? character.negativePrompt
+            : character.prompt,
+        'next request draft',
+      );
+      expect(
+        container.read(imageGenerationNotifierProvider).isGenerating,
+        isTrue,
+      );
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
+    });
     testWidgets('R14 wired editor $target supports blurred undo/redo', (
       tester,
     ) async {

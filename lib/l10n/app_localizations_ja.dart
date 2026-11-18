@@ -9,6 +9,40 @@ class AppLocalizationsJa extends AppLocalizations {
   AppLocalizationsJa([String locale = 'ja']) : super(locale);
 
   @override
+  String get set_importInstallation => '旧バージョンのフォルダーから移行';
+
+  @override
+  String get set_importInstallationHelp =>
+      'この PC のアカウント、環境設定、ショートカット、素材フォルダーを復元します。以前のインストール先または user-data を選択してください。';
+
+  @override
+  String get set_importInstallationInvalid =>
+      '別の Studio のインストール先、または hive/settings.hive を含む user-data フォルダーを選択してください。';
+
+  @override
+  String set_importInstallationPreview(int accounts, int prefs) {
+    return 'アカウント $accounts 件と設定 $prefs 件が見つかりました。登録済みのアカウントはスキップし、以下の設定を適用します。素材は引き続き表示されたフォルダーから読み込みます。';
+  }
+
+  @override
+  String get set_importMissingFolder => 'フォルダーが見つかりません。移動先を選ぶか、そのままスキップできます。';
+
+  @override
+  String get set_importCategoryBase => 'ギャラリー分類フォルダー';
+
+  @override
+  String get set_importEmptyGallery => '以前のギャラリーの参照先は空です。現在の一覧も空になります。';
+
+  @override
+  String get set_importInstallationChanged =>
+      'プレビュー中にフォルダー設定が変更されました。以前のフォルダーを選び直してください。';
+
+  @override
+  String set_importInstallationDone(int added, int missing) {
+    return '移行が完了しました。アカウントを $added 件追加しました。うち $missing 件は認証情報を復元できませんでした。必要に応じて再ログインしてください。';
+  }
+
+  @override
   String get app_title => 'W.O.F NAI Studio';
 
   @override
@@ -21962,6 +21996,21 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get prompt_autocompleteHintRelated =>
       '↑↓ 選択 · ← 戻る · Tab / Enter で追加 · Esc で関連を閉じる';
+
+  @override
+  String get resourceWindow_show => 'リソースウィンドウを開く';
+
+  @override
+  String get resourceWindow_hide => 'リソースウィンドウを隠す';
+
+  @override
+  String get resourceWindow_recall => 'リソースウィンドウを前面に表示';
+
+  @override
+  String get resourceWindow_inBackground => '背面';
+
+  @override
+  String get resourceWindow_opened => '表示中';
 
   @override
   String get resourceWindow_pin => '最前面に表示';

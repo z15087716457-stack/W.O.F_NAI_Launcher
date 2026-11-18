@@ -1,4 +1,15 @@
 {
+  "set_importInstallation": "旧バージョンのフォルダーから移行",
+  "set_importInstallationHelp": "この PC のアカウント、環境設定、ショートカット、素材フォルダーを復元します。以前のインストール先または user-data を選択してください。",
+  "set_importInstallationInvalid": "別の Studio のインストール先、または hive/settings.hive を含む user-data フォルダーを選択してください。",
+  "set_importInstallationPreview": "アカウント {accounts} 件と設定 {prefs} 件が見つかりました。登録済みのアカウントはスキップし、以下の設定を適用します。素材は引き続き表示されたフォルダーから読み込みます。",
+  "@set_importInstallationPreview": {"placeholders":{"accounts":{"type":"int"},"prefs":{"type":"int"}}},
+  "set_importMissingFolder": "フォルダーが見つかりません。移動先を選ぶか、そのままスキップできます。",
+  "set_importCategoryBase": "ギャラリー分類フォルダー",
+  "set_importEmptyGallery": "以前のギャラリーの参照先は空です。現在の一覧も空になります。",
+  "set_importInstallationChanged": "プレビュー中にフォルダー設定が変更されました。以前のフォルダーを選び直してください。",
+  "set_importInstallationDone": "移行が完了しました。アカウントを {added} 件追加しました。うち {missing} 件は認証情報を復元できませんでした。必要に応じて再ログインしてください。",
+  "@set_importInstallationDone": {"placeholders":{"added":{"type":"int"},"missing":{"type":"int"}}},
   "@@locale": "ja",
   "@blocks_cropRange": {
     "placeholders": {
@@ -11638,6 +11649,11 @@
   "prompt_autocompleteTitle": "補完",
   "prompt_autocompleteHint": "↑↓ 選択 · → 関連 · ← 戻る · Tab / Enter で補完 · Esc で閉じる",
   "prompt_autocompleteHintRelated": "↑↓ 選択 · ← 戻る · Tab / Enter で追加 · Esc で関連を閉じる",
+  "resourceWindow_show": "リソースウィンドウを開く",
+  "resourceWindow_hide": "リソースウィンドウを隠す",
+  "resourceWindow_recall": "リソースウィンドウを前面に表示",
+  "resourceWindow_inBackground": "背面",
+  "resourceWindow_opened": "表示中",
   "resourceWindow_pin": "最前面に表示",
   "resourceWindow_newWindow": "リソースウィンドウをもう一つ開く",
   "resourceWindow_rowHeight": "行の高さ",

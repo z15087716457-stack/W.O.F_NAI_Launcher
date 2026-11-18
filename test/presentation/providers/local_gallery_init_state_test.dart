@@ -5,6 +5,7 @@ import 'package:nai_launcher/data/models/gallery/local_image_record.dart';
 import 'package:nai_launcher/data/services/gallery/gallery_filter_service.dart';
 import 'package:nai_launcher/data/services/gallery/gallery_file_changes.dart';
 import 'package:nai_launcher/data/services/gallery/gallery_sort.dart';
+import 'package:nai_launcher/data/services/gallery/scan_state_manager.dart';
 import 'package:nai_launcher/data/services/gallery/unified_gallery_service.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/local_gallery_provider.dart';
@@ -39,6 +40,37 @@ void main() {
   });
 
   group('LocalGalleryNotifier preference restoration sequence (A-2)', () {
+    test(
+      'cold save and background scan update the active NAI filter',
+      () async {
+        final service = _service();
+        final container = ProviderContainer(
+          overrides: [
+            galleryServiceProvider.overrideWith(
+              () => FakeGalleryServiceNotifier(service),
+            ),
+          ],
+        );
+        addTearDown(container.dispose);
+        final notifier = container.read(localGalleryNotifierProvider.notifier);
+        await notifier.setNaiOnly(true);
+        expect(await notifier.addNewlySavedImages(['C:/gallery/new.png']), 1);
+        final dataset = container
+            .read(localGalleryNotifierProvider)
+            .timeline
+            .datasetId;
+        final count = service.applyFilterCount;
+        ScanStateManager.instance.completeScan();
+        await Future<void>.delayed(Duration.zero);
+        expect(service.applyFilterCount, count + 1);
+        expect(service.currentFilter.naiOnly, isTrue);
+        expect(
+          container.read(localGalleryNotifierProvider).timeline.datasetId,
+          dataset,
+        );
+      },
+    );
+
     test(
       'file updates retain other records and the current dataset identity',
       () async {

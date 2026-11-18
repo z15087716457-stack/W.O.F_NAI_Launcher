@@ -235,7 +235,7 @@ class GenerationSettings {
     ref
         .read(characterPromptNotifierProvider.notifier)
         .updateCharacter(update(_character(id)));
-  });
+  }, promptEdit: true);
   Future<void> addCharacter(GenGender gender) => _backend.mutate(() {
     if (ref.read(characterPromptNotifierProvider).characters.length >=
         _spec.maxCharacters) {
@@ -244,13 +244,14 @@ class GenerationSettings {
     ref
         .read(characterPromptNotifierProvider.notifier)
         .addCharacter(CharacterGender.values.byName(gender.name));
-  });
+  }, promptEdit: true);
   Future<void> removeCharacter(String id) => _backend.mutate(() {
     _character(id);
     ref.read(characterPromptNotifierProvider.notifier).removeCharacter(id);
-  });
+  }, promptEdit: true);
   Future<void> clearCharacters() => _backend.mutate(
     () => ref.read(characterPromptNotifierProvider.notifier).clearAll(),
+    promptEdit: true,
   );
   Future<void> renameCharacter(String id, String value) => _updateCharacter(
     id,
@@ -275,14 +276,14 @@ class GenerationSettings {
     ref
         .read(characterPromptNotifierProvider.notifier)
         .reorderCharacters(index, target > index ? target + 1 : target);
-  });
+  }, promptEdit: true);
   Future<void> aiPosition(bool value) => _backend.mutate(() {
     if (_spec.characterPrompts) {
       ref
           .read(characterPromptNotifierProvider.notifier)
           .setGlobalAiChoice(value);
     }
-  });
+  }, promptEdit: true);
   Future<void> characterPosition(String id, Offset value) {
     if (!value.dx.isFinite || !value.dy.isFinite) {
       throw const FormatException('Invalid character position');
@@ -305,7 +306,7 @@ class GenerationSettings {
           ),
         ),
       );
-    });
+    }, promptEdit: true);
   }
 
   Future<void> positioning(bool value) => _backend.mutate(() {
@@ -315,5 +316,5 @@ class GenerationSettings {
     } else {
       notifier.close();
     }
-  });
+  }, promptEdit: true);
 }

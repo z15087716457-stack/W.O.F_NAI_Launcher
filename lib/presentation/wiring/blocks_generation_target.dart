@@ -6,7 +6,6 @@ import '../../core/utils/localization_extension.dart';
 import '../providers/image_generation_provider.dart';
 import '../providers/generation/image_workflow_controller.dart';
 import '../providers/krita/bridge_draft_snapshot.dart';
-import '../providers/krita/krita_bridge_notifier.dart';
 import 'blocks_platform.dart';
 
 final blocksGenerationTargetProvider = Provider<BlocksGenerationTarget>(
@@ -36,12 +35,6 @@ class BlocksGenerationTarget {
             !identical(workflow, ref.read(imageWorkflowControllerProvider)) ||
             unchanged?.call() == false) {
           throw StateError(currentL10n.bridge_conflict);
-        }
-        if (ref.read(imageGenerationNotifierProvider).isGenerating ||
-            workflow.isToolRunning ||
-            (ref.exists(kritaBridgeNotifierProvider) &&
-                ref.read(kritaBridgeNotifierProvider).isBridgeGenerating)) {
-          throw StateError(currentL10n.networkError_conflict);
         }
       }
 

@@ -111,6 +111,98 @@ void main() {
   );
 
   test(
+    'quick window is shared across tabs, hides and recalls without recreation',
+    () async {
+      await service.initialize();
+      service.argumentsFor = (kind) async =>
+          ResourceWindowArguments(kind: kind);
+      final remembered = <FloatingResourceKind>[];
+      service.onQuickKind = (kind) async => remembered.add(kind);
+      var presence = 'front';
+      messenger.setMockMethodCallHandler(native, (call) async {
+        calls.add(call);
+        if (call.method == 'toggle') return {'child-id': presence};
+        return null;
+      });
+      final opening = service.toggleQuick();
+      await Future<void>.delayed(Duration.zero);
+      await service.toggleQuick();
+      expect(created, 1);
+      await service.handle(
+        const MethodCall('ready', {'windowId': 'child-id', 'kind': 'gallery'}),
+      );
+      await opening;
+      await incoming(native.name, 'presence', {'child-id': 'front'});
+      expect(service.quickVisibility.value, ResourceWindowVisibility.front);
+      await service.handle(
+        const MethodCall('resources.kind', {
+          'windowId': 'child-id',
+          'kind': 'vibe',
+        }),
+      );
+      expect(service.lastKind, FloatingResourceKind.vibe);
+      expect(remembered.last, FloatingResourceKind.vibe);
+      presence = 'closed';
+      await service.toggleQuick(fromPointer: true);
+      expect(service.quickVisibility.value, ResourceWindowVisibility.closed);
+      expect(service.windows, {'child-id': FloatingResourceKind.vibe});
+      presence = 'front';
+      await incoming(native.name, 'presence', {'child-id': 'back'});
+      await service.toggleQuick(fromPointer: true);
+      expect(service.quickVisibility.value, ResourceWindowVisibility.front);
+      expect(created, 1);
+      expect(calls.last.arguments, {
+        'windowId': 'child-id',
+        'fromPointer': true,
+      });
+      await service.toggleQuick();
+      expect((calls.last.arguments as Map)['fromPointer'], false);
+      await service.handle(
+        const MethodCall('resources.closed', {'windowId': 'child-id'}),
+      );
+      expect(service.quickVisibility.value, ResourceWindowVisibility.closed);
+      final reopening = service.toggleQuick();
+      await Future<void>.delayed(Duration.zero);
+      await service.handle(
+        const MethodCall('ready', {'windowId': 'child-2', 'kind': 'vibe'}),
+      );
+      await reopening;
+      final config =
+          calls.lastWhere((call) => call.method == 'createWindow').arguments
+              as Map;
+      expect(
+        ResourceWindowArguments.parse(config['arguments'] as String)!.kind,
+        FloatingResourceKind.vibe,
+      );
+    },
+  );
+
+  test(
+    'an explicitly opened extra window does not replace the quick toggle target',
+    () async {
+      await service.initialize();
+      service.argumentsFor = (kind) async =>
+          ResourceWindowArguments(kind: kind);
+      final opening = service.toggleQuick();
+      await Future<void>.delayed(Duration.zero);
+      await service.handle(
+        const MethodCall('ready', {'windowId': 'child-id', 'kind': 'gallery'}),
+      );
+      await opening;
+      await service.openKind(FloatingResourceKind.blocks, newWindow: true);
+      await incoming(native.name, 'presence', {
+        'child-id': 'back',
+        'child-2': 'front',
+      });
+      expect(service.quickVisibility.value, ResourceWindowVisibility.back);
+      await service.handle(
+        const MethodCall('resources.closed', {'windowId': 'child-2'}),
+      );
+      expect(service.quickVisibility.value, ResourceWindowVisibility.back);
+    },
+  );
+
+  test(
     'host uses one unidirectional handler and reports not_ready before data attachment',
     () async {
       await service.initialize();
@@ -311,10 +403,7 @@ void main() {
       'method': 'resource.close',
       'arguments': null,
     });
-    expect(calls.reversed.take(2).map((c) => c.method), [
-      'close',
-      'setAlwaysOnTop',
-    ]);
+    expect(calls.reversed.take(2).map((c) => c.method), ['close', 'getLayout']);
     await tester.pumpWidget(const SizedBox.shrink());
     await controller.setWindowMethodHandler(null);
   });

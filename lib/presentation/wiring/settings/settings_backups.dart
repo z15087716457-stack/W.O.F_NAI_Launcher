@@ -83,9 +83,10 @@ final settingsBackupDataProvider = FutureProvider((ref) async {
 });
 
 class SettingsBackupActions {
-  SettingsBackupActions(this.context, this.ref);
+  SettingsBackupActions(this.context)
+    : ref = ProviderScope.containerOf(context, listen: false);
   final BuildContext context;
-  final WidgetRef ref;
+  final ProviderContainer ref;
   Future<StudioSettingsBackups> ready() async {
     await ref.read(shortcutConfigNotifierProvider.future);
     return ref.read(settingsBackupsProvider.future);

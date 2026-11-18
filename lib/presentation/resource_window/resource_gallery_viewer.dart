@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -154,17 +153,9 @@ class _ResourceGalleryViewerState extends State<ResourceGalleryViewer> {
     try {
       final file = File(record.path);
       final missing = !await file.exists();
-      final header = missing
+      final dimensions = missing
           ? null
-          : await file
-                .openRead(0, 65536)
-                .fold(
-                  BytesBuilder(copy: false),
-                  (buffer, chunk) => buffer..add(chunk),
-                );
-      final dimensions = header == null
-          ? null
-          : NaiResolutionAdapter.readImageSize(header.takeBytes());
+          : await NaiResolutionAdapter.readImageFileSize(file);
       if (!mounted) return;
       final screen = MediaQuery.sizeOf(context);
       final ratio = MediaQuery.devicePixelRatioOf(context);

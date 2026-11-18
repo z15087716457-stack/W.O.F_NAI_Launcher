@@ -107,6 +107,7 @@ class _BlocksDockWiringState extends ConsumerState<BlocksDockWiring> {
     final write = ref
         .read(generationBackendProvider)
         .captureDraft(
+          promptEdit: true,
           alive: () =>
               mounted && ref.read(pillActiveEditorTargetProvider) == target,
         );

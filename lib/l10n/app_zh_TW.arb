@@ -1,5 +1,34 @@
 {
   "@@locale": "zh_TW",
+  "set_importInstallation": "從舊版目錄遷移",
+  "set_importInstallationHelp": "在同一臺電腦上恢復帳號、偏好、快速鍵和素材目錄。選擇舊版的安裝目錄或 user-data。",
+  "set_importInstallationInvalid": "請選擇另一份 Studio 安裝目錄，或其中包含 hive/settings.hive 的 user-data 資料夾。",
+  "set_importInstallationPreview": "找到 {accounts} 個帳號和 {prefs} 項偏好。已有帳號會跳過；下列設定將應用到當前版本。素材繼續從所列目錄讀取，請保留這些目錄。",
+  "@set_importInstallationPreview": {
+    "placeholders": {
+      "accounts": {
+        "type": "int"
+      },
+      "prefs": {
+        "type": "int"
+      }
+    }
+  },
+  "set_importMissingFolder": "找不到此目錄。可選擇新位置；留空將跳過。",
+  "set_importCategoryBase": "圖庫分類目錄",
+  "set_importEmptyGallery": "舊版圖庫來源為空，遷移後會清空當前來源列表。",
+  "set_importInstallationChanged": "預覽期間目錄設定已變更，請重新選擇舊版目錄。",
+  "set_importInstallationDone": "已完成遷移，新增 {added} 個帳號。其中 {missing} 個未找到可複用的登入憑據，可在帳號頁重新登入。",
+  "@set_importInstallationDone": {
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "missing": {
+        "type": "int"
+      }
+    }
+  },
   "@blocks_cropRange": {
     "placeholders": {
       "target": {
@@ -12257,6 +12286,11 @@
   "prompt_autocompleteTitle": "補全",
   "prompt_autocompleteHint": "↑↓ 選擇 · → 關聯 · ← 返回 · Tab / 回車 補全 · Esc 關閉",
   "prompt_autocompleteHintRelated": "↑↓ 選擇 · ← 返回 · Tab / 回車 追加 · Esc 關閉關聯",
+  "resourceWindow_show": "開啟資源小窗",
+  "resourceWindow_hide": "收起資源小窗",
+  "resourceWindow_recall": "喚回資源小窗",
+  "resourceWindow_inBackground": "後臺",
+  "resourceWindow_opened": "已開啟",
   "resourceWindow_pin": "視窗置頂",
   "resourceWindow_newWindow": "新開一個資源視窗",
   "resourceWindow_rowHeight": "行高",

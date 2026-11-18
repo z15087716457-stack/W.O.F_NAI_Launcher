@@ -335,8 +335,11 @@ class _GenerationWiringState extends ConsumerState<GenerationWiring> {
         onPromptTool: (tool, value) =>
             run(() => settings.promptTool(tool, value)),
         onOpenPalette: (rect) => run(() => operations.openPalette(rect)),
-        onOpenResourceWindow: (kind) =>
-            run(() => ref.read(resourceWindowOpenerProvider).open(kind)),
+        onToggleResourceWindow: (pointer) => run(
+          () => ref
+              .read(resourceWindowOpenerProvider)
+              .toggle(fromPointer: pointer),
+        ),
         onTranslate: () => run(() async {
           if (ref.exists(promptAutoTranslationProvider)) {
             ref.read(promptAutoTranslationProvider).suspend();

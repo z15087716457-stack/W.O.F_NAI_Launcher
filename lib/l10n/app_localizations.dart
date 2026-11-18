@@ -103,6 +103,60 @@ abstract class AppLocalizations {
     Locale('zh', 'TW'),
   ];
 
+  /// No description provided for @set_importInstallation.
+  ///
+  /// In en, this message translates to:
+  /// **'Migrate from an older installation'**
+  String get set_importInstallation;
+
+  /// No description provided for @set_importInstallationHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore accounts, preferences, shortcuts and asset folders on this PC. Choose the old installation or its user-data folder.'**
+  String get set_importInstallationHelp;
+
+  /// No description provided for @set_importInstallationInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a different Studio installation or its user-data folder containing hive/settings.hive.'**
+  String get set_importInstallationInvalid;
+
+  /// No description provided for @set_importInstallationPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Found {accounts} accounts and {prefs} preferences. Existing accounts are skipped. The settings below will be applied. Keep the listed folders available for your assets.'**
+  String set_importInstallationPreview(int accounts, int prefs);
+
+  /// No description provided for @set_importMissingFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder unavailable. Choose its new location or leave it to skip.'**
+  String get set_importMissingFolder;
+
+  /// No description provided for @set_importCategoryBase.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery category folder'**
+  String get set_importCategoryBase;
+
+  /// No description provided for @set_importEmptyGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'The old gallery source list is empty. This will clear the current list.'**
+  String get set_importEmptyGallery;
+
+  /// No description provided for @set_importInstallationChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder settings changed during the preview. Select the old installation again.'**
+  String get set_importInstallationChanged;
+
+  /// No description provided for @set_importInstallationDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Migration complete. Added {added} accounts. Of those, {missing} had no reusable credentials. Sign in again from Accounts if needed.'**
+  String set_importInstallationDone(int added, int missing);
+
   /// No description provided for @app_title.
   ///
   /// In en, this message translates to:
@@ -39459,6 +39513,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'↑↓ move · ← back · Tab / Enter to add · Esc close related'**
   String get prompt_autocompleteHintRelated;
+
+  /// No description provided for @resourceWindow_show.
+  ///
+  /// In en, this message translates to:
+  /// **'Open resource window'**
+  String get resourceWindow_show;
+
+  /// No description provided for @resourceWindow_hide.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide resource window'**
+  String get resourceWindow_hide;
+
+  /// No description provided for @resourceWindow_recall.
+  ///
+  /// In en, this message translates to:
+  /// **'Bring resource window forward'**
+  String get resourceWindow_recall;
+
+  /// No description provided for @resourceWindow_inBackground.
+  ///
+  /// In en, this message translates to:
+  /// **'Background'**
+  String get resourceWindow_inBackground;
+
+  /// No description provided for @resourceWindow_opened.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get resourceWindow_opened;
 
   /// No description provided for @resourceWindow_pin.
   ///

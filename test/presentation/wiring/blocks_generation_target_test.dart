@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../providers/krita/agent_bridge_draft_test.dart' show IdleGeneration;
 import 'package:hive/hive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
@@ -22,6 +23,12 @@ class TestBackup extends BlocksPlatform {
     if (fail) throw StateError('Backup failed');
     await wait?.future;
   }
+}
+
+class _Generating extends IdleGeneration {
+  @override
+  ImageGenerationState build() =>
+      const ImageGenerationState(status: GenerationStatus.generating);
 }
 
 void main() {
@@ -69,6 +76,39 @@ void main() {
       'before',
     );
   });
+
+  test(
+    'prompt blocks can be changed during generation with a draft backup',
+    () async {
+      container.dispose();
+      container = ProviderContainer(
+        overrides: [
+          blocksPlatformProvider.overrideWithValue(backup),
+          imageGenerationNotifierProvider.overrideWith(_Generating.new),
+        ],
+      );
+      final params = container.read(generationParamsNotifierProvider.notifier);
+      params.updatePromptImmediately('current request');
+      await container
+          .read(blocksGenerationTargetProvider)
+          .commit(
+            () => params.updatePromptImmediately('next request'),
+            alive: () => true,
+          );
+      expect(
+        container.read(generationParamsNotifierProvider).prompt,
+        'next request',
+      );
+      expect(
+        (jsonDecode(backup.snapshots.single) as Map)['generation']['prompt'],
+        'current request',
+      );
+      expect(
+        container.read(imageGenerationNotifierProvider).isGenerating,
+        isTrue,
+      );
+    },
+  );
 
   test('a newer edit during backup is not overwritten', () async {
     backup.wait = Completer<void>();

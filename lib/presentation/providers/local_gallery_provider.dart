@@ -329,7 +329,21 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
 
     // 监听缓存清理事件
     GalleryCacheManager().registerOnCacheCleared(_resetState);
+    final scanSubscription = ScanStateManager.instance.statusStream.listen((
+      status,
+    ) {
+      if (status == ScanStatus.completed &&
+          state.isInitialized &&
+          !state.isRebuildingIndex) {
+        unawaited(
+          refreshMetadataView().catchError((Object error) {
+            reportFileChangeError(error);
+          }),
+        );
+      }
+    });
     ref.onDispose(() {
+      scanSubscription.cancel();
       GalleryCacheManager().unregisterOnCacheCleared(_resetState);
       _ragCancellation?.cancel();
       _ragRefresh?.cancel();
@@ -1056,9 +1070,9 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
   ///
   /// 返回成功添加的图像数量
   Future<int> addNewlySavedImages(List<String> filePaths) async {
-    if (!state.isInitialized || filePaths.isEmpty) {
-      return 0;
-    }
+    if (filePaths.isEmpty) return 0;
+    if (!state.isInitialized) await initialize();
+    if (!state.isInitialized) return 0;
 
     var addedCount = 0;
 
@@ -1771,21 +1785,8 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
         return;
       }
 
-      // 刷新服务状态
-      final service = await getService();
-
-      // 刷新状态
-      _setState(
-        state.copyWith(
-          totalCount: service.totalCount,
-          filteredCount: service.filteredCount,
-          isRebuildingIndex: false,
-          isLoading: false,
-        ),
-      );
-
-      _markRecordsStale();
-      await _reloadTimeline(newDataset: false);
+      await refreshMetadataView();
+      _setState(state.copyWith(isRebuildingIndex: false, isLoading: false));
     } on GalleryCancelledException {
       _setState(state.copyWith(isRebuildingIndex: false, isLoading: false));
     } on GalleryScanException catch (e) {

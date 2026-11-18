@@ -38,16 +38,27 @@ Future<void> runResourceWindow(
     FloatingResourceKind.vibe => currentL10n.refs_vibeTitle,
     FloatingResourceKind.precise => currentL10n.refs_preciseTitle,
   };
-  final controller = ResourceWindowController(
+  late final ResourceWindowController controller;
+  Future<void> saveLayout() async {
+    final rect = await native.invokeMethod<Object?>('getLayout');
+    if (rect != null) await controller.persistLayout(resourceMap(rect));
+  }
+
+  controller = ResourceWindowController(
     windowId: window.windowId,
     kind: arguments.kind,
     alwaysOnTop: arguments.alwaysOnTop,
     uiScale: arguments.uiScale,
-    onKindChanged: (kind) => native.invokeMethod<void>('setTitle', title(kind)),
+    beforeClose: saveLayout,
+    onKindChanged: (kind) async {
+      await native.invokeMethod<void>('setTitle', title(kind));
+      await saveLayout();
+    },
   );
   await window.setWindowMethodHandler((call) async {
     switch (call.method) {
       case 'resource.close':
+        await saveLayout();
         return native.invokeMethod<void>('close');
       case 'resource.focus':
         return native.invokeMethod<void>('focus');
@@ -73,9 +84,12 @@ Future<void> runResourceWindow(
       controller.nativeLayout(resourceMap(call.arguments));
     } else if (call.method == 'maximizedChanged') {
       controller.maximized(call.arguments as bool);
+    } else if (call.method == 'visibilityChanged') {
+      controller.visibilityChanged(call.arguments as bool);
     }
   });
   await native.invokeMethod<void>('configure', {
+    'windowId': window.windowId,
     'title': title(arguments.kind),
     'rect': arguments.rect,
     'alwaysOnTop': arguments.alwaysOnTop,

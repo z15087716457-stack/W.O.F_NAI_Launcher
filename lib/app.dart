@@ -36,7 +36,6 @@ import 'presentation/wiring/nai_agent_generation_host.dart';
 import 'presentation/wiring/clipboard_history_paste.dart';
 import 'presentation/wiring/floating_resource_window.dart';
 import 'presentation/wiring/floating_resource_windows_host.dart';
-import 'presentation/providers/floating_resource_windows_provider.dart';
 import 'presentation/wiring/resource_window_wiring.dart';
 
 double windowCaptionHeightForRoute(String path) => switch (path) {
@@ -180,11 +179,7 @@ class NAILauncherApp extends ConsumerWidget {
       },
 
       ShortcutIds.openResourceWindow: () {
-        unawaited(
-          ref
-              .read(resourceWindowOpenerProvider)
-              .open(FloatingResourceKind.gallery),
-        );
+        unawaited(ref.read(resourceWindowOpenerProvider).toggle());
       },
 
       // 全局应用快捷键

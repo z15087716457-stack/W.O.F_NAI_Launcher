@@ -2195,12 +2195,21 @@ class GalleryDataSource extends EnhancedBaseDataSource
             // L8 性能优化：将全量 SELECT * 收窄为扫描器预载签名所需的核心字段
             // （id, file_path, file_size, modified_at, metadata_status, last_scanned_at, is_deleted），
             // 未选取的列（width/height/resolution/created_at 等）在 GalleryImageRecord.fromMap 中自动使用默认值填充。
-            final results = await db.rawQuery('''
-                SELECT id, file_path, file_size, modified_at, metadata_status, last_scanned_at, is_deleted
-                FROM $_imagesTable
+            final results = await db.rawQuery(
+              '''
+                SELECT id, file_path, file_size, modified_at, metadata_status,
+                  CASE WHEN metadata_status = ?
+                    AND file_name GLOB '[0-9][0-9]-[0-9][0-9]-[0-9][0-9]-[0-9]*.png'
+                    AND NOT EXISTS (
+                      SELECT 1 FROM $_metadataTable m WHERE m.image_id = i.id
+                    ) THEN NULL ELSE last_scanned_at END AS last_scanned_at,
+                  is_deleted
+                FROM $_imagesTable i
                 WHERE is_deleted = 0
                 ORDER BY modified_at DESC
-                ''');
+                ''',
+              [MetadataStatus.none.index],
+            );
 
             return results
                 .map((row) => GalleryImageRecord.fromMap(row))

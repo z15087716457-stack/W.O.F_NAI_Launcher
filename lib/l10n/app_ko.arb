@@ -1,4 +1,15 @@
 {
+  "set_importInstallation": "이전 설치 폴더에서 가져오기",
+  "set_importInstallationHelp": "이 PC의 계정, 환경설정, 단축키, 자료 폴더를 복원합니다. 이전 설치 폴더 또는 user-data를 선택하세요.",
+  "set_importInstallationInvalid": "다른 Studio 설치 폴더 또는 hive/settings.hive가 있는 user-data 폴더를 선택하세요.",
+  "set_importInstallationPreview": "계정 {accounts}개와 설정 {prefs}개를 찾았습니다. 기존 계정은 건너뛰고 아래 설정을 적용합니다. 자료는 계속 표시된 폴더에서 읽으므로 해당 폴더를 유지하세요.",
+  "@set_importInstallationPreview": {"placeholders":{"accounts":{"type":"int"},"prefs":{"type":"int"}}},
+  "set_importMissingFolder": "폴더를 찾을 수 없습니다. 새 위치를 선택하거나 건너뛰세요.",
+  "set_importCategoryBase": "갤러리 분류 폴더",
+  "set_importEmptyGallery": "이전 갤러리 소스가 비어 있어 현재 소스 목록도 비워집니다.",
+  "set_importInstallationChanged": "미리보기 중 폴더 설정이 변경됐습니다. 이전 설치 폴더를 다시 선택하세요.",
+  "set_importInstallationDone": "가져오기를 완료했습니다. 계정 {added}개를 추가했고 그중 {missing}개는 로그인 정보를 복원할 수 없습니다. 필요한 경우 계정 페이지에서 다시 로그인하세요.",
+  "@set_importInstallationDone": {"placeholders":{"added":{"type":"int"},"missing":{"type":"int"}}},
   "@@locale": "ko",
   "@blocks_cropRange": {
     "placeholders": {
@@ -11638,6 +11649,11 @@
   "prompt_autocompleteTitle": "자동 완성",
   "prompt_autocompleteHint": "↑↓ 선택 · → 연관 · ← 돌아가기 · Tab / Enter 완성 · Esc 닫기",
   "prompt_autocompleteHintRelated": "↑↓ 선택 · ← 돌아가기 · Tab / Enter 추가 · Esc 연관 닫기",
+  "resourceWindow_show": "리소스 창 열기",
+  "resourceWindow_hide": "리소스 창 숨기기",
+  "resourceWindow_recall": "리소스 창을 앞으로 가져오기",
+  "resourceWindow_inBackground": "뒤쪽",
+  "resourceWindow_opened": "열림",
   "resourceWindow_pin": "항상 위에",
   "resourceWindow_newWindow": "리소스 창 하나 더 열기",
   "resourceWindow_rowHeight": "행 높이",

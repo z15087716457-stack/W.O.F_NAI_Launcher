@@ -4,9 +4,11 @@ import 'dart:convert';
 import 'package:hive/hive.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../core/constants/storage_keys.dart';
 import '../../core/network/nai_api_endpoint.dart';
 import '../../core/storage/secure_storage_service.dart';
 import '../../data/models/auth/saved_account.dart';
+import '../../data/models/auth/saved_account_directory.dart';
 
 part 'account_manager_provider.g.dart';
 
@@ -42,10 +44,6 @@ class AccountManagerState {
 /// 账号管理器
 @Riverpod(keepAlive: true)
 class AccountManagerNotifier extends _$AccountManagerNotifier {
-  static const String _boxName = 'accounts';
-  static const String _accountsKey = 'saved_accounts';
-  static const String _accountApiEndpointsKey = 'account_api_endpoints';
-
   Box? _box;
   Future<void> _loading = Future.value();
   Future<void> _mutations = Future.value();
@@ -66,33 +64,13 @@ class AccountManagerNotifier extends _$AccountManagerNotifier {
   /// 加载账号列表
   Future<void> _loadAccounts() async {
     try {
-      _box = await Hive.openBox(_boxName);
-      final accountsJson = _box?.get(_accountsKey) as String?;
-
-      List<SavedAccount> accounts = [];
-      if (accountsJson != null) {
-        final List<dynamic> decoded = jsonDecode(accountsJson);
-        accounts = decoded
-            .map((e) => SavedAccount.fromJson(e as Map<String, dynamic>))
-            .toList();
-      }
-
-      Map<String, NaiApiEndpointConfig> accountApiEndpoints = {};
-      final endpointsJson = _box?.get(_accountApiEndpointsKey) as String?;
-      if (endpointsJson != null) {
-        final decoded = jsonDecode(endpointsJson) as Map<String, dynamic>;
-        accountApiEndpoints = decoded.map(
-          (accountId, value) => MapEntry(
-            accountId,
-            NaiApiEndpointConfig.fromJson(value as Map<String, dynamic>),
-          ),
-        );
-      }
+      _box = await Hive.openBox(SavedAccountDirectory.boxName);
+      final directory = SavedAccountDirectory.read(_box!);
 
       if (_disposed) return;
       state = AccountManagerState(
-        accounts: accounts,
-        accountApiEndpoints: accountApiEndpoints,
+        accounts: directory.accounts,
+        accountApiEndpoints: directory.endpoints,
         isLoading: false,
       );
     } catch (e) {
@@ -105,7 +83,7 @@ class AccountManagerNotifier extends _$AccountManagerNotifier {
   /// 保存账号列表
   Future<void> _saveAccounts(List<SavedAccount> accounts) async {
     final json = jsonEncode(accounts.map((e) => e.toJson()).toList());
-    await _box?.put(_accountsKey, json);
+    await _box?.put(SavedAccountDirectory.accountsKey, json);
   }
 
   /// 保存账号 API 端点配置
@@ -117,8 +95,61 @@ class AccountManagerNotifier extends _$AccountManagerNotifier {
         return MapEntry(accountId, endpoint.toJson());
       }),
     );
-    await _box?.put(_accountApiEndpointsKey, json);
+    await _box?.put(SavedAccountDirectory.endpointsKey, json);
   }
+
+  /// Keep existing accounts and the active session. Publish new records only
+  /// after their credentials and API destinations are available.
+  Future<({int added, int withoutToken})> importMissingAccounts(
+    SavedAccountDirectory source,
+    Map<String, String> credentials,
+  ) => _mutate(() async {
+    final accounts = [...state.accounts];
+    final endpoints = {...state.accountApiEndpoints};
+    final preferred = source.accounts.where((a) => a.isDefault).firstOrNull;
+    var added = 0;
+    var withoutToken = 0;
+    for (final account in source.accounts) {
+      if (accounts.any((a) => a.id == account.id || a.email == account.email)) {
+        continue;
+      }
+      final token =
+          credentials['${StorageKeys.accountTokenPrefix}${account.id}'];
+      final accessKey =
+          credentials['${StorageKeys.accountAccessKeyPrefix}${account.id}'];
+      if (token == null) {
+        withoutToken++;
+      } else {
+        await _saveAccountToken(account.id, token);
+      }
+      if (accessKey != null) {
+        await _secureStorage.saveAccountAccessKey(account.id, accessKey);
+      }
+      final endpoint = source.endpoints[account.id];
+      if (endpoint != null) endpoints[account.id] = endpoint;
+      accounts.add(
+        account.copyWith(
+          isDefault:
+              state.accounts.isEmpty &&
+              (preferred == null
+                  ? accounts.isEmpty
+                  : preferred.id == account.id),
+        ),
+      );
+      added++;
+    }
+    if (added > 0) {
+      await _box!.putAll({
+        SavedAccountDirectory.accountsKey: jsonEncode(accounts),
+        SavedAccountDirectory.endpointsKey: jsonEncode(endpoints),
+      });
+      state = state.copyWith(
+        accounts: accounts,
+        accountApiEndpoints: endpoints,
+      );
+    }
+    return (added: added, withoutToken: withoutToken);
+  });
 
   /// 获取账号 Token
   Future<String?> getAccountToken(String accountId) async {

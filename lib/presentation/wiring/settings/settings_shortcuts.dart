@@ -73,7 +73,7 @@ class SettingsShortcutActions {
   }
 
   Future<void> resetAll() =>
-      SettingsBackupActions(context, ref).reset({SettingsResetScope.shortcuts});
+      SettingsBackupActions(context).reset({SettingsResetScope.shortcuts});
 
   Future<void> exportConfig() async {
     await ref.read(shortcutConfigNotifierProvider.future);
@@ -91,7 +91,7 @@ class SettingsShortcutActions {
   }
 
   Future<void> importConfig() async {
-    final backups = SettingsBackupActions(context, ref);
+    final backups = SettingsBackupActions(context);
     final service = await backups.ready();
     final before = service.capture();
     final picked = await FilePicker.platform.pickFiles(

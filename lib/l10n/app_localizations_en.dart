@@ -9,6 +9,42 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get set_importInstallation => 'Migrate from an older installation';
+
+  @override
+  String get set_importInstallationHelp =>
+      'Restore accounts, preferences, shortcuts and asset folders on this PC. Choose the old installation or its user-data folder.';
+
+  @override
+  String get set_importInstallationInvalid =>
+      'Choose a different Studio installation or its user-data folder containing hive/settings.hive.';
+
+  @override
+  String set_importInstallationPreview(int accounts, int prefs) {
+    return 'Found $accounts accounts and $prefs preferences. Existing accounts are skipped. The settings below will be applied. Keep the listed folders available for your assets.';
+  }
+
+  @override
+  String get set_importMissingFolder =>
+      'Folder unavailable. Choose its new location or leave it to skip.';
+
+  @override
+  String get set_importCategoryBase => 'Gallery category folder';
+
+  @override
+  String get set_importEmptyGallery =>
+      'The old gallery source list is empty. This will clear the current list.';
+
+  @override
+  String get set_importInstallationChanged =>
+      'Folder settings changed during the preview. Select the old installation again.';
+
+  @override
+  String set_importInstallationDone(int added, int missing) {
+    return 'Migration complete. Added $added accounts. Of those, $missing had no reusable credentials. Sign in again from Accounts if needed.';
+  }
+
+  @override
   String get app_title => 'W.O.F NAI Studio';
 
   @override
@@ -22741,6 +22777,21 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get prompt_autocompleteHintRelated =>
       '↑↓ move · ← back · Tab / Enter to add · Esc close related';
+
+  @override
+  String get resourceWindow_show => 'Open resource window';
+
+  @override
+  String get resourceWindow_hide => 'Hide resource window';
+
+  @override
+  String get resourceWindow_recall => 'Bring resource window forward';
+
+  @override
+  String get resourceWindow_inBackground => 'Background';
+
+  @override
+  String get resourceWindow_opened => 'Open';
 
   @override
   String get resourceWindow_pin => 'Keep on top';

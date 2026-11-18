@@ -116,17 +116,25 @@ class GenerationBackend {
       (ref.exists(localUpscaleTaskProvider) &&
           ref.read(localUpscaleTaskProvider).running);
 
-  Future<void> mutate(void Function() write, {bool Function()? alive}) {
-    final operation = _queue.then((_) => captureDraft(alive: alive)(write));
+  Future<void> mutate(
+    void Function() write, {
+    bool Function()? alive,
+    bool promptEdit = false,
+  }) {
+    final operation = _queue.then(
+      (_) => captureDraft(alive: alive, promptEdit: promptEdit)(write),
+    );
     _queue = operation.then<void>((_) {}, onError: (Object _, StackTrace _) {});
     return operation;
   }
 
   Future<void> Function(void Function()) captureDraft({
     bool Function()? alive,
+    bool promptEdit = false,
   }) {
     if (_disposed) throw StateError(currentL10n.bridge_conflict);
     final intent = _intentRevision;
+    final account = _accountRevision;
     final params = ref.read(generationParamsNotifierProvider);
     final version = ref.read(bridgeDraftVersionProvider);
     final workflow = ref.read(imageWorkflowControllerProvider);
@@ -134,7 +142,8 @@ class GenerationBackend {
     void check() {
       if (_disposed ||
           alive?.call() == false ||
-          intent != _intentRevision ||
+          (!promptEdit && intent != _intentRevision) ||
+          account != _accountRevision ||
           params != ref.read(generationParamsNotifierProvider) ||
           version != ref.read(bridgeDraftVersionProvider) ||
           !identical(workflow, ref.read(imageWorkflowControllerProvider)) ||
@@ -142,7 +151,11 @@ class GenerationBackend {
           auth.status != ref.read(authNotifierProvider).status) {
         throw StateError(currentL10n.bridge_conflict);
       }
-      if (busy) throw StateError(currentL10n.kritaBridge_busyGenerating);
+      // Prompt edits prepare the next request; only resource-changing writes
+      // need the generation gate. Backup and current-draft checks apply to both.
+      if (!promptEdit && busy) {
+        throw StateError(currentL10n.kritaBridge_busyGenerating);
+      }
     }
 
     check();
@@ -309,7 +322,7 @@ class GenerationBackend {
     if (before.text.isEmpty && before.instances.isEmpty && raw.isEmpty) {
       return null;
     }
-    final write = captureDraft(alive: alive);
+    final write = captureDraft(alive: alive, promptEdit: true);
     late GenerationPromptUndo undo;
     await write(() {
       final accountRevision = _accountRevision;
@@ -356,7 +369,7 @@ class GenerationBackend {
     }
 
     check();
-    await captureDraft(alive: alive)(() {
+    await captureDraft(alive: alive, promptEdit: true)(() {
       check();
       _writePrompt(undo.scope, undo.characterId, undo.negative, undo.before);
       _promptTickets[undo.scope] = ++_nextPromptTicket;

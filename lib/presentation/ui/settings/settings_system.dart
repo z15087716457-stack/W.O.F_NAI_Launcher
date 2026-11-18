@@ -905,6 +905,17 @@ class _SettingsBackupPageState extends State<SettingsBackupPage> {
         SettingsSection(
           title: l.set_bkOther,
           children: [
+            if (a.onImportInstallation != null)
+              SettingsRow(
+                title: l.set_importInstallation,
+                subtitle: l.set_importInstallationHelp,
+                control: SettingsBtn(
+                  label: l.set_choose,
+                  glyph: UiGlyphs.download,
+                  small: true,
+                  onTap: a.onImportInstallation,
+                ),
+              ),
             SettingsRow(
               title: l.set_pageShortcuts,
               subtitle: l.set_bkShortcutsSub(

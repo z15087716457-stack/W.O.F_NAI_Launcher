@@ -51,6 +51,20 @@ final resourceWindowServiceProvider = Provider(
   (ref) => ResourceWindowService.instance,
 );
 final resourceWindowOpenerProvider = Provider(ResourceWindowOpener.new);
+final resourceWindowVisibilityProvider = Provider<ResourceWindowVisibility>((
+  ref,
+) {
+  if (!ref.watch(nativeResourceWindowsProvider)) {
+    return ref.watch(floatingResourceWindowsProvider).isEmpty
+        ? ResourceWindowVisibility.closed
+        : ResourceWindowVisibility.front;
+  }
+  final visibility = ref.watch(resourceWindowServiceProvider).quickVisibility;
+  void changed() => ref.invalidateSelf();
+  visibility.addListener(changed);
+  ref.onDispose(() => visibility.removeListener(changed));
+  return visibility.value;
+});
 final resourceRefsEditRequestProvider =
     StateProvider<({FloatingResourceKind kind, String id})?>((ref) => null);
 
@@ -68,6 +82,15 @@ class ResourceWindowOpener {
     service.onAllClosed = backend.dispose;
     service.onKind = (id, kind) => backend.windowKinds[id] = kind;
     service.onClosed = backend.closed;
+    final storage = ref.read(localStorageServiceProvider);
+    final savedKind = storage.getSetting<String>('resource_window_last_kind');
+    service.lastKind =
+        FloatingResourceKind.values
+            .where((kind) => kind.name == savedKind)
+            .firstOrNull ??
+        FloatingResourceKind.gallery;
+    service.onQuickKind = (kind) =>
+        storage.setSetting('resource_window_last_kind', kind.name);
     service.argumentsFor = (kind) async {
       final saved = ref
           .read(localStorageServiceProvider)
@@ -189,19 +212,33 @@ class ResourceWindowOpener {
       service.onAllClosed = null;
       service.onKind = null;
       service.onClosed = null;
+      service.onQuickKind = null;
       unawaited(backend.dispose());
     });
   }
 
-  Future<void> open(FloatingResourceKind kind, {bool newWindow = false}) async {
+  Future<void> toggle({bool fromPointer = false}) async {
     if (!ref.read(nativeResourceWindowsProvider)) {
-      ref.read(floatingResourceWindowsProvider.notifier).open(kind);
+      final manager = ref.read(floatingResourceWindowsProvider.notifier);
+      final windows = ref.read(floatingResourceWindowsProvider);
+      if (windows.isEmpty) {
+        final storage = ref.read(localStorageServiceProvider);
+        final saved = storage.getSetting<String>('resource_window_last_kind');
+        manager.open(
+          FloatingResourceKind.values
+                  .where((kind) => kind.name == saved)
+                  .firstOrNull ??
+              FloatingResourceKind.gallery,
+        );
+      } else {
+        manager.close(windows.last.id);
+      }
       return;
     }
     _attach();
     await ref
         .read(resourceWindowServiceProvider)
-        .openKind(kind, newWindow: newWindow);
+        .toggleQuick(fromPointer: fromPointer);
   }
 }
 

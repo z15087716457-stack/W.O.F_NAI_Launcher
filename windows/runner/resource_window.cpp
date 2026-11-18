@@ -12,6 +12,7 @@
 #include <cmath>
 #include "studio_sandbox.h"
 #include "resource_window_geometry.h"
+#include "resource_window_group.h"
 #include <commctrl.h>
 #include <algorithm>
 #include <memory>
@@ -26,9 +27,77 @@ using Value = flutter::EncodableValue;
 using Map = flutter::EncodableMap;
 using Channel = flutter::MethodChannel<Value>;
 
+constexpr UINT kResourceChanged = WM_APP + 0x3d;
+struct ResourceHost {
+  HWND hwnd;
+  std::unique_ptr<Channel> channel;
+  ResourceWindowGroup group;
+  bool queued = false;
+  Map previous;
+};
+std::unique_ptr<ResourceHost> host;
+
+void Changed() {
+  if (host && host->channel && !host->queued) {
+    host->queued = true;
+    PostMessage(host->hwnd, kResourceChanged, 0, 0);
+  }
+}
+
+Map Presence() {
+  Map result;
+  for (const auto& [id, window] : host->group.windows) {
+    const bool visible = IsWindowVisible(window.hwnd) && !IsIconic(window.hwnd);
+    result[Value(id)] = Value(!visible ? "closed" :
+        host->group.InFront(window.hwnd) ? "front" : "back");
+  }
+  return result;
+}
+
+LRESULT CALLBACK HostViewProc(HWND hwnd, UINT message, WPARAM wparam,
+                             LPARAM lparam, UINT_PTR id, DWORD_PTR) {
+  if (message == WM_LBUTTONDOWN || message == WM_LBUTTONDBLCLK || message == WM_RBUTTONDOWN ||
+      message == WM_MBUTTONDOWN || message == WM_POINTERDOWN)
+    host->group.PointerDown();
+  if (message == WM_NCDESTROY) RemoveWindowSubclass(hwnd, HostViewProc, id);
+  return DefSubclassProc(hwnd, message, wparam, lparam);
+}
+
+LRESULT CALLBACK HostProc(HWND hwnd, UINT message, WPARAM wparam,
+                         LPARAM lparam, UINT_PTR id, DWORD_PTR) {
+  if (message == WM_MOUSEACTIVATE || message == WM_POINTERACTIVATE)
+    host->group.BeforeMouseActivation();
+  if (message == WM_NCLBUTTONDOWN || message == WM_NCRBUTTONDOWN)
+    host->group.CancelMouseActivation();
+  if (message == WM_SIZE || message == WM_SHOWWINDOW) {
+    const auto result = DefSubclassProc(hwnd, message, wparam, lparam);
+    host->group.MainVisibilityChanged();
+    Changed();
+    return result;
+  }
+  if (message == WM_ACTIVATE || message == WM_WINDOWPOSCHANGED) Changed();
+  if (message == kResourceChanged) {
+    host->queued = false;
+    host->group.MainVisibilityChanged();
+    auto next = Presence();
+    if (next != host->previous) {
+      host->previous = next;
+      host->channel->InvokeMethod("presence", std::make_unique<Value>(next));
+    }
+    return 0;
+  }
+  if (message == WM_NCDESTROY) {
+    host->group.CloseAll();
+    host->channel.reset();
+    RemoveWindowSubclass(hwnd, HostProc, id);
+  }
+  return DefSubclassProc(hwnd, message, wparam, lparam);
+}
+
 struct ResourceState {
   std::unique_ptr<Channel> channel;
   HWND view = nullptr;
+  std::string id;
   double bar_height = 0, reserved_right = 0;
   using Exclusion = resource_window_geometry::Exclusion;
   std::vector<Exclusion> exclusions;
@@ -109,6 +178,12 @@ LRESULT CALLBACK ResourceProc(HWND hwnd, UINT message, WPARAM wparam,
   if (message == WM_SIZE) {
     state->channel->InvokeMethod("maximizedChanged", std::make_unique<Value>(IsZoomed(hwnd) != FALSE));
   }
+  if (message == WM_ACTIVATE || message == WM_WINDOWPOSCHANGED ||
+      message == WM_SHOWWINDOW) Changed();
+  if (message == WM_SHOWWINDOW) {
+    state->channel->InvokeMethod("visibilityChanged",
+        std::make_unique<Value>(wparam != 0));
+  }
   if (message == WM_GETMINMAXINFO) {
     auto* bounds = reinterpret_cast<MINMAXINFO*>(lparam);
     const double scale = GetDpiForWindow(hwnd) / 96.0;
@@ -120,6 +195,8 @@ LRESULT CALLBACK ResourceProc(HWND hwnd, UINT message, WPARAM wparam,
     state->channel->InvokeMethod("layout", std::make_unique<Value>(Layout(hwnd)));
   }
   if (message == WM_NCDESTROY) {
+    host->group.windows.erase(state->id);
+    Changed();
     if (IsWindow(state->view)) RemoveWindowSubclass(state->view, ResourceViewProc, 1);
     RemoveWindowSubclass(hwnd, ResourceProc, id);
     delete state;
@@ -164,28 +241,32 @@ void Configure(HWND hwnd, const Map& args) {
   }
 }
 
-// WM_CLOSE is posted, not sent: disposing the engine inside its own method
-// handler would destroy the messenger while it is still sending the reply.
-BOOL CALLBACK CloseOwnedResource(HWND hwnd, LPARAM owner) {
-  wchar_t class_name[128] = {};
-  GetClassNameW(hwnd, class_name, 128);
-  if (GetWindow(hwnd, GW_OWNER) == reinterpret_cast<HWND>(owner) &&
-      std::wcscmp(class_name, L"FLUTTER_MULTI_WINDOW_WIN32_WINDOW") == 0) {
-    PostMessage(hwnd, WM_CLOSE, 0, 0);
-  }
-  return TRUE;
-}
 }  // namespace
 
-void RegisterResourceWindowHost(flutter::FlutterEngine* engine, HWND owner) {
-  flutter::MethodChannel<flutter::EncodableValue> channel(
-      engine->messenger(), kChannel,
-      &flutter::StandardMethodCodec::GetInstance());
-  channel.SetMethodCallHandler([owner](const auto& call, auto result) {
+void RegisterResourceWindowHost(flutter::FlutterEngine* engine, HWND owner,
+                                HWND view) {
+  host = std::make_unique<ResourceHost>(ResourceHost{owner,
+      std::make_unique<Channel>(engine->messenger(), kChannel,
+          &flutter::StandardMethodCodec::GetInstance()), ResourceWindowGroup(owner)});
+  SetWindowSubclass(owner, HostProc, 4, 0);
+  SetWindowSubclass(view, HostViewProc, 4, 0);
+  host->channel->SetMethodCallHandler([](const auto& call, auto result) {
     if (call.method_name() == "closeAll") {
-      EnumThreadWindows(GetCurrentThreadId(), CloseOwnedResource,
-                        reinterpret_cast<LPARAM>(owner));
+      host->group.CloseAll();
       result->Success();
+    } else if (call.method_name() == "toggle") {
+      const auto* args = std::get_if<Map>(call.arguments());
+      if (!args) { result->Error("invalid_arguments", "Expected toggle arguments."); return; }
+      const auto id = args->find(Value("windowId"));
+      const auto pointer = args->find(Value("fromPointer"));
+      const auto* key = id == args->end() ? nullptr : std::get_if<std::string>(&id->second);
+      const auto* from_pointer = pointer == args->end() ? nullptr : std::get_if<bool>(&pointer->second);
+      if (!key || !from_pointer || !host->group.windows.count(*key)) {
+        result->Error("not_found", "Resource window not found."); return;
+      }
+      host->group.Toggle(*key, *from_pointer);
+      Changed();
+      result->Success(Value(Presence()));
     } else {
       result->NotImplemented();
     }
@@ -204,15 +285,16 @@ void RegisterResourceWindowPlugins(flutter::FlutterViewController* controller,
       engine->GetRegistrarForPlugin("SuperNativeExtensionsPluginCApi"));
 
   HWND hwnd = GetAncestor(controller->view()->GetNativeWindow(), GA_ROOT);
-  // An owned top-level window can leave the client area / move to another
-  // monitor. Win32 hides it with its minimized owner and destroys it with
-  // the owner. Tray-close explicitly posts closeAll while the owner is alive.
-  // This is NOT a child (WS_CHILD) or runner subclass.
-  SetWindowLongPtr(hwnd, GWLP_HWNDPARENT, reinterpret_cast<LONG_PTR>(owner));
+  // Ordinary, unowned top-level window. Only the explicit pin uses TOPMOST.
+  SetWindowLongPtr(hwnd, GWLP_HWNDPARENT, 0);
+  SetWindowLongPtr(hwnd, GWL_EXSTYLE,
+      (GetWindowLongPtr(hwnd, GWL_EXSTYLE) & ~WS_EX_APPWINDOW) | WS_EX_TOOLWINDOW);
 
   auto* state = new ResourceState{std::make_unique<Channel>(
       engine->messenger(), kChannel, &flutter::StandardMethodCodec::GetInstance())};
   state->view = controller->view()->GetNativeWindow();
+  state->id = "pending:" + std::to_string(reinterpret_cast<uintptr_t>(hwnd));
+  host->group.windows[state->id] = {hwnd};
   SetWindowSubclass(hwnd, ResourceProc, 1, reinterpret_cast<DWORD_PTR>(state));
   SetWindowSubclass(state->view, ResourceViewProc, 1, reinterpret_cast<DWORD_PTR>(state));
   const MARGINS margins{1, 1, 1, 1};
@@ -227,7 +309,16 @@ void RegisterResourceWindowPlugins(flutter::FlutterViewController* controller,
       Map values;
       if (const auto* map = std::get_if<Map>(call.arguments())) values = *map;
       if (const auto* title = std::get_if<std::string>(call.arguments())) values[Value("title")] = Value(*title);
+      const auto id = values.find(Value("windowId"));
+      if (id != values.end()) {
+        if (const auto* key = std::get_if<std::string>(&id->second)) {
+          host->group.windows.erase(state->id);
+          state->id = *key;
+          host->group.windows[*key] = {hwnd};
+        }
+      }
       Configure(hwnd, values);
+      Changed();
       result->Success();
     } else if (call.method_name() == "setDragRegion") {
       const auto* args = std::get_if<Map>(call.arguments());
@@ -270,8 +361,7 @@ void RegisterResourceWindowPlugins(flutter::FlutterViewController* controller,
     } else if (call.method_name() == "getLayout") {
       result->Success(Layout(hwnd));
     } else if (call.method_name() == "focus") {
-      if (IsIconic(hwnd)) ShowWindow(hwnd, SW_RESTORE);
-      SetForegroundWindow(hwnd);
+      ResourceWindowGroup::Focus(hwnd);
       result->Success();
     } else if (call.method_name() == "setAlwaysOnTop") {
       const auto* enabled =

@@ -32,6 +32,7 @@ import 'settings_accounts.dart';
 import 'settings_agent.dart';
 import 'settings_agent_quick.dart';
 import 'settings_backups.dart';
+import 'settings_installation_import.dart';
 import 'settings_connections.dart';
 import 'settings_data.dart';
 import 'settings_edits.dart';
@@ -228,7 +229,7 @@ class _SettingsWiringState extends ConsumerState<SettingsWiring> {
     final plans = ref.read(settingsRagSessionProvider.notifier);
     final upscale = ref.read(settingsUpscaleOperationProvider.notifier);
     final connections = SettingsConnectionActions(context, ref);
-    final backup = SettingsBackupActions(context, ref);
+    final backup = SettingsBackupActions(context);
     final system = SettingsSystemActions(context, ref);
     return SettingsActions(
       onOpenPage: (page) => setState(() {
@@ -509,6 +510,9 @@ class _SettingsWiringState extends ConsumerState<SettingsWiring> {
         ),
       ),
       onExportPreferences: () => _run(backup.exportConfig),
+      onImportInstallation: Platform.isWindows
+          ? () => _run(() => importInstallation(backup))
+          : null,
       onImportPreferences: () => _run(backup.importConfig),
       onUndoImport: () => _run(backup.undoImport),
       onResetScopes: (scopes) => _run(() => backup.reset(scopes)),

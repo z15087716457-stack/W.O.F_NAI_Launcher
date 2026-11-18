@@ -240,7 +240,7 @@ void main() {
       );
     });
 
-    testWidgets('资源窗口：可钉到头部，头部按钮弹出四类入口', (t) async {
+    testWidgets('资源窗口：可钉到头部，按钮直接切换统一小窗', (t) async {
       await pump(t);
       await tapKey(t, 'gen-tool-menu');
       await tapKey(t, 'gen-pin-resources');
@@ -260,11 +260,7 @@ void main() {
         ),
       );
       await tapKey(t, 'gen-tool-resources');
-      await tapKey(t, 'gen-tool-resource-vibe');
-      expect(
-        r.last('onOpenResourceWindow'),
-        'onOpenResourceWindow(FloatingResourceKind.vibe)',
-      );
+      expect(r.last('onToggleResourceWindow'), 'onToggleResourceWindow(true)');
     });
 
     testWidgets('全屏编辑：弹窗里放同一块编辑器（fullscreen 目标）', (t) async {

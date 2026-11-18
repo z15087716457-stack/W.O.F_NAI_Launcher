@@ -39,7 +39,6 @@ import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
 import 'package:nai_launcher/presentation/ui/blocks/blocks_edit.dart';
 import 'package:nai_launcher/presentation/wiring/blocks_library_backend.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_page.dart';
-import 'package:nai_launcher/presentation/ui/gen/gen_header.dart';
 import 'package:nai_launcher/presentation/providers/floating_resource_windows_provider.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_contract.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_contract.dart';
@@ -249,26 +248,23 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('prompt tools menu opens each resource window kind', (
+  testWidgets('prompt tools menu toggles the same resource window directly', (
     tester,
   ) async {
     await pump(tester);
-    final header = tester.widget<GenHeader>(find.byType(GenHeader).first);
-    expect(header.onOpenResourceWindow, isNotNull);
-    for (final kind in FloatingResourceKind.values) {
-      await tester.tap(find.byKey(const Key('gen-tool-menu')).first);
-      await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('gen-resource-windows')));
-      await tester.pumpAndSettle();
-      await tester.tap(find.byKey(Key('gen-resource-${kind.name}')));
-      await tester.pumpAndSettle();
-    }
+    await tester.tap(find.byKey(const Key('gen-tool-menu')).first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('gen-resource-windows')));
+    await tester.pumpAndSettle();
     expect(
-      container
-          .read(floatingResourceWindowsProvider)
-          .map((window) => window.kind),
-      FloatingResourceKind.values,
+      container.read(floatingResourceWindowsProvider).single.kind,
+      FloatingResourceKind.gallery,
     );
+    expect(find.byKey(const Key('gen-tool-resources')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('gen-tool-resources')));
+    await tester.pumpAndSettle();
+    expect(container.read(floatingResourceWindowsProvider), isEmpty);
+    expect(find.byKey(const Key('gen-tool-resources')), findsNothing);
     await tester.pumpWidget(const SizedBox());
   });
 

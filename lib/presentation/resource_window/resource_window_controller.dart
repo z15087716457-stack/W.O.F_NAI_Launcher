@@ -27,6 +27,7 @@ class ResourceWindowController extends ChangeNotifier {
     ResourceHostCall? invoke,
     Future<void> Function(bool)? setAlwaysOnTop,
     this.onKindChanged,
+    this.beforeClose,
     bool alwaysOnTop = false,
     double uiScale = 1,
   }) : _kind = kind,
@@ -46,6 +47,7 @@ class ResourceWindowController extends ChangeNotifier {
   final ResourceHostCall invoke;
   final Future<void> Function(bool) _setAlwaysOnTop;
   final Future<void> Function(FloatingResourceKind)? onKindChanged;
+  final Future<void> Function()? beforeClose;
   FloatingResourceKind _kind;
   String _query = '', _group = 'all';
   String? _sort, _selected;
@@ -516,6 +518,7 @@ class ResourceWindowController extends ChangeNotifier {
   }
 
   Future<void> nativeCommand(String method) => _run(() async {
+    if (method == 'close') await beforeClose?.call();
     final result = await native.invokeMethod<Object?>(method);
     if (result is bool) maximized(result);
   });
@@ -646,7 +649,23 @@ class ResourceWindowController extends ChangeNotifier {
   double _uiScale;
   double get uiScale => _uiScale;
 
+  bool _visible = true;
+  final _pendingChanges = <String, Map<String, Object?>>{};
+  void visibilityChanged(bool visible) {
+    _visible = visible;
+    if (!visible) return;
+    final pending = _pendingChanges.values.toList();
+    _pendingChanges.clear();
+    for (final args in pending) {
+      changed(args);
+    }
+  }
+
   void changed(Map<String, Object?> args) {
+    if (!_visible) {
+      _pendingChanges[args['kind'] as String] = args;
+      return;
+    }
     if (args['kind'] == _kind.name) {
       final selected = _selected;
       final retain = _items.length;

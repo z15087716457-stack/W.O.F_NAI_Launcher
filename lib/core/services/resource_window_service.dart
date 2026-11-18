@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:desktop_multi_window/desktop_multi_window.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../data/models/resources/floating_window_data.dart';
 import 'resource_window_host.dart';
@@ -26,10 +27,39 @@ class ResourceWindowService {
   final _readyWaiters = <String, Completer<void>>{};
   bool _closing = false;
   StreamSubscription<void>? _subscription;
+  final quickVisibility = ValueNotifier(ResourceWindowVisibility.closed);
+  final _presence = <String, ResourceWindowVisibility>{};
+  String? _quickId;
+  bool _toggling = false;
+  FloatingResourceKind lastKind = FloatingResourceKind.gallery;
+  Future<void> Function(FloatingResourceKind)? onQuickKind;
+
+  void _publishPresence() {
+    quickVisibility.value =
+        _presence[_quickId] ?? ResourceWindowVisibility.closed;
+  }
+
+  void _updatePresence(Object? values) {
+    final map = resourceMap(values);
+    _presence
+      ..clear()
+      ..addAll(
+        map.map(
+          (id, value) => MapEntry(
+            id,
+            ResourceWindowVisibility.values.byName(value as String),
+          ),
+        ),
+      );
+    _publishPresence();
+  }
 
   void _forget(String id) {
     _windows.remove(id);
     _ready.remove(id);
+    _presence.remove(id);
+    if (_quickId == id) _quickId = null;
+    _publishPresence();
     host.closed(id);
     onClosed?.call(id);
     _readyWaiters
@@ -47,6 +77,9 @@ class ResourceWindowService {
   };
 
   Future<void> initialize() async {
+    _native.setMethodCallHandler((call) async {
+      if (call.method == 'presence') _updatePresence(call.arguments);
+    });
     await hostChannel.setMethodCallHandler(handle);
     _subscription ??= onWindowsChanged.listen((_) => unawaited(_reconcile()));
   }
@@ -97,6 +130,10 @@ class ResourceWindowService {
       if (window == null) resourceError('not_found');
       _windows[id] = (controller: window.controller, kind: resourceKind(args));
       onKind?.call(id, resourceKind(args));
+      if (id == _quickId) {
+        lastKind = resourceKind(args);
+        await onQuickKind?.call(lastKind);
+      }
       return null;
     }
     return host.handle(call);
@@ -109,6 +146,33 @@ class ResourceWindowService {
     final factory = argumentsFor;
     if (factory == null) resourceError('not_ready');
     return open(await factory(kind), newWindow: newWindow);
+  }
+
+  Future<void> toggleQuick({bool fromPointer = false}) async {
+    if (_closing || _toggling) return;
+    _toggling = true;
+    try {
+      final existing = _quickId == null ? null : _windows[_quickId];
+      if (existing == null) {
+        final window = await openKind(lastKind, newWindow: true);
+        _quickId = window.windowId;
+        _publishPresence();
+        await onQuickKind?.call(lastKind);
+        if (!_ready.contains(window.windowId)) {
+          await _readyWaiters
+              .putIfAbsent(window.windowId, Completer<void>.new)
+              .future;
+        }
+      } else {
+        final values = await _native.invokeMethod<Object?>('toggle', {
+          'windowId': _quickId,
+          'fromPointer': fromPointer,
+        });
+        _updatePresence(values);
+      }
+    } finally {
+      _toggling = false;
+    }
   }
 
   Future<WindowController> open(
@@ -245,5 +309,7 @@ class ResourceWindowService {
     await _subscription?.cancel();
     _subscription = null;
     await hostChannel.setMethodCallHandler(null);
+    _native.setMethodCallHandler(null);
+    quickVisibility.dispose();
   }
 }

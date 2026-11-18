@@ -109,6 +109,43 @@ void main() {
       },
     );
 
+    test('即时保存按原文件识别 NAI，开启筛选也能看到刚保存的图', () async {
+      await ImageMetadataService().initialize();
+      await GalleryStreamScanner(dataSource: dataSource).withFilesystemMutation(
+        () async {
+          await service.initialize();
+          await service.applyFilter(const FilterCriteria(naiOnly: true));
+          final nai = File(p.join(galleryRoot.path, 'generated.png'));
+          final plain = File(p.join(galleryRoot.path, 'plain.png'));
+          await nai.writeAsBytes(
+            img.encodePng(
+              img.Image(
+                width: 16,
+                height: 8,
+                textData: {
+                  'Software': 'NovelAI',
+                  'Source': 'NovelAI Diffusion V5',
+                  'Comment': jsonEncode({'prompt': 'cloud', 'seed': 42}),
+                },
+              ),
+            ),
+          );
+          await plain.writeAsBytes(
+            img.encodePng(img.Image(width: 16, height: 8)),
+          );
+          expect(await service.addNewImageImmediately(nai.path), isTrue);
+          expect(await service.addNewImageImmediately(plain.path), isTrue);
+          expect(await service.addNewImageImmediately(nai.path), isTrue);
+          expect((await service.getTimelineEntries()).map((e) => e.path), [
+            nai.path,
+          ]);
+          expect(service.totalCount, 2);
+          final id = (await dataSource.getImageIdByPath(nai.path))!;
+          expect((await dataSource.getMetadataByImageIds([id]))[id]?.seed, 42);
+        },
+      );
+    });
+
     test('手动刷新先发布磁盘路径，再排队同步新增、移动和修改', () async {
       await ImageMetadataService().initialize();
       final source = File(p.join(galleryRoot.path, 'source.png'));

@@ -310,7 +310,7 @@ void main() {
     expect(await cache.get(entry.id), isNull);
   });
 
-  test('启动对账恢复被中断的删除并清理孤立原图与缓存', () async {
+  test('启动对账恢复被中断的删除，保留未登记原图并清理孤立缓存', () async {
     final entry = await storage.importFromBytes(_pngBytes(), name: 'recover');
     final cache = Hive.lazyBox<Uint8List>('precise_ref_library_thumbnails_v2');
     await cache.put('orphan-cache', _pngBytes());
@@ -328,7 +328,7 @@ void main() {
 
     expect(File(entry.imagePath).existsSync(), isTrue);
     expect(File(tombstone).existsSync(), isFalse);
-    expect(orphanFile.existsSync(), isFalse);
+    expect(orphanFile.existsSync(), isTrue);
     expect(
       await Hive.lazyBox<Uint8List>(
         'precise_ref_library_thumbnails_v2',

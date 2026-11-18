@@ -99,7 +99,8 @@ bool FlutterWindow::OnCreate() {
   }
   RegisterPlugins(flutter_controller_->engine());
   g_resource_window_owner = GetHandle();
-  RegisterResourceWindowHost(flutter_controller_->engine(), GetHandle());
+  RegisterResourceWindowHost(flutter_controller_->engine(), GetHandle(),
+                            flutter_controller_->view()->GetNativeWindow());
   DesktopMultiWindowSetWindowCreatedCallback([](void* controller) {
     auto* child = reinterpret_cast<flutter::FlutterViewController*>(controller);
     RegisterResourceWindowPlugins(child, g_resource_window_owner);

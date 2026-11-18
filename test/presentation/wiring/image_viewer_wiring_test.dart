@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:hive/hive.dart';
+import 'package:nai_launcher/core/cache/thumbnail_cache_service.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'dart:typed_data';
 
@@ -291,6 +292,75 @@ void main() {
         (page(tester).data.current!.width, page(tester).data.current!.height),
         (640, 960),
       );
+    },
+  );
+
+  testWidgets(
+    'file viewer keeps original dimensions after the micro thumbnail arrives',
+    (tester) async {
+      final file = File('${temporary.path}/original.png');
+      final pixels = img.encodePng(img.Image(width: 1216, height: 832));
+      await tester.runAsync(() async {
+        await file.writeAsBytes(pixels);
+        final cache = ThumbnailCacheService.instance;
+        await cache.init();
+        cache.setRootPaths([temporary.path]);
+        final path = await cache.getOrGenerateThumbnail(
+          file.path,
+          size: ThumbnailSize.micro,
+        );
+        final micro = img.decodeJpg(await File(path!).readAsBytes())!;
+        expect((micro.width, micro.height), (80, 55));
+      });
+      final image = LocalImageDetailData(
+        LocalImageRecord(
+          path: file.path,
+          size: pixels.length,
+          modifiedAt: DateTime(2026, 11, 18),
+        ),
+      );
+      await pump(
+        tester,
+        viewer: ImageViewerSession(
+          mode: ViewerMode.gallery,
+          backend: ImageViewerBackend(
+            keys: [file.path],
+            initialKey: file.path,
+            load: (_) async => [image],
+            readMetadata: (_) async =>
+                const NaiImageMetadata(seed: 123, width: 1216, height: 832),
+          ),
+        ),
+      );
+      final originalImage = find.byKey(const Key('viewer-image'));
+      final renderedImage = find.descendant(
+        of: originalImage,
+        matching: find.byWidgetPredicate(
+          (widget) => widget is RawImage && widget.image?.width == 1216,
+        ),
+      );
+      for (var attempt = 0; attempt < 40; attempt++) {
+        if (page(tester).data.current?.thumb != null &&
+            renderedImage.evaluate().isNotEmpty) {
+          break;
+        }
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 20)),
+        );
+        await tester.pump();
+      }
+      final data = page(tester).data;
+      final item = data.current!;
+      expect(item.thumb, isA<FileImage>());
+      expect(data.detail?.seed, 123);
+      expect((item.width, item.height), (1216, 832));
+      expect(find.text('1216 × 832'), findsOneWidget);
+      expect(tester.getSize(originalImage).width, greaterThan(800));
+      expect(renderedImage, findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+      await item.image!.evict();
+      await item.thumb!.evict();
+      await tester.pump();
     },
   );
 

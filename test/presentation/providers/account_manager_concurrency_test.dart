@@ -7,6 +7,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 import 'package:nai_launcher/core/storage/secure_storage_service.dart';
 import 'package:nai_launcher/data/models/auth/saved_account.dart';
+import 'package:nai_launcher/core/constants/storage_keys.dart';
+import 'package:nai_launcher/core/network/nai_api_endpoint.dart';
+import 'package:nai_launcher/data/models/auth/saved_account_directory.dart';
 import 'package:nai_launcher/presentation/providers/account_manager_provider.dart';
 
 import '../../helpers/app_logger_test_isolation.dart';
@@ -98,6 +101,46 @@ void main() {
         .toList();
     expect(stored, container.read(accountManagerNotifierProvider).accounts);
   }
+
+  test(
+    'migration is retryable and keeps the default, credentials and endpoint paired',
+    () async {
+      final endpoint = NaiApiEndpointConfig.fromInput(
+        mainBaseUrl: 'https://example.test',
+      );
+      final incoming = SavedAccountDirectory(
+        [
+          a.copyWith(nickname: 'old installation'),
+          a.copyWith(id: 'C', email: 'c.fixture', isDefault: true),
+          a.copyWith(id: 'D', email: 'd.fixture'),
+        ],
+        {'C': endpoint},
+      );
+      final credentials = {
+        '${StorageKeys.accountTokenPrefix}A': 'old-A',
+        '${StorageKeys.accountTokenPrefix}C': 'fixture-C',
+      };
+      secure.failNextWrite = true;
+      await expectLater(
+        notifier.importMissingAccounts(incoming, credentials),
+        throwsStateError,
+      );
+      expect(SavedAccountDirectory.read(box).accounts, hasLength(2));
+      expect(await notifier.importMissingAccounts(incoming, credentials), (
+        added: 2,
+        withoutToken: 1,
+      ));
+      expect(await notifier.importMissingAccounts(incoming, credentials), (
+        added: 0,
+        withoutToken: 0,
+      ));
+      expect(secure.tokens, {'A': 'fixture', 'C': 'fixture-C'});
+      final stored = SavedAccountDirectory.read(box);
+      expect(stored.endpoints['C'], endpoint);
+      expect(stored.accounts.where((a) => a.isDefault).single.id, 'B');
+      expectPersisted();
+    },
+  );
 
   for (final profileFirst in [true, false]) {
     test(

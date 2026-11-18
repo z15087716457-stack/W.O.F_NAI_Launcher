@@ -22,6 +22,7 @@ import 'package:nai_launcher/presentation/providers/character_prompt_provider.da
 import 'package:nai_launcher/presentation/providers/cost_estimate_provider.dart';
 import 'package:nai_launcher/presentation/providers/generation/image_workflow_controller.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
+import 'package:nai_launcher/presentation/providers/krita/krita_bridge_notifier.dart';
 import 'package:nai_launcher/presentation/providers/pill_workspace_provider.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_contract.dart';
@@ -85,6 +86,9 @@ class RecordingGeneration extends IdleGeneration {
 
   void setGenerating() =>
       state = const ImageGenerationState(status: GenerationStatus.generating);
+
+  void finish() =>
+      state = const ImageGenerationState(status: GenerationStatus.completed);
 }
 
 class SwitchingAuth extends OfflineAuth {
@@ -93,6 +97,12 @@ class SwitchingAuth extends OfflineAuth {
       const AuthState(status: AuthStatus.authenticated, accountId: 'account-a');
   void changeAccount([String id = 'account-b']) =>
       state = AuthState(status: AuthStatus.authenticated, accountId: id);
+}
+
+class _TestBridge extends KritaBridgeNotifier {
+  _TestBridge() : super(persistEnabled: (_) {});
+  void start() =>
+      state = const KritaBridgeState(activeRequestId: 'test-request');
 }
 
 void main() {
@@ -113,6 +123,7 @@ void main() {
         characterPromptRepositoryProvider.overrideWithValue(MemoryCharacters()),
         promptBlockLibraryNotifierProvider.overrideWith(EmptyBlocks.new),
         imageGenerationNotifierProvider.overrideWith(RecordingGeneration.new),
+        kritaBridgeNotifierProvider.overrideWith((ref) => _TestBridge()),
         authNotifierProvider.overrideWith(SwitchingAuth.new),
         subscriptionNotifierProvider.overrideWith(DataSubscription.new),
         generationPlatformProvider.overrideWithValue(platform),
@@ -128,6 +139,73 @@ void main() {
     container.dispose();
     await Hive.close();
     await directory.delete(recursive: true);
+  });
+  test('生成中允许清空、撤销与导入提示词，仍拒绝再次生成和修改资源参数', () async {
+    final generation =
+        container.read(imageGenerationNotifierProvider.notifier)
+            as RecordingGeneration;
+    generation.setGenerating();
+    final undo = await backend.clearPrompt(const GenEditorTarget.base());
+    expect(container.read(generationParamsNotifierProvider).prompt, '');
+    await backend.undoPrompt(undo!);
+    expect(container.read(generationParamsNotifierProvider).prompt, 'original');
+    final commit = container.read(generationEditorImportProvider)(() => true);
+    await commit('next request', const []);
+    expect(
+      container.read(generationParamsNotifierProvider).prompt,
+      'next request',
+    );
+    expect(platform.backups, hasLength(3));
+    expect(platform.backups.first['fields']['prompt'], 'original');
+    await expectLater(backend.mutate(() {}), throwsStateError);
+    await backend.generate(confirm: (_) async => true);
+    expect(generation.requests, isEmpty);
+    expect(
+      container.read(imageGenerationNotifierProvider).isGenerating,
+      isTrue,
+    );
+  });
+  test('生成在备份期间完成不阻止下一份提示词提交', () async {
+    final generation =
+        container.read(imageGenerationNotifierProvider.notifier)
+            as RecordingGeneration;
+    generation.setGenerating();
+    platform.pending = Completer<void>();
+    final clearing = backend.clearPrompt(const GenEditorTarget.base());
+    expect(platform.backups, hasLength(1));
+    generation.finish();
+    platform.pending!.complete();
+    await clearing;
+    expect(container.read(generationParamsNotifierProvider).prompt, '');
+  });
+  test('桥接生成中也允许准备下一份提示词，仍禁止重复生成', () async {
+    (container.read(kritaBridgeNotifierProvider.notifier) as _TestBridge)
+        .start();
+    final undo = await backend.clearPrompt(const GenEditorTarget.base());
+    await backend.undoPrompt(undo!);
+    expect(container.read(generationParamsNotifierProvider).prompt, 'original');
+    await backend.generate(confirm: (_) async => true);
+    expect(
+      (container.read(imageGenerationNotifierProvider.notifier)
+              as RecordingGeneration)
+          .requests,
+      isEmpty,
+    );
+    expect(
+      container.read(kritaBridgeNotifierProvider).activeRequestId,
+      'test-request',
+    );
+  });
+  test('提示词提交仍拒绝备份期间切换后恢复的账号', () async {
+    platform.pending = Completer<void>();
+    final clearing = backend.clearPrompt(const GenEditorTarget.base());
+    final assertion = expectLater(clearing, throwsStateError);
+    final auth = container.read(authNotifierProvider.notifier) as SwitchingAuth;
+    auth.changeAccount();
+    auth.changeAccount('account-a');
+    platform.pending!.complete();
+    await assertion;
+    expect(container.read(generationParamsNotifierProvider).prompt, 'original');
   });
   test('写入前备份完整草稿，负向不变且药丸与参数同步', () async {
     final notifier = container.read(generationParamsNotifierProvider.notifier);

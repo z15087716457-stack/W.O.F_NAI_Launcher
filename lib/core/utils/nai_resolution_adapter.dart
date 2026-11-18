@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -510,6 +511,18 @@ class NaiResolutionAdapter {
   static bool _imageSizeMatches(Uint8List bytes, int width, int height) {
     final size = readImageSize(bytes);
     return size != null && size.$1 == width && size.$2 == height;
+  }
+
+  static Future<(int, int)?> readImageFileSize(File file) async {
+    const headerLimit = 64 * 1024;
+    final header = await file
+        .openRead(0, headerLimit)
+        .fold(BytesBuilder(copy: false), (buffer, chunk) => buffer..add(chunk));
+    final bytes = header.takeBytes();
+    return readImageSize(bytes) ??
+        (bytes.length < headerLimit
+            ? null
+            : readImageSize(await file.readAsBytes()));
   }
 
   /// 只解析编码头获取画布尺寸，不解码任何像素帧。

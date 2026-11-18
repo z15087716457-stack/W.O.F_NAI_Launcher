@@ -5,10 +5,12 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart' show MethodChannel;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:image/image.dart' as img;
 import 'package:mocktail/mocktail.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nai_launcher/core/utils/image_save_utils.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/data/datasources/remote/nai_image_enhancement_api_service.dart';
@@ -26,6 +28,11 @@ import 'package:nai_launcher/presentation/providers/image_save_settings_provider
 import 'package:nai_launcher/presentation/providers/local_gallery_provider.dart';
 import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
 import 'package:nai_launcher/presentation/providers/notification_settings_provider.dart';
+import 'package:nai_launcher/presentation/providers/character_prompt_provider.dart';
+import 'package:nai_launcher/presentation/providers/pill_roll_coordinator.dart';
+import 'package:nai_launcher/presentation/providers/pill_workspace_provider.dart';
+import 'package:nai_launcher/data/models/character/character_prompt.dart'
+    as role;
 import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/canvas_feed_layout.dart';
 
 class MockNAIImageGenerationApiService extends Mock
@@ -33,6 +40,8 @@ class MockNAIImageGenerationApiService extends Mock
 
 class FakeNAIImageEnhancementApiService extends Mock
     implements NAIImageEnhancementApiService {}
+
+class _RecordingRollCoordinator extends Mock implements PillRollCoordinator {}
 
 class _SourceImportGeneration extends ImageGenerationNotifier {
   _SourceImportGeneration(this.initial);
@@ -95,6 +104,11 @@ void main() {
     registerFallbackValue(const ImageParams());
     registerFallbackValue(Uint8List(0));
     hiveTempDir = await Directory.systemTemp.createTemp('nai_launcher_hive_');
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+          const MethodChannel('plugins.flutter.io/path_provider'),
+          (_) async => hiveTempDir.path,
+        );
     Hive.init(hiveTempDir.path);
     await Hive.openBox(StorageKeys.settingsBox);
     await Hive.openBox(StorageKeys.historyBox);
@@ -103,6 +117,11 @@ void main() {
 
   tearDownAll(() async {
     await Hive.close();
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+          const MethodChannel('plugins.flutter.io/path_provider'),
+          null,
+        );
     if (!await hiveTempDir.exists()) return;
 
     for (var attempt = 0; attempt < 5; attempt++) {
@@ -119,7 +138,8 @@ void main() {
   group('ImageGenerationNotifier', () {
     late ProviderContainer container;
 
-    setUp(() {
+    setUp(() async {
+      SharedPreferences.setMockInitialValues({});
       container = ProviderContainer(
         overrides: [
           groupedCanvasBatchesOverride,
@@ -128,12 +148,253 @@ void main() {
           ),
         ],
       );
+      // Individual saving tests explicitly opt in and use temporary output.
+      await container
+          .read(imageSaveSettingsNotifierProvider.notifier)
+          .setAutoSave(false);
     });
 
     tearDown(() async {
       container.dispose();
       await Hive.box(StorageKeys.settingsBox).clear();
     });
+
+    for (final edit in ['base', 'negative', 'character', 'pill']) {
+      test(
+        'editing $edit during a batch run preserves submitted prompts and the next draft',
+        () async {
+          final api = MockNAIImageGenerationApiService();
+          final first = StreamController<ImageStreamChunk>();
+          final started = Completer<void>();
+          final requests = <ImageParams>[];
+          final rolls = _RecordingRollCoordinator();
+          var rollCalls = 0;
+          when(() => rolls.rollAllLanesAndSync()).thenAnswer((_) {
+            rollCalls++;
+            // A nonempty roll must not cause unrelated draft fields to be reread.
+            return {PillScopes.main: 'automatic roll'};
+          });
+          when(() => api.cancelGeneration()).thenReturn(null);
+          when(() => api.generateImageStream(any())).thenAnswer((invocation) {
+            requests.add(invocation.positionalArguments.first as ImageParams);
+            if (requests.length == 1) {
+              started.complete();
+              return first.stream;
+            }
+            return Stream.value(
+              ImageStreamChunk.complete(
+                _validImageBytes(width: 512, height: 768),
+              ),
+            );
+          });
+          container.dispose();
+          container = ProviderContainer(
+            overrides: [
+              groupedCanvasBatchesOverride,
+              naiImageGenerationApiServiceProvider.overrideWithValue(api),
+              pillRollCoordinatorProvider.overrideWithValue(rolls),
+              subscriptionNotifierProvider.overrideWith(
+                TestSubscriptionNotifier.new,
+              ),
+            ],
+          );
+          await container
+              .read(imageSaveSettingsNotifierProvider.notifier)
+              .setAutoSave(false);
+          await container
+              .read(notificationSettingsNotifierProvider.notifier)
+              .setSoundEnabled(false);
+          final params = container.read(
+            generationParamsNotifierProvider.notifier,
+          );
+          params.updatePromptImmediately('submitted positive');
+          params.updateNegativePromptImmediately('submitted negative');
+          final characters = container.read(
+            characterPromptNotifierProvider.notifier,
+          );
+          characters.replaceAll(const [
+            role.CharacterPrompt(
+              id: 'submitted-character',
+              name: 'character',
+              prompt: 'submitted character',
+              negativePrompt: 'submitted character uc',
+            ),
+          ]);
+          final lane = container.read(
+            pillWorkspaceProvider(PillScopes.main).notifier,
+          );
+          lane.syncFromPlainText('submitted positive');
+          final generation = container.read(
+            imageGenerationNotifierProvider.notifier,
+          );
+          final pending = generation.generate(
+            container
+                .read(generationParamsNotifierProvider)
+                .copyWith(nSamples: 2),
+            imagesPerRequestOverride: 1,
+          );
+          await started.future;
+          switch (edit) {
+            case 'base':
+              params.updatePromptImmediately('next positive');
+            case 'negative':
+              params.updateNegativePromptImmediately('next negative');
+            case 'character':
+              characters.updateCharacter(
+                container
+                    .read(characterPromptNotifierProvider)
+                    .characters
+                    .single
+                    .copyWith(prompt: 'next character'),
+              );
+            case 'pill':
+              lane.setText('next pill document');
+          }
+          final nextParams = container.read(generationParamsNotifierProvider);
+          final nextCharacters = container.read(
+            characterPromptNotifierProvider,
+          );
+          final nextDocument = container.read(
+            pillWorkspaceProvider(PillScopes.main),
+          );
+          // A second click cannot replace the in-flight request with the new draft.
+          await generation.generate(nextParams, imagesPerRequestOverride: 1);
+          expect(requests, hasLength(1));
+          first.add(
+            ImageStreamChunk.complete(
+              _validImageBytes(width: 512, height: 768),
+            ),
+          );
+          await first.close();
+          await pending;
+          expect(requests, hasLength(2));
+          expect(requests[1].prompt, requests[0].prompt);
+          expect(requests[1].negativePrompt, requests[0].negativePrompt);
+          expect(requests[1].characters, requests[0].characters);
+          expect(rollCalls, 0);
+          expect(container.read(generationParamsNotifierProvider), nextParams);
+          expect(
+            container.read(characterPromptNotifierProvider),
+            nextCharacters,
+          );
+          expect(
+            container.read(pillWorkspaceProvider(PillScopes.main)),
+            nextDocument,
+          );
+          expect(
+            container.read(imageGenerationNotifierProvider).status,
+            GenerationStatus.completed,
+          );
+        },
+      );
+    }
+
+    test(
+      'saved metadata keeps the submitted character prompts and positions after draft edits',
+      () async {
+        final api = MockNAIImageGenerationApiService();
+        final stream = StreamController<ImageStreamChunk>();
+        final started = Completer<void>();
+        when(() => api.generateImageStream(any())).thenAnswer((_) {
+          started.complete();
+          return stream.stream;
+        });
+        container.dispose();
+        container = ProviderContainer(
+          overrides: [
+            groupedCanvasBatchesOverride,
+            naiImageGenerationApiServiceProvider.overrideWithValue(api),
+            localGalleryNotifierProvider.overrideWith(
+              TestLocalGalleryNotifier.new,
+            ),
+            subscriptionNotifierProvider.overrideWith(
+              TestSubscriptionNotifier.new,
+            ),
+          ],
+        );
+        final output = await Directory.systemTemp.createTemp(
+          'prompt-snapshot-output-',
+        );
+        addTearDown(() => output.delete(recursive: true));
+        await container
+            .read(imageSaveSettingsNotifierProvider.notifier)
+            .setCustomPath(output.path);
+        await container
+            .read(imageSaveSettingsNotifierProvider.notifier)
+            .setAutoSave(true);
+        await container
+            .read(notificationSettingsNotifierProvider.notifier)
+            .setSoundEnabled(false);
+        final params = container.read(
+          generationParamsNotifierProvider.notifier,
+        );
+        params.updatePromptImmediately('submitted positive');
+        final characters = container.read(
+          characterPromptNotifierProvider.notifier,
+        );
+        characters.replaceAll(const [
+          role.CharacterPrompt(
+            id: 'character',
+            name: 'character',
+            prompt: 'submitted character',
+            negativePrompt: 'submitted character uc',
+            positionMode: role.CharacterPositionMode.custom,
+            customPosition: role.CharacterPosition(
+              mode: role.CharacterPositionMode.custom,
+              column: .2,
+              row: .7,
+            ),
+          ),
+        ]);
+        characters.setGlobalAiChoice(false);
+        final pending = container
+            .read(imageGenerationNotifierProvider.notifier)
+            .generate(
+              container.read(generationParamsNotifierProvider),
+              imagesPerRequestOverride: 1,
+            );
+        await started.future;
+        params.updatePromptImmediately('next positive');
+        characters.updateCharacter(
+          container
+              .read(characterPromptNotifierProvider)
+              .characters
+              .single
+              .copyWith(prompt: 'next character'),
+        );
+        characters.setGlobalAiChoice(true);
+        stream.add(
+          ImageStreamChunk.complete(_validImageBytes(width: 512, height: 768)),
+        );
+        await stream.close();
+        await pending;
+        final saved = container
+            .read(imageGenerationNotifierProvider)
+            .history
+            .single
+            .filePath!;
+        final metadata = UnifiedMetadataParser.parseFromPng(
+          await File(saved).readAsBytes(),
+        ).metadata!;
+        expect(metadata.prompt, 'submitted positive');
+        final comment = jsonDecode(metadata.rawJson!) as Map<String, dynamic>;
+        final positive = comment['v4_prompt'] as Map<String, dynamic>;
+        expect(positive['use_coords'], isTrue);
+        final captions = (positive['caption'] as Map)['char_captions'] as List;
+        expect(captions.single['char_caption'], 'submitted character');
+        expect(captions.single['centers'], [
+          {'x': .2, 'y': .7},
+        ]);
+        expect(
+          container.read(generationParamsNotifierProvider).prompt,
+          'next positive',
+        );
+        expect(
+          container.read(characterPromptNotifierProvider).globalAiChoice,
+          isTrue,
+        );
+      },
+    );
 
     for (final outcome in ['failure', 'cancel', 'late failure after new run']) {
       test(

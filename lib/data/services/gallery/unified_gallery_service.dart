@@ -559,13 +559,7 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
     _sortFileListByCache(files);
   }
 
-  /// 收藏变更后的列表同步。
-  ///
-  /// 排序字段不含收藏维度，收藏切换不改变任何文件的排序键；旧实现每次都对
-  /// 全部 `_allFiles`（约 4.9 万张）重排，只为安放 [_trackFileIfMissing]
-  /// 新插入的文件。这里改为：已跟踪 → 零移动；新跟踪 → 单点二分归位；
-  /// 仅当列表刚被 [refresh] 重建（可能与当前排序不一致）时才走全量重排。
-  Future<void> _syncFileListsAfterFavoriteChange(File file) async {
+  Future<void> _syncTrackedFile(File file) async {
     final inserted = _trackFileIfMissing(file);
     // 与旧路径同口径补齐排序键（stat；尺寸排序时含 DB 面积补齐）
     await _ensureFileStats(_allFiles);
@@ -1417,7 +1411,7 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
         if (!isFavorite) {
           await _dataSource.removeImagesFromAllCollections([imageId]);
         }
-        await _syncFileListsAfterFavoriteChange(file);
+        await _syncTrackedFile(file);
         return isFavorite;
       }
 
@@ -1433,7 +1427,7 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
           modifiedAt: stat.modified,
         );
         final isFavorite = await _dataSource.toggleFavorite(newId);
-        await _syncFileListsAfterFavoriteChange(file);
+        await _syncTrackedFile(file);
         return isFavorite;
       }
 
@@ -1499,7 +1493,7 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
           .removeImagesFromAllCollections(imageIds);
       if (removed > 0 || clearedFromCollections > 0) {
         // 重放当前过滤，让移除的图片从收藏根/集合视图即时消失
-        await _syncFileListsAfterFavoriteChange(File(resolvedPaths.first));
+        await _syncTrackedFile(File(resolvedPaths.first));
       }
       return removed;
     } catch (e) {
@@ -1565,23 +1559,27 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
         return false;
       }
 
-      // 检查是否已存在
-      final existingIndex = _allFiles.indexWhere(
-        (f) => galleryFilePathsEqual(f.path, file.path),
-      );
-      if (existingIndex != -1) {
-        AppLogger.d(
-          '[AddNewImage] File already exists in gallery: $filePath',
-          'LocalGalleryService',
-        );
-        return false;
-      }
-
       final stat = await file.stat();
       final fileName = p.basename(file.path);
+      final existing = (await _dataSource.readImagesForPaths([
+        file.path,
+      ])).firstOrNull;
+      if (existing?.isDeleted == true) return false;
+      if (existing != null &&
+          existing.lastScannedAt != null &&
+          existing.fileSize == stat.size &&
+          existing.modifiedAt.millisecondsSinceEpoch ==
+              stat.modified.millisecondsSinceEpoch &&
+          (existing.metadataStatus == MetadataStatus.success ||
+              existing.metadataStatus == MetadataStatus.imported)) {
+        await _syncTrackedFile(file);
+        return true;
+      }
 
-      // 1. 插入/更新数据库（使用 upsert）
-      final metadataStatus = metadata != null && metadata.hasData
+      metadata ??= await ImageMetadataService().getMetadataForScan(file.path);
+      final metadataStatus = metadata == null
+          ? MetadataStatus.failed
+          : metadata.hasData
           ? MetadataStatus.success
           : MetadataStatus.none;
 
@@ -1592,19 +1590,19 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
         width: metadata?.width,
         height: metadata?.height,
         aspectRatio: _calculateAspectRatio(metadata?.width, metadata?.height),
-        createdAt: stat.modified,
+        createdAt: existing?.createdAt ?? stat.modified,
         modifiedAt: stat.modified,
         resolutionKey: metadata?.width != null && metadata?.height != null
             ? '${metadata!.width}x${metadata.height}'
             : null,
-        lastScannedAt: DateTime.now(),
+        isFavorite: existing?.isFavorite,
+        lastScannedAt: metadata == null ? null : DateTime.now(),
         metadataStatus: metadataStatus,
       );
 
       // 2. 如果有元数据，保存到数据库
-      if (metadata != null && metadata.hasData) {
+      if (metadata != null) {
         await _dataSource.upsertMetadata(imageId, metadata);
-        ImageMetadataService().cacheMetadata(file.path, metadata);
       }
 
       // 3. 添加到 _allFiles 并按当前排序归位（不假设"最新在最前"）
@@ -1615,17 +1613,8 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
         area: _calculateArea(metadata?.width, metadata?.height),
       );
       _dimensionsChecked.remove(file.path);
-      _allFiles.add(file);
-      await _sortFileList(_allFiles);
-      // 全量重排后列表与当前排序一致，无需再做收藏变更时的兜底重排
-      _allFilesNeedsResort = false;
-
-      // 4. 重新应用过滤（如果有过滤条件）
-      if (_currentFilter.hasFilters) {
-        await applyFilter(_currentFilter);
-      } else {
-        _filteredFiles = _allFiles;
-      }
+      _dimensions.remove(file.path);
+      await _syncTrackedFile(file);
 
       AppLogger.i(
         '[AddNewImage] Added new image immediately: $fileName (ID: $imageId)',

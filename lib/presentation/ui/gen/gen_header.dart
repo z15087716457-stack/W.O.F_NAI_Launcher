@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/utils/localization_extension.dart';
-import '../kit/ui_resource_kind.dart';
 import '../../widgets/navigation/window_chrome_layout.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_controls.dart';
@@ -17,13 +16,8 @@ import 'gen_parts.dart';
 /// 左：模型胶囊（点模型名弹菜单，点 Anime / Furry 切模式）；右：额度胶囊；最右收起钮。
 /// 放不下时额度胶囊整块换到第二行靠左。
 class GenHeader extends StatelessWidget {
-  const GenHeader({
-    super.key,
-    this.collapsible = true,
-    this.onOpenResourceWindow,
-  });
+  const GenHeader({super.key, this.collapsible = true});
   final bool collapsible;
-  final ValueChanged<FloatingResourceKind>? onOpenResourceWindow;
 
   @override
   Widget build(BuildContext context) {

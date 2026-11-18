@@ -19,7 +19,9 @@ ComfyuiImportCommit beginGenerationComfyuiImport(
   Ref ref, {
   bool Function()? alive,
 }) {
-  final commit = ref.read(generationBackendProvider).captureDraft(alive: alive);
+  final commit = ref
+      .read(generationBackendProvider)
+      .captureDraft(alive: alive, promptEdit: true);
   return (prompt, characters) => commit(() {
     final spec = ModelSpecs.of(
       ref.read(generationParamsNotifierProvider).model,

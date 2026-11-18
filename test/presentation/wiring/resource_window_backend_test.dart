@@ -323,6 +323,11 @@ class NativeWindows extends ResourceWindowService {
   final changes = <FloatingResourceKind>[];
   final views = <String>[];
   @override
+  Future<void> toggleQuick({bool fromPointer = false}) async {
+    await openKind(lastKind);
+  }
+
+  @override
   Future<void> changed(FloatingResourceKind kind) async {
     changes.add(kind);
   }
@@ -967,9 +972,7 @@ void main() {
   test(
     'records and layout changes do not announce content; mutations and scan completion do',
     () async {
-      await container
-          .read(resourceWindowOpenerProvider)
-          .open(FloatingResourceKind.gallery);
+      await container.read(resourceWindowOpenerProvider).toggle();
       await container.read(blocksPreferencesProvider.future);
       native.changes.clear();
       native.views.clear();
@@ -1235,13 +1238,14 @@ void main() {
   );
 
   test(
-    'Windows opener attaches the primary backend and forwards every kind to native windows',
+    'Windows quick opener restores the last tab and attaches the primary backend',
     () async {
       final opener = container.read(resourceWindowOpenerProvider);
-      for (final kind in FloatingResourceKind.values) {
-        await opener.open(kind);
-      }
-      expect(native.opened, FloatingResourceKind.values);
+      await container
+          .read(localStorageServiceProvider)
+          .setSetting('resource_window_last_kind', 'blocks');
+      await opener.toggle();
+      expect(native.opened, [FloatingResourceKind.blocks]);
       expect(native.host.backend, same(backend));
       final args = await native.argumentsFor!(FloatingResourceKind.blocks);
       expect(args.kind, FloatingResourceKind.blocks);

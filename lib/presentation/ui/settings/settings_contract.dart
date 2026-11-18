@@ -2140,6 +2140,7 @@ class SettingsActions {
     this.onDanbooruLogin = _none,
     // 备份
     this.onExportPreferences = _none,
+    this.onImportInstallation,
     this.onImportPreferences = _none,
     this.onUndoImport = _none,
     this.onResetScopes = _noScopes,
@@ -2371,6 +2372,7 @@ class SettingsActions {
   final VoidCallback onDanbooruLogin;
 
   final VoidCallback onExportPreferences;
+  final VoidCallback? onImportInstallation;
   final VoidCallback onImportPreferences;
   final VoidCallback onUndoImport;
 

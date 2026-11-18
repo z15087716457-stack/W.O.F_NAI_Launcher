@@ -9,6 +9,39 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
+  String get set_importInstallation => '从旧版目录迁移';
+
+  @override
+  String get set_importInstallationHelp =>
+      '在同一台电脑上恢复账号、偏好、快捷键和素材目录。选择旧版的安装目录或 user-data。';
+
+  @override
+  String get set_importInstallationInvalid =>
+      '请选择另一份 Studio 安装目录，或其中包含 hive/settings.hive 的 user-data 文件夹。';
+
+  @override
+  String set_importInstallationPreview(int accounts, int prefs) {
+    return '找到 $accounts 个账号和 $prefs 项偏好。已有账号会跳过；下列设置将应用到当前版本。素材继续从所列目录读取，请保留这些目录。';
+  }
+
+  @override
+  String get set_importMissingFolder => '找不到此目录。可选择新位置；留空将跳过。';
+
+  @override
+  String get set_importCategoryBase => '图库分类目录';
+
+  @override
+  String get set_importEmptyGallery => '旧版图库来源为空，迁移后会清空当前来源列表。';
+
+  @override
+  String get set_importInstallationChanged => '预览期间目录设置已变更，请重新选择旧版目录。';
+
+  @override
+  String set_importInstallationDone(int added, int missing) {
+    return '已完成迁移，新增 $added 个账号。其中 $missing 个未找到可复用的登录凭据，可在账号页重新登录。';
+  }
+
+  @override
   String get app_title => 'W.O.F NAI Studio';
 
   @override
@@ -21707,6 +21740,21 @@ class AppLocalizationsZh extends AppLocalizations {
       '↑↓ 选择 · ← 返回 · Tab / 回车 追加 · Esc 关闭关联';
 
   @override
+  String get resourceWindow_show => '打开资源小窗';
+
+  @override
+  String get resourceWindow_hide => '收起资源小窗';
+
+  @override
+  String get resourceWindow_recall => '唤回资源小窗';
+
+  @override
+  String get resourceWindow_inBackground => '后台';
+
+  @override
+  String get resourceWindow_opened => '已打开';
+
+  @override
   String get resourceWindow_pin => '窗口置顶';
 
   @override
@@ -22009,6 +22057,39 @@ class AppLocalizationsZh extends AppLocalizations {
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
 class AppLocalizationsZhTw extends AppLocalizationsZh {
   AppLocalizationsZhTw() : super('zh_TW');
+
+  @override
+  String get set_importInstallation => '從舊版目錄遷移';
+
+  @override
+  String get set_importInstallationHelp =>
+      '在同一臺電腦上恢復帳號、偏好、快速鍵和素材目錄。選擇舊版的安裝目錄或 user-data。';
+
+  @override
+  String get set_importInstallationInvalid =>
+      '請選擇另一份 Studio 安裝目錄，或其中包含 hive/settings.hive 的 user-data 資料夾。';
+
+  @override
+  String set_importInstallationPreview(int accounts, int prefs) {
+    return '找到 $accounts 個帳號和 $prefs 項偏好。已有帳號會跳過；下列設定將應用到當前版本。素材繼續從所列目錄讀取，請保留這些目錄。';
+  }
+
+  @override
+  String get set_importMissingFolder => '找不到此目錄。可選擇新位置；留空將跳過。';
+
+  @override
+  String get set_importCategoryBase => '圖庫分類目錄';
+
+  @override
+  String get set_importEmptyGallery => '舊版圖庫來源為空，遷移後會清空當前來源列表。';
+
+  @override
+  String get set_importInstallationChanged => '預覽期間目錄設定已變更，請重新選擇舊版目錄。';
+
+  @override
+  String set_importInstallationDone(int added, int missing) {
+    return '已完成遷移，新增 $added 個帳號。其中 $missing 個未找到可複用的登入憑據，可在帳號頁重新登入。';
+  }
 
   @override
   String get app_title => 'W.O.F NAI Studio';
@@ -43707,6 +43788,21 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   @override
   String get prompt_autocompleteHintRelated =>
       '↑↓ 選擇 · ← 返回 · Tab / 回車 追加 · Esc 關閉關聯';
+
+  @override
+  String get resourceWindow_show => '開啟資源小窗';
+
+  @override
+  String get resourceWindow_hide => '收起資源小窗';
+
+  @override
+  String get resourceWindow_recall => '喚回資源小窗';
+
+  @override
+  String get resourceWindow_inBackground => '後臺';
+
+  @override
+  String get resourceWindow_opened => '已開啟';
 
   @override
   String get resourceWindow_pin => '視窗置頂';

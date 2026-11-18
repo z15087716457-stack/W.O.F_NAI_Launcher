@@ -61,6 +61,26 @@ void main() {
     });
 
     test(
+      'ordinary scan recovers an old auto-save placeholder with its original ID',
+      () async {
+        final file = await _createWrappedNovelAiPng(
+          tempDir,
+          '23-46-29-2926648663.png',
+          prompt: 'cloud',
+        );
+        final id = await _seedStaleNoneRecord(dataSource, file);
+        final scanner = GalleryStreamScanner(dataSource: dataSource);
+        await scanner.startScanning([tempDir]);
+        expect(await dataSource.getImageIdByPath(file.path), id);
+        expect(await dataSource.getImageIdsWithMetadata(), contains(id));
+        expect(
+          (await dataSource.getImageById(id))?.metadataStatus,
+          MetadataStatus.success,
+        );
+      },
+    );
+
+    test(
       'should skip stale none records during default incremental scan',
       () async {
         final file = await _createWrappedNovelAiPng(

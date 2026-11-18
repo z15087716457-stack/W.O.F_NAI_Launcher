@@ -43,6 +43,42 @@ Map<String, Object?> page(Map<String, Object?> args, {String id = 'a'}) => {
   'sortId': 'updated',
 };
 void main() {
+  test(
+    'hidden content updates coalesce until the window is shown again',
+    () async {
+      final calls = <String>[];
+      final controller = ResourceWindowController(
+        windowId: 'hidden',
+        kind: FloatingResourceKind.blocks,
+        invoke: (method, args) async {
+          calls.add(method);
+          return method == 'resources.query'
+              ? {...page(args), 'hasMore': false}
+              : null;
+        },
+      );
+      addTearDown(controller.dispose);
+      await controller.initialize();
+      calls.clear();
+      controller.visibilityChanged(false);
+      for (var revision = 0; revision < 20; revision++) {
+        controller.changed({'kind': 'blocks', 'revision': revision});
+      }
+      expect(calls, isEmpty);
+      controller.visibilityChanged(true);
+      await Future<void>.delayed(Duration.zero);
+      expect(
+        calls.where((method) => method == 'resources.query'),
+        hasLength(1),
+      );
+      controller.visibilityChanged(true);
+      await Future<void>.delayed(Duration.zero);
+      expect(
+        calls.where((method) => method == 'resources.query'),
+        hasLength(1),
+      );
+    },
+  );
   test('appearance updates change scale without reloading resources', () {
     final controller = ResourceWindowController(
       windowId: 'scale',

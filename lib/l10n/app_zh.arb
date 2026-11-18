@@ -1,4 +1,15 @@
 {
+  "set_importInstallation": "从旧版目录迁移",
+  "set_importInstallationHelp": "在同一台电脑上恢复账号、偏好、快捷键和素材目录。选择旧版的安装目录或 user-data。",
+  "set_importInstallationInvalid": "请选择另一份 Studio 安装目录，或其中包含 hive/settings.hive 的 user-data 文件夹。",
+  "set_importInstallationPreview": "找到 {accounts} 个账号和 {prefs} 项偏好。已有账号会跳过；下列设置将应用到当前版本。素材继续从所列目录读取，请保留这些目录。",
+  "@set_importInstallationPreview": {"placeholders":{"accounts":{"type":"int"},"prefs":{"type":"int"}}},
+  "set_importMissingFolder": "找不到此目录。可选择新位置；留空将跳过。",
+  "set_importCategoryBase": "图库分类目录",
+  "set_importEmptyGallery": "旧版图库来源为空，迁移后会清空当前来源列表。",
+  "set_importInstallationChanged": "预览期间目录设置已变更，请重新选择旧版目录。",
+  "set_importInstallationDone": "已完成迁移，新增 {added} 个账号。其中 {missing} 个未找到可复用的登录凭据，可在账号页重新登录。",
+  "@set_importInstallationDone": {"placeholders":{"added":{"type":"int"},"missing":{"type":"int"}}},
   "@@locale": "zh",
   "@blocks_cropRange": {
     "placeholders": {
@@ -11638,6 +11649,11 @@
   "prompt_autocompleteTitle": "补全",
   "prompt_autocompleteHint": "↑↓ 选择 · → 关联 · ← 返回 · Tab / 回车 补全 · Esc 关闭",
   "prompt_autocompleteHintRelated": "↑↓ 选择 · ← 返回 · Tab / 回车 追加 · Esc 关闭关联",
+  "resourceWindow_show": "打开资源小窗",
+  "resourceWindow_hide": "收起资源小窗",
+  "resourceWindow_recall": "唤回资源小窗",
+  "resourceWindow_inBackground": "后台",
+  "resourceWindow_opened": "已打开",
   "resourceWindow_pin": "窗口置顶",
   "resourceWindow_newWindow": "新开一个资源窗口",
   "resourceWindow_rowHeight": "行高",

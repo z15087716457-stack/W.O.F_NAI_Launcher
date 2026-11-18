@@ -23,13 +23,9 @@ import 'package:nai_launcher/presentation/wiring/generation_backend.dart';
 import 'package:nai_launcher/presentation/wiring/generation_settings.dart';
 import 'package:nai_launcher/presentation/providers/generation/image_workflow_controller.dart';
 import '../providers/krita/agent_bridge_draft_test.dart'
-    show
-        MemoryCharacters,
-        MemoryDraftSettings,
-        EmptyBlocks,
-        IdleGeneration,
-        OfflineAuth;
-import 'generation_backend_test.dart' show MemoryGenerationPlatform;
+    show MemoryCharacters, MemoryDraftSettings, EmptyBlocks, OfflineAuth;
+import 'generation_backend_test.dart'
+    show MemoryGenerationPlatform, RecordingGeneration;
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -45,7 +41,7 @@ void main() {
       overrides: [
         localStorageServiceProvider.overrideWithValue(MemoryDraftSettings()),
         characterPromptRepositoryProvider.overrideWithValue(MemoryCharacters()),
-        imageGenerationNotifierProvider.overrideWith(IdleGeneration.new),
+        imageGenerationNotifierProvider.overrideWith(RecordingGeneration.new),
         authNotifierProvider.overrideWith(OfflineAuth.new),
         promptBlockLibraryNotifierProvider.overrideWith(EmptyBlocks.new),
         generationPlatformProvider.overrideWithValue(
@@ -60,6 +56,34 @@ void main() {
     container.dispose();
     await Hive.close();
     await directory.delete(recursive: true);
+  });
+  test('生成中角色草稿可增删、命名、启停与排序', () async {
+    final generation =
+        container.read(imageGenerationNotifierProvider.notifier)
+            as RecordingGeneration;
+    generation.setGenerating();
+    await settings.renameCharacter('kept', 'next character');
+    await settings.characterEnabled('kept', true);
+    await settings.addCharacter(GenGender.female);
+    await settings.moveCharacter('kept', 1);
+    final characters = container
+        .read(characterPromptNotifierProvider)
+        .characters;
+    expect(characters, hasLength(2));
+    expect(characters.last.id, 'kept');
+    expect(characters.last.name, 'next character');
+    expect(characters.last.enabled, isTrue);
+    await settings.removeCharacter('kept');
+    expect(
+      container.read(characterPromptNotifierProvider).characters,
+      hasLength(1),
+    );
+    await settings.clearCharacters();
+    expect(container.read(characterPromptNotifierProvider).characters, isEmpty);
+    expect(
+      container.read(imageGenerationNotifierProvider).isGenerating,
+      isTrue,
+    );
   });
   test(
     'Turbo toggles preserve Full settings, negative draft and saved defaults',
