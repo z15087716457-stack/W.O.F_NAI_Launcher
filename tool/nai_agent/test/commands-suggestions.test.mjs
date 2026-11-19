@@ -6,6 +6,17 @@ import { fileURLToPath } from 'node:url';
 import { hostFixture, finishReply } from './fixture-host.mjs';
 import { NextSuggestion } from '../lib/next-suggestion.mjs';
 
+test('streamed updates carry one cumulative message and retain text deltas', async () => {
+  const f = await hostFixture({ config: { nextSuggestion: false }, respond: res => finishReply(res, 'local reply') });
+  try {
+    const reply = await f.request('prompt', { text: 'synthetic stream' });
+    const updates = f.events.filter(e => e.event?.type === 'message_update').map(e => e.event);
+    assert.ok(updates.some(e => e.assistantMessageEvent.type === 'text_delta' && e.assistantMessageEvent.delta === 'local reply'));
+    assert.ok(updates.every(e => e.message.role === 'assistant' && !('partial' in e.assistantMessageEvent)));
+    assert.equal(reply.messages.at(-1).content[0].text, 'local reply');
+  } finally { await f.close(); }
+});
+
 test('cache warming defaults to streaming; init and live changes reach Pi', async () => {
   const f = await hostFixture();
   try {

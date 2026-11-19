@@ -64,7 +64,6 @@
     }
   },
   "app_title": "W.O.F NAI Studio",
-  "settings_visualAssets": "界面字体与许可",
   "brand_entryTagline": "给想象，一个发生的地方。",
   "brand_switchToLight": "切换到浅色",
   "brand_switchToDark": "切换到深色",
@@ -73,7 +72,6 @@
   "common_confirm": "确定",
   "common_continue": "继续",
   "common_selectAll": "全选",
-  "common_deselectAll": "全不选",
   "common_save": "保存",
   "common_delete": "删除",
   "common_edit": "编辑",
@@ -90,7 +88,6 @@
   "common_select": "选择",
   "common_reset": "重置",
   "common_add": "添加",
-  "common_added": "已添加",
   "common_confirmDelete": "确认删除",
   "common_confirmClear": "确认清空",
   "common_gotIt": "知道了",
@@ -108,12 +105,6 @@
     }
   },
   "common_clearInputConfirm": "确定要清空输入内容吗？",
-  "common_daysAgo": "{days}天前",
-  "@common_daysAgo": {
-    "placeholders": {
-      "days": {}
-    }
-  },
   "common_undo": "撤销",
   "common_redo": "重做",
   "common_refresh": "刷新",
@@ -178,7 +169,7 @@
   "auth_imageApiSiteHint": "留空则使用同一个第三方 API 站点",
   "auth_thirdPartyNicknameHint": "例如：自建站点 / 镜像站点",
   "auth_thirdPartyTokenHint": "请输入 API Token，或粘贴 New API 连接 JSON",
-  "auth_thirdPartyCompatibilityHint": "支持 NovelAI 兼容接口，登录时识别常见的 /v1 和 /v1/novelai 路径。第三方价格与余额单位以站点为准，不套用官网 Opus 免费规则。",
+  "auth_thirdPartyCompatibilityHint": "支持 NovelAI 兼容接口，登录时识别常见的 /v1 和 /v1/novelai 路径。点数按 NovelAI 官网规则预估，余额从当前接口读取。",
   "auth_thirdPartyApiSiteRequired": "请输入第三方 API 站点地址",
   "auth_validateAndLogin": "验证并登录",
   "auth_tokenGuide": "从 NovelAI 账户设置获取 Token",
@@ -230,55 +221,18 @@
   "auth_troubleshoot_serverStatus_desc": "访问 NovelAI 状态页面或社区查看服务中断情况",
   "common_paste": "粘贴",
   "common_default": "默认",
-  "settings_title": "设置",
-  "settings_savedAccounts": "已保存账号",
-  "settings_style": "风格",
-  "settings_font": "字体",
   "settings_language": "语言",
-  "settings_shortcuts": "快捷键",
-  "settings_generationInputSection": "输入",
-  "settings_generationFeedbackSection": "完成提醒",
-  "settings_selectFont": "选择字体",
-  "settings_selectLanguage": "选择语言",
   "settings_loadFailed": "加载失败: {error}",
   "settings_imageSavePath": "图片保存位置",
   "settings_autoSave": "自动保存",
   "settings_autoSaveSubtitle": "生成后自动保存图片",
-  "settings_extraRootsTitle": "图库来源",
-  "settings_extraRootsHint": "添加的文件夹用于浏览和搜索；父文件夹会合并其下已收录的来源。移除不删除图片，也不改变保存位置。",
-  "settings_extraRootsEmpty": "尚未添加额外图库源",
-  "settings_extraRootsAdd": "添加文件夹",
   "settings_extraRootsAddTitle": "选择要添加的图库源文件夹",
-  "settings_extraRootsRemove": "移除该图库源",
-  "settings_extraRootsRemoveConfirmTitle": "移除图库源？",
-  "settings_extraRootsRemoveConfirmContent": "将「{path}」从画廊中移除（不会删除文件夹中的任何文件）。",
   "settings_extraRootsAdded": "图库源已添加并完成扫描",
   "settings_extraRootsScanFailed": "文件夹已添加，但扫描未完成，请在画廊中重试刷新",
   "settings_extraRootsWaitingScan": "当前图库正在扫描，完成后会继续导入此文件夹",
-  "settings_extraRootsRemoved": "图库源已移除",
   "settings_extraRootsDuplicate": "该文件夹已在图库源中",
   "settings_extraRootsNested": "这个文件夹已包含在现有图库来源中，无需重复添加",
   "settings_extraRootsNotFound": "所选文件夹不存在",
-  "@settings_extraRootsRemoveConfirmContent": {
-    "placeholders": {
-      "path": {
-        "type": "String"
-      }
-    }
-  },
-  "settings_importTagIndex": "导入标签索引…",
-  "settings_importTagIndexPickTitle": "选择标签索引文件 (.jsonl)",
-  "settings_importTagIndexProgress": "正在导入 {processed}/{total} 行…",
-  "@settings_importTagIndexProgress": {
-    "placeholders": {
-      "processed": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
   "settings_importTagIndexDone": "导入完成：新增 {imported}，更新 {updated}，跳过 {skipped}，错误 {errors}",
   "@settings_importTagIndexDone": {
     "placeholders": {
@@ -308,30 +262,15 @@
     }
   },
   "settings_extraRootsIndexImportConfirm": "现在导入",
-  "settings_version": "版本 {version}",
-  "settings_openSource": "开源项目",
-  "settings_openSourceSubtitle": "查看源代码和文档",
-  "settings_fileLogging": "记录应用日志",
-  "settings_fileLoggingSubtitle": "默认关闭；仅在排查问题时开启。开启后会写入 Documents/NAI_Launcher/logs，关闭后不再创建或写入日志文件。",
-  "settings_pathReset": "已重置为默认路径",
-  "settings_pathSaved": "保存路径已更新",
-  "settings_selectFolder": "选择保存文件夹",
-  "settings_vibeLibraryPath": "Vibe库路径",
-  "settings_hiveStoragePath": "数据存储路径",
-  "settings_selectVibeLibraryFolder": "选择Vibe库文件夹",
-  "settings_selectHiveFolder": "选择数据存储文件夹",
-  "settings_pathSavedRestartRequired": "路径已更新，重启后生效",
   "settings_accountType": "账号类型",
   "settings_subscriptionExpiry": "订阅到期",
   "settings_thirdPartyApiAccount": "第三方站点 API",
-  "settings_goToLogin": "去登录",
   "settings_changeAvatar": "更换头像",
   "settings_removeAvatar": "移除头像",
   "settings_accountEmail": "账号邮箱",
   "settings_emailAccount": "邮箱登录",
   "settings_tokenAccount": "Token登录",
   "settings_setAsDefault": "设为默认",
-  "settings_defaultAccount": "默认",
   "settings_nickname": "昵称",
   "settings_nicknameUpdated": "昵称已更新",
   "settings_avatarUpdated": "头像已更新",
@@ -392,69 +331,28 @@
   "generation_imageSize": "图像尺寸",
   "generation_sampler": "采样器",
   "generation_steps": "步数: {steps}",
-  "generation_stepsLabel": "步数",
-  "generation_guidance": "引导",
   "generation_cfgScale": "提示词引导：{scale}",
   "generation_seed": "种子",
   "generation_seedRandom": "随机",
-  "generation_samplerRecommended": "推荐",
-  "generation_samplerOther": "其他",
-  "generation_advancedOptions": "高级选项",
   "generation_smea": "SMEA",
-  "generation_smeaSubtitle": "改善大图像的生成质量",
   "generation_smeaDyn": "SMEA DYN",
-  "generation_smeaDescription": "高分辨率采样器会在超过一定图像尺寸时自动使用",
   "generation_cfgRescale": "提示词引导重缩放：{value}",
   "generation_noiseSchedule": "噪声调度",
-  "generation_modelGroupNew": "最新",
-  "generation_modelGroupLegacy": "旧版",
   "generation_modelDesc_v5Curated": "NovelAI 的最新模型，基于精选图像子集训练。推荐用于流式传输。",
   "generation_modelDesc_v5Full": "NovelAI 最新且最强的模型。",
   "generation_modelDesc_v45Curated": "基于精选图像子集训练的 V4.5 模型。不再推荐使用。",
   "generation_modelDesc_v45Full": "NovelAI 的 V4.5 全量模型。",
   "generation_modelDesc_v4Curated": "基于精选图像子集训练的 V4 模型。",
   "generation_modelDesc_v4Full": "NovelAI 的 V4 全量模型。",
-  "generation_sectionCharacters": "角色提示词",
-  "generation_sectionCharactersSub": "为场景中的角色创建独立提示词。",
-  "character_positionLabel": "定位",
   "anlas_subscription": "订阅赠送",
   "anlas_purchased": "付费购买",
   "prompt_positive": "正面",
-  "prompt_baseTab": "基础提示词",
   "prompt_negativeTab": "负面",
-  "prompt_transparentBg": "透明通道",
-  "prompt_chunksMenu": "模块与开关",
   "qualityTags_presetChip": "质量词预设",
   "ucPreset_presetChip": "负面词预设",
   "prompt_positivePrompt": "正向提示词",
   "prompt_negativePrompt": "负向提示词",
   "prompt_mainPositive": "主提示词（正面）",
-  "prompt_mainNegative": "主提示词（负面）",
-  "prompt_characterPrompts": "多角色提示词",
-  "prompt_finalPrompt": "最终生效提示词",
-  "prompt_finalNegative": "最终生效负面词",
-  "prompt_importedCharacters": "已导入 {count} 个角色",
-  "@prompt_importedCharacters": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "prompt_characterPromptReplaced": "已替换角色提示词",
-  "prompt_characterPromptAppended": "已追加角色提示词 ({count} 个角色)",
-  "@prompt_characterPromptAppended": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "prompt_smartDecomposedWithCharacters": "已分解：主提示词 + {count} 个角色",
-  "@prompt_smartDecomposedWithCharacters": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "prompt_appliedToMainPrompt": "已应用到主提示词",
   "prompt_searchHint": "搜索提示词",
   "prompt_searchMatchCount": "{current} / {total}",
   "@prompt_searchMatchCount": {
@@ -477,16 +375,8 @@
     }
   },
   "kritaBridge_busyGenerating": "Krita Bridge 正在生成，请等待当前任务结束",
-  "prompt_unwantedContent": "不想出现在图像中的内容...",
-  "prompt_autoFormat": "自动格式化",
-  "prompt_autoFormatSubtitle": "规范逗号与空白，移除无效的 1 倍权重符号",
-  "prompt_highlightEmphasis": "高亮强调",
-  "prompt_highlightEmphasisSubtitle": "括号和权重语法高亮显示",
-  "prompt_sdSyntaxAutoConvert": "SD语法自动转换",
-  "prompt_sdSyntaxAutoConvertSubtitle": "失焦或生成时将 SD 权重语法转换为 NAI 格式",
   "prompt_formatted": "已格式化",
   "prompt_cooccurrenceRecommendation": "标签扩展",
-  "prompt_cooccurrenceRecommendationSubtitle": "按住 Ctrl 点击标签或拖选文字，搜索标签与相关推荐；Mac 使用 ⌘。",
   "image_save": "保存",
   "image_copy": "复制",
   "image_upscale": "放大",
@@ -494,30 +384,13 @@
   "image_saveFailed": "保存失败: {error}",
   "image_copiedToClipboard": "已复制到剪贴板",
   "image_copyFailed": "复制失败: {error}",
-  "img2img_title": "图生图",
-  "img2img_subtitle": "基于底图生成变体",
-  "img2img_enabled": "已启用",
-  "img2img_sourceImage": "源图像",
   "img2img_strength": "变化强度",
-  "img2img_strengthHint": "值越高，生成的图像与原图差异越大",
   "img2img_noise": "噪声量",
-  "img2img_noiseHint": "添加额外噪声以增加变化",
-  "img2img_clearSettings": "清除图生图设置",
-  "img2img_changeImage": "更换图片",
-  "img2img_removeImage": "移除图片",
-  "img2img_selectFailed": "选择图片失败: {error}",
   "img2img_editImage": "编辑图像",
   "img2img_placeOnCanvas": "放入画布",
   "img2img_editApplied": "已将编辑结果设为新的源图",
-  "img2img_uploadImage": "上传图片",
-  "img2img_dropToAdd": "松开以设为底图",
   "img2img_moreActions": "更多操作",
-  "img2img_drawSketch": "绘制草图",
   "img2img_inpaint": "局部重绘",
-  "img2img_inpaintStrength": "重绘强度",
-  "img2img_inpaintStrengthHint": "值越高，蒙版区域与当前源图差异越大",
-  "img2img_inpaintPendingHint": "点击“局部重绘”进入画布，用画笔、橡皮或选区工具标出需要重绘的区域。返回这里后，点击主生成按钮即可只重绘蒙版区域。",
-  "img2img_inpaintReadyHint": "遮罩已载入。当前会按局部重绘方式提交，只有蒙版区域会被重新生成。",
   "img2img_inpaintMaskReady": "局部重绘遮罩已准备好",
   "generation_variationOriginal": "原图",
   "generation_requestCostInvalid": "当前请求超出支持的范围，请减小图片尺寸或降低步数。",
@@ -533,8 +406,6 @@
   "img2img_directorEmotion": "表情修复",
   "img2img_directorDeclutter": "杂线清理",
   "img2img_enhance": "增强",
-  "img2img_enhanceMagnitude": "幅度",
-  "img2img_enhanceUpscaleAmount": "放大倍数",
   "img2img_enhanceMax": "Max✨",
   "img2img_novelAiCloudUpscale": "NovelAI 云端超分（固定 2x 放大）",
   "img2img_novelAiCloudUpscaleTitle": "NovelAI 云端超分",
@@ -545,7 +416,6 @@
   "img2img_upscaleRegularModel": "普通模型",
   "img2img_upscaleModel": "超分模型",
   "img2img_startUpscale": "开始超分",
-  "img2img_novelAiUpscaleComplete": "NovelAI 超分完成",
   "img2img_decodeSourceFailed": "无法解码源图像",
   "editor_tolerance": "容差",
   "editor_intensity": "强度",
@@ -557,17 +427,7 @@
   "editor_undo": "撤销",
   "editor_redo": "重做",
   "editor_clearLayer": "清除图层",
-  "editor_toolBrush": "画笔",
-  "editor_toolEraser": "橡皮擦",
   "editor_toolFill": "填充",
-  "editor_toolMagicWand": "魔棒",
-  "editor_magicWandMode": "选择方式",
-  "editor_magicWandSmartObject": "智能对象（EfficientViT）",
-  "editor_magicWandColorArea": "颜色区域（洪水填充）",
-  "editor_magicWandSmartHelp": "点击要选择的对象。首次使用会从 MIT Han Lab 下载约 133 MiB 的 EfficientViT-SAM L0 模型（Apache-2.0），之后保存在本地。",
-  "editor_magicWandColorHelp": "点击颜色相近的连续区域。适合边界清晰的纯色图像，无需下载模型。",
-  "editor_magicWandInvert": "反选结果",
-  "editor_toolLine": "直线",
   "editor_toolRectSelect": "矩形选框",
   "editor_toolEllipseSelect": "椭圆选框",
   "editor_toolLassoSelect": "套索选区",
@@ -575,11 +435,7 @@
   "editor_toolCloneStamp": "仿制图章",
   "editor_toolBlur": "模糊",
   "editor_layers": "图层",
-  "editor_fillClosedRegion": "填充封闭区域",
   "editor_resetMask": "重置蒙版",
-  "editor_zoomIn": "放大",
-  "editor_zoomOut": "缩小",
-  "editor_fitToWindow": "适应窗口",
   "editor_effectBrightness": "亮度",
   "editor_effectSaturation": "饱和度",
   "editor_changeCanvasSize": "更改画布尺寸",
@@ -613,44 +469,6 @@
     }
   },
   "editor_canvasSizeTitle": "画布尺寸",
-  "editor_presetSize": "预设尺寸",
-  "editor_customSize": "自定义",
-  "editor_contentHandling": "内容处理",
-  "editor_contentCrop": "裁剪",
-  "editor_contentPad": "填充",
-  "editor_contentStretch": "拉伸",
-  "editor_width": "宽度",
-  "editor_height": "高度",
-  "editor_lockAspectRatio": "锁定比例",
-  "editor_unlockAspectRatio": "取消锁定比例",
-  "editor_sizePreview": "尺寸预览",
-  "editor_originalSize": "原始",
-  "editor_newSize": "新尺寸",
-  "editor_cropModeDescription": "裁剪模式 - 保持比例裁剪",
-  "editor_padModeDescription": "填充模式 - 保持比例填充",
-  "editor_stretchModeDescription": "拉伸模式 - 拉伸至填满",
-  "editor_canvasPresetSquare": "方形 {size}",
-  "@editor_canvasPresetSquare": {
-    "placeholders": {
-      "size": {}
-    }
-  },
-  "editor_canvasPresetLandscape": "横向 {ratio}",
-  "@editor_canvasPresetLandscape": {
-    "placeholders": {
-      "ratio": {}
-    }
-  },
-  "editor_canvasPresetPortrait": "纵向 {ratio}",
-  "@editor_canvasPresetPortrait": {
-    "placeholders": {
-      "ratio": {}
-    }
-  },
-  "editor_canvasPresetNaiPortrait": "NAI 纵向",
-  "editor_canvasPresetNaiLandscape": "NAI 横向",
-  "editor_canvasPresetFullHd": "全高清 16:9",
-  "editor_colorPanelTitle": "颜色",
   "editor_colorPickerTitle": "选择颜色",
   "editor_brushSettings": "画笔设置",
   "editor_eraserSettings": "橡皮擦设置",
@@ -659,21 +477,6 @@
   "layer_add": "添加图层",
   "layer_mergeDown": "向下合并",
   "vibe_title": "风格迁移",
-  "vibe_description": "改变图像，保留视觉风格",
-  "vibe_addFromFileTitle": "从文件添加",
-  "vibe_addFromFileSubtitle": "PNG、JPG、Vibe 文件",
-  "vibe_addFromLibraryTitle": "从库导入",
-  "vibe_addFromLibrarySubtitle": "从 Vibe 库中选择",
-  "vibe_addReference": "添加参考图",
-  "vibe_clearAll": "清除全部",
-  "vibe_cleared": "已清除 {count} 个 vibes",
-  "vibe_referenceStrength": "参考强度",
-  "vibe_infoExtraction": "信息提取",
-  "vibe_remove": "移除",
-  "reference_enabled": "启用",
-  "reference_enable": "启用参考",
-  "reference_disable": "禁用参考",
-  "vibe_normalize": "标准化参考强度值",
   "vibe_sourceType_png": "PNG",
   "vibe_sourceType_v4vibe": "V4 Vibe",
   "vibe_sourceType_bundle": "组合包",
@@ -681,8 +484,6 @@
   "vibe_sourceType": "数据源",
   "vibe_info": "Vibe 信息",
   "vibe_name": "名称",
-  "character_buttonLabel": "角色/定位",
-  "character_addCharacter": "添加角色",
   "character_number": "角色 {index}",
   "gallery_generationParams": "生成参数",
   "gallery_metaModel": "模型",
@@ -715,7 +516,6 @@
       "error": {}
     }
   },
-  "onlineGallery_login": "登录",
   "onlineGallery_pleaseLogin": "请先登录",
   "mediaType_video": "视频",
   "mediaType_gif": "动图",
@@ -743,27 +543,6 @@
   "onlineGallery_ratingSensitive": "敏感",
   "onlineGallery_ratingQuestionable": "可疑",
   "onlineGallery_ratingExplicit": "限制级",
-  "onlineGallery_blacklistTitle": "在线画廊黑名单",
-  "onlineGallery_blacklistSubtitle": "包含黑名单标签的图片会在在线画廊中直接隐藏。",
-  "onlineGallery_addBlacklistTagHint": "添加黑名单标签",
-  "onlineGallery_noLocalBlacklistTags": "暂无本地黑名单标签",
-  "onlineGallery_autoSyncOnStartup": "启动时自动同步",
-  "onlineGallery_autoSyncOnStartupSubtitle": "默认开启，可随时关闭",
-  "onlineGallery_lastSyncFailed": "上次同步失败: {error}",
-  "@onlineGallery_lastSyncFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "onlineGallery_neverSyncedBlacklist": "尚未同步过 Danbooru 黑名单",
-  "onlineGallery_lastSync": "上次同步: {time}",
-  "@onlineGallery_lastSync": {
-    "placeholders": {
-      "time": {}
-    }
-  },
-  "onlineGallery_blacklistSettingsTitle": "在线画廊黑名单设置",
-  "onlineGallery_blacklistLoginHint": "未登录 Danbooru，仍可使用本地黑名单；同步需要先登录。",
   "onlineGallery_downloadSelectedCompleted": "下载完成: 成功 {success}, 失败 {failed}",
   "@onlineGallery_downloadSelectedCompleted": {
     "placeholders": {
@@ -788,7 +567,6 @@
   "onlineGallery_detailNotFound": "作品不存在或已被删除。",
   "onlineGallery_imageUnavailable": "图片当前不可用。",
   "onlineGallery_gelbooruReadOnly": "只读收藏",
-  "tooltip_fullscreenEdit": "全屏编辑",
   "tooltip_decreaseWeight": "减少权重 [-5%]",
   "tooltip_increaseWeight": "增加权重 [+5%]",
   "tooltip_resetWeight": "点击重置为100%",
@@ -824,9 +602,7 @@
   "gelbooru_unknownError": "Gelbooru 验证失败，请稍后重试。",
   "tag_addTag": "添加标签",
   "qualityTags_label": "质量词",
-  "transparentBackground_tooltip": "向提示词追加 transparent background 标签，生成带 alpha 通道的图像（V5 专属）",
   "qualityTags_positive": "质量词（正面）",
-  "qualityTags_negative": "质量词（负面）",
   "qualityTags_disabled": "质量标签已关闭\n点击开启",
   "qualityTags_addToEnd": "添加到提示词末尾:",
   "qualityTags_addToStart": "添加到提示词开头:",
@@ -845,22 +621,6 @@
   "ucPreset_disabled": "负面提示词预设已关闭",
   "ucPreset_addToNegative": "添加到负面提示词开头:",
   "ucPreset_nsfwHint": "💡 如需生成成人内容，请在正面提示词中添加 nsfw，负面提示词中的 nsfw 将自动移除",
-  "generation_imageCount": "生成数量",
-  "generation_requestCountTooltip": "请求次数：每次点击发起 N 次生成请求",
-  "generation_imageCountTotal": "{requests} 次 × {perRequest} 张 = 共 {total} 张",
-  "@generation_imageCountTotal": {
-    "placeholders": {
-      "requests": {
-        "type": "int"
-      },
-      "perRequest": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
   "warmup_networkCheck": "检测网络连接...",
   "warmup_networkCheck_noProxy": "无法连接到 NovelAI，请开启VPN或启用代理设置",
   "warmup_networkCheck_noSystemProxy": "已启用代理但未检测到系统代理，请开启VPN",
@@ -925,17 +685,6 @@
   "warmup_fetchingCharacterTags": "正在拉取角色标签...",
   "warmup_fetchingCopyrightTags": "正在拉取版权标签...",
   "warmup_fetchingMetaTags": "正在拉取元标签...",
-  "resolution_groupNormal": "常规",
-  "resolution_groupLarge": "大尺寸",
-  "resolution_groupWallpaper": "壁纸",
-  "resolution_groupSmall": "小尺寸",
-  "resolution_groupCustom": "自定义",
-  "resolution_typePortrait": "竖屏",
-  "resolution_typeLandscape": "横屏",
-  "resolution_typeSquare": "方形",
-  "resolution_typeCustom": "自定义",
-  "resolution_width": "宽度",
-  "resolution_height": "高度",
   "api_error_429": "并发限制",
   "api_error_429_hint": "请求过于频繁，请稍后重试（常见于合租账号）",
   "api_error_401": "认证失败",
@@ -974,28 +723,16 @@
   "drop_useAsRawImage": "作为原始图片",
   "drop_dragToImg2ImgOrOther": "拖拽到图生图或其他区域",
   "preciseRef_title": "精准参考",
-  "preciseRef_subtitle": "将生成绑定到角色或风格参考",
-  "preciseRef_description": "添加参考图并设置类型和参数，可同时使用多个参考。",
-  "preciseRef_addReference": "添加参考图",
-  "preciseRef_clearAll": "清空全部",
-  "preciseRef_remove": "移除",
-  "preciseRef_referenceType": "参考类型",
   "preciseRef_importTitle": "导入精准参考",
   "preciseRef_importTypePrompt": "想让这张图片提供哪一类参考？",
   "preciseRef_importTypeHint": "点击选项即可导入",
   "preciseRef_characterDescription": "参考人物的外观与特征",
   "preciseRef_styleDescription": "参考配色、笔触与画面质感",
   "preciseRef_characterAndStyleDescription": "同时参考人物特征与视觉风格",
-  "preciseRef_strength": "参考强度",
-  "preciseRef_fidelity": "保真度",
   "preciseRef_v4Only": "此功能需要 V4+ 模型",
   "preciseRef_typeCharacter": "角色",
   "preciseRef_typeStyle": "风格",
   "preciseRef_typeCharacterAndStyle": "角色+风格",
-  "preciseRef_costHint": "使用精准参考会消耗额外点数",
-  "preciseRef_costBadge": "消耗点数",
-  "preciseRef_dropToAdd": "松开后添加精准参考",
-  "preciseRef_dropNoReadableImage": "拖入源未提供可读取的图片文件或图片链接",
   "preciseRef_addedCount": "已添加 {count} 个精准参考",
   "@preciseRef_addedCount": {
     "placeholders": {
@@ -1004,121 +741,15 @@
       }
     }
   },
-  "preciseRef_removedCount": "已删除 {count} 个精准参考",
-  "@preciseRef_removedCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "characterEditor_clearAll": "清空所有",
   "characterEditor_clearAllTitle": "清空所有角色",
   "characterEditor_clearAllConfirm": "确定要删除所有角色吗？此操作无法撤销。",
   "characterEditor_nameHint": "输入角色名称",
-  "characterEditor_enabled": "启用",
   "characterEditor_negativePromptHint": "输入角色的负面提示词...",
-  "characterCanvas_title": "角色位置",
-  "characterCanvas_finishEditing": "完成位置编辑",
-  "@characterCanvas_finishEditing": {
-    "description": "Button that exits character position editing"
-  },
   "characterCanvas_aiChoice": "AI 选择",
   "characterCanvas_custom": "自定义",
-  "characterCanvas_aiHint": "AI 将自动安排角色位置",
-  "characterCanvas_dragHint": "拖动锚点设置角色位置，松开即生效",
-  "characterEditor_genderFemale": "女性",
-  "characterEditor_genderMale": "男性",
-  "characterEditor_genderOther": "其他",
-  "characterEditor_addFemale": "女",
-  "characterEditor_addMale": "男",
-  "characterEditor_addOther": "其他",
-  "characterEditor_moveUp": "上移",
-  "characterEditor_moveDown": "下移",
-  "toolbar_fullscreenEdit": "全屏编辑",
-  "characterTooltip_noCharacters": "未配置角色",
-  "characterTooltip_clickToConfig": "点击按钮开始配置多人角色",
-  "characterTooltip_globalAiLabel": "全局 AI 位置:",
-  "characterTooltip_enabled": "启用",
-  "characterTooltip_disabled": "禁用",
-  "characterTooltip_positionAi": "AI",
-  "characterTooltip_disabledLabel": "已禁用",
-  "characterTooltip_promptLabel": "正向",
-  "characterTooltip_negativeLabel": "负面",
-  "characterTooltip_notSet": "未设置",
-  "characterTooltip_summary": "共 {total} 个角色 ({enabled} 个启用)",
-  "@characterTooltip_summary": {
-    "placeholders": {
-      "total": {},
-      "enabled": {}
-    }
-  },
-  "characterTooltip_viewFullConfig": "点击查看完整配置",
-  "globalSettings_saveFailed": "保存失败: {error}",
-  "@globalSettings_saveFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
   "nav_generate": "生成",
   "nav_gallery": "画廊",
   "nav_settings": "设置",
-  "sync_preparing": "准备同步...",
-  "sync_fetching": "正在获取 {category}...",
-  "@sync_fetching": {
-    "placeholders": {
-      "category": {}
-    }
-  },
-  "sync_processing": "正在处理数据...",
-  "sync_saving": "正在保存...",
-  "sync_completed": "同步完成，共 {count} 个标签",
-  "@sync_completed": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "sync_failed": "同步失败: {error}",
-  "@sync_failed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "sync_extracting": "正在提取 {poolName} 标签...",
-  "@sync_extracting": {
-    "placeholders": {
-      "poolName": {}
-    }
-  },
-  "sync_merging": "正在合并标签...",
-  "sync_fetching_tags": "正在获取 {groupName} 标签热度...",
-  "@sync_fetching_tags": {
-    "placeholders": {
-      "groupName": {}
-    }
-  },
-  "sync_filtering": "正在筛选标签...",
-  "sync_done": "同步完成",
-  "time_just_now": "刚刚",
-  "time_minutes_ago": "{n}分钟前",
-  "@time_minutes_ago": {
-    "placeholders": {
-      "n": {}
-    }
-  },
-  "time_hours_ago": "{n}小时前",
-  "@time_hours_ago": {
-    "placeholders": {
-      "n": {}
-    }
-  },
-  "time_days_ago": "{n}天前",
-  "@time_days_ago": {
-    "placeholders": {
-      "n": {}
-    }
-  },
-  "time_never_synced": "从未同步",
   "vibeParseFailed": "无法解析 Vibe 文件",
   "localGallery_progressiveLoadError": "图片加载失败",
   "localGallery_unknownError": "未知错误",
@@ -1130,7 +761,10 @@
   },
   "localGallery_indexingLocalImages": "索引本地图片中...",
   "localGallery_emptyTitle": "暂无本地图片",
-  "localGallery_emptySubtitle": "生成的图片将保存在此处",
+  "localGallery_emptyFavorites": "暂无收藏的图片",
+  "localGallery_emptyScope": "这里还没有图片",
+  "localGallery_noNaiHere": "这里没有可显示的 NAI 图片",
+  "localGallery_showNonNai": "显示非 NAI 图片",
   "localGallery_noMatchingResults": "无匹配结果",
   "localGallery_title": "本地画廊",
   "localGallery_allImages": "全部图片",
@@ -1146,17 +780,6 @@
   "localGallery_sortFieldName": "文件名",
   "localGallery_sortFieldSize": "文件大小",
   "localGallery_sortFieldDimensions": "图像尺寸",
-  "localGallery_aboutColumns": "约 {count} 列",
-  "@localGallery_aboutColumns": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "localGallery_columnWidth": "列宽",
-  "localGallery_thumbnailQualitySd": "标清",
-  "localGallery_thumbnailQualityHd": "高清",
-  "settings_galleryThumbnailQuality": "本地画廊清晰度",
-  "settings_galleryThumbnailQualitySubtitle": "缩略图显示质量，默认高清",
   "localGallery_naiOnlyTooltip": "仅显示 NAI 生成的图片",
   "localGallery_naiVersionFilterTooltip": "按 NAI 模型版本过滤",
   "localGallery_masonryViewLabel": "瀑布流",
@@ -1678,46 +1301,6 @@
   "promptToken_characterNegative": "角色负面",
   "common_rename": "重命名",
   "tagLibrary_tags": "标签",
-  "settings_network": "网络",
-  "settings_enableProxy": "启用代理",
-  "settings_proxyEnabled": "已启用",
-  "settings_proxyDisabled": "直接连接网络",
-  "settings_proxyTrafficDisclosure": "代理启用后，NovelAI API 流量（包括认证请求）会通过系统代理或手动代理发送。只使用你信任的代理。",
-  "settings_proxyMode": "代理模式",
-  "settings_proxyModeAuto": "自动检测系统代理",
-  "settings_proxyModeManual": "手动配置",
-  "settings_auto": "自动",
-  "settings_manual": "手动",
-  "settings_proxyHost": "代理地址",
-  "settings_proxyPort": "端口",
-  "settings_proxyNotDetected": "未检测到系统代理",
-  "settings_testConnection": "测试连接",
-  "settings_testConnectionHint": "点击测试代理是否可用",
-  "settings_testSuccess": "连接成功 ({latency}ms)",
-  "@settings_testSuccess": {
-    "placeholders": {
-      "latency": {}
-    }
-  },
-  "settings_testFailed": "连接失败: {error}",
-  "@settings_testFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "settings_proxyRestartHint": "代理设置已更改，建议重启应用",
-  "settings_enablePromptWeightScroll": "滚轮调整提示词权重",
-  "settings_enablePromptWeightScrollSubtitle": "选中提示词时，按住所选修饰键 + 滚轮调整权重；裸滚轮照常翻页",
-  "settings_weightScrollModifierAlt": "Alt",
-  "settings_weightScrollModifierCtrl": "Ctrl",
-  "settings_weightScrollModifierShift": "Shift",
-  "settings_weightScrollModifierNone": "无（旧行为）",
-  "unit_seconds": "秒",
-  "settings_notificationSound": "完成音效",
-  "settings_notificationSoundSubtitle": "仅在窗口失焦时播放生成完成音效",
-  "settings_notificationCustomSound": "自定义音效",
-  "settings_notificationSelectSound": "选择音效",
-  "settings_notificationResetSound": "恢复默认",
   "resetToDefault": "重置为默认",
   "metadataImport_title": "选择要套用的参数",
   "metadataImport_promptsSection": "提示词",
@@ -1907,8 +1490,6 @@
       "failed": {}
     }
   },
-  "vibeLibrary_save": "保存到库",
-  "vibeLibrary_import": "导入 Vibe",
   "vibeLibrary_sendToGeneration": "发送到生成",
   "vibeLibrary_maxVibesReached": "已达到最大数量 (16张)",
   "vibeLibrary_bundleReadFailed": "读取 Bundle 文件失败，使用单文件模式",
@@ -1989,23 +1570,6 @@
       }
     }
   },
-  "vibe_export_title": "导出 Vibe",
-  "vibe_selector_recent": "最近使用",
-  "vibe_export_dialogTitle": "导出 {count} 个 Vibes",
-  "vibe_export_chooseMethod": "选择导出方式",
-  "vibe_export_asBundle": "打包导出",
-  "vibe_export_individually": "逐个导出",
-  "vibe_export_noData": "没有可导出的数据",
-  "vibe_export_success": "导出成功",
-  "vibe_export_failed": "导出失败",
-  "vibe_export_skipped": "跳过了 {count} 个无数据 vibes",
-  "vibe_export_bundleSuccess": "已导出 Bundle: {count} 个 vibes",
-  "vibe_export_selectToEmbed": "选择要嵌入的 vibes",
-  "vibe_export_pngRequired": "需要 PNG 文件",
-  "vibe_export_noEmbeddableData": "没有可嵌入的数据",
-  "vibe_export_embedSuccess": "已嵌入 {count} 个 vibes 到图片",
-  "vibe_export_embedFailed": "嵌入失败",
-  "vibe_embedToImage": "嵌入到图片",
   "vibe_import_noEncodingData": "无编码数据",
   "vibe_import_encodingCost": "编码将消耗 2 Anlas",
   "vibe_import_confirmCost": "继续并消耗 Anlas？",
@@ -2080,29 +1644,11 @@
     }
   },
   "vibe_saveToLibrary_tagHint": "输入标签后点击添加",
-  "vibe_maxReached": "已达到最大数量 (16张)",
   "vibe_addedCount": "已添加 {count} 个 vibes",
   "@vibe_addedCount": {
     "placeholders": {
       "count": {
         "type": "int"
-      }
-    }
-  },
-  "vibe_statusEncoded": "已编码",
-  "vibe_statusEncoding": "编码中...",
-  "vibe_statusPendingEncode": "待编码 (2 Anlas)",
-  "vibe_encodeDialogTitle": "确认编码 Vibe",
-  "vibe_encodeDialogMessage": "是否编码此图片以供生成使用？",
-  "vibe_encodeCostWarning": "此操作将消耗 2 Anlas（点数）",
-  "vibe_encodeButton": "编码",
-  "vibe_encodeSuccess": "Vibe 编码成功！",
-  "vibe_encodeFailed": "Vibe 编码失败，请重试",
-  "vibe_encodeError": "编码失败: {error}",
-  "@vibe_encodeError": {
-    "placeholders": {
-      "error": {
-        "type": "String"
       }
     }
   },
@@ -2116,92 +1662,8 @@
   "shortcut_action_vibe_detail_rename": "重命名",
   "tray_show": "显示窗口",
   "tray_exit": "退出",
-  "settings_shortcutsSubtitle": "自定义键盘快捷键",
-  "settings_openFolder": "打开文件夹",
-  "settings_openFolderFailed": "打开文件夹失败",
-  "settings_vibePathSaved": "Vibe 库路径已保存",
   "settings_selectFolderFailed": "选择文件夹失败",
-  "settings_hivePathSaved": "数据存储路径已保存，重启后生效",
-  "settings_restartRequiredTitle": "需要重启应用",
-  "settings_changePathConfirm": "更改数据存储路径后，需要重启应用才能生效。\\n\\n新路径将在下次启动时生效。是否继续？",
-  "settings_resetPathConfirm": "重置数据存储路径后，需要重启应用才能生效。\\n\\n默认路径将在下次启动时生效。是否继续？",
-  "settings_kritaBridgeEnable": "启用本机桥接",
-  "settings_kritaBridgeDisabledText": "默认关闭；开启后只监听本机 127.0.0.1",
-  "settings_kritaBridgeStartingText": "正在启动本地桥接服务...",
-  "settings_kritaBridgeListeningText": "等待外部 Agent 或 Krita 连接",
-  "settings_kritaBridgeConnectedText": "Krita 插件已连接",
-  "settings_kritaBridgeErrorText": "启动失败，请查看错误信息",
-  "settings_kritaBridgeRegenerateSession": "重生成会话",
-  "settings_kritaBridgeDiscoveryFile": "发现文件",
-  "settings_kritaBridgeWaitingEndpoint": "等待本地 WebSocket 监听",
-  "settings_kritaBridgeClient": "客户端：{client}",
-  "@settings_kritaBridgeClient": {
-    "placeholders": {
-      "client": {}
-    }
-  },
-  "settings_fontScale": "界面缩放",
-  "settings_fontScale_previewSmall": "光影落在画布上。",
-  "settings_fontScale_previewMedium": "色から物語が生まれる。",
-  "settings_fontScale_previewLarge": "Let colors tell a story.",
-  "settings_fontScale_done": "完成",
-  "settings_historyClickBehavior": "历史记录点击行为",
-  "settings_historyClickBehavior_classic": "经典",
-  "settings_historyClickBehavior_classicDescription": "单击历史图片直接打开详情",
-  "settings_historyClickBehavior_linked": "官网式联动",
-  "settings_historyClickBehavior_linkedDescription": "单击切换中央预览，双击或长按打开详情，并支持左右方向键浏览",
-  "settings_outputViewer": "输出查看器",
-  "settings_outputViewer_canvas": "自由画布",
-  "settings_outputViewer_canvasDescription": "NAI5 官网式无限画布：全部生成图按批铺开，中键/Shift+左键平移、Ctrl+滚轮缩放、WASD/f/q 导航",
-  "settings_outputViewer_simple": "简单视图",
-  "settings_outputViewer_simpleDescription": "经典居中/网格预览，适合低配置或习惯旧界面的场景",
-  "settings_canvasLockCamera": "锁定画布相机",
-  "settings_canvasLockCameraDescription": "禁用滚轮缩放/平移、拖拽与 WASD 等手动相机输入；自动选中与跳转不受影响",
-  "settings_canvasReducedMotion": "减少画布动效",
-  "settings_canvasReducedMotionDescription": "飞行、缩放与惯性改为瞬时切换，降低动画负担",
   "image_viewDetail": "查看详情",
-  "settings_defaultImagesPath": "默认 (Documents/NAI_Launcher/images/)",
-  "settings_defaultHivePath": "默认 (./user-data/hive/)",
-  "settings_protectionFeatures": "保护功能",
-  "settings_stripMetadataTitle": "复制/拖拽时移除全部元数据",
-  "settings_stripMetadataSubtitle": "生成净化副本，清除 PNG 文本块、EXIF 与 NAI 隐写水印，并避免拖拽暴露原始路径。",
-  "settings_confirmDangerousActionsTitle": "危险资产操作二次确认",
-  "settings_confirmDangerousActionsSubtitle": "删除、移动、批量移动等本地资产操作会额外弹出保护确认。",
-  "settings_warnExternalImageSendTitle": "发送到外部服务前提示",
-  "settings_warnExternalImageSendSubtitle": "把本地图片发送到 LLM、NovelAI、ComfyUI 等外部边界前进行确认。",
-  "settings_preventOverwriteTitle": "导出时避免覆盖已有文件",
-  "settings_preventOverwriteSubtitle": "导出/打包路径重名时自动编号，避免误覆盖原有资产。",
-  "settings_warnHighAnlasCostTitle": "Anlas 高消耗警告",
-  "settings_warnHighAnlasCostSubtitle": "单次生成预计消耗达到 {threshold} Anlas 时，生成前弹出确认。",
-  "@settings_warnHighAnlasCostSubtitle": {
-    "placeholders": {
-      "threshold": {}
-    }
-  },
-  "settings_highAnlasCostThresholdTitle": "Anlas 警告阈值",
-  "settings_setHighAnlasCostThresholdTitle": "设置 Anlas 警告阈值",
-  "settings_threshold": "阈值",
-  "settings_highAnlasCostThresholdHelper": "当单次生成预计消耗达到或超过该值时弹出确认。",
-  "settings_limitGenerationIntervalTitle": "限制生图频率",
-  "settings_limitGenerationIntervalSubtitle": "开启后，两次生图开始时间必须至少间隔设定秒数；冷却期间生图按钮不可点击。",
-  "settings_generationIntervalTitle": "生图间隔",
-  "settings_generationIntervalValue": "{seconds} 秒",
-  "@settings_generationIntervalValue": {
-    "placeholders": {
-      "seconds": {}
-    }
-  },
-  "settings_setGenerationIntervalTitle": "设置生图间隔",
-  "settings_generationIntervalHelper": "可设置 1–3600 秒，从开始执行生图时计时。",
-  "settings_generationIntervalJitterTitle": "间隔随机抖动",
-  "settings_generationIntervalJitterValue": "±{percent}%",
-  "@settings_generationIntervalJitterValue": {
-    "placeholders": {
-      "percent": {}
-    }
-  },
-  "settings_setGenerationIntervalJitterTitle": "设置间隔随机抖动",
-  "settings_generationIntervalJitterHelper": "每次冷却在「基础间隔 ± 该百分比」内均匀随机取值，让生图节奏不那么机械。可设 0–50，0 为关闭。",
   "settings_confirmExternalSendTitle": "保护模式：确认外部发送",
   "settings_confirmExternalSendContent": "即将把 {count} 张本地图片发送到 {target}。图片会离开本地应用边界，请确认这符合你的预期。",
   "@settings_confirmExternalSendContent": {
@@ -2213,212 +1675,10 @@
   "settings_confirmExternalSend": "确认发送",
   "settings_highAnlasCostTitle": "Anlas 消耗提醒",
   "settings_continueGeneration": "继续生成",
-  "dataSource_syncNow": "立即同步",
-  "settings_comfyUiEnable": "启用 ComfyUI 集成",
-  "settings_comfyUiDisabledSubtitle": "关闭后将隐藏本地超分等 ComfyUI 功能",
-  "settings_comfyUiServerUrl": "服务器地址",
-  "settings_comfyUiConnectionSuccess": "连接成功",
-  "settings_comfyUiConnectionSuccessFull": "ComfyUI 连接成功",
-  "settings_comfyUiConnectionFailed": "连接失败: {error}",
-  "@settings_comfyUiConnectionFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "settings_comfyUiConnected": "已连接",
-  "settings_comfyUiDisconnect": "断开",
-  "settings_comfyUiNoResponse": "服务器无响应",
-  "settings_comfyUiStatusDisconnected": "未连接",
-  "settings_comfyUiStatusConnecting": "正在连接...",
-  "settings_comfyUiStatusConnected": "已连接",
-  "settings_comfyUiStatusError": "连接异常",
-  "settings_comfyUiCategoryEnhance": "增强/超分",
-  "settings_comfyUiCategoryImg2Img": "图生图",
-  "settings_comfyUiCategoryInpaint": "重绘",
-  "settings_comfyUiCategoryTxt2Img": "文生图",
-  "settings_comfyUiCategoryCustom": "自定义",
-  "comfyWorkflow_seedvr2UpscaleName": "SeedVR2 超分",
-  "comfyWorkflow_seedvr2UpscaleDescription": "使用 SeedVR2 AI 模型进行超分辨率放大，效果优秀",
-  "comfyWorkflow_seedvr2TiledUpscaleName": "SeedVR2 分块超分",
-  "comfyWorkflow_seedvr2TiledUpscaleDescription": "使用 SeedVR2TilingUpscaler 分块放大，降低大图显存压力",
-  "comfyWorkflow_modelUpscaleName": "ComfyUI 普通超分模型",
-  "comfyWorkflow_modelUpscaleDescription": "使用 ComfyUI UpscaleModelLoader 加载普通超分模型，并用 Lanczos 修正最终倍率",
-  "comfyWorkflow_rtxUpscaleName": "RTX 超分",
-  "comfyWorkflow_rtxUpscaleDescription": "使用 Nvidia RTX Video Super Resolution 节点进行本地放大",
-  "comfyWorkflowSlot_inputImage": "输入图像",
-  "comfyWorkflowSlot_targetShortSide": "目标短边",
-  "comfyWorkflowSlot_targetLongSide": "目标长边",
-  "comfyWorkflowSlot_upscaleModel": "超分模型",
-  "comfyWorkflowSlot_randomSeed": "随机种子",
-  "comfyWorkflowSlot_outputImage": "输出图像",
-  "comfyWorkflowSlot_tileWidth": "图块宽度",
-  "comfyWorkflowSlot_tileHeight": "图块高度",
-  "comfyWorkflowSlot_tileUpscaleResolution": "图块超分分辨率",
-  "comfyWorkflowSlot_targetWidth": "目标宽度",
-  "comfyWorkflowSlot_targetHeight": "目标高度",
-  "comfyWorkflowSlot_scale": "放大倍数",
-  "comfyWorkflow_parameters": "参数设置",
-  "comfyWorkflow_selectImage": "点击选择图像",
-  "comfyWorkflow_pickImageFailed": "选择图像失败: {error}",
-  "@comfyWorkflow_pickImageFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "comfyWorkflow_useResult": "使用结果",
-  "comfyWorkflow_execute": "执行",
-  "comfyWorkflow_uploadingImage": "正在上传图像...",
-  "comfyWorkflow_queued": "排队中...",
-  "comfyWorkflow_runningSteps": "处理中 {current}/{total}",
-  "@comfyWorkflow_runningSteps": {
-    "placeholders": {
-      "current": {},
-      "total": {}
-    }
-  },
-  "comfyWorkflow_processing": "处理中...",
-  "comfyWorkflow_complete": "执行完成",
-  "comfyWorkflow_imageCount": "{count} 张图像",
-  "@comfyWorkflow_imageCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "cacheStats_title": "缓存统计",
-  "cacheStats_autoRefreshUpdated": "自动刷新 · 上次更新: {time}",
-  "@cacheStats_autoRefreshUpdated": {
-    "placeholders": {
-      "time": {}
-    }
-  },
-  "cacheStats_secondsAgo": "{seconds}秒前",
-  "@cacheStats_secondsAgo": {
-    "placeholders": {
-      "seconds": {}
-    }
-  },
-  "cacheStats_resetStats": "重置统计",
-  "cacheStats_statsReset": "统计已重置",
-  "cacheStats_l1Memory": "L1 内存缓存",
-  "cacheStats_l2Hive": "L2 Hive 缓存",
-  "cacheStats_l3Sqlite": "L3 SQLite 数据库",
   "galleryCache_rescanTitle": "重新扫描画廊",
   "galleryCache_rescanContent": "这将执行以下操作：\n\n1. 检查数据一致性（标记不存在的文件）\n2. 扫描新文件和变更的文件\n3. 重新尝试历史上未提取成功的元数据（含失败记录）\n\n此操作不会清空已有数据，也不会删除图片文件。",
-  "galleryCache_startScan": "开始扫描",
   "galleryCache_scanAlreadyRunning": "已有扫描任务在进行中，请等待完成后再试",
-  "galleryCache_preparing": "准备中...",
   "galleryCache_noGalleryFolder": "未设置画廊目录",
-  "galleryCache_scanningPhase": "正在扫描 {processed}/{total}...",
-  "@galleryCache_scanningPhase": {
-    "placeholders": {
-      "processed": {},
-      "total": {}
-    }
-  },
-  "galleryCache_scanComplete": "扫描完成",
-  "galleryCache_scanFailed": "扫描失败: {error}",
-  "@galleryCache_scanFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "galleryCache_rescan": "重新扫描",
-  "galleryCache_rescanSubtitle": "检查数据一致性、查漏补缺、提取元数据",
-  "galleryCache_scanning": "正在扫描...",
-  "galleryCache_scanAction": "扫描",
-  "galleryCache_evictThumbnailsTitle": "清理缩略图缓存",
-  "galleryCache_evictThumbnailsSubtitle": "按最近使用淘汰超限的 .thumbs 缩略图（不影响原图）",
-  "galleryCache_evictThumbnailsContent": "将按最近使用时间淘汰超出上限的缩略图磁盘缓存。\n\n只删除 .thumbs 目录内的 .thumb.jpg 缩略图文件，不会删除或修改任何原图；被清理的缩略图会在下次浏览时按需重新生成。",
-  "galleryCache_evictThumbnailsStart": "开始清理",
-  "galleryCache_evictThumbnailsRunning": "正在清理缩略图缓存...",
-  "galleryCache_evictThumbnailsDone": "已清理 {count} 个缩略图，释放 {size} MB",
-  "@galleryCache_evictThumbnailsDone": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      },
-      "size": {
-        "type": "String"
-      }
-    }
-  },
-  "galleryCache_evictThumbnailsNone": "缩略图缓存未超限，无需清理",
-  "galleryCache_evictThumbnailsFailed": "清理缩略图缓存失败: {error}",
-  "@galleryCache_evictThumbnailsFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "workflowImport_title": "导入 ComfyUI 工作流",
-  "workflowImport_step": "步骤 {current}/4: {title}",
-  "@workflowImport_step": {
-    "placeholders": {
-      "current": {},
-      "title": {}
-    }
-  },
-  "workflowImport_stepFile": "选择工作流文件",
-  "workflowImport_stepInfo": "工作流信息",
-  "workflowImport_stepSlots": "确认槽位配置",
-  "workflowImport_stepDone": "完成导入",
-  "workflowImport_previous": "上一步",
-  "workflowImport_next": "下一步",
-  "workflowImport_finish": "完成导入",
-  "workflowImport_defaultName": "自定义工作流",
-  "workflowImport_fileInstructions": "请选择 ComfyUI 导出的 workflow_api.json 文件。\n\n在 ComfyUI 中，点击菜单 → 导出 (API格式) 即可获得此文件。",
-  "workflowImport_nodeCount": "{count} 个节点",
-  "@workflowImport_nodeCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "workflowImport_reselect": "点击重新选择",
-  "workflowImport_selectWorkflowApi": "点击选择 workflow_api.json",
-  "workflowImport_invalidTopLevel": "文件格式无效：顶层应为 JSON 对象",
-  "workflowImport_noComfyNodes": "未检测到 ComfyUI 节点，请确认是 API 格式导出",
-  "workflowImport_readFailed": "读取文件失败: {error}",
-  "@workflowImport_readFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "workflowImport_analysisResult": "自动分析结果",
-  "workflowImport_inputImageNodes": "输入图像节点",
-  "workflowImport_adjustableParams": "可调参数",
-  "workflowImport_outputNodes": "输出节点",
-  "workflowImport_totalNodes": "总节点数",
-  "workflowImport_countUnit": "{count} 个",
-  "@workflowImport_countUnit": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "workflowImport_workflowName": "工作流名称 *",
-  "workflowImport_description": "描述",
-  "workflowImport_category": "分类",
-  "workflowImport_slotsHint": "勾选需要暴露给 UI 的槽位。输入/输出槽位建议保留；不需要用户调整的参数可以取消勾选。",
-  "workflowImport_inputSection": "输入",
-  "workflowImport_outputSection": "输出",
-  "workflowImport_parameterSection": "参数",
-  "workflowImport_noSlotsWarning": "未检测到任何可用槽位。该工作流可能无法正常集成。\n请确认工作流中包含 LoadImage 和 SaveImage/SaveImageWebsocket 节点。",
-  "workflowImport_nodeRef": "节点 {node}",
-  "@workflowImport_nodeRef": {
-    "placeholders": {
-      "node": {}
-    }
-  },
-  "workflowImport_confirmTitle": "即将导入以下工作流",
-  "workflowImport_name": "名称",
-  "workflowImport_inputSlots": "输入槽位",
-  "workflowImport_parameterSlots": "参数槽位",
-  "workflowImport_outputSlots": "输出槽位",
-  "workflowImport_afterImportHint": "导入后可在生成界面的 ComfyUI 工作流列表中使用。",
-  "workflowImport_success": "工作流“{name}”导入成功",
-  "@workflowImport_success": {
-    "placeholders": {
-      "name": {}
-    }
-  },
   "shortcut_settings_help": "查看快捷键帮助",
   "shortcut_settings_show_in_menus": "在菜单中显示",
   "shortcut_settings_defaultShortcut": "默认: {shortcut}",
@@ -2444,7 +1704,6 @@
   "toast_kritaNotConnected": "Krita 未连接，请先在设置中启用桥接并连接插件",
   "toast_sentToKrita": "图片已发送到 Krita",
   "toast_kritaUnsupportedImageFormat": "图片格式无法发送到 Krita，请换用常见图片格式",
-  "toast_dropNoReadableImageOrVibe": "拖入源未提供可读取的图片或 Vibe 文件",
   "toast_saveDirNotSet": "未设置保存目录",
   "toast_savedTo": "已保存到 {path}",
   "@toast_savedTo": {
@@ -2499,24 +1758,10 @@
     }
   },
   "toast_savePreviewFailed": "保存预览图失败",
-  "common_justNow": "刚刚",
-  "common_minutesAgo": "{minutes}分钟前",
-  "@common_minutesAgo": {
-    "placeholders": {
-      "minutes": {}
-    }
-  },
-  "common_hoursAgo": "{hours}小时前",
-  "@common_hoursAgo": {
-    "placeholders": {
-      "hours": {}
-    }
-  },
   "common_expand": "展开",
   "common_collapse": "收起",
   "detail_parsingMetadata": "正在解析元数据...",
   "detail_noMetadata": "此图片无元数据",
-  "detail_metadata": "元数据",
   "detail_modifiedTime": "修改时间",
   "detail_fileSize": "文件大小",
   "detail_noContent": "(无内容)",
@@ -2547,16 +1792,7 @@
   "comfyImport_syntaxPipe": "竖线格式",
   "comfyImport_syntaxUnknown": "未知语法",
   "comfyImport_globalPrompt": "全局提示词",
-  "checkForUpdate": "检查更新",
-  "neverChecked": "从未检查",
-  "lastCheckedAt": "上次检查: {time}",
-  "@lastCheckedAt": {
-    "placeholders": {
-      "time": {}
-    }
-  },
   "includePrereleaseUpdates": "包含预发布版本",
-  "includePrereleaseUpdatesDescription": "检查更新时包含 beta/alpha 版本",
   "updateAvailable": "发现新版本",
   "updateChecking": "正在检查更新...",
   "updateDownloading": "正在下载更新...",
@@ -2615,18 +1851,6 @@
   "updateNoticeReadySubtitle": "更新包已校验，重启即可安装",
   "updateNoticeFailed": "上次更新没有完成",
   "updateViewDetails": "查看更新",
-  "updateSettingsAvailable": "发现 v{version}，点击查看更新内容",
-  "@updateSettingsAvailable": {
-    "placeholders": {
-      "version": {}
-    }
-  },
-  "updateSettingsReady": "v{version} 已下载，点击安装",
-  "@updateSettingsReady": {
-    "placeholders": {
-      "version": {}
-    }
-  },
   "goToDownload": "前往下载",
   "cannotOpenUrl": "无法打开链接",
   "model3d_editorTitle": "3D 模型图层",
@@ -2655,30 +1879,10 @@
       }
     }
   },
-  "preciseRefLib_importFailedCount": "{count} 张图片未能导入精准参考库",
-  "@preciseRefLib_importFailedCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "preciseRefLib_fromLibrary": "从库导入",
-  "preciseRefLib_saveCurrentToLibrary": "保存到库",
-  "preciseRefLib_saveCurrentCount": "已保存 {count} 张到精准参考库",
-  "img2img_fromPreciseRefLibrary": "从精准参考库导入",
   "localGallery_saveToPreciseRefLibrary": "保存到精准参考库",
   "drop_saveToPreciseRefLibrary": "存入精准参考库",
   "common_enabled": "已启用",
   "common_disabled": "已禁用",
-  "bulkAction_selectedCount": "已选择 {count} 项",
-  "@bulkAction_selectedCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "comfyTask_errorConnectionFailed": "无法连接到 ComfyUI 服务器",
   "comfyTask_errorConnectionUnavailable": "ComfyUI 连接不可用",
   "comfyTask_errorExecutionFailedGeneric": "ComfyUI 执行失败",
@@ -2699,10 +1903,6 @@
       }
     }
   },
-  "comfyWorkflowSlot_vaeEncodeTileSize": "VAE 编码分块大小",
-  "comfyWorkflowSlot_vaeDecodeTileSize": "VAE 解码分块大小",
-  "comfyWorkflowSlot_blocksToSwap": "换出块数量",
-  "comfyWorkflowSlot_swapIoComponents": "换出输入输出组件",
   "localGallery_firstIndexHint": "检测到 {count} 张图片。首次建立索引可能需要几分钟，期间仍可正常使用应用。",
   "@localGallery_firstIndexHint": {
     "placeholders": {
@@ -2804,19 +2004,7 @@
       "error": {}
     }
   },
-  "@img2img_selectFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
   "@preciseRefLib_importedCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "@preciseRefLib_saveCurrentCount": {
     "placeholders": {
       "count": {
         "type": "int"
@@ -2835,48 +2023,7 @@
       "error": {}
     }
   },
-  "@settings_version": {
-    "placeholders": {
-      "version": {}
-    }
-  },
-  "@vibe_cleared": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "@vibe_export_bundleSuccess": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "@vibe_export_dialogTitle": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "@vibe_export_embedSuccess": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "@vibe_export_skipped": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "common_clickToRetry": "点击重试",
-  "common_opening": "正在打开...",
   "common_swap": "交换",
   "drop_saveVibeBundle": "保存 Vibe Bundle",
   "vibe_import_overwriteOriginalParams": "直接替换原 Vibe 参数",
@@ -2906,32 +2053,6 @@
   },
   "galleryScan_organizingGallery": "正在整理图库",
   "galleryScan_processing": "处理中",
-  "imagePicker_dropReadFailed": "读取拖入图片失败: {error}",
-  "@imagePicker_dropReadFailed": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "imagePicker_dropNoReadableImage": "拖入源未提供可读取的图片文件或图片链接",
-  "imagePicker_fileDataUnavailable": "无法读取文件数据",
-  "imagePicker_fileSelectionFailed": "选择文件失败: {error}",
-  "@imagePicker_fileSelectionFailed": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "imagePicker_directorySelectionFailed": "选择目录失败: {error}",
-  "@imagePicker_directorySelectionFailed": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
   "editor_shiftEdges": "扩展边缘",
   "editor_edgeLeft": "左",
   "editor_edgeRight": "右",
@@ -2939,7 +2060,6 @@
   "editor_edgeBottom": "下",
   "editor_enterNumber": "请输入数字",
   "onlineGallery_videoLoadFailed": "视频加载失败",
-  "vibe_releaseToAddStyleReference": "松开后添加风格参考",
   "router_pageNotFound": "页面未找到: {error}",
   "@router_pageNotFound": {
     "placeholders": {
@@ -2949,12 +2069,19 @@
     }
   },
   "autocomplete_resultLimit": "结果数量",
-  "autocomplete_relatedTagsTitle": "标签扩展",
-  "autocomplete_relatedTagsSubtitle": "按住 Ctrl 点击标签或拖选文字，搜索标签与相关推荐；Mac 使用 ⌘。",
   "tagExpansion_searchHint": "搜索标签或别名",
   "tagExpansion_relatedTitle": "关联标签",
   "tagExpansion_empty": "输入词语搜索本地标签",
   "tagExpansion_noResults": "没有找到本地标签",
+  "tagExpansion_searchingRelated": "本地无精确匹配，正在查找相关标签",
+  "tagExpansion_matchedAlias": "命中别名：{alias}",
+  "@tagExpansion_matchedAlias": {
+    "placeholders": {
+      "alias": {
+        "type": "String"
+      }
+    }
+  },
   "tagExpansion_insert": "插入标签",
   "tagExpansion_showRelated": "查看关联标签",
   "tagExpansion_localOnly": "仅本地",
@@ -2962,37 +2089,6 @@
   "tagExpansion_tabComplete": "Tab 补全：",
   "tagExpansion_wikiTitle": "标签小百科",
   "tagExpansion_wikiUnavailable": "本地暂未收录这个标签的释义。",
-  "autocomplete_cooccurrence": "离线相关标签库",
-  "autocomplete_entryCount": "{count} 条记录",
-  "@autocomplete_entryCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "autocomplete_clearDanbooruCache": "清除 Danbooru 缓存",
-  "autocomplete_clearAiCache": "清除 AI 汉化缓存",
-  "autocomplete_cacheCleared": "已清除 {count} 条缓存",
-  "@autocomplete_cacheCleared": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "autocomplete_baseCatalog": "基础 Danbooru 词库",
-  "autocomplete_catalogStatus": "{count} 个标签 · 数据版本 {version}",
-  "@autocomplete_catalogStatus": {
-    "placeholders": {
-      "count": {
-        "type": "String"
-      },
-      "version": {
-        "type": "String"
-      }
-    }
-  },
   "promptBlockLibrary_allBlocks": "全部块",
   "promptBlockLibrary_unnamedBlock": "未命名块",
   "promptBlockLibrary_useCount": "使用 {count} 次",
@@ -3157,10 +2253,7 @@
     }
   },
   "styleExplore_adoptBlockEmpty": "所选候选没有可保存的画师串或正向提示词",
-  "promptBlockEditor_library": "块库",
   "promptBlockPicker_title": "选择块",
-  "promptBlockLibrary_adjustThumbnailTitle": "调整预览图显示范围",
-  "promptBlockLibrary_dragToMove": "拖拽移动，滚轮或双指缩放",
   "promptBlockLibrary_saveToLibrary": "保存到块库",
   "promptBlockLibrary_droppedImage": "拖入图片",
   "promptBlockLibrary_createBlockFromImage": "创建新块",
@@ -3190,8 +2283,6 @@
     }
   },
   "subscriptionExpired": "已过期",
-  "subscriptionGracePeriod": "宽限期",
-  "subscriptionTierNone": "无订阅",
   "settings_modelsAndInterfaces": "模型与接口",
   "tips_kind_guide": "提示",
   "tips_kind_trick": "过来人",
@@ -3231,7 +2322,7 @@
   "@tips_studio_guide_6": {
     "description": "Weight scroll modifier (settings_enablePromptWeightScrollSubtitle)."
   },
-  "tips_studio_guide_7": "按 F1 随时打开快捷键帮助。Ctrl+1、Ctrl+2、Ctrl+3 在生成页、本地画廊和在线画廊之间切换，Ctrl+, 打开设置。所有快捷键都能在设置里改成你顺手的组合。",
+  "tips_studio_guide_7": "在快捷键帮助里可以看到生成页、本地画廊、在线画廊和设置当前使用的快捷键，也可以在设置里更改这些组合。",
   "@tips_studio_guide_7": {
     "description": "Default shortcuts: showShortcutHelp f1, navigateTo* ctrl+1/2/3, settings ctrl+comma."
   },
@@ -3964,8 +3055,6 @@
   "img2img_generated": "生成结果",
   "img2img_blend": "混合结果",
   "img2img_enhanceAction": "增强！",
-  "img2img_showAdvanced": "显示高级设置",
-  "img2img_hideAdvanced": "收起高级设置",
   "promptToken_usage": "Token 用量：{used} / {limit}",
   "promptToken_promptShare": "此提示词：{used} Token；总用量：{total} / {limit}",
   "promptToken_blockReferenceHint": "单块进度仅供参考；插入后的总量取决于组合使用。",
@@ -4046,16 +3135,6 @@
   "wiki_openFull": "在标签百科中打开",
   "shortcut_action_vibe_detail_prev_sub_vibe": "上一个子 Vibe",
   "shortcut_action_vibe_detail_next_sub_vibe": "下一个子 Vibe",
-  "settings_addAccountsSwitchBetweenThem": "添加账号后，可以在这里快速切换。",
-  "settings_current": "当前",
-  "settings_emailLogin": "邮箱登录",
-  "settings_signedIn": "已登录",
-  "settings_switch": "切换",
-  "settings_accountActions": "账号操作",
-  "settings_editProfile": "编辑资料",
-  "settings_setDefault": "设为默认账号",
-  "settings_credentialsUpdated": "登录凭据已更新",
-  "settings_updateCredentials": "更新凭据",
   "settings_accountDetails": "账号详情",
   "settings_localAccountProfile": "本地账号资料",
   "settings_setDefault2": "设为默认",
@@ -4063,136 +3142,15 @@
   "settings_updateCredentials2": "更新登录凭据",
   "settings_checking": "正在验证…",
   "settings_enterNewSignInToken": "输入新的登录令牌，验证成功后更新此账号。",
-  "auth_notSignedIn": "尚未登录",
-  "settings_tagExpansion": "标签扩展",
-  "settings_tagDictionaries": "标签词库",
-  "settings_cacheMaintenance": "缓存维护",
-  "settings_clear": "清理",
-  "settings_autoRefresh": "自动刷新",
-  "settings_searchFonts": "搜索字体名称",
-  "settings_couldNotLoadFonts": "暂时无法读取字体",
-  "settings_recommended": "推荐",
-  "settings_included": "随应用提供",
-  "settings_systemFonts": "系统字体",
-  "settings_fontPreview": "字体预览",
-  "settings_onlineFontsLoadAfterApplying": "在线字体将在应用后加载，当前显示界面字体。",
-  "settings_saving": "保存设置",
-  "settings_howGeneratedImagesSaved": "生成图片的保存方式",
-  "settings_assetsDisplay": "素材与显示",
-  "settings_vibeLocationThumbnailQuality": "Vibe 位置与缩略图质量",
-  "settings_applicationData": "应用数据",
-  "settings_gallerySources": "图库来源",
-  "settings_manageAdditionalGalleryFolders": "管理额外图库文件夹",
-  "settings_default": "默认",
-  "settings_keyboard": "键盘操作",
-  "settings_customizeFrequentlyUsedActions": "按习惯配置常用操作",
-  "settings_manageShortcuts": "管理快捷键",
-  "settings_costReminders": "消耗提醒",
-  "settings_requestPacing": "请求节奏",
-  "settings_notificationsSound": "完成提醒与声音",
-  "settings_lockCanvasCamera": "锁定画布相机",
-  "settings_dictionariesCache": "词库与缓存",
-  "settings_defaultAccount2": "默认账号",
-  "settings_signInAutomatically": "启动时自动登录",
-  "settings_signInCredentials": "登录凭据",
-  "settings_translationInterfaces": "翻译功能接口",
-  "settings_presetsBuiltInRules": "预设与内置规则",
-  "settings_preferenceBackupRestore": "偏好备份与恢复",
-  "settings_searchSettingsFeatures": "搜索设置、功能或关键词",
-  "settings_noMatchingSettings": "没有找到匹配设置",
-  "settings_change": "更改",
-  "settings_couldNotPlaySoundCheck": "无法播放音效，请检查音频文件。",
-  "settings_useDefaultCompletionSound": "使用默认完成音效",
-  "settings_soundPreview": "音效预览",
-  "settings_listenCurrentCompletionSound": "试听当前完成音效",
-  "settings_playSound": "试听音效",
   "settings_searchResults": "搜索结果",
-  "settings_promptInput": "提示词输入",
-  "settings_manageTranslationModelsRules": "管理翻译模型与规则",
-  "settings_browsing": "浏览方式",
-  "settings_chooseHowViewImages": "选择图片的查看习惯",
-  "settings_canvasControls": "画布操作",
-  "settings_keepViewSteady": "保持视角稳定",
-  "settings_appearance2": "外观样式",
-  "settings_chooseLightDarkWorkspace": "选择工作台的明暗风格",
-  "settings_textLanguage": "文字与语言",
-  "settings_makeReadingComfortable": "统一阅读体验",
-  "settings_adjustSettingsPagesDialogsOnly": "统一调整应用内文字、图标和控件大小，不改变图片分辨率。",
-  "settings_motionNotifications": "动效与提醒",
-  "settings_reduceDistractionsKnowWorkFinishes": "减少打扰，及时获知完成",
-  "settings_notificationStyle": "通知样式",
-  "settings_notificationsAppearUpperRightWrap": "通知会显示在右上角，长文本自动换行，进度任务完成后自动收起。",
-  "settings_preview": "预览",
-  "settings_versionUpdates": "版本与更新",
-  "settings_currentVersionUpdateOptions": "当前版本与更新选项",
-  "settings_diagnosticsResources": "诊断与资料",
-  "settings_logsFontsOpenSourceProject": "日志、字体与开源项目",
-  "settings_viewLicenses": "查看许可",
-  "settings_openProject": "打开项目",
-  "settings_actionIncomplete": "操作未完成",
-  "settings_exportPreferences": "导出偏好",
-  "settings_preferencesExported": "偏好已导出",
-  "settings_noAutomaticBackupYet": "尚无自动回退备份",
-  "settings_restorePreviousPreferences": "恢复上次偏好",
   "settings_importPreferences": "导入偏好",
-  "settings_apply": "确认应用",
-  "settings_preferencesAppliedPreviousSettingsBacked": "偏好已应用，旧设置已自动备份",
-  "settings_restoreDefaultPreferences": "恢复默认偏好",
-  "settings_choosePreferencesResetCurrentSettings": "选择需要恢复的范围，当前偏好将自动备份。",
-  "settings_appearanceSoundControls": "外观、声音与操作",
-  "settings_inputAutocomplete": "输入与自动补全",
-  "settings_privacyGenerationProtection": "隐私与生成保护",
-  "settings_moveAppearanceControlsInputProtection": "界面、操作、输入和保护偏好，可跨设备迁移。",
-  "settings_rollbackCopySavedBeforeImport": "导入或恢复默认前会自动保存回退副本。",
-  "settings_resetSelectedScopeWhileKeeping": "按范围恢复，保留账号、模型、图库和创作内容。",
-  "settings_chooseScope": "选择范围",
-  "settings_preferenceManagement": "偏好管理",
-  "settings_backupMigrationRecovery": "备份、迁移与恢复",
-  "settings_generalAppearance": "常规与外观",
-  "settings_makeWorkspaceComfortableReadUse": "让工作台符合你的阅读与使用习惯。",
-  "settings_controlsShortcuts": "操作与快捷键",
-  "settings_chooseInteractionCanvasControlsKeyboard": "设置交互方式、画布操作和键盘快捷键。",
-  "settings_generationPrompts": "生成与提示词",
-  "settings_managePromptInputGenerationReminders": "管理提示词输入、生成提醒与请求节奏。",
-  "settings_galleryFiles": "图库与文件",
-  "settings_manageImageSavingGallerySources": "管理图片保存、图库来源与浏览显示。",
-  "settings_manageTagDictionariesIndexesCache": "管理标签词库、索引与缓存维护。",
-  "settings_novelaiAccounts": "NovelAI 账号",
-  "settings_viewAccountManageSignIn": "查看当前账号，管理登录与默认账号。",
-  "settings_connectionsIntegrations": "连接与集成",
-  "settings_manageExternalToolsBridgesNetwork": "管理外部工具、桥接连接与网络设置。",
-  "settings_privacySharing2": "隐私与分享",
-  "settings_controlSharedInformationConfirmationBefore": "控制分享信息与需要确认的操作。",
-  "settings_aboutDiagnostics": "关于与诊断",
-  "settings_updatesLogsProjectInformation": "版本更新、日志与项目资料。",
-  "settings_searchSettings": "搜索设置",
-  "settings_preferences": "使用偏好",
-  "settings_creationResources": "创作与资源",
-  "settings_servicesConnections": "服务与连接",
-  "settings_safetyMaintenance": "安全与维护",
-  "settings_subscriptionActive": "订阅有效",
-  "settings_availableBalance": "可用余额",
-  "settings_subscriptionExpiry2": "订阅有效期",
-  "settings_subscriptionDetailsUnavailable": "订阅信息暂不可用",
-  "settings_loadingSubscriptionDetails": "正在读取订阅信息…",
-  "settings_localDataStaysAvailableAfter": "账号到期后仍保留本地数据。",
-  "settings_records": "条记录",
   "settings_hitRate": "命中率",
-  "settings_images": "张图片",
-  "settings_cacheOverview": "缓存概览",
-  "settings_loginPreferences": "登录偏好",
-  "settings_preselectedSignInPage": "在登录页优先选中此账号。",
-  "settings_noAccounts": "暂无账号",
-  "settings_useLastSessionOffNext": "使用上次的登录凭据；关闭后，下次启动进入登录页。",
-  "settings_couldNotSaveLoginPreference": "登录偏好未保存，请重试。",
-  "settings_loginPreferencesUnavailable": "无法读取登录偏好。",
   "settings_applyPreferencesConfirm": "将应用 {count} 项偏好。当前偏好会自动备份，可从“恢复上次偏好”找回。账号、密钥、草稿、图库和模型配置保持独立。",
   "@settings_applyPreferencesConfirm": {
     "placeholders": {
       "count": {}
     }
   },
-  "settings_restore": "恢复",
   "wiki_translating": "正在翻译中",
   "wiki_back": "返回上一次",
   "wiki_readingTranslation": "译文",
@@ -4595,7 +3553,6 @@
       "count": {}
     }
   },
-  "settings_positiveIntegerRequired": "请输入大于 0 的整数",
   "modelSettings_testingPreset": "正在测试预设",
   "modelHealth_lastUpdated": "最近更新：{time}",
   "@modelHealth_lastUpdated": {
@@ -4764,33 +3721,7 @@
   "modelOverrides_valueTypes": "支持字符串、数字、布尔值、数组和对象",
   "modelOverrides_addBodyField": "添加请求体字段",
   "modelOverrides_addHeader": "添加请求头",
-  "promptTranslation_translating": "正在翻译",
-  "promptTranslation_needsModel": "翻译 · 先配置模型",
-  "promptTranslation_withRoute": "翻译 · {provider} / {model}",
-  "@promptTranslation_withRoute": {
-    "placeholders": {
-      "provider": {},
-      "model": {}
-    }
-  },
-  "promptTranslation_actions": "翻译操作",
-  "promptTranslation_promptChanged": "提示词已变化，未覆盖新编辑",
-  "promptTranslation_nothingToTranslate": "当前没有需要翻译的普通文字",
-  "promptTranslation_failed": "翻译失败：{error}",
-  "@promptTranslation_failed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "promptTranslation_setupTitle": "先配置翻译模型",
-  "promptTranslation_setupBody": "翻译需要明确选择服务商和模型。前往「设置 → 集成 → 模型与接口」，先添加服务商并取得模型列表，再在「提示词翻译」卡片中完成选择。",
-  "promptTranslation_later": "稍后",
-  "promptTranslation_openSettings": "前往设置",
-  "promptTranslation_toolTitle": "翻译",
-  "promptTranslation_noModel": "未配置模型",
-  "promptTranslation_configureModel": "配置翻译模型",
   "promptTranslation_translateNew": "翻译新增内容",
-  "promptTranslation_undoRestore": "撤销原文还原，恢复翻译块",
   "promptTranslation_restoreAll": "全部翻译块还原为原文文本",
   "promptTranslation_tutorial": "操作教程",
   "promptReading_mode": "轻量翻译",
@@ -5230,7 +4161,6 @@
   "settings_highAnlasCostEstimate": "预计消耗",
   "settings_highAnlasCostThresholdLabel": "提醒阈值",
   "settings_highAnlasCostQuestion": "是否继续本次生成？",
-  "bridge_title": "本机桥接",
   "bridge_agent": "外部 Agent",
   "bridge_agentHint": "复制说明，交给能执行本机命令的 Agent。",
   "bridge_synced": "当前内容已确认",
@@ -5352,8 +4282,6 @@
   "localUpscale_downloadProgress": "正在下载模型…",
   "localUpscale_importModel": "导入模型",
   "localUpscale_modelOperationFailed": "模型操作失败，请检查网络、文件权限及可用空间后重试。",
-  "settings_localUpscale": "本地放大",
-  "settings_localUpscaleDescription": "管理本地放大模型与运行组件。",
   "localUpscale_noCuda": "需要支持 CUDA 的 NVIDIA 显卡及兼容的驱动。",
   "localUpscale_noRtx": "RTX Video 不可用，请检查 NVIDIA RTX 显卡与驱动。",
   "localUpscale_encoding": "正在编码图片…",
@@ -5411,7 +4339,6 @@
   "localUpscale_installingComponent": "正在下载组件…",
   "upscale_settings": "放大设置",
   "upscale_cloudCost": "预计 {cost} Anlas · 2×",
-  "enhance_localAfterGeneration": "每张生成完成后自动在本机放大。",
   "enhance_localAction": "生成并本地放大",
   "@bridge_clients": {
     "placeholders": {
@@ -5440,31 +4367,8 @@
   },
   "localUpscale_stop": "停止超分",
   "localUpscale_scrollDown": "向下滚动",
-  "wiki_exampleImages": "示例图片",
   "wiki_exampleImagesUnavailable": "示例图片暂时无法加载",
-  "generation_perRequestLabel": "张数",
-  "generation_perRequestTooltip": "每次请求生成的张数（1–4）",
-  "generation_repeatLabel": "重复",
-  "generation_referenceUpload": "上传",
-  "generation_seedPinnedLabel": "种子 · 固定",
-  "generation_paramsDrawerTooltip": "更多参数",
-  "library_sizeSmall": "小",
-  "library_sizeMedium": "中",
-  "library_sizeLarge": "大",
-  "library_currentModel": "当前模型",
-  "library_available": "可用",
   "library_unavailable": "不能用",
-  "library_inGeneration": "在生图页",
-  "library_selectedCount": "已选 {count} 个",
-  "library_invertSelection": "反选",
-  "library_more": "更多",
-  "@library_selectedCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "viewer_fit": "适应",
   "viewer_showInfo": "显示信息栏（I）",
   "viewer_hideInfo": "隐藏信息栏（I）",
@@ -5481,18 +4385,6 @@
         "type": "String"
       }
     }
-  },
-  "styleExplore_openBlockLibrary": "打开块库",
-  "@styleExplore_openBlockLibrary": {
-    "description": "Style exploration workbench: styleExplore_openBlockLibrary"
-  },
-  "styleExplore_drawCountLabel": "本次抽取",
-  "@styleExplore_drawCountLabel": {
-    "description": "Style exploration workbench: styleExplore_drawCountLabel"
-  },
-  "styleExplore_drawCountSuffix": "张 · 逐张生成",
-  "@styleExplore_drawCountSuffix": {
-    "description": "Style exploration workbench: styleExplore_drawCountSuffix"
   },
   "styleExplore_appliedToEditor": "已套用到编辑区",
   "@styleExplore_appliedToEditor": {
@@ -8845,22 +7737,8 @@
   "naiAgent_chatGptError": "无法连接 ChatGPT，请重试或重新登录。",
   "naiAgent_chatGptUsingPlan": "使用 ChatGPT 套餐额度",
   "naiAgent_chatGptManageUsage": "管理用量",
-  "naiAgent_settings": "Agent 设置",
   "naiAgent_chooseModel": "选择模型",
   "naiAgent_interrupted": "上次任务已中断，未自动重发。",
-  "naiAgent_systemPrompt": "内置提示词",
-  "naiAgent_promptHelp": "自定义内容替换默认提示词；工具地图由应用追加。已有聊天记录保持原样，后续请求使用新内容。",
-  "naiAgent_restoreDefault": "恢复默认",
-  "naiAgent_showEffective": "查看生效提示词",
-  "naiAgent_useGlobal": "使用全局提示词",
-  "naiAgent_save": "保存",
-  "naiAgent_runLimit": "每次运行的模型请求上限",
-  "naiAgent_enterSends": "Enter 发送，Shift+Enter 换行",
-  "naiAgent_dataFolder": "工作区数据目录",
-  "naiAgent_openFolder": "打开文件夹",
-  "naiAgent_toolsManuals": "工具与 Skill",
-  "naiAgent_toolsHint": "当前状态、图片、提示词和工作区文件按需调用；业务操作的详细用法写在 nai-studio、nai-prompt 等 Skill 里，用到时才读取。",
-  "naiAgent_unknownCost": "实际费用以服务商为准",
   "naiAgent_error": "操作未完成，请检查模型设置或工作区文件。",
   "naiAgent_emptyResponse": "模型结束了请求，但没有返回正文或工具调用。请重试，或检查模型输出设置。",
   "naiAgent_imageRequestTooLarge": "本次图片总量过大或无法处理。请减少图片数量、缩小图片或更换格式后重试。",
@@ -8888,9 +7766,6 @@
   "naiAgent_imageLimit": "图片格式无效、文件过大或超出上传限制。",
   "naiAgent_composerNotEmpty": "请先保存或发送当前输入，再恢复这条消息。",
   "naiAgent_runtimeMissing": "Agent 运行组件尚未安装，请使用完整更新包。",
-  "naiAgent_usage": "模型用量",
-  "naiAgent_globalScope": "全局默认",
-  "naiAgent_workspaceScope": "当前工作区",
   "naiAgent_generationLocalEnhance": "生成后本地超分：{model} ×{scale}",
   "@naiAgent_generationLocalEnhance": {
     "placeholders": {
@@ -8925,22 +7800,7 @@
       }
     }
   },
-  "naiAgent_extensions": "扩展",
-  "naiAgent_interactionExtension": "Studio 交互",
-  "naiAgent_extensionRequired": "内置 · 必需",
-  "naiAgent_interactionExtensionHint": "按需读取当前 Studio 状态，并通过问题卡片收集用户回答。",
-  "naiAgent_extensionAddFile": "添加扩展文件",
-  "naiAgent_extensionAddFolder": "添加扩展目录",
-  "naiAgent_extensionsHint": "扩展在各工作区独立加载。更改会在当前任务结束后的下一次发送生效。外部扩展能运行本地代码，请选择可信来源。",
   "naiAgent_extensionError": "扩展运行失败",
-  "naiAgent_extensionCompatibility": "支持本地 Pi 扩展及扩展包目录、工具、命令和标准提问对话框；终端专用自定义界面不在桌面渲染。",
-  "naiAgent_instructions": "指令",
-  "naiAgent_globalInstructions": "全局指令",
-  "naiAgent_globalInstructionsHelp": "所有工作区都会使用，可填写语言、风格或任务偏好。留空即可停用这一部分。",
-  "naiAgent_systemPromptPrefix": "系统提示词前置内容",
-  "naiAgent_systemPromptPrefixHelp": "插在 NAI Agent 基础提示词之前，保留基础提示词和工具地图。留空即可停用这一部分。",
-  "naiAgent_instructionOrder": "生效顺序：前置内容 → 基础提示词 → 全局指令 → 工作区规则。仅影响后续请求。",
-  "naiAgent_saveInstructions": "保存指令",
   "naiAgent_mcpBuiltin": "NAI Studio · 内置工具组",
   "naiAgent_mcpBuiltinHint": "提示词、积木、百科、图片、历史、参考图、生图和设置工具。默认按需发现，原有备份、版本校验和真实确认继续生效。",
   "naiAgent_mcpAdd": "添加 MCP 服务器",
@@ -9026,153 +7886,18 @@
   "channel_weekday5": "周五",
   "channel_weekday6": "周六",
   "channel_weekday7": "周日",
-  "rag_title": "RAG 向量系统",
-  "rag_description": "管理本地语义检索、模型与标签上下文推荐",
-  "rag_enabled": "启用 RAG",
-  "rag_enabledHint": "开启本地语义检索服务；首次建库需预览范围后手动开始。",
-  "rag_status": "统一向量池",
-  "rag_off": "未启用",
-  "rag_loading": "正在准备本地模型",
-  "rag_empty": "模型已连接，等待建立索引",
-  "rag_ready": "语义检索已就绪",
   "rag_partial": "部分就绪，未覆盖内容保留普通搜索",
-  "rag_building": "正在建立索引",
-  "rag_paused": "建库已暂停，已有索引仍可查询",
   "rag_unavailable": "RAG 暂不可用，保留普通搜索",
-  "rag_operationFailed": "操作未完成，请检查模型路径与独立运行环境",
-  "rag_indexCounts": "已索引 {indexed} / {total} 项",
-  "@rag_indexCounts": {
-    "placeholders": {
-      "indexed": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "rag_storage": "索引占用 {size} MiB",
-  "@rag_storage": {
-    "placeholders": {
-      "size": {
-        "type": "String"
-      }
-    }
-  },
-  "rag_refresh": "刷新状态",
-  "rag_embeddingPath": "EmbeddingGemma 2 权重目录",
-  "rag_notConfigured": "尚未配置",
-  "rag_choose": "选择",
-  "rag_modelMode": "模型能力",
-  "rag_modelModeHint": "Gemma 2 用于文字与图片检索，音频关闭。",
-  "rag_discover": "检测本地权重",
   "rag_modelsMissing": "未找到模型，请选择已下载的权重目录",
-  "rag_pythonPath": "独立 Python 运行环境",
-  "rag_runtime": "推理运行环境",
-  "rag_runtimeHint": "使用专用环境，不修改现有放大组件。模型权重需单独选择。",
-  "rag_installRuntime": "安装独立运行环境",
-  "rag_installHint": "下载 Python 与推理依赖。CUDA 版本约需数 GB 下载空间，适用于兼容的 NVIDIA 显卡；CPU 版本下载较小。不会下载模型权重。",
-  "rag_installing": "正在安装运行环境",
-  "rag_device": "运行设备",
-  "rag_auto": "自动选择",
-  "rag_tagsEnabled": "标签语义搜索与推荐",
   "rag_tagsHint": "按输入的名称或描述检索标签，空框使用本地共现推荐。",
-  "rag_buildIndex": "预览并建立索引",
-  "rag_plan": "将收录当前标签目录的 {total} 项标签、别名与已有本地释义。首次处理可能较久；可暂停，已完成部分可提前使用。",
-  "@rag_plan": {
-    "placeholders": {
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "rag_start": "开始建立",
-  "rag_pause": "暂停建库",
-  "rag_resume": "继续建库",
-  "rag_rebuild": "重建索引",
-  "rag_clear": "清除索引",
-  "rag_clearHint": "仅删除此来源的派生索引，保留原始内容与模型；重新建库后可继续使用。",
-  "rag_futureSources": "已接入标签推荐、Wiki、提示词块与图库多模态检索；工作区与 Agent 检索后续接入。",
   "rag_badgeHint": "本地语义检索已就绪",
-  "rag_wikiEnabled": "Wiki 语义搜索",
-  "rag_wikiHint": "收录本地百科正文，名称精确匹配优先，语义结果补充。单独预览并开始首次建库。",
-  "rag_blocksEnabled": "提示词块语义搜索",
-  "rag_blocksHint": "仅收录已保存、未归档块的标题、标签与正负面文字；不收录图片或编辑草稿。",
-  "rag_textPlan": "将收录 {documents} 份已保存资料，切分为 {total} 个文字片段。首次建库需手动开始，之后增量更新；可暂停，已完成部分可检索。",
-  "rag_textCounts": "已索引 {indexed} / {total} 个文字片段",
-  "@rag_textPlan": {
-    "placeholders": {
-      "documents": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "@rag_textCounts": {
-    "placeholders": {
-      "indexed": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "rag_galleryEnabled": "图库多模态检索",
-  "rag_galleryHint": "分析已登记图库中的图片画面；仅为 NAI 图的已有参数另建文字索引。原图不改写，普通图不解析其他软件元数据。",
-  "rag_galleryPlan": "当前图库来源将收录 {images} 张未删除图片及 {parameters} 个 NAI 参数片段。首次需点击开始，之后增量更新；画面与参数分开索引，可随时暂停。",
-  "rag_galleryCounts": "画面 {indexed} / {images} 张；NAI 参数 {parameters} 段；跳过 {skipped} 张",
   "rag_galleryMixed": "综合检索",
   "rag_galleryVisual": "仅画面",
   "rag_galleryParameters": "仅 NAI 参数",
   "rag_galleryChooseImage": "选择图片找相似",
   "rag_galleryClearImage": "清除查询图片",
   "rag_gallerySearchOptions": "图库 RAG 检索方式",
-  "@rag_galleryPlan": {
-    "placeholders": {
-      "images": {
-        "type": "int"
-      },
-      "parameters": {
-        "type": "int"
-      }
-    }
-  },
-  "@rag_galleryCounts": {
-    "placeholders": {
-      "indexed": {
-        "type": "int"
-      },
-      "images": {
-        "type": "int"
-      },
-      "parameters": {
-        "type": "int"
-      },
-      "skipped": {
-        "type": "int"
-      }
-    }
-  },
-  "rag_downloadModel": "下载模型",
-  "rag_modelDownloading": "正在下载模型",
-  "rag_modelVerifying": "正在校验模型",
-  "rag_downloadProgress": "{done} / {total} MB",
-  "rag_poolHint": "所有已启用来源共用一个向量池，新增资料与翻译自动增量更新。",
   "rag_runtimeReady": "运行环境已就绪",
-  "rag_runtimeCheck": "检测运行环境",
-  "rag_runtimeExisting": "正在检测已有环境",
-  "rag_runtimeDownload": "正在下载环境安装工具",
-  "rag_runtimeCreate": "正在准备 Python 环境",
-  "rag_runtimeCuda": "正在安装 CUDA 推理组件",
-  "rag_runtimePackages": "正在安装推理依赖",
-  "rag_runtimeVerify": "正在校验环境兼容性",
-  "rag_runtimeElapsed": "此阶段已用 {seconds} 秒",
-  "rag_useRuntime": "使用已有环境",
-  "@rag_downloadProgress": {"placeholders": {"done": {"type": "String"}, "total": {"type": "String"}}},
-  "@rag_runtimeElapsed": {"placeholders": {"seconds": {"type": "int"}}},
   "set_title": "设置",
   "set_search": "搜索设置",
   "set_searchResults": "搜索结果",
@@ -10102,7 +8827,6 @@
   "set_agRemoveMcp": "移除服务器",
   "set_agRemoveExt": "移除扩展",
   "set_rgDesc": "本地运行的 RAG：给标签推荐、Wiki、提示词块和图库找相似提供语义能力，不上传任何内容。",
-  "set_rgReady": "语义检索已就绪",
   "set_rgOff": "语义检索已关闭",
   "set_rgPartial": "部分来源建库中",
   "set_rgAllDone": "全部完成",
@@ -10178,11 +8902,6 @@
       "n": {}
     }
   },
-  "set_rgStartupTitle": "准备本地索引",
-  "set_rgStartupBody": "首次建立或继续索引前，需要先准备本地运行环境、模型和已有数据。",
-  "set_rgStartupWaitTitle": "可能需要几分钟或更久",
-  "set_rgStartupWaitBody": "准备期间，进度数字可能暂时不变，请耐心等待。",
-  "set_rgStartupFrequency": "每次启动仅提示一次",
   "set_rgLoading": "正在载入索引",
   "set_rgOpening": "正在连接本地工作进程，读取已有索引。",
   "set_rgLoadingSaved": "正在载入已保存的检索索引。",
@@ -10288,7 +9007,7 @@
       "n": {}
     }
   },
-  "set_upNoGpu": "没有检测到独立显卡",
+  "set_upNoGpu": "未获取到 NVIDIA 显卡信息",
   "set_upLocal": "在本机放大图片，不消耗 Anlas。",
   "set_upEsrgan": "常规模型",
   "set_upEsrganSub": "Real-ESRGAN NCNN，4 倍放大，速度快，任何支持 Vulkan 的显卡都能用。",
@@ -11594,6 +10313,27 @@
       }
     }
   },
+  "set_stDraftBackups": "生图草稿备份",
+  "resourceWindow_retryPage": "下一页加载失败 · 重试",
+  "set_rgSuspended": "检索暂时暂停",
+  "set_rgNoSearchable": "尚无可检索内容",
+  "set_rgSearchableCount": "{count}/{total} 个来源可检索",
+  "set_rgWaitRetry": "索引正被占用，请稍后重试。",
+  "set_rgCheckSource": "无法读取来源，请检查路径和读取权限后重试。",
+  "set_rgCheckDevice": "CUDA 不可用，请检查运行设备设置后重试。",
+  "set_rgRetryDownload": "模型下载失败，请检查网络后重试下载。",
+  "set_rgRefreshRetry": "本地检索服务未响应，请刷新状态后重试。",
+  "set_rgOperationFailed": "本地检索操作失败，请刷新状态后重试。",
+  "@set_rgSearchableCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "set_stOther": "其他文件",
   "set_stIncomplete": "部分目录读取失败，数字不完整；悬停分类可查看来源目录。",
   "set_stSliceIncomplete": "未完整读取",
@@ -11647,6 +10387,8 @@
     }
   },
   "prompt_autocompleteTitle": "补全",
+  "prompt_spellingSuggestion": "拼写建议",
+  "prompt_spellingHint": "Tab 采用 · 回车换行 · Esc 收起",
   "prompt_autocompleteHint": "↑↓ 选择 · → 关联 · ← 返回 · Tab / 回车 补全 · Esc 关闭",
   "prompt_autocompleteHintRelated": "↑↓ 选择 · ← 返回 · Tab / 回车 追加 · Esc 关闭关联",
   "resourceWindow_show": "打开资源小窗",

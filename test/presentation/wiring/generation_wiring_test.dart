@@ -37,6 +37,10 @@ import 'package:nai_launcher/presentation/providers/tips_provider.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
 import 'package:nai_launcher/presentation/ui/blocks/blocks_edit.dart';
+import 'package:nai_launcher/presentation/ui/blocks/blocks_contract.dart'
+    show BlockDraft;
+import 'package:nai_launcher/presentation/providers/layout_state_provider.dart';
+import 'package:nai_launcher/presentation/wiring/blocks_preferences.dart';
 import 'package:nai_launcher/presentation/wiring/blocks_library_backend.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_page.dart';
 import 'package:nai_launcher/presentation/providers/floating_resource_windows_provider.dart';
@@ -833,6 +837,83 @@ void main() {
     expect(page.slots.drop, isNotNull);
     expect(page.slots.dock, isNotNull);
     expect(page.slots.historyDrag, isNotNull);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox());
+  });
+  testWidgets('生图中点击块库侧栏先备份并插入下一张的正负提示词', (tester) async {
+    final block = await tester.runAsync(() async {
+      await container.read(promptBlockLibraryNotifierProvider.future);
+      return container
+          .read(blocksLibraryBackendProvider)
+          .save(
+            const BlockDraft(
+              title: 'Prompt pair',
+              atoms: ['forest'],
+              negativeAtoms: ['fog'],
+            ),
+          );
+    });
+    (container.read(imageGenerationNotifierProvider.notifier) as DataGeneration)
+        .publish(
+          const ImageGenerationState(status: GenerationStatus.generating),
+        );
+    await container
+        .read(layoutStateNotifierProvider.notifier)
+        .setBlockLibraryPanelExpanded(true);
+    await pump(tester);
+    container.read(pillActiveEditorTargetProvider.notifier).state = (
+      scope: PillScopes.main,
+      caret: 0,
+    );
+    final pill = find.byKey(Key('dock-pill-${block!.id}'));
+    await tester.ensureVisible(pill);
+    await tester.tap(pill);
+    await tester.pump();
+    expect(
+      (container.read(generationPlatformProvider) as MemoryGenerationPlatform)
+          .backups,
+      hasLength(1),
+    );
+    for (final scope in [PillScopes.main, PillScopes.negative]) {
+      expect(
+        container.read(pillWorkspaceProvider(scope)).document.instances,
+        hasLength(1),
+      );
+    }
+    expect(
+      (await container.read(blocksPreferencesProvider.future)).recentIds.first,
+      block.id,
+    );
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump(Duration.zero);
+  });
+
+  testWidgets('生成中可以从参数条固定种子，并打开抽屉修改下一张的种子', (tester) async {
+    (container.read(imageGenerationNotifierProvider.notifier) as DataGeneration)
+        .publish(
+          const ImageGenerationState(status: GenerationStatus.generating),
+        );
+    await pump(tester);
+    final strip = find.byKey(const Key('gen-param-seed'));
+    await tester.tap(strip);
+    await tester.pump();
+    expect(
+      container.read(generationParamsNotifierProvider).seed,
+      isNonNegative,
+    );
+    await tester.tap(find.byKey(const Key('gen-params-toggle')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    final field = find.byKey(const Key('gen-drawer-seed'));
+    await tester.ensureVisible(field);
+    await tester.enterText(field, '314159');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump();
+    expect(container.read(generationParamsNotifierProvider).seed, 314159);
+    expect(
+      container.read(imageGenerationNotifierProvider).isGenerating,
+      isTrue,
+    );
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox());
   });

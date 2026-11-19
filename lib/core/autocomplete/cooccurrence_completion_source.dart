@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import '../database/datasources/cooccurrence_data_source.dart';
+import '../utils/tag_normalizer.dart';
 import 'completion_models.dart';
 import 'tag_catalog_repository.dart';
 
@@ -34,17 +35,23 @@ class CooccurrenceCompletionSource implements CompletionSource {
 
   @override
   Future<List<CompletionCandidate>> search(CompletionQuery query) async {
-    final relatedTag = query.relatedTag?.trim().toLowerCase();
-    if (relatedTag == null || relatedTag.isEmpty || query.token.isNotEmpty) {
+    final relatedTag = TagNormalizer.normalize(query.relatedTag ?? '');
+    if (relatedTag.isEmpty || query.token.isNotEmpty) {
       return const [];
     }
 
+    final resolved = await _catalog.resolveCanonicalNames({
+      relatedTag,
+      ...query.existingTags,
+    });
+    final seed = resolved[relatedTag];
+    if (seed == null) return const [];
     final requestedLimit = CompletionResultLimits.isAll(query.limit)
         ? CompletionResultLimits.maxRelatedTags
         : query.limit.clamp(1, CompletionResultLimits.maxRelatedTags);
     final matches = await related(
-      [relatedTag],
-      exclude: query.existingTags,
+      [seed],
+      exclude: {for (final tag in query.existingTags) resolved[tag] ?? tag},
       limit: requestedLimit,
     );
     return [for (final match in matches) match.candidate];

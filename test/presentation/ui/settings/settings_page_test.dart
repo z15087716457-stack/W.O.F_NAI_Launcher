@@ -9,6 +9,7 @@ import 'package:nai_launcher/presentation/ui/agent/agent_glyphs.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_contract.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_fixture.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_kit.dart';
+import 'package:nai_launcher/presentation/ui/settings/settings_search.dart';
 import 'package:nai_launcher/presentation/ui/kit/ui_colors.dart';
 import 'package:nai_launcher/presentation/utils/shortcut_guide.dart';
 
@@ -115,7 +116,7 @@ void main() {
     expect(find.byKey(const Key('settings-attention')), findsOneWidget);
     await tap(t, 'settings-nav-network');
     expect(rec.pages, [SettingsPageId.network]);
-    expect(find.byKey(const Key('endpoint-github.com')), findsOneWidget);
+    expect(find.text('github.com'), findsOneWidget);
   });
 
   testWidgets('概览卡片跳到对应页', (t) async {
@@ -529,6 +530,29 @@ void main() {
     };
     for (final MapEntry(:key, :value) in expected.entries) {
       expect(SettingSpec.of(key).defaultValue, value, reason: key.name);
+    }
+  });
+
+  testWidgets('keyboard selection stays visible in both directions', (t) async {
+    await pumpSettings(t, window: 1200, height: 720);
+    await t.enterText(find.byKey(const Key('settings-search-input')), 'a');
+    await t.pumpAndSettle();
+    final results = find.byType(SettingsSearchResults);
+    final hits = settingsSearch(t.element(results), 'a');
+    for (final (key, count, expected) in [
+      (LogicalKeyboardKey.arrowDown, 15, 15),
+      (LogicalKeyboardKey.arrowUp, 15, 0),
+    ]) {
+      for (var i = 0; i < count; i++) {
+        await t.sendKeyEvent(key);
+        await t.pump();
+      }
+      await t.pumpAndSettle();
+      expect(t.widget<SettingsSearchResults>(results).selected, expected);
+      final row = t.getRect(find.byKey(Key('hit-${hits[expected].anchor}')));
+      final viewport = t.getRect(results);
+      expect(row.top, greaterThanOrEqualTo(viewport.top - 1));
+      expect(row.bottom, lessThanOrEqualTo(viewport.bottom + 1));
     }
   });
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nai_launcher/core/autocomplete/completion_models.dart';
 import 'package:nai_launcher/core/autocomplete/prompt_autocomplete_controller.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/prompt_autocomplete_binding.dart';
 import '../../../core/autocomplete/prompt_autocomplete_controller_test.dart'
@@ -72,85 +73,93 @@ void main() {
     });
   }
 
-  testWidgets(
-    'hidden autocomplete leaves Enter newline and Tab traversal intact',
-    (tester) async {
-      var calls = 0;
-      final completion = PromptAutocompleteController(
-        enabled: true,
-        search: (_) async {
-          calls++;
-          return const [];
-        },
-      );
-      final text = TextEditingController();
-      final focus = FocusNode();
-      final next = FocusNode();
-      final unhandled = <LogicalKeyboardKey>[];
-      addTearDown(() {
-        completion.dispose();
-        text.dispose();
-        focus.dispose();
-        next.dispose();
-      });
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Focus(
-              canRequestFocus: false,
-              onKeyEvent: (_, event) {
-                if (event is KeyDownEvent) unhandled.add(event.logicalKey);
-                return KeyEventResult.ignored;
-              },
-              child: Column(
-                children: [
-                  PromptAutocompleteBinding(
-                    autocomplete: completion,
-                    controller: text,
-                    focusNode: focus,
-                    locale: 'en',
-                    autoInsertComma: true,
-                    onAccept: (value) => text.value = value,
-                    child: TextField(
-                      inputFormatters: [
-                        TextInputFormatter.withFunction((oldValue, newValue) {
-                          completion.update(newValue, locale: 'en');
-                          return newValue;
-                        }),
-                      ],
+  for (final suggestSpelling in [false, true]) {
+    testWidgets(
+      'native newline and Tab traversal with spelling suggestion=$suggestSpelling',
+      (tester) async {
+        var calls = 0;
+        final completion = PromptAutocompleteController(
+          enabled: true,
+          search: (_) async {
+            calls++;
+            return suggestSpelling
+                ? [
+                    candidates.first.copyWith(
+                      matchKind: CompletionMatchKind.spelling,
+                    ),
+                  ]
+                : [];
+          },
+        );
+        final text = TextEditingController();
+        final focus = FocusNode();
+        final next = FocusNode();
+        final unhandled = <LogicalKeyboardKey>[];
+        addTearDown(() {
+          completion.dispose();
+          text.dispose();
+          focus.dispose();
+          next.dispose();
+        });
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: Focus(
+                canRequestFocus: false,
+                onKeyEvent: (_, event) {
+                  if (event is KeyDownEvent) unhandled.add(event.logicalKey);
+                  return KeyEventResult.ignored;
+                },
+                child: Column(
+                  children: [
+                    PromptAutocompleteBinding(
+                      autocomplete: completion,
                       controller: text,
                       focusNode: focus,
-                      maxLines: null,
+                      locale: 'en',
+                      autoInsertComma: true,
+                      onAccept: (value) => text.value = value,
+                      child: TextField(
+                        inputFormatters: [
+                          TextInputFormatter.withFunction((oldValue, newValue) {
+                            completion.update(newValue, locale: 'en');
+                            return newValue;
+                          }),
+                        ],
+                        controller: text,
+                        focusNode: focus,
+                        maxLines: null,
+                      ),
                     ),
-                  ),
-                  TextField(focusNode: next),
-                ],
+                    TextField(focusNode: next),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-      );
-      await tester.tap(find.byType(TextField).first);
-      await tester.enterText(find.byType(TextField).first, 'bl');
-      await tester.pump(const Duration(milliseconds: 120));
-      expect(calls, 1);
-      expect(completion.value.visible, false);
-      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
-      expect(unhandled, contains(LogicalKeyboardKey.enter));
-      // The test IME delivers the newline after shortcut handling.
-      await tester.testTextInput.receiveAction(TextInputAction.newline);
-      tester.testTextInput.updateEditingValue(
-        const TextEditingValue(
-          text: 'bl\n',
-          selection: TextSelection.collapsed(offset: 3),
-        ),
-      );
-      await tester.pump();
-      expect(text.text, 'bl\n');
-      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-      await tester.pump();
-      expect(next.hasPrimaryFocus, true);
-      await tester.pumpWidget(const SizedBox.shrink());
-    },
-  );
+        );
+        await tester.tap(find.byType(TextField).first);
+        await tester.enterText(find.byType(TextField).first, 'bl');
+        await tester.pump(const Duration(milliseconds: 120));
+        expect(calls, 1);
+        expect(completion.value.visible, suggestSpelling);
+        await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+        expect(unhandled, contains(LogicalKeyboardKey.enter));
+        // The test IME delivers the newline after shortcut handling.
+        await tester.testTextInput.receiveAction(TextInputAction.newline);
+        tester.testTextInput.updateEditingValue(
+          const TextEditingValue(
+            text: 'bl\n',
+            selection: TextSelection.collapsed(offset: 3),
+          ),
+        );
+        await tester.pump();
+        expect(text.text, 'bl\n');
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.pump();
+        expect(next.hasPrimaryFocus, true);
+        await tester.pumpWidget(const SizedBox.shrink());
+      },
+    );
+  }
 }

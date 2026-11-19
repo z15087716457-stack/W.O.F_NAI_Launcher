@@ -18,6 +18,8 @@ class UiSearchField extends StatefulWidget {
     required this.value,
     required this.hint,
     required this.onChanged,
+    this.onSubmitted,
+    this.debounce = const Duration(milliseconds: 300),
     this.focusNode,
     this.height = 36,
     this.enabled = true,
@@ -27,6 +29,8 @@ class UiSearchField extends StatefulWidget {
   final String value;
   final String hint;
   final ValueChanged<String> onChanged;
+  final ValueChanged<String>? onSubmitted;
+  final Duration debounce;
   final FocusNode? focusNode;
   final double height;
   final bool enabled;
@@ -76,13 +80,20 @@ class _UiSearchFieldState extends State<UiSearchField> {
   void _changed(String v) {
     setState(() {});
     _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 300), () => _submit(v));
+    if (widget.debounce == Duration.zero) {
+      _submit(v);
+    } else {
+      _debounce = Timer(widget.debounce, () => _submit(v));
+    }
   }
 
-  void _submit(String v) {
+  void _submit(String v, {bool confirmed = false}) {
     _debounce?.cancel();
     _synced = v.trim();
-    widget.onChanged(v.trim());
+    final action = confirmed
+        ? widget.onSubmitted ?? widget.onChanged
+        : widget.onChanged;
+    action(_synced);
   }
 
   @override
@@ -140,7 +151,7 @@ class _UiSearchFieldState extends State<UiSearchField> {
                       hintStyle: UiText.sans(small ? 12.5 : 13, color: c.faint),
                     ),
                     onChanged: _changed,
-                    onSubmitted: _submit,
+                    onSubmitted: (v) => _submit(v, confirmed: true),
                   ),
                 ),
               ),

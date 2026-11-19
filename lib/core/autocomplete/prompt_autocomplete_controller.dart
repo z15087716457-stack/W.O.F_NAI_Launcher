@@ -44,6 +44,10 @@ class PromptAutocompleteState {
   final Set<String> relatedAdded;
   final Object? relatedError;
   bool get visible => candidates.isNotEmpty;
+  bool get spellingSelected =>
+      visible &&
+      relatedFor == null &&
+      candidates[selectedIndex].matchKind == CompletionMatchKind.spelling;
   int get anchorTextOffset => query?.replacementRange.start ?? 0;
 
   /// Tags available to the popup. The UI reports only viewport-visible rows to
@@ -108,6 +112,7 @@ class PromptAutocompleteController
       locale: query.locale,
       existingTags: query.existingTags,
       limit: query.limit,
+      suggestSpelling: true,
     ),
     relatedSearch: (sourceTag, {required locale, required existingTags}) =>
         service.related(
@@ -195,10 +200,15 @@ class PromptAutocompleteController
       locale: locale,
       inputRange: TextReplacementRange(start: start, end: cursor),
     );
+    // A completed weight may still contain a typo. Offer corrections only
+    // immediately after its closing marker, keeping other delimiters quiet.
+    final afterToken = cursor > query.replacementRange.end;
     if (query.kind != CompletionQueryKind.tag ||
         query.token.runes.length < (query.isChinese ? 1 : 2) ||
         query.cursorPosition < query.replacementRange.start ||
-        query.cursorPosition > query.replacementRange.end) {
+        (afterToken &&
+            editing.text.substring(query.replacementRange.end, cursor) !=
+                '::')) {
       return;
     }
     final revision = _revision;
@@ -209,7 +219,13 @@ class PromptAutocompleteController
         if (_disposed || revision != _revision) return;
         value = PromptAutocompleteState(
           query: query,
-          candidates: List.unmodifiable(candidates),
+          candidates: List.unmodifiable(
+            afterToken
+                ? candidates.where(
+                    (item) => item.matchKind == CompletionMatchKind.spelling,
+                  )
+                : candidates,
+          ),
         );
       } catch (error) {
         if (_disposed || revision != _revision) return;
@@ -430,6 +446,10 @@ class PromptAutocompleteController
     } else if (key == LogicalKeyboardKey.tab ||
         key == LogicalKeyboardKey.enter ||
         key == LogicalKeyboardKey.numpadEnter) {
+      if (key != LogicalKeyboardKey.tab && value.spellingSelected) {
+        dismiss();
+        return false;
+      }
       final result = value.relatedFor != null
           ? acceptRelated(value.relatedSelected, autoInsertComma)
           : accept(null, autoInsertComma);

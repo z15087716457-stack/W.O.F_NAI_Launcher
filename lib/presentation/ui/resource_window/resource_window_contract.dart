@@ -287,6 +287,7 @@ class ResourceWindowViewData {
     this.items = const [],
     this.total = 0,
     this.hasMore = false,
+    this.pageFailed = false,
     this.loading = false,
     this.replacing = false,
     this.trashPaths = const [],
@@ -326,6 +327,7 @@ class ResourceWindowViewData {
   final List<ResourceItem> items;
   final int total;
   final bool hasMore;
+  final bool pageFailed;
   final bool loading;
   final bool replacing;
   final List<String> trashPaths;

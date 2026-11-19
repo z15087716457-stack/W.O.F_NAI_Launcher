@@ -37,13 +37,19 @@ class SettingsGpuProbe {
   static SettingsGpuInfo? parse(String csv, String driver) {
     final candidates = <SettingsGpuInfo>[];
     final cuda =
-        RegExp(r'CUDA Version:\s*([0-9.]+)').firstMatch(driver)?.group(1) ?? '';
+        RegExp(
+          r'CUDA(?: UMD)? Version:\s*([0-9.]+)',
+        ).firstMatch(driver)?.group(1) ??
+        '';
     for (final line in csv.split('\n')) {
       final fields = line.split(',').map((part) => part.trim()).toList();
       if (fields.length != 3 || fields[0].isEmpty) continue;
       final memory = int.tryParse(fields[1]);
       final compute = double.tryParse(fields[2]);
-      if (memory == null || memory < 0 || compute == null || !compute.isFinite) {
+      if (memory == null ||
+          memory < 0 ||
+          compute == null ||
+          !compute.isFinite) {
         continue;
       }
       candidates.add(SettingsGpuInfo(fields[0], memory, compute, cuda));

@@ -254,7 +254,7 @@ void main() {
               .submitted!;
       expect(sent.sourceImage, same(source));
       expect(sent.enhanceWorkflow, isTrue);
-      expect((sent.width, sent.height), (1248, 1824));
+      expect((sent.width, sent.height), (1280, 1856));
       expect(container.read(generationParamsNotifierProvider), same(before));
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());

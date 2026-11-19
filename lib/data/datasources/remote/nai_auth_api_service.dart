@@ -142,10 +142,7 @@ class NAIAuthApiService {
         ),
       );
 
-      final subscription = readNaiSubscriptionResponse(
-        response,
-        isThirdParty: endpoint.isThirdParty,
-      );
+      final subscription = readNaiSubscriptionResponse(response);
       AppLogger.i('Token validation successful', 'NAIAuth');
       return subscription;
     } on DioException catch (e) {

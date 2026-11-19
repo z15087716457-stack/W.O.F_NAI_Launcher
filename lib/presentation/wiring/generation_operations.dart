@@ -49,7 +49,7 @@ import '../widgets/image_editor/image_editor_screen.dart';
 import '../widgets/prompt/blocks/prompt_block_palette.dart';
 import 'blocks_edit_wiring.dart';
 import 'generation_backend.dart';
-import 'generation_blocks_dock.dart';
+import 'blocks_dock_wiring.dart';
 import 'generation_drop_wiring.dart';
 import 'generation_history_actions.dart';
 import 'generation_reference_imports.dart';

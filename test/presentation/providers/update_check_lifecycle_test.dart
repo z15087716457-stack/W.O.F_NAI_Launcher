@@ -20,12 +20,22 @@ class _Installer extends UpdateInstallerService {
   _Installer(this.result)
     : super(dio: Dio(), installationService: AppInstallationService());
   final DownloadedUpdate result;
+  var downloads = 0;
+  var installs = 0;
+  @override
+  Future<void> installAndRestart(DownloadedUpdate update) async {
+    installs++;
+  }
+
   @override
   Future<DownloadedUpdate> downloadUpdate(
     VersionInfo versionInfo, {
     void Function(UpdateDownloadProgress progress)? onProgress,
     CancelToken? cancelToken,
-  }) async => result;
+  }) async {
+    downloads++;
+    return result;
+  }
 }
 
 void main() {
@@ -50,6 +60,7 @@ void main() {
   late ProviderContainer container;
   late UpdateStateNotifier notifier;
   late _Check check;
+  late _Installer installer;
   late DownloadedUpdate downloaded;
   late Completer<VersionInfo?> automatic;
   late Completer<VersionInfo?> manual;
@@ -97,7 +108,7 @@ void main() {
       overrides: [
         updateCheckServiceProvider.overrideWithValue(check),
         updateInstallerServiceProvider.overrideWithValue(
-          _Installer(downloaded),
+          installer = _Installer(downloaded),
         ),
       ],
     );
@@ -123,6 +134,35 @@ void main() {
     manual.complete(info);
     await task;
   }
+
+  test(
+    'two entry points start only one download and one installation',
+    () async {
+      await manualResult();
+      await Future.wait([notifier.downloadUpdate(), notifier.downloadUpdate()]);
+      expect(installer.downloads, 1);
+      expect(current().status, UpdateStatus.downloaded);
+      await Future.wait([
+        notifier.installAndRestart(),
+        notifier.installAndRestart(),
+      ]);
+      expect(installer.installs, 1);
+    },
+  );
+  test(
+    'a reset while preparing a download does not resurrect the package',
+    () async {
+      await manualResult();
+      final reminder = Completer<void>();
+      when(check.clearReminder).thenAnswer((_) => reminder.future);
+      final pending = notifier.downloadUpdate();
+      notifier.reset();
+      reminder.complete();
+      await pending;
+      expect(installer.downloads, 0);
+      expect(current().versionInfo, isNull);
+    },
+  );
 
   for (final result in ['version', 'none', 'error']) {
     test(

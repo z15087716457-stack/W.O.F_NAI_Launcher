@@ -46,6 +46,39 @@ void main() {
 
   Finder text(String s) => find.text(s, findRichText: true);
 
+  testWidgets('分组与进化线右键改名可提交或取消', (t) async {
+    await pump(t);
+    for (final (tab, chip, id, action) in [
+      ('candidates', 'filter', 'g1', 'renameGroup'),
+      ('evolution', 'line', 'l1', 'renameLine'),
+    ]) {
+      await tapKey(t, 'explore-tab-$tab');
+      Future<void> openRename() async {
+        await t.tap(
+          find.byKey(Key('explore-$chip-$id')),
+          buttons: kSecondaryButton,
+        );
+        await t.pumpAndSettle();
+        await tapKey(t, 'explore-chip-rename');
+      }
+
+      await openRename();
+      final input = find.byKey(const Key('explore-chip-name'));
+      await t.enterText(input, '取消');
+      await key(t, LogicalKeyboardKey.escape);
+      expect(input, findsNothing);
+      expect(rec.calls, isNot(contains('$action:$id:取消')));
+      await openRename();
+      await t.enterText(input, ' 新名字 ');
+      await t.testTextInput.receiveAction(TextInputAction.done);
+      await t.pumpAndSettle();
+      expect(
+        rec.calls.where((call) => call == '$action:$id:新名字'),
+        hasLength(1),
+      );
+    }
+  });
+
   group('候选墙', () {
     testWidgets('默认看最新一轮的第一张：检查器写 #27', (t) async {
       await pump(t);

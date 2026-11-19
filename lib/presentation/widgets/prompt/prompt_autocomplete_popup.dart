@@ -353,6 +353,8 @@ class _PromptAutocompletePopupState
             tag: TagNormalizer.toDisplay(cand.canonicalTag),
             zh: _zh(cand),
             count: cand.postCount > 0 ? _count(cand.postCount) : null,
+            spelling: cand.matchKind == CompletionMatchKind.spelling,
+            matchedAlias: cand.matchedAlias,
             leading: _Dot(TagCategoryVisuals.color(context, cand.category)),
             selected: selected,
             onHover: () => _previewMeaning(cand),
@@ -481,7 +483,16 @@ class _PromptAutocompletePopupState
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Flexible(child: lists),
+              // Leave room for the matched alias when suggestions wrap.
+              Flexible(
+                flex:
+                    related == null &&
+                        state.candidates.first.matchKind ==
+                            CompletionMatchKind.spelling
+                    ? 3
+                    : 1,
+                child: lists,
+              ),
               Divider(height: 1, color: c.border),
               Flexible(child: meaning),
             ],
@@ -531,7 +542,10 @@ class _PromptAutocompletePopupState
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Flexible(child: content),
-                _Footer(related: related != null),
+                _Footer(
+                  related: related != null,
+                  spelling: state.spellingSelected,
+                ),
               ],
             ),
           ),
@@ -596,6 +610,8 @@ class _Row extends StatelessWidget {
     required this.onTap,
     required this.onHover,
     this.onSecondaryTap,
+    this.spelling = false,
+    this.matchedAlias,
     this.dim = false,
     this.source = false,
     this.muted = false,
@@ -603,7 +619,8 @@ class _Row extends StatelessWidget {
   final String tag;
   final String? zh, count;
   final Widget leading;
-  final bool selected, dim, source, muted;
+  final bool selected, dim, source, muted, spelling;
+  final String? matchedAlias;
   final VoidCallback onTap;
   final VoidCallback onHover;
   final VoidCallback? onSecondaryTap;
@@ -655,10 +672,22 @@ class _Row extends StatelessWidget {
                         zh!,
                         style: UiText.sans(11.5, color: c.faint, height: 1.45),
                       ),
+                    if (matchedAlias case final alias?)
+                      Text(
+                        context.l10n.tagExpansion_matchedAlias(
+                          TagNormalizer.toDisplay(alias),
+                        ),
+                        style: UiText.sans(11, color: c.muted, height: 1.45),
+                      ),
                   ],
                 ),
               ),
-              if (count != null)
+              if (spelling)
+                Text(
+                  context.l10n.prompt_spellingSuggestion,
+                  style: UiText.sans(11, color: c.accent, height: 1.45),
+                )
+              else if (count != null)
                 Text(
                   count!,
                   softWrap: false,
@@ -686,10 +715,10 @@ class _Dot extends StatelessWidget {
 
 /// 一行浅色操作提示：主栏时提示右键关联，关联栏开着时提示追加 / 关闭。
 class _Footer extends StatelessWidget {
-  const _Footer({required this.related});
+  const _Footer({required this.related, required this.spelling});
   static const padding = EdgeInsets.symmetric(horizontal: 11, vertical: 6);
   static final textStyle = UiText.sans(11, height: 1.45);
-  final bool related;
+  final bool related, spelling;
 
   @override
   Widget build(BuildContext context) {
@@ -704,7 +733,11 @@ class _Footer extends StatelessWidget {
       ),
       alignment: Alignment.centerLeft,
       child: Text(
-        related ? l.prompt_autocompleteHintRelated : l.prompt_autocompleteHint,
+        related
+            ? l.prompt_autocompleteHintRelated
+            : spelling
+            ? l.prompt_spellingHint
+            : l.prompt_autocompleteHint,
         style: textStyle.copyWith(color: c.faint),
       ),
     );

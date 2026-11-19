@@ -609,24 +609,28 @@ abstract final class SettingsFixture {
       SettingsRagSource(
         kind: SettingsRagSourceKind.tags,
         state: SettingsRagState.ready,
+        searchable: true,
         done: 182340,
         total: 182340,
       ),
       SettingsRagSource(
         kind: SettingsRagSourceKind.wiki,
         state: SettingsRagState.ready,
+        searchable: true,
         done: 12406,
         total: 12406,
       ),
       SettingsRagSource(
         kind: SettingsRagSourceKind.blocks,
         state: SettingsRagState.ready,
+        searchable: true,
         done: 842,
         total: 842,
       ),
       SettingsRagSource(
         kind: SettingsRagSourceKind.gallery,
         state: SettingsRagState.paused,
+        searchable: true,
         done: 7702,
         total: 12408,
         secondary: 9120,
@@ -732,6 +736,7 @@ abstract final class SettingsFixture {
 
   static final _network = SettingsNetworkData(
     systemProxy: '127.0.0.1:7897',
+    checkedViaProxy: true,
     checkedAt: _ago(s: 3),
     endpoints: const [
       SettingsEndpoint(
@@ -812,6 +817,7 @@ abstract final class SettingsFixture {
       SettingsRagSource(
         kind: SettingsRagSourceKind.tags,
         state: SettingsRagState.ready,
+        searchable: true,
         done: 120400,
         total: 182340,
       ),
@@ -822,6 +828,7 @@ abstract final class SettingsFixture {
       SettingsRagSource(
         kind: SettingsRagSourceKind.blocks,
         state: SettingsRagState.building,
+        searchable: true,
         done: 310,
         total: 842,
       ),
@@ -869,6 +876,7 @@ abstract final class SettingsFixture {
       SettingsRagSource(
         kind: SettingsRagSourceKind.gallery,
         state: SettingsRagState.ready,
+        searchable: true,
         done: 12408,
         total: 12408,
         secondary: 9120,

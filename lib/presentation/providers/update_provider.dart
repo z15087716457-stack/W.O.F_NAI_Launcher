@@ -297,13 +297,12 @@ class UpdateStateNotifier extends _$UpdateStateNotifier {
 
   Future<void> downloadUpdate() async {
     final versionInfo = state.versionInfo;
-    if (versionInfo == null) return;
+    if (versionInfo == null || _packageBusy) return;
     _invalidateCheck();
-
     final cancelToken = CancelToken();
-    _downloadCancelToken?.cancel();
     _downloadCancelToken = cancelToken;
-    await ref.read(updateCheckServiceProvider).clearReminder();
+    bool ownsDownload() =>
+        !_disposed && identical(_downloadCancelToken, cancelToken);
 
     state = state.copyWith(
       status: UpdateStatus.downloading,
@@ -316,13 +315,18 @@ class UpdateStateNotifier extends _$UpdateStateNotifier {
     );
 
     try {
+      await ref.read(updateCheckServiceProvider).clearReminder();
+      if (!ownsDownload()) return;
+      if (cancelToken.isCancelled) {
+        throw const UpdateDownloadCancelledException();
+      }
       final downloaded = await ref
           .read(updateInstallerServiceProvider)
           .downloadUpdate(
             versionInfo,
             cancelToken: cancelToken,
             onProgress: (progress) {
-              if (cancelToken.isCancelled) return;
+              if (!ownsDownload() || cancelToken.isCancelled) return;
               state = state.copyWith(
                 status: UpdateStatus.downloading,
                 downloadProgress: progress.progress,
@@ -333,22 +337,27 @@ class UpdateStateNotifier extends _$UpdateStateNotifier {
               );
             },
           );
+      if (!ownsDownload()) return;
+      final size = downloaded.asset.size ?? await downloaded.file.length();
+      if (!ownsDownload()) return;
       state = state.copyWith(
         status: UpdateStatus.downloaded,
         downloadedUpdate: downloaded,
         downloadProgress: 1,
-        receivedBytes: downloaded.asset.size ?? await downloaded.file.length(),
-        totalBytes: downloaded.asset.size ?? await downloaded.file.length(),
+        receivedBytes: size,
+        totalBytes: size,
         downloadBytesPerSecond: 0,
         notificationVisible: true,
       );
     } on UpdateDownloadCancelledException {
+      if (!ownsDownload()) return;
       state = UpdateState(
         status: UpdateStatus.available,
         versionInfo: versionInfo,
         notificationVisible: true,
       );
     } catch (error) {
+      if (!ownsDownload()) return;
       state = UpdateState(
         status: UpdateStatus.error,
         versionInfo: versionInfo,
@@ -371,7 +380,7 @@ class UpdateStateNotifier extends _$UpdateStateNotifier {
 
   Future<void> installAndRestart() async {
     final downloaded = state.downloadedUpdate;
-    if (downloaded == null) return;
+    if (downloaded == null || state.status == UpdateStatus.installing) return;
     _invalidateCheck();
 
     state = state.copyWith(

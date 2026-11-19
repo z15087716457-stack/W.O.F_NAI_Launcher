@@ -106,6 +106,120 @@ void main() {
     );
   }
 
+  for (final (name, alignment, start, end, screen) in [
+    ('caret near top', Alignment.topCenter, 4, 4, const Size(620, 510)),
+    ('caret near bottom', Alignment.bottomCenter, 4, 4, const Size(620, 510)),
+    (
+      'forward multiline selection',
+      Alignment.bottomCenter,
+      0,
+      16,
+      const Size(620, 510),
+    ),
+    (
+      'backward multiline selection',
+      Alignment.topCenter,
+      16,
+      0,
+      const Size(620, 510),
+    ),
+    (
+      'limited space on both sides',
+      Alignment.center,
+      0,
+      16,
+      const Size(620, 510),
+    ),
+    (
+      'tall selection beside a narrow panel',
+      Alignment.center,
+      0,
+      16,
+      const Size(620, 225),
+    ),
+    (
+      'selection in a short narrow viewport',
+      Alignment.center,
+      0,
+      16,
+      const Size(340, 225),
+    ),
+  ]) {
+    testWidgets('tag expansion keeps $name visible', (tester) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = screen;
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.view.resetPhysicalSize);
+      final controller = TextEditingController(
+        text: 'grey hair,\nwhite dress, solo',
+      );
+      final focus = FocusNode();
+      addTearDown(controller.dispose);
+      addTearDown(focus.dispose);
+      await _pumpEditor(
+        tester,
+        controller,
+        focus,
+        _Source([for (var i = 0; i < 32; i++) _tag('grey_hair_$i')]),
+        alignment: alignment,
+        maxLines: 3,
+      );
+      await tester.tap(find.byKey(const Key('prompt-editor')));
+      await tester.pump();
+      final field = tester
+          .state<EditableTextState>(find.byType(EditableText))
+          .renderEditable;
+      Offset point(int offset) {
+        final caret = field.getLocalRectForCaret(TextPosition(offset: offset));
+        return field.localToGlobal(Offset(caret.left + 1, caret.center.dy));
+      }
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      final gesture = await tester.startGesture(
+        point(start),
+        kind: PointerDeviceKind.mouse,
+      );
+      if (start != end) {
+        await gesture.moveTo(point(end));
+        await tester.pump();
+      }
+      await gesture.up();
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.pumpAndSettle();
+      final selection = controller.selection;
+      expect(selection.start, start < end ? start : end);
+      expect(selection.end, start > end ? start : end);
+      final rects = [
+        field.getLocalRectForCaret(selection.extent),
+        ...field.getBoxesForSelection(selection).map((b) => b.toRect()),
+      ];
+      final scrollViewport = find.byKey(
+        const Key('tag-expansion-scroll-viewport'),
+      );
+      final popup = tester.getRect(
+        scrollViewport.evaluate().isEmpty
+            ? find.byKey(const Key('tag-expansion-popup'))
+            : scrollViewport,
+      );
+      if (screen.width == 340) expect(scrollViewport, findsOneWidget);
+      for (final rect in rects) {
+        final source = Rect.fromPoints(
+          field.localToGlobal(rect.topLeft),
+          field.localToGlobal(rect.bottomRight),
+        );
+        if (alignment == Alignment.bottomCenter) {
+          expect(popup.bottom, lessThanOrEqualTo(source.top - 7.9));
+        } else if (alignment == Alignment.topCenter) {
+          expect(popup.top, greaterThanOrEqualTo(source.bottom + 7.9));
+        } else {
+          expect(popup.overlaps(source.inflate(7.9)), isFalse);
+        }
+      }
+      expect(popup.top, greaterThanOrEqualTo(8));
+      expect(popup.bottom, lessThanOrEqualTo(screen.height - 8));
+    });
+  }
+
   testWidgets('typing stays quiet; Ctrl+click searches and inserts locally', (
     tester,
   ) async {
@@ -1049,6 +1163,15 @@ void main() {
       await tester.pump();
       await tester.pump();
       await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      final sourcePosition = controller.selection.extent;
+      final field = tester
+          .state<EditableTextState>(
+            find.descendant(
+              of: find.byKey(const Key('prompt-editor')),
+              matching: find.byType(EditableText),
+            ),
+          )
+          .renderEditable;
       await tester.enterText(
         find.byKey(const Key('tag-expansion-search')),
         'solo',
@@ -1092,6 +1215,19 @@ void main() {
           findsOneWidget,
         );
         expect(tester.getRect(preview).right, lessThanOrEqualTo(width - 8));
+        final caret = field.getLocalRectForCaret(sourcePosition);
+        final protected = Rect.fromPoints(
+          field.localToGlobal(caret.topLeft),
+          field.localToGlobal(caret.bottomRight),
+        ).inflate(7.9);
+        for (final panel in [
+          root,
+          preview,
+          find.byKey(const Key('tag-expansion-wiki-panel')),
+          if (width >= 640) pane,
+        ]) {
+          expect(tester.getRect(panel).overlaps(protected), isFalse);
+        }
         expect(tester.takeException(), isNull);
       }
       for (var i = 0; i < 6; i++) {
@@ -1648,6 +1784,8 @@ Future<void> _pumpEditor(
   bool enabled = true,
   bool splitOnSpaces = false,
   bool includeWeightToolbar = false,
+  Alignment alignment = Alignment.center,
+  int maxLines = 1,
   ValueChanged<bool>? onActiveChanged,
   ValueChanged<String>? onTagSelected,
   Future<TagSemanticProfile?> Function(String)? meaning,
@@ -1668,6 +1806,7 @@ Future<void> _pumpEditor(
     onTagSelected: onTagSelected,
     child: TextField(
       key: const Key('prompt-editor'),
+      maxLines: maxLines,
       controller: controller,
       focusNode: focusNode,
     ),
@@ -1718,7 +1857,10 @@ Future<void> _pumpEditor(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
-          body: Center(child: SizedBox(width: 400, height: 80, child: editor)),
+          body: Align(
+            alignment: alignment,
+            child: SizedBox(width: 400, height: 80, child: editor),
+          ),
         ),
       ),
     ),

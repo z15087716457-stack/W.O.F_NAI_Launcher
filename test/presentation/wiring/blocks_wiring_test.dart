@@ -575,10 +575,7 @@ void main() {
   testWidgets('dock uses live data and persists expanded state', (
     tester,
   ) async {
-    await mount(
-      tester,
-      const SizedBox(width: 300, child: BlocksDockWiring(allowPopOut: false)),
-    );
+    await mount(tester, const SizedBox(width: 300, child: BlocksDockWiring()));
     final dock = tester.widget<BlocksDock>(find.byType(BlocksDock));
     expect(dock.data.total, 1);
     dock.actions.onToggleGroup('', false);
@@ -608,10 +605,7 @@ void main() {
         await mount(
           tester,
           dock
-              ? const SizedBox(
-                  width: 300,
-                  child: BlocksDockWiring(allowPopOut: false),
-                )
+              ? const SizedBox(width: 300, child: BlocksDockWiring())
               : const BlocksLibraryWiring(),
         );
         if (dock) {
@@ -713,10 +707,7 @@ void main() {
       );
       await backend.patch(blockId, BlockPatch(folderId: child.id));
     });
-    await mount(
-      tester,
-      const SizedBox(width: 300, child: BlocksDockWiring(allowPopOut: false)),
-    );
+    await mount(tester, const SizedBox(width: 300, child: BlocksDockWiring()));
     tester
         .widget<BlocksDock>(find.byType(BlocksDock))
         .actions

@@ -1757,18 +1757,56 @@ class SettingsRagPage extends StatelessWidget {
     final rg = d.rag;
     final a = s.actions;
     final on = d.values.flag(SettingKey.ragEnabled);
-    final usable = on && rg.runtimeReady;
+    final runtimeReady = on && rg.runtimeReady;
+    final missingWeights = rg.embedder.tone == SettingsTone.warn;
     final loading = on && rg.initializing;
+    final searchable = rg.sources.where((x) => x.searchable).length;
+    String statusTitle() {
+      if (!on) return l.set_rgOff;
+      if (loading) return l.set_rgLoading;
+      if (rg.checking) return l.set_testing;
+      if (!runtimeReady ||
+          missingWeights ||
+          (!rg.progressKnown && rg.error != null)) {
+        return l.set_rgNotReady;
+      }
+      if (rg.suspended) return l.set_rgSuspended;
+      return searchable == 0
+          ? l.set_rgNoSearchable
+          : l.set_rgSearchableCount(searchable, rg.sources.length);
+    }
+
     final building = rg.sources.any(
       (x) => x.state == SettingsRagState.building,
     );
     final allDone =
         rg.sources.isNotEmpty &&
         rg.sources.every(
-          (x) => x.state == SettingsRagState.ready && x.done >= x.total,
+          (x) =>
+              x.searchable &&
+              x.state == SettingsRagState.ready &&
+              x.done >= x.total,
         );
-    String? errorText(String? value) =>
-        value == 'initialization_timeout' ? l.set_rgLoadingTimeout : value;
+    Widget errorNote(String code, {Key? key}) {
+      final message = switch (code) {
+        'initialization_timeout' => l.set_rgLoadingTimeout,
+        'database_locked' || 'index_busy' => l.set_rgWaitRetry,
+        'source_unavailable' => l.set_rgCheckSource,
+        'cuda_unavailable' => l.set_rgCheckDevice,
+        'model_download_failed' => l.set_rgRetryDownload,
+        'worker_closed' || 'timeout' => l.set_rgRefreshRetry,
+        _ => l.set_rgOperationFailed,
+      };
+      return Tooltip(
+        key: key,
+        message: code,
+        child: Text(
+          message,
+          style: UiText.sans(12, color: c.error, height: 1.5),
+        ),
+      );
+    }
+
     final loadingHint = switch (rg.initializationPhase) {
       'loading' => l.set_rgLoadingSaved,
       'restoring' => l.set_rgRestoring(
@@ -1904,13 +1942,7 @@ class SettingsRagPage extends StatelessWidget {
             key: const Key('rag-upgrade-notice'),
             style: UiText.sans(11.5, color: c.muted, height: 1.5),
           ),
-        if (x.error != null)
-          Text(
-            errorText(x.error)!,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: UiText.sans(12, color: c.error, height: 1.5),
-          ),
+        if (x.error != null) errorNote(x.error!),
         if (plan != null) _RagPlanCard(plan: plan),
       ];
       if (parts.isEmpty) return null;
@@ -2007,17 +2039,7 @@ class SettingsRagPage extends StatelessWidget {
                               children: [
                                 Flexible(
                                   child: Text(
-                                    !on
-                                        ? l.set_rgOff
-                                        : loading
-                                        ? l.set_rgLoading
-                                        : rg.checking && !usable
-                                        ? l.set_testing
-                                        : !rg.progressKnown && rg.error != null
-                                        ? l.set_rgNotReady
-                                        : usable
-                                        ? l.set_rgReady
-                                        : l.set_rgNotReady,
+                                    statusTitle(),
                                     style: UiText.sans(
                                       15,
                                       weight: FontWeight.w600,
@@ -2025,7 +2047,9 @@ class SettingsRagPage extends StatelessWidget {
                                     ),
                                   ),
                                 ),
-                                if (usable &&
+                                if (runtimeReady &&
+                                    !missingWeights &&
+                                    !rg.suspended &&
                                     !loading &&
                                     rg.progressKnown &&
                                     (building || allDone))
@@ -2040,22 +2064,27 @@ class SettingsRagPage extends StatelessWidget {
                             Text(
                               loading
                                   ? loadingHint
-                                  : on && rg.checking && !usable
+                                  : on && rg.checking && !runtimeReady
                                   ? l.set_rgEnvSub
-                                  : on && !usable
-                                  ? l.set_rgNotReadySub
+                                  : on && !runtimeReady
+                                  ? rg.runtimeIssue ==
+                                            SettingsRagRuntimeIssue.missing
+                                        ? l.set_rgNotReadySub
+                                        : SettingsFormat.ragRuntimeHint(
+                                            context,
+                                            rg,
+                                          )
+                                  : on && missingWeights
+                                  ? l.rag_modelsMissing
                                   : l.set_rgPool,
                               style: UiText.sans(12, color: c.muted),
                             ),
                             if (rg.error != null)
                               Padding(
                                 padding: const EdgeInsets.only(top: 4),
-                                child: Text(
-                                  errorText(rg.error)!,
+                                child: errorNote(
+                                  rg.error!,
                                   key: const Key('rag-error'),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: UiText.sans(12, color: c.error),
                                 ),
                               ),
                           ],
@@ -2078,7 +2107,17 @@ class SettingsRagPage extends StatelessWidget {
                 ),
                 Row(
                   children: [
-                    step('01 · ${l.set_rgStepRuntime}', rg.runtime, true),
+                    step(
+                      '01 · ${l.set_rgStepRuntime}',
+                      rg.runtimeReady
+                          ? SettingsRagStep(
+                              value: l.rag_runtimeReady,
+                              detail: rg.runtime.value,
+                              tone: SettingsTone.ok,
+                            )
+                          : rg.runtime,
+                      true,
+                    ),
                     step('02 · ${l.set_rgStepEmbed}', rg.embedder, false),
                     step('03 · ${l.set_rgStepDevice}', rg.device, false),
                   ],
@@ -2419,14 +2458,7 @@ class _RagRuntimeRowState extends State<_RagRuntimeRow> {
         anchor: 'rag-runtime',
         title: l.set_rgEnv,
         titleLead: const SettingsDot(SettingsTone.ok),
-        subtitle: switch (install.phase) {
-          SettingsRagInstallPhase.existing => l.set_rgPhaseExisting,
-          SettingsRagInstallPhase.download => l.set_rgPhaseDownload,
-          SettingsRagInstallPhase.create => l.set_rgPhaseCreate,
-          SettingsRagInstallPhase.cuda => l.set_rgPhaseCuda,
-          SettingsRagInstallPhase.packages => l.set_rgPhasePackages,
-          SettingsRagInstallPhase.check => l.set_rgPhaseCheck,
-        },
+        subtitle: SettingsFormat.ragRuntimeStatus(context, rg),
         below: Column(
           key: const Key('rag-install'),
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -2471,27 +2503,10 @@ class _RagRuntimeRowState extends State<_RagRuntimeRow> {
       key: const Key('rag-runtime'),
       anchor: 'rag-runtime',
       title: l.set_rgEnv,
-      subtitle: switch (rg.runtimeIssue) {
-        SettingsRagRuntimeIssue.dependencies => l.set_rgEnvDependencies(
-          rg.runtimePackages.join(', '),
-        ),
-        SettingsRagRuntimeIssue.pythonVersion => l.set_rgEnvPythonVersion,
-        SettingsRagRuntimeIssue.importFailed => l.set_rgEnvImportFailed,
-        SettingsRagRuntimeIssue.timedOut => l.set_rgEnvCheckTimeout,
-        _ => l.set_rgEnvSub,
-      },
+      subtitle: SettingsFormat.ragRuntimeHint(context, rg),
       badges: [
         UiMini(
-          rg.checking
-              ? l.set_testing
-              : rg.runtimeReady
-              ? l.set_rgEnvReady
-              : needsUpdate
-              ? l.set_rgEnvNeedsUpdate
-              : rg.runtimeIssue != null &&
-                    rg.runtimeIssue != SettingsRagRuntimeIssue.missing
-              ? l.set_rgEnvCheckFailed
-              : l.set_rgEnvMissing,
+          SettingsFormat.ragRuntimeStatus(context, rg),
           tone: rg.checking
               ? UiMiniTone.plain
               : rg.runtimeReady
@@ -2568,13 +2583,19 @@ class _RagRuntimeRowState extends State<_RagRuntimeRow> {
               tone: SettingsBtnTone.ghost,
               onTap: locked ? null : installRuntime,
             ),
-          if (!rg.runtimeReady && platform != RagPlatform.macOSX64)
+          if (!rg.runtimeReady &&
+              (needsUpdate ||
+                  rg.runtimeIssue == SettingsRagRuntimeIssue.missing ||
+                  rg.runtimeIssue == SettingsRagRuntimeIssue.importFailed) &&
+              platform != RagPlatform.macOSX64)
             SettingsBtn(
               key: const Key('rag-install'),
               label: rg.checking
                   ? l.set_testing
                   : needsUpdate
                   ? l.set_rgEnvUpdate
+                  : rg.runtimeIssue == SettingsRagRuntimeIssue.importFailed
+                  ? l.set_rgReinstall
                   : l.set_rgInstall,
               small: true,
               tone: SettingsBtnTone.primary,
@@ -3013,7 +3034,7 @@ class _SettingsUpscalePageState extends State<SettingsUpscalePage> {
                     children: [
                       Text(
                         up.gpuName == null
-                            ? l.set_upNoGpu
+                            ? (up.checkingGpu ? l.set_testing : l.set_upNoGpu)
                             : l.set_upGpu(up.gpuName!, '${up.vramGb}'),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,

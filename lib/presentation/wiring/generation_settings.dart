@@ -33,7 +33,8 @@ class GenerationSettings {
   GenerationSettings(this.ref);
   final Ref ref;
   Future<void> _layoutQueue = Future<void>.value();
-  GenerationBackend get _backend => ref.read(generationBackendProvider);
+  Future<void> _editDraft(void Function() write) =>
+      ref.read(generationBackendProvider).mutate(write, nextRequest: true);
   GenerationParamsNotifier get _params =>
       ref.read(generationParamsNotifierProvider.notifier);
   ModelSpec get _spec =>
@@ -72,30 +73,30 @@ class GenerationSettings {
     return operation;
   }
 
-  Future<void> model(String value) => _backend.mutate(() {
+  Future<void> model(String value) => _editDraft(() {
     if (ImageModels.allModels.contains(value)) _params.updateModel(value);
   });
-  Future<void> turbo(bool value) => _backend.mutate(() {
+  Future<void> turbo(bool value) => _editDraft(() {
     final current = ref.read(generationParamsNotifierProvider).model;
     final target = value
         ? ImageModels.turboModelForModel(current)
         : ImageModels.baseModelForTurboModel(current);
     if (target != null) _params.updateModel(target);
   });
-  Future<void> furry(bool value) => _backend.mutate(() {
+  Future<void> furry(bool value) => _editDraft(() {
     if (_spec.v4Prompts) _params.updateModelMode(value);
   });
-  Future<void> transparent(bool value) => _backend.mutate(() {
+  Future<void> transparent(bool value) => _editDraft(() {
     if (_spec.transparency) _params.updateTransparentBackground(value);
   });
-  Future<void> size(int width, int height) => _backend.mutate(() {
+  Future<void> size(int width, int height) => _editDraft(() {
     int aligned(int value) => ((value / 64).round() * 64).clamp(64, 4096);
     _params.updateSize(aligned(width), aligned(height));
   });
-  Future<void> count(int value) => _backend.mutate(
+  Future<void> count(int value) => _editDraft(
     () => ref.read(imagesPerRequestProvider.notifier).set(value.clamp(1, 4)),
   );
-  Future<void> repeat(int value) => _backend.mutate(() {
+  Future<void> repeat(int value) => _editDraft(() {
     final current = ref.read(generationParamsNotifierProvider).nSamples;
     _params.updateNSamples(value.clamp(1, current > 99 ? current : 99));
   });
@@ -103,7 +104,7 @@ class GenerationSettings {
     if (!value.isFinite) {
       throw const FormatException('Invalid generation parameter');
     }
-    return _backend.mutate(() {
+    return _editDraft(() {
       switch (param) {
         case GenParam.steps:
           if (!_spec.isTurbo) _params.updateSteps(value.round().clamp(1, 50));
@@ -116,8 +117,8 @@ class GenerationSettings {
   }
 
   Future<void> seed(int value) =>
-      _backend.mutate(() => _params.updateSeed(value.clamp(0, 4294967295)));
-  Future<void> pinSeed(bool value, {int? lastSeed}) => _backend.mutate(() {
+      _editDraft(() => _params.updateSeed(value.clamp(0, 4294967295)));
+  Future<void> pinSeed(bool value, {int? lastSeed}) => _editDraft(() {
     if (!value) {
       _params.randomizeSeed();
     } else if (ref.read(generationParamsNotifierProvider).seed == -1) {
@@ -128,7 +129,7 @@ class GenerationSettings {
       }
     }
   });
-  Future<void> sampler(String value) => _backend.mutate(() {
+  Future<void> sampler(String value) => _editDraft(() {
     if (_spec.isTurbo) return;
     if (Samplers.samplersForModel(
       ref.read(generationParamsNotifierProvider).model,
@@ -136,20 +137,20 @@ class GenerationSettings {
       _params.updateSampler(value);
     }
   });
-  Future<void> noise(String value) => _backend.mutate(() {
+  Future<void> noise(String value) => _editDraft(() {
     if (_spec.noiseSchedule && NoiseSchedules.all.contains(value)) {
       _params.updateNoiseSchedule(value);
     }
   });
-  Future<void> variety(bool value) => _backend.mutate(() {
+  Future<void> variety(bool value) => _editDraft(() {
     if (_spec.varietyPlus) _params.updateVarietyPlus(value);
   });
-  Future<void> decrisp(bool value) => _backend.mutate(() {
+  Future<void> decrisp(bool value) => _editDraft(() {
     if (ref.read(generationParamsNotifierProvider).isV3Model) {
       _params.updateDecrisp(value);
     }
   });
-  Future<void> smea(GenSmea value) => _backend.mutate(() {
+  Future<void> smea(GenSmea value) => _editDraft(() {
     final params = ref.read(generationParamsNotifierProvider);
     final sampler = params.sampler;
     if (!params.isV3Model ||
@@ -162,7 +163,7 @@ class GenerationSettings {
     _params.updateSmea(value.smea);
     _params.updateSmeaDyn(value.dyn && value.smea);
   });
-  Future<void> quality(String value) => _backend.mutate(() {
+  Future<void> quality(String value) => _editDraft(() {
     final native = QualityTagPreset.values
         .where((preset) => preset.name == value)
         .firstOrNull;
@@ -179,7 +180,7 @@ class GenerationSettings {
       }
     }
   });
-  Future<void> uc(String value) => _backend.mutate(() {
+  Future<void> uc(String value) => _editDraft(() {
     if (!_spec.customNegativePrompt) return;
     final native = UcPresetType.values
         .where((preset) => preset.name == value)
@@ -231,12 +232,12 @@ class GenerationSettings {
   Future<void> _updateCharacter(
     String id,
     CharacterPrompt Function(CharacterPrompt) update,
-  ) => _backend.mutate(() {
+  ) => _editDraft(() {
     ref
         .read(characterPromptNotifierProvider.notifier)
         .updateCharacter(update(_character(id)));
-  }, promptEdit: true);
-  Future<void> addCharacter(GenGender gender) => _backend.mutate(() {
+  });
+  Future<void> addCharacter(GenGender gender) => _editDraft(() {
     if (ref.read(characterPromptNotifierProvider).characters.length >=
         _spec.maxCharacters) {
       return;
@@ -244,14 +245,13 @@ class GenerationSettings {
     ref
         .read(characterPromptNotifierProvider.notifier)
         .addCharacter(CharacterGender.values.byName(gender.name));
-  }, promptEdit: true);
-  Future<void> removeCharacter(String id) => _backend.mutate(() {
+  });
+  Future<void> removeCharacter(String id) => _editDraft(() {
     _character(id);
     ref.read(characterPromptNotifierProvider.notifier).removeCharacter(id);
-  }, promptEdit: true);
-  Future<void> clearCharacters() => _backend.mutate(
+  });
+  Future<void> clearCharacters() => _editDraft(
     () => ref.read(characterPromptNotifierProvider.notifier).clearAll(),
-    promptEdit: true,
   );
   Future<void> renameCharacter(String id, String value) => _updateCharacter(
     id,
@@ -267,7 +267,7 @@ class GenerationSettings {
     (character) =>
         character.copyWith(gender: CharacterGender.values.byName(value.name)),
   );
-  Future<void> moveCharacter(String id, int delta) => _backend.mutate(() {
+  Future<void> moveCharacter(String id, int delta) => _editDraft(() {
     final characters = ref.read(characterPromptNotifierProvider).characters;
     final index = characters.indexWhere((character) => character.id == id);
     if (index < 0) throw StateError(currentL10n.bridge_conflict);
@@ -276,19 +276,19 @@ class GenerationSettings {
     ref
         .read(characterPromptNotifierProvider.notifier)
         .reorderCharacters(index, target > index ? target + 1 : target);
-  }, promptEdit: true);
-  Future<void> aiPosition(bool value) => _backend.mutate(() {
+  });
+  Future<void> aiPosition(bool value) => _editDraft(() {
     if (_spec.characterPrompts) {
       ref
           .read(characterPromptNotifierProvider.notifier)
           .setGlobalAiChoice(value);
     }
-  }, promptEdit: true);
+  });
   Future<void> characterPosition(String id, Offset value) {
     if (!value.dx.isFinite || !value.dy.isFinite) {
       throw const FormatException('Invalid character position');
     }
-    return _backend.mutate(() {
+    return _editDraft(() {
       if (!_spec.characterPrompts) return;
       _character(id);
       double coordinate(double value) => _spec.freeformCharacterPosition
@@ -306,15 +306,15 @@ class GenerationSettings {
           ),
         ),
       );
-    }, promptEdit: true);
+    });
   }
 
-  Future<void> positioning(bool value) => _backend.mutate(() {
+  Future<void> positioning(bool value) => _editDraft(() {
     final notifier = ref.read(characterPositionCanvasProvider.notifier);
     if (value) {
       notifier.open();
     } else {
       notifier.close();
     }
-  }, promptEdit: true);
+  });
 }

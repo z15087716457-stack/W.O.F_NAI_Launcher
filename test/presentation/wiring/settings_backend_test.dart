@@ -105,7 +105,7 @@ void main() {
     second.dispose();
   });
   test(
-    'account connection target follows actual login user routing, official and custom',
+    'network diagnostics use the active accounts image and login hosts and actual proxy',
     () async {
       final storage = MemoryStorage();
       for (final endpoint in [
@@ -116,11 +116,16 @@ void main() {
         ),
       ]) {
         final called = <Uri>[];
+        final proxy = endpoint.isOfficial ? null : '127.0.0.1:7890';
         final container = ProviderContainer(
           overrides: [
             localStorageServiceProvider.overrideWithValue(storage),
-            currentProxyAddressProvider.overrideWith((ref) => null),
-            settingsEndpointProbeProvider.overrideWithValue((uri, _) async {
+            currentProxyAddressProvider.overrideWith((ref) => proxy),
+            settingsEndpointProbeProvider.overrideWithValue((
+              uri,
+              actualProxy,
+            ) async {
+              expect(actualProxy, proxy);
               called.add(uri);
               return 1;
             }),
@@ -128,10 +133,12 @@ void main() {
         );
         container.read(naiApiEndpointServiceProvider).setCurrent(endpoint);
         await container.read(settingsNetworkProvider.notifier).check();
-        final account = container
-            .read(settingsNetworkProvider)
-            .endpoints
-            .singleWhere((e) => e.kind == SettingsEndpointKind.naiApi);
+        final network = container.read(settingsNetworkProvider);
+        expect(network.checkedViaProxy, proxy != null);
+        expect(called, contains(Uri.parse(endpoint.imageBaseUrl)));
+        final account = network.endpoints.singleWhere(
+          (e) => e.kind == SettingsEndpointKind.naiApi,
+        );
         expect(account.host, Uri.parse(endpoint.userUrl('/user/login')).host);
         expect(called, contains(Uri.parse(endpoint.userUrl('/user/login'))));
         container.dispose();
@@ -237,6 +244,14 @@ void main() {
       )!;
       expect(info.name, 'NVIDIA RTX A');
       expect(info.vramMb, 8192);
+      expect(info.cuda, '12.6');
+      expect(
+        SettingsGpuProbe.parse(
+          'NVIDIA GeForce RTX 4080, 16376, 8.9',
+          '| NVIDIA-SMI 621.14  KMD Version: 621.14  CUDA UMD Version: 13.5  |',
+        )!.cuda,
+        '13.5',
+      );
       expect(info.int8, isTrue);
       expect(SettingsGpuProbe.parse('old GPU, 4096, 6.1', '')!.int8, isFalse);
       expect(SettingsGpuProbe.parse('N/A,N/A,N/A', ''), isNull);

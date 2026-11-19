@@ -292,6 +292,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                 if (searching)
                                   Positioned.fill(
                                     child: SettingsSearchResults(
+                                      key: ValueKey(_query.trim()),
                                       query: _query.trim(),
                                       selected: _sel,
                                       onHits: (h) => _hits = h,

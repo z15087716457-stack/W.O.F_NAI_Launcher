@@ -10,6 +10,7 @@ import '../../../core/cache/gallery_cache_manager.dart';
 import '../../../core/database/database_providers.dart';
 import '../../../core/database/asset_database_manager.dart';
 import '../../../core/database/dictionary_data_store.dart';
+import '../../../core/storage/generation_draft_backup.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/hive_storage_helper.dart';
 import '../../../core/utils/gallery_storage_layout.dart';
@@ -32,6 +33,7 @@ final settingsStorageSignatureProvider = FutureProvider<String>((ref) async {
   return [
     for (final folder in SettingsFolder.values) folders[folder] ?? '',
     ...roots,
+    p.join(support.path, GenerationDraftBackup.directoryName),
     support.path,
     rag.path,
   ].map(_physicalPath).join('|');
@@ -64,11 +66,13 @@ class SettingsDirectoryMeasurement {
     this.images = 0,
     this.other = 0,
     this.incomplete = false,
+    this.rootMissing = false,
     this.files = const {},
     this.rootPath,
   });
   final int bytes, thumbs, images, other;
   final bool incomplete;
+  final bool rootMissing;
   final String? rootPath;
 
   /// Canonical physical paths allow cross-category and configured-alias dedup.
@@ -153,6 +157,7 @@ SettingsDirectoryMeasurement settingsMeasureDirectory(
 }) {
   var bytes = 0, thumbs = 0, images = 0, other = 0;
   var incomplete = false;
+  var rootMissing = false;
   final seen = <String>{};
   final files = <String, SettingsMeasuredFile>{};
   String? rootPath;
@@ -205,8 +210,15 @@ SettingsDirectoryMeasurement settingsMeasureDirectory(
           }
         }
       }
-    } on FileSystemException {
+    } on FileSystemException catch (error) {
       incomplete = true;
+      // resolveSymbolicLinksSync reports missing Windows paths as a plain
+      // FileSystemException (file/path not found), before listing can start.
+      final code = error.osError?.errorCode;
+      if (directory.path == path &&
+          (code == 2 || Platform.isWindows && code == 3)) {
+        rootMissing = true;
+      }
     }
   }
 
@@ -218,6 +230,7 @@ SettingsDirectoryMeasurement settingsMeasureDirectory(
     images: images,
     other: other,
     incomplete: incomplete,
+    rootMissing: rootMissing,
     files: files,
     rootPath: rootPath,
   );
@@ -309,6 +322,9 @@ final settingsStorageDataProvider = FutureProvider<SettingsStorageData>((
     }
   }
   final categories = <SettingsStorageKind, List<String>>{
+    SettingsStorageKind.draftBackups: [
+      p.join(support.path, GenerationDraftBackup.directoryName),
+    ],
     SettingsStorageKind.upscaleModels: [p.join(support.path, 'upscale')],
     SettingsStorageKind.vibes: [folders[SettingsFolder.vibes]!],
     SettingsStorageKind.preciseRefs: [folders[SettingsFolder.preciseRefs]!],
@@ -321,10 +337,26 @@ final settingsStorageDataProvider = FutureProvider<SettingsStorageData>((
   };
   final categoryMeasurements =
       <SettingsStorageKind, Map<String, SettingsDirectoryMeasurement>>{};
+  // Libraries can live on a removable drive. An absent custom root must
+  // stay visible as unavailable, while a never-used built-in cache is empty.
+  final defaultLibraries = {
+    SettingsStorageKind.vibes: await VibeLibraryPathHelper.instance
+        .getDefaultPath(),
+    SettingsStorageKind.preciseRefs: await PreciseRefLibraryPathHelper.instance
+        .getDefaultPath(),
+  };
   for (final entry in categories.entries) {
-    categoryMeasurements[entry.key] = {
-      for (final path in entry.value) path: await worker.measure(path),
-    };
+    final measured = <String, SettingsDirectoryMeasurement>{};
+    final defaultLibrary = defaultLibraries[entry.key];
+    for (final path in entry.value) {
+      final result = await worker.measure(path);
+      final usesDefault =
+          defaultLibrary == null || p.equals(path, defaultLibrary);
+      measured[path] = result.rootMissing && usesDefault
+          ? const SettingsDirectoryMeasurement()
+          : result;
+    }
+    categoryMeasurements[entry.key] = measured;
   }
   final slices = settingsClassifyStorage(
     galleries: measurements,

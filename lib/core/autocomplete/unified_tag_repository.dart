@@ -206,15 +206,16 @@ class UnifiedTagRepository implements CompletionSource {
     if (normalized.isEmpty) return const [];
     final db = await _openUnion();
     try {
-      final union = _unionSql(await _hasRuntimeTable(db));
+      final hasRuntime = await _hasRuntimeTable(db);
       final result = <String, CompletionCandidate>{};
       for (var start = 0; start < normalized.length; start += 400) {
         final chunk = normalized.skip(start).take(400).toList();
         final placeholders = List.filled(chunk.length, '?').join(',');
+        // Filter each table on its own indexed column. Filtering the union
+        // makes SQLite scan bundled names when the synced collation differs.
         final rows = await db.rawQuery(
-          'WITH all_tags AS ($union) SELECT name, category, post_count '
-          'FROM all_tags WHERE name IN ($placeholders)',
-          chunk,
+          _unionSql(hasRuntime, placeholders: placeholders),
+          [...chunk, if (hasRuntime) ...chunk],
         );
         for (final row in rows) {
           final candidate = _fromRow(row);
@@ -245,6 +246,54 @@ class UnifiedTagRepository implements CompletionSource {
     );
     result.addAll(aliases);
     return result;
+  }
+
+  /// Resolve one edit against the existing name and alias indexes. Limit the
+  /// work per keystroke, including when a user is typing a free-form sentence.
+  Future<List<CompletionCandidate>> spellingSuggestions(String token) async {
+    if (token.length < 4 ||
+        token.length > 48 ||
+        !RegExp(r'^[a-z0-9][a-z0-9_]*[a-z0-9]$').hasMatch(token) ||
+        !RegExp('[a-z]').hasMatch(token)) {
+      return const [];
+    }
+    const alphabet = 'abcdefghijklmnopqrstuvwxyz0123456789_';
+    final variants = <String>{};
+    for (var i = 0; i <= token.length; i++) {
+      final left = token.substring(0, i);
+      final right = token.substring(i);
+      final rest = right.isEmpty ? '' : right.substring(1);
+      for (var j = 0; j < alphabet.length; j++) {
+        final letter = alphabet[j];
+        variants.add('$left$letter$right');
+        if (right.isNotEmpty && letter != right[0]) {
+          variants.add('$left$letter$rest');
+        }
+      }
+      if (right.isNotEmpty) variants.add('$left$rest');
+      if (right.length >= 2) {
+        variants.add('$left${right[1]}${right[0]}${right.substring(2)}');
+      }
+    }
+    variants.remove(token);
+    final matches = await resolveExact(variants);
+    final byTag = <String, CompletionCandidate>{};
+    for (final entry in matches.entries) {
+      final tag = entry.value.canonicalTag;
+      // Prefer a correction to the canonical spelling over one via an alias.
+      if (entry.key == tag || !byTag.containsKey(tag)) {
+        byTag[tag] = entry.value.copyWith(
+          matchKind: CompletionMatchKind.spelling,
+          matchedAlias: entry.key == tag ? null : entry.key,
+        );
+      }
+    }
+    final ranked = byTag.values.toList()
+      ..sort((a, b) {
+        final count = b.postCount.compareTo(a.postCount);
+        return count != 0 ? count : a.canonicalTag.compareTo(b.canonicalTag);
+      });
+    return ranked.take(3).toList(growable: false);
   }
 
   static CompletionCandidate? _fromRow(Map<String, Object?> row) {
@@ -290,12 +339,15 @@ class UnifiedTagRepository implements CompletionSource {
     return tables.isNotEmpty;
   }
 
-  static String _unionSql(bool runtime) => runtime
-      ? 'SELECT tag AS name, category, post_count FROM runtime.danbooru_tags '
-            'UNION ALL SELECT t.name, t.category, t.post_count FROM tags t '
-            'WHERE NOT EXISTS (SELECT 1 FROM runtime.danbooru_tags r '
-            'WHERE r.tag = t.name)'
-      : 'SELECT name, category, post_count FROM tags';
+  static String _unionSql(bool runtime, {String? placeholders}) {
+    const bundled = 'SELECT t.name, t.category, t.post_count FROM tags t';
+    final names = placeholders == null ? '' : 't.name IN ($placeholders)';
+    if (!runtime) return names.isEmpty ? bundled : '$bundled WHERE $names';
+    return 'SELECT tag AS name, category, post_count FROM runtime.danbooru_tags '
+        '${placeholders == null ? '' : 'WHERE tag IN ($placeholders) '}'
+        'UNION ALL $bundled WHERE ${names.isEmpty ? '' : '$names AND '}'
+        'NOT EXISTS (SELECT 1 FROM runtime.danbooru_tags r WHERE r.tag = t.name)';
+  }
 
   static List<int> _rawCategories(TagCategory? category) => switch (category) {
     TagCategory.general => [0, 7],

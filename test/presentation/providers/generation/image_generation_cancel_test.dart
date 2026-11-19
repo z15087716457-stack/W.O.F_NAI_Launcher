@@ -1214,6 +1214,54 @@ void main() {
   }
 
   test(
+    'later success preserves the exact failed requests for manual retry',
+    () async {
+      final api = MockNAIImageGenerationApiService();
+      final image = _validImageBytes(width: 16, height: 16);
+      final attempted = <ImageParams>[];
+      final failedSeeds = <int?>{};
+      var manualRetry = false;
+      when(() => api.generateImageStream(any())).thenAnswer((call) {
+        final params = call.positionalArguments.first as ImageParams;
+        attempted.add(params);
+        if (!manualRetry &&
+            (failedSeeds.contains(params.seed) || failedSeeds.length < 2)) {
+          failedSeeds.add(params.seed);
+          return Stream.value(
+            ImageStreamChunk.failed(
+              const GenerationFailure('Service unavailable', statusCode: 503),
+            ),
+          );
+        }
+        return Stream.value(ImageStreamChunk.complete(image));
+      });
+      final container = ProviderContainer(
+        overrides: [
+          naiImageGenerationApiServiceProvider.overrideWithValue(api),
+        ],
+      );
+      addTearDown(container.dispose);
+      final notifier = container.read(imageGenerationNotifierProvider.notifier);
+      await notifier.generate(const ImageParams(prompt: 'test', nSamples: 3));
+      expect(
+        container.read(imageGenerationNotifierProvider).currentImages,
+        hasLength(1),
+      );
+      final request = notifier.lastRequest;
+      expect(request?.params.nSamples, 2);
+      manualRetry = true;
+      attempted.clear();
+      await notifier.retry(request!);
+      expect(attempted.map((p) => p.seed), orderedEquals(failedSeeds));
+      expect(
+        container.read(imageGenerationNotifierProvider).status,
+        GenerationStatus.completed,
+      );
+      expect(notifier.lastRequest, isNull);
+    },
+  );
+
+  test(
     'retains partial batch in its original slots and retries only unsent batches',
     () async {
       final api = MockNAIImageGenerationApiService();

@@ -25,6 +25,7 @@ final localTagExpansionServiceProvider = Provider<LocalTagExpansionService>((
     catalog: catalog,
     relatedTags: ref.watch(cooccurrenceCompletionSourceProvider),
     substringSearch: catalog.searchContains,
+    spellingSearch: catalog.spellingSuggestions,
     popularSearch: catalog.popular,
     semantics: ref.watch(tagSemanticsRepositoryProvider),
     readingLanguage: () => ref

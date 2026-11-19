@@ -32,6 +32,21 @@ void main() {
     expect(paths, ['a.png', 'b.png', 'c.png']);
   });
 
+  test(
+    'failed undo keeps its pending paths recoverable without adding nonmembers',
+    () async {
+      await store.addAll(['a.png', 'b.png']);
+      await expectLater(
+        store.restore(['a.png', 'not-pending.png'], () async {
+          expect(await store.load(), ['b.png']);
+          throw StateError('index unavailable');
+        }),
+        throwsStateError,
+      );
+      expect(await store.load(), unorderedEquals(['a.png', 'b.png']));
+    },
+  );
+
   test('removeAll is idempotent and removes only requested paths', () async {
     await store.addAll(['a.png', 'b.png', 'c.png']);
 

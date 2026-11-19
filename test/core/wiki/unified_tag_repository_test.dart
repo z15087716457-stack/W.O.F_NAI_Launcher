@@ -21,10 +21,11 @@ void main() {
 
     final bundled = native.sqlite3.open(catalog);
     bundled.execute('''
-      CREATE TABLE tags(name TEXT PRIMARY KEY, category INTEGER, post_count INTEGER);
-      INSERT INTO tags VALUES ('blue_eyes', 0, 100);
-      INSERT INTO tags VALUES ('old_character', 4, 20);
-      INSERT INTO tags VALUES ('only_bundled', 0, 10);
+      CREATE TABLE tags(id INTEGER PRIMARY KEY, name TEXT UNIQUE COLLATE NOCASE, category INTEGER, post_count INTEGER);
+      CREATE TABLE aliases(alias TEXT, tag_id INTEGER);
+      INSERT INTO tags VALUES (1, 'blue_eyes', 0, 100);
+      INSERT INTO tags VALUES (2, 'old_character', 4, 20);
+      INSERT INTO tags VALUES (3, 'only_bundled', 0, 10);
     ''');
     bundled.dispose();
 
@@ -44,8 +45,10 @@ void main() {
     ''');
     articles.dispose();
 
+    final bundledCatalog = TagCatalogRepository(path: () async => catalog);
+    addTearDown(bundledCatalog.dispose);
     repository = UnifiedTagRepository(
-      catalog: TagCatalogRepository(),
+      catalog: bundledCatalog,
       runtime: () async => throw StateError('Not used in browse tests'),
       unionDatabase: ({required includeWiki}) async {
         final database = await databaseFactoryFfi.openDatabase(
@@ -79,6 +82,17 @@ void main() {
       'old_character',
     ]);
   });
+
+  test(
+    'corrections include synced names and retain synced popularity',
+    () async {
+      final synced = await repository.spellingSuggestions('new_charatcer');
+      expect(synced.single.canonicalTag, 'new_character');
+      final common = await repository.spellingSuggestions('bule_eyes');
+      expect(common.single.postCount, 900);
+      expect(common.single.matchKind, CompletionMatchKind.spelling);
+    },
+  );
 
   test('article coverage filters the same unified tag view', () async {
     expect(await repository.count(hasWiki: true), 2);

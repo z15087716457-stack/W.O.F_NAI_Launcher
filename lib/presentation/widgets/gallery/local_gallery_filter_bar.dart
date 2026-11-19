@@ -8,7 +8,6 @@ import 'package:flutter/services.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../data/services/gallery/gallery_group_mode.dart';
 import '../../../data/services/gallery/gallery_filter_service.dart';
-import '../../../data/services/gallery/gallery_nai_only_store.dart';
 import '../../providers/local_gallery_provider.dart';
 import 'date_range_picker_dialog.dart';
 import 'gallery_nai_versions.dart';
@@ -34,18 +33,11 @@ class LocalGalleryFilterBar extends ConsumerWidget {
           state.isTimeSorted && state.browseScope != GalleryBrowseScope.recent
           ? state.groupMode
           : null,
-      onNaiOnly: (value) {
-        notifier.setNaiOnly(value);
-        unawaited(const GalleryNaiOnlyStore().save(value));
-        if (!value && criteria.filterModels.isNotEmpty) {
-          notifier.setFilterModels(const []);
-        }
-      },
+      onNaiOnly: notifier.changeNaiOnlyPreference,
       onModels: (ids) {
         notifier.setFilterModels(ids);
         if (ids.isNotEmpty && !criteria.naiOnly) {
-          notifier.setNaiOnly(true);
-          unawaited(const GalleryNaiOnlyStore().save(true));
+          notifier.changeNaiOnlyPreference(true);
         }
       },
       onDateRange: notifier.setDateRange,

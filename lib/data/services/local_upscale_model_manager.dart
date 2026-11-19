@@ -361,6 +361,16 @@ class LocalUpscaleModelManager {
     }
   }
 
+  /// A native multi-select dialog can return the weights before the parameters.
+  Future<String> importSelection(List<String?> paths) async {
+    if (paths case [final String first, final String second]) {
+      return p.extension(first).toLowerCase() == '.bin'
+          ? importPair(File(second), File(first))
+          : importPair(File(first), File(second));
+    }
+    throw const LocalUpscaleException(LocalUpscaleError.invalidModel);
+  }
+
   Future<String> importPair(File param, File weights) async {
     await initialize();
     _claimMutation();

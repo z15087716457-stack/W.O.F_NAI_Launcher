@@ -198,7 +198,11 @@ void main() {
   });
 
   group('GalleryTimelineView empty & loading state guards (A-1)', () {
-    Future<void> pumpView(WidgetTester tester, LocalGalleryState state) async {
+    Future<void> pumpView(
+      WidgetTester tester,
+      LocalGalleryState state, {
+      VoidCallback? onImport,
+    }) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
@@ -216,6 +220,7 @@ void main() {
                 onUseImage: (_) async {},
                 onFavoriteMenu: (_, __) {},
                 onClearFilters: () {},
+                onImportFolder: onImport,
               ),
             ),
           ),
@@ -230,12 +235,58 @@ void main() {
       expect(find.byType(GalleryEmptyView), findsNothing);
     });
 
-    testWidgets('初始化完成且确实无图时显示 EmptyView', (tester) async {
-      await pumpView(tester, const LocalGalleryState(isInitialized: true));
+    testWidgets('初始化完成且确实无图时可从空状态导入文件夹', (tester) async {
+      var imports = 0;
+      await pumpView(
+        tester,
+        const LocalGalleryState(
+          isInitialized: true,
+          filterCriteria: FilterCriteria(naiOnly: true),
+        ),
+        onImport: () => imports++,
+      );
+      final l = AppLocalizations.of(
+        tester.element(find.byType(GalleryEmptyView)),
+      )!;
+      await tester.tap(find.text(l.localGallery_importFolder));
+      expect(imports, 1);
 
       expect(find.byType(GalleryEmptyView), findsOneWidget);
       expect(find.byType(GalleryLoadingView), findsNothing);
     });
+
+    for (final (criteria, total, expected) in [
+      (const FilterCriteria(showFavoritesOnly: true), 3, 'favorites'),
+      (const FilterCriteria(naiOnly: true), 0, 'library'),
+      (const FilterCriteria(naiOnly: true), 3, 'nai'),
+      (const FilterCriteria(categoryId: 'fixture'), 3, 'folder'),
+    ]) {
+      testWidgets(
+        'empty gallery distinguishes $expected from a clearable filter',
+        (tester) async {
+          await pumpView(
+            tester,
+            LocalGalleryState(
+              isInitialized: true,
+              totalCount: total,
+              filterCriteria: criteria,
+            ),
+          );
+          final empty = find.byType(GalleryEmptyView);
+          final l = AppLocalizations.of(tester.element(empty))!;
+          expect(find.text(l.localGallery_clearFilters), findsNothing);
+          expect(
+            find.text(switch (expected) {
+              'favorites' => l.localGallery_emptyFavorites,
+              'library' => l.localGallery_emptyTitle,
+              'nai' => l.localGallery_showNonNai,
+              _ => l.localGallery_emptyScope,
+            }),
+            findsOneWidget,
+          );
+        },
+      );
+    }
 
     testWidgets('有筛选且无结果时显示 NoResults 而非 EmptyView', (tester) async {
       await pumpView(

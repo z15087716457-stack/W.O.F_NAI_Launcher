@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -7,7 +8,15 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:nai_launcher/core/cache/gallery_cache_manager.dart';
 import 'package:nai_launcher/core/constants/app_version.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
+import 'package:nai_launcher/core/rag/rag_runtime_probe.dart';
+import 'package:nai_launcher/core/rag/rag_settings.dart';
+import 'package:nai_launcher/presentation/providers/rag_provider.dart';
+import 'package:nai_launcher/presentation/wiring/settings/settings_rag.dart';
 import 'package:nai_launcher/core/services/app_visibility.dart';
+import 'package:nai_launcher/core/services/settings_gpu_probe.dart';
+import 'package:nai_launcher/data/models/upscale/local_upscale_models.dart';
+import 'package:nai_launcher/presentation/providers/generation/local_upscale_provider.dart';
+import 'package:nai_launcher/presentation/wiring/settings/settings_upscale.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/core/storage/secure_storage_service.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
@@ -31,6 +40,39 @@ class _Updater extends SettingsDictionaryUpdater {
 
   @override
   Future<void> check() async => checks++;
+}
+
+class _Rag extends RagController {
+  final starts = <(String, RagSource, bool)>[];
+  final resumes = <RagSource>[];
+
+  @override
+  RagStatus build() => const RagStatus(
+    phase: 'ready',
+    indexKnown: true,
+    sources: {
+      RagSource.wiki: RagStatus(indexKnown: true),
+      RagSource.blocks: RagStatus(indexKnown: true, indexed: 12, total: 12),
+      RagSource.gallery: RagStatus(indexKnown: true, phase: 'paused'),
+    },
+  );
+
+  @override
+  Future<Map<String, dynamic>> preview({
+    RagSource source = RagSource.tags,
+    bool verify = true,
+  }) async => {'plan_id': source.name, 'documents': 22, 'total': 30};
+
+  @override
+  Future<void> start(
+    String planId, {
+    bool rebuild = false,
+    RagSource source = RagSource.tags,
+  }) async => starts.add((planId, source, rebuild));
+
+  @override
+  Future<void> resume({RagSource source = RagSource.tags}) async =>
+      resumes.add(source);
 }
 
 void main() {
@@ -62,6 +104,139 @@ void main() {
     await Hive.close();
     await hive.delete(recursive: true);
   });
+
+  testWidgets(
+    'RAG build and rebuild use the inline plan, resume runs directly',
+    (tester) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(1500, 1200);
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final storage = MemorySettings();
+      await storage.setSetting(
+        RagSettingsController.storageKey,
+        '{"version":1,"enabled":true}',
+      );
+      final rag = _Rag();
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            localStorageServiceProvider.overrideWithValue(storage),
+            secureStorageServiceProvider.overrideWithValue(MemorySecrets()),
+            ragControllerProvider.overrideWith(() => rag),
+            ragRuntimeInfoProvider.overrideWith(
+              (ref) async =>
+                  const RagRuntimeInfo(python: 'fixture', ready: true),
+            ),
+            settingsIndexBytesProvider.overrideWith((ref) async => 0),
+            settingsRagWeightsProvider.overrideWith((ref) async => true),
+          ],
+          child: MaterialApp(
+            locale: const Locale('zh'),
+            theme: GeistTheme.light,
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            home: const Scaffold(
+              body: SettingsWiring(initialPage: SettingsPageId.rag),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      Future<void> tap(Finder target) async {
+        await tester.ensureVisible(target);
+        await tester.tap(target);
+        await tester.pumpAndSettle();
+      }
+
+      final build = find.byKey(const Key('rag-build-wiki'));
+      final plan = find.byKey(const Key('rag-plan-wiki'));
+      final start = find.byKey(const Key('rag-plan-start'));
+      final cancel = find.byKey(const Key('rag-plan-cancel'));
+      await tap(build);
+      expect(plan, findsOneWidget);
+      expect(ModalRoute.of(tester.element(plan))!.isCurrent, isTrue);
+      expect(rag.starts, isEmpty);
+      await tap(cancel);
+      expect(plan, findsNothing);
+      expect(rag.starts, isEmpty);
+      await tap(build);
+      await tap(start);
+      expect(rag.starts, [('wiki', RagSource.wiki, false)]);
+
+      await tap(find.byKey(const Key('rag-resume-gallery')));
+      expect(rag.resumes, [RagSource.gallery]);
+      await tap(find.byKey(const Key('rag-more-blocks')));
+      final l = AppLocalizations.of(tester.element(find.byType(SettingsPage)))!;
+      await tap(find.text(l.set_rebuild));
+      expect(find.byKey(const Key('rag-plan-blocks')), findsOneWidget);
+      expect(ModalRoute.of(tester.element(start))!.isCurrent, isTrue);
+      expect(rag.starts, hasLength(1));
+      await tap(start);
+      expect(rag.starts.last, ('blocks', RagSource.blocks, true));
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
+
+  testWidgets(
+    'overview and local upscale show the same detected GPU and available models',
+    (tester) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(1500, 1000);
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final gpu = Completer<SettingsGpuInfo?>();
+      var probes = 0;
+      final container = ProviderContainer(
+        overrides: [
+          localStorageServiceProvider.overrideWithValue(MemorySettings()),
+          secureStorageServiceProvider.overrideWithValue(MemorySecrets()),
+          settingsGpuProvider.overrideWith((ref) {
+            probes++;
+            return gpu.future;
+          }),
+          localUpscaleModelsProvider.overrideWith(
+            (ref) async => [
+              localUpscaleCatalog.first,
+              localUpscaleCatalog[1].withInstalled(true),
+            ],
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+      Future<void> open(SettingsPageId page) async {
+        await tester.pumpWidget(
+          UncontrolledProviderScope(
+            container: container,
+            child: MaterialApp(
+              locale: const Locale('zh'),
+              theme: GeistTheme.light,
+              supportedLocales: AppLocalizations.supportedLocales,
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              home: Scaffold(body: SettingsWiring(initialPage: page)),
+            ),
+          ),
+        );
+        await tester.pump();
+      }
+
+      await open(SettingsPageId.overview);
+      expect(probes, 1);
+      final l = AppLocalizations.of(tester.element(find.byType(SettingsPage)))!;
+      expect(find.text(l.set_upNoGpu), findsNothing);
+      expect(find.text(l.set_testing), findsOneWidget);
+      gpu.complete(
+        const SettingsGpuInfo('NVIDIA GeForce RTX 4080', 16384, 8.9, '12.6'),
+      );
+      await tester.pumpAndSettle();
+      expect(find.textContaining('RTX 4080'), findsOneWidget);
+      expect(find.text(l.set_tileUpscaleModels('2')), findsOneWidget);
+      await open(SettingsPageId.upscale);
+      expect(find.textContaining('RTX 4080'), findsOneWidget);
+      expect(probes, 1);
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
 
   testWidgets(
     'dictionaries check on visits and manual refresh, cache timer follows visibility and the switch',

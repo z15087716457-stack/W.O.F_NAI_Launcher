@@ -26,6 +26,7 @@ import '../screens/settings/widgets/settings_motion_scope.dart';
 import '../screens/slideshow_screen.dart';
 import '../screens/image_comparison_screen.dart';
 import '../wiring/statistics_wiring.dart';
+import '../../data/models/gallery/local_image_record.dart';
 import 'gallery_navigation_request.dart';
 import '../wiring/style_explore_wiring.dart';
 import '../wiring/refs_library_wiring.dart';
@@ -241,7 +242,9 @@ GoRouter appRouter(Ref ref) {
                         key: state.pageKey,
                         child: WindowChromePage(
                           child: SlideshowScreen(
-                            images: const [],
+                            images: state.extra is List<LocalImageRecord>
+                                ? state.extra as List<LocalImageRecord>
+                                : const [],
                             initialIndex: initialIndex,
                           ),
                         ),
@@ -255,8 +258,12 @@ GoRouter appRouter(Ref ref) {
                     pageBuilder: (context, state) {
                       return MaterialPage(
                         key: state.pageKey,
-                        child: const WindowChromePage(
-                          child: ImageComparisonScreen(images: []),
+                        child: WindowChromePage(
+                          child: ImageComparisonScreen(
+                            images: state.extra is List<LocalImageRecord>
+                                ? state.extra as List<LocalImageRecord>
+                                : const [],
+                          ),
                         ),
                       );
                     },

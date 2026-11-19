@@ -190,19 +190,14 @@ Map<String, NaiAgentToolExecutor> naiAgentKnowledgeTools(
         raw: TagNormalizer.normalize(raw),
     };
     final catalog = ref.read(tagCatalogRepositoryProvider);
-    final records = await catalog.recordsByCanonicalTag(normalized.values);
-    final aliases = await catalog.exactAliases(
-      normalized.values.where((tag) => !records.containsKey(tag)),
-    );
+    final canonical = await catalog.resolveCanonicalNames(normalized.values);
     cancellation.check();
     final resolved = <Map<String, String>>[];
     final unknown = <String>[];
     final seeds = <String>{};
     for (final input in inputs.toSet()) {
       final normalizedTag = normalized[input]!;
-      final tag =
-          records[normalizedTag]?.canonicalTag ??
-          aliases[normalizedTag]?.canonicalTag;
+      final tag = canonical[normalizedTag];
       if (tag == null) {
         unknown.add(input);
       } else {
@@ -213,9 +208,7 @@ Map<String, NaiAgentToolExecutor> naiAgentKnowledgeTools(
     final exclude = <String>{...seeds};
     for (final raw in excluded) {
       final tag = normalized[raw]!;
-      exclude.add(
-        records[tag]?.canonicalTag ?? aliases[tag]?.canonicalTag ?? tag,
-      );
+      exclude.add(canonical[tag] ?? tag);
     }
     final List<RelatedTagMatch> matches = seeds.isEmpty
         ? const []

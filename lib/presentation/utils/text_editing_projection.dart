@@ -82,36 +82,37 @@ class EditingTextProjection {
         : first[raw];
   }
 
+  TextSelection toDisplaySelection(TextSelection selection) => selection.isValid
+      ? selection.isCollapsed
+            ? TextSelection.collapsed(
+                offset: toDisplay(
+                  selection.extentOffset,
+                  affinity: selection.affinity,
+                ),
+                affinity: selection.affinity,
+              )
+            : TextSelection(
+                baseOffset: toDisplay(
+                  selection.baseOffset,
+                  affinity: selection.baseOffset == selection.start
+                      ? TextAffinity.downstream
+                      : TextAffinity.upstream,
+                ),
+                extentOffset: toDisplay(
+                  selection.extentOffset,
+                  affinity: selection.extentOffset == selection.start
+                      ? TextAffinity.downstream
+                      : TextAffinity.upstream,
+                ),
+                affinity: selection.affinity,
+                isDirectional: selection.isDirectional,
+              )
+      : selection;
+
   TextEditingValue toDisplayValue(TextEditingValue value) {
-    final selection = value.selection;
     return ProjectedEditingValue(
       projection: this,
-      selection: selection.isValid
-          ? selection.isCollapsed
-                ? TextSelection.collapsed(
-                    offset: toDisplay(
-                      selection.extentOffset,
-                      affinity: selection.affinity,
-                    ),
-                    affinity: selection.affinity,
-                  )
-                : TextSelection(
-                    baseOffset: toDisplay(
-                      selection.baseOffset,
-                      affinity: selection.baseOffset == selection.start
-                          ? TextAffinity.downstream
-                          : TextAffinity.upstream,
-                    ),
-                    extentOffset: toDisplay(
-                      selection.extentOffset,
-                      affinity: selection.extentOffset == selection.start
-                          ? TextAffinity.downstream
-                          : TextAffinity.upstream,
-                    ),
-                    affinity: selection.affinity,
-                    isDirectional: selection.isDirectional,
-                  )
-          : selection,
+      selection: toDisplaySelection(value.selection),
       // A valid empty range starts/finishes an IME composition. Preserve it;
       // replacing it with TextRange.empty sends a cancellation to the IME.
       composing: value.composing.isValid

@@ -39,9 +39,64 @@ void main() {
   });
   tearDown(() async => temp.delete(recursive: true));
 
+  test(
+    'unused managed folders are empty but a missing custom library is unavailable',
+    () async {
+      final images = await Directory(p.join(temp.path, 'images')).create();
+      final saved = _CachedStorage(const SettingsStorageData());
+      var vibePath = p.join(temp.path, 'vibes');
+      final container = ProviderContainer(
+        overrides: [
+          settingsFoldersProvider.overrideWith(
+            (_) async => {
+              for (final folder in SettingsFolder.values)
+                folder: switch (folder) {
+                  SettingsFolder.images => images.path,
+                  SettingsFolder.vibes => vibePath,
+                  SettingsFolder.preciseRefs => p.join(
+                    temp.path,
+                    'precise_refs',
+                  ),
+                  _ => p.join(temp.path, folder.name),
+                },
+            },
+          ),
+          settingsGallerySourcesProvider.overrideWith(
+            (_) async => [images.path],
+          ),
+          ragDirectoryProvider.overrideWithValue(
+            () async => Directory(p.join(temp.path, 'rag')),
+          ),
+          settingsDiskFreeProvider.overrideWithValue((_) async => null),
+          settingsStorageSnapshotStoreProvider.overrideWithValue(saved),
+        ],
+      );
+      addTearDown(container.dispose);
+      final fresh = await container.read(settingsStorageDataProvider.future);
+      expect(fresh.incomplete, isFalse);
+      expect(saved.data.measuredAt, isNotNull);
+      expect(fresh.totalBytes, 0);
+      vibePath = p.join(temp.path, 'detached-library');
+      container.invalidate(settingsFoldersProvider);
+      final offline = await container.read(settingsStorageDataProvider.future);
+      expect(
+        offline.slices
+            .firstWhere((s) => s.kind == SettingsStorageKind.vibes)
+            .incomplete,
+        isTrue,
+      );
+      expect(offline.incomplete, isTrue);
+    },
+  );
+
   test('PR originals inside a gallery root count once as PR assets', () async {
     final images = await Directory(p.join(temp.path, 'pictures')).create();
     final precise = await Directory(p.join(images.path, 'pr')).create();
+    final media = await Directory(
+      p.join(temp.path, 'draft-backups', 'media'),
+    ).create(recursive: true);
+    await File(p.join(media.path, 'digest')).writeAsBytes([1, 2, 3]);
+    await File(p.join(media.parent.path, 'snapshot.json')).writeAsBytes([4, 5]);
     await File(p.join(images.path, 'generated.png')).writeAsBytes([1, 2, 3]);
     await File(
       p.join(precise.path, 'reference.png'),
@@ -75,7 +130,8 @@ void main() {
     expect(bytes(SettingsStorageKind.preciseRefs), 4);
     expect(bytes(SettingsStorageKind.images), 3);
     expect(bytes(SettingsStorageKind.other), 2);
-    expect(result.totalBytes, 9);
+    expect(bytes(SettingsStorageKind.draftBackups), 5);
+    expect(result.totalBytes, 14);
   });
 
   test(

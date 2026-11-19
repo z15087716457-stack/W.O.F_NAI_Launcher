@@ -30,6 +30,7 @@ extension SettingsColors on UiColors {
   /// 存储占用分类色（数据图表色，浅深通用）。
   Color storage(SettingsStorageKind k) => switch (k) {
     SettingsStorageKind.images => accent,
+    SettingsStorageKind.draftBackups => const Color(0xFFAB8058),
     SettingsStorageKind.upscaleModels => const Color(0xFF8E4EC6),
     SettingsStorageKind.vibes => const Color(0xFF12A594),
     SettingsStorageKind.preciseRefs => const Color(0xFFD6409F),

@@ -66,6 +66,7 @@ enum CompletionMatchKind {
   chineseContains,
   related,
   fullText,
+  spelling,
 }
 
 class TextReplacementRange {

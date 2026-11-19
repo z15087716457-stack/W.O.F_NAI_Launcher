@@ -221,14 +221,14 @@ class AgentThreadMapper {
 
   AgentThreadMapping map(
     AgentChatRuntime runtime, {
-    List<Map<String, dynamic>>? historyMessages,
     String? draftVersion,
     bool waitingUser = false,
     Map<String, Object?>? preferences,
     AgentPromptSet Function(Map<String, dynamic>, Map<String, AgentImage>)?
     promptSetView,
   }) {
-    final messages = historyMessages ?? runtime.displayMessages;
+    final messages = runtime.displayMessages;
+    final entryIds = runtime.userEntryIdsByTimestamp;
     final responding = runtime.running && !runtime.compacting;
     final opening = runtime.starting && !runtime.compacting;
     final renderContext = Object.hash(
@@ -397,7 +397,7 @@ class AgentThreadMapper {
         flushTurn();
         userTimestamp = agentInt(message['timestamp']);
         turnId = '${runtime.chat.id}/turn/$mi';
-        final entryId = runtime.userEntryId(message);
+        final entryId = entryIds[message['timestamp']];
         final attachmentPaths = _attachmentPaths(message);
         var attachmentIndex = 0;
         user = AgentUserMessage(

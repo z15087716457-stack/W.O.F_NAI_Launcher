@@ -41,25 +41,38 @@ void main() {
 
   group('estimatedCostProvider', () {
     test(
-      'virtual gateway Opus does not turn a paid image into a free estimate',
+      'V5 single-image estimate follows Opus entitlement and remaining quota',
       () {
         const params = ImageParams(
-          model: 'nai-diffusion-4-5-full',
+          model: 'nai-diffusion-5-full',
           width: 832,
           height: 1216,
           steps: 28,
         );
         const workflow = ImageWorkflowState();
-        const official = UserSubscription(tier: 3, active: true);
-        expect(generationRequestCost(params, workflow, official, 1), 0);
+        const opus = UserSubscription(
+          tier: 3,
+          active: true,
+          usage: OpusUsage(percent: 100),
+        );
+        expect(generationRequestCost(params, workflow, opus, 1), 0);
         expect(
           generationRequestCost(
             params,
             workflow,
-            official.copyWith(usesExternalBilling: true),
+            opus.copyWith(expiresAt: 1),
             1,
           ),
-          greaterThan(0),
+          30,
+        );
+        expect(
+          generationRequestCost(
+            params,
+            workflow,
+            opus.copyWith(usage: const OpusUsage(isNegative: true)),
+            1,
+          ),
+          30,
         );
       },
     );

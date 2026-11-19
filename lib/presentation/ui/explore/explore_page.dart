@@ -782,7 +782,7 @@ class _StyleExplorePageState extends State<StyleExplorePage>
             if (!basic && run.lines.isEmpty)
               const Expanded(child: ExploreOnboarding(compact: true))
             else ...[
-              const ExploreTabsRow(),
+              ExploreTabsRow(key: ValueKey((run.id, _tab))),
               Expanded(
                 child: _tab == ExploreTab.candidates
                     ? const ExploreWall()

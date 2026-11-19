@@ -295,9 +295,11 @@ class PiHostClient {
       }
       final token = NaiAgentCancellation();
       _permits[id] = token;
+      message['waitingForSlot'] = true;
       unawaited(_acquirePermit(id, token));
     } else if (type == 'request_cancel') {
-      _permits[message['requestId']]?.cancel();
+      _permits.remove(message['requestId'])?.cancel();
+      message['waitingForSlot'] = _permits.isNotEmpty;
       _releases.remove(message['requestId'])?.call();
     } else if (type == 'request_release') {
       _releases.remove(message['requestId'])?.call();
@@ -314,6 +316,7 @@ class PiHostClient {
   }
 
   Future<void> _acquirePermit(String id, NaiAgentCancellation token) async {
+    var started = false;
     try {
       final release = await ModelRequestGates.shared
           .forProvider(_providerId)
@@ -334,7 +337,11 @@ class PiHostClient {
         } catch (_) {
           _releases.remove(id)?.call();
           if (!_closed && !token.isCancelled) {
-            _send({'type': 'permit_result', 'requestId': id, 'error': 'chatgpt'});
+            _send({
+              'type': 'permit_result',
+              'requestId': id,
+              'error': 'chatgpt',
+            });
           }
           return;
         }
@@ -348,13 +355,19 @@ class PiHostClient {
         'requestId': id,
         if (accessToken != null) 'accessToken': accessToken,
       });
-      _events.add({'type': 'request_started', 'requestId': id});
+      started = true;
     } on ModelRequestCancelled {
       if (!_closed) {
         _send({'type': 'permit_result', 'requestId': id, 'error': true});
       }
     } finally {
-      _permits.remove(id);
+      if (_permits.remove(id) != null && !_closed) {
+        _events.add({
+          'type': started ? 'request_started' : 'request_wait_ended',
+          'requestId': id,
+          'waitingForSlot': _permits.isNotEmpty,
+        });
+      }
     }
   }
 

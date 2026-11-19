@@ -13,6 +13,8 @@ import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nai_launcher/core/utils/image_save_utils.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
+import 'package:nai_launcher/core/constants/api_constants.dart';
+import 'package:nai_launcher/core/enums/quality_tag_preset.dart';
 import 'package:nai_launcher/data/datasources/remote/nai_image_enhancement_api_service.dart';
 import 'package:nai_launcher/data/datasources/remote/nai_image_generation_api_service.dart';
 import 'package:nai_launcher/data/models/gallery/nai_image_metadata.dart';
@@ -159,7 +161,149 @@ void main() {
       await Hive.box(StorageKeys.settingsBox).clear();
     });
 
-    for (final edit in ['base', 'negative', 'character', 'pill']) {
+    test(
+      'late Vibe encoding belongs to the submitted reference, not its replacement',
+      () async {
+        final api = MockNAIImageGenerationApiService();
+        final stream = StreamController<ImageStreamChunk>();
+        final started = Completer<void>();
+        when(() => api.generateImageStream(any())).thenAnswer((_) {
+          started.complete();
+          return stream.stream;
+        });
+        container.dispose();
+        container = ProviderContainer(
+          overrides: [
+            naiImageGenerationApiServiceProvider.overrideWithValue(api),
+            localGalleryNotifierProvider.overrideWith(
+              TestLocalGalleryNotifier.new,
+            ),
+            subscriptionNotifierProvider.overrideWith(
+              TestSubscriptionNotifier.new,
+            ),
+          ],
+        );
+        final out = await hiveTempDir.createTemp('vibe-metadata-');
+        final save = container.read(imageSaveSettingsNotifierProvider.notifier);
+        await save.setCustomPath(out.path);
+        await save.setAutoSave(true);
+        final editor = container.read(
+          generationParamsNotifierProvider.notifier,
+        );
+        editor.addVibeReference(
+          const VibeReference(displayName: 'A', vibeEncoding: 'YQ=='),
+        );
+        final pending = container
+            .read(imageGenerationNotifierProvider.notifier)
+            .generate(
+              container
+                  .read(generationParamsNotifierProvider)
+                  .copyWith(prompt: 'fixture'),
+            );
+        await started.future;
+        editor.removeVibeReference(0);
+        editor.addVibeReference(
+          const VibeReference(displayName: 'B', vibeEncoding: 'Yg=='),
+        );
+        stream.add(
+          ImageStreamChunk.complete(
+            _validImageBytes(width: 64, height: 64),
+            vibeEncodings: const {0: 'YQ=='},
+          ),
+        );
+        await stream.close();
+        await pending;
+        final current = container
+            .read(generationParamsNotifierProvider)
+            .vibeReferencesV4
+            .single;
+        expect((current.displayName, current.vibeEncoding), ('B', 'Yg=='));
+        final saved = container
+            .read(imageGenerationNotifierProvider)
+            .history
+            .single
+            .filePath!;
+        final metadata = UnifiedMetadataParser.parseFromPng(
+          await File(saved).readAsBytes(),
+        ).metadata!;
+        expect(metadata.vibeReferences.single.vibeEncoding, 'YQ==');
+      },
+    );
+
+    for (final stopAfterFirst in [false, true]) {
+      test(
+        'auto-save retains each submitted batch even when cancelled=$stopAfterFirst',
+        () async {
+          final api = MockNAIImageGenerationApiService();
+          final requests = <ImageParams>[];
+          final png = _validImageBytes(width: 64, height: 64);
+          final rolls = _RecordingRollCoordinator();
+          when(
+            () => rolls.rollAllLanesAndSync(),
+          ).thenReturn({PillScopes.main: 'second roll'});
+          when(api.cancelGeneration).thenReturn(null);
+          when(() => api.generateImageStream(any())).thenAnswer((call) {
+            requests.add(call.positionalArguments.single as ImageParams);
+            return Stream.value(ImageStreamChunk.complete(png));
+          });
+          container.dispose();
+          container = ProviderContainer(
+            overrides: [
+              naiImageGenerationApiServiceProvider.overrideWithValue(api),
+              localGalleryNotifierProvider.overrideWith(
+                TestLocalGalleryNotifier.new,
+              ),
+              pillRollCoordinatorProvider.overrideWithValue(rolls),
+              subscriptionNotifierProvider.overrideWith(
+                TestSubscriptionNotifier.new,
+              ),
+            ],
+          );
+          final out = await hiveTempDir.createTemp('batch-metadata-');
+          final save = container.read(
+            imageSaveSettingsNotifierProvider.notifier,
+          );
+          await save.setCustomPath(out.path);
+          await save.setAutoSave(true);
+          final notifier = container.read(
+            imageGenerationNotifierProvider.notifier,
+          );
+          await notifier.generate(
+            const ImageParams(prompt: 'first roll', nSamples: 2),
+            imagesPerRequestOverride: 1,
+            onBatchEvent: (event) {
+              if (stopAfterFirst &&
+                  event.kind == GenerationBatchEventKind.complete &&
+                  event.batchIndex == 0) {
+                notifier.cancel();
+              }
+            },
+          );
+          final images = container
+              .read(imageGenerationNotifierProvider)
+              .currentImages;
+          expect(requests, hasLength(stopAfterFirst ? 1 : 2));
+          expect(images, hasLength(requests.length));
+          if (!stopAfterFirst) {
+            expect(requests.last.prompt, contains('second roll'));
+          }
+          for (final (i, image) in images.indexed) {
+            expect(
+              image.filePath,
+              isNotNull,
+              reason: 'finished images should already be on disk',
+            );
+            final metadata = UnifiedMetadataParser.parseFromPng(
+              await File(image.filePath!).readAsBytes(),
+            ).metadata!;
+            expect(metadata.seed, requests[i].seed);
+            expect(metadata.prompt, requests[i].prompt);
+          }
+        },
+      );
+    }
+
+    for (final edit in ['base', 'negative', 'character', 'pill', 'settings']) {
       test(
         'editing $edit during a batch run preserves submitted prompts and the next draft',
         () async {
@@ -207,6 +351,8 @@ void main() {
           final params = container.read(
             generationParamsNotifierProvider.notifier,
           );
+          params.updateQualityPreset(QualityTagPreset.standard);
+          params.updateUcPreset(UcPresets.heavyApiValue);
           params.updatePromptImmediately('submitted positive');
           params.updateNegativePromptImmediately('submitted negative');
           final characters = container.read(
@@ -249,6 +395,14 @@ void main() {
               );
             case 'pill':
               lane.setText('next pill document');
+            case 'settings':
+              params.updateSize(640, 960);
+              params.updateSteps(13);
+              params.updateSeed(9921);
+              params.updateNSamples(7);
+              params.updateQualityPreset(QualityTagPreset.none);
+              params.updateUcPreset(UcPresets.noneApiValue);
+              container.read(imagesPerRequestProvider.notifier).set(3);
           }
           final nextParams = container.read(generationParamsNotifierProvider);
           final nextCharacters = container.read(
@@ -268,10 +422,29 @@ void main() {
           await first.close();
           await pending;
           expect(requests, hasLength(2));
-          expect(requests[1].prompt, requests[0].prompt);
+          if (edit == 'settings') {
+            expect(requests[1].prompt, contains('automatic roll'));
+            expect(requests[1].width, requests[0].width);
+            expect(requests[1].height, requests[0].height);
+            expect(requests[1].steps, requests[0].steps);
+            expect(requests[1].nSamples, 1);
+            expect(requests[1].qualityTagPreset, QualityTagPreset.standard);
+            expect(requests[1].ucPreset, requests[0].ucPreset);
+            final upcoming = generation.preparePromptParams(nextParams);
+            expect(
+              (upcoming.width, upcoming.height, upcoming.steps, upcoming.seed),
+              (640, 960, 13, 9921),
+            );
+            expect(upcoming.qualityTagPreset, QualityTagPreset.none);
+            expect(upcoming.ucPreset, UcPresets.noneApiValue);
+            expect(upcoming.nSamples, 7);
+            expect(container.read(imagesPerRequestProvider), 3);
+          } else {
+            expect(requests[1].prompt, requests[0].prompt);
+          }
           expect(requests[1].negativePrompt, requests[0].negativePrompt);
           expect(requests[1].characters, requests[0].characters);
-          expect(rollCalls, 0);
+          expect(rollCalls, edit == 'settings' ? 1 : 0);
           expect(container.read(generationParamsNotifierProvider), nextParams);
           expect(
             container.read(characterPromptNotifierProvider),

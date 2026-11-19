@@ -63,6 +63,10 @@ class AgentChatRuntime {
   List<Map<String, dynamic>> messages = [], queue = [];
   List<Map<String, dynamic>> historyMessages = [];
 
+  // Tool calls can finish in the same millisecond.
+  static Object _messageKey(Map<String, dynamic> message) =>
+      (message['role'], message['timestamp'], message['toolCallId']);
+
   /// Full current-branch display, with live updates replacing persisted copies.
   /// This never changes the compacted messages sent to Pi/model providers.
   List<Map<String, dynamic>> get displayMessages {
@@ -70,14 +74,15 @@ class AgentChatRuntime {
       return value.displayMessages(chat.createdAt);
     }
     if (historyMessages.isEmpty) return messages;
-    Object key(Map<String, dynamic> message) =>
-        (message['role'], message['timestamp']);
-    final live = {for (final message in messages) key(message): message};
-    final saved = {for (final message in historyMessages) key(message)};
+    final live = {
+      for (final message in messages) _messageKey(message): message,
+    };
+    final saved = {for (final message in historyMessages) _messageKey(message)};
     return [
-      for (final message in historyMessages) live[key(message)] ?? message,
+      for (final message in historyMessages)
+        live[_messageKey(message)] ?? message,
       for (final message in messages)
-        if (!saved.contains(key(message))) message,
+        if (!saved.contains(_messageKey(message))) message,
     ];
   }
 
@@ -176,18 +181,17 @@ class AgentChatRuntime {
 
   /// Host entries are flat and current-branch only. Older snapshots were nested.
   /// userEntries is an all-branches fork menu, not a source of branch membership.
-  String? userEntryId(Map<String, dynamic> message) {
-    if (message['role'] != 'user' || message['timestamp'] == null) return null;
-    for (final entry in [...entries, ...userEntries]) {
+  Map<Object, String> get userEntryIdsByTimestamp {
+    final ids = <Object, String>{};
+    for (final entry in entries.followedBy(userEntries)) {
       final value = _entryMessage(entry);
+      final timestamp = value['timestamp'];
       final id = entry['id'] ?? entry['entryId'];
-      if (id is String &&
-          value['role'] == 'user' &&
-          value['timestamp'] == message['timestamp']) {
-        return id;
+      if (value['role'] == 'user' && timestamp != null && id is String) {
+        ids.putIfAbsent(timestamp, () => id);
       }
     }
-    return null;
+    return ids;
   }
 
   /// Resolve only a user entry on the current branch, never the fork menu.
@@ -1984,10 +1988,11 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
           }
       }
     }
-    if (envelope['type'] == 'request_permit') runtime.waitingForSlot = true;
-    if (envelope['type'] == 'request_release') runtime.waitingForSlot = false;
-    if (envelope['type'] == 'request_started') runtime.waitingForSlot = false;
+    if (envelope['waitingForSlot'] case final bool waiting) {
+      runtime.waitingForSlot = waiting;
+    }
     if (envelope['type'] == 'closed') {
+      runtime.waitingForSlot = false;
       runtime.running = false;
       runtime.runLimitHit = null;
       runtime.error = currentL10n.naiAgent_interrupted;
@@ -2047,10 +2052,9 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
             message['stopReason'] == 'error') {
           _applyAssistantError(runtime, message);
         }
+        final key = AgentChatRuntime._messageKey(message);
         final index = runtime.messages.lastIndexWhere(
-          (m) =>
-              m['role'] == message['role'] &&
-              m['timestamp'] == message['timestamp'],
+          (m) => AgentChatRuntime._messageKey(m) == key,
         );
         if (index >= 0) runtime.messages[index] = message;
       }
@@ -2082,21 +2086,20 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
     final client = runtime.client;
     if (client == null) return;
     try {
-      final atRequest = List<Map<String, dynamic>>.of(runtime.messages);
+      final atRequest = Set<Map<String, dynamic>>.identity()
+        ..addAll(runtime.messages);
       final state = await client.state();
       if (_disposed || !identical(runtime.client, client)) return;
       // state() is a snapshot. Replay messages arriving after its request so an
       // auto-compaction refresh cannot erase a concurrently streamed answer.
-      final latest = List<Map<String, dynamic>>.of(runtime.messages);
+      final latest = runtime.messages;
       _applyState(runtime, state);
-      for (final message in latest.where(
-        (m) => !atRequest.any((old) => identical(old, m)),
-      )) {
+      for (final message in latest.where((m) => !atRequest.contains(m))) {
         if (message['role'] == 'compactionSummary') continue;
-        final timestamp = message['timestamp'];
-        if (timestamp == null) continue;
+        if (message['timestamp'] == null) continue;
+        final key = AgentChatRuntime._messageKey(message);
         final index = runtime.messages.indexWhere(
-          (m) => m['role'] == message['role'] && m['timestamp'] == timestamp,
+          (m) => AgentChatRuntime._messageKey(m) == key,
         );
         if (index >= 0) {
           runtime.messages[index] = message;

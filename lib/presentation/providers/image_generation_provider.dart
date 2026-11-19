@@ -73,6 +73,7 @@ class GenerationRetryRequest {
     required this.accountId,
     this.operation,
     this.original,
+    this.pendingBatches = const [],
   });
   final ImageParams params;
   final int count;
@@ -80,15 +81,22 @@ class GenerationRetryRequest {
   final String? accountId;
   final ImageOperation? operation;
   final GeneratedImage? original;
-  GenerationRetryRequest withParams(ImageParams value) =>
-      GenerationRetryRequest(
-        params: value,
-        count: count,
-        workflow: workflow,
-        accountId: accountId,
-        operation: operation,
-        original: original,
-      );
+
+  /// Prepared requests for failed or unsent batches, in their original order.
+  final List<ImageParams> pendingBatches;
+
+  GenerationRetryRequest withParams(
+    ImageParams value, {
+    List<ImageParams>? pendingBatches,
+  }) => GenerationRetryRequest(
+    params: value,
+    count: count,
+    workflow: workflow,
+    accountId: accountId,
+    operation: operation,
+    original: original,
+    pendingBatches: pendingBatches ?? this.pendingBatches,
+  );
 }
 
 class _RememberedStreamPreview {
@@ -151,6 +159,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
       operation: request.operation,
       variationOriginal: request.original,
       workflowOverride: request.workflow,
+      pendingBatches: request.pendingBatches,
       preserveSnapshot: true,
     ),
   );
@@ -606,10 +615,13 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     ImageParams params,
     int generationRunId, {
     bool preserveSnapshot = false,
+    PromptPresetResolution Function(ImageParams)? resolvePresets,
   }) async {
     try {
       return await _prepareVibesForGeneration(
-        preserveSnapshot ? params : _applyPromptPipeline(params),
+        preserveSnapshot
+            ? params
+            : preparePromptParams(params, resolvePresets: resolvePresets),
         syncCurrentState: !preserveSnapshot,
       );
     } catch (error) {
@@ -628,18 +640,20 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     }
   }
 
-  PromptPresetResolution _resolvePromptPresets(ImageParams params) {
+  PromptPresetResolution Function(ImageParams) _capturePromptPresets(
+    String model,
+  ) {
     final qualityState = ref.read(qualityPresetNotifierProvider);
     final qualityContent = ref
         .read(qualityPresetNotifierProvider.notifier)
-        .getEffectiveContent(params.model);
+        .getEffectiveContent(model);
     final ucState = ref.read(ucPresetNotifierProvider);
     final ucPresetContent = ref
         .read(ucPresetNotifierProvider.notifier)
-        .getEffectiveContent(params.model);
+        .getEffectiveContent(model);
 
-    return resolvePromptPresetSettings(
-      model: params.model,
+    return (params) => resolvePromptPresetSettings(
+      model: model,
       prompt: params.prompt,
       negativePrompt: params.negativePrompt,
       qualityMode: qualityState.mode,
@@ -658,6 +672,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     bool useParamsCharacters = false,
     bool useParamsQualityPreset = false,
     bool useParamsUcPreset = false,
+    PromptPresetResolution Function(ImageParams)? resolvePresets,
   }) {
     var effectiveParams = params;
 
@@ -678,7 +693,10 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
       );
     }
 
-    final presetResolution = _resolvePromptPresets(effectiveParams);
+    final presetResolution =
+        (resolvePresets ?? _capturePromptPresets(params.model))(
+          effectiveParams,
+        );
     effectiveParams = effectiveParams.copyWith(
       prompt: useParamsQualityPreset
           ? effectiveParams.prompt
@@ -738,9 +756,6 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
         )
         .constrainedForModel;
   }
-
-  ImageParams _applyPromptPipeline(ImageParams params) =>
-      preparePromptParams(params);
 
   Future<void> generate(
     ImageParams params, {
@@ -912,6 +927,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     ImageWorkflowState? workflowOverride,
     bool preserveSnapshot = false,
     bool preservePromptSnapshot = false,
+    List<ImageParams> pendingBatches = const [],
   }) async {
     preserveSnapshot = preserveSnapshot || preservePromptSnapshot;
     // 同步在途门禁：已有生成进行中时直接丢弃本次调用。
@@ -966,6 +982,13 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
           : Uint8List.fromList(params.maskImage!),
     );
 
+    // A later batch can reroll prompt blocks, but keeps the presets selected at submit.
+    final preparedPrompt =
+        preserveSnapshot || operation == ImageOperation.variations;
+    final resolvePresets = preparedPrompt
+        ? null
+        : _capturePromptPresets(params.model);
+
     // Automatic rolls may update an untouched draft between batches. Once the
     // user edits it, leave that next-request draft alone and finish this run
     // with its already prepared prompts (including characters and presets).
@@ -1007,6 +1030,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
           : null,
       operation: operation,
       original: variationOriginal,
+      pendingBatches: pendingBatches,
     );
     state = state.copyWith(
       generationRunId: generationRunId,
@@ -1049,8 +1073,8 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     final preparedParams = await _prepareGenerationParams(
       effectiveParams,
       generationRunId,
-      preserveSnapshot:
-          preserveSnapshot || operation == ImageOperation.variations,
+      preserveSnapshot: preparedPrompt,
+      resolvePresets: resolvePresets,
     );
     if (preparedParams == null || _shouldAbortGenerationRun(generationRunId)) {
       return;
@@ -1143,12 +1167,26 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     final random = Random();
     int generatedImages = 0;
     GenerationFailure? lastBatchError;
-    ImageParams? retryParams;
+    final retryBatches = <ImageParams>[];
     final startedBatches = <int>{};
     final completedBatches = <int>{};
 
     // 当前使用的参数（P2.5：批次间重 roll 块实例后重跑提示词管线，逐张换内容）
     var currentParams = preparedParams;
+
+    ImageParams paramsForBatch(int index) {
+      if (pendingBatches.isNotEmpty) return pendingBatches[index];
+      final noiseSeed = random.nextInt(_randomSeedExclusiveUpperBound);
+      return currentParams.copyWith(
+        nSamples: batchSize,
+        seed: operation == ImageOperation.variations
+            ? noiseSeed + 1
+            : noiseSeed,
+        extraNoiseSeed: operation == ImageOperation.variations
+            ? noiseSeed
+            : null,
+      );
+    }
 
     var batch = 0;
     for (; batch < batchCount; batch++) {
@@ -1198,22 +1236,16 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
         return;
       }
 
-      // 每批使用不同的随机种子
-      final noiseSeed = random.nextInt(_randomSeedExclusiveUpperBound);
-      final batchParams = currentParams.copyWith(
-        nSamples: batchSize,
-        seed: operation == ImageOperation.variations
-            ? noiseSeed + 1
-            : noiseSeed,
-        extraNoiseSeed: operation == ImageOperation.variations
-            ? noiseSeed
-            : null,
-      );
+      final batchParams = paramsForBatch(batch);
       final batchStopwatch = Stopwatch()..start();
 
       try {
         // 使用流式 API 生成，支持预览
-        final (imageBytes, interruption) = await _generateBatchWithStream(
+        final (
+          imageBytes,
+          interruption,
+          actualParams,
+        ) = await _generateBatchWithStream(
           batchParams,
           slotStart,
           totalImages,
@@ -1234,24 +1266,25 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
         }
         final generatedList = await _completeGeneratedImages(
           imageBytes,
-          batchParams,
+          actualParams,
           generationRunId,
           offset: slotStart - 1,
         );
         if (_shouldAbortGenerationRun(generationRunId)) return;
         if (generatedList.isNotEmpty) {
           // 将字节数据包装成带唯一ID的 GeneratedImage
-          allImages.addAll(generatedList);
           // 立即更新显示和历史
           state = state.copyWith(
-            currentImages: withOriginal(allImages),
+            currentImages: withOriginal([...allImages, ...generatedList]),
             history: _prependCompletedHistory(withOriginal(generatedList)),
             clearStreamPreview: true,
           );
           _retainSharePreparationCacheForCurrentHistory();
+          allImages.addAll(
+            await _autoSaveIfEnabled(generatedList, actualParams),
+          );
         }
         generatedImages += generatedList.length;
-        retryParams = null;
         batchStopwatch.stop();
         await _emitBatchComplete(
           callback: onBatchEvent,
@@ -1268,11 +1301,6 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
         if (_shouldAbortGenerationRun(generationRunId)) return;
         if (interruption != null) {
           lastBatchError = interruption;
-          if (batch + 1 < batchCount) {
-            retryParams = currentParams.copyWith(
-              nSamples: batchCount - batch - 1,
-            );
-          }
           break;
         }
       } catch (e) {
@@ -1305,11 +1333,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
         lastBatchError = failure;
         AppLogger.e('生成第 ${batch + 1} 批失败: $failure');
         generatedImages += batchSize;
-        retryParams = failure.canRetry
-            ? (retryParams ?? currentParams.copyWith(nSamples: 0)).copyWith(
-                nSamples: (retryParams?.nSamples ?? 0) + 1,
-              )
-            : null;
+        if (failure.canRetry) retryBatches.add(batchParams);
         batchStopwatch.stop();
         await _emitBatchComplete(
           callback: onBatchEvent,
@@ -1323,16 +1347,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
           elapsedMs: batchStopwatch.elapsedMilliseconds,
         );
         if (_shouldAbortGenerationRun(generationRunId)) return;
-        if (failure.stopsRun) {
-          final remaining = batchCount - batch - 1;
-          final retry = retryParams;
-          retryParams = retry != null
-              ? retry.copyWith(nSamples: retry.nSamples + remaining)
-              : remaining > 0
-              ? currentParams.copyWith(nSamples: remaining)
-              : null;
-          break;
-        }
+        if (failure.stopsRun) break;
       }
 
       // P2.5 逐张重抽：本批已结束（成功或失败），重 roll 随机块实例并把
@@ -1342,12 +1357,13 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
         if (rolled.isNotEmpty) {
           final freshParams = ref.read(generationParamsNotifierProvider);
           currentParams =
-              _applyPromptPipeline(
+              preparePromptParams(
                 params.copyWith(
                   prompt: rolled[PillScopes.main] ?? freshParams.prompt,
                   negativePrompt:
                       rolled[PillScopes.negative] ?? freshParams.negativePrompt,
                 ),
+                resolvePresets: resolvePresets,
               )
               // vibes 编码只跑一次：保留已准备结果，不被管线重建覆盖
               .copyWith(vibeReferencesV4: currentParams.vibeReferencesV4);
@@ -1356,6 +1372,9 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     }
 
     if (batch + 1 < batchCount && lastBatchError != null) {
+      for (var unsent = batch + 1; unsent < batchCount; unsent++) {
+        retryBatches.add(paramsForBatch(unsent));
+      }
       await _emitUnsentBatchEvents(
         callback: onBatchEvent,
         completedBatches: completedBatches,
@@ -1370,9 +1389,12 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
 
     if (!_isCurrentGenerationRun(generationRunId)) return;
 
-    _lastRequest = retryParams == null
+    _lastRequest = retryBatches.isEmpty
         ? null
-        : _lastRequest?.withParams(retryParams);
+        : _lastRequest?.withParams(
+            retryBatches.first.copyWith(nSamples: retryBatches.length),
+            pendingBatches: List.unmodifiable(retryBatches),
+          );
     state = state.copyWith(
       status: lastBatchError == null
           ? GenerationStatus.completed
@@ -1393,11 +1415,6 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     );
 
     // 注意：生成完成音效由 GenerationCompletionWatcher 统一监听
-
-    // 自动保存：如果启用且生成成功，保存所有图像
-    if (!_isCancelled && allImages.isNotEmpty) {
-      await _autoSaveIfEnabled(allImages, preparedParams);
-    }
   }
 
   List<GeneratedImage> _prependCompletedHistory(List<GeneratedImage> images) {
@@ -1494,20 +1511,14 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
   }
 
   /// 自动保存图像（如果启用）
-  Future<void> _autoSaveIfEnabled(
+  Future<List<GeneratedImage>> _autoSaveIfEnabled(
     List<GeneratedImage> images,
     ImageParams params,
-  ) async {
-    final saveSettings = ref.read(imageSaveSettingsNotifierProvider);
-    final currentVibes = ref
-        .read(generationParamsNotifierProvider)
-        .vibeReferencesV4;
-    await _saveImagesToGallery(
-      images,
-      params.copyWith(vibeReferencesV4: currentVibes),
-      saveImages: saveSettings.autoSave,
-    );
-  }
+  ) => _saveImagesToGallery(
+    images,
+    params,
+    saveImages: ref.read(imageSaveSettingsNotifierProvider).autoSave,
+  );
 
   /// Put a local source on the canvas without generating, saving or rebuilding
   /// metadata from the current draft. Repeated imports reuse the existing tile.
@@ -1710,20 +1721,21 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     return null;
   }
 
-  Future<void> _saveImagesToGallery(
+  Future<List<GeneratedImage>> _saveImagesToGallery(
     List<GeneratedImage> images,
     ImageParams params, {
     required bool saveImages,
     String? saveDirectoryPath,
     bool syncToGalleryIndex = true,
   }) async {
-    if (!saveImages) return;
+    if (!saveImages) return images;
+    final results = [...images];
 
     try {
       final saveDirPath =
           saveDirectoryPath ??
           await GalleryFolderRepository.instance.getRootPath();
-      if (saveDirPath == null) return;
+      if (saveDirPath == null) return images;
       final saveDir = Directory(saveDirPath);
       if (!await saveDir.exists()) {
         await saveDir.create(recursive: true);
@@ -1735,7 +1747,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
       final savedFilePaths = <String>[];
       final savedImages = <GeneratedImage>[];
 
-      for (final image in images) {
+      for (final (index, image) in images.indexed) {
         try {
           // 从图片元数据中提取实际的 seed（文件名与元数据嵌入共用）
           final hasEmbeddedMetadata = ImageSaveUtils.hasEmbeddedNovelAiMetadata(
@@ -1780,6 +1792,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
           // 更新 filePath 到 GeneratedImage
           final updatedImage = image.copyWithFilePath(filePath);
           _updateImageInState(image.id, updatedImage);
+          results[index] = updatedImage;
           savedImages.add(updatedImage);
         } catch (e) {
           AppLogger.e('自动保存图像失败: $e');
@@ -1828,6 +1841,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     } catch (e) {
       AppLogger.e('自动保存失败: $e');
     }
+    return results;
   }
 
   static const _concurrencyRetryInterval = Duration(seconds: 3);
@@ -1854,27 +1868,28 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
         lower.contains('stream not allowed');
   }
 
-  /// 保存 Vibe 编码哈希到状态
-  ///
-  /// [vibeEncodings] 索引到编码哈希的映射
-  void _saveVibeEncodings(Map<int, String> vibeEncodings) {
-    AppLogger.d(
-      'Saving ${vibeEncodings.length} Vibe encodings to state',
-      'Generation',
-    );
-    for (final entry in vibeEncodings.entries) {
-      final index = entry.key;
-      final encoding = entry.value;
-      if (encoding.isNotEmpty) {
+  /// Encodings belong to the submitted slots. Only update a draft slot if it
+  /// still holds the reference that was submitted with the same model.
+  ImageParams _applyVibeEncodings(
+    ImageParams submitted,
+    Map<int, String> encodings,
+  ) {
+    final vibes = [...submitted.vibeReferencesV4];
+    final draft = ref.read(generationParamsNotifierProvider);
+    for (final MapEntry(key: index, value: encoding) in encodings.entries) {
+      if (index < 0 || index >= vibes.length || encoding.isEmpty) continue;
+      final source = vibes[index];
+      if (source.vibeEncoding == encoding) continue;
+      vibes[index] = source.withEncodedVibe(encoding, model: submitted.model);
+      if (draft.model == submitted.model &&
+          index < draft.vibeReferencesV4.length &&
+          identical(draft.vibeReferencesV4[index], source)) {
         ref
             .read(generationParamsNotifierProvider.notifier)
             .updateVibeReference(index, vibeEncoding: encoding);
-        AppLogger.d(
-          'Saved Vibe encoding for index $index (hash length: ${encoding.length})',
-          'Generation',
-        );
       }
     }
+    return submitted.copyWith(vibeReferencesV4: vibes);
   }
 
   /// 使用流式 API 生成批次图像（支持预览）
@@ -1882,7 +1897,8 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
   /// [params] 生成参数（nSamples 表示本次请求要生成的图片数量）
   /// [currentStart] 当前批次起始图像编号
   /// [total] 总图像数量
-  Future<(Map<int, Uint8List>, GenerationFailure?)> _generateBatchWithStream(
+  Future<(Map<int, Uint8List>, GenerationFailure?, ImageParams)>
+  _generateBatchWithStream(
     ImageParams params,
     int currentStart,
     int total,
@@ -1927,7 +1943,8 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     while (!_shouldAbortGenerationRun(generationRunId)) {
       final finalImages = <int, Uint8List>{};
 
-      (Map<int, Uint8List>, GenerationFailure?) finish(
+      var resultParams = requestParams;
+      (Map<int, Uint8List>, GenerationFailure?, ImageParams) finish(
         GenerationFailure? interruption,
       ) {
         final indices = finalImages.keys.toList()..sort();
@@ -1946,6 +1963,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
           partial || interruption?.stopsRun == true
               ? interruption ?? GenerationFailure.missingImages
               : null,
+          resultParams,
         );
       }
 
@@ -1968,7 +1986,9 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
           if (finalImages.isEmpty) {
             throw const GenerationFailure('No images returned from generation');
           }
-          if (images.$2.isNotEmpty) _saveVibeEncodings(images.$2);
+          if (images.$2.isNotEmpty) {
+            resultParams = _applyVibeEncodings(resultParams, images.$2);
+          }
           return finish(null);
         }
 
@@ -1976,7 +1996,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
           requestParams,
         )) {
           if (_shouldAbortGenerationRun(generationRunId)) {
-            return (const <int, Uint8List>{}, null);
+            return (const <int, Uint8List>{}, null, requestParams);
           }
           if (chunk.hasError) {
             throw chunk.failure ?? GenerationFailure.stream(chunk.error!);
@@ -2016,7 +2036,10 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
           if (chunk.isComplete && chunk.hasFinalImage) {
             finalImages[chunk.sampleIndex] = chunk.finalImage!;
             if (chunk.vibeEncodings?.isNotEmpty == true) {
-              _saveVibeEncodings(chunk.vibeEncodings!);
+              resultParams = _applyVibeEncodings(
+                resultParams,
+                chunk.vibeEncodings!,
+              );
             }
             _rememberStreamPreview(
               bytes: chunk.finalImage!,
@@ -2077,7 +2100,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
         if (!await _waitBeforeRetry(delay, generationRunId)) break;
       }
     }
-    return (const <int, Uint8List>{}, null);
+    return (const <int, Uint8List>{}, null, requestParams);
   }
 
   Future<GenerationFailure?> _generateSingle(
@@ -2088,7 +2111,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
   ) async {
     if (_shouldAbortGenerationRun(generationRunId)) return null;
     try {
-      final (images, _) = await _generateBatchWithStream(
+      final (images, _, actualParams) = await _generateBatchWithStream(
         params,
         current,
         total,
@@ -2097,7 +2120,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
       if (_shouldAbortGenerationRun(generationRunId)) return null;
       final generatedList = await _completeGeneratedImages(
         images,
-        params,
+        actualParams,
         generationRunId,
       );
       if (_shouldAbortGenerationRun(generationRunId)) return null;
@@ -2115,7 +2138,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
         clearStreamPreview: true,
       );
       _retainSharePreparationCacheForCurrentHistory();
-      await _autoSaveIfEnabled(generatedList, params);
+      await _autoSaveIfEnabled(generatedList, actualParams);
       _preloadMetadataInBackground(generatedList);
       return null;
     } catch (error) {

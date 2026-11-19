@@ -63,6 +63,7 @@ class GalleryTimelineView extends ConsumerStatefulWidget {
     required this.onFavoriteMenu,
     required this.onClearFilters,
     this.onDeleteRequested,
+    this.onImportFolder,
   });
 
   final GalleryTimelineController? controller;
@@ -73,6 +74,7 @@ class GalleryTimelineView extends ConsumerStatefulWidget {
   final Future<void> Function(LocalImageRecord record) onUseImage;
   final void Function(LocalImageRecord record, Offset anchor) onFavoriteMenu;
   final VoidCallback onClearFilters;
+  final VoidCallback? onImportFolder;
 
   /// Delete 键：删除多选内容或当前查看的图片（由宿主确认）
   final VoidCallback? onDeleteRequested;
@@ -468,7 +470,9 @@ class _GalleryTimelineViewState extends ConsumerState<GalleryTimelineView> {
           tileSize: s.columnWidth,
           isInitialized: s.isInitialized,
           isLoading: s.isLoading,
-          hasFilters: s.hasFilters,
+          hasSessionFilters: s.hasSessionFilters,
+          criteria: s.filterCriteria,
+          totalCount: s.totalCount,
           browseScope: s.browseScope,
         ),
       ),
@@ -480,6 +484,11 @@ class _GalleryTimelineViewState extends ConsumerState<GalleryTimelineView> {
       return const GalleryLoadingView();
     }
     if (state.timeline.isEmpty) {
+      if (state.browseScope == GalleryBrowseScope.trash
+          ? state.criteria.searchQuery.trim().isNotEmpty
+          : state.hasSessionFilters) {
+        return GalleryNoResultsView(onClearFilters: widget.onClearFilters);
+      }
       if (state.browseScope != GalleryBrowseScope.library) {
         return Center(
           child: Text(
@@ -489,9 +498,27 @@ class _GalleryTimelineViewState extends ConsumerState<GalleryTimelineView> {
           ),
         );
       }
-      return state.hasFilters
-          ? GalleryNoResultsView(onClearFilters: widget.onClearFilters)
-          : const GalleryEmptyView();
+      final criteria = state.criteria;
+      final favorites = criteria.showFavoritesOnly;
+      final all =
+          !favorites &&
+          criteria.categoryId == null &&
+          criteria.categoryFolderPath == null &&
+          criteria.collectionId == null;
+      return GalleryEmptyView(
+        favorites: favorites,
+        allImages: all,
+        naiOnly: criteria.naiOnly,
+        scopeCount: all || state.totalCount == 0
+            ? state.totalCount
+            : favorites && criteria.naiOnly
+            ? ref.watch(galleryFavoriteCountProvider).valueOrNull
+            : null,
+        onShowNonNai: () => ref
+            .read(localGalleryNotifierProvider.notifier)
+            .changeNaiOnlyPreference(false),
+        onImportFolder: widget.onImportFolder,
+      );
     }
 
     return LayoutBuilder(

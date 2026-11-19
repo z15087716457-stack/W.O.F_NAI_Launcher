@@ -13,6 +13,86 @@ import 'settings_test_harness.dart';
 
 void main() {
   testWidgets(
+    'partially built sources report searchable counts independently of progress',
+    (t) async {
+      final base = SettingsFixture.view(page: SettingsPageId.rag);
+      await pumpSettings(
+        t,
+        data: base.copyWith(
+          values: base.values.copyWith(SettingKey.ragEnabled, true),
+          rag: const SettingsRagData(
+            runtimeReady: true,
+            sources: [
+              SettingsRagSource(
+                kind: SettingsRagSourceKind.tags,
+                state: SettingsRagState.paused,
+                done: 3,
+                total: 15,
+                searchable: true,
+              ),
+              SettingsRagSource(
+                kind: SettingsRagSourceKind.wiki,
+                state: SettingsRagState.error,
+              ),
+              SettingsRagSource(
+                kind: SettingsRagSourceKind.blocks,
+                state: SettingsRagState.empty,
+              ),
+              SettingsRagSource(
+                kind: SettingsRagSourceKind.gallery,
+                state: SettingsRagState.ready,
+                done: 1,
+                total: 1,
+                searchable: true,
+              ),
+            ],
+          ),
+        ),
+      );
+      expect(find.text('2/4 个来源可检索'), findsOneWidget);
+    },
+  );
+  testWidgets('runtime green, no indexed data', (t) async {
+    final base = SettingsFixture.view(page: SettingsPageId.rag);
+    await pumpSettings(
+      t,
+      dark: true,
+      window: 1260,
+      height: 860,
+      data: base.copyWith(
+        values: base.values.copyWith(SettingKey.ragEnabled, true),
+        rag: SettingsRagData(
+          runtimeReady: true,
+          runtime: const SettingsRagStep(
+            value: 'Python',
+            tone: SettingsTone.ok,
+          ),
+          embedder: const SettingsRagStep(
+            value: 'EmbeddingGemma 2',
+            tone: SettingsTone.ok,
+          ),
+          device: const SettingsRagStep(value: 'CPU'),
+          error: 'rag_runtime_error',
+          sources: [
+            for (final k in SettingsRagSourceKind.values)
+              SettingsRagSource(
+                kind: k,
+                state: k == SettingsRagSourceKind.tags
+                    ? SettingsRagState.error
+                    : SettingsRagState.empty,
+                error: k == SettingsRagSourceKind.tags
+                    ? 'rag_runtime_error'
+                    : null,
+              ),
+          ],
+        ),
+      ),
+    );
+    expect(find.text('尚无可检索内容'), findsOneWidget);
+    expect(find.text('rag_runtime_error'), findsNothing);
+    expect(find.byTooltip('rag_runtime_error'), findsWidgets);
+  });
+  testWidgets(
     'retrying a partial build keeps vectors and opens a continuation plan',
     (t) async {
       final base = SettingsFixture.view(page: SettingsPageId.rag);
@@ -56,12 +136,14 @@ void main() {
               SettingsRagSource(
                 kind: SettingsRagSourceKind.tags,
                 state: SettingsRagState.ready,
+                searchable: true,
                 done: 638024,
                 total: 638024,
               ),
               SettingsRagSource(
                 kind: SettingsRagSourceKind.blocks,
                 state: SettingsRagState.ready,
+                searchable: true,
                 done: 727,
                 total: 727,
               ),
@@ -78,6 +160,7 @@ void main() {
         ),
       );
       final l = AppLocalizations.of(t.element(find.byType(SettingsHost)))!;
+      expect(find.text(l.set_rgSearchableCount(2, 4)), findsOneWidget);
       expect(find.text(l.set_rgBuilding), findsNothing);
       expect(find.text(l.set_rgPartial), findsNothing);
       expect(find.text(l.set_pause), findsNothing);
@@ -131,7 +214,7 @@ void main() {
             expect(find.text(l.set_rgEmpty), findsNothing);
             expect(find.text(l.set_rgBuild), findsNothing);
             expect(find.text('0%'), findsNothing);
-            expect(find.text(l.set_rgReady), findsNothing);
+            expect(find.text(l.set_rgNoSearchable), findsNothing);
             expect(find.text(l.set_rgPartial), findsNothing);
             expect(find.text(l.set_rgLoading), findsWidgets);
             expect(
@@ -210,7 +293,7 @@ void main() {
     expect(find.text('0%'), findsNothing);
     expect(find.text(l.set_rgBuild), findsNothing);
     expect(find.text(l.set_retry), findsOneWidget);
-    expect(find.text(l.set_rgReady), findsNothing);
+    expect(find.text(l.set_rgNoSearchable), findsNothing);
     expect(find.text(l.set_rgNotReady), findsOneWidget);
     expect(
       t

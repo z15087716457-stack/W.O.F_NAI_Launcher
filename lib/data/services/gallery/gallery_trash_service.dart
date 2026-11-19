@@ -14,12 +14,7 @@ class GalleryTrashService {
     final pending = (await pool.load()).toSet();
     final targets = paths.where(pending.contains).toSet().toList();
     if (targets.isEmpty) return [];
-    try {
-      await pool.restore(targets, () => restoreIndex(targets));
-    } catch (_) {
-      await pool.addAll(targets);
-      rethrow;
-    }
+    await pool.restore(targets, () => restoreIndex(targets));
     return targets;
   }
 

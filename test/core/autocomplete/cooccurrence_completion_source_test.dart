@@ -121,6 +121,19 @@ void main() {
       final soloRelations = await dataSource.getRelatedTags('solo', limit: 100);
       expect(soloRelations.map((relation) => relation.tag), contains('1girl'));
       expect(await dataSource.getRelatedTagCount('solo'), greaterThan(20000));
+
+      final byName = await source.search(
+        _query(relatedTag: 'grey_hair', limit: 20),
+      );
+      final byAlias = await source.search(
+        _query(relatedTag: 'Silver Hair', limit: 20),
+      );
+      expect(byName, hasLength(20));
+      expect(
+        byAlias.map((c) => c.canonicalTag),
+        byName.map((c) => c.canonicalTag),
+      );
+      expect(byAlias.map((c) => c.canonicalTag), isNot(contains('grey_hair')));
     },
   );
 
@@ -203,6 +216,11 @@ class _FakeCatalog extends TagCatalogRepository {
   _FakeCatalog(this.records);
 
   final Map<String, TagCatalogRecord> records;
+
+  @override
+  Future<Map<String, CompletionCandidate>> exactAliases(
+    Iterable<String> terms,
+  ) async => {};
 
   @override
   Future<int> maximumPostCount() async => records.values.fold<int>(

@@ -21,6 +21,7 @@ import 'package:nai_launcher/presentation/ui/kit/ui_scale.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/unified/unified_prompt_input.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/unified/unified_prompt_config.dart';
 import '../../../../helpers/studio_capture_fonts.dart';
+import '../../../../helpers/empty_tag_expansion.dart';
 
 class _MemorySettings extends LocalStorageService {
   @override
@@ -178,6 +179,7 @@ Future<void> pumpReadingEditor(
     ProviderScope(
       overrides: [
         localStorageServiceProvider.overrideWithValue(_MemorySettings()),
+        emptyTagExpansionOverride,
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -218,6 +220,55 @@ Future<void> pumpReadingEditor(
 void main() {
   setUpAll(loadStudioCaptureFonts);
   setUp(() => SharedPreferences.setMockInitialValues({}));
+  testWidgets(
+    'scaled tag expansion clears selected text with inline readings',
+    (t) async {
+      final controller = TextEditingController(text: readingSource);
+      addTearDown(controller.dispose);
+      addTearDown(() => t.binding.setSurfaceSize(null));
+      await pumpReadingEditor(
+        t,
+        controller,
+        readingDocument().readings,
+        width: 540,
+        scale: 1.5,
+      );
+      final field = t
+          .state<EditableTextState>(find.byType(EditableText))
+          .renderEditable;
+      final start = readingSource.indexOf('soft lighting');
+      final range = displaySelection(field, start, start + 'soft light'.length);
+      Offset point(TextPosition position) {
+        final rect = field.getLocalRectForCaret(position);
+        return field.localToGlobal(Offset(rect.left + 1, rect.center.dy));
+      }
+
+      await t.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      final gesture = await t.startGesture(
+        point(range.base),
+        kind: ui.PointerDeviceKind.mouse,
+      );
+      await gesture.moveTo(point(range.extent));
+      await t.pump();
+      await gesture.up();
+      await t.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await t.pump();
+      await t.pump();
+      expect(controller.selection.textInside(controller.text), 'soft light');
+      final popup = t.getRect(find.byKey(const Key('tag-expansion-popup')));
+      final selected = field.getBoxesForSelection(range);
+      expect(selected, isNotEmpty);
+      for (final box in selected) {
+        final source = MatrixUtils.transformRect(
+          field.getTransformTo(null),
+          box.toRect(),
+        );
+        expect(popup.top, greaterThanOrEqualTo(source.bottom + 1.5 * 7.9));
+      }
+      await t.pumpWidget(const SizedBox());
+    },
+  );
+
   for (final dark in [true, false]) {
     for (final width in [320.0, 736.0]) {
       for (final scale in [1.0, 1.5]) {

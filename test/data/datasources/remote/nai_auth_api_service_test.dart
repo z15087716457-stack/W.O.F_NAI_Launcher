@@ -14,9 +14,10 @@ import 'package:nai_launcher/data/datasources/remote/nai_subscription_response.d
 void main() {
   group('third-party native API discovery', () {
     final subscription = {
-      'tier': 0,
-      'active': false,
-      'trainingStepsLeft': null,
+      'tier': 3,
+      'active': true,
+      'usage': {'percent': 100, 'isNegative': false},
+      'trainingStepsLeft': {'fixedTrainingStepsLeft': 400},
     };
     ResponseBody jsonResponse(Object value, [int status = 200]) =>
         ResponseBody.fromString(
@@ -60,8 +61,7 @@ void main() {
             result.endpoint.imageUrl(ApiConstants.generateImageStreamEndpoint),
             'https://gateway.invalid$prefix/ai/generate-image-stream',
           );
-          expect(result.subscription['trainingStepsLeft'], isNull);
-          expect(result.subscription['usesExternalBilling'], isTrue);
+          expect(result.subscription, subscription);
           expect(
             adapter.requests.every(
               (r) =>
@@ -194,33 +194,33 @@ void main() {
       );
       expect(adapter.requests, hasLength(1));
     });
-    test('refresh retains external billing and rejects console HTML', () async {
-      final adapter = _RecordingDioAdapter(
-        reply: (_) => jsonResponse(subscription),
-      );
-      final endpoints = NaiApiEndpointService()
-        ..setCurrent(
-          NaiApiEndpointConfig.fromInput(
-            mainBaseUrl: 'https://gateway.invalid/v1',
-          ),
+    test(
+      'refresh preserves subscription fields and rejects console HTML',
+      () async {
+        final adapter = _RecordingDioAdapter(
+          reply: (_) => jsonResponse(subscription),
         );
-      final service = NAIUserInfoApiService(
-        Dio()..httpClientAdapter = adapter,
-        endpoints,
-      );
-      expect(
-        (await service.getUserSubscription())['usesExternalBilling'],
-        isTrue,
-      );
-      final html = _RecordingDioAdapter(reply: (_) => consolePage());
-      await expectLater(
-        NAIUserInfoApiService(
-          Dio()..httpClientAdapter = html,
+        final endpoints = NaiApiEndpointService()
+          ..setCurrent(
+            NaiApiEndpointConfig.fromInput(
+              mainBaseUrl: 'https://gateway.invalid/v1',
+            ),
+          );
+        final service = NAIUserInfoApiService(
+          Dio()..httpClientAdapter = adapter,
           endpoints,
-        ).getUserSubscription(),
-        throwsA(isA<NaiApiCompatibilityException>()),
-      );
-    });
+        );
+        expect(await service.getUserSubscription(), subscription);
+        final html = _RecordingDioAdapter(reply: (_) => consolePage());
+        await expectLater(
+          NAIUserInfoApiService(
+            Dio()..httpClientAdapter = html,
+            endpoints,
+          ).getUserSubscription(),
+          throwsA(isA<NaiApiCompatibilityException>()),
+        );
+      },
+    );
   });
 
   group('NAI user endpoint routing', () {

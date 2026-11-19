@@ -126,6 +126,26 @@ void main() {
     },
   );
 
+  test('incomplete and ambiguous selections report an invalid model', () async {
+    for (final paths in <List<String?>>[
+      ['one.param'],
+      ['a.bin', 'b.bin'],
+      ['a.param', null],
+      ['a.param', 'a.bin', 'b.param'],
+    ]) {
+      await expectLater(
+        manager.importSelection(paths),
+        throwsA(
+          isA<LocalUpscaleException>().having(
+            (e) => e.code,
+            'code',
+            LocalUpscaleError.invalidModel,
+          ),
+        ),
+      );
+    }
+  });
+
   test(
     'model import uses actual engine blob names, verifies copies, and cannot mutate active models',
     () async {
@@ -136,7 +156,7 @@ void main() {
       final weights = File(
         'assets/local_upscale/models/realesrgan-x4plus-anime.bin',
       );
-      final id = await manager.importPair(param, weights);
+      final id = await manager.importSelection([weights.path, param.path]);
       final imported = (await manager.resolve(id)).$3;
       expect(imported.custom, isTrue);
       expect(

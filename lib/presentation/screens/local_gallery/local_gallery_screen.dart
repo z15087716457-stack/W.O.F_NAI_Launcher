@@ -517,6 +517,7 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
             onUseImage: _importImageMetadata,
             onFavoriteMenu: _showFavoriteMenu,
             onClearFilters: _clearFilters,
+            onImportFolder: _importFolder,
             onDeleteRequested: () => unawaited(_deleteFocusedOrSelected()),
           ),
         ),

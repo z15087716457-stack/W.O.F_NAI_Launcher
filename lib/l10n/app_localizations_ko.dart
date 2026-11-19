@@ -46,9 +46,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get app_title => 'W.O.F NAI Studio';
 
   @override
-  String get settings_visualAssets => '인터페이스 글꼴 및 라이선스';
-
-  @override
   String get brand_entryTagline => '상상이 현실이 되는 곳.';
 
   @override
@@ -71,9 +68,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get common_selectAll => '모두 선택';
-
-  @override
-  String get common_deselectAll => '모두 선택 해제';
 
   @override
   String get common_save => '저장';
@@ -124,9 +118,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get common_add => '추가';
 
   @override
-  String get common_added => '추가했습니다';
-
-  @override
   String get common_confirmDelete => '삭제 확인';
 
   @override
@@ -147,11 +138,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get common_clearInputConfirm => '입력한 내용을 지우시겠습니까?';
-
-  @override
-  String common_daysAgo(Object days) {
-    return '$days일 전';
-  }
 
   @override
   String get common_undo => '실행 취소';
@@ -331,7 +317,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get auth_thirdPartyCompatibilityHint =>
-      'NovelAI 호환 API를 지원하며 로그인 시 /v1 및 /v1/novelai 경로를 감지합니다. 요금과 잔액 단위는 제공업체 기준이며 공식 Opus 무료 규칙은 적용되지 않습니다.';
+      'NovelAI 호환 API를 지원하며 로그인 시 /v1 및 /v1/novelai 경로를 감지합니다. 예상 소모 포인트는 NovelAI 공식 기준으로 계산하며 잔액은 연결된 API에서 가져옵니다.';
 
   @override
   String get auth_thirdPartyApiSiteRequired => '서드파티 API 사이트 주소를 입력하세요';
@@ -470,34 +456,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get common_default => '기본값';
 
   @override
-  String get settings_title => '설정';
-
-  @override
-  String get settings_savedAccounts => '저장된 계정';
-
-  @override
-  String get settings_style => '스타일';
-
-  @override
-  String get settings_font => '글꼴';
-
-  @override
   String get settings_language => '언어';
-
-  @override
-  String get settings_shortcuts => '단축키';
-
-  @override
-  String get settings_generationInputSection => '입력';
-
-  @override
-  String get settings_generationFeedbackSection => '완료 알림';
-
-  @override
-  String get settings_selectFont => '글꼴 선택';
-
-  @override
-  String get settings_selectLanguage => '언어 선택';
 
   @override
   String settings_loadFailed(Object error) {
@@ -514,31 +473,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settings_autoSaveSubtitle => '생성 후 이미지를 자동으로 저장합니다';
 
   @override
-  String get settings_extraRootsTitle => '갤러리 소스';
-
-  @override
-  String get settings_extraRootsHint =>
-      '탐색과 검색할 폴더를 추가합니다. 상위 폴더를 추가하면 포함된 소스를 통합합니다. 목록에서 제거해도 이미지와 저장 위치는 유지됩니다.';
-
-  @override
-  String get settings_extraRootsEmpty => '추가한 갤러리 소스가 없습니다';
-
-  @override
-  String get settings_extraRootsAdd => '폴더 추가';
-
-  @override
   String get settings_extraRootsAddTitle => '갤러리 소스로 추가할 폴더 선택';
-
-  @override
-  String get settings_extraRootsRemove => '이 갤러리 소스 제거';
-
-  @override
-  String get settings_extraRootsRemoveConfirmTitle => '갤러리 소스를 제거하시겠습니까?';
-
-  @override
-  String settings_extraRootsRemoveConfirmContent(String path) {
-    return '\"$path\"을(를) 갤러리에서 제거합니다(폴더 안의 파일은 삭제되지 않습니다).';
-  }
 
   @override
   String get settings_extraRootsAdded => '갤러리 소스를 추가하고 스캔했습니다';
@@ -552,9 +487,6 @@ class AppLocalizationsKo extends AppLocalizations {
       '갤러리를 스캔하는 중입니다. 스캔이 끝나면 이 폴더를 가져옵니다';
 
   @override
-  String get settings_extraRootsRemoved => '갤러리 소스를 제거했습니다';
-
-  @override
   String get settings_extraRootsDuplicate => '이미 갤러리 소스로 추가된 폴더입니다';
 
   @override
@@ -562,17 +494,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get settings_extraRootsNotFound => '선택한 폴더가 존재하지 않습니다';
-
-  @override
-  String get settings_importTagIndex => '태그 인덱스 가져오기…';
-
-  @override
-  String get settings_importTagIndexPickTitle => '태그 인덱스 파일 선택(.jsonl)';
-
-  @override
-  String settings_importTagIndexProgress(int processed, int total) {
-    return '$processed/$total줄 가져오는 중…';
-  }
 
   @override
   String settings_importTagIndexDone(
@@ -603,48 +524,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settings_extraRootsIndexImportConfirm => '지금 가져오기';
 
   @override
-  String settings_version(Object version) {
-    return '버전 $version';
-  }
-
-  @override
-  String get settings_openSource => '오픈 소스';
-
-  @override
-  String get settings_openSourceSubtitle => '소스 코드와 문서 보기';
-
-  @override
-  String get settings_fileLogging => '앱 로그 기록';
-
-  @override
-  String get settings_fileLoggingSubtitle =>
-      '기본값은 꺼짐이며 문제를 해결할 때만 켜세요. 켜면 로그가 Documents/NAI_Launcher/logs에 기록되고, 끄면 로그 파일을 더 이상 만들거나 기록하지 않습니다.';
-
-  @override
-  String get settings_pathReset => '기본 위치로 초기화했습니다';
-
-  @override
-  String get settings_pathSaved => '저장 위치를 변경했습니다';
-
-  @override
-  String get settings_selectFolder => '저장 폴더 선택';
-
-  @override
-  String get settings_vibeLibraryPath => 'Vibe 라이브러리 경로';
-
-  @override
-  String get settings_hiveStoragePath => '데이터 저장 경로';
-
-  @override
-  String get settings_selectVibeLibraryFolder => 'Vibe 라이브러리 폴더 선택';
-
-  @override
-  String get settings_selectHiveFolder => '데이터 저장 폴더 선택';
-
-  @override
-  String get settings_pathSavedRestartRequired => '경로를 변경했습니다. 다시 시작하면 적용됩니다';
-
-  @override
   String get settings_accountType => '계정 유형';
 
   @override
@@ -652,9 +531,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get settings_thirdPartyApiAccount => '서드파티 사이트 API';
-
-  @override
-  String get settings_goToLogin => '로그인하러 가기';
 
   @override
   String get settings_changeAvatar => '아바타 변경';
@@ -673,9 +549,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get settings_setAsDefault => '기본값으로 설정';
-
-  @override
-  String get settings_defaultAccount => '기본';
 
   @override
   String get settings_nickname => '닉네임';
@@ -810,12 +683,6 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get generation_stepsLabel => '스텝';
-
-  @override
-  String get generation_guidance => '가이던스';
-
-  @override
   String generation_cfgScale(Object scale) {
     return '프롬프트 가이던스: $scale';
   }
@@ -827,26 +694,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get generation_seedRandom => '무작위';
 
   @override
-  String get generation_samplerRecommended => '추천';
-
-  @override
-  String get generation_samplerOther => '기타';
-
-  @override
-  String get generation_advancedOptions => '고급 옵션';
-
-  @override
   String get generation_smea => 'SMEA';
 
   @override
-  String get generation_smeaSubtitle => '큰 이미지의 생성 품질을 개선합니다';
-
-  @override
   String get generation_smeaDyn => 'SMEA DYN';
-
-  @override
-  String get generation_smeaDescription =>
-      '이미지가 일정 크기를 넘으면 고해상도 샘플러를 자동으로 사용합니다';
 
   @override
   String generation_cfgRescale(Object value) {
@@ -855,12 +706,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get generation_noiseSchedule => '노이즈 스케줄';
-
-  @override
-  String get generation_modelGroupNew => '최신';
-
-  @override
-  String get generation_modelGroupLegacy => '레거시';
 
   @override
   String get generation_modelDesc_v5Curated =>
@@ -884,15 +729,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get generation_modelDesc_v4Full => 'NovelAI V4 전체 모델입니다.';
 
   @override
-  String get generation_sectionCharacters => '캐릭터 프롬프트';
-
-  @override
-  String get generation_sectionCharactersSub => '장면 속 캐릭터마다 별도의 프롬프트를 만듭니다.';
-
-  @override
-  String get character_positionLabel => '위치';
-
-  @override
   String get anlas_subscription => '구독';
 
   @override
@@ -902,16 +738,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get prompt_positive => '프롬프트';
 
   @override
-  String get prompt_baseTab => '기본 프롬프트';
-
-  @override
   String get prompt_negativeTab => '네거티브';
-
-  @override
-  String get prompt_transparentBg => '투명 배경';
-
-  @override
-  String get prompt_chunksMenu => '도구 및 전환';
 
   @override
   String get qualityTags_presetChip => '품질 태그';
@@ -927,39 +754,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get prompt_mainPositive => '메인 프롬프트';
-
-  @override
-  String get prompt_mainNegative => '메인 프롬프트(네거티브)';
-
-  @override
-  String get prompt_characterPrompts => '다중 캐릭터 프롬프트';
-
-  @override
-  String get prompt_finalPrompt => '최종 적용 프롬프트';
-
-  @override
-  String get prompt_finalNegative => '최종 적용 네거티브';
-
-  @override
-  String prompt_importedCharacters(int count) {
-    return '캐릭터 $count명을 가져왔습니다';
-  }
-
-  @override
-  String get prompt_characterPromptReplaced => '캐릭터 프롬프트를 교체했습니다';
-
-  @override
-  String prompt_characterPromptAppended(Object count) {
-    return '캐릭터 프롬프트를 추가했습니다(캐릭터 $count명)';
-  }
-
-  @override
-  String prompt_smartDecomposedWithCharacters(Object count) {
-    return '메인 프롬프트 + 캐릭터 $count명으로 분해했습니다';
-  }
-
-  @override
-  String get prompt_appliedToMainPrompt => '메인 프롬프트에 적용했습니다';
 
   @override
   String get prompt_searchHint => '프롬프트 검색';
@@ -1000,33 +794,7 @@ class AppLocalizationsKo extends AppLocalizations {
       'Krita Bridge에서 생성하는 중입니다. 현재 작업이 끝날 때까지 기다리세요.';
 
   @override
-  String get prompt_unwantedContent => '이미지에 나오지 않았으면 하는 내용...';
-
-  @override
-  String get prompt_autoFormat => '자동 서식';
-
-  @override
-  String get prompt_autoFormatSubtitle => '쉼표와 공백을 정리하고 불필요한 1배 가중치 기호를 제거합니다';
-
-  @override
-  String get prompt_highlightEmphasis => '강조 구문 강조 표시';
-
-  @override
-  String get prompt_highlightEmphasisSubtitle => '괄호와 가중치 구문을 강조 표시합니다';
-
-  @override
-  String get prompt_sdSyntaxAutoConvert => 'SD 구문 자동 변환';
-
-  @override
-  String get prompt_sdSyntaxAutoConvertSubtitle =>
-      '포커스를 잃거나 생성할 때 SD 가중치 구문을 NAI 형식으로 변환합니다';
-
-  @override
   String get prompt_cooccurrenceRecommendation => '태그 확장';
-
-  @override
-  String get prompt_cooccurrenceRecommendationSubtitle =>
-      'Ctrl(Mac은 ⌘)을 누른 채 클릭하거나 드래그로 선택하면 태그 검색과 관련 추천을 볼 수 있습니다.';
 
   @override
   String get prompt_formatted => '서식을 정리했습니다';
@@ -1059,42 +827,10 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get img2img_title => 'Image2Image';
-
-  @override
-  String get img2img_subtitle => '원본 이미지로 베리에이션을 생성합니다';
-
-  @override
-  String get img2img_enabled => '사용';
-
-  @override
-  String get img2img_sourceImage => '원본 이미지';
-
-  @override
   String get img2img_strength => '강도';
 
   @override
-  String get img2img_strengthHint => '값이 높을수록 원본과 차이가 커집니다';
-
-  @override
   String get img2img_noise => '노이즈';
-
-  @override
-  String get img2img_noiseHint => '노이즈를 추가해 변화를 키웁니다';
-
-  @override
-  String get img2img_clearSettings => 'Image2Image 설정 지우기';
-
-  @override
-  String get img2img_changeImage => '이미지 변경';
-
-  @override
-  String get img2img_removeImage => '이미지 제거';
-
-  @override
-  String img2img_selectFailed(Object error) {
-    return '이미지를 선택하지 못했습니다: $error';
-  }
 
   @override
   String get img2img_editImage => '이미지 편집';
@@ -1106,34 +842,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get img2img_editApplied => '편집한 이미지를 새 원본 이미지로 설정했습니다';
 
   @override
-  String get img2img_uploadImage => '이미지 업로드';
-
-  @override
-  String get img2img_dropToAdd => '놓으면 원본 이미지로 설정합니다';
-
-  @override
   String get img2img_moreActions => '추가 작업';
 
   @override
-  String get img2img_drawSketch => '스케치 그리기';
-
-  @override
   String get img2img_inpaint => '인페인트';
-
-  @override
-  String get img2img_inpaintStrength => '인페인트 강도';
-
-  @override
-  String get img2img_inpaintStrengthHint =>
-      '값이 높을수록 마스크 영역이 현재 원본 이미지와 더 많이 달라집니다';
-
-  @override
-  String get img2img_inpaintPendingHint =>
-      '인페인트를 클릭해 캔버스를 열고 브러시, 지우개, 선택 도구로 다시 그릴 영역을 표시한 뒤, 여기로 돌아와 메인 생성 버튼을 누르세요.';
-
-  @override
-  String get img2img_inpaintReadyHint =>
-      '마스크를 불러왔습니다. 다음 생성에서는 마스크 영역만 다시 그립니다.';
 
   @override
   String get img2img_inpaintMaskReady => '인페인트 마스크가 준비되었습니다';
@@ -1183,12 +895,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get img2img_enhance => '향상';
 
   @override
-  String get img2img_enhanceMagnitude => '강도';
-
-  @override
-  String get img2img_enhanceUpscaleAmount => '업스케일 배율';
-
-  @override
   String get img2img_enhanceMax => '최대✨';
 
   @override
@@ -1209,9 +915,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get img2img_startUpscale => '업스케일 시작';
-
-  @override
-  String get img2img_novelAiUpscaleComplete => 'NovelAI 업스케일 완료';
 
   @override
   String get img2img_decodeSourceFailed => '원본 이미지를 디코딩하지 못했습니다';
@@ -1247,39 +950,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get editor_clearLayer => '레이어 지우기';
 
   @override
-  String get editor_toolBrush => '브러시';
-
-  @override
-  String get editor_toolEraser => '지우개';
-
-  @override
   String get editor_toolFill => '채우기';
-
-  @override
-  String get editor_toolMagicWand => '자동 선택';
-
-  @override
-  String get editor_magicWandMode => '선택 방식';
-
-  @override
-  String get editor_magicWandSmartObject => '스마트 개체(EfficientViT)';
-
-  @override
-  String get editor_magicWandColorArea => '색상 영역(플러드 필)';
-
-  @override
-  String get editor_magicWandSmartHelp =>
-      '선택할 개체를 클릭하세요. 처음 사용할 때 MIT Han Lab의 약 133 MiB EfficientViT-SAM L0 모델(Apache-2.0)을 다운로드한 뒤 로컬에 보관합니다.';
-
-  @override
-  String get editor_magicWandColorHelp =>
-      '비슷한 색이 이어진 영역을 클릭하세요. 경계가 깔끔한 단색 이미지에 적합하며 모델을 다운로드하지 않습니다.';
-
-  @override
-  String get editor_magicWandInvert => '결과 반전';
-
-  @override
-  String get editor_toolLine => '직선';
 
   @override
   String get editor_toolRectSelect => '사각형';
@@ -1303,19 +974,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get editor_layers => '레이어';
 
   @override
-  String get editor_fillClosedRegion => '닫힌 영역 채우기';
-
-  @override
   String get editor_resetMask => '마스크 초기화';
-
-  @override
-  String get editor_zoomIn => '확대';
-
-  @override
-  String get editor_zoomOut => '축소';
-
-  @override
-  String get editor_fitToWindow => '창에 맞추기';
 
   @override
   String get editor_effectBrightness => '밝기';
@@ -1379,81 +1038,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get editor_canvasSizeTitle => '캔버스 크기';
 
   @override
-  String get editor_presetSize => '프리셋 크기';
-
-  @override
-  String get editor_customSize => '사용자 지정';
-
-  @override
-  String get editor_contentHandling => '내용 처리';
-
-  @override
-  String get editor_contentCrop => '자르기';
-
-  @override
-  String get editor_contentPad => '여백 채우기';
-
-  @override
-  String get editor_contentStretch => '늘이기';
-
-  @override
-  String get editor_width => '너비';
-
-  @override
-  String get editor_height => '높이';
-
-  @override
-  String get editor_lockAspectRatio => '가로세로 비율 고정';
-
-  @override
-  String get editor_unlockAspectRatio => '가로세로 비율 고정 해제';
-
-  @override
-  String get editor_sizePreview => '크기 미리 보기';
-
-  @override
-  String get editor_originalSize => '원본';
-
-  @override
-  String get editor_newSize => '새 크기';
-
-  @override
-  String get editor_cropModeDescription => '자르기 모드 - 비율을 유지하고 자릅니다';
-
-  @override
-  String get editor_padModeDescription => '여백 모드 - 비율을 유지하고 여백을 채웁니다';
-
-  @override
-  String get editor_stretchModeDescription => '늘이기 모드 - 꽉 차게 늘입니다';
-
-  @override
-  String editor_canvasPresetSquare(Object size) {
-    return '정사각형 $size';
-  }
-
-  @override
-  String editor_canvasPresetLandscape(Object ratio) {
-    return '가로 $ratio';
-  }
-
-  @override
-  String editor_canvasPresetPortrait(Object ratio) {
-    return '세로 $ratio';
-  }
-
-  @override
-  String get editor_canvasPresetNaiPortrait => 'NAI 세로';
-
-  @override
-  String get editor_canvasPresetNaiLandscape => 'NAI 가로';
-
-  @override
-  String get editor_canvasPresetFullHd => 'Full HD 16:9';
-
-  @override
-  String get editor_colorPanelTitle => '색상';
-
-  @override
   String get editor_colorPickerTitle => '색상 선택';
 
   @override
@@ -1503,53 +1087,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get vibe_title => 'Vibe 트랜스퍼';
 
   @override
-  String get vibe_description => '이미지는 바꾸고, 분위기는 그대로.';
-
-  @override
-  String get vibe_addFromFileTitle => '파일에서 추가';
-
-  @override
-  String get vibe_addFromFileSubtitle => 'PNG, JPG, Vibe 파일';
-
-  @override
-  String get vibe_addFromLibraryTitle => '라이브러리에서 가져오기';
-
-  @override
-  String get vibe_addFromLibrarySubtitle => 'Vibe 라이브러리에서 선택';
-
-  @override
-  String get vibe_addReference => '참조 추가';
-
-  @override
-  String get vibe_clearAll => '모두 지우기';
-
-  @override
-  String vibe_cleared(int count) {
-    return 'Vibe $count개를 지웠습니다';
-  }
-
-  @override
-  String get vibe_referenceStrength => '참조 강도';
-
-  @override
-  String get vibe_infoExtraction => '정보 추출량';
-
-  @override
-  String get vibe_remove => '제거';
-
-  @override
-  String get reference_enabled => '사용';
-
-  @override
-  String get reference_enable => '참조 사용';
-
-  @override
-  String get reference_disable => '참조 사용 안 함';
-
-  @override
-  String get vibe_normalize => '참조 강도 값 정규화';
-
-  @override
   String get vibe_sourceType_png => 'PNG';
 
   @override
@@ -1569,12 +1106,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get vibe_name => '이름';
-
-  @override
-  String get character_buttonLabel => '캐릭터/위치';
-
-  @override
-  String get character_addCharacter => '캐릭터 추가';
 
   @override
   String character_number(Object index) {
@@ -1636,9 +1167,6 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get onlineGallery_login => '로그인';
-
-  @override
   String get onlineGallery_pleaseLogin => '먼저 로그인하세요';
 
   @override
@@ -1692,47 +1220,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get onlineGallery_ratingExplicit => '성인';
-
-  @override
-  String get onlineGallery_blacklistTitle => '온라인 갤러리 차단 목록';
-
-  @override
-  String get onlineGallery_blacklistSubtitle =>
-      '차단 태그가 포함된 이미지는 온라인 갤러리에서 바로 숨겨집니다.';
-
-  @override
-  String get onlineGallery_addBlacklistTagHint => '차단 태그 추가';
-
-  @override
-  String get onlineGallery_noLocalBlacklistTags => '로컬 차단 태그가 없습니다';
-
-  @override
-  String get onlineGallery_autoSyncOnStartup => '시작할 때 자동 동기화';
-
-  @override
-  String get onlineGallery_autoSyncOnStartupSubtitle =>
-      '기본으로 켜져 있으며 언제든 끌 수 있습니다';
-
-  @override
-  String onlineGallery_lastSyncFailed(Object error) {
-    return '마지막 동기화 실패: $error';
-  }
-
-  @override
-  String get onlineGallery_neverSyncedBlacklist =>
-      'Danbooru 차단 목록을 아직 동기화하지 않았습니다';
-
-  @override
-  String onlineGallery_lastSync(Object time) {
-    return '마지막 동기화: $time';
-  }
-
-  @override
-  String get onlineGallery_blacklistSettingsTitle => '온라인 갤러리 차단 목록 설정';
-
-  @override
-  String get onlineGallery_blacklistLoginHint =>
-      'Danbooru에 로그인하지 않았습니다. 로컬 차단 목록은 사용할 수 있지만 동기화하려면 로그인해야 합니다.';
 
   @override
   String onlineGallery_downloadSelectedCompleted(
@@ -1804,9 +1291,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get onlineGallery_gelbooruReadOnly => '읽기 전용 즐겨찾기';
-
-  @override
-  String get tooltip_fullscreenEdit => '전체 화면 편집';
 
   @override
   String get tooltip_decreaseWeight => '가중치 낮추기 [-5%]';
@@ -1917,14 +1401,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get qualityTags_label => '품질';
 
   @override
-  String get transparentBackground_tooltip =>
-      '프롬프트에 \"transparent background\"를 추가하고 알파 채널이 있는 이미지를 생성합니다(V5 전용)';
-
-  @override
   String get qualityTags_positive => '품질(프롬프트)';
-
-  @override
-  String get qualityTags_negative => '품질(네거티브)';
 
   @override
   String get qualityTags_disabled => '품질 태그가 꺼져 있습니다\n클릭하여 켜기';
@@ -1980,17 +1457,6 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get ucPreset_nsfwHint =>
       '💡 성인 콘텐츠를 생성하려면 프롬프트에 nsfw를 추가하세요. 네거티브의 nsfw 태그는 자동으로 제거됩니다';
-
-  @override
-  String get generation_imageCount => '이미지 수';
-
-  @override
-  String get generation_requestCountTooltip => '요청 횟수: 클릭할 때마다 생성 요청을 N번 보냅니다';
-
-  @override
-  String generation_imageCountTotal(int requests, int perRequest, int total) {
-    return '요청 $requests회 × $perRequest장 = 총 $total장';
-  }
 
   @override
   String get warmup_networkCheck => '네트워크 연결 확인 중...';
@@ -2147,39 +1613,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get warmup_fetchingMetaTags => '메타 태그 가져오는 중...';
 
   @override
-  String get resolution_groupNormal => '일반';
-
-  @override
-  String get resolution_groupLarge => '크게';
-
-  @override
-  String get resolution_groupWallpaper => '배경화면';
-
-  @override
-  String get resolution_groupSmall => '작게';
-
-  @override
-  String get resolution_groupCustom => '사용자 지정';
-
-  @override
-  String get resolution_typePortrait => '세로';
-
-  @override
-  String get resolution_typeLandscape => '가로';
-
-  @override
-  String get resolution_typeSquare => '정사각형';
-
-  @override
-  String get resolution_typeCustom => '사용자 지정';
-
-  @override
-  String get resolution_width => '너비';
-
-  @override
-  String get resolution_height => '높이';
-
-  @override
   String get api_error_429 => '동시 요청 한도 도달';
 
   @override
@@ -2229,9 +1662,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get drop_processingSubtitle => '읽기가 끝나면 용도를 선택하세요';
 
   @override
-  String get characterEditor_clearAll => '모두 지우기';
-
-  @override
   String get characterEditor_clearAllTitle => '모든 캐릭터 지우기';
 
   @override
@@ -2242,98 +1672,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get characterEditor_nameHint => '캐릭터 이름 입력';
 
   @override
-  String get characterEditor_enabled => '사용';
-
-  @override
   String get characterEditor_negativePromptHint => '이 캐릭터의 네거티브 입력...';
-
-  @override
-  String get characterCanvas_title => '캐릭터 위치';
-
-  @override
-  String get characterCanvas_finishEditing => '위치 편집 완료';
 
   @override
   String get characterCanvas_aiChoice => 'AI 선택';
 
   @override
   String get characterCanvas_custom => '사용자 지정';
-
-  @override
-  String get characterCanvas_aiHint => 'AI가 모든 캐릭터를 자동으로 배치합니다';
-
-  @override
-  String get characterCanvas_dragHint => '앵커를 끌어 캐릭터 위치를 정하고, 놓으면 적용됩니다';
-
-  @override
-  String get characterEditor_genderFemale => '여성';
-
-  @override
-  String get characterEditor_genderMale => '남성';
-
-  @override
-  String get characterEditor_genderOther => '기타';
-
-  @override
-  String get characterEditor_addFemale => '여';
-
-  @override
-  String get characterEditor_addMale => '남';
-
-  @override
-  String get characterEditor_addOther => '기타';
-
-  @override
-  String get characterEditor_moveUp => '위로 이동';
-
-  @override
-  String get characterEditor_moveDown => '아래로 이동';
-
-  @override
-  String get toolbar_fullscreenEdit => '전체 화면 편집';
-
-  @override
-  String get characterTooltip_noCharacters => '설정된 캐릭터가 없습니다';
-
-  @override
-  String get characterTooltip_clickToConfig => '클릭하여 다중 캐릭터 프롬프트 설정';
-
-  @override
-  String get characterTooltip_globalAiLabel => '전체 AI 위치:';
-
-  @override
-  String get characterTooltip_enabled => '사용';
-
-  @override
-  String get characterTooltip_disabled => '사용 안 함';
-
-  @override
-  String get characterTooltip_positionAi => 'AI';
-
-  @override
-  String get characterTooltip_disabledLabel => '사용 안 함';
-
-  @override
-  String get characterTooltip_promptLabel => '프롬프트';
-
-  @override
-  String get characterTooltip_negativeLabel => '네거티브';
-
-  @override
-  String get characterTooltip_notSet => '설정 안 됨';
-
-  @override
-  String characterTooltip_summary(Object total, Object enabled) {
-    return '캐릭터 $total명(사용 $enabled명)';
-  }
-
-  @override
-  String get characterTooltip_viewFullConfig => '클릭하여 전체 설정 보기';
-
-  @override
-  String globalSettings_saveFailed(Object error) {
-    return '저장하지 못했습니다: $error';
-  }
 
   @override
   String get nav_generate => '생성';
@@ -2343,70 +1688,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get nav_settings => '설정';
-
-  @override
-  String get sync_preparing => '동기화 준비 중...';
-
-  @override
-  String sync_fetching(Object category) {
-    return '$category 가져오는 중...';
-  }
-
-  @override
-  String get sync_processing => '데이터 처리 중...';
-
-  @override
-  String get sync_saving => '저장하는 중...';
-
-  @override
-  String sync_completed(Object count) {
-    return '동기화 완료, 태그 $count개';
-  }
-
-  @override
-  String sync_failed(Object error) {
-    return '동기화하지 못했습니다: $error';
-  }
-
-  @override
-  String sync_extracting(Object poolName) {
-    return '$poolName 태그 추출 중...';
-  }
-
-  @override
-  String get sync_merging => '태그 병합 중...';
-
-  @override
-  String sync_fetching_tags(Object groupName) {
-    return '$groupName 태그 인기도 가져오는 중...';
-  }
-
-  @override
-  String get sync_filtering => '태그 필터링 중...';
-
-  @override
-  String get sync_done => '동기화 완료';
-
-  @override
-  String get time_just_now => '방금';
-
-  @override
-  String time_minutes_ago(Object n) {
-    return '$n분 전';
-  }
-
-  @override
-  String time_hours_ago(Object n) {
-    return '$n시간 전';
-  }
-
-  @override
-  String time_days_ago(Object n) {
-    return '$n일 전';
-  }
-
-  @override
-  String get time_never_synced => '동기화한 적 없음';
 
   @override
   String get vibeParseFailed => 'Vibe 파일을 분석하지 못했습니다';
@@ -2429,7 +1710,16 @@ class AppLocalizationsKo extends AppLocalizations {
   String get localGallery_emptyTitle => '로컬 이미지가 없습니다';
 
   @override
-  String get localGallery_emptySubtitle => '생성한 이미지가 여기에 저장됩니다';
+  String get localGallery_emptyFavorites => '즐겨찾는 이미지가 없습니다';
+
+  @override
+  String get localGallery_emptyScope => '아직 이미지가 없습니다';
+
+  @override
+  String get localGallery_noNaiHere => '여기에 표시할 NAI 이미지가 없습니다';
+
+  @override
+  String get localGallery_showNonNai => 'NAI 이외의 이미지도 표시';
 
   @override
   String get localGallery_noMatchingResults => '일치하는 결과가 없습니다';
@@ -2475,27 +1765,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get localGallery_sortFieldDimensions => '이미지 크기';
-
-  @override
-  String localGallery_aboutColumns(Object count) {
-    return '약 $count열';
-  }
-
-  @override
-  String get localGallery_columnWidth => '열 너비';
-
-  @override
-  String get localGallery_thumbnailQualitySd => '표준';
-
-  @override
-  String get localGallery_thumbnailQualityHd => '높음';
-
-  @override
-  String get settings_galleryThumbnailQuality => '로컬 갤러리 화질';
-
-  @override
-  String get settings_galleryThumbnailQualitySubtitle =>
-      '썸네일 표시 화질이며 기본값은 높음입니다';
 
   @override
   String get localGallery_naiOnlyTooltip => 'NAI로 생성한 이미지만 표시';
@@ -3302,103 +2571,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get tagLibrary_tags => '태그';
 
   @override
-  String get settings_network => '네트워크';
-
-  @override
-  String get settings_enableProxy => '프록시 사용';
-
-  @override
-  String get settings_proxyEnabled => '사용';
-
-  @override
-  String get settings_proxyDisabled => '직접 연결';
-
-  @override
-  String get settings_proxyTrafficDisclosure =>
-      '프록시를 사용하면 인증 요청을 포함한 NovelAI API 트래픽이 시스템 프록시나 수동 프록시를 거쳐 전송됩니다. 신뢰할 수 있는 프록시만 사용하세요.';
-
-  @override
-  String get settings_proxyMode => '프록시 모드';
-
-  @override
-  String get settings_proxyModeAuto => '시스템 프록시 자동 감지';
-
-  @override
-  String get settings_proxyModeManual => '수동 설정';
-
-  @override
-  String get settings_auto => '자동';
-
-  @override
-  String get settings_manual => '수동';
-
-  @override
-  String get settings_proxyHost => '프록시 호스트';
-
-  @override
-  String get settings_proxyPort => '포트';
-
-  @override
-  String get settings_proxyNotDetected => '시스템 프록시가 감지되지 않았습니다';
-
-  @override
-  String get settings_testConnection => '연결 테스트';
-
-  @override
-  String get settings_testConnectionHint => '클릭하여 프록시가 작동하는지 테스트';
-
-  @override
-  String settings_testSuccess(Object latency) {
-    return '연결 성공(${latency}ms)';
-  }
-
-  @override
-  String settings_testFailed(Object error) {
-    return '연결하지 못했습니다: $error';
-  }
-
-  @override
-  String get settings_proxyRestartHint => '프록시 설정이 바뀌었습니다. 다시 시작하는 것이 좋습니다';
-
-  @override
-  String get settings_enablePromptWeightScroll => '마우스 휠로 프롬프트 가중치 조정';
-
-  @override
-  String get settings_enablePromptWeightScrollSubtitle =>
-      '프롬프트 텍스트를 선택한 상태에서 지정한 보조 키를 누른 채 휠을 돌리면 가중치가 조정됩니다. 보조 키 없이 휠을 돌리면 평소처럼 페이지가 스크롤됩니다.';
-
-  @override
-  String get settings_weightScrollModifierAlt => 'Alt';
-
-  @override
-  String get settings_weightScrollModifierCtrl => 'Ctrl';
-
-  @override
-  String get settings_weightScrollModifierShift => 'Shift';
-
-  @override
-  String get settings_weightScrollModifierNone => '없음(이전 방식)';
-
-  @override
-  String get unit_seconds => '초';
-
-  @override
-  String get settings_notificationSound => '완료 효과음';
-
-  @override
-  String get settings_notificationSoundSubtitle =>
-      '창이 포커스를 잃었을 때만 완료 효과음을 재생합니다';
-
-  @override
-  String get settings_notificationCustomSound => '사용자 지정 효과음';
-
-  @override
-  String get settings_notificationSelectSound => '효과음 선택';
-
-  @override
-  String get settings_notificationResetSound => '기본값으로 초기화';
-
-  @override
   String get resetToDefault => '기본값으로 초기화';
 
   @override
@@ -3777,25 +2949,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get preciseRef_title => '정밀 참조';
 
   @override
-  String get preciseRef_subtitle => '캐릭터나 스타일 참조에 맞춰 생성합니다';
-
-  @override
-  String get preciseRef_description =>
-      '참조 이미지를 추가하고 유형과 매개변수를 설정하세요. 여러 참조를 동시에 사용할 수 있습니다.';
-
-  @override
-  String get preciseRef_addReference => '참조 추가';
-
-  @override
-  String get preciseRef_clearAll => '모두 지우기';
-
-  @override
-  String get preciseRef_remove => '제거';
-
-  @override
-  String get preciseRef_referenceType => '참조 유형';
-
-  @override
   String get preciseRef_importTitle => '정밀 참조 가져오기';
 
   @override
@@ -3815,12 +2968,6 @@ class AppLocalizationsKo extends AppLocalizations {
       '인물의 특징과 시각적 스타일을 함께 참고';
 
   @override
-  String get preciseRef_strength => '강도';
-
-  @override
-  String get preciseRef_fidelity => '충실도';
-
-  @override
   String get preciseRef_v4Only => '이 기능은 V4 이상 모델이 필요합니다';
 
   @override
@@ -3833,26 +2980,8 @@ class AppLocalizationsKo extends AppLocalizations {
   String get preciseRef_typeCharacterAndStyle => '캐릭터 + 스타일';
 
   @override
-  String get preciseRef_costHint => '정밀 참조를 사용하면 Anlas가 추가로 소비됩니다';
-
-  @override
-  String get preciseRef_costBadge => 'Anlas 사용';
-
-  @override
-  String get preciseRef_dropToAdd => '놓으면 정밀 참조를 추가합니다';
-
-  @override
-  String get preciseRef_dropNoReadableImage =>
-      '놓은 항목에서 읽을 수 있는 이미지 파일이나 이미지 링크를 찾지 못했습니다';
-
-  @override
   String preciseRef_addedCount(int count) {
     return '정밀 참조 $count개를 추가했습니다';
-  }
-
-  @override
-  String preciseRef_removedCount(int count) {
-    return '정밀 참조 $count개를 제거했습니다';
   }
 
   @override
@@ -3870,12 +2999,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String vibeLibrary_importSummary(Object success, Object failed) {
     return '가져오기 완료: 성공 $success, 실패 $failed';
   }
-
-  @override
-  String get vibeLibrary_save => '라이브러리에 저장';
-
-  @override
-  String get vibeLibrary_import => 'Vibe 가져오기';
 
   @override
   String get vibeLibrary_sendToGeneration => '생성으로 보내기';
@@ -3946,65 +3069,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String categoryError_reorderFailed(String error) {
     return '분류 순서를 바꾸지 못했습니다: $error';
   }
-
-  @override
-  String get vibe_export_title => 'Vibe 내보내기';
-
-  @override
-  String get vibe_selector_recent => '최근';
-
-  @override
-  String vibe_export_dialogTitle(int count) {
-    return 'Vibe $count개 내보내기';
-  }
-
-  @override
-  String get vibe_export_chooseMethod => 'Vibe 내보내기 방식 선택';
-
-  @override
-  String get vibe_export_asBundle => '번들로';
-
-  @override
-  String get vibe_export_individually => '개별로';
-
-  @override
-  String get vibe_export_noData => '내보낼 데이터가 없습니다';
-
-  @override
-  String get vibe_export_success => '내보냈습니다';
-
-  @override
-  String get vibe_export_failed => '내보내지 못했습니다';
-
-  @override
-  String vibe_export_skipped(int count) {
-    return '데이터가 없는 Vibe $count개를 건너뛰었습니다';
-  }
-
-  @override
-  String vibe_export_bundleSuccess(int count) {
-    return '번들을 내보냈습니다: Vibe $count개';
-  }
-
-  @override
-  String get vibe_export_selectToEmbed => '포함할 Vibe 선택';
-
-  @override
-  String get vibe_export_pngRequired => 'PNG 파일이 필요합니다';
-
-  @override
-  String get vibe_export_noEmbeddableData => '포함할 수 있는 데이터가 없습니다';
-
-  @override
-  String vibe_export_embedSuccess(int count) {
-    return 'Vibe $count개를 이미지에 포함했습니다';
-  }
-
-  @override
-  String get vibe_export_embedFailed => '포함하지 못했습니다';
-
-  @override
-  String get vibe_embedToImage => '이미지에 포함';
 
   @override
   String get vibe_import_noEncodingData => '인코딩 데이터 없음';
@@ -4107,43 +3171,8 @@ class AppLocalizationsKo extends AppLocalizations {
   String get vibe_saveToLibrary_tagHint => '태그를 입력한 뒤 추가를 누르세요';
 
   @override
-  String get vibe_maxReached => '최대 16개의 Vibe에 도달했습니다';
-
-  @override
   String vibe_addedCount(int count) {
     return 'Vibe $count개를 추가했습니다';
-  }
-
-  @override
-  String get vibe_statusEncoded => '인코딩됨';
-
-  @override
-  String get vibe_statusEncoding => '인코딩 중...';
-
-  @override
-  String get vibe_statusPendingEncode => '인코딩(2 Anlas)';
-
-  @override
-  String get vibe_encodeDialogTitle => 'Vibe 인코딩 확인';
-
-  @override
-  String get vibe_encodeDialogMessage => '생성에 사용하도록 이 이미지를 인코딩하시겠습니까?';
-
-  @override
-  String get vibe_encodeCostWarning => '2 Anlas(크레딧)가 소비됩니다';
-
-  @override
-  String get vibe_encodeButton => '인코딩';
-
-  @override
-  String get vibe_encodeSuccess => 'Vibe를 인코딩했습니다!';
-
-  @override
-  String get vibe_encodeFailed => 'Vibe를 인코딩하지 못했습니다. 다시 시도하세요';
-
-  @override
-  String vibe_encodeError(String error) {
-    return '인코딩하지 못했습니다: $error';
   }
 
   @override
@@ -4177,228 +3206,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get tray_exit => '종료';
 
   @override
-  String get settings_shortcutsSubtitle => '키보드 단축키를 사용자 지정합니다';
-
-  @override
-  String get settings_openFolder => '폴더 열기';
-
-  @override
-  String get settings_openFolderFailed => '폴더를 열지 못했습니다';
-
-  @override
-  String get settings_vibePathSaved => 'Vibe 라이브러리 경로를 저장했습니다';
-
-  @override
   String get settings_selectFolderFailed => '폴더를 선택하지 못했습니다';
 
   @override
-  String get settings_hivePathSaved => '데이터 저장 경로를 저장했습니다. 다시 시작하면 적용됩니다';
-
-  @override
-  String get settings_restartRequiredTitle => '다시 시작 필요';
-
-  @override
-  String get settings_changePathConfirm =>
-      '데이터 저장 경로를 변경하면 앱을 다시 시작해야 적용됩니다.\\n\\n새 경로는 다음 실행 때 적용됩니다. 계속하시겠습니까?';
-
-  @override
-  String get settings_resetPathConfirm =>
-      '데이터 저장 경로를 초기화하면 앱을 다시 시작해야 적용됩니다.\\n\\n기본 경로는 다음 실행 때 적용됩니다. 계속하시겠습니까?';
-
-  @override
-  String get settings_kritaBridgeEnable => '로컬 연결 활성화';
-
-  @override
-  String get settings_kritaBridgeDisabledText =>
-      '기본값은 꺼짐이며, 켜면 로컬 127.0.0.1에서만 수신합니다';
-
-  @override
-  String get settings_kritaBridgeStartingText => '로컬 브리지 서비스 시작 중...';
-
-  @override
-  String get settings_kritaBridgeListeningText => '외부 Agent 또는 Krita 연결 대기 중';
-
-  @override
-  String get settings_kritaBridgeConnectedText => 'Krita 플러그인 연결됨';
-
-  @override
-  String get settings_kritaBridgeErrorText => '시작하지 못했습니다. 오류 메시지를 확인하세요';
-
-  @override
-  String get settings_kritaBridgeRegenerateSession => '세션 다시 만들기';
-
-  @override
-  String get settings_kritaBridgeDiscoveryFile => '검색 파일';
-
-  @override
-  String get settings_kritaBridgeWaitingEndpoint => '로컬 WebSocket 수신 대기 중';
-
-  @override
-  String settings_kritaBridgeClient(Object client) {
-    return '클라이언트: $client';
-  }
-
-  @override
-  String get settings_fontScale => '인터페이스 배율';
-
-  @override
-  String get settings_fontScale_previewSmall => '빛과 그림자가 캔버스에 내려앉는다.';
-
-  @override
-  String get settings_fontScale_previewMedium => '色から物語が生まれる。';
-
-  @override
-  String get settings_fontScale_previewLarge => 'Let colors tell a story.';
-
-  @override
-  String get settings_fontScale_done => '완료';
-
-  @override
-  String get settings_historyClickBehavior => '기록 클릭 동작';
-
-  @override
-  String get settings_historyClickBehavior_classic => '기본';
-
-  @override
-  String get settings_historyClickBehavior_classicDescription =>
-      '기록 이미지를 클릭하면 상세 정보를 엽니다';
-
-  @override
-  String get settings_historyClickBehavior_linked => '연동 미리 보기';
-
-  @override
-  String get settings_historyClickBehavior_linkedDescription =>
-      '클릭하면 가운데 미리 보기가 바뀌고, 두 번 클릭하거나 길게 누르면 상세 정보를 열며, 왼쪽/오른쪽 키로 둘러볼 수 있습니다';
-
-  @override
-  String get settings_outputViewer => '출력 뷰어';
-
-  @override
-  String get settings_outputViewer_canvas => '자유 캔버스';
-
-  @override
-  String get settings_outputViewer_canvasDescription =>
-      'NAI5 방식 무한 캔버스: 생성한 이미지를 모두 배치별로 펼쳐 놓고, 가운데 버튼/Shift+왼쪽 드래그로 이동, Ctrl+휠로 확대/축소, WASD/f/q로 탐색합니다';
-
-  @override
-  String get settings_outputViewer_simple => '간단한 보기';
-
-  @override
-  String get settings_outputViewer_simpleDescription =>
-      '저사양 PC나 익숙한 배치를 위한 기본 가운데/그리드 미리 보기';
-
-  @override
-  String get settings_canvasLockCamera => '캔버스 카메라 잠금';
-
-  @override
-  String get settings_canvasLockCameraDescription =>
-      '휠 확대/축소·이동, 드래그 이동, WASD 등 수동 카메라 입력을 끕니다. 자동 선택과 탐색 이동은 계속 작동합니다';
-
-  @override
-  String get settings_canvasReducedMotion => '캔버스 움직임 줄이기';
-
-  @override
-  String get settings_canvasReducedMotionDescription =>
-      '카메라 이동, 확대/축소, 관성이 즉시 전환되어 애니메이션이 줄어듭니다';
-
-  @override
   String get image_viewDetail => '상세 정보 보기';
-
-  @override
-  String get settings_defaultImagesPath =>
-      '기본값(Documents/NAI_Launcher/images/)';
-
-  @override
-  String get settings_defaultHivePath => '기본값(./user-data/hive/)';
-
-  @override
-  String get settings_protectionFeatures => '보호 기능';
-
-  @override
-  String get settings_stripMetadataTitle => '복사하거나 끌 때 메타데이터 모두 제거';
-
-  @override
-  String get settings_stripMetadataSubtitle =>
-      '정리된 사본을 만들어 PNG 텍스트 청크, EXIF, NAI 스테가노그래피 워터마크 데이터를 제거하고, 끌 때 원본 경로가 노출되지 않게 합니다.';
-
-  @override
-  String get settings_confirmDangerousActionsTitle => '위험한 자산 작업 이중 확인';
-
-  @override
-  String get settings_confirmDangerousActionsSubtitle =>
-      '로컬 자산을 삭제, 이동, 일괄 이동할 때 보호 확인을 한 번 더 표시합니다.';
-
-  @override
-  String get settings_warnExternalImageSendTitle => '외부 서비스로 보내기 전 확인';
-
-  @override
-  String get settings_warnExternalImageSendSubtitle =>
-      '로컬 이미지가 LLM, NovelAI, ComfyUI 같은 외부 서비스로 나가기 전에 확인합니다.';
-
-  @override
-  String get settings_preventOverwriteTitle => '내보낼 때 기존 파일 덮어쓰지 않기';
-
-  @override
-  String get settings_preventOverwriteSubtitle =>
-      '내보내기나 묶기 경로가 겹치면 자동으로 번호를 붙여 기존 자산을 실수로 바꾸지 않게 합니다.';
-
-  @override
-  String get settings_warnHighAnlasCostTitle => '높은 Anlas 비용 경고';
-
-  @override
-  String settings_warnHighAnlasCostSubtitle(Object threshold) {
-    return '요청 한 번의 예상 비용이 $threshold Anlas에 도달하면 생성 전에 확인을 표시합니다.';
-  }
-
-  @override
-  String get settings_highAnlasCostThresholdTitle => 'Anlas 경고 기준값';
-
-  @override
-  String get settings_setHighAnlasCostThresholdTitle => 'Anlas 경고 기준값 설정';
-
-  @override
-  String get settings_threshold => '기준값';
-
-  @override
-  String get settings_highAnlasCostThresholdHelper =>
-      '생성 한 번의 예상 비용이 이 값 이상이면 확인을 표시합니다.';
-
-  @override
-  String get settings_limitGenerationIntervalTitle => '생성 빈도 제한';
-
-  @override
-  String get settings_limitGenerationIntervalSubtitle =>
-      '생성 시작 사이에 설정한 최소 간격을 둡니다. 대기 시간 동안 생성 버튼을 사용할 수 없습니다.';
-
-  @override
-  String get settings_generationIntervalTitle => '생성 간격';
-
-  @override
-  String settings_generationIntervalValue(Object seconds) {
-    return '$seconds초';
-  }
-
-  @override
-  String get settings_setGenerationIntervalTitle => '생성 간격 설정';
-
-  @override
-  String get settings_generationIntervalHelper =>
-      '1~3600초를 입력하세요. 대기 시간은 생성을 시작할 때부터 계산합니다.';
-
-  @override
-  String get settings_generationIntervalJitterTitle => '간격 무작위 변동';
-
-  @override
-  String settings_generationIntervalJitterValue(Object percent) {
-    return '±$percent%';
-  }
-
-  @override
-  String get settings_setGenerationIntervalJitterTitle => '간격 무작위 변동 설정';
-
-  @override
-  String get settings_generationIntervalJitterHelper =>
-      '대기 시간마다 기본 간격 ± 이 비율 안에서 무작위로 정해져 생성 리듬이 덜 기계적으로 됩니다. 0~50을 입력하세요. 0이면 끕니다.';
 
   @override
   String get settings_confirmExternalSendTitle => '보호 모드: 외부 전송 확인';
@@ -4418,197 +3229,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settings_continueGeneration => '생성 계속';
 
   @override
-  String get dataSource_syncNow => '지금 동기화';
-
-  @override
-  String get settings_comfyUiEnable => 'ComfyUI 연동 사용';
-
-  @override
-  String get settings_comfyUiDisabledSubtitle =>
-      '끄면 로컬 업스케일 등 ComfyUI 기능이 숨겨집니다';
-
-  @override
-  String get settings_comfyUiServerUrl => '서버 URL';
-
-  @override
-  String get settings_comfyUiConnectionSuccess => '연결 성공';
-
-  @override
-  String get settings_comfyUiConnectionSuccessFull => 'ComfyUI 연결 성공';
-
-  @override
-  String settings_comfyUiConnectionFailed(Object error) {
-    return '연결하지 못했습니다: $error';
-  }
-
-  @override
-  String get settings_comfyUiConnected => '연결됨';
-
-  @override
-  String get settings_comfyUiDisconnect => '연결 끊기';
-
-  @override
-  String get settings_comfyUiNoResponse => '서버가 응답하지 않습니다';
-
-  @override
-  String get settings_comfyUiStatusDisconnected => '연결 안 됨';
-
-  @override
-  String get settings_comfyUiStatusConnecting => '연결하는 중...';
-
-  @override
-  String get settings_comfyUiStatusConnected => '연결됨';
-
-  @override
-  String get settings_comfyUiStatusError => '연결 오류';
-
-  @override
-  String get settings_comfyUiCategoryEnhance => '향상/업스케일';
-
-  @override
-  String get settings_comfyUiCategoryImg2Img => 'Image2Image';
-
-  @override
-  String get settings_comfyUiCategoryInpaint => '인페인트';
-
-  @override
-  String get settings_comfyUiCategoryTxt2Img => '텍스트로 이미지 생성';
-
-  @override
-  String get settings_comfyUiCategoryCustom => '사용자 지정';
-
-  @override
-  String get comfyWorkflow_seedvr2UpscaleName => 'SeedVR2 업스케일';
-
-  @override
-  String get comfyWorkflow_seedvr2UpscaleDescription =>
-      'SeedVR2 AI 모델로 업스케일합니다. 고품질 결과를 얻을 수 있습니다.';
-
-  @override
-  String get comfyWorkflow_seedvr2TiledUpscaleName => 'SeedVR2 타일 업스케일';
-
-  @override
-  String get comfyWorkflow_seedvr2TiledUpscaleDescription =>
-      'SeedVR2TilingUpscaler로 타일 업스케일해 큰 이미지의 VRAM 부담을 줄입니다.';
-
-  @override
-  String get comfyWorkflow_modelUpscaleName => 'ComfyUI 표준 업스케일 모델';
-
-  @override
-  String get comfyWorkflow_modelUpscaleDescription =>
-      'ComfyUI UpscaleModelLoader로 표준 업스케일 모델을 불러온 뒤 Lanczos로 최종 배율을 맞춥니다.';
-
-  @override
-  String get comfyWorkflow_rtxUpscaleName => 'RTX 업스케일';
-
-  @override
-  String get comfyWorkflow_rtxUpscaleDescription =>
-      'Nvidia RTX Video Super Resolution 노드로 로컬 업스케일합니다.';
-
-  @override
-  String get comfyWorkflowSlot_inputImage => '입력 이미지';
-
-  @override
-  String get comfyWorkflowSlot_targetShortSide => '목표 짧은 변';
-
-  @override
-  String get comfyWorkflowSlot_targetLongSide => '목표 긴 변';
-
-  @override
-  String get comfyWorkflowSlot_upscaleModel => '업스케일 모델';
-
-  @override
-  String get comfyWorkflowSlot_randomSeed => '무작위 시드';
-
-  @override
-  String get comfyWorkflowSlot_outputImage => '출력 이미지';
-
-  @override
-  String get comfyWorkflowSlot_tileWidth => '타일 너비';
-
-  @override
-  String get comfyWorkflowSlot_tileHeight => '타일 높이';
-
-  @override
-  String get comfyWorkflowSlot_tileUpscaleResolution => '타일 업스케일 해상도';
-
-  @override
-  String get comfyWorkflowSlot_targetWidth => '목표 너비';
-
-  @override
-  String get comfyWorkflowSlot_targetHeight => '목표 높이';
-
-  @override
-  String get comfyWorkflowSlot_scale => '배율';
-
-  @override
-  String get comfyWorkflow_parameters => '매개변수';
-
-  @override
-  String get comfyWorkflow_selectImage => '클릭하여 이미지 선택';
-
-  @override
-  String comfyWorkflow_pickImageFailed(Object error) {
-    return '이미지를 선택하지 못했습니다: $error';
-  }
-
-  @override
-  String get comfyWorkflow_useResult => '결과 사용';
-
-  @override
-  String get comfyWorkflow_execute => '실행';
-
-  @override
-  String get comfyWorkflow_uploadingImage => '이미지 업로드 중...';
-
-  @override
-  String get comfyWorkflow_queued => '대기열에 추가됨...';
-
-  @override
-  String comfyWorkflow_runningSteps(Object current, Object total) {
-    return '처리 중 $current/$total';
-  }
-
-  @override
-  String get comfyWorkflow_processing => '처리하는 중...';
-
-  @override
-  String get comfyWorkflow_complete => '완료';
-
-  @override
-  String comfyWorkflow_imageCount(Object count) {
-    return '이미지 $count장';
-  }
-
-  @override
-  String get cacheStats_title => '캐시 통계';
-
-  @override
-  String cacheStats_autoRefreshUpdated(Object time) {
-    return '자동 새로 고침 · 마지막 업데이트: $time';
-  }
-
-  @override
-  String cacheStats_secondsAgo(Object seconds) {
-    return '$seconds초 전';
-  }
-
-  @override
-  String get cacheStats_resetStats => '통계 초기화';
-
-  @override
-  String get cacheStats_statsReset => '통계를 초기화했습니다';
-
-  @override
-  String get cacheStats_l1Memory => 'L1 메모리 캐시';
-
-  @override
-  String get cacheStats_l2Hive => 'L2 Hive 캐시';
-
-  @override
-  String get cacheStats_l3Sqlite => 'L3 SQLite 데이터베이스';
-
-  @override
   String get galleryCache_rescanTitle => '갤러리 다시 스캔';
 
   @override
@@ -4616,208 +3236,11 @@ class AppLocalizationsKo extends AppLocalizations {
       '다음 작업을 실행합니다:\n\n1. 데이터 일관성을 확인하고 없는 파일을 표시합니다\n2. 새 파일과 바뀐 파일을 스캔합니다\n3. 이전에 실패한 기록을 포함해 메타데이터 추출을 다시 시도합니다\n\n기존 데이터를 지우거나 이미지 파일을 삭제하지 않습니다.';
 
   @override
-  String get galleryCache_startScan => '스캔 시작';
-
-  @override
   String get galleryCache_scanAlreadyRunning =>
       '이미 스캔 작업이 진행 중입니다. 끝날 때까지 기다리세요.';
 
   @override
-  String get galleryCache_preparing => '준비하는 중...';
-
-  @override
   String get galleryCache_noGalleryFolder => '갤러리 폴더가 설정되지 않았습니다';
-
-  @override
-  String galleryCache_scanningPhase(Object processed, Object total) {
-    return '스캔 중 $processed/$total...';
-  }
-
-  @override
-  String get galleryCache_scanComplete => '스캔 완료';
-
-  @override
-  String galleryCache_scanFailed(Object error) {
-    return '스캔하지 못했습니다: $error';
-  }
-
-  @override
-  String get galleryCache_rescan => '다시 스캔';
-
-  @override
-  String get galleryCache_rescanSubtitle => '데이터 일관성 확인, 누락 파일 찾기, 메타데이터 추출';
-
-  @override
-  String get galleryCache_scanning => '스캔하는 중...';
-
-  @override
-  String get galleryCache_scanAction => '스캔';
-
-  @override
-  String get galleryCache_evictThumbnailsTitle => '썸네일 캐시 정리';
-
-  @override
-  String get galleryCache_evictThumbnailsSubtitle =>
-      '한도를 넘은 .thumbs 파일을 오래 사용하지 않은 순서로 정리합니다(원본은 그대로)';
-
-  @override
-  String get galleryCache_evictThumbnailsContent =>
-      '한도를 넘은 디스크 썸네일 캐시를 오래 사용하지 않은 것부터 정리합니다.\n\n.thumbs 폴더 안의 .thumb.jpg 파일만 삭제하며 원본 이미지는 절대 삭제하거나 수정하지 않습니다. 정리한 썸네일은 다음에 둘러볼 때 필요에 따라 다시 만들어집니다.';
-
-  @override
-  String get galleryCache_evictThumbnailsStart => '지금 정리';
-
-  @override
-  String get galleryCache_evictThumbnailsRunning => '썸네일 캐시 정리 중...';
-
-  @override
-  String galleryCache_evictThumbnailsDone(int count, String size) {
-    return '썸네일 $count개를 정리해 $size MB를 확보했습니다';
-  }
-
-  @override
-  String get galleryCache_evictThumbnailsNone =>
-      '썸네일 캐시가 한도 아래입니다. 정리할 항목이 없습니다';
-
-  @override
-  String galleryCache_evictThumbnailsFailed(Object error) {
-    return '썸네일 캐시를 정리하지 못했습니다: $error';
-  }
-
-  @override
-  String get workflowImport_title => 'ComfyUI 워크플로 가져오기';
-
-  @override
-  String workflowImport_step(Object current, Object title) {
-    return '$current/4단계: $title';
-  }
-
-  @override
-  String get workflowImport_stepFile => '워크플로 파일 선택';
-
-  @override
-  String get workflowImport_stepInfo => '워크플로 정보';
-
-  @override
-  String get workflowImport_stepSlots => '슬롯 설정 확인';
-
-  @override
-  String get workflowImport_stepDone => '가져오기 완료';
-
-  @override
-  String get workflowImport_previous => '이전';
-
-  @override
-  String get workflowImport_next => '다음';
-
-  @override
-  String get workflowImport_finish => '가져오기 완료';
-
-  @override
-  String get workflowImport_defaultName => '사용자 지정 워크플로';
-
-  @override
-  String get workflowImport_fileInstructions =>
-      'ComfyUI에서 내보낸 workflow_api.json 파일을 선택하세요.\n\nComfyUI 메뉴에서 내보내기(API 형식)를 선택하면 이 파일을 얻을 수 있습니다.';
-
-  @override
-  String workflowImport_nodeCount(Object count) {
-    return '노드 $count개';
-  }
-
-  @override
-  String get workflowImport_reselect => '클릭하여 다른 파일 선택';
-
-  @override
-  String get workflowImport_selectWorkflowApi => '클릭하여 workflow_api.json 선택';
-
-  @override
-  String get workflowImport_invalidTopLevel =>
-      '파일 형식이 올바르지 않습니다. 최상위는 JSON 객체여야 합니다';
-
-  @override
-  String get workflowImport_noComfyNodes =>
-      'ComfyUI 노드를 찾지 못했습니다. API 형식으로 내보낸 파일인지 확인하세요.';
-
-  @override
-  String workflowImport_readFailed(Object error) {
-    return '파일을 읽지 못했습니다: $error';
-  }
-
-  @override
-  String get workflowImport_analysisResult => '자동 분석 결과';
-
-  @override
-  String get workflowImport_inputImageNodes => '입력 이미지 노드';
-
-  @override
-  String get workflowImport_adjustableParams => '조정 가능한 매개변수';
-
-  @override
-  String get workflowImport_outputNodes => '출력 노드';
-
-  @override
-  String get workflowImport_totalNodes => '전체 노드';
-
-  @override
-  String workflowImport_countUnit(Object count) {
-    return '$count개';
-  }
-
-  @override
-  String get workflowImport_workflowName => '워크플로 이름 *';
-
-  @override
-  String get workflowImport_description => '설명';
-
-  @override
-  String get workflowImport_category => '분류';
-
-  @override
-  String get workflowImport_slotsHint =>
-      'UI에 노출할 슬롯을 선택하세요. 입력·출력 슬롯은 보통 켜 두고, 사용자가 조정할 필요가 없는 매개변수는 끌 수 있습니다.';
-
-  @override
-  String get workflowImport_inputSection => '입력';
-
-  @override
-  String get workflowImport_outputSection => '출력';
-
-  @override
-  String get workflowImport_parameterSection => '매개변수';
-
-  @override
-  String get workflowImport_noSlotsWarning =>
-      '사용할 수 있는 슬롯을 찾지 못했습니다. 이 워크플로가 제대로 연동되지 않을 수 있습니다.\n워크플로에 LoadImage와 SaveImage/SaveImageWebsocket 노드가 있는지 확인하세요.';
-
-  @override
-  String workflowImport_nodeRef(Object node) {
-    return '노드 $node';
-  }
-
-  @override
-  String get workflowImport_confirmTitle => '이 워크플로를 가져오려고 합니다';
-
-  @override
-  String get workflowImport_name => '이름';
-
-  @override
-  String get workflowImport_inputSlots => '입력 슬롯';
-
-  @override
-  String get workflowImport_parameterSlots => '매개변수 슬롯';
-
-  @override
-  String get workflowImport_outputSlots => '출력 슬롯';
-
-  @override
-  String get workflowImport_afterImportHint =>
-      '가져온 뒤 생성 화면의 ComfyUI 워크플로 목록에서 사용할 수 있습니다.';
-
-  @override
-  String workflowImport_success(Object name) {
-    return '\"$name\" 워크플로를 가져왔습니다';
-  }
 
   @override
   String get shortcut_settings_help => '단축키 도움말 보기';
@@ -4871,10 +3294,6 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get toast_kritaUnsupportedImageFormat =>
       '이 이미지 형식은 Krita로 보낼 수 없습니다. 일반적인 이미지 형식을 사용하세요.';
-
-  @override
-  String get toast_dropNoReadableImageOrVibe =>
-      '놓은 항목에서 읽을 수 있는 이미지나 Vibe 파일을 찾지 못했습니다';
 
   @override
   String get toast_saveDirNotSet => '저장 폴더가 설정되지 않았습니다';
@@ -4951,19 +3370,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get toast_savePreviewFailed => '미리 보기 이미지를 저장하지 못했습니다';
 
   @override
-  String get common_justNow => '방금';
-
-  @override
-  String common_minutesAgo(Object minutes) {
-    return '$minutes분 전';
-  }
-
-  @override
-  String common_hoursAgo(Object hours) {
-    return '$hours시간 전';
-  }
-
-  @override
   String get common_expand => '펼치기';
 
   @override
@@ -4974,9 +3380,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get detail_noMetadata => '이 이미지에는 메타데이터가 없습니다';
-
-  @override
-  String get detail_metadata => '메타데이터';
 
   @override
   String get detail_modifiedTime => '수정한 날짜';
@@ -5031,22 +3434,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get comfyImport_globalPrompt => '전역 프롬프트';
 
   @override
-  String get checkForUpdate => '업데이트 확인';
-
-  @override
-  String get neverChecked => '확인한 적 없음';
-
-  @override
-  String lastCheckedAt(Object time) {
-    return '마지막 확인: $time';
-  }
-
-  @override
   String get includePrereleaseUpdates => '시험판 버전 포함';
-
-  @override
-  String get includePrereleaseUpdatesDescription =>
-      '업데이트를 확인할 때 beta/alpha 버전을 포함합니다';
 
   @override
   String get updateAvailable => '업데이트 있음';
@@ -5153,16 +3541,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get updateViewDetails => '업데이트 보기';
 
   @override
-  String updateSettingsAvailable(Object version) {
-    return 'v$version을(를) 사용할 수 있습니다. 선택하면 자세히 볼 수 있습니다';
-  }
-
-  @override
-  String updateSettingsReady(Object version) {
-    return 'v$version을(를) 다운로드했습니다. 선택하면 설치합니다';
-  }
-
-  @override
   String get goToDownload => '다운로드하러 가기';
 
   @override
@@ -5232,25 +3610,6 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String preciseRefLib_importFailedCount(int count) {
-    return '이미지 $count장을 정밀 참조 라이브러리로 가져오지 못했습니다';
-  }
-
-  @override
-  String get preciseRefLib_fromLibrary => '라이브러리에서';
-
-  @override
-  String get preciseRefLib_saveCurrentToLibrary => '라이브러리에 저장';
-
-  @override
-  String preciseRefLib_saveCurrentCount(int count) {
-    return '참조 $count개를 라이브러리에 저장했습니다';
-  }
-
-  @override
-  String get img2img_fromPreciseRefLibrary => '정밀 참조 라이브러리에서';
-
-  @override
   String get localGallery_saveToPreciseRefLibrary => '정밀 참조 라이브러리에 저장';
 
   @override
@@ -5261,11 +3620,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get common_disabled => '사용 안 함';
-
-  @override
-  String bulkAction_selectedCount(int count) {
-    return '$count개 선택됨';
-  }
 
   @override
   String get comfyTask_errorConnectionFailed => 'ComfyUI 서버에 연결할 수 없습니다';
@@ -5288,18 +3642,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String comfyTask_errorWorkflowNotFound(String workflowId) {
     return '워크플로를 찾을 수 없습니다: $workflowId';
   }
-
-  @override
-  String get comfyWorkflowSlot_vaeEncodeTileSize => 'VAE 인코딩 타일 크기';
-
-  @override
-  String get comfyWorkflowSlot_vaeDecodeTileSize => 'VAE 디코딩 타일 크기';
-
-  @override
-  String get comfyWorkflowSlot_blocksToSwap => '스왑할 블록 수';
-
-  @override
-  String get comfyWorkflowSlot_swapIoComponents => '입출력 구성 요소 스왑';
 
   @override
   String localGallery_firstIndexHint(int count) {
@@ -5353,9 +3695,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get common_clickToRetry => '클릭하여 다시 시도';
 
   @override
-  String get common_opening => '여는 중...';
-
-  @override
   String get common_swap => '바꾸기';
 
   @override
@@ -5386,28 +3725,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get galleryScan_processing => '처리 중';
 
   @override
-  String imagePicker_dropReadFailed(String error) {
-    return '놓은 이미지를 읽지 못했습니다: $error';
-  }
-
-  @override
-  String get imagePicker_dropNoReadableImage =>
-      '놓은 데이터에 읽을 수 있는 이미지 파일이나 이미지 URL이 없습니다';
-
-  @override
-  String get imagePicker_fileDataUnavailable => '파일 데이터를 읽을 수 없습니다';
-
-  @override
-  String imagePicker_fileSelectionFailed(String error) {
-    return '파일을 선택하지 못했습니다: $error';
-  }
-
-  @override
-  String imagePicker_directorySelectionFailed(String error) {
-    return '폴더를 선택하지 못했습니다: $error';
-  }
-
-  @override
   String get editor_shiftEdges => '가장자리 확장';
 
   @override
@@ -5429,22 +3746,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get onlineGallery_videoLoadFailed => '동영상을 불러오지 못했습니다';
 
   @override
-  String get vibe_releaseToAddStyleReference => '놓으면 스타일 참조를 추가합니다';
-
-  @override
   String router_pageNotFound(String error) {
     return '페이지를 찾을 수 없습니다: $error';
   }
 
   @override
   String get autocomplete_resultLimit => '결과 수';
-
-  @override
-  String get autocomplete_relatedTagsTitle => '태그 확장';
-
-  @override
-  String get autocomplete_relatedTagsSubtitle =>
-      'Ctrl(Mac은 ⌘)을 누른 채 클릭하거나 드래그로 선택하면 태그 검색과 관련 추천을 볼 수 있습니다.';
 
   @override
   String get tagExpansion_searchHint => '태그나 별칭 검색';
@@ -5457,6 +3764,15 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get tagExpansion_noResults => '로컬 태그를 찾을 수 없습니다';
+
+  @override
+  String get tagExpansion_searchingRelated =>
+      '로컬에 정확히 일치하는 태그가 없어 관련 태그를 찾고 있습니다';
+
+  @override
+  String tagExpansion_matchedAlias(String alias) {
+    return '일치한 별칭: $alias';
+  }
 
   @override
   String get tagExpansion_insert => '태그 삽입';
@@ -5478,33 +3794,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get tagExpansion_wikiUnavailable => '이 태그에 대한 로컬 문서가 아직 없습니다.';
-
-  @override
-  String get autocomplete_cooccurrence => '오프라인 관련 태그 데이터베이스';
-
-  @override
-  String autocomplete_entryCount(int count) {
-    return '항목 $count개';
-  }
-
-  @override
-  String get autocomplete_clearDanbooruCache => 'Danbooru 캐시 지우기';
-
-  @override
-  String get autocomplete_clearAiCache => 'AI 번역 캐시 지우기';
-
-  @override
-  String autocomplete_cacheCleared(int count) {
-    return '캐시 항목 $count개를 지웠습니다';
-  }
-
-  @override
-  String get autocomplete_baseCatalog => '기본 Danbooru 카탈로그';
-
-  @override
-  String autocomplete_catalogStatus(String count, String version) {
-    return '태그 $count개 · 데이터 버전 $version';
-  }
 
   @override
   String get promptBlockLibrary_allBlocks => '모든 블록';
@@ -5719,16 +4008,7 @@ class AppLocalizationsKo extends AppLocalizations {
       '선택한 후보에 저장할 작가 조합이나 긍정 프롬프트가 없습니다';
 
   @override
-  String get promptBlockEditor_library => '블록 라이브러리';
-
-  @override
   String get promptBlockPicker_title => '블록 선택';
-
-  @override
-  String get promptBlockLibrary_adjustThumbnailTitle => '썸네일 표시 범위 조정';
-
-  @override
-  String get promptBlockLibrary_dragToMove => '끌어서 이동, 스크롤하거나 손가락을 오므려 확대/축소';
 
   @override
   String get promptBlockLibrary_saveToLibrary => '블록 라이브러리에 저장';
@@ -5767,12 +4047,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get subscriptionExpired => '만료됨';
-
-  @override
-  String get subscriptionGracePeriod => '유예 기간';
-
-  @override
-  String get subscriptionTierNone => '구독 없음';
 
   @override
   String get settings_modelsAndInterfaces => '모델 및 API';
@@ -5817,7 +4091,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get tips_studio_guide_7 =>
-      'F1을 누르면 언제든 단축키 도움말이 열립니다. Ctrl+1, Ctrl+2, Ctrl+3으로 생성, 갤러리, 온라인 갤러리를 오가고, Ctrl+,로 설정을 엽니다. 모든 단축키는 설정에서 원하는 조합으로 바꿀 수 있습니다.';
+      '단축키 도움말에서 생성, 로컬 갤러리, 온라인 갤러리, 설정에 현재 지정된 키를 확인할 수 있습니다. 키 조합은 설정에서 변경할 수 있습니다.';
 
   @override
   String get tips_studio_guide_8 =>
@@ -6660,12 +4934,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get img2img_enhanceAction => '향상!';
 
   @override
-  String get img2img_showAdvanced => '고급 설정 표시';
-
-  @override
-  String get img2img_hideAdvanced => '고급 설정 숨기기';
-
-  @override
   String promptToken_usage(int used, int limit) {
     return '토큰 사용량: $used / $limit';
   }
@@ -6842,37 +5110,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get shortcut_action_vibe_detail_next_sub_vibe => '다음 하위 Vibe';
 
   @override
-  String get settings_addAccountsSwitchBetweenThem =>
-      '계정을 추가하면 여기서 바로 전환할 수 있습니다.';
-
-  @override
-  String get settings_current => '현재';
-
-  @override
-  String get settings_emailLogin => '이메일 로그인';
-
-  @override
-  String get settings_signedIn => '로그인됨';
-
-  @override
-  String get settings_switch => '전환';
-
-  @override
-  String get settings_accountActions => '계정 작업';
-
-  @override
-  String get settings_editProfile => '프로필 편집';
-
-  @override
-  String get settings_setDefault => '기본 계정으로 설정';
-
-  @override
-  String get settings_credentialsUpdated => '로그인 정보를 업데이트했습니다';
-
-  @override
-  String get settings_updateCredentials => '로그인 정보 업데이트';
-
-  @override
   String get settings_accountDetails => '계정 상세 정보';
 
   @override
@@ -6896,400 +5133,18 @@ class AppLocalizationsKo extends AppLocalizations {
       '새 로그인 토큰을 입력하세요. 확인되면 이 계정이 업데이트됩니다.';
 
   @override
-  String get auth_notSignedIn => '로그인하지 않음';
-
-  @override
-  String get settings_tagExpansion => '태그 확장';
-
-  @override
-  String get settings_tagDictionaries => '태그 사전';
-
-  @override
-  String get settings_cacheMaintenance => '캐시 관리';
-
-  @override
-  String get settings_clear => '정리';
-
-  @override
-  String get settings_autoRefresh => '자동 새로 고침';
-
-  @override
-  String get settings_searchFonts => '글꼴 검색';
-
-  @override
-  String get settings_couldNotLoadFonts => '글꼴을 불러올 수 없습니다';
-
-  @override
-  String get settings_recommended => '추천';
-
-  @override
-  String get settings_included => '기본 포함';
-
-  @override
-  String get settings_systemFonts => '시스템 글꼴';
-
-  @override
-  String get settings_fontPreview => '글꼴 미리 보기';
-
-  @override
-  String get settings_onlineFontsLoadAfterApplying =>
-      '온라인 글꼴은 적용한 뒤 불러오며, 미리 보기에는 인터페이스 글꼴이 쓰입니다.';
-
-  @override
-  String get settings_saving => '저장';
-
-  @override
-  String get settings_howGeneratedImagesSaved => '생성한 이미지 저장 방식';
-
-  @override
-  String get settings_assetsDisplay => '자산 및 표시';
-
-  @override
-  String get settings_vibeLocationThumbnailQuality => 'Vibe 위치와 썸네일 화질';
-
-  @override
-  String get settings_applicationData => '앱 데이터';
-
-  @override
-  String get settings_gallerySources => '갤러리 소스';
-
-  @override
-  String get settings_manageAdditionalGalleryFolders => '추가 갤러리 폴더 관리';
-
-  @override
-  String get settings_default => '기본값';
-
-  @override
-  String get settings_keyboard => '키보드';
-
-  @override
-  String get settings_customizeFrequentlyUsedActions => '자주 쓰는 작업을 원하는 대로 설정';
-
-  @override
-  String get settings_manageShortcuts => '단축키 관리';
-
-  @override
-  String get settings_costReminders => '비용 알림';
-
-  @override
-  String get settings_requestPacing => '요청 간격';
-
-  @override
-  String get settings_notificationsSound => '알림 및 소리';
-
-  @override
-  String get settings_lockCanvasCamera => '캔버스 카메라 잠금';
-
-  @override
-  String get settings_dictionariesCache => '사전 및 캐시';
-
-  @override
-  String get settings_defaultAccount2 => '기본 계정';
-
-  @override
-  String get settings_signInAutomatically => '자동 로그인';
-
-  @override
-  String get settings_signInCredentials => '로그인 정보';
-
-  @override
-  String get settings_translationInterfaces => '번역 인터페이스';
-
-  @override
-  String get settings_presetsBuiltInRules => '프리셋 및 기본 제공 규칙';
-
-  @override
-  String get settings_preferenceBackupRestore => '환경 설정 백업 및 복원';
-
-  @override
-  String get settings_searchSettingsFeatures => '설정과 기능 검색';
-
-  @override
-  String get settings_noMatchingSettings => '일치하는 설정이 없습니다';
-
-  @override
-  String get settings_change => '변경';
-
-  @override
-  String get settings_couldNotPlaySoundCheck =>
-      '소리를 재생할 수 없습니다. 오디오 파일을 확인하세요.';
-
-  @override
-  String get settings_useDefaultCompletionSound => '기본 완료 효과음 사용';
-
-  @override
-  String get settings_soundPreview => '효과음 미리 듣기';
-
-  @override
-  String get settings_listenCurrentCompletionSound => '현재 완료 효과음 듣기';
-
-  @override
-  String get settings_playSound => '소리 재생';
-
-  @override
   String get settings_searchResults => '검색 결과';
-
-  @override
-  String get settings_promptInput => '프롬프트 입력';
-
-  @override
-  String get settings_manageTranslationModelsRules => '번역 모델 및 규칙 관리';
-
-  @override
-  String get settings_browsing => '보기 방식';
-
-  @override
-  String get settings_chooseHowViewImages => '이미지를 보는 방식 선택';
-
-  @override
-  String get settings_canvasControls => '캔버스 조작';
-
-  @override
-  String get settings_keepViewSteady => '시점을 안정적으로 유지';
-
-  @override
-  String get settings_appearance2 => '외관';
-
-  @override
-  String get settings_chooseLightDarkWorkspace => '밝거나 어두운 작업 공간 선택';
-
-  @override
-  String get settings_textLanguage => '텍스트 및 언어';
-
-  @override
-  String get settings_makeReadingComfortable => '읽기 편하게 만들기';
-
-  @override
-  String get settings_adjustSettingsPagesDialogsOnly =>
-      '앱 전체의 글자, 아이콘, 컨트롤 크기를 조절합니다. 이미지 해상도는 바뀌지 않습니다.';
-
-  @override
-  String get settings_motionNotifications => '움직임 및 알림';
-
-  @override
-  String get settings_reduceDistractionsKnowWorkFinishes =>
-      '방해는 줄이고 작업이 끝나면 알기';
-
-  @override
-  String get settings_notificationStyle => '알림 스타일';
-
-  @override
-  String get settings_notificationsAppearUpperRightWrap =>
-      '알림은 오른쪽 위에 나타나며, 긴 메시지는 줄바꿈되고 진행 작업이 끝나면 닫힙니다.';
-
-  @override
-  String get settings_preview => '미리 보기';
-
-  @override
-  String get settings_versionUpdates => '버전 및 업데이트';
-
-  @override
-  String get settings_currentVersionUpdateOptions => '현재 버전과 업데이트 옵션';
-
-  @override
-  String get settings_diagnosticsResources => '진단 및 자료';
-
-  @override
-  String get settings_logsFontsOpenSourceProject => '로그, 글꼴, 오픈 소스 프로젝트';
-
-  @override
-  String get settings_viewLicenses => '라이선스 보기';
-
-  @override
-  String get settings_openProject => '프로젝트 열기';
-
-  @override
-  String get settings_actionIncomplete => '작업 미완료';
-
-  @override
-  String get settings_exportPreferences => '환경 설정 내보내기';
-
-  @override
-  String get settings_preferencesExported => '환경 설정을 내보냈습니다';
-
-  @override
-  String get settings_noAutomaticBackupYet => '아직 자동 백업이 없습니다';
-
-  @override
-  String get settings_restorePreviousPreferences => '이전 환경 설정 복원';
 
   @override
   String get settings_importPreferences => '환경 설정 가져오기';
 
   @override
-  String get settings_apply => '적용';
-
-  @override
-  String get settings_preferencesAppliedPreviousSettingsBacked =>
-      '환경 설정을 적용하고 이전 설정을 백업했습니다';
-
-  @override
-  String get settings_restoreDefaultPreferences => '기본 환경 설정 복원';
-
-  @override
-  String get settings_choosePreferencesResetCurrentSettings =>
-      '초기화할 환경 설정을 선택하세요. 현재 설정은 백업됩니다.';
-
-  @override
-  String get settings_appearanceSoundControls => '외관, 소리 및 조작';
-
-  @override
-  String get settings_inputAutocomplete => '입력 및 자동 완성';
-
-  @override
-  String get settings_privacyGenerationProtection => '개인정보 및 생성 보호';
-
-  @override
-  String get settings_moveAppearanceControlsInputProtection =>
-      '외관, 조작, 입력, 보호 환경 설정을 기기 간에 옮깁니다.';
-
-  @override
-  String get settings_rollbackCopySavedBeforeImport =>
-      '가져오거나 초기화하기 전에 되돌리기용 사본을 저장합니다.';
-
-  @override
-  String get settings_resetSelectedScopeWhileKeeping =>
-      '계정, 모델, 라이브러리, 창작물은 유지한 채 선택한 범위만 초기화합니다.';
-
-  @override
-  String get settings_chooseScope => '범위 선택';
-
-  @override
-  String get settings_preferenceManagement => '환경 설정 관리';
-
-  @override
-  String get settings_backupMigrationRecovery => '백업, 이전 및 복구';
-
-  @override
-  String get settings_generalAppearance => '일반 및 외관';
-
-  @override
-  String get settings_makeWorkspaceComfortableReadUse =>
-      '작업 공간을 읽고 쓰기 편하게 만듭니다.';
-
-  @override
-  String get settings_controlsShortcuts => '조작 및 단축키';
-
-  @override
-  String get settings_chooseInteractionCanvasControlsKeyboard =>
-      '상호작용, 캔버스 조작, 키보드 단축키를 설정합니다.';
-
-  @override
-  String get settings_generationPrompts => '생성 및 프롬프트';
-
-  @override
-  String get settings_managePromptInputGenerationReminders =>
-      '프롬프트 입력, 생성 알림, 요청 간격을 관리합니다.';
-
-  @override
-  String get settings_galleryFiles => '갤러리 및 파일';
-
-  @override
-  String get settings_manageImageSavingGallerySources =>
-      '이미지 저장, 갤러리 소스, 표시 방식을 관리합니다.';
-
-  @override
-  String get settings_manageTagDictionariesIndexesCache =>
-      '태그 사전, 인덱스, 캐시를 관리합니다.';
-
-  @override
-  String get settings_novelaiAccounts => 'NovelAI 계정';
-
-  @override
-  String get settings_viewAccountManageSignIn => '계정을 확인하고 로그인과 기본 계정을 관리합니다.';
-
-  @override
-  String get settings_connectionsIntegrations => '연결 및 연동';
-
-  @override
-  String get settings_manageExternalToolsBridgesNetwork =>
-      '외부 도구, 브리지, 네트워크 설정을 관리합니다.';
-
-  @override
-  String get settings_privacySharing2 => '개인정보 및 공유';
-
-  @override
-  String get settings_controlSharedInformationConfirmationBefore =>
-      '공유되는 정보와 민감한 작업 전 확인을 관리합니다.';
-
-  @override
-  String get settings_aboutDiagnostics => '정보 및 진단';
-
-  @override
-  String get settings_updatesLogsProjectInformation => '업데이트, 로그, 프로젝트 정보.';
-
-  @override
-  String get settings_searchSettings => '설정 검색';
-
-  @override
-  String get settings_preferences => '환경 설정';
-
-  @override
-  String get settings_creationResources => '창작 및 리소스';
-
-  @override
-  String get settings_servicesConnections => '서비스 및 연결';
-
-  @override
-  String get settings_safetyMaintenance => '보안 및 관리';
-
-  @override
-  String get settings_subscriptionActive => '구독 활성';
-
-  @override
-  String get settings_availableBalance => '사용 가능 잔액';
-
-  @override
-  String get settings_subscriptionExpiry2 => '구독 만료일';
-
-  @override
-  String get settings_subscriptionDetailsUnavailable => '구독 정보를 확인할 수 없습니다';
-
-  @override
-  String get settings_loadingSubscriptionDetails => '구독 정보 불러오는 중…';
-
-  @override
-  String get settings_localDataStaysAvailableAfter =>
-      '만료된 뒤에도 로컬 데이터는 그대로 사용할 수 있습니다.';
-
-  @override
-  String get settings_records => '건';
-
-  @override
   String get settings_hitRate => '적중률';
-
-  @override
-  String get settings_images => '장';
-
-  @override
-  String get settings_cacheOverview => '캐시 개요';
-
-  @override
-  String get settings_loginPreferences => '로그인 환경 설정';
-
-  @override
-  String get settings_preselectedSignInPage => '로그인 페이지에서 미리 선택됩니다.';
-
-  @override
-  String get settings_noAccounts => '계정 없음';
-
-  @override
-  String get settings_useLastSessionOffNext =>
-      '마지막 세션을 사용합니다. 끄면 다음 실행 때 로그인 화면이 열립니다.';
-
-  @override
-  String get settings_couldNotSaveLoginPreference => '로그인 환경 설정을 저장하지 못했습니다.';
-
-  @override
-  String get settings_loginPreferencesUnavailable => '로그인 환경 설정을 확인할 수 없습니다.';
 
   @override
   String settings_applyPreferencesConfirm(Object count) {
     return '환경 설정 $count개를 적용합니다. 현재 환경 설정은 자동으로 백업되며 \"이전 환경 설정 복원\"에서 되돌릴 수 있습니다. 계정, 비밀 키, 초안, 라이브러리, 모델 설정은 따로 유지됩니다.';
   }
-
-  @override
-  String get settings_restore => '복원';
 
   @override
   String get wiki_translating => '번역 중';
@@ -8276,9 +6131,6 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get settings_positiveIntegerRequired => '0보다 큰 정수를 입력하세요';
-
-  @override
   String get modelSettings_testingPreset => '프리셋 테스트 중';
 
   @override
@@ -8622,57 +6474,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get modelOverrides_addHeader => '헤더 추가';
 
   @override
-  String get promptTranslation_translating => '번역 중';
-
-  @override
-  String get promptTranslation_needsModel => '번역 · 먼저 모델을 설정하세요';
-
-  @override
-  String promptTranslation_withRoute(Object provider, Object model) {
-    return '번역 · $provider / $model';
-  }
-
-  @override
-  String get promptTranslation_actions => '번역 작업';
-
-  @override
-  String get promptTranslation_promptChanged => '프롬프트가 바뀌어 새 편집 내용을 덮어쓰지 않았습니다';
-
-  @override
-  String get promptTranslation_nothingToTranslate => '번역할 일반 텍스트가 없습니다';
-
-  @override
-  String promptTranslation_failed(Object error) {
-    return '번역하지 못했습니다: $error';
-  }
-
-  @override
-  String get promptTranslation_setupTitle => '먼저 번역 모델을 설정하세요';
-
-  @override
-  String get promptTranslation_setupBody =>
-      '번역하려면 서비스와 모델을 명시적으로 선택해야 합니다. 설정 → 연동 → 모델 및 API에서 서비스를 추가하고 모델 목록을 가져온 뒤, 프롬프트 번역에 쓸 모델을 고르세요.';
-
-  @override
-  String get promptTranslation_later => '나중에';
-
-  @override
-  String get promptTranslation_openSettings => '설정 열기';
-
-  @override
-  String get promptTranslation_toolTitle => '번역';
-
-  @override
-  String get promptTranslation_noModel => '설정된 모델 없음';
-
-  @override
-  String get promptTranslation_configureModel => '번역 모델 설정';
-
-  @override
   String get promptTranslation_translateNew => '새 내용 번역';
-
-  @override
-  String get promptTranslation_undoRestore => '복원을 취소하고 번역 블록 되돌리기';
 
   @override
   String get promptTranslation_restoreAll => '모든 번역 블록을 원문 텍스트로 복원';
@@ -9389,9 +7191,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settings_highAnlasCostQuestion => '이번 생성을 계속할까요?';
 
   @override
-  String get bridge_title => '로컬 연결';
-
-  @override
   String get bridge_agent => '외부 Agent';
 
   @override
@@ -9770,12 +7569,6 @@ class AppLocalizationsKo extends AppLocalizations {
       '모델 작업에 실패했습니다. 연결, 파일 권한 및 여유 공간을 확인한 후 다시 시도하세요.';
 
   @override
-  String get settings_localUpscale => '로컬 확대';
-
-  @override
-  String get settings_localUpscaleDescription => '로컬 확대 모델과 실행 구성 요소를 관리합니다.';
-
-  @override
   String get localUpscale_noCuda => 'CUDA 지원 NVIDIA GPU와 호환 드라이버가 필요합니다.';
 
   @override
@@ -9946,9 +7739,6 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get enhance_localAfterGeneration => '생성된 각 이미지를 로컬에서 자동으로 확대합니다.';
-
-  @override
   String get enhance_localAction => '생성 후 로컬 확대';
 
   @override
@@ -9958,60 +7748,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get localUpscale_scrollDown => '아래로 스크롤';
 
   @override
-  String get wiki_exampleImages => '예시 이미지';
-
-  @override
   String get wiki_exampleImagesUnavailable => '예시 이미지를 불러올 수 없습니다';
 
   @override
-  String get generation_perRequestLabel => '장 수';
-
-  @override
-  String get generation_perRequestTooltip => '요청당 생성할 이미지 수 (1–4)';
-
-  @override
-  String get generation_repeatLabel => '반복';
-
-  @override
-  String get generation_referenceUpload => '업로드';
-
-  @override
-  String get generation_seedPinnedLabel => '시드 · 고정';
-
-  @override
-  String get generation_paramsDrawerTooltip => '추가 매개변수';
-
-  @override
-  String get library_sizeSmall => '작게';
-
-  @override
-  String get library_sizeMedium => '보통';
-
-  @override
-  String get library_sizeLarge => '크게';
-
-  @override
-  String get library_currentModel => '현재 모델';
-
-  @override
-  String get library_available => '사용 가능';
-
-  @override
   String get library_unavailable => '사용 불가';
-
-  @override
-  String get library_inGeneration => '생성에 사용 중';
-
-  @override
-  String library_selectedCount(int count) {
-    return '$count개 선택';
-  }
-
-  @override
-  String get library_invertSelection => '선택 반전';
-
-  @override
-  String get library_more => '더 보기';
 
   @override
   String get viewer_fit => '맞춤';
@@ -10035,15 +7775,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String styleExplore_autoRunName(String blocks, String time) {
     return '$blocks · $time';
   }
-
-  @override
-  String get styleExplore_openBlockLibrary => '블록 라이브러리 열기';
-
-  @override
-  String get styleExplore_drawCountLabel => '이번 추출';
-
-  @override
-  String get styleExplore_drawCountSuffix => '장 · 한 장씩 생성';
 
   @override
   String get styleExplore_appliedToEditor => '편집기에 적용됨';
@@ -16156,54 +13887,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get naiAgent_chatGptManageUsage => '사용량 관리';
 
   @override
-  String get naiAgent_settings => 'Agent 설정';
-
-  @override
   String get naiAgent_chooseModel => '모델 선택';
 
   @override
   String get naiAgent_interrupted => '이전 작업이 중단되었으며 자동으로 다시 보내지 않았습니다.';
-
-  @override
-  String get naiAgent_systemPrompt => '시스템 프롬프트';
-
-  @override
-  String get naiAgent_promptHelp =>
-      '사용자 지정 내용은 기본 프롬프트를 대체합니다. 도구 지도는 앱이 추가하며 이후 요청에 적용됩니다.';
-
-  @override
-  String get naiAgent_restoreDefault => '기본값 복원';
-
-  @override
-  String get naiAgent_showEffective => '적용되는 프롬프트 보기';
-
-  @override
-  String get naiAgent_useGlobal => '전역 프롬프트 사용';
-
-  @override
-  String get naiAgent_save => '저장';
-
-  @override
-  String get naiAgent_runLimit => '작업당 모델 요청 한도';
-
-  @override
-  String get naiAgent_enterSends => 'Enter로 전송, Shift+Enter로 줄바꿈';
-
-  @override
-  String get naiAgent_dataFolder => '작업 공간 데이터 폴더';
-
-  @override
-  String get naiAgent_openFolder => '폴더 열기';
-
-  @override
-  String get naiAgent_toolsManuals => '도구 및 Skill';
-
-  @override
-  String get naiAgent_toolsHint =>
-      '현재 상태, 이미지, 프롬프트 및 작업 공간 파일을 필요할 때 호출합니다. Studio 작업의 자세한 사용법은 nai-studio, nai-prompt 등의 Skill에 있으며 필요할 때만 읽습니다.';
-
-  @override
-  String get naiAgent_unknownCost => '실제 비용은 서비스 제공자 기준';
 
   @override
   String get naiAgent_error => '작업에 실패했습니다. 모델 설정이나 파일을 확인하세요.';
@@ -16242,15 +13929,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get naiAgent_runtimeMissing => 'Agent 런타임이 없습니다. 전체 업데이트 패키지를 사용하세요.';
 
   @override
-  String get naiAgent_usage => '모델 사용량';
-
-  @override
-  String get naiAgent_globalScope => '전역 기본값';
-
-  @override
-  String get naiAgent_workspaceScope => '현재 작업 공간';
-
-  @override
   String naiAgent_generationLocalEnhance(Object model, Object scale) {
     return '생성 후 로컬 업스케일: $model ×$scale';
   }
@@ -16271,58 +13949,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get naiAgent_extensions => '확장';
-
-  @override
-  String get naiAgent_interactionExtension => 'Studio 연동';
-
-  @override
-  String get naiAgent_extensionRequired => '내장 · 필수';
-
-  @override
-  String get naiAgent_interactionExtensionHint =>
-      '필요할 때 현재 Studio 상태를 읽고 질문 카드로 답변을 받습니다.';
-
-  @override
-  String get naiAgent_extensionAddFile => '확장 파일 추가';
-
-  @override
-  String get naiAgent_extensionAddFolder => '확장 폴더 추가';
-
-  @override
-  String get naiAgent_extensionsHint =>
-      '확장은 작업 공간별로 로드됩니다. 변경 사항은 현재 작업이 끝난 뒤 다음 전송에 적용됩니다. 외부 확장은 로컬 코드를 실행하므로 신뢰할 수 있는 출처를 선택하세요.';
-
-  @override
   String get naiAgent_extensionError => '확장 실행 실패';
-
-  @override
-  String get naiAgent_extensionCompatibility =>
-      '로컬 Pi 확장과 패키지 폴더, 도구, 명령 및 표준 대화 상자를 지원합니다. 터미널 전용 사용자 지정 UI는 데스크톱에 표시되지 않습니다.';
-
-  @override
-  String get naiAgent_instructions => '지침';
-
-  @override
-  String get naiAgent_globalInstructions => '전역 지침';
-
-  @override
-  String get naiAgent_globalInstructionsHelp =>
-      '모든 작업 공간에서 사용합니다. 언어, 문체 또는 작업 선호도를 입력할 수 있습니다. 비워 두면 이 부분이 비활성화됩니다.';
-
-  @override
-  String get naiAgent_systemPromptPrefix => '시스템 프롬프트 앞부분';
-
-  @override
-  String get naiAgent_systemPromptPrefixHelp =>
-      'NAI Agent 기본 프롬프트 앞에 삽입하며 기본 프롬프트와 도구 맵을 유지합니다. 비워 두면 이 부분이 비활성화됩니다.';
-
-  @override
-  String get naiAgent_instructionOrder =>
-      '적용 순서: 앞부분 → 기본 프롬프트 → 전역 지침 → 작업 공간 규칙. 이후 요청부터 적용됩니다.';
-
-  @override
-  String get naiAgent_saveInstructions => '지침 저장';
 
   @override
   String get naiAgent_mcpBuiltin => 'NAI Studio · 내장 도구';
@@ -16561,191 +14188,19 @@ class AppLocalizationsKo extends AppLocalizations {
   String get channel_weekday7 => '일';
 
   @override
-  String get rag_title => 'RAG 벡터 시스템';
-
-  @override
-  String get rag_description => '로컬 검색, 모델 및 문맥 태그 추천 관리';
-
-  @override
-  String get rag_enabled => 'RAG 사용';
-
-  @override
-  String get rag_enabledHint => '로컬 의미 검색을 켭니다. 최초 색인은 범위를 확인한 후 시작합니다.';
-
-  @override
-  String get rag_status => '공유 벡터 풀';
-
-  @override
-  String get rag_off => '꺼짐';
-
-  @override
-  String get rag_loading => '로컬 모델 준비 중';
-
-  @override
-  String get rag_empty => '모델 연결됨 · 색인 대기';
-
-  @override
-  String get rag_ready => '의미 검색 준비 완료';
-
-  @override
   String get rag_partial => '일부 준비됨 · 나머지는 일반 검색';
-
-  @override
-  String get rag_building => '색인 생성 중';
-
-  @override
-  String get rag_paused => '색인 생성 일시 정지 · 기존 색인은 검색 가능';
 
   @override
   String get rag_unavailable => 'RAG 사용 불가 · 일반 검색 가능';
 
   @override
-  String get rag_operationFailed => '작업에 실패했습니다. 모델 경로와 전용 환경을 확인하세요.';
-
-  @override
-  String rag_indexCounts(int indexed, int total) {
-    return '색인 완료 $indexed / $total개';
-  }
-
-  @override
-  String rag_storage(String size) {
-    return '색인 용량: $size MiB';
-  }
-
-  @override
-  String get rag_refresh => '상태 새로 고침';
-
-  @override
-  String get rag_embeddingPath => 'EmbeddingGemma 2 모델 폴더';
-
-  @override
-  String get rag_notConfigured => '설정되지 않음';
-
-  @override
-  String get rag_choose => '선택';
-
-  @override
-  String get rag_modelMode => '모델 기능';
-
-  @override
-  String get rag_modelModeHint => 'Gemma 2로 텍스트와 이미지를 검색합니다. 오디오는 비활성화됩니다.';
-
-  @override
-  String get rag_discover => '로컬 모델 찾기';
-
-  @override
   String get rag_modelsMissing => '모델을 찾지 못했습니다. 다운로드한 모델 폴더를 선택하세요.';
-
-  @override
-  String get rag_pythonPath => '전용 Python 실행 환경';
-
-  @override
-  String get rag_runtime => '추론 실행 환경';
-
-  @override
-  String get rag_runtimeHint => '전용 환경을 사용합니다. 기존 업스케일 환경은 유지되며 모델은 별도로 선택합니다.';
-
-  @override
-  String get rag_installRuntime => '전용 실행 환경 설치';
-
-  @override
-  String get rag_installHint =>
-      'Python과 추론 패키지를 다운로드합니다. CUDA는 수 GB와 호환 NVIDIA GPU가 필요하며 CPU 버전은 더 작습니다. 모델 파일은 별도입니다.';
-
-  @override
-  String get rag_installing => '실행 환경 설치 중';
-
-  @override
-  String get rag_device => '실행 장치';
-
-  @override
-  String get rag_auto => '자동 선택';
-
-  @override
-  String get rag_tagsEnabled => '태그 의미 검색 및 추천';
 
   @override
   String get rag_tagsHint => '이름이나 설명으로 태그를 검색합니다. 빈 검색은 로컬 동시 출현 후보를 표시합니다.';
 
   @override
-  String get rag_buildIndex => '미리 보기 및 색인 생성';
-
-  @override
-  String rag_plan(int total) {
-    return '현재 태그 $total개와 별칭, 기존 로컬 설명을 색인합니다. 최초 작업은 시간이 걸리며 일시 정지와 부분 사용이 가능합니다.';
-  }
-
-  @override
-  String get rag_start => '색인 시작';
-
-  @override
-  String get rag_pause => '색인 일시 정지';
-
-  @override
-  String get rag_resume => '색인 계속';
-
-  @override
-  String get rag_rebuild => '색인 다시 생성';
-
-  @override
-  String get rag_clear => '색인 삭제';
-
-  @override
-  String get rag_clearHint =>
-      '원본 콘텐츠와 모델을 유지하고 이 파생 색인만 삭제합니다. 다시 구축하면 사용할 수 있습니다.';
-
-  @override
-  String get rag_futureSources =>
-      '태그 추천, Wiki, 프롬프트 블록 및 갤러리 멀티모달 검색이 연결되었습니다. 작업 공간과 Agent 검색은 추후 지원됩니다.';
-
-  @override
   String get rag_badgeHint => '로컬 의미 검색을 사용할 수 있습니다';
-
-  @override
-  String get rag_wikiEnabled => 'Wiki 의미 검색';
-
-  @override
-  String get rag_wikiHint =>
-      '로컬 문서 본문을 색인합니다. 정확한 이름 일치를 우선하고 의미 검색 결과로 보완합니다. 첫 색인은 범위를 확인한 뒤 시작하세요.';
-
-  @override
-  String get rag_blocksEnabled => '프롬프트 블록 의미 검색';
-
-  @override
-  String get rag_blocksHint =>
-      '저장된 활성 블록의 제목, 태그, 긍정·부정 텍스트만 색인합니다. 이미지와 저장하지 않은 초안은 제외합니다.';
-
-  @override
-  String rag_textPlan(int documents, int total) {
-    return '저장된 자료 $documents개를 텍스트 조각 $total개로 색인합니다. 첫 작업은 직접 시작하고 이후에는 변경분만 갱신합니다. 일시 중지하거나 완료된 부분을 검색할 수 있습니다.';
-  }
-
-  @override
-  String rag_textCounts(int indexed, int total) {
-    return '색인된 텍스트 조각 $indexed / $total개';
-  }
-
-  @override
-  String get rag_galleryEnabled => '갤러리 멀티모달 검색';
-
-  @override
-  String get rag_galleryHint =>
-      '등록된 갤러리의 이미지 내용과 기존 NAI 매개변수를 별도로 색인합니다. 원본은 유지하며 다른 소프트웨어의 메타데이터는 분석하지 않습니다.';
-
-  @override
-  String rag_galleryPlan(int images, int parameters) {
-    return '삭제되지 않은 이미지 $images개와 NAI 매개변수 조각 $parameters개를 색인합니다. 처음에는 직접 시작하고 이후에는 증분 업데이트합니다. 이미지와 텍스트 색인은 별도로 저장되며 일시 중지할 수 있습니다.';
-  }
-
-  @override
-  String rag_galleryCounts(
-    int indexed,
-    int images,
-    int parameters,
-    int skipped,
-  ) {
-    return '이미지 $indexed / $images개 · NAI 조각 $parameters개 · 건너뜀 $skipped개';
-  }
 
   @override
   String get rag_galleryMixed => '통합 검색';
@@ -16766,54 +14221,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get rag_gallerySearchOptions => '갤러리 RAG 검색 옵션';
 
   @override
-  String get rag_downloadModel => '모델 다운로드';
-
-  @override
-  String get rag_modelDownloading => '모델 다운로드 중';
-
-  @override
-  String get rag_modelVerifying => '모델 검증 중';
-
-  @override
-  String rag_downloadProgress(String done, String total) {
-    return '$done / $total MB';
-  }
-
-  @override
-  String get rag_poolHint =>
-      '활성화한 자료는 하나의 벡터 풀을 공유합니다. 새 자료와 저장한 번역은 증분 업데이트됩니다.';
-
-  @override
   String get rag_runtimeReady => '실행 환경 준비 완료';
-
-  @override
-  String get rag_runtimeCheck => '실행 환경 확인';
-
-  @override
-  String get rag_runtimeExisting => '기존 실행 환경 확인 중';
-
-  @override
-  String get rag_runtimeDownload => '설치 도구 다운로드 중';
-
-  @override
-  String get rag_runtimeCreate => 'Python 환경 준비 중';
-
-  @override
-  String get rag_runtimeCuda => 'CUDA 추론 패키지 설치 중';
-
-  @override
-  String get rag_runtimePackages => '추론 의존 패키지 설치 중';
-
-  @override
-  String get rag_runtimeVerify => '실행 환경 호환성 검증 중';
-
-  @override
-  String rag_runtimeElapsed(int seconds) {
-    return '현재 단계 경과: $seconds초';
-  }
-
-  @override
-  String get rag_useRuntime => '기존 환경 사용';
 
   @override
   String get set_title => '설정';
@@ -18577,9 +15985,6 @@ class AppLocalizationsKo extends AppLocalizations {
       '로컬 RAG로 태그 제안, 위키, 블록, 유사 이미지 검색에 쓰며 아무것도 올리지 않습니다.';
 
   @override
-  String get set_rgReady => '시맨틱 검색 준비됨';
-
-  @override
   String get set_rgOff => '시맨틱 검색 꺼짐';
 
   @override
@@ -18728,23 +16133,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String set_rgSkipped(Object n) {
     return '$n장 건너뜀';
   }
-
-  @override
-  String get set_rgStartupTitle => '로컬 색인 준비';
-
-  @override
-  String get set_rgStartupBody =>
-      '색인을 처음 만들거나 재개하기 전에 로컬 실행 환경, 모델, 기존 데이터를 준비합니다.';
-
-  @override
-  String get set_rgStartupWaitTitle => '몇 분 이상 걸릴 수 있습니다';
-
-  @override
-  String get set_rgStartupWaitBody =>
-      '준비 중에는 진행 수치가 잠시 바뀌지 않을 수 있습니다. 잠시 기다려 주세요.';
-
-  @override
-  String get set_rgStartupFrequency => 'Studio를 시작할 때마다 한 번만 표시';
 
   @override
   String get set_rgLoading => '색인 불러오는 중';
@@ -18967,7 +16355,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get set_upNoGpu => '외장 GPU를 찾지 못했습니다';
+  String get set_upNoGpu => 'NVIDIA GPU 정보를 확인할 수 없습니다';
 
   @override
   String get set_upLocal => '이 PC에서 확대하며 Anlas를 쓰지 않습니다.';
@@ -21989,6 +19377,42 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
+  String get set_stDraftBackups => '생성 초안 백업';
+
+  @override
+  String get resourceWindow_retryPage => '다음 페이지 로드 실패 · 다시 시도';
+
+  @override
+  String get set_rgSuspended => '검색이 일시 중지되었습니다';
+
+  @override
+  String get set_rgNoSearchable => '아직 검색할 콘텐츠가 없습니다';
+
+  @override
+  String set_rgSearchableCount(int count, int total) {
+    return '검색 가능한 소스: $count/$total';
+  }
+
+  @override
+  String get set_rgWaitRetry => '색인이 사용 중입니다. 잠시 후 다시 시도하세요.';
+
+  @override
+  String get set_rgCheckSource => '소스 경로와 읽기 권한을 확인한 후 다시 시도하세요.';
+
+  @override
+  String get set_rgCheckDevice => 'CUDA를 사용할 수 없습니다. 장치 설정을 확인한 후 다시 시도하세요.';
+
+  @override
+  String get set_rgRetryDownload => '모델 다운로드에 실패했습니다. 연결을 확인하고 다시 다운로드하세요.';
+
+  @override
+  String get set_rgRefreshRetry =>
+      '로컬 검색 서비스가 응답하지 않습니다. 상태를 새로 고친 후 다시 시도하세요.';
+
+  @override
+  String get set_rgOperationFailed => '로컬 검색 작업에 실패했습니다. 상태를 새로 고친 후 다시 시도하세요.';
+
+  @override
   String get set_stOther => '기타 파일';
 
   @override
@@ -22063,6 +19487,12 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get prompt_autocompleteTitle => '자동 완성';
+
+  @override
+  String get prompt_spellingSuggestion => '철자 제안';
+
+  @override
+  String get prompt_spellingHint => 'Tab 적용 · Enter 줄 바꿈 · Esc 닫기';
 
   @override
   String get prompt_autocompleteHint =>

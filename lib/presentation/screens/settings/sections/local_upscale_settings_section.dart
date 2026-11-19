@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
@@ -85,25 +84,10 @@ class _LocalUpscaleSettingsSectionState
       allowMultiple: true,
     );
     if (!mounted || picked == null) return;
-    final params = picked.files
-        .where(
-          (file) =>
-              file.extension?.toLowerCase() == 'param' && file.path != null,
-        )
-        .toList();
-    final weights = picked.files
-        .where(
-          (file) => file.extension?.toLowerCase() == 'bin' && file.path != null,
-        )
-        .toList();
-    if (picked.files.length != 2 || params.length != 1 || weights.length != 1) {
-      setState(() => _error = LocalUpscaleError.invalidModel);
-      return;
-    }
     await _operate(() async {
       await ref
           .read(localUpscaleModelManagerProvider)
-          .importPair(File(params.single.path!), File(weights.single.path!));
+          .importSelection(picked.paths);
     });
   }
 

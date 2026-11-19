@@ -61,15 +61,11 @@ void main() {
     }
 
     test('Korean messages contain no Chinese characters or kana', () {
-      // The font-size sample deliberately shows several scripts.
-      const multilingualSamples = {'settings_fontScale_previewMedium'};
       final korean = _readArb('lib/l10n/app_ko.arb');
       final hanOrKana = RegExp(r'[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff]');
       final offenders = [
         for (final key in _messageKeys(korean))
-          if (!multilingualSamples.contains(key) &&
-              hanOrKana.hasMatch(korean[key] as String))
-            key,
+          if (hanOrKana.hasMatch(korean[key] as String)) key,
       ];
       expect(offenders, isEmpty);
     });
@@ -225,8 +221,8 @@ void main() {
     expect(japanese.editor_shiftEdges, 'エッジをシフト');
     expect(chinese.editor_shiftEdges, '扩展边缘');
     expect(
-      english.imagePicker_fileSelectionFailed('denied'),
-      'Failed to select file: denied',
+      english.gallery_readImageFailed('denied'),
+      'Failed to read image: denied',
     );
     expect(japanese.gen_history, '履歴');
     expect(chinese.refs_dropReplacePreview, '把新图拖到这里 = 换掉预览图（不影响编码）');

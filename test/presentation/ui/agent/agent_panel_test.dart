@@ -796,9 +796,12 @@ void main() {
       );
       await tester.pump();
       expect(find.byKey(const Key('agent-zoom')), findsOneWidget);
-      // 展开参数时不重复显示缩略图。
+      await tester.tap(find.byKey(const Key('agent-zoom-close')));
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('agent-step-s-read')));
       await tester.pump();
+      expect(find.text('参数'), findsOneWidget);
+      expect(find.byType(AgentThumb), findsOneWidget);
     });
 
     testWidgets('聊天列表：输入两个字以上同时搜正文，命中点开切过去', (tester) async {

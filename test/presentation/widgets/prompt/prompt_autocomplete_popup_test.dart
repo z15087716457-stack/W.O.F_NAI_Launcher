@@ -99,6 +99,7 @@ Future<_Editor> _pumpEditor(
   double scale = 1,
   Locale locale = const Locale('zh'),
   Brightness brightness = Brightness.dark,
+  String input = 'ke',
   Alignment alignment = Alignment.topLeft,
   List<CompletionCandidate>? candidates,
   Completer<List<CompletionCandidate>>? related,
@@ -166,7 +167,7 @@ Future<_Editor> _pumpEditor(
     ),
   );
   await t.tap(find.byType(TextField));
-  await t.enterText(find.byType(TextField), 'ke');
+  await t.enterText(find.byType(TextField), input);
   await t.pump(const Duration(milliseconds: 120));
   await t.pump();
   if (openRelated) {
@@ -232,6 +233,94 @@ void _checkRows(WidgetTester t) {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUpAll(loadStudioCaptureFonts);
+
+  final aliasCorrection = _tag('grey_hair', '灰发').copyWith(
+    category: TagCategory.general,
+    matchKind: CompletionMatchKind.spelling,
+    matchedAlias: 'silver_hair',
+  );
+  for (final locale in AppLocalizations.supportedLocales) {
+    testWidgets(
+      'spelling suggestion displays its alias and accepts a click ${locale.toLanguageTag()}',
+      (t) async {
+        final editor = await _pumpEditor(
+          t,
+          size: locale.languageCode == 'ja'
+              ? const Size(320, 360)
+              : const Size(560, 430),
+          scale: locale.languageCode == 'ja' ? 1.5 : 1,
+          brightness: locale.languageCode == 'ko'
+              ? Brightness.light
+              : Brightness.dark,
+          input: 'silvre hair',
+          candidates: [aliasCorrection],
+          locale: locale,
+        );
+        final l = AppLocalizations.of(t.element(find.byType(TextField)))!;
+        expect(find.text(l.prompt_spellingSuggestion), findsOneWidget);
+        expect(
+          find.text(l.tagExpansion_matchedAlias('silver hair')),
+          findsOneWidget,
+        );
+        expect(find.text(l.prompt_spellingHint), findsOneWidget);
+        final list = t.getRect(
+          find.byKey(const Key('prompt-autocomplete-list')),
+        );
+        final alias = t.getRect(
+          find.text(l.tagExpansion_matchedAlias('silver hair')),
+        );
+        expect(alias.bottom, lessThanOrEqualTo(list.bottom + 1));
+        _checkRows(t);
+        await captureTagMeaning(t, 'spelling-${locale.toLanguageTag()}');
+        await t.tap(_row(0));
+        await t.pump();
+        expect(editor.text.text, 'grey hair, ');
+        expect(find.byKey(const Key('prompt-autocomplete')), findsNothing);
+      },
+    );
+  }
+
+  for (final key in [
+    LogicalKeyboardKey.tab,
+    LogicalKeyboardKey.enter,
+    LogicalKeyboardKey.numpadEnter,
+    LogicalKeyboardKey.escape,
+  ]) {
+    testWidgets('spelling keyboard ${key.keyLabel} keeps explicit acceptance', (
+      t,
+    ) async {
+      final editor = await _pumpEditor(
+        t,
+        input: 'silvre hair',
+        candidates: [aliasCorrection],
+      );
+      await t.sendKeyEvent(key);
+      await t.pump();
+      expect(find.byKey(const Key('prompt-autocomplete')), findsNothing);
+      expect(
+        editor.text.text,
+        key == LogicalKeyboardKey.tab
+            ? 'grey hair, '
+            : startsWith('silvre hair'),
+      );
+    });
+  }
+
+  testWidgets('moving to a regular result restores normal Enter completion', (
+    t,
+  ) async {
+    final editor = await _pumpEditor(
+      t,
+      input: 'silvre hair',
+      candidates: [aliasCorrection, _tag('silver_hairband')],
+    );
+    await t.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await t.pump();
+    expect(editor.completion.value.spellingSelected, false);
+    await t.sendKeyEvent(LogicalKeyboardKey.enter);
+    await t.pump();
+    expect(editor.text.text, 'silver hairband, ');
+  });
 
   for (final locale in [
     const Locale('zh'),

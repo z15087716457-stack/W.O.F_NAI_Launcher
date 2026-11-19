@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
+import 'package:nai_launcher/core/services/data_migration_service.dart';
+import 'package:nai_launcher/data/repositories/gallery_folder_repository.dart';
 import 'package:nai_launcher/core/utils/vibe_library_path_helper.dart';
 import 'package:nai_launcher/data/services/nai_agent/agent_workspace_store.dart';
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_workspace_provider.dart';
@@ -51,6 +53,25 @@ void main() {
         PathProviderPlatform.instance = original;
         await temp.delete(recursive: true);
       });
+      final output = await DataMigrationService.instance.migrateImageStorage();
+      expect(output, p.join(temp.path, 'user-data', 'images'));
+      final folders = GalleryFolderRepository.instance;
+      expect((await folders.getAllRootDirs()).map((d) => d.path), [output]);
+      expect(await folders.getCategoryBasePath(), output);
+      final legacy = Directory(
+        p.join(temp.path, 'documents', 'NAI_Launcher', 'images'),
+      );
+      expect(await legacy.exists(), isFalse);
+      await legacy.create(recursive: true);
+      final legacyImage = File(p.join(legacy.path, 'existing.png'));
+      await legacyImage.writeAsBytes([1]);
+      await DataMigrationService.instance.migrateImageStorage();
+      expect(
+        await folders.getSourcePaths(),
+        containsAll([output, legacy.path]),
+      );
+      expect(await folders.getCategoryBasePath(), legacy.path);
+      expect(await legacyImage.readAsBytes(), [1]);
       final first = await container.read(settingsFoldersProvider.future);
       expect(
         first[SettingsFolder.images],

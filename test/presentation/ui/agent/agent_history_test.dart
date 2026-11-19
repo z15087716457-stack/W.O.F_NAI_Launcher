@@ -353,7 +353,6 @@ void main() {
           kind: AgentHistoryKind.user,
           title: 'Old question',
           blockIndex: 0,
-          beforeCompaction: true,
         ),
         ...agentHistoryEntries(turns),
       ];

@@ -87,13 +87,11 @@ class SettingsNetwork extends Notifier<SettingsNetworkData> {
         .where((p) => p.enabled)
         .toList();
     final proxy = ref.read(currentProxyAddressProvider);
+    final endpointService = ref.read(naiApiEndpointServiceProvider);
+    final endpoint = endpointService.current;
     final targets = <(SettingsEndpointKind, String, String)>[
-      (SettingsEndpointKind.naiImage, 'https://image.novelai.net', ''),
-      (
-        SettingsEndpointKind.naiApi,
-        ref.read(naiApiEndpointServiceProvider).current.userUrl('/user/login'),
-        '',
-      ),
+      (SettingsEndpointKind.naiImage, endpoint.imageBaseUrl, ''),
+      (SettingsEndpointKind.naiApi, endpoint.userUrl('/user/login'), ''),
       (SettingsEndpointKind.danbooru, 'https://danbooru.donmai.us', ''),
       (SettingsEndpointKind.update, 'https://api.github.com', ''),
       for (final provider in providers)
@@ -126,7 +124,8 @@ class SettingsNetwork extends Notifier<SettingsNetworkData> {
     );
     if (_disposed || revision != _revision) return;
     // An old probe must not describe a newly selected proxy/configuration.
-    if (proxy != ref.read(currentProxyAddressProvider) ||
+    if (endpoint != endpointService.current ||
+        proxy != ref.read(currentProxyAddressProvider) ||
         providers.map((p) => '${p.id}:${p.baseUrl}').join('|') !=
             ref
                 .read(promptAssistantConfigProvider)
@@ -140,6 +139,7 @@ class SettingsNetwork extends Notifier<SettingsNetworkData> {
     state = SettingsNetworkData(
       endpoints: endpoints,
       checkedAt: DateTime.now(),
+      checkedViaProxy: proxy?.isNotEmpty ?? false,
     );
   }
 }

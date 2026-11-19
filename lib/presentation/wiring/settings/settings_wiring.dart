@@ -11,6 +11,7 @@ import '../../../core/constants/app_version.dart';
 import '../../../core/rag/rag_settings.dart';
 import '../../../core/services/app_visibility.dart';
 import '../../../core/utils/localization_extension.dart';
+import '../../../data/models/upscale/local_upscale_models.dart';
 import '../../prompt_assistant/providers/prompt_assistant_config_provider.dart';
 import '../../providers/account_manager_provider.dart';
 import '../../providers/canvas_channel_provider.dart';
@@ -27,6 +28,7 @@ import '../../ui/settings/settings_format.dart';
 import '../../ui/settings/settings_page.dart';
 import '../../ui/settings/settings_search.dart';
 import '../../widgets/common/app_toast.dart';
+import '../../widgets/common/local_upscale_labels.dart';
 import '../../widgets/danbooru_login_dialog.dart';
 import 'settings_accounts.dart';
 import 'settings_agent.dart';
@@ -144,9 +146,15 @@ class _SettingsWiringState extends ConsumerState<SettingsWiring> {
 
   void _run(FutureOr<void> Function() action) {
     unawaited(
-      Future<void>.sync(action).catchError((Object _) {
+      Future<void>.sync(action).catchError((Object error) {
         if (mounted) {
-          AppToast.error(context, context.l10n.styleExplore_operationFailed);
+          final l = context.l10n;
+          AppToast.error(
+            context,
+            error is LocalUpscaleException
+                ? localUpscaleErrorLabel(l, error.code)
+                : l.styleExplore_operationFailed,
+          );
         }
       }),
     );
@@ -227,6 +235,7 @@ class _SettingsWiringState extends ConsumerState<SettingsWiring> {
     final agentBackend = ref.read(settingsAgentBackendProvider);
     final rag = ref.read(ragControllerProvider.notifier);
     final plans = ref.read(settingsRagSessionProvider.notifier);
+    final ragStartup = ref.read(settingsRagStartupProvider.notifier);
     final upscale = ref.read(settingsUpscaleOperationProvider.notifier);
     final connections = SettingsConnectionActions(context, ref);
     final backup = SettingsBackupActions(context);
@@ -420,34 +429,19 @@ class _SettingsWiringState extends ConsumerState<SettingsWiring> {
       onRagPause: (kind) =>
           _run(() => rag.pause(source: settingsRagSource(kind))),
       onRagResume: (kind) => _run(
-        () => runSettingsRagStartup(
-          ref,
-          context,
+        () => ragStartup.run(
           kind,
           () => rag.resume(source: settingsRagSource(kind)),
         ),
       ),
-      onRagBuild: (kind) => _run(
-        () => runSettingsRagStartup(
-          ref,
-          context,
-          kind,
-          () => plans.preview(kind),
-        ),
-      ),
+      onRagBuild: (kind) =>
+          _run(() => ragStartup.run(kind, () => plans.preview(kind))),
       onRagRebuild: (kind) => _run(
-        () => runSettingsRagStartup(
-          ref,
-          context,
-          kind,
-          () => plans.preview(kind, rebuild: true),
-        ),
+        () => ragStartup.run(kind, () => plans.preview(kind, rebuild: true)),
       ),
       onRagStartPlan: () => _run(() async {
         final kind = ref.read(settingsRagSessionProvider).plan?.kind;
-        if (kind != null) {
-          await runSettingsRagStartup(ref, context, kind, plans.start);
-        }
+        if (kind != null) await ragStartup.run(kind, plans.start);
       }),
       onRagCancelPlan: plans.cancelPlan,
       onRagClear: (kind) =>

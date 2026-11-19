@@ -462,6 +462,7 @@ class SettingsStoragePage extends StatelessWidget {
     final total = st.totalBytes;
     String kindName(SettingsStorageKind k) => switch (k) {
       SettingsStorageKind.images => l.set_stImages,
+      SettingsStorageKind.draftBackups => l.set_stDraftBackups,
       SettingsStorageKind.upscaleModels => l.set_stUpscaleModels,
       SettingsStorageKind.vibes => l.set_stVibes,
       SettingsStorageKind.preciseRefs => l.set_stPr,

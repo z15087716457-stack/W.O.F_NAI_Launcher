@@ -18,17 +18,16 @@ import '../../core/rag/rag_settings.dart';
 import '../../core/rag/rag_text_search.dart';
 import '../providers/rag_provider.dart';
 import 'blocks_rag_wiring.dart';
+import 'generation_blocks_dock.dart';
 
 class BlocksDockWiring extends ConsumerStatefulWidget {
   const BlocksDockWiring({
     super.key,
     this.fallbackScope = PillScopes.main,
-    this.allowPopOut = true,
-    this.onClose,
+    this.onInsert,
   });
   final String fallbackScope;
-  final bool allowPopOut;
-  final VoidCallback? onClose;
+  final Future<void> Function(String id)? onInsert;
   @override
   ConsumerState<BlocksDockWiring> createState() => _BlocksDockWiringState();
 }
@@ -82,6 +81,11 @@ class _BlocksDockWiringState extends ConsumerState<BlocksDockWiring> {
     );
     final host = BlocksActions(ref, context, () => mounted && context.mounted);
     final backend = ref.read(blocksLibraryBackendProvider);
+    Future<void> edit(String? id) async {
+      await ref.read(promptBlockLibraryNotifierProvider.future);
+      if (mounted) await host.edit(id: id, folderId: filter.folderId);
+    }
+
     final folders = library.foldersIn(null);
     final groups = <BlocksDockGroup>[];
     if (!filter.favorites) {
@@ -121,6 +125,9 @@ class _BlocksDockWiringState extends ConsumerState<BlocksDockWiring> {
         );
       }
     }
+    final previouslyUsed =
+        library.blocks.where((block) => block.useCount > 0).toList()
+          ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
     return Material(
       type: MaterialType.transparency,
       child: BlocksDock(
@@ -140,10 +147,10 @@ class _BlocksDockWiringState extends ConsumerState<BlocksDockWiring> {
           favorites: library.favoriteBlocks
               .map((b) => blockDataOf(b, library))
               .toList(),
-          recent: recentBlocks(
-            library,
-            prefs.recentIds,
-          ).take(8).map((b) => blockDataOf(b, library)).toList(),
+          recent: recentBlocks(library, [
+            ...prefs.recentIds,
+            ...previouslyUsed.map((block) => block.id),
+          ]).take(8).map((b) => blockDataOf(b, library)).toList(),
           groups: groups,
           results: data.blocks,
           rag: blocksRagStatus(ref, context),
@@ -154,18 +161,25 @@ class _BlocksDockWiringState extends ConsumerState<BlocksDockWiring> {
             _filter = value;
             _query = '';
           }),
-          onInsert: (id) =>
-              host.insert([id], fallbackScope: widget.fallbackScope),
+          onInsert: (id) => host.run(() {
+            final insert = widget.onInsert;
+            if (insert != null) return insert(id);
+            return insertGenerationDockBlock(
+              ref,
+              id,
+              fallbackScope: widget.fallbackScope,
+            );
+          }),
           dragDataOf: (id) => PromptBlockDragData(blockId: id),
-          onCreate: () => host.edit(folderId: filter.folderId),
-          onEdit: (id) => host.edit(id: id),
+          onCreate: () => host.run(() => edit(null)),
+          onEdit: (id) => host.run(() => edit(id)),
           onOpenLibrary: () => host.showInLibrary(null),
           onShowInLibrary: host.showInLibrary,
-          onClose:
-              widget.onClose ??
-              () => ref
-                  .read(layoutStateNotifierProvider.notifier)
-                  .setBlockLibraryPanelExpanded(false),
+          onClose: () => host.run(
+            () => ref
+                .read(layoutStateNotifierProvider.notifier)
+                .setBlockLibraryPanelExpanded(false),
+          ),
           onToggleGroup: (id, expanded) => host.preference(
             (p) => p.copyWith(
               collapsed: expanded
@@ -183,22 +197,6 @@ class _BlocksDockWiringState extends ConsumerState<BlocksDockWiring> {
                 .read(promptBlockPaletteNotifierProvider.notifier)
                 .addBlock(id),
           ),
-          onPopOut: !widget.allowPopOut
-              ? null
-              : () => showDialog<void>(
-                  context: context,
-                  builder: (ctx) => Dialog(
-                    child: SizedBox(
-                      width: 300,
-                      height: 600,
-                      child: BlocksDockWiring(
-                        fallbackScope: widget.fallbackScope,
-                        allowPopOut: false,
-                        onClose: () => Navigator.of(ctx).pop(),
-                      ),
-                    ),
-                  ),
-                ),
         ),
       ),
     );

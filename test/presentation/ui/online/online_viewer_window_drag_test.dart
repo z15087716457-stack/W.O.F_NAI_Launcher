@@ -89,7 +89,7 @@ void main() {
       find.byKey(const Key('online-viewer-position')),
     ]) {
       windowCalls.clear();
-      await tester.drag(target, const Offset(70, 15));
+      await tester.dragFrom(tester.getCenter(target), const Offset(70, 15));
       await tester.pump(const Duration(milliseconds: 100));
       expect(windowCalls, contains('startDragging'));
     }

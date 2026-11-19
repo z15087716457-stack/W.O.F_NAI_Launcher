@@ -2,6 +2,7 @@ import 'package:nai_launcher/core/krita/krita_bridge_models.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/core/krita/bridge_draft_guard.dart';
@@ -171,6 +172,15 @@ class Fixture {
   }
 }
 
+Future<void> _statusInIsolate((String, SendPort) args) async {
+  final code = await cli.studioBridgeMain(
+    ['status', '--discovery', args.$1],
+    output: (_) {},
+    errorOutput: (_) {},
+  );
+  args.$2.send(code);
+}
+
 void main() {
   test('文档变化、模型采样器联动与非法角色保护', () {
     final old = BridgeDraftSnapshot(
@@ -230,6 +240,25 @@ void main() {
     await f.start();
   });
   tearDown(() async => f.close());
+
+  test(
+    'a completed CLI status releases its isolate without a close timeout',
+    () async {
+      final result = ReceivePort();
+      final exited = ReceivePort();
+      final isolate = await Isolate.spawn(_statusInIsolate, (
+        f.notifier.state.discoveryFilePath!,
+        result.sendPort,
+      ), onExit: exited.sendPort);
+      addTearDown(() {
+        isolate.kill();
+        result.close();
+        exited.close();
+      });
+      expect(await result.first, 0);
+      await exited.first.timeout(const Duration(seconds: 3));
+    },
+  );
 
   test('Agent读写和报价确认精确快照；正常断连保留完成，错误不确认', () async {
     final peer = await f.connect('Codex');

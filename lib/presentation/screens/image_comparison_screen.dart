@@ -30,7 +30,7 @@ class _ImageComparisonScreenState extends ConsumerState<ImageComparisonScreen> {
     // 验证图片数量
     if (widget.images.isEmpty) {
       return Scaffold(
-        backgroundColor: Colors.black,
+        appBar: AppBar(leading: const CloseButton()),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -55,7 +55,7 @@ class _ImageComparisonScreenState extends ConsumerState<ImageComparisonScreen> {
 
     if (widget.images.length > 4) {
       return Scaffold(
-        backgroundColor: Colors.black,
+        appBar: AppBar(leading: const CloseButton()),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -167,12 +167,11 @@ class _ImageComparisonScreenState extends ConsumerState<ImageComparisonScreen> {
   /// 构建网格布局（3-4张图片）
   Widget _buildGridLayout(ThemeData theme, AppLocalizations l10n) {
     final imageCount = widget.images.length;
-    final int crossAxisCount = imageCount == 3 ? 2 : 2;
 
     return GridView.builder(
       padding: const EdgeInsets.all(8),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: crossAxisCount,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
         mainAxisSpacing: 8,
         crossAxisSpacing: 8,
         childAspectRatio: 1.0,

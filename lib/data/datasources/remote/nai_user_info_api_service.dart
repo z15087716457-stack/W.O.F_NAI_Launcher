@@ -34,10 +34,7 @@ class NAIUserInfoApiService {
         ),
       );
 
-      return readNaiSubscriptionResponse(
-        response,
-        isThirdParty: endpoint.isThirdParty,
-      );
+      return readNaiSubscriptionResponse(response);
     } on DioException catch (e) {
       AppLogger.w('Get user subscription failed: ${e.message}', 'NAIUserInfo');
       rethrow;

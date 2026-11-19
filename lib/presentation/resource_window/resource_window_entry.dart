@@ -173,11 +173,7 @@ class _ResourceWindowAppState extends State<ResourceWindowApp> {
               : GalleryFilterBar(
                   key: const Key('rw-gallery-filters'),
                   criteria: criteria,
-                  showClearFilters:
-                      criteria.filterModels.isNotEmpty ||
-                      criteria.dateStart != null ||
-                      criteria.dateEnd != null ||
-                      data.query.isNotEmpty,
+                  showClearFilters: criteria.hasSessionFilters,
                   groupMode:
                       data.groupId != 'recent' &&
                           const [

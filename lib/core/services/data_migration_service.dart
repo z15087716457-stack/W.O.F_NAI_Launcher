@@ -52,6 +52,7 @@ class DataMigrationService {
       onProgress?.call('Hive 数据迁移完成', 0.35);
       AppLogger.i('Hive 存储路径: $hivePath', 'DataMigration');
       result.hiveMigrated = true;
+      await migrateAutocompleteSettings();
 
       // 2. Vibe 库迁移（触发路径初始化和迁移）
       onProgress?.call('迁移 Vibe 库数据', 0.4);
@@ -62,12 +63,11 @@ class DataMigrationService {
 
       // 3. 图片存储迁移（触发路径初始化和迁移）
       onProgress?.call('迁移图片存储数据', 0.7);
-      final imagePath = await _migrateImageStorage();
+      final imagePath = await migrateImageStorage();
       onProgress?.call('图片存储迁移完成', 0.95);
       AppLogger.i('图片存储路径: $imagePath', 'DataMigration');
       result.imageMigrated = true;
 
-      await _migrateAutocompleteSettings();
       await migrateMainNavPreferences();
 
       onProgress?.call('数据迁移完成', 1.0);
@@ -88,27 +88,31 @@ class DataMigrationService {
     }
   }
 
-  Future<void> _migrateAutocompleteSettings() async {
+  @visibleForTesting
+  Future<void> migrateAutocompleteSettings() async {
     if (!Hive.isBoxOpen(StorageKeys.settingsBox)) return;
     final box = Hive.box(StorageKeys.settingsBox);
     final version =
         box.get(StorageKeys.autocompleteMigrationVersion, defaultValue: 0)
             as int;
-    if (version >= 1) return;
-    for (final key in const [
-      StorageKeys.hfTranslationRefreshInterval,
-      StorageKeys.hfTranslationLastUpdate,
-      StorageKeys.danbooruTagsHotThreshold,
-      StorageKeys.danbooruTagsHotPreset,
-      StorageKeys.danbooruTagsLastUpdate,
-      StorageKeys.danbooruTagsRefreshInterval,
-      StorageKeys.danbooruTagsRefreshIntervalDays,
-    ]) {
-      await box.delete(key);
+    if (version >= 2) return;
+    if (version < 1) {
+      await box.deleteAll(const [
+        StorageKeys.hfTranslationRefreshInterval,
+        StorageKeys.hfTranslationLastUpdate,
+        StorageKeys.danbooruTagsHotThreshold,
+        StorageKeys.danbooruTagsHotPreset,
+        StorageKeys.danbooruTagsLastUpdate,
+        StorageKeys.danbooruTagsRefreshInterval,
+        StorageKeys.danbooruTagsRefreshIntervalDays,
+      ]);
     }
-    await box.put(StorageKeys.autocompleteMigrationVersion, 1);
+    await box.putAll({
+      StorageKeys.promptAutocompleteEnabled: true,
+      StorageKeys.autocompleteMigrationVersion: 2,
+    });
     AppLogger.i(
-      'Autocomplete settings migrated to unified pipeline',
+      'Prompt autocomplete enabled by settings migration v2',
       'DataMigration',
     );
   }
@@ -143,7 +147,12 @@ class DataMigrationService {
   /// 从旧位置迁移到新位置：
   /// 旧：Documents/nai_launcher/images/
   /// 新：Documents/NAI_Launcher/images/
-  Future<String> _migrateImageStorage() async {
+  @visibleForTesting
+  Future<String> migrateImageStorage() async {
+    // The gallery subscribes only to existing roots. Prepare the managed
+    // output folder before the first scan so the first save is observable.
+    final output = await getUserAssetPath('images');
+    await Directory(output).create(recursive: true);
     final appDir = await getApplicationDocumentsDirectory();
     final newPath = p.join(appDir.path, 'NAI_Launcher', 'images');
     final oldPath = p.join(appDir.path, 'nai_launcher', 'images');
@@ -153,21 +162,19 @@ class DataMigrationService {
     if (await newDir.exists()) {
       final files = await newDir.list().toList();
       if (files.isNotEmpty) {
-        return newPath;
+        return output;
       }
     }
 
     // 检查旧位置是否存在且有文件
     final oldDir = Directory(oldPath);
     if (!await oldDir.exists()) {
-      await _ensureDirExists(newDir);
-      return newPath;
+      return output;
     }
 
     final oldFiles = await oldDir.list().toList();
     if (oldFiles.isEmpty) {
-      await _ensureDirExists(newDir);
-      return newPath;
+      return output;
     }
 
     AppLogger.i('发现旧版本图片数据，开始迁移...', 'DataMigration');
@@ -200,7 +207,7 @@ class DataMigrationService {
       AppLogger.i('图片数据迁移完成: $migratedCount 个项目', 'DataMigration');
     }
 
-    return newPath;
+    return output;
   }
 
   /// 递归复制目录

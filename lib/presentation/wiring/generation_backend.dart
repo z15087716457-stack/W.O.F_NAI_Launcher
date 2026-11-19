@@ -1,6 +1,8 @@
 import 'dart:async';
-import 'dart:convert';
+import 'dart:typed_data';
 import 'dart:io';
+import 'dart:isolate';
+import '../../core/storage/generation_draft_backup.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
@@ -35,17 +37,14 @@ final generationEncodingReferencesProvider = StateProvider<Set<String>>(
 class GenerationPlatform {
   const GenerationPlatform();
 
-  Future<void> backupDraft(String snapshot) async {
+  Future<void> backupDraft(Map<String, dynamic> snapshot) async {
     final root = await getApplicationSupportDirectory();
-    final directory = Directory(p.join(root.path, 'draft-backups'));
-    await directory.create(recursive: true);
-    final file = File(
-      p.join(
-        directory.path,
-        'before-generation-${DateTime.now().microsecondsSinceEpoch}.json',
-      ),
+    final directory = Directory(
+      p.join(root.path, GenerationDraftBackup.directoryName),
     );
-    await file.writeAsString(snapshot, flush: true);
+    await Isolate.run(() {
+      GenerationDraftBackup.write(directory, snapshot);
+    });
   }
 }
 
@@ -119,10 +118,10 @@ class GenerationBackend {
   Future<void> mutate(
     void Function() write, {
     bool Function()? alive,
-    bool promptEdit = false,
+    bool nextRequest = false,
   }) {
     final operation = _queue.then(
-      (_) => captureDraft(alive: alive, promptEdit: promptEdit)(write),
+      (_) => captureDraft(alive: alive, nextRequest: nextRequest)(write),
     );
     _queue = operation.then<void>((_) {}, onError: (Object _, StackTrace _) {});
     return operation;
@@ -130,10 +129,11 @@ class GenerationBackend {
 
   Future<void> Function(void Function()) captureDraft({
     bool Function()? alive,
-    bool promptEdit = false,
+    bool nextRequest = false,
   }) {
     if (_disposed) throw StateError(currentL10n.bridge_conflict);
     final intent = _intentRevision;
+    final count = ref.read(imagesPerRequestProvider);
     final account = _accountRevision;
     final params = ref.read(generationParamsNotifierProvider);
     final version = ref.read(bridgeDraftVersionProvider);
@@ -142,7 +142,8 @@ class GenerationBackend {
     void check() {
       if (_disposed ||
           alive?.call() == false ||
-          (!promptEdit && intent != _intentRevision) ||
+          (!nextRequest && intent != _intentRevision) ||
+          count != ref.read(imagesPerRequestProvider) ||
           account != _accountRevision ||
           params != ref.read(generationParamsNotifierProvider) ||
           version != ref.read(bridgeDraftVersionProvider) ||
@@ -151,9 +152,9 @@ class GenerationBackend {
           auth.status != ref.read(authNotifierProvider).status) {
         throw StateError(currentL10n.bridge_conflict);
       }
-      // Prompt edits prepare the next request; only resource-changing writes
-      // need the generation gate. Backup and current-draft checks apply to both.
-      if (!promptEdit && busy) {
+      // Prompts and generation settings edit the next request. Operations on
+      // active resources still need an idle worker.
+      if (!nextRequest && busy) {
         throw StateError(currentL10n.kritaBridge_busyGenerating);
       }
     }
@@ -322,7 +323,7 @@ class GenerationBackend {
     if (before.text.isEmpty && before.instances.isEmpty && raw.isEmpty) {
       return null;
     }
-    final write = captureDraft(alive: alive, promptEdit: true);
+    final write = captureDraft(alive: alive, nextRequest: true);
     late GenerationPromptUndo undo;
     await write(() {
       final accountRevision = _accountRevision;
@@ -369,7 +370,7 @@ class GenerationBackend {
     }
 
     check();
-    await captureDraft(alive: alive, promptEdit: true)(() {
+    await captureDraft(alive: alive, nextRequest: true)(() {
       check();
       _writePrompt(undo.scope, undo.characterId, undo.negative, undo.before);
       _promptTickets[undo.scope] = ++_nextPromptTicket;
@@ -418,35 +419,36 @@ class GenerationBackend {
     }
   }
 
-  String _snapshot() {
+  Map<String, dynamic> _snapshot() {
     final params = ref.read(generationParamsNotifierProvider);
     final workflow = ref.read(imageWorkflowControllerProvider);
-    return jsonEncode({
+    return {
       ...readBridgeDraft(ref).toJson(),
       'generation': params.toJson(),
+      'imagesPerRequest': ref.read(imagesPerRequestProvider),
       'img2imgEnabled': ref.read(generationImg2ImgEnabledProvider),
       'sourceImage': params.sourceImage == null
           ? null
-          : base64Encode(params.sourceImage!),
+          : Uint8List.fromList(params.sourceImage!),
       'maskImage': params.maskImage == null
           ? null
-          : base64Encode(params.maskImage!),
+          : Uint8List.fromList(params.maskImage!),
       'vibes': [
         for (final vibe in params.vibeReferencesV4)
           {
             ...vibe.toJson(),
             'rawImageData': vibe.rawImageData == null
                 ? null
-                : base64Encode(vibe.rawImageData!),
+                : Uint8List.fromList(vibe.rawImageData!),
             'thumbnail': vibe.thumbnail == null
                 ? null
-                : base64Encode(vibe.thumbnail!),
+                : Uint8List.fromList(vibe.thumbnail!),
           },
       ],
       'precise': [
         for (final reference in params.preciseReferences)
           {
-            'image': base64Encode(reference.image),
+            'image': Uint8List.fromList(reference.image),
             'type': reference.type.name,
             'strength': reference.strength,
             'fidelity': reference.fidelity,
@@ -467,7 +469,7 @@ class GenerationBackend {
         'isOutpaint': workflow.isOutpaint,
         'temporaryEnhanceSource': workflow.temporaryEnhanceSource == null
             ? null
-            : base64Encode(workflow.temporaryEnhanceSource!),
+            : Uint8List.fromList(workflow.temporaryEnhanceSource!),
         'enhanceUsesGenerationSize': workflow.enhanceUsesGenerationSize,
         'enhance': {
           'magnitude': workflow.enhance.magnitude,
@@ -498,6 +500,6 @@ class GenerationBackend {
           'seedvr2BlocksToSwap': workflow.upscale.seedvr2BlocksToSwap,
         },
       },
-    });
+    };
   }
 }

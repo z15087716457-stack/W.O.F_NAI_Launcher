@@ -103,8 +103,7 @@ void main() {
     expect(rec.calls, contains('skillEnabled:builtin/nai-studio:false'));
     await t.tap(find.byKey(const Key('skill-mode-builtin/nai-studio')));
     await t.pumpAndSettle();
-    // 菜单项在弹层里（第一个匹配）；下面某行的“仅手动调用”标签也会被找到。
-    await t.tap(find.text('仅手动调用').first);
+    await t.tap(find.byKey(const Key('menu-仅手动调用')));
     await t.pumpAndSettle();
     expect(rec.calls, contains('skillManual:builtin/nai-studio:true'));
 
@@ -117,7 +116,7 @@ void main() {
     expect(rec.calls, contains('skillEnabled:global/style-replica:false'));
     await t.tap(find.byKey(const Key('skill-mode-global/style-replica')));
     await t.pumpAndSettle();
-    await t.tap(find.text('仅手动调用').last);
+    await t.tap(find.byKey(const Key('menu-仅手动调用')));
     await t.pumpAndSettle();
     expect(rec.calls, contains('skillManual:global/style-replica:true'));
 

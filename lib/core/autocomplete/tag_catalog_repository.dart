@@ -78,6 +78,24 @@ class TagCatalogRepository implements CompletionSource {
   Future<Map<String, TagCatalogRecord>> recordsByCanonicalTag(
     Iterable<String> tags,
   ) async => (await _current()).recordsByCanonicalTag(tags);
+
+  /// Cooccurrence seeds and exclusions use canonical names from this catalog.
+  Future<Map<String, String>> resolveCanonicalNames(
+    Iterable<String> normalizedTags,
+  ) async {
+    final names = normalizedTags.toSet();
+    final records = await recordsByCanonicalTag(names);
+    final missing = names.difference(records.keys.toSet());
+    final aliases = missing.isEmpty
+        ? const <String, CompletionCandidate>{}
+        : await exactAliases(missing);
+    return {
+      for (final record in records.values)
+        record.canonicalTag: record.canonicalTag,
+      for (final alias in aliases.entries) alias.key: alias.value.canonicalTag,
+    };
+  }
+
   Future<Map<String, String>> metadata() async => (await _current()).metadata();
   Future<Map<TagCategory, int>> categoryCounts() async =>
       (await _current()).categoryCounts();

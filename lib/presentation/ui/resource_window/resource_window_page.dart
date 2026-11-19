@@ -61,7 +61,7 @@ class ResourceWindowPage extends StatefulWidget {
 class _ResourceWindowPageState extends State<ResourceWindowPage> {
   bool _trashBusy = false;
   final _search = FocusNode();
-  final _focus = FocusNode();
+  final _focus = FocusScopeNode();
   final _scroll = ScrollController();
 
   /// 大小滑杆拖动中的预览值；松手才回调持久化。
@@ -75,6 +75,7 @@ class _ResourceWindowPageState extends State<ResourceWindowPage> {
   void initState() {
     super.initState();
     _scroll.addListener(_maybeLoadMore);
+    _search.addListener(_searchFocusChanged);
     _showNotice(widget.data.notice);
   }
 
@@ -86,10 +87,13 @@ class _ResourceWindowPageState extends State<ResourceWindowPage> {
         if (mounted) _focus.requestFocus();
       });
     }
-    if (old.data.kind != widget.data.kind ||
-        old.data.groupId != widget.data.groupId) {
-      _cell = null;
-      if (_scroll.hasClients) _scroll.jumpTo(0);
+    final scopeChanged =
+        old.data.kind != widget.data.kind ||
+        old.data.groupId != widget.data.groupId;
+    if (scopeChanged) _cell = null;
+    if ((scopeChanged || old.data.query != widget.data.query) &&
+        _scroll.hasClients) {
+      _scroll.jumpTo(0);
     }
     if (widget.data.notice?.id != old.data.notice?.id) {
       _showNotice(widget.data.notice);
@@ -97,6 +101,8 @@ class _ResourceWindowPageState extends State<ResourceWindowPage> {
     // 新一页到了但还没填满视口 / 仍靠近底部：继续要（不依赖用户再滚一下）。
     WidgetsBinding.instance.addPostFrameCallback((_) => _maybeLoadMore());
   }
+
+  void _searchFocusChanged() => setState(() {});
 
   void _showNotice(ResourceNotice? n) {
     if (n == null) return;
@@ -110,6 +116,7 @@ class _ResourceWindowPageState extends State<ResourceWindowPage> {
   @override
   void dispose() {
     _noticeTimer?.cancel();
+    _search.removeListener(_searchFocusChanged);
     _search.dispose();
     _focus.dispose();
     _scroll.dispose();
@@ -121,6 +128,7 @@ class _ResourceWindowPageState extends State<ResourceWindowPage> {
     if (!mounted ||
         widget.viewer != null ||
         !d.hasMore ||
+        d.pageFailed ||
         d.loading ||
         !_scroll.hasClients) {
       return;
@@ -184,6 +192,9 @@ class _ResourceWindowPageState extends State<ResourceWindowPage> {
     return CallbackShortcuts(
       bindings: widget.viewer == null
           ? {
+              if (!_search.hasFocus)
+                const SingleActivator(LogicalKeyboardKey.slash): () =>
+                    _search.requestFocus(),
               const PrimaryActivator(LogicalKeyboardKey.keyF): () =>
                   _search.requestFocus(),
               const SingleActivator(LogicalKeyboardKey.arrowRight): () =>
@@ -193,8 +204,8 @@ class _ResourceWindowPageState extends State<ResourceWindowPage> {
               const SingleActivator(LogicalKeyboardKey.enter): _primary,
             }
           : const {},
-      child: Focus(
-        focusNode: _focus,
+      child: FocusScope(
+        node: _focus,
         autofocus: true,
         // 子窗口入口直接挂在 MaterialApp 下：页面自带 Material（输入框需要）。
         child: Material(
@@ -703,7 +714,9 @@ class _ToolbarState extends State<_Toolbar> {
               hint: d.queryHint,
               height: 30,
               focusNode: widget.focus,
-              onChanged: (q) => widget.actions.onQuery(q, submit: true),
+              debounce: Duration.zero,
+              onChanged: (q) => widget.actions.onQuery(q),
+              onSubmitted: (q) => widget.actions.onQuery(q, submit: true),
             ),
           ),
         ),
@@ -1034,7 +1047,15 @@ class _Wall extends StatelessWidget {
               _refsGrid(width),
             if (data.hasMore)
               SliverToBoxAdapter(
-                child: _LoadMore(onVisible: actions.onLoadMore),
+                child: data.pageFailed
+                    ? Center(
+                        child: TextButton.icon(
+                          onPressed: actions.onLoadMore,
+                          icon: const Icon(Icons.refresh, size: 15),
+                          label: Text(l.resourceWindow_retryPage),
+                        ),
+                      )
+                    : _LoadMore(onVisible: actions.onLoadMore),
               ),
           ];
           return CustomScrollView(
@@ -1256,8 +1277,7 @@ class _Wall extends StatelessWidget {
   );
 }
 
-/// 列表末尾的加载行：一出现在屏幕上就要下一页（不依赖滚动事件；失败 / 被打断后
-/// 只要它还在视口里，下一帧会再要一次，控制器保证幂等）。
+/// 进入视口时加载下一页；失败时由列表末尾的重试按钮替代。
 class _LoadMore extends StatefulWidget {
   const _LoadMore({required this.onVisible});
   final VoidCallback onVisible;

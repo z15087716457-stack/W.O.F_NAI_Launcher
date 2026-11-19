@@ -75,6 +75,7 @@ class ResourceWindowController extends ChangeNotifier {
   double _cellSize = 132;
   bool _connected = true, _loading = false, _disposed = false, _alwaysOnTop;
   bool _replacing = false;
+  bool _pageFailed = false;
   bool get galleryTrash =>
       _kind == FloatingResourceKind.gallery && _group == 'trash';
   String? _error;
@@ -258,6 +259,7 @@ class ResourceWindowController extends ChangeNotifier {
     final target = retain == null || retain < 60 ? 60 : retain;
     _loading = true;
     _loadingMore = more;
+    _pageFailed = false;
     _error = null;
     _changed();
     try {
@@ -354,6 +356,7 @@ class ResourceWindowController extends ChangeNotifier {
           id == _requestId &&
           _code(error) != 'cancelled') {
         _error = '$error';
+        _pageFailed = more;
         if (_replacing) {
           _items.clear();
           _galleryTimeline = const [];
@@ -379,6 +382,7 @@ class ResourceWindowController extends ChangeNotifier {
     _selected = null;
     _detail = null;
     _replacing = true;
+    _pageFailed = false;
     if (clearPage) {
       _items.clear();
       _galleryTimeline = const [];
@@ -912,6 +916,7 @@ class ResourceWindowController extends ChangeNotifier {
           ]
         : [for (final i in _items) _decodeItem(i)],
     total: _page['total'] as int? ?? 0,
+    pageFailed: _pageFailed,
     hasMore: _page['hasMore'] as bool? ?? false,
     selectedId: _selected,
     detail: _detail,

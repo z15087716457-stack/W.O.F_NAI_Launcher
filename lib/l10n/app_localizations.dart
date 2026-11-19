@@ -163,12 +163,6 @@ abstract class AppLocalizations {
   /// **'W.O.F NAI Studio'**
   String get app_title;
 
-  /// No description provided for @settings_visualAssets.
-  ///
-  /// In en, this message translates to:
-  /// **'Interface fonts & licenses'**
-  String get settings_visualAssets;
-
   /// No description provided for @brand_entryTagline.
   ///
   /// In en, this message translates to:
@@ -216,12 +210,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Select All'**
   String get common_selectAll;
-
-  /// No description provided for @common_deselectAll.
-  ///
-  /// In en, this message translates to:
-  /// **'Deselect All'**
-  String get common_deselectAll;
 
   /// No description provided for @common_save.
   ///
@@ -319,12 +307,6 @@ abstract class AppLocalizations {
   /// **'Add'**
   String get common_add;
 
-  /// No description provided for @common_added.
-  ///
-  /// In en, this message translates to:
-  /// **'Added'**
-  String get common_added;
-
   /// No description provided for @common_confirmDelete.
   ///
   /// In en, this message translates to:
@@ -360,12 +342,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Clear the input content?'**
   String get common_clearInputConfirm;
-
-  /// No description provided for @common_daysAgo.
-  ///
-  /// In en, this message translates to:
-  /// **'{days} days ago'**
-  String common_daysAgo(Object days);
 
   /// No description provided for @common_undo.
   ///
@@ -712,7 +688,7 @@ abstract class AppLocalizations {
   /// No description provided for @auth_thirdPartyCompatibilityHint.
   ///
   /// In en, this message translates to:
-  /// **'Supports NovelAI-compatible APIs. Common /v1 and /v1/novelai paths are detected at login. Third-party prices and balance units follow the provider; official Opus free rules do not apply.'**
+  /// **'Supports NovelAI-compatible APIs. Common /v1 and /v1/novelai paths are detected at login. Costs are estimated using NovelAI’s rules. The balance comes from the connected API.'**
   String get auth_thirdPartyCompatibilityHint;
 
   /// No description provided for @auth_thirdPartyApiSiteRequired.
@@ -961,65 +937,11 @@ abstract class AppLocalizations {
   /// **'Default'**
   String get common_default;
 
-  /// No description provided for @settings_title.
-  ///
-  /// In en, this message translates to:
-  /// **'Settings'**
-  String get settings_title;
-
-  /// No description provided for @settings_savedAccounts.
-  ///
-  /// In en, this message translates to:
-  /// **'Saved Accounts'**
-  String get settings_savedAccounts;
-
-  /// No description provided for @settings_style.
-  ///
-  /// In en, this message translates to:
-  /// **'Style'**
-  String get settings_style;
-
-  /// No description provided for @settings_font.
-  ///
-  /// In en, this message translates to:
-  /// **'Font'**
-  String get settings_font;
-
   /// No description provided for @settings_language.
   ///
   /// In en, this message translates to:
   /// **'Language'**
   String get settings_language;
-
-  /// No description provided for @settings_shortcuts.
-  ///
-  /// In en, this message translates to:
-  /// **'Shortcuts'**
-  String get settings_shortcuts;
-
-  /// No description provided for @settings_generationInputSection.
-  ///
-  /// In en, this message translates to:
-  /// **'Input'**
-  String get settings_generationInputSection;
-
-  /// No description provided for @settings_generationFeedbackSection.
-  ///
-  /// In en, this message translates to:
-  /// **'Completion Alert'**
-  String get settings_generationFeedbackSection;
-
-  /// No description provided for @settings_selectFont.
-  ///
-  /// In en, this message translates to:
-  /// **'Select Font'**
-  String get settings_selectFont;
-
-  /// No description provided for @settings_selectLanguage.
-  ///
-  /// In en, this message translates to:
-  /// **'Select Language'**
-  String get settings_selectLanguage;
 
   /// No description provided for @settings_loadFailed.
   ///
@@ -1045,53 +967,11 @@ abstract class AppLocalizations {
   /// **'Automatically save images after generation'**
   String get settings_autoSaveSubtitle;
 
-  /// No description provided for @settings_extraRootsTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Gallery sources'**
-  String get settings_extraRootsTitle;
-
-  /// No description provided for @settings_extraRootsHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Add folders for browsing and search. Adding a parent combines the sources it covers. Removing a source keeps its files and save location.'**
-  String get settings_extraRootsHint;
-
-  /// No description provided for @settings_extraRootsEmpty.
-  ///
-  /// In en, this message translates to:
-  /// **'No extra gallery sources added'**
-  String get settings_extraRootsEmpty;
-
-  /// No description provided for @settings_extraRootsAdd.
-  ///
-  /// In en, this message translates to:
-  /// **'Add Folder'**
-  String get settings_extraRootsAdd;
-
   /// No description provided for @settings_extraRootsAddTitle.
   ///
   /// In en, this message translates to:
   /// **'Select a folder to add as a gallery source'**
   String get settings_extraRootsAddTitle;
-
-  /// No description provided for @settings_extraRootsRemove.
-  ///
-  /// In en, this message translates to:
-  /// **'Remove this gallery source'**
-  String get settings_extraRootsRemove;
-
-  /// No description provided for @settings_extraRootsRemoveConfirmTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Remove gallery source?'**
-  String get settings_extraRootsRemoveConfirmTitle;
-
-  /// No description provided for @settings_extraRootsRemoveConfirmContent.
-  ///
-  /// In en, this message translates to:
-  /// **'Remove \"{path}\" from the gallery (no files in the folder will be deleted).'**
-  String settings_extraRootsRemoveConfirmContent(String path);
 
   /// No description provided for @settings_extraRootsAdded.
   ///
@@ -1111,12 +991,6 @@ abstract class AppLocalizations {
   /// **'The gallery is scanning. This folder will be imported when it finishes'**
   String get settings_extraRootsWaitingScan;
 
-  /// No description provided for @settings_extraRootsRemoved.
-  ///
-  /// In en, this message translates to:
-  /// **'Gallery source removed'**
-  String get settings_extraRootsRemoved;
-
   /// No description provided for @settings_extraRootsDuplicate.
   ///
   /// In en, this message translates to:
@@ -1134,24 +1008,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The selected folder does not exist'**
   String get settings_extraRootsNotFound;
-
-  /// No description provided for @settings_importTagIndex.
-  ///
-  /// In en, this message translates to:
-  /// **'Import Tag Index…'**
-  String get settings_importTagIndex;
-
-  /// No description provided for @settings_importTagIndexPickTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Select tag index file (.jsonl)'**
-  String get settings_importTagIndexPickTitle;
-
-  /// No description provided for @settings_importTagIndexProgress.
-  ///
-  /// In en, this message translates to:
-  /// **'Importing {processed}/{total} lines…'**
-  String settings_importTagIndexProgress(int processed, int total);
 
   /// No description provided for @settings_importTagIndexDone.
   ///
@@ -1194,84 +1050,6 @@ abstract class AppLocalizations {
   /// **'Import Now'**
   String get settings_extraRootsIndexImportConfirm;
 
-  /// No description provided for @settings_version.
-  ///
-  /// In en, this message translates to:
-  /// **'Version {version}'**
-  String settings_version(Object version);
-
-  /// No description provided for @settings_openSource.
-  ///
-  /// In en, this message translates to:
-  /// **'Open Source'**
-  String get settings_openSource;
-
-  /// No description provided for @settings_openSourceSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'View source code and documentation'**
-  String get settings_openSourceSubtitle;
-
-  /// No description provided for @settings_fileLogging.
-  ///
-  /// In en, this message translates to:
-  /// **'Record application logs'**
-  String get settings_fileLogging;
-
-  /// No description provided for @settings_fileLoggingSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Off by default; enable only for troubleshooting. When enabled, logs are written to Documents/NAI_Launcher/logs. When disabled, log files are no longer created or written.'**
-  String get settings_fileLoggingSubtitle;
-
-  /// No description provided for @settings_pathReset.
-  ///
-  /// In en, this message translates to:
-  /// **'Reset to default location'**
-  String get settings_pathReset;
-
-  /// No description provided for @settings_pathSaved.
-  ///
-  /// In en, this message translates to:
-  /// **'Save location updated'**
-  String get settings_pathSaved;
-
-  /// No description provided for @settings_selectFolder.
-  ///
-  /// In en, this message translates to:
-  /// **'Select Save Folder'**
-  String get settings_selectFolder;
-
-  /// No description provided for @settings_vibeLibraryPath.
-  ///
-  /// In en, this message translates to:
-  /// **'Vibe Library Path'**
-  String get settings_vibeLibraryPath;
-
-  /// No description provided for @settings_hiveStoragePath.
-  ///
-  /// In en, this message translates to:
-  /// **'Data Storage Path'**
-  String get settings_hiveStoragePath;
-
-  /// No description provided for @settings_selectVibeLibraryFolder.
-  ///
-  /// In en, this message translates to:
-  /// **'Select Vibe Library Folder'**
-  String get settings_selectVibeLibraryFolder;
-
-  /// No description provided for @settings_selectHiveFolder.
-  ///
-  /// In en, this message translates to:
-  /// **'Select Data Storage Folder'**
-  String get settings_selectHiveFolder;
-
-  /// No description provided for @settings_pathSavedRestartRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Path updated, restart to apply changes'**
-  String get settings_pathSavedRestartRequired;
-
   /// No description provided for @settings_accountType.
   ///
   /// In en, this message translates to:
@@ -1289,12 +1067,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Third-party Site API'**
   String get settings_thirdPartyApiAccount;
-
-  /// No description provided for @settings_goToLogin.
-  ///
-  /// In en, this message translates to:
-  /// **'Go to Login'**
-  String get settings_goToLogin;
 
   /// No description provided for @settings_changeAvatar.
   ///
@@ -1331,12 +1103,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Set as Default'**
   String get settings_setAsDefault;
-
-  /// No description provided for @settings_defaultAccount.
-  ///
-  /// In en, this message translates to:
-  /// **'Default'**
-  String get settings_defaultAccount;
 
   /// No description provided for @settings_nickname.
   ///
@@ -1584,18 +1350,6 @@ abstract class AppLocalizations {
   /// **'Steps: {steps}'**
   String generation_steps(Object steps);
 
-  /// No description provided for @generation_stepsLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Steps'**
-  String get generation_stepsLabel;
-
-  /// No description provided for @generation_guidance.
-  ///
-  /// In en, this message translates to:
-  /// **'Guidance'**
-  String get generation_guidance;
-
   /// No description provided for @generation_cfgScale.
   ///
   /// In en, this message translates to:
@@ -1614,47 +1368,17 @@ abstract class AppLocalizations {
   /// **'Random'**
   String get generation_seedRandom;
 
-  /// No description provided for @generation_samplerRecommended.
-  ///
-  /// In en, this message translates to:
-  /// **'RECOMMENDED'**
-  String get generation_samplerRecommended;
-
-  /// No description provided for @generation_samplerOther.
-  ///
-  /// In en, this message translates to:
-  /// **'OTHER'**
-  String get generation_samplerOther;
-
-  /// No description provided for @generation_advancedOptions.
-  ///
-  /// In en, this message translates to:
-  /// **'Advanced Options'**
-  String get generation_advancedOptions;
-
   /// No description provided for @generation_smea.
   ///
   /// In en, this message translates to:
   /// **'SMEA'**
   String get generation_smea;
 
-  /// No description provided for @generation_smeaSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Improve generation quality for large images'**
-  String get generation_smeaSubtitle;
-
   /// No description provided for @generation_smeaDyn.
   ///
   /// In en, this message translates to:
   /// **'SMEA DYN'**
   String get generation_smeaDyn;
-
-  /// No description provided for @generation_smeaDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'High resolution samplers will automatically be used above a certain image size'**
-  String get generation_smeaDescription;
 
   /// No description provided for @generation_cfgRescale.
   ///
@@ -1667,18 +1391,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Noise Schedule'**
   String get generation_noiseSchedule;
-
-  /// No description provided for @generation_modelGroupNew.
-  ///
-  /// In en, this message translates to:
-  /// **'NEW'**
-  String get generation_modelGroupNew;
-
-  /// No description provided for @generation_modelGroupLegacy.
-  ///
-  /// In en, this message translates to:
-  /// **'LEGACY'**
-  String get generation_modelGroupLegacy;
 
   /// No description provided for @generation_modelDesc_v5Curated.
   ///
@@ -1716,24 +1428,6 @@ abstract class AppLocalizations {
   /// **'NovelAI\'s V4 full model.'**
   String get generation_modelDesc_v4Full;
 
-  /// No description provided for @generation_sectionCharacters.
-  ///
-  /// In en, this message translates to:
-  /// **'Character Prompts'**
-  String get generation_sectionCharacters;
-
-  /// No description provided for @generation_sectionCharactersSub.
-  ///
-  /// In en, this message translates to:
-  /// **'Create a separate prompt for characters in your scene.'**
-  String get generation_sectionCharactersSub;
-
-  /// No description provided for @character_positionLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Position'**
-  String get character_positionLabel;
-
   /// No description provided for @anlas_subscription.
   ///
   /// In en, this message translates to:
@@ -1752,29 +1446,11 @@ abstract class AppLocalizations {
   /// **'Prompt'**
   String get prompt_positive;
 
-  /// No description provided for @prompt_baseTab.
-  ///
-  /// In en, this message translates to:
-  /// **'Base Prompt'**
-  String get prompt_baseTab;
-
   /// No description provided for @prompt_negativeTab.
   ///
   /// In en, this message translates to:
   /// **'Undesired Content'**
   String get prompt_negativeTab;
-
-  /// No description provided for @prompt_transparentBg.
-  ///
-  /// In en, this message translates to:
-  /// **'Transparent BG'**
-  String get prompt_transparentBg;
-
-  /// No description provided for @prompt_chunksMenu.
-  ///
-  /// In en, this message translates to:
-  /// **'Tools & toggles'**
-  String get prompt_chunksMenu;
 
   /// No description provided for @qualityTags_presetChip.
   ///
@@ -1805,60 +1481,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Main Prompt'**
   String get prompt_mainPositive;
-
-  /// No description provided for @prompt_mainNegative.
-  ///
-  /// In en, this message translates to:
-  /// **'Main Prompt (Undesired Content)'**
-  String get prompt_mainNegative;
-
-  /// No description provided for @prompt_characterPrompts.
-  ///
-  /// In en, this message translates to:
-  /// **'Multi-Character Prompts'**
-  String get prompt_characterPrompts;
-
-  /// No description provided for @prompt_finalPrompt.
-  ///
-  /// In en, this message translates to:
-  /// **'Final Effective Prompt'**
-  String get prompt_finalPrompt;
-
-  /// No description provided for @prompt_finalNegative.
-  ///
-  /// In en, this message translates to:
-  /// **'Final Effective Undesired Content'**
-  String get prompt_finalNegative;
-
-  /// No description provided for @prompt_importedCharacters.
-  ///
-  /// In en, this message translates to:
-  /// **'Imported {count} character(s)'**
-  String prompt_importedCharacters(int count);
-
-  /// No description provided for @prompt_characterPromptReplaced.
-  ///
-  /// In en, this message translates to:
-  /// **'Replaced character prompts'**
-  String get prompt_characterPromptReplaced;
-
-  /// No description provided for @prompt_characterPromptAppended.
-  ///
-  /// In en, this message translates to:
-  /// **'Appended character prompts ({count} character(s))'**
-  String prompt_characterPromptAppended(Object count);
-
-  /// No description provided for @prompt_smartDecomposedWithCharacters.
-  ///
-  /// In en, this message translates to:
-  /// **'Decomposed into main prompt + {count} character(s)'**
-  String prompt_smartDecomposedWithCharacters(Object count);
-
-  /// No description provided for @prompt_appliedToMainPrompt.
-  ///
-  /// In en, this message translates to:
-  /// **'Applied to main prompt'**
-  String get prompt_appliedToMainPrompt;
 
   /// No description provided for @prompt_searchHint.
   ///
@@ -1926,59 +1548,11 @@ abstract class AppLocalizations {
   /// **'Krita Bridge is generating. Wait for the current task to finish.'**
   String get kritaBridge_busyGenerating;
 
-  /// No description provided for @prompt_unwantedContent.
-  ///
-  /// In en, this message translates to:
-  /// **'Content you don\'t want in the image...'**
-  String get prompt_unwantedContent;
-
-  /// No description provided for @prompt_autoFormat.
-  ///
-  /// In en, this message translates to:
-  /// **'Auto Format'**
-  String get prompt_autoFormat;
-
-  /// No description provided for @prompt_autoFormatSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Normalize commas and whitespace; remove redundant 1x weight markers'**
-  String get prompt_autoFormatSubtitle;
-
-  /// No description provided for @prompt_highlightEmphasis.
-  ///
-  /// In en, this message translates to:
-  /// **'Highlight Emphasis'**
-  String get prompt_highlightEmphasis;
-
-  /// No description provided for @prompt_highlightEmphasisSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Highlight brackets and weight syntax'**
-  String get prompt_highlightEmphasisSubtitle;
-
-  /// No description provided for @prompt_sdSyntaxAutoConvert.
-  ///
-  /// In en, this message translates to:
-  /// **'SD Syntax Auto Convert'**
-  String get prompt_sdSyntaxAutoConvert;
-
-  /// No description provided for @prompt_sdSyntaxAutoConvertSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Convert SD weights to NAI syntax on blur or generation'**
-  String get prompt_sdSyntaxAutoConvertSubtitle;
-
   /// No description provided for @prompt_cooccurrenceRecommendation.
   ///
   /// In en, this message translates to:
   /// **'Tag Expansion'**
   String get prompt_cooccurrenceRecommendation;
-
-  /// No description provided for @prompt_cooccurrenceRecommendationSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Hold Ctrl (⌘ on Mac) and click or drag-select to search tags and see related suggestions.'**
-  String get prompt_cooccurrenceRecommendationSubtitle;
 
   /// No description provided for @prompt_formatted.
   ///
@@ -2028,77 +1602,17 @@ abstract class AppLocalizations {
   /// **'Copy failed: {error}'**
   String image_copyFailed(Object error);
 
-  /// No description provided for @img2img_title.
-  ///
-  /// In en, this message translates to:
-  /// **'Image2Image'**
-  String get img2img_title;
-
-  /// No description provided for @img2img_subtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Generate variations from a source image'**
-  String get img2img_subtitle;
-
-  /// No description provided for @img2img_enabled.
-  ///
-  /// In en, this message translates to:
-  /// **'Enabled'**
-  String get img2img_enabled;
-
-  /// No description provided for @img2img_sourceImage.
-  ///
-  /// In en, this message translates to:
-  /// **'Source Image'**
-  String get img2img_sourceImage;
-
   /// No description provided for @img2img_strength.
   ///
   /// In en, this message translates to:
   /// **'Strength'**
   String get img2img_strength;
 
-  /// No description provided for @img2img_strengthHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Higher values create greater difference from original'**
-  String get img2img_strengthHint;
-
   /// No description provided for @img2img_noise.
   ///
   /// In en, this message translates to:
   /// **'Noise'**
   String get img2img_noise;
-
-  /// No description provided for @img2img_noiseHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Add extra noise for more variation'**
-  String get img2img_noiseHint;
-
-  /// No description provided for @img2img_clearSettings.
-  ///
-  /// In en, this message translates to:
-  /// **'Clear Image2Image Settings'**
-  String get img2img_clearSettings;
-
-  /// No description provided for @img2img_changeImage.
-  ///
-  /// In en, this message translates to:
-  /// **'Change Image'**
-  String get img2img_changeImage;
-
-  /// No description provided for @img2img_removeImage.
-  ///
-  /// In en, this message translates to:
-  /// **'Remove Image'**
-  String get img2img_removeImage;
-
-  /// No description provided for @img2img_selectFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to select image: {error}'**
-  String img2img_selectFailed(Object error);
 
   /// No description provided for @img2img_editImage.
   ///
@@ -2118,59 +1632,17 @@ abstract class AppLocalizations {
   /// **'The edited image is now the new source image'**
   String get img2img_editApplied;
 
-  /// No description provided for @img2img_uploadImage.
-  ///
-  /// In en, this message translates to:
-  /// **'Upload Image'**
-  String get img2img_uploadImage;
-
-  /// No description provided for @img2img_dropToAdd.
-  ///
-  /// In en, this message translates to:
-  /// **'Release to set as source image'**
-  String get img2img_dropToAdd;
-
   /// No description provided for @img2img_moreActions.
   ///
   /// In en, this message translates to:
   /// **'More actions'**
   String get img2img_moreActions;
 
-  /// No description provided for @img2img_drawSketch.
-  ///
-  /// In en, this message translates to:
-  /// **'Draw Sketch'**
-  String get img2img_drawSketch;
-
   /// No description provided for @img2img_inpaint.
   ///
   /// In en, this message translates to:
   /// **'Inpaint'**
   String get img2img_inpaint;
-
-  /// No description provided for @img2img_inpaintStrength.
-  ///
-  /// In en, this message translates to:
-  /// **'Inpaint Strength'**
-  String get img2img_inpaintStrength;
-
-  /// No description provided for @img2img_inpaintStrengthHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Higher values make the masked area diverge more from the current source image'**
-  String get img2img_inpaintStrengthHint;
-
-  /// No description provided for @img2img_inpaintPendingHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Click Inpaint to open the canvas, mark the region you want to repaint with brush, eraser, or selection tools, then return here and use the main generate button.'**
-  String get img2img_inpaintPendingHint;
-
-  /// No description provided for @img2img_inpaintReadyHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Mask loaded. The next generation will repaint only the masked area.'**
-  String get img2img_inpaintReadyHint;
 
   /// No description provided for @img2img_inpaintMaskReady.
   ///
@@ -2262,18 +1734,6 @@ abstract class AppLocalizations {
   /// **'Enhance'**
   String get img2img_enhance;
 
-  /// No description provided for @img2img_enhanceMagnitude.
-  ///
-  /// In en, this message translates to:
-  /// **'Magnitude'**
-  String get img2img_enhanceMagnitude;
-
-  /// No description provided for @img2img_enhanceUpscaleAmount.
-  ///
-  /// In en, this message translates to:
-  /// **'Upscale Amount'**
-  String get img2img_enhanceUpscaleAmount;
-
   /// No description provided for @img2img_enhanceMax.
   ///
   /// In en, this message translates to:
@@ -2315,12 +1775,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Start Upscale'**
   String get img2img_startUpscale;
-
-  /// No description provided for @img2img_novelAiUpscaleComplete.
-  ///
-  /// In en, this message translates to:
-  /// **'NovelAI upscale complete'**
-  String get img2img_novelAiUpscaleComplete;
 
   /// No description provided for @img2img_decodeSourceFailed.
   ///
@@ -2388,71 +1842,11 @@ abstract class AppLocalizations {
   /// **'Clear Layer'**
   String get editor_clearLayer;
 
-  /// No description provided for @editor_toolBrush.
-  ///
-  /// In en, this message translates to:
-  /// **'Brush'**
-  String get editor_toolBrush;
-
-  /// No description provided for @editor_toolEraser.
-  ///
-  /// In en, this message translates to:
-  /// **'Eraser'**
-  String get editor_toolEraser;
-
   /// No description provided for @editor_toolFill.
   ///
   /// In en, this message translates to:
   /// **'Fill'**
   String get editor_toolFill;
-
-  /// No description provided for @editor_toolMagicWand.
-  ///
-  /// In en, this message translates to:
-  /// **'Magic Wand'**
-  String get editor_toolMagicWand;
-
-  /// No description provided for @editor_magicWandMode.
-  ///
-  /// In en, this message translates to:
-  /// **'Selection method'**
-  String get editor_magicWandMode;
-
-  /// No description provided for @editor_magicWandSmartObject.
-  ///
-  /// In en, this message translates to:
-  /// **'Smart object (EfficientViT)'**
-  String get editor_magicWandSmartObject;
-
-  /// No description provided for @editor_magicWandColorArea.
-  ///
-  /// In en, this message translates to:
-  /// **'Color area (flood fill)'**
-  String get editor_magicWandColorArea;
-
-  /// No description provided for @editor_magicWandSmartHelp.
-  ///
-  /// In en, this message translates to:
-  /// **'Click the object to select. The first use downloads the approximately 133 MiB EfficientViT-SAM L0 model from MIT Han Lab (Apache-2.0), then keeps it locally.'**
-  String get editor_magicWandSmartHelp;
-
-  /// No description provided for @editor_magicWandColorHelp.
-  ///
-  /// In en, this message translates to:
-  /// **'Click a contiguous region of similar color. This works best on flat, clean boundaries and requires no model download.'**
-  String get editor_magicWandColorHelp;
-
-  /// No description provided for @editor_magicWandInvert.
-  ///
-  /// In en, this message translates to:
-  /// **'Invert result'**
-  String get editor_magicWandInvert;
-
-  /// No description provided for @editor_toolLine.
-  ///
-  /// In en, this message translates to:
-  /// **'Line'**
-  String get editor_toolLine;
 
   /// No description provided for @editor_toolRectSelect.
   ///
@@ -2496,35 +1890,11 @@ abstract class AppLocalizations {
   /// **'Layers'**
   String get editor_layers;
 
-  /// No description provided for @editor_fillClosedRegion.
-  ///
-  /// In en, this message translates to:
-  /// **'Fill Closed Region'**
-  String get editor_fillClosedRegion;
-
   /// No description provided for @editor_resetMask.
   ///
   /// In en, this message translates to:
   /// **'Reset Mask'**
   String get editor_resetMask;
-
-  /// No description provided for @editor_zoomIn.
-  ///
-  /// In en, this message translates to:
-  /// **'Zoom In'**
-  String get editor_zoomIn;
-
-  /// No description provided for @editor_zoomOut.
-  ///
-  /// In en, this message translates to:
-  /// **'Zoom Out'**
-  String get editor_zoomOut;
-
-  /// No description provided for @editor_fitToWindow.
-  ///
-  /// In en, this message translates to:
-  /// **'Fit to Window'**
-  String get editor_fitToWindow;
 
   /// No description provided for @editor_effectBrightness.
   ///
@@ -2634,144 +2004,6 @@ abstract class AppLocalizations {
   /// **'Canvas Size'**
   String get editor_canvasSizeTitle;
 
-  /// No description provided for @editor_presetSize.
-  ///
-  /// In en, this message translates to:
-  /// **'Preset Size'**
-  String get editor_presetSize;
-
-  /// No description provided for @editor_customSize.
-  ///
-  /// In en, this message translates to:
-  /// **'Custom'**
-  String get editor_customSize;
-
-  /// No description provided for @editor_contentHandling.
-  ///
-  /// In en, this message translates to:
-  /// **'Content Handling'**
-  String get editor_contentHandling;
-
-  /// No description provided for @editor_contentCrop.
-  ///
-  /// In en, this message translates to:
-  /// **'Crop'**
-  String get editor_contentCrop;
-
-  /// No description provided for @editor_contentPad.
-  ///
-  /// In en, this message translates to:
-  /// **'Pad'**
-  String get editor_contentPad;
-
-  /// No description provided for @editor_contentStretch.
-  ///
-  /// In en, this message translates to:
-  /// **'Stretch'**
-  String get editor_contentStretch;
-
-  /// No description provided for @editor_width.
-  ///
-  /// In en, this message translates to:
-  /// **'Width'**
-  String get editor_width;
-
-  /// No description provided for @editor_height.
-  ///
-  /// In en, this message translates to:
-  /// **'Height'**
-  String get editor_height;
-
-  /// No description provided for @editor_lockAspectRatio.
-  ///
-  /// In en, this message translates to:
-  /// **'Lock aspect ratio'**
-  String get editor_lockAspectRatio;
-
-  /// No description provided for @editor_unlockAspectRatio.
-  ///
-  /// In en, this message translates to:
-  /// **'Unlock aspect ratio'**
-  String get editor_unlockAspectRatio;
-
-  /// No description provided for @editor_sizePreview.
-  ///
-  /// In en, this message translates to:
-  /// **'Size Preview'**
-  String get editor_sizePreview;
-
-  /// No description provided for @editor_originalSize.
-  ///
-  /// In en, this message translates to:
-  /// **'Original'**
-  String get editor_originalSize;
-
-  /// No description provided for @editor_newSize.
-  ///
-  /// In en, this message translates to:
-  /// **'New Size'**
-  String get editor_newSize;
-
-  /// No description provided for @editor_cropModeDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Crop mode - keep aspect ratio and crop'**
-  String get editor_cropModeDescription;
-
-  /// No description provided for @editor_padModeDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Pad mode - keep aspect ratio and pad'**
-  String get editor_padModeDescription;
-
-  /// No description provided for @editor_stretchModeDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Stretch mode - stretch to fill'**
-  String get editor_stretchModeDescription;
-
-  /// No description provided for @editor_canvasPresetSquare.
-  ///
-  /// In en, this message translates to:
-  /// **'Square {size}'**
-  String editor_canvasPresetSquare(Object size);
-
-  /// No description provided for @editor_canvasPresetLandscape.
-  ///
-  /// In en, this message translates to:
-  /// **'Landscape {ratio}'**
-  String editor_canvasPresetLandscape(Object ratio);
-
-  /// No description provided for @editor_canvasPresetPortrait.
-  ///
-  /// In en, this message translates to:
-  /// **'Portrait {ratio}'**
-  String editor_canvasPresetPortrait(Object ratio);
-
-  /// No description provided for @editor_canvasPresetNaiPortrait.
-  ///
-  /// In en, this message translates to:
-  /// **'NAI Portrait'**
-  String get editor_canvasPresetNaiPortrait;
-
-  /// No description provided for @editor_canvasPresetNaiLandscape.
-  ///
-  /// In en, this message translates to:
-  /// **'NAI Landscape'**
-  String get editor_canvasPresetNaiLandscape;
-
-  /// No description provided for @editor_canvasPresetFullHd.
-  ///
-  /// In en, this message translates to:
-  /// **'Full HD 16:9'**
-  String get editor_canvasPresetFullHd;
-
-  /// No description provided for @editor_colorPanelTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Color'**
-  String get editor_colorPanelTitle;
-
   /// No description provided for @editor_colorPickerTitle.
   ///
   /// In en, this message translates to:
@@ -2868,96 +2100,6 @@ abstract class AppLocalizations {
   /// **'Vibe Transfer'**
   String get vibe_title;
 
-  /// No description provided for @vibe_description.
-  ///
-  /// In en, this message translates to:
-  /// **'Change the image, keep the vision.'**
-  String get vibe_description;
-
-  /// No description provided for @vibe_addFromFileTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Add from File'**
-  String get vibe_addFromFileTitle;
-
-  /// No description provided for @vibe_addFromFileSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'PNG, JPG, Vibe files'**
-  String get vibe_addFromFileSubtitle;
-
-  /// No description provided for @vibe_addFromLibraryTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Import from Library'**
-  String get vibe_addFromLibraryTitle;
-
-  /// No description provided for @vibe_addFromLibrarySubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Select from Vibe Library'**
-  String get vibe_addFromLibrarySubtitle;
-
-  /// No description provided for @vibe_addReference.
-  ///
-  /// In en, this message translates to:
-  /// **'Add Reference'**
-  String get vibe_addReference;
-
-  /// No description provided for @vibe_clearAll.
-  ///
-  /// In en, this message translates to:
-  /// **'Clear All'**
-  String get vibe_clearAll;
-
-  /// No description provided for @vibe_cleared.
-  ///
-  /// In en, this message translates to:
-  /// **'Cleared {count} vibes'**
-  String vibe_cleared(int count);
-
-  /// No description provided for @vibe_referenceStrength.
-  ///
-  /// In en, this message translates to:
-  /// **'Ref Strength'**
-  String get vibe_referenceStrength;
-
-  /// No description provided for @vibe_infoExtraction.
-  ///
-  /// In en, this message translates to:
-  /// **'Information Extracted'**
-  String get vibe_infoExtraction;
-
-  /// No description provided for @vibe_remove.
-  ///
-  /// In en, this message translates to:
-  /// **'Remove'**
-  String get vibe_remove;
-
-  /// No description provided for @reference_enabled.
-  ///
-  /// In en, this message translates to:
-  /// **'Enabled'**
-  String get reference_enabled;
-
-  /// No description provided for @reference_enable.
-  ///
-  /// In en, this message translates to:
-  /// **'Enable reference'**
-  String get reference_enable;
-
-  /// No description provided for @reference_disable.
-  ///
-  /// In en, this message translates to:
-  /// **'Disable reference'**
-  String get reference_disable;
-
-  /// No description provided for @vibe_normalize.
-  ///
-  /// In en, this message translates to:
-  /// **'Normalize Reference Strength Values'**
-  String get vibe_normalize;
-
   /// No description provided for @vibe_sourceType_png.
   ///
   /// In en, this message translates to:
@@ -2999,18 +2141,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Name'**
   String get vibe_name;
-
-  /// No description provided for @character_buttonLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Char/Position'**
-  String get character_buttonLabel;
-
-  /// No description provided for @character_addCharacter.
-  ///
-  /// In en, this message translates to:
-  /// **'Add Character'**
-  String get character_addCharacter;
 
   /// No description provided for @character_number.
   ///
@@ -3114,12 +2244,6 @@ abstract class AppLocalizations {
   /// **'Send failed: {error}'**
   String gallery_sendFailed(Object error);
 
-  /// No description provided for @onlineGallery_login.
-  ///
-  /// In en, this message translates to:
-  /// **'Login'**
-  String get onlineGallery_login;
-
   /// No description provided for @onlineGallery_pleaseLogin.
   ///
   /// In en, this message translates to:
@@ -3221,72 +2345,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Explicit'**
   String get onlineGallery_ratingExplicit;
-
-  /// No description provided for @onlineGallery_blacklistTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Online Gallery Blacklist'**
-  String get onlineGallery_blacklistTitle;
-
-  /// No description provided for @onlineGallery_blacklistSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Images containing blacklisted tags will be hidden directly in the online gallery.'**
-  String get onlineGallery_blacklistSubtitle;
-
-  /// No description provided for @onlineGallery_addBlacklistTagHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Add blacklist tag'**
-  String get onlineGallery_addBlacklistTagHint;
-
-  /// No description provided for @onlineGallery_noLocalBlacklistTags.
-  ///
-  /// In en, this message translates to:
-  /// **'No local blacklist tags'**
-  String get onlineGallery_noLocalBlacklistTags;
-
-  /// No description provided for @onlineGallery_autoSyncOnStartup.
-  ///
-  /// In en, this message translates to:
-  /// **'Auto-sync on startup'**
-  String get onlineGallery_autoSyncOnStartup;
-
-  /// No description provided for @onlineGallery_autoSyncOnStartupSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Enabled by default; you can turn it off at any time'**
-  String get onlineGallery_autoSyncOnStartupSubtitle;
-
-  /// No description provided for @onlineGallery_lastSyncFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Last sync failed: {error}'**
-  String onlineGallery_lastSyncFailed(Object error);
-
-  /// No description provided for @onlineGallery_neverSyncedBlacklist.
-  ///
-  /// In en, this message translates to:
-  /// **'Danbooru blacklist has not been synced yet'**
-  String get onlineGallery_neverSyncedBlacklist;
-
-  /// No description provided for @onlineGallery_lastSync.
-  ///
-  /// In en, this message translates to:
-  /// **'Last sync: {time}'**
-  String onlineGallery_lastSync(Object time);
-
-  /// No description provided for @onlineGallery_blacklistSettingsTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Online Gallery Blacklist Settings'**
-  String get onlineGallery_blacklistSettingsTitle;
-
-  /// No description provided for @onlineGallery_blacklistLoginHint.
-  ///
-  /// In en, this message translates to:
-  /// **'You are not logged in to Danbooru. The local blacklist still works, but syncing requires login.'**
-  String get onlineGallery_blacklistLoginHint;
 
   /// No description provided for @onlineGallery_downloadSelectedCompleted.
   ///
@@ -3395,12 +2453,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Read-only favorites'**
   String get onlineGallery_gelbooruReadOnly;
-
-  /// No description provided for @tooltip_fullscreenEdit.
-  ///
-  /// In en, this message translates to:
-  /// **'Fullscreen Edit'**
-  String get tooltip_fullscreenEdit;
 
   /// No description provided for @tooltip_decreaseWeight.
   ///
@@ -3612,23 +2664,11 @@ abstract class AppLocalizations {
   /// **'Quality'**
   String get qualityTags_label;
 
-  /// No description provided for @transparentBackground_tooltip.
-  ///
-  /// In en, this message translates to:
-  /// **'Adds \"transparent background\" to the prompt and generates images with an alpha channel (V5 only)'**
-  String get transparentBackground_tooltip;
-
   /// No description provided for @qualityTags_positive.
   ///
   /// In en, this message translates to:
   /// **'Quality (Prompt)'**
   String get qualityTags_positive;
-
-  /// No description provided for @qualityTags_negative.
-  ///
-  /// In en, this message translates to:
-  /// **'Quality (Undesired Content)'**
-  String get qualityTags_negative;
 
   /// No description provided for @qualityTags_disabled.
   ///
@@ -3737,24 +2777,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'💡 To generate adult content, add nsfw to your prompt. The nsfw tag will be auto-removed from Undesired Content'**
   String get ucPreset_nsfwHint;
-
-  /// No description provided for @generation_imageCount.
-  ///
-  /// In en, this message translates to:
-  /// **'Number of Images'**
-  String get generation_imageCount;
-
-  /// No description provided for @generation_requestCountTooltip.
-  ///
-  /// In en, this message translates to:
-  /// **'Requests: each click sends N generation requests'**
-  String get generation_requestCountTooltip;
-
-  /// No description provided for @generation_imageCountTotal.
-  ///
-  /// In en, this message translates to:
-  /// **'{requests} requests × {perRequest} images = {total} total'**
-  String generation_imageCountTotal(int requests, int perRequest, int total);
 
   /// No description provided for @warmup_networkCheck.
   ///
@@ -4044,72 +3066,6 @@ abstract class AppLocalizations {
   /// **'Fetching meta tags...'**
   String get warmup_fetchingMetaTags;
 
-  /// No description provided for @resolution_groupNormal.
-  ///
-  /// In en, this message translates to:
-  /// **'NORMAL'**
-  String get resolution_groupNormal;
-
-  /// No description provided for @resolution_groupLarge.
-  ///
-  /// In en, this message translates to:
-  /// **'LARGE'**
-  String get resolution_groupLarge;
-
-  /// No description provided for @resolution_groupWallpaper.
-  ///
-  /// In en, this message translates to:
-  /// **'WALLPAPER'**
-  String get resolution_groupWallpaper;
-
-  /// No description provided for @resolution_groupSmall.
-  ///
-  /// In en, this message translates to:
-  /// **'SMALL'**
-  String get resolution_groupSmall;
-
-  /// No description provided for @resolution_groupCustom.
-  ///
-  /// In en, this message translates to:
-  /// **'CUSTOM'**
-  String get resolution_groupCustom;
-
-  /// No description provided for @resolution_typePortrait.
-  ///
-  /// In en, this message translates to:
-  /// **'Portrait'**
-  String get resolution_typePortrait;
-
-  /// No description provided for @resolution_typeLandscape.
-  ///
-  /// In en, this message translates to:
-  /// **'Landscape'**
-  String get resolution_typeLandscape;
-
-  /// No description provided for @resolution_typeSquare.
-  ///
-  /// In en, this message translates to:
-  /// **'Square'**
-  String get resolution_typeSquare;
-
-  /// No description provided for @resolution_typeCustom.
-  ///
-  /// In en, this message translates to:
-  /// **'Custom'**
-  String get resolution_typeCustom;
-
-  /// No description provided for @resolution_width.
-  ///
-  /// In en, this message translates to:
-  /// **'Width'**
-  String get resolution_width;
-
-  /// No description provided for @resolution_height.
-  ///
-  /// In en, this message translates to:
-  /// **'Height'**
-  String get resolution_height;
-
   /// No description provided for @api_error_429.
   ///
   /// In en, this message translates to:
@@ -4206,12 +3162,6 @@ abstract class AppLocalizations {
   /// **'Choose a use after loading'**
   String get drop_processingSubtitle;
 
-  /// No description provided for @characterEditor_clearAll.
-  ///
-  /// In en, this message translates to:
-  /// **'Clear All'**
-  String get characterEditor_clearAll;
-
   /// No description provided for @characterEditor_clearAllTitle.
   ///
   /// In en, this message translates to:
@@ -4230,29 +3180,11 @@ abstract class AppLocalizations {
   /// **'Enter character name'**
   String get characterEditor_nameHint;
 
-  /// No description provided for @characterEditor_enabled.
-  ///
-  /// In en, this message translates to:
-  /// **'Enabled'**
-  String get characterEditor_enabled;
-
   /// No description provided for @characterEditor_negativePromptHint.
   ///
   /// In en, this message translates to:
   /// **'Enter Undesired Content for this character...'**
   String get characterEditor_negativePromptHint;
-
-  /// No description provided for @characterCanvas_title.
-  ///
-  /// In en, this message translates to:
-  /// **'Character Positions'**
-  String get characterCanvas_title;
-
-  /// Button that exits character position editing
-  ///
-  /// In en, this message translates to:
-  /// **'Finish Editing Positions'**
-  String get characterCanvas_finishEditing;
 
   /// No description provided for @characterCanvas_aiChoice.
   ///
@@ -4265,150 +3197,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Custom'**
   String get characterCanvas_custom;
-
-  /// No description provided for @characterCanvas_aiHint.
-  ///
-  /// In en, this message translates to:
-  /// **'AI will place all characters automatically'**
-  String get characterCanvas_aiHint;
-
-  /// No description provided for @characterCanvas_dragHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Drag anchors to position characters; release to apply'**
-  String get characterCanvas_dragHint;
-
-  /// No description provided for @characterEditor_genderFemale.
-  ///
-  /// In en, this message translates to:
-  /// **'Female'**
-  String get characterEditor_genderFemale;
-
-  /// No description provided for @characterEditor_genderMale.
-  ///
-  /// In en, this message translates to:
-  /// **'Male'**
-  String get characterEditor_genderMale;
-
-  /// No description provided for @characterEditor_genderOther.
-  ///
-  /// In en, this message translates to:
-  /// **'Other'**
-  String get characterEditor_genderOther;
-
-  /// No description provided for @characterEditor_addFemale.
-  ///
-  /// In en, this message translates to:
-  /// **'F'**
-  String get characterEditor_addFemale;
-
-  /// No description provided for @characterEditor_addMale.
-  ///
-  /// In en, this message translates to:
-  /// **'M'**
-  String get characterEditor_addMale;
-
-  /// No description provided for @characterEditor_addOther.
-  ///
-  /// In en, this message translates to:
-  /// **'Other'**
-  String get characterEditor_addOther;
-
-  /// No description provided for @characterEditor_moveUp.
-  ///
-  /// In en, this message translates to:
-  /// **'Move Up'**
-  String get characterEditor_moveUp;
-
-  /// No description provided for @characterEditor_moveDown.
-  ///
-  /// In en, this message translates to:
-  /// **'Move Down'**
-  String get characterEditor_moveDown;
-
-  /// No description provided for @toolbar_fullscreenEdit.
-  ///
-  /// In en, this message translates to:
-  /// **'Fullscreen Edit'**
-  String get toolbar_fullscreenEdit;
-
-  /// No description provided for @characterTooltip_noCharacters.
-  ///
-  /// In en, this message translates to:
-  /// **'No characters configured'**
-  String get characterTooltip_noCharacters;
-
-  /// No description provided for @characterTooltip_clickToConfig.
-  ///
-  /// In en, this message translates to:
-  /// **'Click to configure multi-character prompts'**
-  String get characterTooltip_clickToConfig;
-
-  /// No description provided for @characterTooltip_globalAiLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Global AI Position:'**
-  String get characterTooltip_globalAiLabel;
-
-  /// No description provided for @characterTooltip_enabled.
-  ///
-  /// In en, this message translates to:
-  /// **'Enabled'**
-  String get characterTooltip_enabled;
-
-  /// No description provided for @characterTooltip_disabled.
-  ///
-  /// In en, this message translates to:
-  /// **'Disabled'**
-  String get characterTooltip_disabled;
-
-  /// No description provided for @characterTooltip_positionAi.
-  ///
-  /// In en, this message translates to:
-  /// **'AI'**
-  String get characterTooltip_positionAi;
-
-  /// No description provided for @characterTooltip_disabledLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Disabled'**
-  String get characterTooltip_disabledLabel;
-
-  /// No description provided for @characterTooltip_promptLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Prompt'**
-  String get characterTooltip_promptLabel;
-
-  /// No description provided for @characterTooltip_negativeLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Undesired Content'**
-  String get characterTooltip_negativeLabel;
-
-  /// No description provided for @characterTooltip_notSet.
-  ///
-  /// In en, this message translates to:
-  /// **'Not set'**
-  String get characterTooltip_notSet;
-
-  /// No description provided for @characterTooltip_summary.
-  ///
-  /// In en, this message translates to:
-  /// **'{total} characters ({enabled} enabled)'**
-  String characterTooltip_summary(Object total, Object enabled);
-
-  /// No description provided for @characterTooltip_viewFullConfig.
-  ///
-  /// In en, this message translates to:
-  /// **'Click for full configuration'**
-  String get characterTooltip_viewFullConfig;
-
-  /// No description provided for @globalSettings_saveFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Save failed: {error}'**
-  String globalSettings_saveFailed(Object error);
 
   /// No description provided for @nav_generate.
   ///
@@ -4427,102 +3215,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Settings'**
   String get nav_settings;
-
-  /// No description provided for @sync_preparing.
-  ///
-  /// In en, this message translates to:
-  /// **'Preparing to sync...'**
-  String get sync_preparing;
-
-  /// No description provided for @sync_fetching.
-  ///
-  /// In en, this message translates to:
-  /// **'Fetching {category}...'**
-  String sync_fetching(Object category);
-
-  /// No description provided for @sync_processing.
-  ///
-  /// In en, this message translates to:
-  /// **'Processing data...'**
-  String get sync_processing;
-
-  /// No description provided for @sync_saving.
-  ///
-  /// In en, this message translates to:
-  /// **'Saving...'**
-  String get sync_saving;
-
-  /// No description provided for @sync_completed.
-  ///
-  /// In en, this message translates to:
-  /// **'Sync completed, {count} tags'**
-  String sync_completed(Object count);
-
-  /// No description provided for @sync_failed.
-  ///
-  /// In en, this message translates to:
-  /// **'Sync failed: {error}'**
-  String sync_failed(Object error);
-
-  /// No description provided for @sync_extracting.
-  ///
-  /// In en, this message translates to:
-  /// **'Extracting {poolName} tags...'**
-  String sync_extracting(Object poolName);
-
-  /// No description provided for @sync_merging.
-  ///
-  /// In en, this message translates to:
-  /// **'Merging tags...'**
-  String get sync_merging;
-
-  /// No description provided for @sync_fetching_tags.
-  ///
-  /// In en, this message translates to:
-  /// **'Fetching {groupName} tag popularity...'**
-  String sync_fetching_tags(Object groupName);
-
-  /// No description provided for @sync_filtering.
-  ///
-  /// In en, this message translates to:
-  /// **'Filtering tags...'**
-  String get sync_filtering;
-
-  /// No description provided for @sync_done.
-  ///
-  /// In en, this message translates to:
-  /// **'Sync completed'**
-  String get sync_done;
-
-  /// No description provided for @time_just_now.
-  ///
-  /// In en, this message translates to:
-  /// **'Just now'**
-  String get time_just_now;
-
-  /// No description provided for @time_minutes_ago.
-  ///
-  /// In en, this message translates to:
-  /// **'{n} minutes ago'**
-  String time_minutes_ago(Object n);
-
-  /// No description provided for @time_hours_ago.
-  ///
-  /// In en, this message translates to:
-  /// **'{n} hours ago'**
-  String time_hours_ago(Object n);
-
-  /// No description provided for @time_days_ago.
-  ///
-  /// In en, this message translates to:
-  /// **'{n} days ago'**
-  String time_days_ago(Object n);
-
-  /// No description provided for @time_never_synced.
-  ///
-  /// In en, this message translates to:
-  /// **'Never synced'**
-  String get time_never_synced;
 
   /// No description provided for @vibeParseFailed.
   ///
@@ -4560,11 +3252,29 @@ abstract class AppLocalizations {
   /// **'No local images'**
   String get localGallery_emptyTitle;
 
-  /// No description provided for @localGallery_emptySubtitle.
+  /// No description provided for @localGallery_emptyFavorites.
   ///
   /// In en, this message translates to:
-  /// **'Generated images will be saved here'**
-  String get localGallery_emptySubtitle;
+  /// **'No favorite images yet'**
+  String get localGallery_emptyFavorites;
+
+  /// No description provided for @localGallery_emptyScope.
+  ///
+  /// In en, this message translates to:
+  /// **'No images here yet'**
+  String get localGallery_emptyScope;
+
+  /// No description provided for @localGallery_noNaiHere.
+  ///
+  /// In en, this message translates to:
+  /// **'No NAI images to show here'**
+  String get localGallery_noNaiHere;
+
+  /// No description provided for @localGallery_showNonNai.
+  ///
+  /// In en, this message translates to:
+  /// **'Show non-NAI images'**
+  String get localGallery_showNonNai;
 
   /// No description provided for @localGallery_noMatchingResults.
   ///
@@ -4655,42 +3365,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Image size'**
   String get localGallery_sortFieldDimensions;
-
-  /// No description provided for @localGallery_aboutColumns.
-  ///
-  /// In en, this message translates to:
-  /// **'≈ {count} columns'**
-  String localGallery_aboutColumns(Object count);
-
-  /// No description provided for @localGallery_columnWidth.
-  ///
-  /// In en, this message translates to:
-  /// **'Column width'**
-  String get localGallery_columnWidth;
-
-  /// No description provided for @localGallery_thumbnailQualitySd.
-  ///
-  /// In en, this message translates to:
-  /// **'Standard'**
-  String get localGallery_thumbnailQualitySd;
-
-  /// No description provided for @localGallery_thumbnailQualityHd.
-  ///
-  /// In en, this message translates to:
-  /// **'High'**
-  String get localGallery_thumbnailQualityHd;
-
-  /// No description provided for @settings_galleryThumbnailQuality.
-  ///
-  /// In en, this message translates to:
-  /// **'Local gallery quality'**
-  String get settings_galleryThumbnailQuality;
-
-  /// No description provided for @settings_galleryThumbnailQualitySubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Thumbnail display quality; defaults to High'**
-  String get settings_galleryThumbnailQualitySubtitle;
 
   /// No description provided for @localGallery_naiOnlyTooltip.
   ///
@@ -6048,186 +4722,6 @@ abstract class AppLocalizations {
   /// **'Tags'**
   String get tagLibrary_tags;
 
-  /// No description provided for @settings_network.
-  ///
-  /// In en, this message translates to:
-  /// **'Network'**
-  String get settings_network;
-
-  /// No description provided for @settings_enableProxy.
-  ///
-  /// In en, this message translates to:
-  /// **'Enable Proxy'**
-  String get settings_enableProxy;
-
-  /// No description provided for @settings_proxyEnabled.
-  ///
-  /// In en, this message translates to:
-  /// **'Enabled'**
-  String get settings_proxyEnabled;
-
-  /// No description provided for @settings_proxyDisabled.
-  ///
-  /// In en, this message translates to:
-  /// **'Direct connection'**
-  String get settings_proxyDisabled;
-
-  /// No description provided for @settings_proxyTrafficDisclosure.
-  ///
-  /// In en, this message translates to:
-  /// **'When proxy is enabled, NovelAI API traffic, including authentication requests, is sent through the system or manual proxy. Use only proxies you trust.'**
-  String get settings_proxyTrafficDisclosure;
-
-  /// No description provided for @settings_proxyMode.
-  ///
-  /// In en, this message translates to:
-  /// **'Proxy Mode'**
-  String get settings_proxyMode;
-
-  /// No description provided for @settings_proxyModeAuto.
-  ///
-  /// In en, this message translates to:
-  /// **'Auto-detect system proxy'**
-  String get settings_proxyModeAuto;
-
-  /// No description provided for @settings_proxyModeManual.
-  ///
-  /// In en, this message translates to:
-  /// **'Manual configuration'**
-  String get settings_proxyModeManual;
-
-  /// No description provided for @settings_auto.
-  ///
-  /// In en, this message translates to:
-  /// **'Auto'**
-  String get settings_auto;
-
-  /// No description provided for @settings_manual.
-  ///
-  /// In en, this message translates to:
-  /// **'Manual'**
-  String get settings_manual;
-
-  /// No description provided for @settings_proxyHost.
-  ///
-  /// In en, this message translates to:
-  /// **'Proxy Host'**
-  String get settings_proxyHost;
-
-  /// No description provided for @settings_proxyPort.
-  ///
-  /// In en, this message translates to:
-  /// **'Port'**
-  String get settings_proxyPort;
-
-  /// No description provided for @settings_proxyNotDetected.
-  ///
-  /// In en, this message translates to:
-  /// **'No system proxy detected'**
-  String get settings_proxyNotDetected;
-
-  /// No description provided for @settings_testConnection.
-  ///
-  /// In en, this message translates to:
-  /// **'Test Connection'**
-  String get settings_testConnection;
-
-  /// No description provided for @settings_testConnectionHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Click to test if proxy is working'**
-  String get settings_testConnectionHint;
-
-  /// No description provided for @settings_testSuccess.
-  ///
-  /// In en, this message translates to:
-  /// **'Connection successful ({latency}ms)'**
-  String settings_testSuccess(Object latency);
-
-  /// No description provided for @settings_testFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Connection failed: {error}'**
-  String settings_testFailed(Object error);
-
-  /// No description provided for @settings_proxyRestartHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Proxy settings changed, restart recommended'**
-  String get settings_proxyRestartHint;
-
-  /// No description provided for @settings_enablePromptWeightScroll.
-  ///
-  /// In en, this message translates to:
-  /// **'Adjust prompt weight with mouse wheel'**
-  String get settings_enablePromptWeightScroll;
-
-  /// No description provided for @settings_enablePromptWeightScrollSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'When prompt text is selected, hold the chosen modifier + wheel to adjust weight; a bare wheel scrolls the page as usual.'**
-  String get settings_enablePromptWeightScrollSubtitle;
-
-  /// No description provided for @settings_weightScrollModifierAlt.
-  ///
-  /// In en, this message translates to:
-  /// **'Alt'**
-  String get settings_weightScrollModifierAlt;
-
-  /// No description provided for @settings_weightScrollModifierCtrl.
-  ///
-  /// In en, this message translates to:
-  /// **'Ctrl'**
-  String get settings_weightScrollModifierCtrl;
-
-  /// No description provided for @settings_weightScrollModifierShift.
-  ///
-  /// In en, this message translates to:
-  /// **'Shift'**
-  String get settings_weightScrollModifierShift;
-
-  /// No description provided for @settings_weightScrollModifierNone.
-  ///
-  /// In en, this message translates to:
-  /// **'None (legacy)'**
-  String get settings_weightScrollModifierNone;
-
-  /// No description provided for @unit_seconds.
-  ///
-  /// In en, this message translates to:
-  /// **'seconds'**
-  String get unit_seconds;
-
-  /// No description provided for @settings_notificationSound.
-  ///
-  /// In en, this message translates to:
-  /// **'Completion Sound'**
-  String get settings_notificationSound;
-
-  /// No description provided for @settings_notificationSoundSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Play the completion sound only while the window is unfocused'**
-  String get settings_notificationSoundSubtitle;
-
-  /// No description provided for @settings_notificationCustomSound.
-  ///
-  /// In en, this message translates to:
-  /// **'Custom Sound'**
-  String get settings_notificationCustomSound;
-
-  /// No description provided for @settings_notificationSelectSound.
-  ///
-  /// In en, this message translates to:
-  /// **'Select Sound'**
-  String get settings_notificationSelectSound;
-
-  /// No description provided for @settings_notificationResetSound.
-  ///
-  /// In en, this message translates to:
-  /// **'Reset to Default'**
-  String get settings_notificationResetSound;
-
   /// No description provided for @resetToDefault.
   ///
   /// In en, this message translates to:
@@ -6935,42 +5429,6 @@ abstract class AppLocalizations {
   /// **'Precise Reference'**
   String get preciseRef_title;
 
-  /// No description provided for @preciseRef_subtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Tie generation to a character or style reference'**
-  String get preciseRef_subtitle;
-
-  /// No description provided for @preciseRef_description.
-  ///
-  /// In en, this message translates to:
-  /// **'Add reference images and set type and parameters. Multiple references can be used simultaneously.'**
-  String get preciseRef_description;
-
-  /// No description provided for @preciseRef_addReference.
-  ///
-  /// In en, this message translates to:
-  /// **'Add Reference'**
-  String get preciseRef_addReference;
-
-  /// No description provided for @preciseRef_clearAll.
-  ///
-  /// In en, this message translates to:
-  /// **'Clear All'**
-  String get preciseRef_clearAll;
-
-  /// No description provided for @preciseRef_remove.
-  ///
-  /// In en, this message translates to:
-  /// **'Remove'**
-  String get preciseRef_remove;
-
-  /// No description provided for @preciseRef_referenceType.
-  ///
-  /// In en, this message translates to:
-  /// **'Reference Type'**
-  String get preciseRef_referenceType;
-
   /// No description provided for @preciseRef_importTitle.
   ///
   /// In en, this message translates to:
@@ -7007,18 +5465,6 @@ abstract class AppLocalizations {
   /// **'Reference both the character and visual style'**
   String get preciseRef_characterAndStyleDescription;
 
-  /// No description provided for @preciseRef_strength.
-  ///
-  /// In en, this message translates to:
-  /// **'Strength'**
-  String get preciseRef_strength;
-
-  /// No description provided for @preciseRef_fidelity.
-  ///
-  /// In en, this message translates to:
-  /// **'Fidelity'**
-  String get preciseRef_fidelity;
-
   /// No description provided for @preciseRef_v4Only.
   ///
   /// In en, this message translates to:
@@ -7043,41 +5489,11 @@ abstract class AppLocalizations {
   /// **'Character + Style'**
   String get preciseRef_typeCharacterAndStyle;
 
-  /// No description provided for @preciseRef_costHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Using Precise Reference consumes extra Anlas'**
-  String get preciseRef_costHint;
-
-  /// No description provided for @preciseRef_costBadge.
-  ///
-  /// In en, this message translates to:
-  /// **'Uses Anlas'**
-  String get preciseRef_costBadge;
-
-  /// No description provided for @preciseRef_dropToAdd.
-  ///
-  /// In en, this message translates to:
-  /// **'Release to add precise reference'**
-  String get preciseRef_dropToAdd;
-
-  /// No description provided for @preciseRef_dropNoReadableImage.
-  ///
-  /// In en, this message translates to:
-  /// **'The drop source did not provide a readable image file or image link'**
-  String get preciseRef_dropNoReadableImage;
-
   /// No description provided for @preciseRef_addedCount.
   ///
   /// In en, this message translates to:
   /// **'Added {count} precise references'**
   String preciseRef_addedCount(int count);
-
-  /// No description provided for @preciseRef_removedCount.
-  ///
-  /// In en, this message translates to:
-  /// **'Removed {count} precise references'**
-  String preciseRef_removedCount(int count);
 
   /// No description provided for @vibeLibrary_title.
   ///
@@ -7102,18 +5518,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Import complete: {success} succeeded, {failed} failed'**
   String vibeLibrary_importSummary(Object success, Object failed);
-
-  /// No description provided for @vibeLibrary_save.
-  ///
-  /// In en, this message translates to:
-  /// **'Save to Library'**
-  String get vibeLibrary_save;
-
-  /// No description provided for @vibeLibrary_import.
-  ///
-  /// In en, this message translates to:
-  /// **'Import Vibe'**
-  String get vibeLibrary_import;
 
   /// No description provided for @vibeLibrary_sendToGeneration.
   ///
@@ -7216,108 +5620,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to reorder categories: {error}'**
   String categoryError_reorderFailed(String error);
-
-  /// No description provided for @vibe_export_title.
-  ///
-  /// In en, this message translates to:
-  /// **'Export Vibe'**
-  String get vibe_export_title;
-
-  /// No description provided for @vibe_selector_recent.
-  ///
-  /// In en, this message translates to:
-  /// **'Recent'**
-  String get vibe_selector_recent;
-
-  /// No description provided for @vibe_export_dialogTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Export {count} Vibes'**
-  String vibe_export_dialogTitle(int count);
-
-  /// No description provided for @vibe_export_chooseMethod.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose how to export the vibes'**
-  String get vibe_export_chooseMethod;
-
-  /// No description provided for @vibe_export_asBundle.
-  ///
-  /// In en, this message translates to:
-  /// **'As Bundle'**
-  String get vibe_export_asBundle;
-
-  /// No description provided for @vibe_export_individually.
-  ///
-  /// In en, this message translates to:
-  /// **'Individually'**
-  String get vibe_export_individually;
-
-  /// No description provided for @vibe_export_noData.
-  ///
-  /// In en, this message translates to:
-  /// **'No data to export'**
-  String get vibe_export_noData;
-
-  /// No description provided for @vibe_export_success.
-  ///
-  /// In en, this message translates to:
-  /// **'Export successful'**
-  String get vibe_export_success;
-
-  /// No description provided for @vibe_export_failed.
-  ///
-  /// In en, this message translates to:
-  /// **'Export failed'**
-  String get vibe_export_failed;
-
-  /// No description provided for @vibe_export_skipped.
-  ///
-  /// In en, this message translates to:
-  /// **'Skipped {count} vibes without data'**
-  String vibe_export_skipped(int count);
-
-  /// No description provided for @vibe_export_bundleSuccess.
-  ///
-  /// In en, this message translates to:
-  /// **'Bundle exported: {count} vibes'**
-  String vibe_export_bundleSuccess(int count);
-
-  /// No description provided for @vibe_export_selectToEmbed.
-  ///
-  /// In en, this message translates to:
-  /// **'Select vibes to embed'**
-  String get vibe_export_selectToEmbed;
-
-  /// No description provided for @vibe_export_pngRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'PNG file required'**
-  String get vibe_export_pngRequired;
-
-  /// No description provided for @vibe_export_noEmbeddableData.
-  ///
-  /// In en, this message translates to:
-  /// **'No embeddable data'**
-  String get vibe_export_noEmbeddableData;
-
-  /// No description provided for @vibe_export_embedSuccess.
-  ///
-  /// In en, this message translates to:
-  /// **'Embedded {count} vibes into image'**
-  String vibe_export_embedSuccess(int count);
-
-  /// No description provided for @vibe_export_embedFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Embed failed'**
-  String get vibe_export_embedFailed;
-
-  /// No description provided for @vibe_embedToImage.
-  ///
-  /// In en, this message translates to:
-  /// **'Embed to Image'**
-  String get vibe_embedToImage;
 
   /// No description provided for @vibe_import_noEncodingData.
   ///
@@ -7493,77 +5795,11 @@ abstract class AppLocalizations {
   /// **'Enter a tag, then press Add'**
   String get vibe_saveToLibrary_tagHint;
 
-  /// No description provided for @vibe_maxReached.
-  ///
-  /// In en, this message translates to:
-  /// **'Maximum 16 vibes reached'**
-  String get vibe_maxReached;
-
   /// No description provided for @vibe_addedCount.
   ///
   /// In en, this message translates to:
   /// **'Added {count} vibes'**
   String vibe_addedCount(int count);
-
-  /// No description provided for @vibe_statusEncoded.
-  ///
-  /// In en, this message translates to:
-  /// **'Encoded'**
-  String get vibe_statusEncoded;
-
-  /// No description provided for @vibe_statusEncoding.
-  ///
-  /// In en, this message translates to:
-  /// **'Encoding...'**
-  String get vibe_statusEncoding;
-
-  /// No description provided for @vibe_statusPendingEncode.
-  ///
-  /// In en, this message translates to:
-  /// **'Encode (2 Anlas)'**
-  String get vibe_statusPendingEncode;
-
-  /// No description provided for @vibe_encodeDialogTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Confirm Vibe Encoding'**
-  String get vibe_encodeDialogTitle;
-
-  /// No description provided for @vibe_encodeDialogMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Encode this image for generation?'**
-  String get vibe_encodeDialogMessage;
-
-  /// No description provided for @vibe_encodeCostWarning.
-  ///
-  /// In en, this message translates to:
-  /// **'This will cost 2 Anlas (credits)'**
-  String get vibe_encodeCostWarning;
-
-  /// No description provided for @vibe_encodeButton.
-  ///
-  /// In en, this message translates to:
-  /// **'Encode'**
-  String get vibe_encodeButton;
-
-  /// No description provided for @vibe_encodeSuccess.
-  ///
-  /// In en, this message translates to:
-  /// **'Vibe encoded successfully!'**
-  String get vibe_encodeSuccess;
-
-  /// No description provided for @vibe_encodeFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Vibe encoding failed, please retry'**
-  String get vibe_encodeFailed;
-
-  /// No description provided for @vibe_encodeError.
-  ///
-  /// In en, this message translates to:
-  /// **'Encoding failed: {error}'**
-  String vibe_encodeError(String error);
 
   /// No description provided for @shortcuts_customize.
   ///
@@ -7625,401 +5861,17 @@ abstract class AppLocalizations {
   /// **'Exit'**
   String get tray_exit;
 
-  /// No description provided for @settings_shortcutsSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Customize keyboard shortcuts'**
-  String get settings_shortcutsSubtitle;
-
-  /// No description provided for @settings_openFolder.
-  ///
-  /// In en, this message translates to:
-  /// **'Open folder'**
-  String get settings_openFolder;
-
-  /// No description provided for @settings_openFolderFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to open folder'**
-  String get settings_openFolderFailed;
-
-  /// No description provided for @settings_vibePathSaved.
-  ///
-  /// In en, this message translates to:
-  /// **'Vibe library path saved'**
-  String get settings_vibePathSaved;
-
   /// No description provided for @settings_selectFolderFailed.
   ///
   /// In en, this message translates to:
   /// **'Failed to select folder'**
   String get settings_selectFolderFailed;
 
-  /// No description provided for @settings_hivePathSaved.
-  ///
-  /// In en, this message translates to:
-  /// **'Data storage path saved, effective after restart'**
-  String get settings_hivePathSaved;
-
-  /// No description provided for @settings_restartRequiredTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Restart Required'**
-  String get settings_restartRequiredTitle;
-
-  /// No description provided for @settings_changePathConfirm.
-  ///
-  /// In en, this message translates to:
-  /// **'After changing the data storage path, the app needs to restart to take effect.\\n\\nThe new path will take effect on the next startup. Continue?'**
-  String get settings_changePathConfirm;
-
-  /// No description provided for @settings_resetPathConfirm.
-  ///
-  /// In en, this message translates to:
-  /// **'After resetting the data storage path, the app needs to restart to take effect.\\n\\nThe default path will take effect on the next startup. Continue?'**
-  String get settings_resetPathConfirm;
-
-  /// No description provided for @settings_kritaBridgeEnable.
-  ///
-  /// In en, this message translates to:
-  /// **'Enable local bridge'**
-  String get settings_kritaBridgeEnable;
-
-  /// No description provided for @settings_kritaBridgeDisabledText.
-  ///
-  /// In en, this message translates to:
-  /// **'Off by default; listens only on local 127.0.0.1 when enabled'**
-  String get settings_kritaBridgeDisabledText;
-
-  /// No description provided for @settings_kritaBridgeStartingText.
-  ///
-  /// In en, this message translates to:
-  /// **'Starting local bridge service...'**
-  String get settings_kritaBridgeStartingText;
-
-  /// No description provided for @settings_kritaBridgeListeningText.
-  ///
-  /// In en, this message translates to:
-  /// **'Waiting for an external Agent or Krita'**
-  String get settings_kritaBridgeListeningText;
-
-  /// No description provided for @settings_kritaBridgeConnectedText.
-  ///
-  /// In en, this message translates to:
-  /// **'Krita plugin connected'**
-  String get settings_kritaBridgeConnectedText;
-
-  /// No description provided for @settings_kritaBridgeErrorText.
-  ///
-  /// In en, this message translates to:
-  /// **'Startup failed, check the error message'**
-  String get settings_kritaBridgeErrorText;
-
-  /// No description provided for @settings_kritaBridgeRegenerateSession.
-  ///
-  /// In en, this message translates to:
-  /// **'Regenerate Session'**
-  String get settings_kritaBridgeRegenerateSession;
-
-  /// No description provided for @settings_kritaBridgeDiscoveryFile.
-  ///
-  /// In en, this message translates to:
-  /// **'Discovery File'**
-  String get settings_kritaBridgeDiscoveryFile;
-
-  /// No description provided for @settings_kritaBridgeWaitingEndpoint.
-  ///
-  /// In en, this message translates to:
-  /// **'Waiting for local WebSocket listener'**
-  String get settings_kritaBridgeWaitingEndpoint;
-
-  /// No description provided for @settings_kritaBridgeClient.
-  ///
-  /// In en, this message translates to:
-  /// **'Client: {client}'**
-  String settings_kritaBridgeClient(Object client);
-
-  /// No description provided for @settings_fontScale.
-  ///
-  /// In en, this message translates to:
-  /// **'Interface scale'**
-  String get settings_fontScale;
-
-  /// No description provided for @settings_fontScale_previewSmall.
-  ///
-  /// In en, this message translates to:
-  /// **'光影落在画布上。'**
-  String get settings_fontScale_previewSmall;
-
-  /// No description provided for @settings_fontScale_previewMedium.
-  ///
-  /// In en, this message translates to:
-  /// **'色から物語が生まれる。'**
-  String get settings_fontScale_previewMedium;
-
-  /// No description provided for @settings_fontScale_previewLarge.
-  ///
-  /// In en, this message translates to:
-  /// **'Let colors tell a story.'**
-  String get settings_fontScale_previewLarge;
-
-  /// No description provided for @settings_fontScale_done.
-  ///
-  /// In en, this message translates to:
-  /// **'Done'**
-  String get settings_fontScale_done;
-
-  /// No description provided for @settings_historyClickBehavior.
-  ///
-  /// In en, this message translates to:
-  /// **'History click behavior'**
-  String get settings_historyClickBehavior;
-
-  /// No description provided for @settings_historyClickBehavior_classic.
-  ///
-  /// In en, this message translates to:
-  /// **'Classic'**
-  String get settings_historyClickBehavior_classic;
-
-  /// No description provided for @settings_historyClickBehavior_classicDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Click a history image to open its details'**
-  String get settings_historyClickBehavior_classicDescription;
-
-  /// No description provided for @settings_historyClickBehavior_linked.
-  ///
-  /// In en, this message translates to:
-  /// **'Linked preview'**
-  String get settings_historyClickBehavior_linked;
-
-  /// No description provided for @settings_historyClickBehavior_linkedDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Click to switch the central preview, double-click or hold for details, and browse with Left/Right'**
-  String get settings_historyClickBehavior_linkedDescription;
-
-  /// No description provided for @settings_outputViewer.
-  ///
-  /// In en, this message translates to:
-  /// **'Output viewer'**
-  String get settings_outputViewer;
-
-  /// No description provided for @settings_outputViewer_canvas.
-  ///
-  /// In en, this message translates to:
-  /// **'Free canvas'**
-  String get settings_outputViewer_canvas;
-
-  /// No description provided for @settings_outputViewer_canvasDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'NAI5-style infinite canvas: all generated images laid out by batch, middle/Shift+left drag to pan, Ctrl+wheel to zoom, WASD/f/q to navigate'**
-  String get settings_outputViewer_canvasDescription;
-
-  /// No description provided for @settings_outputViewer_simple.
-  ///
-  /// In en, this message translates to:
-  /// **'Simple view'**
-  String get settings_outputViewer_simple;
-
-  /// No description provided for @settings_outputViewer_simpleDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Classic centered/grid preview for low-spec machines or the familiar layout'**
-  String get settings_outputViewer_simpleDescription;
-
-  /// No description provided for @settings_canvasLockCamera.
-  ///
-  /// In en, this message translates to:
-  /// **'Lock canvas camera'**
-  String get settings_canvasLockCamera;
-
-  /// No description provided for @settings_canvasLockCameraDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Disables wheel zoom/pan, drag panning, WASD and other manual camera input; auto-select and navigation jumps still work'**
-  String get settings_canvasLockCameraDescription;
-
-  /// No description provided for @settings_canvasReducedMotion.
-  ///
-  /// In en, this message translates to:
-  /// **'Reduce canvas motion'**
-  String get settings_canvasReducedMotion;
-
-  /// No description provided for @settings_canvasReducedMotionDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Camera flights, zooms and inertia become instant, reducing animation'**
-  String get settings_canvasReducedMotionDescription;
-
   /// No description provided for @image_viewDetail.
   ///
   /// In en, this message translates to:
   /// **'View details'**
   String get image_viewDetail;
-
-  /// No description provided for @settings_defaultImagesPath.
-  ///
-  /// In en, this message translates to:
-  /// **'Default (Documents/NAI_Launcher/images/)'**
-  String get settings_defaultImagesPath;
-
-  /// No description provided for @settings_defaultHivePath.
-  ///
-  /// In en, this message translates to:
-  /// **'Default (./user-data/hive/)'**
-  String get settings_defaultHivePath;
-
-  /// No description provided for @settings_protectionFeatures.
-  ///
-  /// In en, this message translates to:
-  /// **'Protection Features'**
-  String get settings_protectionFeatures;
-
-  /// No description provided for @settings_stripMetadataTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Remove all metadata when copying or dragging'**
-  String get settings_stripMetadataTitle;
-
-  /// No description provided for @settings_stripMetadataSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Create a sanitized copy, remove PNG text chunks, EXIF, and NAI steganographic watermark data, and avoid exposing the original path while dragging.'**
-  String get settings_stripMetadataSubtitle;
-
-  /// No description provided for @settings_confirmDangerousActionsTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Double-confirm dangerous asset actions'**
-  String get settings_confirmDangerousActionsTitle;
-
-  /// No description provided for @settings_confirmDangerousActionsSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Deleting, moving, or batch-moving local assets will show an additional protection confirmation.'**
-  String get settings_confirmDangerousActionsSubtitle;
-
-  /// No description provided for @settings_warnExternalImageSendTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Confirm before sending to external services'**
-  String get settings_warnExternalImageSendTitle;
-
-  /// No description provided for @settings_warnExternalImageSendSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Confirm before local images cross the app boundary to LLMs, NovelAI, ComfyUI, or similar services.'**
-  String get settings_warnExternalImageSendSubtitle;
-
-  /// No description provided for @settings_preventOverwriteTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Avoid overwriting existing files on export'**
-  String get settings_preventOverwriteTitle;
-
-  /// No description provided for @settings_preventOverwriteSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Automatically number duplicate export or package paths to avoid replacing existing assets by mistake.'**
-  String get settings_preventOverwriteSubtitle;
-
-  /// No description provided for @settings_warnHighAnlasCostTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'High Anlas cost warning'**
-  String get settings_warnHighAnlasCostTitle;
-
-  /// No description provided for @settings_warnHighAnlasCostSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Show a confirmation before generation when the estimated single request cost reaches {threshold} Anlas.'**
-  String settings_warnHighAnlasCostSubtitle(Object threshold);
-
-  /// No description provided for @settings_highAnlasCostThresholdTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Anlas Warning Threshold'**
-  String get settings_highAnlasCostThresholdTitle;
-
-  /// No description provided for @settings_setHighAnlasCostThresholdTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Set Anlas Warning Threshold'**
-  String get settings_setHighAnlasCostThresholdTitle;
-
-  /// No description provided for @settings_threshold.
-  ///
-  /// In en, this message translates to:
-  /// **'Threshold'**
-  String get settings_threshold;
-
-  /// No description provided for @settings_highAnlasCostThresholdHelper.
-  ///
-  /// In en, this message translates to:
-  /// **'Show a confirmation when the estimated single generation cost reaches or exceeds this value.'**
-  String get settings_highAnlasCostThresholdHelper;
-
-  /// No description provided for @settings_limitGenerationIntervalTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Limit generation frequency'**
-  String get settings_limitGenerationIntervalTitle;
-
-  /// No description provided for @settings_limitGenerationIntervalSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Require the configured minimum time between generation starts. The Generate button is disabled during the cooldown.'**
-  String get settings_limitGenerationIntervalSubtitle;
-
-  /// No description provided for @settings_generationIntervalTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Generation interval'**
-  String get settings_generationIntervalTitle;
-
-  /// No description provided for @settings_generationIntervalValue.
-  ///
-  /// In en, this message translates to:
-  /// **'{seconds} seconds'**
-  String settings_generationIntervalValue(Object seconds);
-
-  /// No description provided for @settings_setGenerationIntervalTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Set Generation Interval'**
-  String get settings_setGenerationIntervalTitle;
-
-  /// No description provided for @settings_generationIntervalHelper.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter 1–3600 seconds. The cooldown starts when generation begins.'**
-  String get settings_generationIntervalHelper;
-
-  /// No description provided for @settings_generationIntervalJitterTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Interval jitter'**
-  String get settings_generationIntervalJitterTitle;
-
-  /// No description provided for @settings_generationIntervalJitterValue.
-  ///
-  /// In en, this message translates to:
-  /// **'±{percent}%'**
-  String settings_generationIntervalJitterValue(Object percent);
-
-  /// No description provided for @settings_setGenerationIntervalJitterTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Set Interval Jitter'**
-  String get settings_setGenerationIntervalJitterTitle;
-
-  /// No description provided for @settings_generationIntervalJitterHelper.
-  ///
-  /// In en, this message translates to:
-  /// **'Each cooldown is drawn at random from base interval ± this percentage, so the pacing is less mechanical. Enter 0–50; 0 disables jitter.'**
-  String get settings_generationIntervalJitterHelper;
 
   /// No description provided for @settings_confirmExternalSendTitle.
   ///
@@ -8051,354 +5903,6 @@ abstract class AppLocalizations {
   /// **'Continue Generation'**
   String get settings_continueGeneration;
 
-  /// No description provided for @dataSource_syncNow.
-  ///
-  /// In en, this message translates to:
-  /// **'Sync Now'**
-  String get dataSource_syncNow;
-
-  /// No description provided for @settings_comfyUiEnable.
-  ///
-  /// In en, this message translates to:
-  /// **'Enable ComfyUI Integration'**
-  String get settings_comfyUiEnable;
-
-  /// No description provided for @settings_comfyUiDisabledSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'When disabled, local upscale and other ComfyUI features are hidden'**
-  String get settings_comfyUiDisabledSubtitle;
-
-  /// No description provided for @settings_comfyUiServerUrl.
-  ///
-  /// In en, this message translates to:
-  /// **'Server URL'**
-  String get settings_comfyUiServerUrl;
-
-  /// No description provided for @settings_comfyUiConnectionSuccess.
-  ///
-  /// In en, this message translates to:
-  /// **'Connection successful'**
-  String get settings_comfyUiConnectionSuccess;
-
-  /// No description provided for @settings_comfyUiConnectionSuccessFull.
-  ///
-  /// In en, this message translates to:
-  /// **'ComfyUI connection successful'**
-  String get settings_comfyUiConnectionSuccessFull;
-
-  /// No description provided for @settings_comfyUiConnectionFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Connection failed: {error}'**
-  String settings_comfyUiConnectionFailed(Object error);
-
-  /// No description provided for @settings_comfyUiConnected.
-  ///
-  /// In en, this message translates to:
-  /// **'Connected'**
-  String get settings_comfyUiConnected;
-
-  /// No description provided for @settings_comfyUiDisconnect.
-  ///
-  /// In en, this message translates to:
-  /// **'Disconnect'**
-  String get settings_comfyUiDisconnect;
-
-  /// No description provided for @settings_comfyUiNoResponse.
-  ///
-  /// In en, this message translates to:
-  /// **'Server did not respond'**
-  String get settings_comfyUiNoResponse;
-
-  /// No description provided for @settings_comfyUiStatusDisconnected.
-  ///
-  /// In en, this message translates to:
-  /// **'Disconnected'**
-  String get settings_comfyUiStatusDisconnected;
-
-  /// No description provided for @settings_comfyUiStatusConnecting.
-  ///
-  /// In en, this message translates to:
-  /// **'Connecting...'**
-  String get settings_comfyUiStatusConnecting;
-
-  /// No description provided for @settings_comfyUiStatusConnected.
-  ///
-  /// In en, this message translates to:
-  /// **'Connected'**
-  String get settings_comfyUiStatusConnected;
-
-  /// No description provided for @settings_comfyUiStatusError.
-  ///
-  /// In en, this message translates to:
-  /// **'Connection error'**
-  String get settings_comfyUiStatusError;
-
-  /// No description provided for @settings_comfyUiCategoryEnhance.
-  ///
-  /// In en, this message translates to:
-  /// **'Enhance/Upscale'**
-  String get settings_comfyUiCategoryEnhance;
-
-  /// No description provided for @settings_comfyUiCategoryImg2Img.
-  ///
-  /// In en, this message translates to:
-  /// **'Image2Image'**
-  String get settings_comfyUiCategoryImg2Img;
-
-  /// No description provided for @settings_comfyUiCategoryInpaint.
-  ///
-  /// In en, this message translates to:
-  /// **'Inpaint'**
-  String get settings_comfyUiCategoryInpaint;
-
-  /// No description provided for @settings_comfyUiCategoryTxt2Img.
-  ///
-  /// In en, this message translates to:
-  /// **'Text-to-Image'**
-  String get settings_comfyUiCategoryTxt2Img;
-
-  /// No description provided for @settings_comfyUiCategoryCustom.
-  ///
-  /// In en, this message translates to:
-  /// **'Custom'**
-  String get settings_comfyUiCategoryCustom;
-
-  /// No description provided for @comfyWorkflow_seedvr2UpscaleName.
-  ///
-  /// In en, this message translates to:
-  /// **'SeedVR2 Upscale'**
-  String get comfyWorkflow_seedvr2UpscaleName;
-
-  /// No description provided for @comfyWorkflow_seedvr2UpscaleDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Upscale with the SeedVR2 AI model. Produces high-quality results.'**
-  String get comfyWorkflow_seedvr2UpscaleDescription;
-
-  /// No description provided for @comfyWorkflow_seedvr2TiledUpscaleName.
-  ///
-  /// In en, this message translates to:
-  /// **'SeedVR2 Tiled Upscale'**
-  String get comfyWorkflow_seedvr2TiledUpscaleName;
-
-  /// No description provided for @comfyWorkflow_seedvr2TiledUpscaleDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Use SeedVR2TilingUpscaler for tiled upscale to reduce VRAM pressure on large images.'**
-  String get comfyWorkflow_seedvr2TiledUpscaleDescription;
-
-  /// No description provided for @comfyWorkflow_modelUpscaleName.
-  ///
-  /// In en, this message translates to:
-  /// **'ComfyUI Standard Upscale Model'**
-  String get comfyWorkflow_modelUpscaleName;
-
-  /// No description provided for @comfyWorkflow_modelUpscaleDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Load a standard upscale model with ComfyUI UpscaleModelLoader, then correct the final scale with Lanczos.'**
-  String get comfyWorkflow_modelUpscaleDescription;
-
-  /// No description provided for @comfyWorkflow_rtxUpscaleName.
-  ///
-  /// In en, this message translates to:
-  /// **'RTX Upscale'**
-  String get comfyWorkflow_rtxUpscaleName;
-
-  /// No description provided for @comfyWorkflow_rtxUpscaleDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Use the Nvidia RTX Video Super Resolution node for local upscaling.'**
-  String get comfyWorkflow_rtxUpscaleDescription;
-
-  /// No description provided for @comfyWorkflowSlot_inputImage.
-  ///
-  /// In en, this message translates to:
-  /// **'Input Image'**
-  String get comfyWorkflowSlot_inputImage;
-
-  /// No description provided for @comfyWorkflowSlot_targetShortSide.
-  ///
-  /// In en, this message translates to:
-  /// **'Target Short Side'**
-  String get comfyWorkflowSlot_targetShortSide;
-
-  /// No description provided for @comfyWorkflowSlot_targetLongSide.
-  ///
-  /// In en, this message translates to:
-  /// **'Target Long Side'**
-  String get comfyWorkflowSlot_targetLongSide;
-
-  /// No description provided for @comfyWorkflowSlot_upscaleModel.
-  ///
-  /// In en, this message translates to:
-  /// **'Upscale Model'**
-  String get comfyWorkflowSlot_upscaleModel;
-
-  /// No description provided for @comfyWorkflowSlot_randomSeed.
-  ///
-  /// In en, this message translates to:
-  /// **'Random Seed'**
-  String get comfyWorkflowSlot_randomSeed;
-
-  /// No description provided for @comfyWorkflowSlot_outputImage.
-  ///
-  /// In en, this message translates to:
-  /// **'Output Image'**
-  String get comfyWorkflowSlot_outputImage;
-
-  /// No description provided for @comfyWorkflowSlot_tileWidth.
-  ///
-  /// In en, this message translates to:
-  /// **'Tile Width'**
-  String get comfyWorkflowSlot_tileWidth;
-
-  /// No description provided for @comfyWorkflowSlot_tileHeight.
-  ///
-  /// In en, this message translates to:
-  /// **'Tile Height'**
-  String get comfyWorkflowSlot_tileHeight;
-
-  /// No description provided for @comfyWorkflowSlot_tileUpscaleResolution.
-  ///
-  /// In en, this message translates to:
-  /// **'Tile Upscale Resolution'**
-  String get comfyWorkflowSlot_tileUpscaleResolution;
-
-  /// No description provided for @comfyWorkflowSlot_targetWidth.
-  ///
-  /// In en, this message translates to:
-  /// **'Target Width'**
-  String get comfyWorkflowSlot_targetWidth;
-
-  /// No description provided for @comfyWorkflowSlot_targetHeight.
-  ///
-  /// In en, this message translates to:
-  /// **'Target Height'**
-  String get comfyWorkflowSlot_targetHeight;
-
-  /// No description provided for @comfyWorkflowSlot_scale.
-  ///
-  /// In en, this message translates to:
-  /// **'Scale'**
-  String get comfyWorkflowSlot_scale;
-
-  /// No description provided for @comfyWorkflow_parameters.
-  ///
-  /// In en, this message translates to:
-  /// **'Parameters'**
-  String get comfyWorkflow_parameters;
-
-  /// No description provided for @comfyWorkflow_selectImage.
-  ///
-  /// In en, this message translates to:
-  /// **'Click to select image'**
-  String get comfyWorkflow_selectImage;
-
-  /// No description provided for @comfyWorkflow_pickImageFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to select image: {error}'**
-  String comfyWorkflow_pickImageFailed(Object error);
-
-  /// No description provided for @comfyWorkflow_useResult.
-  ///
-  /// In en, this message translates to:
-  /// **'Use Result'**
-  String get comfyWorkflow_useResult;
-
-  /// No description provided for @comfyWorkflow_execute.
-  ///
-  /// In en, this message translates to:
-  /// **'Run'**
-  String get comfyWorkflow_execute;
-
-  /// No description provided for @comfyWorkflow_uploadingImage.
-  ///
-  /// In en, this message translates to:
-  /// **'Uploading image...'**
-  String get comfyWorkflow_uploadingImage;
-
-  /// No description provided for @comfyWorkflow_queued.
-  ///
-  /// In en, this message translates to:
-  /// **'Queued...'**
-  String get comfyWorkflow_queued;
-
-  /// No description provided for @comfyWorkflow_runningSteps.
-  ///
-  /// In en, this message translates to:
-  /// **'Processing {current}/{total}'**
-  String comfyWorkflow_runningSteps(Object current, Object total);
-
-  /// No description provided for @comfyWorkflow_processing.
-  ///
-  /// In en, this message translates to:
-  /// **'Processing...'**
-  String get comfyWorkflow_processing;
-
-  /// No description provided for @comfyWorkflow_complete.
-  ///
-  /// In en, this message translates to:
-  /// **'Complete'**
-  String get comfyWorkflow_complete;
-
-  /// No description provided for @comfyWorkflow_imageCount.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} images'**
-  String comfyWorkflow_imageCount(Object count);
-
-  /// No description provided for @cacheStats_title.
-  ///
-  /// In en, this message translates to:
-  /// **'Cache Statistics'**
-  String get cacheStats_title;
-
-  /// No description provided for @cacheStats_autoRefreshUpdated.
-  ///
-  /// In en, this message translates to:
-  /// **'Auto refresh · Last updated: {time}'**
-  String cacheStats_autoRefreshUpdated(Object time);
-
-  /// No description provided for @cacheStats_secondsAgo.
-  ///
-  /// In en, this message translates to:
-  /// **'{seconds} seconds ago'**
-  String cacheStats_secondsAgo(Object seconds);
-
-  /// No description provided for @cacheStats_resetStats.
-  ///
-  /// In en, this message translates to:
-  /// **'Reset statistics'**
-  String get cacheStats_resetStats;
-
-  /// No description provided for @cacheStats_statsReset.
-  ///
-  /// In en, this message translates to:
-  /// **'Statistics reset'**
-  String get cacheStats_statsReset;
-
-  /// No description provided for @cacheStats_l1Memory.
-  ///
-  /// In en, this message translates to:
-  /// **'L1 Memory Cache'**
-  String get cacheStats_l1Memory;
-
-  /// No description provided for @cacheStats_l2Hive.
-  ///
-  /// In en, this message translates to:
-  /// **'L2 Hive Cache'**
-  String get cacheStats_l2Hive;
-
-  /// No description provided for @cacheStats_l3Sqlite.
-  ///
-  /// In en, this message translates to:
-  /// **'L3 SQLite Database'**
-  String get cacheStats_l3Sqlite;
-
   /// No description provided for @galleryCache_rescanTitle.
   ///
   /// In en, this message translates to:
@@ -8411,353 +5915,17 @@ abstract class AppLocalizations {
   /// **'This will:\n\n1. Check data consistency and mark missing files\n2. Scan new and changed files\n3. Retry metadata extraction that failed before, including failed records\n\nThis will not clear existing data or delete image files.'**
   String get galleryCache_rescanContent;
 
-  /// No description provided for @galleryCache_startScan.
-  ///
-  /// In en, this message translates to:
-  /// **'Start Scan'**
-  String get galleryCache_startScan;
-
   /// No description provided for @galleryCache_scanAlreadyRunning.
   ///
   /// In en, this message translates to:
   /// **'A scan task is already running. Please wait for it to finish.'**
   String get galleryCache_scanAlreadyRunning;
 
-  /// No description provided for @galleryCache_preparing.
-  ///
-  /// In en, this message translates to:
-  /// **'Preparing...'**
-  String get galleryCache_preparing;
-
   /// No description provided for @galleryCache_noGalleryFolder.
   ///
   /// In en, this message translates to:
   /// **'Gallery folder is not set'**
   String get galleryCache_noGalleryFolder;
-
-  /// No description provided for @galleryCache_scanningPhase.
-  ///
-  /// In en, this message translates to:
-  /// **'Scanning {processed}/{total}...'**
-  String galleryCache_scanningPhase(Object processed, Object total);
-
-  /// No description provided for @galleryCache_scanComplete.
-  ///
-  /// In en, this message translates to:
-  /// **'Scan complete'**
-  String get galleryCache_scanComplete;
-
-  /// No description provided for @galleryCache_scanFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Scan failed: {error}'**
-  String galleryCache_scanFailed(Object error);
-
-  /// No description provided for @galleryCache_rescan.
-  ///
-  /// In en, this message translates to:
-  /// **'Rescan'**
-  String get galleryCache_rescan;
-
-  /// No description provided for @galleryCache_rescanSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Check data consistency, find missing files, and extract metadata'**
-  String get galleryCache_rescanSubtitle;
-
-  /// No description provided for @galleryCache_scanning.
-  ///
-  /// In en, this message translates to:
-  /// **'Scanning...'**
-  String get galleryCache_scanning;
-
-  /// No description provided for @galleryCache_scanAction.
-  ///
-  /// In en, this message translates to:
-  /// **'Scan'**
-  String get galleryCache_scanAction;
-
-  /// No description provided for @galleryCache_evictThumbnailsTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Clean Thumbnail Cache'**
-  String get galleryCache_evictThumbnailsTitle;
-
-  /// No description provided for @galleryCache_evictThumbnailsSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Evict least-recently-used .thumbs files over the limit (originals untouched)'**
-  String get galleryCache_evictThumbnailsSubtitle;
-
-  /// No description provided for @galleryCache_evictThumbnailsContent.
-  ///
-  /// In en, this message translates to:
-  /// **'Evicts the on-disk thumbnail cache over its limit, least recently used first.\n\nOnly .thumb.jpg files inside .thumbs directories are deleted; original images are never removed or modified. Removed thumbnails will be regenerated on demand the next time you browse.'**
-  String get galleryCache_evictThumbnailsContent;
-
-  /// No description provided for @galleryCache_evictThumbnailsStart.
-  ///
-  /// In en, this message translates to:
-  /// **'Clean Now'**
-  String get galleryCache_evictThumbnailsStart;
-
-  /// No description provided for @galleryCache_evictThumbnailsRunning.
-  ///
-  /// In en, this message translates to:
-  /// **'Cleaning thumbnail cache...'**
-  String get galleryCache_evictThumbnailsRunning;
-
-  /// No description provided for @galleryCache_evictThumbnailsDone.
-  ///
-  /// In en, this message translates to:
-  /// **'Removed {count} thumbnails, freed {size} MB'**
-  String galleryCache_evictThumbnailsDone(int count, String size);
-
-  /// No description provided for @galleryCache_evictThumbnailsNone.
-  ///
-  /// In en, this message translates to:
-  /// **'Thumbnail cache is under the limit; nothing to clean'**
-  String get galleryCache_evictThumbnailsNone;
-
-  /// No description provided for @galleryCache_evictThumbnailsFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to clean thumbnail cache: {error}'**
-  String galleryCache_evictThumbnailsFailed(Object error);
-
-  /// No description provided for @workflowImport_title.
-  ///
-  /// In en, this message translates to:
-  /// **'Import ComfyUI Workflow'**
-  String get workflowImport_title;
-
-  /// No description provided for @workflowImport_step.
-  ///
-  /// In en, this message translates to:
-  /// **'Step {current}/4: {title}'**
-  String workflowImport_step(Object current, Object title);
-
-  /// No description provided for @workflowImport_stepFile.
-  ///
-  /// In en, this message translates to:
-  /// **'Select Workflow File'**
-  String get workflowImport_stepFile;
-
-  /// No description provided for @workflowImport_stepInfo.
-  ///
-  /// In en, this message translates to:
-  /// **'Workflow Info'**
-  String get workflowImport_stepInfo;
-
-  /// No description provided for @workflowImport_stepSlots.
-  ///
-  /// In en, this message translates to:
-  /// **'Confirm Slot Config'**
-  String get workflowImport_stepSlots;
-
-  /// No description provided for @workflowImport_stepDone.
-  ///
-  /// In en, this message translates to:
-  /// **'Complete Import'**
-  String get workflowImport_stepDone;
-
-  /// No description provided for @workflowImport_previous.
-  ///
-  /// In en, this message translates to:
-  /// **'Previous'**
-  String get workflowImport_previous;
-
-  /// No description provided for @workflowImport_next.
-  ///
-  /// In en, this message translates to:
-  /// **'Next'**
-  String get workflowImport_next;
-
-  /// No description provided for @workflowImport_finish.
-  ///
-  /// In en, this message translates to:
-  /// **'Finish Import'**
-  String get workflowImport_finish;
-
-  /// No description provided for @workflowImport_defaultName.
-  ///
-  /// In en, this message translates to:
-  /// **'Custom Workflow'**
-  String get workflowImport_defaultName;
-
-  /// No description provided for @workflowImport_fileInstructions.
-  ///
-  /// In en, this message translates to:
-  /// **'Select a workflow_api.json file exported from ComfyUI.\n\nIn ComfyUI, open the menu and choose Export (API format) to get this file.'**
-  String get workflowImport_fileInstructions;
-
-  /// No description provided for @workflowImport_nodeCount.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} nodes'**
-  String workflowImport_nodeCount(Object count);
-
-  /// No description provided for @workflowImport_reselect.
-  ///
-  /// In en, this message translates to:
-  /// **'Click to choose another file'**
-  String get workflowImport_reselect;
-
-  /// No description provided for @workflowImport_selectWorkflowApi.
-  ///
-  /// In en, this message translates to:
-  /// **'Click to select workflow_api.json'**
-  String get workflowImport_selectWorkflowApi;
-
-  /// No description provided for @workflowImport_invalidTopLevel.
-  ///
-  /// In en, this message translates to:
-  /// **'Invalid file format: top level should be a JSON object'**
-  String get workflowImport_invalidTopLevel;
-
-  /// No description provided for @workflowImport_noComfyNodes.
-  ///
-  /// In en, this message translates to:
-  /// **'No ComfyUI nodes detected. Make sure this is an API-format export.'**
-  String get workflowImport_noComfyNodes;
-
-  /// No description provided for @workflowImport_readFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to read file: {error}'**
-  String workflowImport_readFailed(Object error);
-
-  /// No description provided for @workflowImport_analysisResult.
-  ///
-  /// In en, this message translates to:
-  /// **'Automatic Analysis Result'**
-  String get workflowImport_analysisResult;
-
-  /// No description provided for @workflowImport_inputImageNodes.
-  ///
-  /// In en, this message translates to:
-  /// **'Input image nodes'**
-  String get workflowImport_inputImageNodes;
-
-  /// No description provided for @workflowImport_adjustableParams.
-  ///
-  /// In en, this message translates to:
-  /// **'Adjustable parameters'**
-  String get workflowImport_adjustableParams;
-
-  /// No description provided for @workflowImport_outputNodes.
-  ///
-  /// In en, this message translates to:
-  /// **'Output nodes'**
-  String get workflowImport_outputNodes;
-
-  /// No description provided for @workflowImport_totalNodes.
-  ///
-  /// In en, this message translates to:
-  /// **'Total nodes'**
-  String get workflowImport_totalNodes;
-
-  /// No description provided for @workflowImport_countUnit.
-  ///
-  /// In en, this message translates to:
-  /// **'{count}'**
-  String workflowImport_countUnit(Object count);
-
-  /// No description provided for @workflowImport_workflowName.
-  ///
-  /// In en, this message translates to:
-  /// **'Workflow Name *'**
-  String get workflowImport_workflowName;
-
-  /// No description provided for @workflowImport_description.
-  ///
-  /// In en, this message translates to:
-  /// **'Description'**
-  String get workflowImport_description;
-
-  /// No description provided for @workflowImport_category.
-  ///
-  /// In en, this message translates to:
-  /// **'Category'**
-  String get workflowImport_category;
-
-  /// No description provided for @workflowImport_slotsHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Select the slots to expose in the UI. Input and output slots should usually stay enabled; parameters that users do not need to adjust can be disabled.'**
-  String get workflowImport_slotsHint;
-
-  /// No description provided for @workflowImport_inputSection.
-  ///
-  /// In en, this message translates to:
-  /// **'Input'**
-  String get workflowImport_inputSection;
-
-  /// No description provided for @workflowImport_outputSection.
-  ///
-  /// In en, this message translates to:
-  /// **'Output'**
-  String get workflowImport_outputSection;
-
-  /// No description provided for @workflowImport_parameterSection.
-  ///
-  /// In en, this message translates to:
-  /// **'Parameters'**
-  String get workflowImport_parameterSection;
-
-  /// No description provided for @workflowImport_noSlotsWarning.
-  ///
-  /// In en, this message translates to:
-  /// **'No usable slots were detected. This workflow may not integrate correctly.\nMake sure the workflow includes LoadImage and SaveImage/SaveImageWebsocket nodes.'**
-  String get workflowImport_noSlotsWarning;
-
-  /// No description provided for @workflowImport_nodeRef.
-  ///
-  /// In en, this message translates to:
-  /// **'Node {node}'**
-  String workflowImport_nodeRef(Object node);
-
-  /// No description provided for @workflowImport_confirmTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'About to import this workflow'**
-  String get workflowImport_confirmTitle;
-
-  /// No description provided for @workflowImport_name.
-  ///
-  /// In en, this message translates to:
-  /// **'Name'**
-  String get workflowImport_name;
-
-  /// No description provided for @workflowImport_inputSlots.
-  ///
-  /// In en, this message translates to:
-  /// **'Input Slots'**
-  String get workflowImport_inputSlots;
-
-  /// No description provided for @workflowImport_parameterSlots.
-  ///
-  /// In en, this message translates to:
-  /// **'Parameter Slots'**
-  String get workflowImport_parameterSlots;
-
-  /// No description provided for @workflowImport_outputSlots.
-  ///
-  /// In en, this message translates to:
-  /// **'Output Slots'**
-  String get workflowImport_outputSlots;
-
-  /// No description provided for @workflowImport_afterImportHint.
-  ///
-  /// In en, this message translates to:
-  /// **'After import, it can be used from the ComfyUI workflow list on the generation screen.'**
-  String get workflowImport_afterImportHint;
-
-  /// No description provided for @workflowImport_success.
-  ///
-  /// In en, this message translates to:
-  /// **'Workflow \"{name}\" imported'**
-  String workflowImport_success(Object name);
 
   /// No description provided for @shortcut_settings_help.
   ///
@@ -8848,12 +6016,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This image format cannot be sent to Krita. Use a common image format.'**
   String get toast_kritaUnsupportedImageFormat;
-
-  /// No description provided for @toast_dropNoReadableImageOrVibe.
-  ///
-  /// In en, this message translates to:
-  /// **'The drop source did not provide a readable image or Vibe file'**
-  String get toast_dropNoReadableImageOrVibe;
 
   /// No description provided for @toast_saveDirNotSet.
   ///
@@ -8969,24 +6131,6 @@ abstract class AppLocalizations {
   /// **'Failed to save preview image'**
   String get toast_savePreviewFailed;
 
-  /// No description provided for @common_justNow.
-  ///
-  /// In en, this message translates to:
-  /// **'Just now'**
-  String get common_justNow;
-
-  /// No description provided for @common_minutesAgo.
-  ///
-  /// In en, this message translates to:
-  /// **'{minutes} minutes ago'**
-  String common_minutesAgo(Object minutes);
-
-  /// No description provided for @common_hoursAgo.
-  ///
-  /// In en, this message translates to:
-  /// **'{hours} hours ago'**
-  String common_hoursAgo(Object hours);
-
   /// No description provided for @common_expand.
   ///
   /// In en, this message translates to:
@@ -9010,12 +6154,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This image has no metadata'**
   String get detail_noMetadata;
-
-  /// No description provided for @detail_metadata.
-  ///
-  /// In en, this message translates to:
-  /// **'Metadata'**
-  String get detail_metadata;
 
   /// No description provided for @detail_modifiedTime.
   ///
@@ -9107,35 +6245,11 @@ abstract class AppLocalizations {
   /// **'Global Prompt'**
   String get comfyImport_globalPrompt;
 
-  /// No description provided for @checkForUpdate.
-  ///
-  /// In en, this message translates to:
-  /// **'Check for Updates'**
-  String get checkForUpdate;
-
-  /// No description provided for @neverChecked.
-  ///
-  /// In en, this message translates to:
-  /// **'Never checked'**
-  String get neverChecked;
-
-  /// No description provided for @lastCheckedAt.
-  ///
-  /// In en, this message translates to:
-  /// **'Last checked: {time}'**
-  String lastCheckedAt(Object time);
-
   /// No description provided for @includePrereleaseUpdates.
   ///
   /// In en, this message translates to:
   /// **'Include Prerelease Versions'**
   String get includePrereleaseUpdates;
-
-  /// No description provided for @includePrereleaseUpdatesDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Include beta/alpha versions when checking for updates'**
-  String get includePrereleaseUpdatesDescription;
 
   /// No description provided for @updateAvailable.
   ///
@@ -9323,18 +6437,6 @@ abstract class AppLocalizations {
   /// **'View Update'**
   String get updateViewDetails;
 
-  /// No description provided for @updateSettingsAvailable.
-  ///
-  /// In en, this message translates to:
-  /// **'v{version} is available; select to view details'**
-  String updateSettingsAvailable(Object version);
-
-  /// No description provided for @updateSettingsReady.
-  ///
-  /// In en, this message translates to:
-  /// **'v{version} is downloaded; select to install'**
-  String updateSettingsReady(Object version);
-
   /// No description provided for @goToDownload.
   ///
   /// In en, this message translates to:
@@ -9461,36 +6563,6 @@ abstract class AppLocalizations {
   /// **'Failed to save to the Precise Reference Library: {error}'**
   String preciseRefLib_importFailed(String error);
 
-  /// No description provided for @preciseRefLib_importFailedCount.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} images could not be imported into the Precise Reference Library'**
-  String preciseRefLib_importFailedCount(int count);
-
-  /// No description provided for @preciseRefLib_fromLibrary.
-  ///
-  /// In en, this message translates to:
-  /// **'From Library'**
-  String get preciseRefLib_fromLibrary;
-
-  /// No description provided for @preciseRefLib_saveCurrentToLibrary.
-  ///
-  /// In en, this message translates to:
-  /// **'Save to Library'**
-  String get preciseRefLib_saveCurrentToLibrary;
-
-  /// No description provided for @preciseRefLib_saveCurrentCount.
-  ///
-  /// In en, this message translates to:
-  /// **'Saved {count} references to library'**
-  String preciseRefLib_saveCurrentCount(int count);
-
-  /// No description provided for @img2img_fromPreciseRefLibrary.
-  ///
-  /// In en, this message translates to:
-  /// **'From Precise Ref Library'**
-  String get img2img_fromPreciseRefLibrary;
-
   /// No description provided for @localGallery_saveToPreciseRefLibrary.
   ///
   /// In en, this message translates to:
@@ -9514,12 +6586,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Disabled'**
   String get common_disabled;
-
-  /// No description provided for @bulkAction_selectedCount.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} selected'**
-  String bulkAction_selectedCount(int count);
 
   /// No description provided for @comfyTask_errorConnectionFailed.
   ///
@@ -9556,30 +6622,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Workflow not found: {workflowId}'**
   String comfyTask_errorWorkflowNotFound(String workflowId);
-
-  /// No description provided for @comfyWorkflowSlot_vaeEncodeTileSize.
-  ///
-  /// In en, this message translates to:
-  /// **'VAE encode tile size'**
-  String get comfyWorkflowSlot_vaeEncodeTileSize;
-
-  /// No description provided for @comfyWorkflowSlot_vaeDecodeTileSize.
-  ///
-  /// In en, this message translates to:
-  /// **'VAE decode tile size'**
-  String get comfyWorkflowSlot_vaeDecodeTileSize;
-
-  /// No description provided for @comfyWorkflowSlot_blocksToSwap.
-  ///
-  /// In en, this message translates to:
-  /// **'Blocks to swap'**
-  String get comfyWorkflowSlot_blocksToSwap;
-
-  /// No description provided for @comfyWorkflowSlot_swapIoComponents.
-  ///
-  /// In en, this message translates to:
-  /// **'Swap I/O components'**
-  String get comfyWorkflowSlot_swapIoComponents;
 
   /// No description provided for @localGallery_firstIndexHint.
   ///
@@ -9647,12 +6689,6 @@ abstract class AppLocalizations {
   /// **'Click to retry'**
   String get common_clickToRetry;
 
-  /// No description provided for @common_opening.
-  ///
-  /// In en, this message translates to:
-  /// **'Opening...'**
-  String get common_opening;
-
   /// No description provided for @common_swap.
   ///
   /// In en, this message translates to:
@@ -9701,36 +6737,6 @@ abstract class AppLocalizations {
   /// **'Processing'**
   String get galleryScan_processing;
 
-  /// No description provided for @imagePicker_dropReadFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to read the dropped image: {error}'**
-  String imagePicker_dropReadFailed(String error);
-
-  /// No description provided for @imagePicker_dropNoReadableImage.
-  ///
-  /// In en, this message translates to:
-  /// **'The dropped data does not contain a readable image file or image URL'**
-  String get imagePicker_dropNoReadableImage;
-
-  /// No description provided for @imagePicker_fileDataUnavailable.
-  ///
-  /// In en, this message translates to:
-  /// **'Unable to read file data'**
-  String get imagePicker_fileDataUnavailable;
-
-  /// No description provided for @imagePicker_fileSelectionFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to select file: {error}'**
-  String imagePicker_fileSelectionFailed(String error);
-
-  /// No description provided for @imagePicker_directorySelectionFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to select directory: {error}'**
-  String imagePicker_directorySelectionFailed(String error);
-
   /// No description provided for @editor_shiftEdges.
   ///
   /// In en, this message translates to:
@@ -9773,12 +6779,6 @@ abstract class AppLocalizations {
   /// **'Failed to load video'**
   String get onlineGallery_videoLoadFailed;
 
-  /// No description provided for @vibe_releaseToAddStyleReference.
-  ///
-  /// In en, this message translates to:
-  /// **'Release to add style reference'**
-  String get vibe_releaseToAddStyleReference;
-
   /// No description provided for @router_pageNotFound.
   ///
   /// In en, this message translates to:
@@ -9790,18 +6790,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Result count'**
   String get autocomplete_resultLimit;
-
-  /// No description provided for @autocomplete_relatedTagsTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Tag Expansion'**
-  String get autocomplete_relatedTagsTitle;
-
-  /// No description provided for @autocomplete_relatedTagsSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Hold Ctrl (⌘ on Mac) and click or drag-select to search tags and see related suggestions.'**
-  String get autocomplete_relatedTagsSubtitle;
 
   /// No description provided for @tagExpansion_searchHint.
   ///
@@ -9826,6 +6814,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No local tags found'**
   String get tagExpansion_noResults;
+
+  /// No description provided for @tagExpansion_searchingRelated.
+  ///
+  /// In en, this message translates to:
+  /// **'No exact local match. Searching for related tags…'**
+  String get tagExpansion_searchingRelated;
+
+  /// No description provided for @tagExpansion_matchedAlias.
+  ///
+  /// In en, this message translates to:
+  /// **'Matched alias: {alias}'**
+  String tagExpansion_matchedAlias(String alias);
 
   /// No description provided for @tagExpansion_insert.
   ///
@@ -9868,48 +6868,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No local article for this tag yet.'**
   String get tagExpansion_wikiUnavailable;
-
-  /// No description provided for @autocomplete_cooccurrence.
-  ///
-  /// In en, this message translates to:
-  /// **'Offline related-tag database'**
-  String get autocomplete_cooccurrence;
-
-  /// No description provided for @autocomplete_entryCount.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} entries'**
-  String autocomplete_entryCount(int count);
-
-  /// No description provided for @autocomplete_clearDanbooruCache.
-  ///
-  /// In en, this message translates to:
-  /// **'Clear Danbooru cache'**
-  String get autocomplete_clearDanbooruCache;
-
-  /// No description provided for @autocomplete_clearAiCache.
-  ///
-  /// In en, this message translates to:
-  /// **'Clear AI translation cache'**
-  String get autocomplete_clearAiCache;
-
-  /// No description provided for @autocomplete_cacheCleared.
-  ///
-  /// In en, this message translates to:
-  /// **'Cleared {count} cached entries'**
-  String autocomplete_cacheCleared(int count);
-
-  /// No description provided for @autocomplete_baseCatalog.
-  ///
-  /// In en, this message translates to:
-  /// **'Base Danbooru catalog'**
-  String get autocomplete_baseCatalog;
-
-  /// No description provided for @autocomplete_catalogStatus.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} tags · data version {version}'**
-  String autocomplete_catalogStatus(String count, String version);
 
   /// No description provided for @promptBlockLibrary_allBlocks.
   ///
@@ -10258,29 +7216,11 @@ abstract class AppLocalizations {
   /// **'The selected candidates have no artist strings or positive prompts to save'**
   String get styleExplore_adoptBlockEmpty;
 
-  /// No description provided for @promptBlockEditor_library.
-  ///
-  /// In en, this message translates to:
-  /// **'Block library'**
-  String get promptBlockEditor_library;
-
   /// No description provided for @promptBlockPicker_title.
   ///
   /// In en, this message translates to:
   /// **'Select Block'**
   String get promptBlockPicker_title;
-
-  /// No description provided for @promptBlockLibrary_adjustThumbnailTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Adjust Thumbnail Display Range'**
-  String get promptBlockLibrary_adjustThumbnailTitle;
-
-  /// No description provided for @promptBlockLibrary_dragToMove.
-  ///
-  /// In en, this message translates to:
-  /// **'Drag to move, scroll or pinch to zoom'**
-  String get promptBlockLibrary_dragToMove;
 
   /// No description provided for @promptBlockLibrary_saveToLibrary.
   ///
@@ -10341,18 +7281,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Expired'**
   String get subscriptionExpired;
-
-  /// No description provided for @subscriptionGracePeriod.
-  ///
-  /// In en, this message translates to:
-  /// **'Grace period'**
-  String get subscriptionGracePeriod;
-
-  /// No description provided for @subscriptionTierNone.
-  ///
-  /// In en, this message translates to:
-  /// **'No subscription'**
-  String get subscriptionTierNone;
 
   /// No description provided for @settings_modelsAndInterfaces.
   ///
@@ -10423,7 +7351,7 @@ abstract class AppLocalizations {
   /// Default shortcuts: showShortcutHelp f1, navigateTo* ctrl+1/2/3, settings ctrl+comma.
   ///
   /// In en, this message translates to:
-  /// **'Press F1 any time for the shortcut list. Ctrl+1, Ctrl+2 and Ctrl+3 jump between Generate, Gallery and Online Gallery, and Ctrl+, opens Settings. Every shortcut can be remapped in Settings.'**
+  /// **'Open the shortcut list to see the current keys for Generate, Gallery, Online Gallery and Settings. You can change these bindings in Settings.'**
   String get tips_studio_guide_7;
 
   /// settings_warnHighAnlasCostTitle.
@@ -11800,18 +8728,6 @@ abstract class AppLocalizations {
   /// **'Enhance!'**
   String get img2img_enhanceAction;
 
-  /// No description provided for @img2img_showAdvanced.
-  ///
-  /// In en, this message translates to:
-  /// **'Show Advanced'**
-  String get img2img_showAdvanced;
-
-  /// No description provided for @img2img_hideAdvanced.
-  ///
-  /// In en, this message translates to:
-  /// **'Hide Advanced'**
-  String get img2img_hideAdvanced;
-
   /// No description provided for @promptToken_usage.
   ///
   /// In en, this message translates to:
@@ -12148,66 +9064,6 @@ abstract class AppLocalizations {
   /// **'Next sub-Vibe'**
   String get shortcut_action_vibe_detail_next_sub_vibe;
 
-  /// No description provided for @settings_addAccountsSwitchBetweenThem.
-  ///
-  /// In en, this message translates to:
-  /// **'Add accounts to switch between them here.'**
-  String get settings_addAccountsSwitchBetweenThem;
-
-  /// No description provided for @settings_current.
-  ///
-  /// In en, this message translates to:
-  /// **'Current'**
-  String get settings_current;
-
-  /// No description provided for @settings_emailLogin.
-  ///
-  /// In en, this message translates to:
-  /// **'Email login'**
-  String get settings_emailLogin;
-
-  /// No description provided for @settings_signedIn.
-  ///
-  /// In en, this message translates to:
-  /// **'Signed in'**
-  String get settings_signedIn;
-
-  /// No description provided for @settings_switch.
-  ///
-  /// In en, this message translates to:
-  /// **'Switch'**
-  String get settings_switch;
-
-  /// No description provided for @settings_accountActions.
-  ///
-  /// In en, this message translates to:
-  /// **'Account actions'**
-  String get settings_accountActions;
-
-  /// No description provided for @settings_editProfile.
-  ///
-  /// In en, this message translates to:
-  /// **'Edit profile'**
-  String get settings_editProfile;
-
-  /// No description provided for @settings_setDefault.
-  ///
-  /// In en, this message translates to:
-  /// **'Set as default'**
-  String get settings_setDefault;
-
-  /// No description provided for @settings_credentialsUpdated.
-  ///
-  /// In en, this message translates to:
-  /// **'Credentials updated'**
-  String get settings_credentialsUpdated;
-
-  /// No description provided for @settings_updateCredentials.
-  ///
-  /// In en, this message translates to:
-  /// **'Update credentials'**
-  String get settings_updateCredentials;
-
   /// No description provided for @settings_accountDetails.
   ///
   /// In en, this message translates to:
@@ -12250,431 +9106,11 @@ abstract class AppLocalizations {
   /// **'Enter a new sign-in token. This account updates after validation.'**
   String get settings_enterNewSignInToken;
 
-  /// No description provided for @auth_notSignedIn.
-  ///
-  /// In en, this message translates to:
-  /// **'Not signed in'**
-  String get auth_notSignedIn;
-
-  /// No description provided for @settings_tagExpansion.
-  ///
-  /// In en, this message translates to:
-  /// **'Tag expansion'**
-  String get settings_tagExpansion;
-
-  /// No description provided for @settings_tagDictionaries.
-  ///
-  /// In en, this message translates to:
-  /// **'Tag dictionaries'**
-  String get settings_tagDictionaries;
-
-  /// No description provided for @settings_cacheMaintenance.
-  ///
-  /// In en, this message translates to:
-  /// **'Cache maintenance'**
-  String get settings_cacheMaintenance;
-
-  /// No description provided for @settings_clear.
-  ///
-  /// In en, this message translates to:
-  /// **'Clear'**
-  String get settings_clear;
-
-  /// No description provided for @settings_autoRefresh.
-  ///
-  /// In en, this message translates to:
-  /// **'Auto refresh'**
-  String get settings_autoRefresh;
-
-  /// No description provided for @settings_searchFonts.
-  ///
-  /// In en, this message translates to:
-  /// **'Search fonts'**
-  String get settings_searchFonts;
-
-  /// No description provided for @settings_couldNotLoadFonts.
-  ///
-  /// In en, this message translates to:
-  /// **'Could not load fonts'**
-  String get settings_couldNotLoadFonts;
-
-  /// No description provided for @settings_recommended.
-  ///
-  /// In en, this message translates to:
-  /// **'Recommended'**
-  String get settings_recommended;
-
-  /// No description provided for @settings_included.
-  ///
-  /// In en, this message translates to:
-  /// **'Included'**
-  String get settings_included;
-
-  /// No description provided for @settings_systemFonts.
-  ///
-  /// In en, this message translates to:
-  /// **'System fonts'**
-  String get settings_systemFonts;
-
-  /// No description provided for @settings_fontPreview.
-  ///
-  /// In en, this message translates to:
-  /// **'Font preview'**
-  String get settings_fontPreview;
-
-  /// No description provided for @settings_onlineFontsLoadAfterApplying.
-  ///
-  /// In en, this message translates to:
-  /// **'Online fonts load after applying; preview uses the interface font.'**
-  String get settings_onlineFontsLoadAfterApplying;
-
-  /// No description provided for @settings_saving.
-  ///
-  /// In en, this message translates to:
-  /// **'Saving'**
-  String get settings_saving;
-
-  /// No description provided for @settings_howGeneratedImagesSaved.
-  ///
-  /// In en, this message translates to:
-  /// **'How generated images are saved'**
-  String get settings_howGeneratedImagesSaved;
-
-  /// No description provided for @settings_assetsDisplay.
-  ///
-  /// In en, this message translates to:
-  /// **'Assets & display'**
-  String get settings_assetsDisplay;
-
-  /// No description provided for @settings_vibeLocationThumbnailQuality.
-  ///
-  /// In en, this message translates to:
-  /// **'Vibe location and thumbnail quality'**
-  String get settings_vibeLocationThumbnailQuality;
-
-  /// No description provided for @settings_applicationData.
-  ///
-  /// In en, this message translates to:
-  /// **'Application data'**
-  String get settings_applicationData;
-
-  /// No description provided for @settings_gallerySources.
-  ///
-  /// In en, this message translates to:
-  /// **'Gallery sources'**
-  String get settings_gallerySources;
-
-  /// No description provided for @settings_manageAdditionalGalleryFolders.
-  ///
-  /// In en, this message translates to:
-  /// **'Manage additional gallery folders'**
-  String get settings_manageAdditionalGalleryFolders;
-
-  /// No description provided for @settings_default.
-  ///
-  /// In en, this message translates to:
-  /// **'Default'**
-  String get settings_default;
-
-  /// No description provided for @settings_keyboard.
-  ///
-  /// In en, this message translates to:
-  /// **'Keyboard'**
-  String get settings_keyboard;
-
-  /// No description provided for @settings_customizeFrequentlyUsedActions.
-  ///
-  /// In en, this message translates to:
-  /// **'Customize frequently used actions'**
-  String get settings_customizeFrequentlyUsedActions;
-
-  /// No description provided for @settings_manageShortcuts.
-  ///
-  /// In en, this message translates to:
-  /// **'Manage shortcuts'**
-  String get settings_manageShortcuts;
-
-  /// No description provided for @settings_costReminders.
-  ///
-  /// In en, this message translates to:
-  /// **'Cost reminders'**
-  String get settings_costReminders;
-
-  /// No description provided for @settings_requestPacing.
-  ///
-  /// In en, this message translates to:
-  /// **'Request pacing'**
-  String get settings_requestPacing;
-
-  /// No description provided for @settings_notificationsSound.
-  ///
-  /// In en, this message translates to:
-  /// **'Notifications & sound'**
-  String get settings_notificationsSound;
-
-  /// No description provided for @settings_lockCanvasCamera.
-  ///
-  /// In en, this message translates to:
-  /// **'Lock canvas camera'**
-  String get settings_lockCanvasCamera;
-
-  /// No description provided for @settings_dictionariesCache.
-  ///
-  /// In en, this message translates to:
-  /// **'Dictionaries & cache'**
-  String get settings_dictionariesCache;
-
-  /// No description provided for @settings_defaultAccount2.
-  ///
-  /// In en, this message translates to:
-  /// **'Default account'**
-  String get settings_defaultAccount2;
-
-  /// No description provided for @settings_signInAutomatically.
-  ///
-  /// In en, this message translates to:
-  /// **'Sign in automatically'**
-  String get settings_signInAutomatically;
-
-  /// No description provided for @settings_signInCredentials.
-  ///
-  /// In en, this message translates to:
-  /// **'Sign-in credentials'**
-  String get settings_signInCredentials;
-
-  /// No description provided for @settings_translationInterfaces.
-  ///
-  /// In en, this message translates to:
-  /// **'Translation interfaces'**
-  String get settings_translationInterfaces;
-
-  /// No description provided for @settings_presetsBuiltInRules.
-  ///
-  /// In en, this message translates to:
-  /// **'Presets & built-in rules'**
-  String get settings_presetsBuiltInRules;
-
-  /// No description provided for @settings_preferenceBackupRestore.
-  ///
-  /// In en, this message translates to:
-  /// **'Preference backup & restore'**
-  String get settings_preferenceBackupRestore;
-
-  /// No description provided for @settings_searchSettingsFeatures.
-  ///
-  /// In en, this message translates to:
-  /// **'Search settings and features'**
-  String get settings_searchSettingsFeatures;
-
-  /// No description provided for @settings_noMatchingSettings.
-  ///
-  /// In en, this message translates to:
-  /// **'No matching settings'**
-  String get settings_noMatchingSettings;
-
-  /// No description provided for @settings_change.
-  ///
-  /// In en, this message translates to:
-  /// **'Change'**
-  String get settings_change;
-
-  /// No description provided for @settings_couldNotPlaySoundCheck.
-  ///
-  /// In en, this message translates to:
-  /// **'Could not play the sound. Check the audio file.'**
-  String get settings_couldNotPlaySoundCheck;
-
-  /// No description provided for @settings_useDefaultCompletionSound.
-  ///
-  /// In en, this message translates to:
-  /// **'Use the default completion sound'**
-  String get settings_useDefaultCompletionSound;
-
-  /// No description provided for @settings_soundPreview.
-  ///
-  /// In en, this message translates to:
-  /// **'Sound preview'**
-  String get settings_soundPreview;
-
-  /// No description provided for @settings_listenCurrentCompletionSound.
-  ///
-  /// In en, this message translates to:
-  /// **'Listen to the current completion sound'**
-  String get settings_listenCurrentCompletionSound;
-
-  /// No description provided for @settings_playSound.
-  ///
-  /// In en, this message translates to:
-  /// **'Play sound'**
-  String get settings_playSound;
-
   /// No description provided for @settings_searchResults.
   ///
   /// In en, this message translates to:
   /// **'Search results'**
   String get settings_searchResults;
-
-  /// No description provided for @settings_promptInput.
-  ///
-  /// In en, this message translates to:
-  /// **'Prompt input'**
-  String get settings_promptInput;
-
-  /// No description provided for @settings_manageTranslationModelsRules.
-  ///
-  /// In en, this message translates to:
-  /// **'Manage translation models & rules'**
-  String get settings_manageTranslationModelsRules;
-
-  /// No description provided for @settings_browsing.
-  ///
-  /// In en, this message translates to:
-  /// **'Browsing'**
-  String get settings_browsing;
-
-  /// No description provided for @settings_chooseHowViewImages.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose how to view images'**
-  String get settings_chooseHowViewImages;
-
-  /// No description provided for @settings_canvasControls.
-  ///
-  /// In en, this message translates to:
-  /// **'Canvas controls'**
-  String get settings_canvasControls;
-
-  /// No description provided for @settings_keepViewSteady.
-  ///
-  /// In en, this message translates to:
-  /// **'Keep the view steady'**
-  String get settings_keepViewSteady;
-
-  /// No description provided for @settings_appearance2.
-  ///
-  /// In en, this message translates to:
-  /// **'Appearance'**
-  String get settings_appearance2;
-
-  /// No description provided for @settings_chooseLightDarkWorkspace.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose a light or dark workspace'**
-  String get settings_chooseLightDarkWorkspace;
-
-  /// No description provided for @settings_textLanguage.
-  ///
-  /// In en, this message translates to:
-  /// **'Text & language'**
-  String get settings_textLanguage;
-
-  /// No description provided for @settings_makeReadingComfortable.
-  ///
-  /// In en, this message translates to:
-  /// **'Make reading comfortable'**
-  String get settings_makeReadingComfortable;
-
-  /// No description provided for @settings_adjustSettingsPagesDialogsOnly.
-  ///
-  /// In en, this message translates to:
-  /// **'Resize text, icons and controls throughout the app. Image resolution stays the same.'**
-  String get settings_adjustSettingsPagesDialogsOnly;
-
-  /// No description provided for @settings_motionNotifications.
-  ///
-  /// In en, this message translates to:
-  /// **'Motion & notifications'**
-  String get settings_motionNotifications;
-
-  /// No description provided for @settings_reduceDistractionsKnowWorkFinishes.
-  ///
-  /// In en, this message translates to:
-  /// **'Reduce distractions, know when work finishes'**
-  String get settings_reduceDistractionsKnowWorkFinishes;
-
-  /// No description provided for @settings_notificationStyle.
-  ///
-  /// In en, this message translates to:
-  /// **'Notification style'**
-  String get settings_notificationStyle;
-
-  /// No description provided for @settings_notificationsAppearUpperRightWrap.
-  ///
-  /// In en, this message translates to:
-  /// **'Notifications appear at the upper right, wrap long messages, and close when progress tasks finish.'**
-  String get settings_notificationsAppearUpperRightWrap;
-
-  /// No description provided for @settings_preview.
-  ///
-  /// In en, this message translates to:
-  /// **'Preview'**
-  String get settings_preview;
-
-  /// No description provided for @settings_versionUpdates.
-  ///
-  /// In en, this message translates to:
-  /// **'Version & updates'**
-  String get settings_versionUpdates;
-
-  /// No description provided for @settings_currentVersionUpdateOptions.
-  ///
-  /// In en, this message translates to:
-  /// **'Current version and update options'**
-  String get settings_currentVersionUpdateOptions;
-
-  /// No description provided for @settings_diagnosticsResources.
-  ///
-  /// In en, this message translates to:
-  /// **'Diagnostics & resources'**
-  String get settings_diagnosticsResources;
-
-  /// No description provided for @settings_logsFontsOpenSourceProject.
-  ///
-  /// In en, this message translates to:
-  /// **'Logs, fonts and the open-source project'**
-  String get settings_logsFontsOpenSourceProject;
-
-  /// No description provided for @settings_viewLicenses.
-  ///
-  /// In en, this message translates to:
-  /// **'View licenses'**
-  String get settings_viewLicenses;
-
-  /// No description provided for @settings_openProject.
-  ///
-  /// In en, this message translates to:
-  /// **'Open project'**
-  String get settings_openProject;
-
-  /// No description provided for @settings_actionIncomplete.
-  ///
-  /// In en, this message translates to:
-  /// **'Action incomplete'**
-  String get settings_actionIncomplete;
-
-  /// No description provided for @settings_exportPreferences.
-  ///
-  /// In en, this message translates to:
-  /// **'Export preferences'**
-  String get settings_exportPreferences;
-
-  /// No description provided for @settings_preferencesExported.
-  ///
-  /// In en, this message translates to:
-  /// **'Preferences exported'**
-  String get settings_preferencesExported;
-
-  /// No description provided for @settings_noAutomaticBackupYet.
-  ///
-  /// In en, this message translates to:
-  /// **'No automatic backup yet'**
-  String get settings_noAutomaticBackupYet;
-
-  /// No description provided for @settings_restorePreviousPreferences.
-  ///
-  /// In en, this message translates to:
-  /// **'Restore previous preferences'**
-  String get settings_restorePreviousPreferences;
 
   /// No description provided for @settings_importPreferences.
   ///
@@ -12682,323 +9118,17 @@ abstract class AppLocalizations {
   /// **'Import preferences'**
   String get settings_importPreferences;
 
-  /// No description provided for @settings_apply.
-  ///
-  /// In en, this message translates to:
-  /// **'Apply'**
-  String get settings_apply;
-
-  /// No description provided for @settings_preferencesAppliedPreviousSettingsBacked.
-  ///
-  /// In en, this message translates to:
-  /// **'Preferences applied; previous settings backed up'**
-  String get settings_preferencesAppliedPreviousSettingsBacked;
-
-  /// No description provided for @settings_restoreDefaultPreferences.
-  ///
-  /// In en, this message translates to:
-  /// **'Restore default preferences'**
-  String get settings_restoreDefaultPreferences;
-
-  /// No description provided for @settings_choosePreferencesResetCurrentSettings.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose the preferences to reset. Current settings will be backed up.'**
-  String get settings_choosePreferencesResetCurrentSettings;
-
-  /// No description provided for @settings_appearanceSoundControls.
-  ///
-  /// In en, this message translates to:
-  /// **'Appearance, sound & controls'**
-  String get settings_appearanceSoundControls;
-
-  /// No description provided for @settings_inputAutocomplete.
-  ///
-  /// In en, this message translates to:
-  /// **'Input & autocomplete'**
-  String get settings_inputAutocomplete;
-
-  /// No description provided for @settings_privacyGenerationProtection.
-  ///
-  /// In en, this message translates to:
-  /// **'Privacy & generation protection'**
-  String get settings_privacyGenerationProtection;
-
-  /// No description provided for @settings_moveAppearanceControlsInputProtection.
-  ///
-  /// In en, this message translates to:
-  /// **'Move appearance, controls, input and protection preferences between devices.'**
-  String get settings_moveAppearanceControlsInputProtection;
-
-  /// No description provided for @settings_rollbackCopySavedBeforeImport.
-  ///
-  /// In en, this message translates to:
-  /// **'A rollback copy is saved before an import or reset.'**
-  String get settings_rollbackCopySavedBeforeImport;
-
-  /// No description provided for @settings_resetSelectedScopeWhileKeeping.
-  ///
-  /// In en, this message translates to:
-  /// **'Reset a selected scope while keeping accounts, models, libraries and creative work.'**
-  String get settings_resetSelectedScopeWhileKeeping;
-
-  /// No description provided for @settings_chooseScope.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose scope'**
-  String get settings_chooseScope;
-
-  /// No description provided for @settings_preferenceManagement.
-  ///
-  /// In en, this message translates to:
-  /// **'Preference management'**
-  String get settings_preferenceManagement;
-
-  /// No description provided for @settings_backupMigrationRecovery.
-  ///
-  /// In en, this message translates to:
-  /// **'Backup, migration and recovery'**
-  String get settings_backupMigrationRecovery;
-
-  /// No description provided for @settings_generalAppearance.
-  ///
-  /// In en, this message translates to:
-  /// **'General & appearance'**
-  String get settings_generalAppearance;
-
-  /// No description provided for @settings_makeWorkspaceComfortableReadUse.
-  ///
-  /// In en, this message translates to:
-  /// **'Make the workspace comfortable to read and use.'**
-  String get settings_makeWorkspaceComfortableReadUse;
-
-  /// No description provided for @settings_controlsShortcuts.
-  ///
-  /// In en, this message translates to:
-  /// **'Controls & shortcuts'**
-  String get settings_controlsShortcuts;
-
-  /// No description provided for @settings_chooseInteractionCanvasControlsKeyboard.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose interaction, canvas controls and keyboard shortcuts.'**
-  String get settings_chooseInteractionCanvasControlsKeyboard;
-
-  /// No description provided for @settings_generationPrompts.
-  ///
-  /// In en, this message translates to:
-  /// **'Generation & prompts'**
-  String get settings_generationPrompts;
-
-  /// No description provided for @settings_managePromptInputGenerationReminders.
-  ///
-  /// In en, this message translates to:
-  /// **'Manage prompt input, generation reminders and request pacing.'**
-  String get settings_managePromptInputGenerationReminders;
-
-  /// No description provided for @settings_galleryFiles.
-  ///
-  /// In en, this message translates to:
-  /// **'Gallery & files'**
-  String get settings_galleryFiles;
-
-  /// No description provided for @settings_manageImageSavingGallerySources.
-  ///
-  /// In en, this message translates to:
-  /// **'Manage image saving, gallery sources and display.'**
-  String get settings_manageImageSavingGallerySources;
-
-  /// No description provided for @settings_manageTagDictionariesIndexesCache.
-  ///
-  /// In en, this message translates to:
-  /// **'Manage tag dictionaries, indexes and cache maintenance.'**
-  String get settings_manageTagDictionariesIndexesCache;
-
-  /// No description provided for @settings_novelaiAccounts.
-  ///
-  /// In en, this message translates to:
-  /// **'NovelAI accounts'**
-  String get settings_novelaiAccounts;
-
-  /// No description provided for @settings_viewAccountManageSignIn.
-  ///
-  /// In en, this message translates to:
-  /// **'View your account and manage sign-in and the default account.'**
-  String get settings_viewAccountManageSignIn;
-
-  /// No description provided for @settings_connectionsIntegrations.
-  ///
-  /// In en, this message translates to:
-  /// **'Connections & integrations'**
-  String get settings_connectionsIntegrations;
-
-  /// No description provided for @settings_manageExternalToolsBridgesNetwork.
-  ///
-  /// In en, this message translates to:
-  /// **'Manage external tools, bridges and network settings.'**
-  String get settings_manageExternalToolsBridgesNetwork;
-
-  /// No description provided for @settings_privacySharing2.
-  ///
-  /// In en, this message translates to:
-  /// **'Privacy & sharing'**
-  String get settings_privacySharing2;
-
-  /// No description provided for @settings_controlSharedInformationConfirmationBefore.
-  ///
-  /// In en, this message translates to:
-  /// **'Control shared information and confirmation before sensitive actions.'**
-  String get settings_controlSharedInformationConfirmationBefore;
-
-  /// No description provided for @settings_aboutDiagnostics.
-  ///
-  /// In en, this message translates to:
-  /// **'About & diagnostics'**
-  String get settings_aboutDiagnostics;
-
-  /// No description provided for @settings_updatesLogsProjectInformation.
-  ///
-  /// In en, this message translates to:
-  /// **'Updates, logs and project information.'**
-  String get settings_updatesLogsProjectInformation;
-
-  /// No description provided for @settings_searchSettings.
-  ///
-  /// In en, this message translates to:
-  /// **'Search settings'**
-  String get settings_searchSettings;
-
-  /// No description provided for @settings_preferences.
-  ///
-  /// In en, this message translates to:
-  /// **'Preferences'**
-  String get settings_preferences;
-
-  /// No description provided for @settings_creationResources.
-  ///
-  /// In en, this message translates to:
-  /// **'Creation & resources'**
-  String get settings_creationResources;
-
-  /// No description provided for @settings_servicesConnections.
-  ///
-  /// In en, this message translates to:
-  /// **'Services & connections'**
-  String get settings_servicesConnections;
-
-  /// No description provided for @settings_safetyMaintenance.
-  ///
-  /// In en, this message translates to:
-  /// **'Safety & maintenance'**
-  String get settings_safetyMaintenance;
-
-  /// No description provided for @settings_subscriptionActive.
-  ///
-  /// In en, this message translates to:
-  /// **'Subscription active'**
-  String get settings_subscriptionActive;
-
-  /// No description provided for @settings_availableBalance.
-  ///
-  /// In en, this message translates to:
-  /// **'Available balance'**
-  String get settings_availableBalance;
-
-  /// No description provided for @settings_subscriptionExpiry2.
-  ///
-  /// In en, this message translates to:
-  /// **'Subscription expiry'**
-  String get settings_subscriptionExpiry2;
-
-  /// No description provided for @settings_subscriptionDetailsUnavailable.
-  ///
-  /// In en, this message translates to:
-  /// **'Subscription details are unavailable'**
-  String get settings_subscriptionDetailsUnavailable;
-
-  /// No description provided for @settings_loadingSubscriptionDetails.
-  ///
-  /// In en, this message translates to:
-  /// **'Loading subscription details…'**
-  String get settings_loadingSubscriptionDetails;
-
-  /// No description provided for @settings_localDataStaysAvailableAfter.
-  ///
-  /// In en, this message translates to:
-  /// **'Local data stays available after expiry.'**
-  String get settings_localDataStaysAvailableAfter;
-
-  /// No description provided for @settings_records.
-  ///
-  /// In en, this message translates to:
-  /// **'records'**
-  String get settings_records;
-
   /// No description provided for @settings_hitRate.
   ///
   /// In en, this message translates to:
   /// **'Hit rate'**
   String get settings_hitRate;
 
-  /// No description provided for @settings_images.
-  ///
-  /// In en, this message translates to:
-  /// **'images'**
-  String get settings_images;
-
-  /// No description provided for @settings_cacheOverview.
-  ///
-  /// In en, this message translates to:
-  /// **'Cache overview'**
-  String get settings_cacheOverview;
-
-  /// No description provided for @settings_loginPreferences.
-  ///
-  /// In en, this message translates to:
-  /// **'Login preferences'**
-  String get settings_loginPreferences;
-
-  /// No description provided for @settings_preselectedSignInPage.
-  ///
-  /// In en, this message translates to:
-  /// **'Preselected on the sign-in page.'**
-  String get settings_preselectedSignInPage;
-
-  /// No description provided for @settings_noAccounts.
-  ///
-  /// In en, this message translates to:
-  /// **'No accounts'**
-  String get settings_noAccounts;
-
-  /// No description provided for @settings_useLastSessionOffNext.
-  ///
-  /// In en, this message translates to:
-  /// **'Use the last session. When off, the next launch opens sign-in.'**
-  String get settings_useLastSessionOffNext;
-
-  /// No description provided for @settings_couldNotSaveLoginPreference.
-  ///
-  /// In en, this message translates to:
-  /// **'Could not save the login preference.'**
-  String get settings_couldNotSaveLoginPreference;
-
-  /// No description provided for @settings_loginPreferencesUnavailable.
-  ///
-  /// In en, this message translates to:
-  /// **'Login preferences are unavailable.'**
-  String get settings_loginPreferencesUnavailable;
-
   /// No description provided for @settings_applyPreferencesConfirm.
   ///
   /// In en, this message translates to:
   /// **'Apply {count} preferences. Current preferences are backed up automatically and can be recovered from “Restore previous preferences”. Accounts, secrets, drafts, libraries and model configurations are kept separately.'**
   String settings_applyPreferencesConfirm(Object count);
-
-  /// No description provided for @settings_restore.
-  ///
-  /// In en, this message translates to:
-  /// **'Restore'**
-  String get settings_restore;
 
   /// No description provided for @wiki_translating.
   ///
@@ -14804,12 +10934,6 @@ abstract class AppLocalizations {
   /// **'{count}×'**
   String modelControls_retryTimes(Object count);
 
-  /// No description provided for @settings_positiveIntegerRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter an integer greater than 0'**
-  String get settings_positiveIntegerRequired;
-
   /// No description provided for @modelSettings_testingPreset.
   ///
   /// In en, this message translates to:
@@ -15428,101 +11552,11 @@ abstract class AppLocalizations {
   /// **'Add header'**
   String get modelOverrides_addHeader;
 
-  /// No description provided for @promptTranslation_translating.
-  ///
-  /// In en, this message translates to:
-  /// **'Translating'**
-  String get promptTranslation_translating;
-
-  /// No description provided for @promptTranslation_needsModel.
-  ///
-  /// In en, this message translates to:
-  /// **'Translate · configure a model first'**
-  String get promptTranslation_needsModel;
-
-  /// No description provided for @promptTranslation_withRoute.
-  ///
-  /// In en, this message translates to:
-  /// **'Translate · {provider} / {model}'**
-  String promptTranslation_withRoute(Object provider, Object model);
-
-  /// No description provided for @promptTranslation_actions.
-  ///
-  /// In en, this message translates to:
-  /// **'Translation actions'**
-  String get promptTranslation_actions;
-
-  /// No description provided for @promptTranslation_promptChanged.
-  ///
-  /// In en, this message translates to:
-  /// **'The prompt changed; new edits were not overwritten'**
-  String get promptTranslation_promptChanged;
-
-  /// No description provided for @promptTranslation_nothingToTranslate.
-  ///
-  /// In en, this message translates to:
-  /// **'There is no plain text to translate'**
-  String get promptTranslation_nothingToTranslate;
-
-  /// No description provided for @promptTranslation_failed.
-  ///
-  /// In en, this message translates to:
-  /// **'Translation failed: {error}'**
-  String promptTranslation_failed(Object error);
-
-  /// No description provided for @promptTranslation_setupTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Configure a translation model first'**
-  String get promptTranslation_setupTitle;
-
-  /// No description provided for @promptTranslation_setupBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Translation needs an explicitly selected service and model. Go to Settings → Integrations → Models & APIs, add a service and fetch its model list, then choose a model for prompt translation.'**
-  String get promptTranslation_setupBody;
-
-  /// No description provided for @promptTranslation_later.
-  ///
-  /// In en, this message translates to:
-  /// **'Later'**
-  String get promptTranslation_later;
-
-  /// No description provided for @promptTranslation_openSettings.
-  ///
-  /// In en, this message translates to:
-  /// **'Open settings'**
-  String get promptTranslation_openSettings;
-
-  /// No description provided for @promptTranslation_toolTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Translate'**
-  String get promptTranslation_toolTitle;
-
-  /// No description provided for @promptTranslation_noModel.
-  ///
-  /// In en, this message translates to:
-  /// **'No model configured'**
-  String get promptTranslation_noModel;
-
-  /// No description provided for @promptTranslation_configureModel.
-  ///
-  /// In en, this message translates to:
-  /// **'Configure translation model'**
-  String get promptTranslation_configureModel;
-
   /// No description provided for @promptTranslation_translateNew.
   ///
   /// In en, this message translates to:
   /// **'Translate new content'**
   String get promptTranslation_translateNew;
-
-  /// No description provided for @promptTranslation_undoRestore.
-  ///
-  /// In en, this message translates to:
-  /// **'Undo the restore and bring translation blocks back'**
-  String get promptTranslation_undoRestore;
 
   /// No description provided for @promptTranslation_restoreAll.
   ///
@@ -16730,12 +12764,6 @@ abstract class AppLocalizations {
   /// **'Continue with this generation?'**
   String get settings_highAnlasCostQuestion;
 
-  /// No description provided for @bridge_title.
-  ///
-  /// In en, this message translates to:
-  /// **'Local bridge'**
-  String get bridge_title;
-
   /// No description provided for @bridge_agent.
   ///
   /// In en, this message translates to:
@@ -17462,18 +13490,6 @@ abstract class AppLocalizations {
   /// **'Model operation failed. Check your connection, file permissions and free disk space, then retry.'**
   String get localUpscale_modelOperationFailed;
 
-  /// No description provided for @settings_localUpscale.
-  ///
-  /// In en, this message translates to:
-  /// **'Local upscaling'**
-  String get settings_localUpscale;
-
-  /// No description provided for @settings_localUpscaleDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Manage local upscaling models and components.'**
-  String get settings_localUpscaleDescription;
-
   /// No description provided for @localUpscale_noCuda.
   ///
   /// In en, this message translates to:
@@ -17774,12 +13790,6 @@ abstract class AppLocalizations {
   /// **'Estimated {cost} Anlas · 2×'**
   String upscale_cloudCost(int cost);
 
-  /// No description provided for @enhance_localAfterGeneration.
-  ///
-  /// In en, this message translates to:
-  /// **'Automatically upscale each generated image locally.'**
-  String get enhance_localAfterGeneration;
-
   /// No description provided for @enhance_localAction.
   ///
   /// In en, this message translates to:
@@ -17798,113 +13808,17 @@ abstract class AppLocalizations {
   /// **'Scroll down'**
   String get localUpscale_scrollDown;
 
-  /// No description provided for @wiki_exampleImages.
-  ///
-  /// In en, this message translates to:
-  /// **'Example image'**
-  String get wiki_exampleImages;
-
   /// No description provided for @wiki_exampleImagesUnavailable.
   ///
   /// In en, this message translates to:
   /// **'Example images are temporarily unavailable'**
   String get wiki_exampleImagesUnavailable;
 
-  /// No description provided for @generation_perRequestLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Images'**
-  String get generation_perRequestLabel;
-
-  /// No description provided for @generation_perRequestTooltip.
-  ///
-  /// In en, this message translates to:
-  /// **'Images per request (1–4)'**
-  String get generation_perRequestTooltip;
-
-  /// No description provided for @generation_repeatLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Repeat'**
-  String get generation_repeatLabel;
-
-  /// No description provided for @generation_referenceUpload.
-  ///
-  /// In en, this message translates to:
-  /// **'Upload'**
-  String get generation_referenceUpload;
-
-  /// No description provided for @generation_seedPinnedLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Seed · Fixed'**
-  String get generation_seedPinnedLabel;
-
-  /// No description provided for @generation_paramsDrawerTooltip.
-  ///
-  /// In en, this message translates to:
-  /// **'More parameters'**
-  String get generation_paramsDrawerTooltip;
-
-  /// No description provided for @library_sizeSmall.
-  ///
-  /// In en, this message translates to:
-  /// **'Small'**
-  String get library_sizeSmall;
-
-  /// No description provided for @library_sizeMedium.
-  ///
-  /// In en, this message translates to:
-  /// **'Medium'**
-  String get library_sizeMedium;
-
-  /// No description provided for @library_sizeLarge.
-  ///
-  /// In en, this message translates to:
-  /// **'Large'**
-  String get library_sizeLarge;
-
-  /// No description provided for @library_currentModel.
-  ///
-  /// In en, this message translates to:
-  /// **'Current model'**
-  String get library_currentModel;
-
-  /// No description provided for @library_available.
-  ///
-  /// In en, this message translates to:
-  /// **'Available'**
-  String get library_available;
-
   /// No description provided for @library_unavailable.
   ///
   /// In en, this message translates to:
   /// **'Unavailable'**
   String get library_unavailable;
-
-  /// No description provided for @library_inGeneration.
-  ///
-  /// In en, this message translates to:
-  /// **'In generation'**
-  String get library_inGeneration;
-
-  /// No description provided for @library_selectedCount.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} selected'**
-  String library_selectedCount(int count);
-
-  /// No description provided for @library_invertSelection.
-  ///
-  /// In en, this message translates to:
-  /// **'Invert selection'**
-  String get library_invertSelection;
-
-  /// No description provided for @library_more.
-  ///
-  /// In en, this message translates to:
-  /// **'More'**
-  String get library_more;
 
   /// No description provided for @viewer_fit.
   ///
@@ -17947,24 +13861,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{blocks} · {time}'**
   String styleExplore_autoRunName(String blocks, String time);
-
-  /// Style exploration workbench: styleExplore_openBlockLibrary
-  ///
-  /// In en, this message translates to:
-  /// **'Open block library'**
-  String get styleExplore_openBlockLibrary;
-
-  /// Style exploration workbench: styleExplore_drawCountLabel
-  ///
-  /// In en, this message translates to:
-  /// **'Draw'**
-  String get styleExplore_drawCountLabel;
-
-  /// Style exploration workbench: styleExplore_drawCountSuffix
-  ///
-  /// In en, this message translates to:
-  /// **'images · one at a time'**
-  String get styleExplore_drawCountSuffix;
 
   /// Candidate prompt applied to editor.
   ///
@@ -28943,12 +24839,6 @@ abstract class AppLocalizations {
   /// **'Manage usage'**
   String get naiAgent_chatGptManageUsage;
 
-  /// No description provided for @naiAgent_settings.
-  ///
-  /// In en, this message translates to:
-  /// **'Agent settings'**
-  String get naiAgent_settings;
-
   /// No description provided for @naiAgent_chooseModel.
   ///
   /// In en, this message translates to:
@@ -28960,84 +24850,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The previous run was interrupted and was not resent.'**
   String get naiAgent_interrupted;
-
-  /// No description provided for @naiAgent_systemPrompt.
-  ///
-  /// In en, this message translates to:
-  /// **'System prompt'**
-  String get naiAgent_systemPrompt;
-
-  /// No description provided for @naiAgent_promptHelp.
-  ///
-  /// In en, this message translates to:
-  /// **'Custom text replaces the default prompt. The app appends its tool map. Existing history stays intact; later requests use the new text.'**
-  String get naiAgent_promptHelp;
-
-  /// No description provided for @naiAgent_restoreDefault.
-  ///
-  /// In en, this message translates to:
-  /// **'Restore default'**
-  String get naiAgent_restoreDefault;
-
-  /// No description provided for @naiAgent_showEffective.
-  ///
-  /// In en, this message translates to:
-  /// **'View effective prompt'**
-  String get naiAgent_showEffective;
-
-  /// No description provided for @naiAgent_useGlobal.
-  ///
-  /// In en, this message translates to:
-  /// **'Use global prompt'**
-  String get naiAgent_useGlobal;
-
-  /// No description provided for @naiAgent_save.
-  ///
-  /// In en, this message translates to:
-  /// **'Save'**
-  String get naiAgent_save;
-
-  /// No description provided for @naiAgent_runLimit.
-  ///
-  /// In en, this message translates to:
-  /// **'Model requests per run'**
-  String get naiAgent_runLimit;
-
-  /// No description provided for @naiAgent_enterSends.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter sends; Shift+Enter adds a line'**
-  String get naiAgent_enterSends;
-
-  /// No description provided for @naiAgent_dataFolder.
-  ///
-  /// In en, this message translates to:
-  /// **'Workspace data directory'**
-  String get naiAgent_dataFolder;
-
-  /// No description provided for @naiAgent_openFolder.
-  ///
-  /// In en, this message translates to:
-  /// **'Open folder'**
-  String get naiAgent_openFolder;
-
-  /// No description provided for @naiAgent_toolsManuals.
-  ///
-  /// In en, this message translates to:
-  /// **'Tools and skills'**
-  String get naiAgent_toolsManuals;
-
-  /// No description provided for @naiAgent_toolsHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Read current state, images, prompts and workspace files on demand. Detailed Studio usage lives in skills such as nai-studio and nai-prompt, loaded only when needed.'**
-  String get naiAgent_toolsHint;
-
-  /// No description provided for @naiAgent_unknownCost.
-  ///
-  /// In en, this message translates to:
-  /// **'Actual cost is set by the provider'**
-  String get naiAgent_unknownCost;
 
   /// No description provided for @naiAgent_error.
   ///
@@ -29099,24 +24911,6 @@ abstract class AppLocalizations {
   /// **'Agent runtime is missing. Install the complete update package.'**
   String get naiAgent_runtimeMissing;
 
-  /// No description provided for @naiAgent_usage.
-  ///
-  /// In en, this message translates to:
-  /// **'Model usage'**
-  String get naiAgent_usage;
-
-  /// No description provided for @naiAgent_globalScope.
-  ///
-  /// In en, this message translates to:
-  /// **'Global default'**
-  String get naiAgent_globalScope;
-
-  /// No description provided for @naiAgent_workspaceScope.
-  ///
-  /// In en, this message translates to:
-  /// **'Current workspace'**
-  String get naiAgent_workspaceScope;
-
   /// No description provided for @naiAgent_generationLocalEnhance.
   ///
   /// In en, this message translates to:
@@ -29141,101 +24935,11 @@ abstract class AppLocalizations {
   /// **'…and {count} more'**
   String naiAgent_galleryMoreItems(int count);
 
-  /// No description provided for @naiAgent_extensions.
-  ///
-  /// In en, this message translates to:
-  /// **'Extensions'**
-  String get naiAgent_extensions;
-
-  /// No description provided for @naiAgent_interactionExtension.
-  ///
-  /// In en, this message translates to:
-  /// **'Studio interaction'**
-  String get naiAgent_interactionExtension;
-
-  /// No description provided for @naiAgent_extensionRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Built in · Required'**
-  String get naiAgent_extensionRequired;
-
-  /// No description provided for @naiAgent_interactionExtensionHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Read current Studio state on demand and collect answers through question cards.'**
-  String get naiAgent_interactionExtensionHint;
-
-  /// No description provided for @naiAgent_extensionAddFile.
-  ///
-  /// In en, this message translates to:
-  /// **'Add extension file'**
-  String get naiAgent_extensionAddFile;
-
-  /// No description provided for @naiAgent_extensionAddFolder.
-  ///
-  /// In en, this message translates to:
-  /// **'Add extension folder'**
-  String get naiAgent_extensionAddFolder;
-
-  /// No description provided for @naiAgent_extensionsHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Extensions load separately in each workspace. Changes apply on the next send after the current task ends. External extensions run local code; choose trusted sources.'**
-  String get naiAgent_extensionsHint;
-
   /// No description provided for @naiAgent_extensionError.
   ///
   /// In en, this message translates to:
   /// **'Extension failed'**
   String get naiAgent_extensionError;
-
-  /// No description provided for @naiAgent_extensionCompatibility.
-  ///
-  /// In en, this message translates to:
-  /// **'Supports local Pi extensions and package folders, tools, commands and standard dialogs. Terminal-only custom UI is not rendered on desktop.'**
-  String get naiAgent_extensionCompatibility;
-
-  /// No description provided for @naiAgent_instructions.
-  ///
-  /// In en, this message translates to:
-  /// **'Instructions'**
-  String get naiAgent_instructions;
-
-  /// No description provided for @naiAgent_globalInstructions.
-  ///
-  /// In en, this message translates to:
-  /// **'Global instructions'**
-  String get naiAgent_globalInstructions;
-
-  /// No description provided for @naiAgent_globalInstructionsHelp.
-  ///
-  /// In en, this message translates to:
-  /// **'Shared by every workspace. Use for language, style or task preferences. Leave blank to disable this part.'**
-  String get naiAgent_globalInstructionsHelp;
-
-  /// No description provided for @naiAgent_systemPromptPrefix.
-  ///
-  /// In en, this message translates to:
-  /// **'System prompt prefix'**
-  String get naiAgent_systemPromptPrefix;
-
-  /// No description provided for @naiAgent_systemPromptPrefixHelp.
-  ///
-  /// In en, this message translates to:
-  /// **'Inserted before the NAI Agent base prompt, keeping the base prompt and tool map. Leave blank to disable this part.'**
-  String get naiAgent_systemPromptPrefixHelp;
-
-  /// No description provided for @naiAgent_instructionOrder.
-  ///
-  /// In en, this message translates to:
-  /// **'Order: prefix → base prompt → global instructions → workspace rules. Applies to subsequent requests.'**
-  String get naiAgent_instructionOrder;
-
-  /// No description provided for @naiAgent_saveInstructions.
-  ///
-  /// In en, this message translates to:
-  /// **'Save instructions'**
-  String get naiAgent_saveInstructions;
 
   /// No description provided for @naiAgent_mcpBuiltin.
   ///
@@ -29651,77 +25355,11 @@ abstract class AppLocalizations {
   /// **'Sun'**
   String get channel_weekday7;
 
-  /// No description provided for @rag_title.
-  ///
-  /// In en, this message translates to:
-  /// **'RAG vector system'**
-  String get rag_title;
-
-  /// No description provided for @rag_description.
-  ///
-  /// In en, this message translates to:
-  /// **'Manage local retrieval, models and contextual tag suggestions'**
-  String get rag_description;
-
-  /// No description provided for @rag_enabled.
-  ///
-  /// In en, this message translates to:
-  /// **'Enable RAG'**
-  String get rag_enabled;
-
-  /// No description provided for @rag_enabledHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Enable local semantic retrieval. Preview and start the first index explicitly.'**
-  String get rag_enabledHint;
-
-  /// No description provided for @rag_status.
-  ///
-  /// In en, this message translates to:
-  /// **'Shared vector pool'**
-  String get rag_status;
-
-  /// No description provided for @rag_off.
-  ///
-  /// In en, this message translates to:
-  /// **'Disabled'**
-  String get rag_off;
-
-  /// No description provided for @rag_loading.
-  ///
-  /// In en, this message translates to:
-  /// **'Preparing local models'**
-  String get rag_loading;
-
-  /// No description provided for @rag_empty.
-  ///
-  /// In en, this message translates to:
-  /// **'Models connected; index not built'**
-  String get rag_empty;
-
-  /// No description provided for @rag_ready.
-  ///
-  /// In en, this message translates to:
-  /// **'Semantic retrieval ready'**
-  String get rag_ready;
-
   /// No description provided for @rag_partial.
   ///
   /// In en, this message translates to:
   /// **'Partly ready; ordinary search covers the rest'**
   String get rag_partial;
-
-  /// No description provided for @rag_building.
-  ///
-  /// In en, this message translates to:
-  /// **'Building index'**
-  String get rag_building;
-
-  /// No description provided for @rag_paused.
-  ///
-  /// In en, this message translates to:
-  /// **'Indexing paused; existing index remains searchable'**
-  String get rag_paused;
 
   /// No description provided for @rag_unavailable.
   ///
@@ -29729,125 +25367,11 @@ abstract class AppLocalizations {
   /// **'RAG unavailable; ordinary search remains available'**
   String get rag_unavailable;
 
-  /// No description provided for @rag_operationFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Operation failed. Check model paths and the separate runtime.'**
-  String get rag_operationFailed;
-
-  /// No description provided for @rag_indexCounts.
-  ///
-  /// In en, this message translates to:
-  /// **'Indexed {indexed} / {total} items'**
-  String rag_indexCounts(int indexed, int total);
-
-  /// No description provided for @rag_storage.
-  ///
-  /// In en, this message translates to:
-  /// **'Index storage: {size} MiB'**
-  String rag_storage(String size);
-
-  /// No description provided for @rag_refresh.
-  ///
-  /// In en, this message translates to:
-  /// **'Refresh status'**
-  String get rag_refresh;
-
-  /// No description provided for @rag_embeddingPath.
-  ///
-  /// In en, this message translates to:
-  /// **'EmbeddingGemma 2 model directory'**
-  String get rag_embeddingPath;
-
-  /// No description provided for @rag_notConfigured.
-  ///
-  /// In en, this message translates to:
-  /// **'Not configured'**
-  String get rag_notConfigured;
-
-  /// No description provided for @rag_choose.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose'**
-  String get rag_choose;
-
-  /// No description provided for @rag_modelMode.
-  ///
-  /// In en, this message translates to:
-  /// **'Model capabilities'**
-  String get rag_modelMode;
-
-  /// No description provided for @rag_modelModeHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Gemma 2 handles text and image retrieval. Audio is disabled.'**
-  String get rag_modelModeHint;
-
-  /// No description provided for @rag_discover.
-  ///
-  /// In en, this message translates to:
-  /// **'Find local models'**
-  String get rag_discover;
-
   /// No description provided for @rag_modelsMissing.
   ///
   /// In en, this message translates to:
   /// **'Models not found. Choose downloaded model directories.'**
   String get rag_modelsMissing;
-
-  /// No description provided for @rag_pythonPath.
-  ///
-  /// In en, this message translates to:
-  /// **'Separate Python runtime'**
-  String get rag_pythonPath;
-
-  /// No description provided for @rag_runtime.
-  ///
-  /// In en, this message translates to:
-  /// **'Inference runtime'**
-  String get rag_runtime;
-
-  /// No description provided for @rag_runtimeHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Use a dedicated environment. Existing upscale components are unchanged. Select model weights separately.'**
-  String get rag_runtimeHint;
-
-  /// No description provided for @rag_installRuntime.
-  ///
-  /// In en, this message translates to:
-  /// **'Install separate runtime'**
-  String get rag_installRuntime;
-
-  /// No description provided for @rag_installHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Download Python and inference dependencies. CUDA requires several GB and a compatible NVIDIA GPU; CPU needs a smaller download. Model weights are separate.'**
-  String get rag_installHint;
-
-  /// No description provided for @rag_installing.
-  ///
-  /// In en, this message translates to:
-  /// **'Installing runtime'**
-  String get rag_installing;
-
-  /// No description provided for @rag_device.
-  ///
-  /// In en, this message translates to:
-  /// **'Device'**
-  String get rag_device;
-
-  /// No description provided for @rag_auto.
-  ///
-  /// In en, this message translates to:
-  /// **'Automatic'**
-  String get rag_auto;
-
-  /// No description provided for @rag_tagsEnabled.
-  ///
-  /// In en, this message translates to:
-  /// **'Semantic tag search & suggestions'**
-  String get rag_tagsEnabled;
 
   /// No description provided for @rag_tagsHint.
   ///
@@ -29855,130 +25379,11 @@ abstract class AppLocalizations {
   /// **'Search tags by name or description. Empty queries use local cooccurrence suggestions.'**
   String get rag_tagsHint;
 
-  /// No description provided for @rag_buildIndex.
-  ///
-  /// In en, this message translates to:
-  /// **'Preview and build index'**
-  String get rag_buildIndex;
-
-  /// No description provided for @rag_plan.
-  ///
-  /// In en, this message translates to:
-  /// **'Index {total} tags with aliases and existing local descriptions. Initial processing may take time; pause is supported and completed parts are usable.'**
-  String rag_plan(int total);
-
-  /// No description provided for @rag_start.
-  ///
-  /// In en, this message translates to:
-  /// **'Start indexing'**
-  String get rag_start;
-
-  /// No description provided for @rag_pause.
-  ///
-  /// In en, this message translates to:
-  /// **'Pause indexing'**
-  String get rag_pause;
-
-  /// No description provided for @rag_resume.
-  ///
-  /// In en, this message translates to:
-  /// **'Resume indexing'**
-  String get rag_resume;
-
-  /// No description provided for @rag_rebuild.
-  ///
-  /// In en, this message translates to:
-  /// **'Rebuild index'**
-  String get rag_rebuild;
-
-  /// No description provided for @rag_clear.
-  ///
-  /// In en, this message translates to:
-  /// **'Clear index'**
-  String get rag_clear;
-
-  /// No description provided for @rag_clearHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete this derived index while keeping source content and models. Rebuild before using it again.'**
-  String get rag_clearHint;
-
-  /// No description provided for @rag_futureSources.
-  ///
-  /// In en, this message translates to:
-  /// **'Tag suggestions, Wiki, prompt blocks and multimodal gallery search are connected. Workspace and Agent retrieval will follow.'**
-  String get rag_futureSources;
-
   /// No description provided for @rag_badgeHint.
   ///
   /// In en, this message translates to:
   /// **'Local semantic search is ready'**
   String get rag_badgeHint;
-
-  /// No description provided for @rag_wikiEnabled.
-  ///
-  /// In en, this message translates to:
-  /// **'Wiki semantic search'**
-  String get rag_wikiEnabled;
-
-  /// No description provided for @rag_wikiHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Index local article text. Exact names come first; semantic matches supplement them. Preview and start the first index separately.'**
-  String get rag_wikiHint;
-
-  /// No description provided for @rag_blocksEnabled.
-  ///
-  /// In en, this message translates to:
-  /// **'Prompt block semantic search'**
-  String get rag_blocksEnabled;
-
-  /// No description provided for @rag_blocksHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Index saved, active block titles, tags and positive/negative text. Images and unsaved drafts are excluded.'**
-  String get rag_blocksHint;
-
-  /// No description provided for @rag_textPlan.
-  ///
-  /// In en, this message translates to:
-  /// **'Index {documents} saved documents as {total} text passages. Start this first build explicitly; later updates are incremental. Pause anytime and search completed passages.'**
-  String rag_textPlan(int documents, int total);
-
-  /// No description provided for @rag_textCounts.
-  ///
-  /// In en, this message translates to:
-  /// **'Indexed {indexed} / {total} text passages'**
-  String rag_textCounts(int indexed, int total);
-
-  /// No description provided for @rag_galleryEnabled.
-  ///
-  /// In en, this message translates to:
-  /// **'Gallery multimodal search'**
-  String get rag_galleryEnabled;
-
-  /// No description provided for @rag_galleryHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Index visual content from registered gallery folders and existing NAI parameters as separate text. Originals stay unchanged; other software metadata is not parsed.'**
-  String get rag_galleryHint;
-
-  /// No description provided for @rag_galleryPlan.
-  ///
-  /// In en, this message translates to:
-  /// **'Index {images} active gallery images and {parameters} NAI parameter passages. Start this first build explicitly; later updates are incremental. Visual and text indices are separate and pausable.'**
-  String rag_galleryPlan(int images, int parameters);
-
-  /// No description provided for @rag_galleryCounts.
-  ///
-  /// In en, this message translates to:
-  /// **'Images {indexed} / {images}; NAI passages {parameters}; skipped images {skipped}'**
-  String rag_galleryCounts(
-    int indexed,
-    int images,
-    int parameters,
-    int skipped,
-  );
 
   /// No description provided for @rag_galleryMixed.
   ///
@@ -30016,95 +25421,11 @@ abstract class AppLocalizations {
   /// **'Gallery RAG search options'**
   String get rag_gallerySearchOptions;
 
-  /// No description provided for @rag_downloadModel.
-  ///
-  /// In en, this message translates to:
-  /// **'Download model'**
-  String get rag_downloadModel;
-
-  /// No description provided for @rag_modelDownloading.
-  ///
-  /// In en, this message translates to:
-  /// **'Downloading model'**
-  String get rag_modelDownloading;
-
-  /// No description provided for @rag_modelVerifying.
-  ///
-  /// In en, this message translates to:
-  /// **'Verifying model'**
-  String get rag_modelVerifying;
-
-  /// No description provided for @rag_downloadProgress.
-  ///
-  /// In en, this message translates to:
-  /// **'{done} / {total} MB'**
-  String rag_downloadProgress(String done, String total);
-
-  /// No description provided for @rag_poolHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Enabled sources share one vector pool. New content and saved translations update incrementally.'**
-  String get rag_poolHint;
-
   /// No description provided for @rag_runtimeReady.
   ///
   /// In en, this message translates to:
   /// **'Runtime ready'**
   String get rag_runtimeReady;
-
-  /// No description provided for @rag_runtimeCheck.
-  ///
-  /// In en, this message translates to:
-  /// **'Check runtime'**
-  String get rag_runtimeCheck;
-
-  /// No description provided for @rag_runtimeExisting.
-  ///
-  /// In en, this message translates to:
-  /// **'Checking existing runtime'**
-  String get rag_runtimeExisting;
-
-  /// No description provided for @rag_runtimeDownload.
-  ///
-  /// In en, this message translates to:
-  /// **'Downloading setup tool'**
-  String get rag_runtimeDownload;
-
-  /// No description provided for @rag_runtimeCreate.
-  ///
-  /// In en, this message translates to:
-  /// **'Preparing Python runtime'**
-  String get rag_runtimeCreate;
-
-  /// No description provided for @rag_runtimeCuda.
-  ///
-  /// In en, this message translates to:
-  /// **'Installing CUDA inference packages'**
-  String get rag_runtimeCuda;
-
-  /// No description provided for @rag_runtimePackages.
-  ///
-  /// In en, this message translates to:
-  /// **'Installing inference dependencies'**
-  String get rag_runtimePackages;
-
-  /// No description provided for @rag_runtimeVerify.
-  ///
-  /// In en, this message translates to:
-  /// **'Verifying runtime compatibility'**
-  String get rag_runtimeVerify;
-
-  /// No description provided for @rag_runtimeElapsed.
-  ///
-  /// In en, this message translates to:
-  /// **'{seconds}s in this step'**
-  String rag_runtimeElapsed(int seconds);
-
-  /// No description provided for @rag_useRuntime.
-  ///
-  /// In en, this message translates to:
-  /// **'Use existing runtime'**
-  String get rag_useRuntime;
 
   /// No description provided for @set_title.
   ///
@@ -33256,12 +28577,6 @@ abstract class AppLocalizations {
   /// **'Local RAG for tag suggestions, wiki, prompt blocks and similar images. Nothing is uploaded.'**
   String get set_rgDesc;
 
-  /// No description provided for @set_rgReady.
-  ///
-  /// In en, this message translates to:
-  /// **'Semantic search ready'**
-  String get set_rgReady;
-
   /// No description provided for @set_rgOff.
   ///
   /// In en, this message translates to:
@@ -33537,36 +28852,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{n} skipped'**
   String set_rgSkipped(Object n);
-
-  /// No description provided for @set_rgStartupTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Prepare your local index'**
-  String get set_rgStartupTitle;
-
-  /// No description provided for @set_rgStartupBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Before building or resuming an index, Studio prepares the local runtime, models, and existing data.'**
-  String get set_rgStartupBody;
-
-  /// No description provided for @set_rgStartupWaitTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'This may take a few minutes or longer'**
-  String get set_rgStartupWaitTitle;
-
-  /// No description provided for @set_rgStartupWaitBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Progress counts may stay unchanged during preparation. Please wait.'**
-  String get set_rgStartupWaitBody;
-
-  /// No description provided for @set_rgStartupFrequency.
-  ///
-  /// In en, this message translates to:
-  /// **'Shown once per Studio session'**
-  String get set_rgStartupFrequency;
 
   /// No description provided for @set_rgLoading.
   ///
@@ -33943,7 +29228,7 @@ abstract class AppLocalizations {
   /// No description provided for @set_upNoGpu.
   ///
   /// In en, this message translates to:
-  /// **'No discrete GPU detected'**
+  /// **'NVIDIA GPU information unavailable'**
   String get set_upNoGpu;
 
   /// No description provided for @set_upLocal.
@@ -39370,6 +34655,72 @@ abstract class AppLocalizations {
   /// **'Next refresh in {time}'**
   String ag_cacheWarmNext(String time);
 
+  /// No description provided for @set_stDraftBackups.
+  ///
+  /// In en, this message translates to:
+  /// **'Generation draft backups'**
+  String get set_stDraftBackups;
+
+  /// No description provided for @resourceWindow_retryPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Next page failed to load · Retry'**
+  String get resourceWindow_retryPage;
+
+  /// No description provided for @set_rgSuspended.
+  ///
+  /// In en, this message translates to:
+  /// **'Search temporarily paused'**
+  String get set_rgSuspended;
+
+  /// No description provided for @set_rgNoSearchable.
+  ///
+  /// In en, this message translates to:
+  /// **'No searchable content yet'**
+  String get set_rgNoSearchable;
+
+  /// No description provided for @set_rgSearchableCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}/{total} sources searchable'**
+  String set_rgSearchableCount(int count, int total);
+
+  /// No description provided for @set_rgWaitRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'The index is busy. Try again shortly.'**
+  String get set_rgWaitRetry;
+
+  /// No description provided for @set_rgCheckSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the source path and read permissions, then retry.'**
+  String get set_rgCheckSource;
+
+  /// No description provided for @set_rgCheckDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'CUDA is unavailable. Check the device settings and retry.'**
+  String get set_rgCheckDevice;
+
+  /// No description provided for @set_rgRetryDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Model download failed. Check your connection and retry the download.'**
+  String get set_rgRetryDownload;
+
+  /// No description provided for @set_rgRefreshRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'The local search service did not respond. Refresh its status and retry.'**
+  String get set_rgRefreshRetry;
+
+  /// No description provided for @set_rgOperationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The local search operation failed. Refresh its status and retry.'**
+  String get set_rgOperationFailed;
+
   /// No description provided for @set_stOther.
   ///
   /// In en, this message translates to:
@@ -39501,6 +34852,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Complete'**
   String get prompt_autocompleteTitle;
+
+  /// No description provided for @prompt_spellingSuggestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Spelling suggestion'**
+  String get prompt_spellingSuggestion;
+
+  /// No description provided for @prompt_spellingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tab to accept · Enter for a new line · Esc to dismiss'**
+  String get prompt_spellingHint;
 
   /// No description provided for @prompt_autocompleteHint.
   ///

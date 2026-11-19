@@ -65,11 +65,12 @@ function usage() {
     stats: session.getSessionStats(), context: context ? { ...context, windowKnown: created.contextWindowKnown } : null };
 }
 function state() {
+  const branch = created.manager.getBranch();
   return { messages: session.messages, sessionFile: session.sessionFile,
-    historyMessages: created.manager.getBranch().flatMap(entry => entry.type === 'message'
+    historyMessages: branch.flatMap(entry => entry.type === 'message'
       ? [entry.message] : entry.type === 'compaction'
         ? [{role:'compactionSummary', summary:entry.summary, tokensBefore:entry.tokensBefore, timestamp:Date.parse(entry.timestamp)}] : []),
-    entries: created.manager.getBranch().filter(entry => entry.type === 'message')
+    entries: branch.filter(entry => entry.type === 'message')
       .map(entry => ({ id: entry.id, parentId: entry.parentId, role: entry.message.role, timestamp: entry.message.timestamp })),
     userMessages: session.getUserMessagesForForking(), queue: queueState(),
     streaming: session.isStreaming, permissionMode: created.getPermissionMode(), ...usage(),
@@ -127,7 +128,14 @@ async function handle(message) {
       onUsage: () => { if (!closing) send({ type: 'usage', ...usage() }); },
     });
     session.subscribe(event => {
-      send({ type: 'event', event });
+      // Pi includes the cumulative message in both fields of each streaming update.
+      // The Studio renderer uses event.message; keep the delta metadata on the wire.
+      if (event.type === 'message_update') {
+        const { partial, ...delta } = event.assistantMessageEvent;
+        send({ type: 'event', event: { ...event, assistantMessageEvent: delta } });
+      } else {
+        send({ type: 'event', event });
+      }
       if (event.type === 'agent_settled' && !event.aborted) {
         const epoch = suggestions?.epoch;
         queueMicrotask(() => { if (!closing && epoch === suggestions?.epoch) void suggestions?.generate(); });

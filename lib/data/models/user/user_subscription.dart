@@ -30,9 +30,6 @@ class UserSubscription with _$UserSubscription {
     /// 是否激活
     @Default(false) bool active,
 
-    /// Compatible gateways have their own prices, even when they report Opus.
-    @Default(false) bool usesExternalBilling,
-
     /// 订阅到期时间（Unix 时间戳秒）
     int? expiresAt,
 
@@ -75,7 +72,7 @@ class UserSubscription with _$UserSubscription {
   }
 
   /// 是否拥有有效的 Opus 订阅权益
-  bool get isOpus => !usesExternalBilling && tier == 3 && hasActiveSubscription;
+  bool get isOpus => tier == 3 && hasActiveSubscription;
 
   /// Opus 免费额度是否已耗尽。
   ///

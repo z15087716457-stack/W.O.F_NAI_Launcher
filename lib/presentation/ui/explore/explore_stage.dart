@@ -419,8 +419,33 @@ class _SizeSeg extends StatelessWidget {
 
 /// 页签行 46（原型 `.trow`）：候选 / 进化 大页签 │ 筛选胶囊（横向滚动）—— 排序 · 多选。
 /// 进化页签时筛选换成进化线切换。
-class ExploreTabsRow extends StatelessWidget {
+class ExploreTabsRow extends StatefulWidget {
   const ExploreTabsRow({super.key});
+
+  @override
+  State<ExploreTabsRow> createState() => _ExploreTabsRowState();
+}
+
+class _ExploreTabsRowState extends State<ExploreTabsRow> {
+  String? _renaming;
+
+  Widget _nameInput(String name, ValueChanged<String> onSubmit) =>
+      ExploreInlineInput(
+        key: const Key('explore-chip-name'),
+        initial: name,
+        onCancel: () => setState(() => _renaming = null),
+        onSubmit: (value) {
+          setState(() => _renaming = null);
+          onSubmit(value);
+        },
+      );
+
+  UiMenuItem _renameItem(String id) => UiMenuItem(
+    key: const Key('explore-chip-rename'),
+    label: context.l10n.explore_rename,
+    glyph: UiGlyphs.pencil,
+    onTap: () => setState(() => _renaming = id),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -443,29 +468,36 @@ class ExploreTabsRow extends StatelessWidget {
     if (evo) {
       chips = [
         for (final line in run.lines)
-          ExploreChip(
-            key: Key('explore-line-${line.id}'),
-            label: line.name,
-            countText: 'G${line.current.number}',
-            selected: line.id == ctrl.lineId,
-            selectedColor: c.evo,
-            selectedInk: c.onEvo,
-            onTap: () => ctrl.setLine(line.id),
-            onSecondaryTap: (p) => ctrl.openMenu(UiPopoverAnchor(p), [
-              UiMenuItem(
-                label: l.explore_compareShort,
-                glyph: UiGlyphs.sort,
-                onTap: () => ctrl.compare(line.id),
-              ),
-              UiMenuItem(
-                label: l.explore_deleteLine,
-                glyph: UiGlyphs.trash,
-                danger: true,
-                divider: true,
-                onTap: () => ctrl.confirmDeleteLine(line.id),
-              ),
-            ]),
-          ),
+          if (_renaming == line.id)
+            _nameInput(
+              line.name,
+              (name) => scope.actions.onRenameLine(line.id, name),
+            )
+          else
+            ExploreChip(
+              key: Key('explore-line-${line.id}'),
+              label: line.name,
+              countText: 'G${line.current.number}',
+              selected: line.id == ctrl.lineId,
+              selectedColor: c.evo,
+              selectedInk: c.onEvo,
+              onTap: () => ctrl.setLine(line.id),
+              onSecondaryTap: (p) => ctrl.openMenu(UiPopoverAnchor(p), [
+                UiMenuItem(
+                  label: l.explore_compareShort,
+                  glyph: UiGlyphs.sort,
+                  onTap: () => ctrl.compare(line.id),
+                ),
+                _renameItem(line.id),
+                UiMenuItem(
+                  label: l.explore_deleteLine,
+                  glyph: UiGlyphs.trash,
+                  danger: true,
+                  divider: true,
+                  onTap: () => ctrl.confirmDeleteLine(line.id),
+                ),
+              ]),
+            ),
         ExploreChip(
           key: const Key('explore-new-line'),
           label: l.explore_newLine,
@@ -515,26 +547,35 @@ class ExploreTabsRow extends StatelessWidget {
           onTap: () => ctrl.setFilter(ExploreFilter.ungrouped),
         ),
         for (final g in run.groups)
-          ExploreChip(
-            key: Key('explore-filter-${g.id}'),
-            label: g.name,
-            count: groupCount[g.id],
-            selected: ctrl.filter == ExploreFilter.group(g.id),
-            leading: UiGlyph(
-              UiGlyphs.folder,
-              size: 13,
-              color: ctrl.filter == ExploreFilter.group(g.id) ? c.bg : c.muted,
-            ),
-            onTap: () => ctrl.setFilter(ExploreFilter.group(g.id)),
-            onSecondaryTap: (p) => ctrl.openMenu(UiPopoverAnchor(p), [
-              UiMenuItem(
-                label: l.explore_deleteGroup,
-                glyph: UiGlyphs.trash,
-                danger: true,
-                onTap: () => scope.actions.onDeleteGroup(g.id),
+          if (_renaming == g.id)
+            _nameInput(
+              g.name,
+              (name) => scope.actions.onRenameGroup(g.id, name),
+            )
+          else
+            ExploreChip(
+              key: Key('explore-filter-${g.id}'),
+              label: g.name,
+              count: groupCount[g.id],
+              selected: ctrl.filter == ExploreFilter.group(g.id),
+              leading: UiGlyph(
+                UiGlyphs.folder,
+                size: 13,
+                color: ctrl.filter == ExploreFilter.group(g.id)
+                    ? c.bg
+                    : c.muted,
               ),
-            ]),
-          ),
+              onTap: () => ctrl.setFilter(ExploreFilter.group(g.id)),
+              onSecondaryTap: (p) => ctrl.openMenu(UiPopoverAnchor(p), [
+                _renameItem(g.id),
+                UiMenuItem(
+                  label: l.explore_deleteGroup,
+                  glyph: UiGlyphs.trash,
+                  danger: true,
+                  onTap: () => scope.actions.onDeleteGroup(g.id),
+                ),
+              ]),
+            ),
         if (ctrl.addingGroup)
           ExploreInlineInput(
             key: const Key('explore-group-input'),

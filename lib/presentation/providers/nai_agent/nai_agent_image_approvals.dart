@@ -1,32 +1,26 @@
-import 'dart:async';
-import 'package:flutter/foundation.dart';
+import 'dart:typed_data';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:uuid/uuid.dart';
+
 import '../../../core/nai_agent/agent_tool.dart';
 import '../../../core/nai_agent/generation_tools.dart';
+import 'nai_agent_quote_approvals.dart';
 
-class AgentImageApproval {
+class AgentImageApproval extends AgentQuoteApproval {
   AgentImageApproval(
-    this.owner,
-    this.quote,
-    this.check,
-    this.sourceBytes, {
-    this.expiresAt,
-  });
-  final DateTime? expiresAt;
-  final String id = const Uuid().v4();
-  final NaiAgentConversationOwner owner;
+    super.owner,
+    super.expiresAt,
+    super.check,
+    Map<String, dynamic> quote,
+    this.sourceBytes,
+  ) : quote = Map.unmodifiable(quote);
   final Map<String, dynamic> quote;
-  final void Function() check;
   final Uint8List? sourceBytes;
-  final completion = Completer<bool>();
 }
 
-class NaiAgentImageApprovals extends ChangeNotifier {
-  final _pending = <String, AgentImageApproval>{};
-  bool _disposed = false;
-  List<AgentImageApproval> forChat(String chatId) =>
-      _pending.values.where((r) => r.owner.chatId == chatId).toList();
+class NaiAgentImageApprovals
+    extends NaiAgentQuoteApprovals<AgentImageApproval> {
+  NaiAgentImageApprovals() : super('Image', 'Image approvals closed');
 
   Future<bool> request(
     NaiAgentConversationOwner owner,
@@ -35,72 +29,12 @@ class NaiAgentImageApprovals extends ChangeNotifier {
     NaiAgentCancellation token,
     void Function() check, {
     Uint8List? sourceBytes,
-  }) async {
-    token.check();
-    check();
-    if (_disposed) {
-      throw const NaiAgentToolError('closed', 'Image approvals closed');
-    }
-    final r = AgentImageApproval(
-      owner,
-      Map.unmodifiable(quote),
-      check,
-      sourceBytes,
-      expiresAt: expiresAt,
-    );
-    _pending[r.id] = r;
-    notifyListeners();
-    final remaining = expiresAt.difference(DateTime.now());
-    final timer = Timer(remaining.isNegative ? Duration.zero : remaining, () {
-      if (!r.completion.isCompleted) {
-        r.completion.completeError(
-          const NaiAgentToolError('quote_expired', 'Image quote expired'),
-        );
-      }
-    });
-    token.whenCancelled.then((_) {
-      if (!r.completion.isCompleted) {
-        r.completion.completeError(
-          const NaiAgentToolError('cancelled', 'Image authorization cancelled'),
-        );
-      }
-    });
-    try {
-      return await r.completion.future;
-    } finally {
-      timer.cancel();
-      _pending.remove(r.id);
-      if (!_disposed) notifyListeners();
-    }
-  }
+  }) => waitForDecision(
+    AgentImageApproval(owner, expiresAt, check, quote, sourceBytes),
+    token,
+  );
 
-  void decide(String id, {required bool run}) {
-    final r = _pending[id];
-    if (r == null || r.completion.isCompleted) return;
-    if (run) {
-      try {
-        r.check();
-      } catch (error, stack) {
-        r.completion.completeError(error, stack);
-        return;
-      }
-    }
-    r.completion.complete(run);
-  }
-
-  @override
-  void dispose() {
-    _disposed = true;
-    for (final r in _pending.values) {
-      if (!r.completion.isCompleted) {
-        r.completion.completeError(
-          const NaiAgentToolError('closed', 'Image approvals closed'),
-        );
-      }
-    }
-    _pending.clear();
-    super.dispose();
-  }
+  void decide(String id, {required bool run}) => resolveDecision(id, run);
 }
 
 final naiAgentImageApprovalsProvider =

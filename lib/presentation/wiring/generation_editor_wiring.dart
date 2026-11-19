@@ -21,7 +21,7 @@ ComfyuiImportCommit beginGenerationComfyuiImport(
 }) {
   final commit = ref
       .read(generationBackendProvider)
-      .captureDraft(alive: alive, promptEdit: true);
+      .captureDraft(alive: alive, nextRequest: true);
   return (prompt, characters) => commit(() {
     final spec = ModelSpecs.of(
       ref.read(generationParamsNotifierProvider).model,

@@ -18,6 +18,7 @@ class LocalTagExpansionService {
     required this.substringSearch,
     required this.popularSearch,
     this.semanticNames,
+    this.spellingSearch,
     this.semantics,
     this.readingLanguage,
   });
@@ -27,6 +28,8 @@ class LocalTagExpansionService {
   final SubstringTagSearch substringSearch;
   final PopularTagSearch popularSearch;
   final SubstringTagSearch? semanticNames;
+  final Future<List<CompletionCandidate>> Function(String token)?
+  spellingSearch;
   final TagSemanticsRepository? semantics;
   final String Function()? readingLanguage;
 
@@ -53,6 +56,7 @@ class LocalTagExpansionService {
     required String locale,
     Set<String> existingTags = const {},
     int limit = 40,
+    bool suggestSpelling = false,
   }) async {
     final token = TagNormalizer.normalize(input);
     if (token.isEmpty) return const [];
@@ -78,6 +82,16 @@ class LocalTagExpansionService {
     // equal undecorated rows here could discard that order before the limit.
     if (!query.isChinese) {
       candidates.sort((a, b) => a.matchKind.index.compareTo(b.matchKind.index));
+    }
+    if (suggestSpelling &&
+        !query.isChinese &&
+        !candidates.any(
+          (candidate) =>
+              candidate.matchKind.index <=
+              CompletionMatchKind.aliasPrefix.index,
+        )) {
+      final suggestions = await spellingSearch?.call(token);
+      if (suggestions != null) candidates.insertAll(0, suggestions);
     }
     return _decorate(
       _unique(candidates, limit),

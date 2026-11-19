@@ -9,7 +9,6 @@ void main() {
       'tier': 0,
       'active': false,
       'trainingStepsLeft': null,
-      'usesExternalBilling': true,
     });
     expect(SubscriptionState.loaded(subscription).balance, isNull);
     expect(
@@ -19,14 +18,14 @@ void main() {
       0,
     );
   });
-  test('gateway virtual Opus never enables official free generation', () {
+  test('legacy gateway cache uses the reported Opus entitlement', () {
     final subscription = UserSubscription.fromJson({
       'tier': 3,
       'active': true,
       'trainingStepsLeft': {'purchasedTrainingSteps': 1000},
       'usesExternalBilling': true,
     });
-    expect(subscription.isOpus, isFalse);
+    expect(subscription.isOpus, isTrue);
     expect(SubscriptionState.loaded(subscription).balance, 1000);
     expect(
       UserSubscription.fromJson(
@@ -34,7 +33,6 @@ void main() {
       ),
       subscription,
     );
-    expect(const UserSubscription(tier: 3, active: true).isOpus, isTrue);
   });
 
   group('Opus quota pools', () {

@@ -12,7 +12,7 @@ import 'package:nai_launcher/presentation/providers/prompt_block_palette_provide
 import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
 import 'package:nai_launcher/presentation/ui/kit/ui_block_pill.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/blocks/prompt_block_palette.dart';
-import 'package:nai_launcher/presentation/wiring/generation_blocks_dock.dart';
+import 'package:nai_launcher/presentation/wiring/blocks_dock_wiring.dart';
 
 import '../../helpers/studio_capture_fonts.dart';
 

@@ -1,8 +1,6 @@
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/utils/localization_extension.dart';
-import '../../providers/local_gallery_provider.dart';
 
 /// Error state view for gallery
 /// 画廊错误状态视图
@@ -79,55 +77,68 @@ class GalleryLoadingView extends StatelessWidget {
 /// Empty state view for gallery
 /// 画廊空状态视图
 class GalleryEmptyView extends StatelessWidget {
-  /// Title text
-  /// 标题文本
-  final String? title;
-
-  /// Subtitle text
-  /// 副标题文本
-  final String? subtitle;
-
-  /// Icon to display
-  /// 显示的图标
-  final IconData icon;
-
   const GalleryEmptyView({
     super.key,
-    this.title,
-    this.subtitle,
-    this.icon = Icons.image_not_supported,
+    required this.allImages,
+    required this.favorites,
+    required this.naiOnly,
+    required this.scopeCount,
+    required this.onShowNonNai,
+    this.onImportFolder,
   });
+
+  final bool allImages;
+  final bool favorites;
+  final bool naiOnly;
+  final int? scopeCount;
+  final VoidCallback onShowNonNai;
+  final VoidCallback? onImportFolder;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
+    final l = context.l10n;
+    final filtered = naiOnly && scopeCount != 0;
+    final title = filtered
+        ? l.localGallery_noNaiHere
+        : favorites
+        ? l.localGallery_emptyFavorites
+        : allImages
+        ? l.localGallery_emptyTitle
+        : l.localGallery_emptyScope;
+
     return Center(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            icon,
+            favorites ? Icons.favorite_border : Icons.image_not_supported,
             size: 64,
             color: theme.colorScheme.onSurfaceVariant.withValues(
               alpha: isDark ? 0.6 : 1.0,
             ),
           ),
           const SizedBox(height: 16),
-          Text(
-            title ?? context.l10n.localGallery_emptyTitle,
-            style: TextStyle(color: theme.colorScheme.onSurface),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            subtitle ?? context.l10n.localGallery_emptySubtitle,
-            style: TextStyle(
-              color: theme.colorScheme.onSurfaceVariant.withValues(
-                alpha: isDark ? 0.7 : 1.0,
+          Text(title, style: TextStyle(color: theme.colorScheme.onSurface)),
+          if (filtered || (allImages && onImportFolder != null)) ...[
+            const SizedBox(height: 8),
+            TextButton.icon(
+              onPressed: filtered ? onShowNonNai : onImportFolder,
+              icon: Icon(
+                filtered
+                    ? Icons.filter_alt_off
+                    : Icons.create_new_folder_outlined,
+                size: 16,
+              ),
+              label: Text(
+                filtered
+                    ? l.localGallery_showNonNai
+                    : l.localGallery_importFolder,
               ),
             ),
-          ),
+          ],
         ],
       ),
     );
@@ -136,10 +147,10 @@ class GalleryEmptyView extends StatelessWidget {
 
 /// No results view for gallery (when filters applied)
 /// 画廊无结果视图（应用过滤器后）
-class GalleryNoResultsView extends ConsumerWidget {
+class GalleryNoResultsView extends StatelessWidget {
   /// Callback when clear filters button is pressed
   /// 清除过滤按钮回调
-  final VoidCallback? onClearFilters;
+  final VoidCallback onClearFilters;
 
   /// Custom title text
   /// 自定义标题文本
@@ -155,14 +166,14 @@ class GalleryNoResultsView extends ConsumerWidget {
 
   const GalleryNoResultsView({
     super.key,
-    this.onClearFilters,
+    required this.onClearFilters,
     this.title,
     this.subtitle,
     this.icon,
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -195,13 +206,7 @@ class GalleryNoResultsView extends ConsumerWidget {
           ],
           const SizedBox(height: 8),
           TextButton.icon(
-            onPressed:
-                onClearFilters ??
-                () {
-                  ref
-                      .read(localGalleryNotifierProvider.notifier)
-                      .clearAllFilters();
-                },
+            onPressed: onClearFilters,
             icon: const Icon(Icons.filter_alt_off, size: 16),
             label: Text(context.l10n.localGallery_clearFilters),
             style: TextButton.styleFrom(

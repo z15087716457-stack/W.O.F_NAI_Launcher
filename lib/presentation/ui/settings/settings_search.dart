@@ -367,7 +367,7 @@ List<SettingsHit> settingsIndex(BuildContext context) {
       page: SettingsPageId.rag,
       section: l.set_rgRuntime,
       title: l.set_rgEnv,
-      detail: d.rag.runtimeReady ? l.set_rgEnvReady : l.set_rgEnvMissing,
+      detail: SettingsFormat.ragRuntimeStatus(context, d.rag),
       keywords: 'rag python cuda cpu install runtime 安装',
       anchor: 'rag-runtime',
     ),
@@ -646,7 +646,7 @@ class SettingsSearchResults extends StatelessWidget {
   }
 }
 
-class _HitRow extends StatelessWidget {
+class _HitRow extends StatefulWidget {
   const _HitRow({
     super.key,
     required this.hit,
@@ -660,11 +660,31 @@ class _HitRow extends StatelessWidget {
   final VoidCallback onJump;
 
   @override
+  State<_HitRow> createState() => _HitRowState();
+}
+
+class _HitRowState extends State<_HitRow> {
+  @override
+  void didUpdateWidget(_HitRow oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.selected && !oldWidget.selected) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && widget.selected) {
+          context.findRenderObject()?.showOnScreen();
+        }
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l = context.l10n;
     final c = context.ui;
+    final hit = widget.hit;
     return ColoredBox(
-      color: selected ? c.accent.withValues(alpha: .05) : Colors.transparent,
+      color: widget.selected
+          ? c.accent.withValues(alpha: .05)
+          : Colors.transparent,
       child: SettingsRow(
         titleWidget: Row(
           spacing: 7,
@@ -672,7 +692,7 @@ class _HitRow extends StatelessWidget {
             Flexible(
               child: SettingsMarked(
                 text: hit.title,
-                query: query,
+                query: widget.query,
                 style: UiText.sans(13, weight: FontWeight.w500, color: c.ink),
               ),
             ),
@@ -684,7 +704,7 @@ class _HitRow extends StatelessWidget {
             ? null
             : SettingsMarked(
                 text: hit.detail,
-                query: query,
+                query: widget.query,
                 style: UiText.sans(12, color: c.muted, height: 1.55),
               ),
         control: Row(
@@ -696,7 +716,7 @@ class _HitRow extends StatelessWidget {
               key: Key('jump-${hit.anchor}'),
               glyph: UiGlyphs.chevronRight,
               tooltip: l.set_goTo,
-              onTap: onJump,
+              onTap: widget.onJump,
             ),
           ],
         ),

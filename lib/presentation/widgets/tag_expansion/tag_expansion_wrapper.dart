@@ -151,7 +151,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
   String? _textAtDown;
   bool _dragged = false;
   int _gestureGeneration = 0;
-  Offset? _anchorGlobal;
+  late TextSelection _sourceSelection;
   bool _controlAtDown = false;
   bool _active = false;
   String _openedText = '';
@@ -360,10 +360,6 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
   }) {
     _close();
     _surfaceEpoch++;
-    final anchor = _anchorKey.currentContext;
-    final anchorBox = anchor?.findRenderObject();
-    if (anchorBox is! RenderBox || !anchorBox.hasSize) return;
-
     _openedText = widget.controller.text;
     _insertionOffset = offset;
     final parsed = PromptTokenParser.parse(
@@ -378,8 +374,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
       if (parsed.kind == CompletionQueryKind.tag && parsed.token.isNotEmpty)
         parsed.token,
     };
-    final caret = _caretOffset(anchor!, anchorBox);
-    _anchorGlobal = anchorBox.localToGlobal(caret);
+    _sourceSelection = widget.controller.selection;
     _searchController.text = TagNormalizer.toDisplay(query);
     _history.clear();
     _selectedIndex = 0;
@@ -406,32 +401,41 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     });
   }
 
-  Offset _caretOffset(BuildContext anchor, RenderBox anchorBox) {
+  Rect _sourceBounds(RenderBox overlay) {
+    final anchor = _anchorKey.currentContext!.findRenderObject()! as RenderBox;
     RenderEditable? editable;
-    void visit(Element element) {
+    void visit(RenderObject object) {
       if (editable != null) return;
-      if (element.renderObject case final RenderEditable found) {
-        editable = found;
-        return;
+      if (object is RenderEditable) {
+        editable = object;
+      } else {
+        object.visitChildren(visit);
       }
-      element.visitChildren(visit);
     }
 
-    (anchor as Element).visitChildren(visit);
-    final selection = widget.controller.selection;
-    if (editable == null || !selection.isValid) {
-      return Offset(0, anchorBox.size.height);
+    visit(anchor);
+    final field = editable;
+    if (field == null) {
+      return MatrixUtils.transformRect(
+        anchor.getTransformTo(overlay),
+        anchor.paintBounds,
+      );
     }
-    final field = editable!;
-    final rect = field.getLocalRectForCaret(
-      displayPositionForEditable(
-        field,
-        TextPosition(offset: selection.extentOffset),
+    final selection = switch (field.text) {
+      SourceMappedTextSpan(:final projection) => projection.toDisplaySelection(
+        _sourceSelection,
       ),
-    );
-    return field.localToGlobal(
-      Offset(rect.left, rect.top + field.preferredLineHeight),
-      ancestor: anchorBox,
+      _ => _sourceSelection,
+    };
+    var bounds = field.getLocalRectForCaret(selection.extent);
+    if (!selection.isCollapsed) {
+      for (final box in field.getBoxesForSelection(selection)) {
+        bounds = bounds.expandToInclude(box.toRect());
+      }
+    }
+    return MatrixUtils.transformRect(
+      field.getTransformTo(overlay),
+      bounds.intersect(field.paintBounds),
     );
   }
 
@@ -1007,6 +1011,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
           text: result.text,
           selection: TextSelection.collapsed(offset: result.cursorPosition),
         );
+        _sourceSelection = widget.controller.selection;
         widget.onApplied?.call(result.text);
       } finally {
         _applyingRag = false;
@@ -1098,12 +1103,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     painter.dispose();
     final detailPainter = TextPainter(
       text: TextSpan(
-        text:
-            _autoTranslation.nameFor(candidate.canonicalTag) ??
-            candidate.translation ??
-            (candidate.matchedAlias == null
-                ? TagCategoryVisuals.label(context, candidate.category)
-                : TagNormalizer.toDisplay(candidate.matchedAlias!)),
+        text: _candidateDetail(context, candidate),
         style: Theme.of(context).textTheme.labelSmall,
       ),
       maxLines: 1,
@@ -1203,31 +1203,45 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
       context,
       rootOverlay: true,
     ).context.findRenderObject();
-    if (root is! RenderBox || !root.hasSize || _anchorGlobal == null) {
+    if (root is! RenderBox || !root.hasSize) {
       return const SizedBox.shrink();
     }
-    final anchor = root.globalToLocal(_anchorGlobal!);
+    final anchor = _sourceBounds(root);
+    const margin = 8.0;
+    final above = math.max(0.0, anchor.top - 2 * margin);
+    final below = math.max(0.0, screen.height - anchor.bottom - 2 * margin);
+    // A tall selection can leave only a sliver above and below. Use the empty
+    // side of the editor in that case, wrapping the panels to that width.
+    const minimumListHeight = 160.0;
+    final rightSpace = screen.width - anchor.right;
+    final beside =
+        math.max(above, below) < minimumListHeight &&
+        math.max(anchor.left, rightSpace) >= 256;
+    final rightSide = rightSpace >= anchor.left;
+    final layoutWidth = beside
+        ? math.max(anchor.left, rightSpace)
+        : screen.width;
     final hasRelated = _relatedTag != null;
-    final relatedOnly = hasRelated && screen.width < 560;
+    final relatedOnly = hasRelated && layoutWidth < 560;
     final hasWiki = _wikiCandidate != null;
     final content = _wikiImageContent(overlayContext);
     final hasImages =
         hasWiki && _wikiImagesVisible && content.references.isNotEmpty;
-    final sideImages = hasImages && screen.width >= 640;
+    final sideImages = hasImages && layoutWidth >= 640;
     final rightColumn = (hasRelated && !relatedOnly) || sideImages;
     _inlineWikiImages = hasImages && !sideImages;
     final preview = hasImages ? _wikiPreview : null;
     // Keep 320px for search, 240px for thumbnails, and at least 300px for preview.
     final previewBeside =
-        preview != null && screen.width >= 16 + 320 + 240 + 300 + 2 * _panelGap;
+        preview != null && layoutWidth >= 16 + 320 + 240 + 300 + 2 * _panelGap;
     final previewWidth = previewBeside
-        ? math.min(440.0, screen.width - 16 - 240 - 320 - 2 * _panelGap)
+        ? math.min(440.0, layoutWidth - 16 - 240 - 320 - 2 * _panelGap)
         : 0.0;
     final width = math.min(
       480.0,
       math.max(
         0.0,
-        screen.width -
+        layoutWidth -
             16 -
             (previewBeside
                 ? 240 + previewWidth + 2 * _panelGap
@@ -1238,7 +1252,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     );
     final relatedWidth = relatedOnly
         ? width
-        : math.min(240.0, math.max(0.0, screen.width - 19 - width));
+        : math.min(240.0, math.max(0.0, layoutWidth - 19 - width));
     final combinedWidth = width + (rightColumn ? relatedWidth + _panelGap : 0);
     final totalWidth =
         combinedWidth + (previewBeside ? previewWidth + _panelGap : 0);
@@ -1247,13 +1261,6 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     _relatedWidth = relatedWidth;
     _scheduleVisibleUpdate();
     final previewBelow = preview != null && !previewBeside;
-    final previewHeight = previewBelow
-        ? math.min(380.0, (screen.height - 16) * .42)
-        : 0.0;
-    final availableHeight = math.max(
-      0.0,
-      screen.height - 16 - (previewBelow ? previewHeight + _panelGap : 0),
-    );
     final desiredHeight =
         (103.0 + _rowHeights.fold<double>(0, (total, row) => total + row))
             .clamp(320.0, 460.0);
@@ -1309,43 +1316,97 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
         : 0.0;
     if (hasImages) desiredWikiHeight = math.max(300.0, desiredWikiHeight);
     bodyMeasure.dispose();
-    // Reserve the article's preferred space before sizing the result list.
-    // On short screens the list can scroll, while both panels stay visible.
+    final fullHeight = math.max(0.0, screen.height - 2 * margin);
+    final desiredPreview = previewBelow
+        ? math.min(380.0, fullHeight * .42)
+        : 0.0;
+    final desiredTotal =
+        desiredHeight +
+        (hasWiki ? desiredWikiHeight + _panelGap : 0) +
+        (previewBelow ? desiredPreview + _panelGap : 0);
+    final fitsVertically = desiredTotal <= math.max(above, below);
+    final opensBelow =
+        below >= desiredTotal || (!fitsVertically && below >= above);
+    final panelLeft = beside
+        ? (rightSide
+              ? anchor.right + margin
+              : anchor.left - margin - totalWidth)
+        : (anchor.left - 48)
+              .clamp(
+                margin,
+                math.max(margin, screen.width - totalWidth - margin),
+              )
+              .toDouble();
+    // On a short screen the list and its Wiki can share the space on opposite
+    // sides of the highlighted text. The image preview follows its Wiki.
+    final split =
+        hasWiki &&
+        (!previewBeside ||
+            panelLeft + combinedWidth + _panelGap >= anchor.right + margin) &&
+        !fitsVertically &&
+        !beside &&
+        above >= minimumListHeight &&
+        below >= minimumWiki + (previewBelow ? 120 : 0);
+    final room = beside
+        ? fullHeight
+        : opensBelow
+        ? below
+        : above;
+    final minimumGroupHeight =
+        minimumListHeight +
+        (hasWiki ? minimumWiki + _panelGap : 0) +
+        (previewBelow ? 120 + _panelGap : 0);
+    final scrollGroup = !split && room < minimumGroupHeight;
+    final detailRoom = split
+        ? below
+        : scrollGroup
+        ? desiredTotal
+        : room;
+    final previewHeight = previewBelow
+        ? math.min(desiredPreview, detailRoom * .42)
+        : 0.0;
+    final availableHeight = math.max(
+      0.0,
+      detailRoom - (previewBelow ? previewHeight + _panelGap : 0),
+    );
     final reservedWikiHeight = math.min(
       desiredWikiHeight,
       math.max(minimumWiki, availableHeight - (previewBelow ? 144 : 200)),
     );
     final height = math.min(
       desiredHeight,
-      availableHeight - (hasWiki ? reservedWikiHeight + _panelGap : 0),
+      split
+          ? above
+          : availableHeight - (hasWiki ? reservedWikiHeight + _panelGap : 0),
     );
     if (width <= 0 || height <= 0) return const SizedBox.shrink();
     final wikiHeight = math.min(
       desiredWikiHeight,
-      math.max(0.0, availableHeight - height - _panelGap),
+      split
+          ? availableHeight
+          : math.max(0.0, availableHeight - height - _panelGap),
     );
     final baseHeight = height + (hasWiki ? wikiHeight + _panelGap : 0);
     final totalHeight =
         baseHeight + (previewBelow ? previewHeight + _panelGap : 0);
-    final below = anchor.dy + 8;
-    final top =
-        (below + totalHeight <= screen.height - 8
-                ? below
-                : anchor.dy - totalHeight - 8)
-            .clamp(8.0, math.max(8.0, screen.height - totalHeight - 8))
-            .toDouble();
-    final left = (anchor.dx - 48)
-        .clamp(8.0, math.max(8.0, screen.width - totalWidth - 8))
-        .toDouble();
-    return Stack(
+    final visibleHeight = math.min(room, totalHeight);
+    final panelTop = beside
+        ? anchor.bottom
+              .clamp(
+                margin,
+                math.max(margin, screen.height - visibleHeight - margin),
+              )
+              .toDouble()
+        : split
+        ? anchor.top - margin - height
+        : opensBelow
+        ? anchor.bottom + margin
+        : anchor.top - margin - visibleHeight;
+    final left = scrollGroup ? 0.0 : panelLeft;
+    final top = scrollGroup ? 0.0 : panelTop;
+    final wikiTop = split ? anchor.bottom + margin : top + height + _panelGap;
+    final panels = Stack(
       children: [
-        Positioned.fill(
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: _close,
-            child: const ColoredBox(color: Colors.transparent),
-          ),
-        ),
         if (!relatedOnly)
           Positioned(
             left: left,
@@ -1470,7 +1531,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
         if (hasWiki && wikiHeight > 0)
           Positioned(
             left: left,
-            top: top + height + _panelGap,
+            top: wikiTop,
             width: width,
             height: wikiHeight.toDouble(),
             child: _buildWikiPanel(overlayContext),
@@ -1478,7 +1539,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
         if (sideImages && wikiHeight > 0)
           Positioned(
             left: left + width + _panelGap,
-            top: top + height + _panelGap,
+            top: wikiTop,
             width: relatedWidth,
             height: wikiHeight.toDouble(),
             child: _buildImagePanel(overlayContext),
@@ -1487,9 +1548,9 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
           Positioned(
             key: const Key('wiki-image-preview-position'),
             left: previewBeside ? left + combinedWidth + _panelGap : left,
-            top: previewBeside ? top : top + baseHeight + _panelGap,
+            top: previewBeside ? top : wikiTop + wikiHeight + _panelGap,
             width: previewBeside ? previewWidth : combinedWidth,
-            height: previewBeside ? baseHeight : previewHeight,
+            height: previewBeside ? wikiTop + wikiHeight - top : previewHeight,
             child: WikiExampleViewer(
               key: const Key('tag-expansion-image-preview'),
               embedded: true,
@@ -1512,6 +1573,30 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
               onClose: _closeWikiPreview,
             ),
           ),
+      ],
+    );
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: _close,
+            child: const ColoredBox(color: Colors.transparent),
+          ),
+        ),
+        if (scrollGroup)
+          Positioned(
+            left: panelLeft,
+            top: panelTop,
+            width: totalWidth,
+            height: visibleHeight,
+            child: SingleChildScrollView(
+              key: const Key('tag-expansion-scroll-viewport'),
+              child: SizedBox(height: totalHeight, child: panels),
+            ),
+          )
+        else
+          panels,
       ],
     );
   }
@@ -1716,10 +1801,11 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
   }
 
   Widget _buildSearchList(BuildContext context) {
-    if ((_searchLoading || _ragLoading) && _results.isEmpty) {
-      return _loadingIndicator();
-    }
     if (_results.isEmpty) {
+      if (_searchLoading) return _loadingIndicator();
+      if (_ragLoading) {
+        return _message(context.l10n.tagExpansion_searchingRelated);
+      }
       return _message(
         _searchFailed
             ? context.l10n.common_error
@@ -1918,6 +2004,23 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     }
   }
 
+  String _candidateDetail(BuildContext context, CompletionCandidate candidate) {
+    final translation =
+        _autoTranslation.nameFor(candidate.canonicalTag) ??
+        candidate.translation;
+    if (candidate.matchedAlias case final alias?) {
+      final match = context.l10n.tagExpansion_matchedAlias(
+        TagNormalizer.toDisplay(alias),
+      );
+      return translation == null || translation.isEmpty
+          ? match
+          : '$match · $translation';
+    }
+    return translation?.isNotEmpty == true
+        ? translation!
+        : TagCategoryVisuals.label(context, candidate.category);
+  }
+
   Widget _candidateRow(
     BuildContext context,
     CompletionCandidate candidate, {
@@ -1927,15 +2030,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     bool related = false,
   }) {
     final theme = Theme.of(context);
-    final translation =
-        ref.read(autoTagTranslationProvider).nameFor(candidate.canonicalTag) ??
-        candidate.translation;
-    final alias = candidate.matchedAlias;
-    final detail = translation?.isNotEmpty == true
-        ? translation!
-        : alias != null
-        ? TagNormalizer.toDisplay(alias)
-        : TagCategoryVisuals.label(context, candidate.category);
+    final detail = _candidateDetail(context, candidate);
     final id = '${related ? 'related' : 'search'}:${candidate.stableId}';
     final showActions = _hoveredId == id || _focusedId == id;
     return MouseRegion(

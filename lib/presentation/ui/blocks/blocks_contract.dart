@@ -926,7 +926,6 @@ class BlocksDockActions {
     required this.onSetFavorite,
     required this.onAddToPalette,
     required this.onShowInLibrary,
-    this.onPopOut,
   });
 
   final ValueChanged<String> onQueryChanged;
@@ -951,9 +950,6 @@ class BlocksDockActions {
   final void Function(String id, bool favorite) onSetFavorite;
   final ValueChanged<String> onAddToPalette;
   final ValueChanged<String> onShowInLibrary;
-
-  /// 弹出为浮窗（画风探索页的浮层不传）。
-  final VoidCallback? onPopOut;
 }
 
 // ───────────────────────────── 实例卡 ─────────────────────────────

@@ -95,14 +95,15 @@ class GalleryDeletePoolStore {
   }
 
   /// 移除路径（幂等；路径不在池中时无操作）。
-  Future<void> removeAll(List<String> paths) async {
-    if (paths.isEmpty) return;
+  Future<List<String>> removeAll(List<String> paths) async {
+    if (paths.isEmpty) return const [];
     final prefs = await SharedPreferences.getInstance();
     final current = await load();
-    if (current.isEmpty) return;
-    final removed = <String>{...paths};
+    final targets = paths.toSet();
+    final removed = current.where(targets.contains).toList();
+    if (removed.isEmpty) return const [];
     final remaining = current
-        .where((path) => !removed.contains(path))
+        .where((path) => !targets.contains(path))
         .toList(growable: false);
     if (!await prefs.setString(
       StorageKeys.galleryDeletePool,
@@ -111,6 +112,7 @@ class GalleryDeletePoolStore {
       throw StateError('Failed to persist gallery delete pool removal');
     }
     _changes.add(null);
+    return removed;
   }
 
   /// Restore must stop durable startup cleanup before exposing an index row.
@@ -118,8 +120,13 @@ class GalleryDeletePoolStore {
     List<String> paths,
     Future<void> Function() restoreIndex,
   ) async {
-    await removeAll(paths);
-    await restoreIndex();
+    final removed = await removeAll(paths);
+    try {
+      await restoreIndex();
+    } catch (_) {
+      await addAll(removed);
+      rethrow;
+    }
   }
 
   /// 清空删除池（物理文件不受影响）。

@@ -7,6 +7,7 @@ import '../../core/utils/localization_extension.dart';
 import '../../data/services/gallery/gallery_view_mode.dart';
 import '../ui/kit/ui_controls.dart';
 import '../ui/resource_window/resource_window_cards.dart';
+import '../widgets/gallery/gallery_state_views.dart';
 import '../widgets/gallery/timeline/gallery_timeline_header.dart';
 import '../widgets/gallery/timeline/gallery_timeline_layout.dart';
 import '../widgets/gallery/timeline/gallery_timeline_scrubber.dart';
@@ -91,21 +92,40 @@ class _ResourceGalleryTimelineState extends State<ResourceGalleryTimeline> {
     final entries = controller.galleryTimeline;
     final mode = controller.effectiveGalleryGroupMode;
     if (entries.isEmpty) {
-      return Center(
-        child: data.loading
-            ? const UiSpinner(size: 16)
-            : data.error != null
-            ? TextButton(
-                onPressed: controller.refresh,
-                child: Text(context.l10n.common_retry),
-              )
-            : Text(
-                controller.galleryTrash
-                    ? context.l10n.localGallery_trashEmpty
-                    : data.groupId == 'recent'
-                    ? context.l10n.localGallery_recentViewsEmpty
-                    : context.l10n.floating_empty,
-              ),
+      final l = context.l10n;
+      if (data.loading) return const Center(child: UiSpinner(size: 16));
+      if (data.error != null) {
+        return Center(
+          child: TextButton(
+            onPressed: controller.refresh,
+            child: Text(l.common_retry),
+          ),
+        );
+      }
+      final criteria = controller.galleryCriteria;
+      if (controller.galleryTrash
+          ? criteria.searchQuery.trim().isNotEmpty
+          : criteria.hasSessionFilters) {
+        return GalleryNoResultsView(
+          onClearFilters: () => controller.galleryFilters(clear: true),
+        );
+      }
+      if (controller.galleryTrash) {
+        return Center(child: Text(l.localGallery_trashEmpty));
+      }
+      if (data.groupId == 'recent' && !criteria.naiOnly) {
+        return Center(child: Text(l.localGallery_recentViewsEmpty));
+      }
+      final group = data.sections
+          .expand((s) => s.groups)
+          .where((g) => g.id == data.groupId)
+          .firstOrNull;
+      return GalleryEmptyView(
+        allImages: data.groupId == 'all',
+        favorites: data.groupId == 'favorites',
+        naiOnly: criteria.naiOnly,
+        scopeCount: group?.count,
+        onShowNonNai: () => controller.galleryFilters(naiOnly: false),
       );
     }
     return LayoutBuilder(

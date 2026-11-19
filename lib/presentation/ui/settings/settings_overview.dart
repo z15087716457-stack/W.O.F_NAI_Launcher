@@ -311,13 +311,16 @@ class SettingsOverviewPage extends StatelessWidget {
       page: SettingsPageId.upscale,
       icon: StudioIcons.galleryUpscale,
       title: l.set_tileUpscale,
-      value: _value(context, l.set_tileUpscaleModels('$avail')),
+      value: _value(
+        context,
+        up.modelsKnown ? l.set_tileUpscaleModels('$avail') : '—',
+      ),
       lines: [
         _line(
           context,
           up.gpuName == null ? SettingsTone.idle : SettingsTone.ok,
           up.gpuName == null
-              ? l.set_upNoGpu
+              ? (up.checkingGpu ? l.set_testing : l.set_upNoGpu)
               : [
                   l.set_upGpu(
                     up.gpuName!.replaceFirst('NVIDIA GeForce ', ''),
@@ -327,11 +330,12 @@ class SettingsOverviewPage extends StatelessWidget {
                 ].join(' · '),
         ),
         if (def != null) _line(context, null, l.set_tileDefaultIs(def.label)),
-        _line(
-          context,
-          null,
-          seedReady ? l.set_tileSeedReady : l.set_tileSeedMissing,
-        ),
+        if (up.modelsKnown)
+          _line(
+            context,
+            null,
+            seedReady ? l.set_tileSeedReady : l.set_tileSeedMissing,
+          ),
       ],
     );
 

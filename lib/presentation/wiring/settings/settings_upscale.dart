@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
@@ -184,20 +183,9 @@ class SettingsUpscaleOperations extends Notifier<SettingsUpscaleOperation> {
       allowedExtensions: ['param', 'bin'],
     );
     if (selected == null) return;
-    final paths = selected.files
-        .map((file) => file.path)
-        .whereType<String>()
-        .toList();
-    final param = paths
-        .where((path) => path.toLowerCase().endsWith('.param'))
-        .single;
-    final bin = paths
-        .where((path) => path.toLowerCase().endsWith('.bin'))
-        .single;
-    // The manager checks its inference/mutation lock and validates the pair.
     await ref
         .read(localUpscaleModelManagerProvider)
-        .importPair(File(param), File(bin));
+        .importSelection(selected.paths);
     if (!_disposed) ref.invalidate(localUpscaleModelsProvider);
   }
 }
@@ -208,6 +196,8 @@ SettingsUpscaleData settingsUpscaleData(
   AdvancedUpscaleInstallState advanced,
   UpscaleWorkflowSettings workflow, {
   SettingsGpuInfo? gpu,
+  bool checkingGpu = false,
+  bool modelsKnown = true,
   AppLocalizations? l10n,
 }) {
   final l = l10n ?? currentL10n;
@@ -275,6 +265,8 @@ SettingsUpscaleData settingsUpscaleData(
   return SettingsUpscaleData(
     busy: operation.id != null || advanced.running,
     gpuName: gpu?.name,
+    checkingGpu: checkingGpu,
+    modelsKnown: modelsKnown,
     vramGb: gpu == null ? 0 : (gpu.vramMb / 1024).round(),
     cudaVersion: gpu?.cuda ?? '',
     caps: {

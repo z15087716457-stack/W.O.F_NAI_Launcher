@@ -169,9 +169,14 @@ SettingsViewData settingsViewData(
   final values = ref.watch(settingsValuesProvider);
   final edits = ref.watch(settingsEditsProvider);
   final config = ref.watch(promptAssistantConfigProvider);
-  final upscaleModels = page == SettingsPageId.upscale
-      ? ref.watch(localUpscaleModelsProvider).valueOrNull ??
-            const <LocalUpscaleModel>[]
+  final showsUpscale =
+      page == SettingsPageId.upscale || page == SettingsPageId.overview;
+  final installedModels = showsUpscale
+      ? ref.watch(localUpscaleModelsProvider)
+      : null;
+  final gpu = showsUpscale ? ref.watch(settingsGpuProvider) : null;
+  final upscaleModels = showsUpscale
+      ? installedModels?.valueOrNull ?? const <LocalUpscaleModel>[]
       : [...localUpscaleCatalog, ...advancedUpscaleCatalog];
   final workflow = ref.watch(imageWorkflowControllerProvider).upscale;
   final ragSettings = ref.watch(ragSettingsProvider);
@@ -191,7 +196,7 @@ SettingsViewData settingsViewData(
     indexBytes: page == SettingsPageId.rag
         ? ref.watch(settingsIndexBytesProvider).valueOrNull ?? 0
         : 0,
-    preparing: ref.watch(settingsRagStartupProvider).preparing,
+    preparing: ref.watch(settingsRagStartupProvider),
   );
   final storage =
       page == SettingsPageId.storage || page == SettingsPageId.overview
@@ -391,9 +396,9 @@ SettingsViewData settingsViewData(
       ref.watch(advancedUpscaleInstallProvider),
       workflow,
       l10n: context.l10n,
-      gpu: page == SettingsPageId.upscale
-          ? ref.watch(settingsGpuProvider).valueOrNull
-          : null,
+      gpu: gpu?.valueOrNull,
+      checkingGpu: gpu?.isLoading ?? false,
+      modelsKnown: installedModels?.hasValue ?? false,
     ),
     bridges: settingsBridgesData(context, ref),
     network: SettingsNetworkData(
@@ -402,6 +407,7 @@ SettingsViewData settingsViewData(
           : null,
       endpoints: network.endpoints,
       checking: network.checking,
+      checkedViaProxy: network.checkedViaProxy,
       checkedAt: network.checkedAt,
     ),
     privacy: SettingsPrivacyData(

@@ -644,8 +644,11 @@ void main() {
           await t.pumpAndSettle();
           expect(t.takeException(), isNull, reason: id);
         }
-        await t.tap(find.byKey(const Key('mp-mode')).first);
+        final catalog = find.byKey(const ValueKey(ProvidersListMode.catalog));
+        await t.ensureVisible(catalog);
+        await t.tap(catalog);
         await t.pumpAndSettle();
+        expect(find.byKey(const Key('mp-refresh')), findsOneWidget);
         expect(t.takeException(), isNull);
       });
     }

@@ -12,12 +12,12 @@ import '../../../helpers/agent_test_node.dart';
 import '../../../helpers/fetch_test_server.dart';
 
 void main() {
-  for (final scenario in ['buffered', 'empty', 'stop']) {
+  for (final scenario in ['buffered', 'empty', 'stop', 'credential']) {
     test('real host exposes $scenario correctly and can send again', () async {
       final root = await Directory.systemTemp.createTemp('agent-failure-');
       final server = await bindFetchTestServer();
       final entered = Completer<void>();
-      var requests = 0;
+      var requests = 0, tokenAttempts = 0;
       server.listen((request) async {
         await utf8.decoder.bind(request).join();
         requests++;
@@ -66,6 +66,12 @@ void main() {
                 'cacheWarming': 'off',
                 'nextSuggestion': false,
               },
+              requestAccessToken: scenario == 'credential'
+                  ? () async {
+                      if (tokenAttempts++ == 0) throw StateError('expired');
+                      return 'local-test-token';
+                    }
+                  : null,
               executeTool: (_, _, _) async => {'content': []},
             ),
       );
@@ -84,9 +90,13 @@ void main() {
       await run;
       final runtime = controller.selected!;
       expect(runtime.running, false);
+      expect(runtime.waitingForSlot, false);
       if (scenario == 'stop') {
         expect(runtime.error, isNull);
         expect(runtime.messages.last['stopReason'], 'aborted');
+      } else if (scenario == 'credential') {
+        expect(runtime.error, isNotNull);
+        expect(requests, 0);
       } else if (scenario == 'empty') {
         expect(runtime.error, currentL10n.naiAgent_emptyResponse);
         expect(runtime.messages.last['stopReason'], 'error');
@@ -97,7 +107,7 @@ void main() {
       await controller.sendText('Retry');
       expect(controller.selected!.error, isNull);
       expect(controller.selected!.messages.last['stopReason'], 'stop');
-      expect(requests, 2);
+      expect(requests, scenario == 'credential' ? 1 : 2);
     }, timeout: const Timeout(Duration(seconds: 30)));
   }
 }

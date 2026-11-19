@@ -103,10 +103,7 @@ AgentGate agentImageGate(AgentImageApproval request, AppLocalizations l) {
     request.id,
     kind: AgentGateKind.imageTool,
     title: tool?.labelKey(l) ?? l.img2img_novelAiCloudUpscale,
-    expiresAt:
-        request.expiresAt?.toLocal() ??
-        DateTime.tryParse(q['expires_at']?.toString() ?? '')?.toLocal() ??
-        DateTime.fromMillisecondsSinceEpoch(0),
+    expiresAt: request.expiresAt.toLocal(),
     ready: ready,
     changed: !ready,
     width: agentInt(q['width']),

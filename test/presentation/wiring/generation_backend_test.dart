@@ -6,6 +6,8 @@ import 'dart:typed_data';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
+import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
+import 'package:nai_launcher/core/storage/generation_draft_backup.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nai_launcher/core/constants/api_constants.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
@@ -27,6 +29,7 @@ import 'package:nai_launcher/presentation/providers/pill_workspace_provider.dart
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_contract.dart';
 import 'package:nai_launcher/presentation/wiring/generation_backend.dart';
+import 'package:nai_launcher/presentation/wiring/generation_settings.dart';
 import 'package:nai_launcher/presentation/wiring/generation_editor_wiring.dart';
 import 'package:nai_launcher/data/models/character/character_prompt.dart'
     as role;
@@ -38,14 +41,23 @@ import '../providers/krita/agent_bridge_draft_test.dart'
         OfflineAuth,
         IdleGeneration;
 
+class _BackupPaths extends PathProviderPlatform {
+  _BackupPaths(this.path);
+  final String path;
+  @override
+  Future<String?> getApplicationSupportPath() async => path;
+}
+
 class MemoryGenerationPlatform extends GenerationPlatform {
   final backups = <Map<String, dynamic>>[];
   Completer<void>? pending;
   bool fail = false;
+  bool writeToDisk = false;
   @override
-  Future<void> backupDraft(String snapshot) async {
+  Future<void> backupDraft(Map<String, dynamic> snapshot) async {
+    if (writeToDisk) return super.backupDraft(snapshot);
     if (fail) throw StateError('backup failed');
-    backups.add(jsonDecode(snapshot) as Map<String, dynamic>);
+    backups.add(jsonDecode(jsonEncode(snapshot)) as Map<String, dynamic>);
     await pending?.future;
   }
 }
@@ -184,6 +196,17 @@ void main() {
     final undo = await backend.clearPrompt(const GenEditorTarget.base());
     await backend.undoPrompt(undo!);
     expect(container.read(generationParamsNotifierProvider).prompt, 'original');
+    final settings = container.read(generationSettingsProvider);
+    await settings.size(768, 1024);
+    await settings.param(GenParam.steps, 19);
+    await settings.count(3);
+    await settings.repeat(2);
+    final draft = container.read(generationParamsNotifierProvider);
+    expect(
+      (draft.width, draft.height, draft.steps, draft.nSamples),
+      (768, 1024, 19, 2),
+    );
+    expect(platform.backups.last['imagesPerRequest'], 3);
     await backend.generate(confirm: (_) async => true);
     expect(
       (container.read(imageGenerationNotifierProvider.notifier)
@@ -390,11 +413,30 @@ void main() {
     params.setMaskImage(Uint8List.fromList([3, 4]));
     await backend.mutate(() => params.updateSteps(29));
     final snapshot = platform.backups.single;
-    expect(snapshot['sourceImage'], base64Encode([1, 2]));
-    expect(snapshot['maskImage'], base64Encode([3, 4]));
+    expect(snapshot['sourceImage'], [1, 2]);
+    expect(snapshot['maskImage'], [3, 4]);
     expect(snapshot['workflow'], isA<Map>());
     expect(snapshot['generation']['steps'], 28);
   });
+  test(
+    'production backup saves the pre-edit media and steps in the background',
+    () async {
+      final previous = PathProviderPlatform.instance;
+      PathProviderPlatform.instance = _BackupPaths(directory.path);
+      addTearDown(() => PathProviderPlatform.instance = previous);
+      platform.writeToDisk = true;
+      final params = container.read(generationParamsNotifierProvider.notifier);
+      params.setSourceImage(Uint8List.fromList([3, 7, 9]));
+      await backend.mutate(() => params.updateSteps(19));
+      final backupDir = Directory('${directory.path}/draft-backups');
+      final file = backupDir.listSync().whereType<File>().single;
+      final before = GenerationDraftBackup.read(file);
+      expect(before['sourceImage'], base64Encode([3, 7, 9]));
+      expect(before['generation']['steps'], 28);
+      expect(before['fields']['prompt'], 'original');
+      expect(container.read(generationParamsNotifierProvider).steps, 19);
+    },
+  );
   test('连续设置串行执行，每次都备份最新值', () async {
     final notifier = container.read(generationParamsNotifierProvider.notifier);
     await Future.wait([

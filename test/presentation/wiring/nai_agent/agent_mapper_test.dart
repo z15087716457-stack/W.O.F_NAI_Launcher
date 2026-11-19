@@ -78,6 +78,32 @@ void main() {
     },
   );
   test(
+    'same-millisecond tool results stay distinct when merging a restored branch',
+    () {
+      final first = {
+        'role': 'toolResult',
+        'timestamp': 200,
+        'toolCallId': 'a',
+        'content': 'first',
+      };
+      final second = {
+        'role': 'toolResult',
+        'timestamp': 200,
+        'toolCallId': 'b',
+        'content': 'second',
+      };
+      runtime.historyMessages = [first, second];
+      runtime.messages = [
+        {...first, 'content': 'fresh first'},
+        {...second, 'content': 'fresh second'},
+      ];
+      expect(runtime.displayMessages.map((m) => m['content']), [
+        'fresh first',
+        'fresh second',
+      ]);
+    },
+  );
+  test(
     'full branch survives compaction while live messages and model context stay separate',
     () async {
       final imageData = base64Encode(

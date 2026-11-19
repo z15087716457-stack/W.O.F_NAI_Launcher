@@ -18,6 +18,7 @@ import '../../data/models/gallery/nai_image_metadata.dart';
 import '../../core/database/datasources/gallery_data_source.dart';
 import '../../data/repositories/gallery_folder_repository.dart';
 import '../../data/services/gallery/gallery_filter_service.dart';
+import '../../data/services/gallery/gallery_nai_only_store.dart';
 import '../../data/services/gallery/gallery_file_changes.dart';
 import '../../data/services/gallery/gallery_group_mode.dart';
 import '../../data/services/gallery/gallery_thumbnail_quality_store.dart';
@@ -1265,6 +1266,14 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
     if (state.thumbnailQuality == quality) return;
     _setState(state.copyWith(thumbnailQuality: quality));
     await _thumbnailQualityStore.save(quality);
+  }
+
+  void changeNaiOnlyPreference(bool value) {
+    unawaited(setNaiOnly(value));
+    unawaited(const GalleryNaiOnlyStore().save(value));
+    if (!value && state.filterCriteria.filterModels.isNotEmpty) {
+      unawaited(setFilterModels(const []));
+    }
   }
 
   /// 设置 NAI-only 过滤（进画廊时从持久化偏好恢复；切换时调用方负责持久化）

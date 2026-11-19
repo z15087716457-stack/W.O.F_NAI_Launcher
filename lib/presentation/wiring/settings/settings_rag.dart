@@ -51,6 +51,7 @@ SettingsRagData settingsRagData(
       );
   return SettingsRagData(
     indexBusy: status.anyBusy,
+    suspended: status.suspended,
     initializing:
         settings.enabled &&
         (status.initializing ||
@@ -96,6 +97,7 @@ SettingsRagData settingsRagData(
                 ? SettingsRagState.ready
                 : SettingsRagState.empty,
             known: item.hasIndexStatus,
+            searchable: settings.enabled && item.available,
             done: gallery
                 ? item.details['visual_indexed'] ?? 0
                 : item.busy && item.phase == 'building'

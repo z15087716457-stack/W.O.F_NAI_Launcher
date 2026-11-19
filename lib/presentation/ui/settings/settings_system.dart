@@ -437,7 +437,6 @@ class SettingsNetworkPage extends StatelessWidget {
           children: [
             for (final e in n.endpoints)
               SettingsRow(
-                key: Key('endpoint-${e.host}'),
                 minHeight: 48,
                 leading: SettingsDot(e.tone),
                 title: name(e),
@@ -480,7 +479,7 @@ class SettingsNetworkPage extends StatelessWidget {
                     child: Text(
                       n.checkedAt == null
                           ? l.set_nwNeverChecked
-                          : '${l.set_nwChecked(SettingsFormat.ago(context, n.checkedAt!, d.now))} · ${on ? l.set_nwViaProxy : l.set_nwDirect}',
+                          : '${l.set_nwChecked(SettingsFormat.ago(context, n.checkedAt!, d.now))} · ${n.checkedViaProxy ? l.set_nwViaProxy : l.set_nwDirect}',
                       style: UiText.sans(11, color: c.faint),
                     ),
                   ),

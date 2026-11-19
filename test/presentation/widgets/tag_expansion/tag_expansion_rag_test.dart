@@ -32,27 +32,15 @@ CompletionCandidate tag(String name) => CompletionCandidate(
 );
 
 class Source implements CompletionSource {
-  Source({
-    this.empty = false,
-    this.count = 2,
-    this.exact = false,
-    this.prefixName,
-  });
+  Source({this.empty = false, this.count = 2, this.first});
   final bool empty;
   final int count;
-  final bool exact;
-  final String? prefixName;
+  final CompletionCandidate? first;
   @override
   Future<List<CompletionCandidate>> search(CompletionQuery q) async => empty
       ? []
       : [
-          prefixName != null
-              ? tag(prefixName!)
-              : exact
-              ? tag(
-                  'blue_hair',
-                ).copyWith(matchKind: CompletionMatchKind.englishExact)
-              : tag('blue_hair'),
+          first ?? tag('blue_hair'),
           tag('red_hair'),
           for (var i = 2; i < count; i++) tag('fixture_$i'),
         ];
@@ -148,14 +136,13 @@ void main() {
     bool emptyLexical = false,
     bool relatedFromPrompt = true,
     int idleCount = 2,
-    bool exactLexical = false,
-    String? prefixName,
+    CompletionCandidate? firstLexical,
+    Locale locale = const Locale('en'),
   }) async {
     final source = Source(
       empty: emptyLexical,
       count: idleCount,
-      exact: exactLexical,
-      prefixName: prefixName,
+      first: firstLexical,
     );
     await tester.pumpWidget(
       ProviderScope(
@@ -189,7 +176,7 @@ void main() {
                     fontFamily: 'Geist',
                     fontFamilyFallback: const ['HarmonyOS Sans SC'],
                   ),
-            locale: const Locale('en'),
+            locale: locale,
             supportedLocales: AppLocalizations.supportedLocales,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             home: Scaffold(
@@ -273,7 +260,7 @@ void main() {
     final c = TextEditingController(text: 'rain, ');
     final rag = FakeRag();
     addTearDown(c.dispose);
-    await pump(tester, c, rag, prefixName: 'watercolor_effect');
+    await pump(tester, c, rag, firstLexical: tag('watercolor_effect'));
     await typeQuery(tester, 'watercolor');
     rag.requests.single.result.complete([tag('grass')]);
     await tester.pump();
@@ -321,7 +308,14 @@ void main() {
       final c = TextEditingController(text: 'rain, ');
       final rag = FakeRag();
       addTearDown(c.dispose);
-      await pump(tester, c, rag, exactLexical: true);
+      await pump(
+        tester,
+        c,
+        rag,
+        firstLexical: tag(
+          'blue_hair',
+        ).copyWith(matchKind: CompletionMatchKind.englishExact),
+      );
       await typeQuery(tester, 'blue_hair');
       rag.requests.single.result.complete([tag('grass'), tag('blue_hair')]);
       await tester.pump();
@@ -333,6 +327,37 @@ void main() {
       await capture(tester, 'exact-name-with-semantic-results');
     },
   );
+
+  testWidgets('the matched alias and translation survive semantic merging', (
+    tester,
+  ) async {
+    final c = TextEditingController();
+    final rag = FakeRag();
+    addTearDown(c.dispose);
+    await pump(
+      tester,
+      c,
+      rag,
+      locale: const Locale('zh'),
+      firstLexical: tag('grey_hair').copyWith(
+        matchKind: CompletionMatchKind.aliasExact,
+        matchedAlias: 'silver_hair',
+        translation: '灰发',
+      ),
+    );
+    await typeQuery(tester, 'silver hair');
+    final detail = find.text('命中别名：silver hair · 灰发');
+    expect(detail, findsOneWidget);
+    expect(find.text('本地无精确匹配，正在查找相关标签'), findsNothing);
+    rag.requests.single.result.complete([tag('grey_hair'), tag('white_hair')]);
+    await tester.pump();
+    await tester.pump();
+    expect(detail, findsOneWidget);
+    expect(find.text('grey hair'), findsOneWidget);
+    expect(find.text('white hair'), findsOneWidget);
+    expect(c.text, isEmpty);
+    await capture(tester, 'matched-alias');
+  });
 
   testWidgets(
     'natural-language queries preserve existing-tag exclusion and the draft',
@@ -365,14 +390,24 @@ void main() {
       final c = TextEditingController();
       final rag = FakeRag();
       addTearDown(c.dispose);
-      await pump(tester, c, rag, emptyLexical: true);
-      await typeQuery(tester, '在阳光下奔跑');
-      expect(rag.requests.single.query, '在阳光下奔跑');
-      expect(find.text('No local tags found'), findsNothing);
+      await pump(
+        tester,
+        c,
+        rag,
+        emptyLexical: true,
+        locale: const Locale('zh'),
+      );
+      await typeQuery(tester, 'ultra complexity');
+      expect(rag.requests.single.query, 'ultra complexity');
+      final pending = find.text('本地无精确匹配，正在查找相关标签');
+      expect(pending, findsOneWidget);
+      expect(find.text('没有找到本地标签'), findsNothing);
+      await capture(tester, 'waiting-for-related-tags');
       rag.requests.single.result.complete([]);
       await tester.pump();
       await tester.pump();
-      expect(find.text('No local tags found'), findsOneWidget);
+      expect(pending, findsNothing);
+      expect(find.text('没有找到本地标签'), findsOneWidget);
       expect(find.byType(CircularProgressIndicator), findsNothing);
       expect(c.text, isEmpty);
     },

@@ -10,6 +10,43 @@ import 'settings_kit.dart';
 typedef SettingsPageIcon = ({IconData? icon, String? glyph});
 
 abstract final class SettingsFormat {
+  static String ragRuntimeStatus(BuildContext context, SettingsRagData rg) {
+    final l = context.l10n;
+    if (rg.install case final install?) {
+      return switch (install.phase) {
+        SettingsRagInstallPhase.existing => l.set_rgPhaseExisting,
+        SettingsRagInstallPhase.download => l.set_rgPhaseDownload,
+        SettingsRagInstallPhase.create => l.set_rgPhaseCreate,
+        SettingsRagInstallPhase.cuda => l.set_rgPhaseCuda,
+        SettingsRagInstallPhase.packages => l.set_rgPhasePackages,
+        SettingsRagInstallPhase.check => l.set_rgPhaseCheck,
+      };
+    }
+    if (rg.checking) return l.set_testing;
+    if (rg.runtimeReady) return l.set_rgEnvReady;
+    return switch (rg.runtimeIssue) {
+      SettingsRagRuntimeIssue.missing => l.set_rgEnvMissing,
+      SettingsRagRuntimeIssue.dependencies ||
+      SettingsRagRuntimeIssue.pythonVersion => l.set_rgEnvNeedsUpdate,
+      SettingsRagRuntimeIssue.importFailed ||
+      SettingsRagRuntimeIssue.timedOut ||
+      null => l.set_rgEnvCheckFailed,
+    };
+  }
+
+  static String ragRuntimeHint(BuildContext context, SettingsRagData rg) {
+    final l = context.l10n;
+    return switch (rg.runtimeIssue) {
+      SettingsRagRuntimeIssue.dependencies => l.set_rgEnvDependencies(
+        rg.runtimePackages.join(', '),
+      ),
+      SettingsRagRuntimeIssue.pythonVersion => l.set_rgEnvPythonVersion,
+      SettingsRagRuntimeIssue.importFailed => l.set_rgEnvImportFailed,
+      SettingsRagRuntimeIssue.timedOut => l.set_rgEnvCheckTimeout,
+      _ => l.set_rgEnvSub,
+    };
+  }
+
   static String group(BuildContext context, SettingsGroup g) {
     final l = context.l10n;
     return switch (g) {

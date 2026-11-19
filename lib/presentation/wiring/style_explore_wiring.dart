@@ -32,7 +32,7 @@ import '../utils/asset_protection_guard.dart';
 import '../widgets/common/app_toast.dart';
 import '../widgets/common/themed_confirm_dialog.dart';
 import '../widgets/navigation/integrated_title_bar.dart';
-import 'generation_blocks_dock.dart';
+import 'blocks_dock_wiring.dart';
 import 'nai_agent_generation_host.dart';
 import 'style_explore_backend.dart';
 import 'style_explore_blocks_wiring.dart';

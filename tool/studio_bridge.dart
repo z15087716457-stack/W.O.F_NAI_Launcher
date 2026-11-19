@@ -290,7 +290,9 @@ class _Bridge {
     final socket = await WebSocket.connect(
       'ws://127.0.0.1:$port/krita',
     ).timeout(timeout);
-    final events = StreamIterator<dynamic>(socket);
+    // Keep the transport reading the peer's close frame when the RPC iterator
+    // pauses after its last response or is cancelled during shutdown.
+    final events = StreamIterator<dynamic>(socket.asBroadcastStream());
     try {
       socket.add(
         jsonEncode({

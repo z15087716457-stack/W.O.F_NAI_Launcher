@@ -154,7 +154,6 @@ class AgentHistoryEntry {
     this.at,
     this.number,
     this.blockIndex,
-    this.beforeCompaction = false,
     this.auto = false,
     this.tokensBefore,
   });
@@ -162,7 +161,7 @@ class AgentHistoryEntry {
   final AgentHistoryKind kind;
   final DateTime? at;
   final int? number, blockIndex, tokensBefore;
-  final bool beforeCompaction, auto;
+  final bool auto;
 }
 
 /// 聊天正文搜索的一条命中。

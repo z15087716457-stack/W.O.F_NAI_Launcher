@@ -12,7 +12,6 @@
   "@set_importInstallationDone": {"placeholders":{"added":{"type":"int"},"missing":{"type":"int"}}},
   "@@locale": "en",
   "app_title": "W.O.F NAI Studio",
-  "settings_visualAssets": "Interface fonts & licenses",
   "brand_entryTagline": "A place for your imagination.",
   "brand_switchToLight": "Switch to light mode",
   "brand_switchToDark": "Switch to dark mode",
@@ -21,7 +20,6 @@
   "common_confirm": "Confirm",
   "common_continue": "Continue",
   "common_selectAll": "Select All",
-  "common_deselectAll": "Deselect All",
   "common_save": "Save",
   "common_delete": "Delete",
   "common_edit": "Edit",
@@ -38,7 +36,6 @@
   "common_select": "Select",
   "common_reset": "Reset",
   "common_add": "Add",
-  "common_added": "Added",
   "common_confirmDelete": "Confirm Delete",
   "common_confirmClear": "Confirm Clear",
   "common_gotIt": "Got it",
@@ -56,12 +53,6 @@
     }
   },
   "common_clearInputConfirm": "Clear the input content?",
-  "common_daysAgo": "{days} days ago",
-  "@common_daysAgo": {
-    "placeholders": {
-      "days": {}
-    }
-  },
   "common_undo": "Undo",
   "common_redo": "Redo",
   "common_refresh": "Refresh",
@@ -126,7 +117,7 @@
   "auth_imageApiSiteHint": "Leave empty to use the same third-party API site",
   "auth_thirdPartyNicknameHint": "For example: self-hosted site / mirror site",
   "auth_thirdPartyTokenHint": "Enter an API token or paste New API connection JSON",
-  "auth_thirdPartyCompatibilityHint": "Supports NovelAI-compatible APIs. Common /v1 and /v1/novelai paths are detected at login. Third-party prices and balance units follow the provider; official Opus free rules do not apply.",
+  "auth_thirdPartyCompatibilityHint": "Supports NovelAI-compatible APIs. Common /v1 and /v1/novelai paths are detected at login. Costs are estimated using NovelAI’s rules. The balance comes from the connected API.",
   "auth_thirdPartyApiSiteRequired": "Enter third-party API site URL",
   "auth_validateAndLogin": "Validate & Login",
   "auth_tokenGuide": "Get Token from NovelAI settings",
@@ -178,16 +169,7 @@
   "auth_troubleshoot_serverStatus_desc": "Visit NovelAI status page or community to check for outages",
   "common_paste": "Paste",
   "common_default": "Default",
-  "settings_title": "Settings",
-  "settings_savedAccounts": "Saved Accounts",
-  "settings_style": "Style",
-  "settings_font": "Font",
   "settings_language": "Language",
-  "settings_shortcuts": "Shortcuts",
-  "settings_generationInputSection": "Input",
-  "settings_generationFeedbackSection": "Completion Alert",
-  "settings_selectFont": "Select Font",
-  "settings_selectLanguage": "Select Language",
   "settings_loadFailed": "Load failed: {error}",
   "@settings_loadFailed": {
     "placeholders": {
@@ -197,41 +179,13 @@
   "settings_imageSavePath": "Image Save Location",
   "settings_autoSave": "Auto Save",
   "settings_autoSaveSubtitle": "Automatically save images after generation",
-  "settings_extraRootsTitle": "Gallery sources",
-  "settings_extraRootsHint": "Add folders for browsing and search. Adding a parent combines the sources it covers. Removing a source keeps its files and save location.",
-  "settings_extraRootsEmpty": "No extra gallery sources added",
-  "settings_extraRootsAdd": "Add Folder",
   "settings_extraRootsAddTitle": "Select a folder to add as a gallery source",
-  "settings_extraRootsRemove": "Remove this gallery source",
-  "settings_extraRootsRemoveConfirmTitle": "Remove gallery source?",
-  "settings_extraRootsRemoveConfirmContent": "Remove \"{path}\" from the gallery (no files in the folder will be deleted).",
   "settings_extraRootsAdded": "Gallery source added and scanned",
   "settings_extraRootsScanFailed": "Folder added, but scanning did not finish. Refresh the gallery to retry",
   "settings_extraRootsWaitingScan": "The gallery is scanning. This folder will be imported when it finishes",
-  "settings_extraRootsRemoved": "Gallery source removed",
   "settings_extraRootsDuplicate": "This folder is already a gallery source",
   "settings_extraRootsNested": "This folder is already covered by an existing gallery source.",
   "settings_extraRootsNotFound": "The selected folder does not exist",
-  "@settings_extraRootsRemoveConfirmContent": {
-    "placeholders": {
-      "path": {
-        "type": "String"
-      }
-    }
-  },
-  "settings_importTagIndex": "Import Tag Index…",
-  "settings_importTagIndexPickTitle": "Select tag index file (.jsonl)",
-  "settings_importTagIndexProgress": "Importing {processed}/{total} lines…",
-  "@settings_importTagIndexProgress": {
-    "placeholders": {
-      "processed": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
   "settings_importTagIndexDone": "Import complete: {imported} new, {updated} updated, {skipped} skipped, {errors} errors",
   "@settings_importTagIndexDone": {
     "placeholders": {
@@ -261,35 +215,15 @@
     }
   },
   "settings_extraRootsIndexImportConfirm": "Import Now",
-  "settings_version": "Version {version}",
-  "@settings_version": {
-    "placeholders": {
-      "version": {}
-    }
-  },
-  "settings_openSource": "Open Source",
-  "settings_openSourceSubtitle": "View source code and documentation",
-  "settings_fileLogging": "Record application logs",
-  "settings_fileLoggingSubtitle": "Off by default; enable only for troubleshooting. When enabled, logs are written to Documents/NAI_Launcher/logs. When disabled, log files are no longer created or written.",
-  "settings_pathReset": "Reset to default location",
-  "settings_pathSaved": "Save location updated",
-  "settings_selectFolder": "Select Save Folder",
-  "settings_vibeLibraryPath": "Vibe Library Path",
-  "settings_hiveStoragePath": "Data Storage Path",
-  "settings_selectVibeLibraryFolder": "Select Vibe Library Folder",
-  "settings_selectHiveFolder": "Select Data Storage Folder",
-  "settings_pathSavedRestartRequired": "Path updated, restart to apply changes",
   "settings_accountType": "Account Type",
   "settings_subscriptionExpiry": "Subscription Expires",
   "settings_thirdPartyApiAccount": "Third-party Site API",
-  "settings_goToLogin": "Go to Login",
   "settings_changeAvatar": "Change Avatar",
   "settings_removeAvatar": "Remove Avatar",
   "settings_accountEmail": "Account Email",
   "settings_emailAccount": "Email Account",
   "settings_tokenAccount": "Token Account",
   "settings_setAsDefault": "Set as Default",
-  "settings_defaultAccount": "Default",
   "settings_nickname": "Nickname",
   "settings_nicknameUpdated": "Nickname updated",
   "settings_avatarUpdated": "Avatar updated",
@@ -355,8 +289,6 @@
       "steps": {}
     }
   },
-  "generation_stepsLabel": "Steps",
-  "generation_guidance": "Guidance",
   "generation_cfgScale": "Prompt Guidance: {scale}",
   "@generation_cfgScale": {
     "placeholders": {
@@ -365,13 +297,8 @@
   },
   "generation_seed": "Seed",
   "generation_seedRandom": "Random",
-  "generation_samplerRecommended": "RECOMMENDED",
-  "generation_samplerOther": "OTHER",
-  "generation_advancedOptions": "Advanced Options",
   "generation_smea": "SMEA",
-  "generation_smeaSubtitle": "Improve generation quality for large images",
   "generation_smeaDyn": "SMEA DYN",
-  "generation_smeaDescription": "High resolution samplers will automatically be used above a certain image size",
   "generation_cfgRescale": "Prompt Guidance Rescale: {value}",
   "@generation_cfgRescale": {
     "placeholders": {
@@ -379,55 +306,21 @@
     }
   },
   "generation_noiseSchedule": "Noise Schedule",
-  "generation_modelGroupNew": "NEW",
-  "generation_modelGroupLegacy": "LEGACY",
   "generation_modelDesc_v5Curated": "NovelAI's newest model, trained on a curated subset of images. Recommended for streaming.",
   "generation_modelDesc_v5Full": "NovelAI's newest and best model.",
   "generation_modelDesc_v45Curated": "NovelAI's V4.5 model trained on a curated subset of images. No longer recommended for use.",
   "generation_modelDesc_v45Full": "NovelAI's V4.5 full model.",
   "generation_modelDesc_v4Curated": "NovelAI's V4 model trained on a curated subset of images.",
   "generation_modelDesc_v4Full": "NovelAI's V4 full model.",
-  "generation_sectionCharacters": "Character Prompts",
-  "generation_sectionCharactersSub": "Create a separate prompt for characters in your scene.",
-  "character_positionLabel": "Position",
   "anlas_subscription": "Subscription",
   "anlas_purchased": "Purchased",
   "prompt_positive": "Prompt",
-  "prompt_baseTab": "Base Prompt",
   "prompt_negativeTab": "Undesired Content",
-  "prompt_transparentBg": "Transparent BG",
-  "prompt_chunksMenu": "Tools & toggles",
   "qualityTags_presetChip": "Quality Tags",
   "ucPreset_presetChip": "Undesired Content Preset",
   "prompt_positivePrompt": "Prompt",
   "prompt_negativePrompt": "Undesired Content",
   "prompt_mainPositive": "Main Prompt",
-  "prompt_mainNegative": "Main Prompt (Undesired Content)",
-  "prompt_characterPrompts": "Multi-Character Prompts",
-  "prompt_finalPrompt": "Final Effective Prompt",
-  "prompt_finalNegative": "Final Effective Undesired Content",
-  "prompt_importedCharacters": "Imported {count} character(s)",
-  "@prompt_importedCharacters": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "prompt_characterPromptReplaced": "Replaced character prompts",
-  "prompt_characterPromptAppended": "Appended character prompts ({count} character(s))",
-  "@prompt_characterPromptAppended": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "prompt_smartDecomposedWithCharacters": "Decomposed into main prompt + {count} character(s)",
-  "@prompt_smartDecomposedWithCharacters": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "prompt_appliedToMainPrompt": "Applied to main prompt",
   "prompt_searchHint": "Search prompt",
   "prompt_searchMatchCount": "{current} / {total}",
   "@prompt_searchMatchCount": {
@@ -450,15 +343,7 @@
     }
   },
   "kritaBridge_busyGenerating": "Krita Bridge is generating. Wait for the current task to finish.",
-  "prompt_unwantedContent": "Content you don't want in the image...",
-  "prompt_autoFormat": "Auto Format",
-  "prompt_autoFormatSubtitle": "Normalize commas and whitespace; remove redundant 1x weight markers",
-  "prompt_highlightEmphasis": "Highlight Emphasis",
-  "prompt_highlightEmphasisSubtitle": "Highlight brackets and weight syntax",
-  "prompt_sdSyntaxAutoConvert": "SD Syntax Auto Convert",
-  "prompt_sdSyntaxAutoConvertSubtitle": "Convert SD weights to NAI syntax on blur or generation",
   "prompt_cooccurrenceRecommendation": "Tag Expansion",
-  "prompt_cooccurrenceRecommendationSubtitle": "Hold Ctrl (⌘ on Mac) and click or drag-select to search tags and see related suggestions.",
   "prompt_formatted": "Formatted",
   "image_save": "Save",
   "image_copy": "Copy",
@@ -482,35 +367,13 @@
       "error": {}
     }
   },
-  "img2img_title": "Image2Image",
-  "img2img_subtitle": "Generate variations from a source image",
-  "img2img_enabled": "Enabled",
-  "img2img_sourceImage": "Source Image",
   "img2img_strength": "Strength",
-  "img2img_strengthHint": "Higher values create greater difference from original",
   "img2img_noise": "Noise",
-  "img2img_noiseHint": "Add extra noise for more variation",
-  "img2img_clearSettings": "Clear Image2Image Settings",
-  "img2img_changeImage": "Change Image",
-  "img2img_removeImage": "Remove Image",
-  "img2img_selectFailed": "Failed to select image: {error}",
-  "@img2img_selectFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
   "img2img_editImage": "Edit Image",
   "img2img_placeOnCanvas": "Place on canvas",
   "img2img_editApplied": "The edited image is now the new source image",
-  "img2img_uploadImage": "Upload Image",
-  "img2img_dropToAdd": "Release to set as source image",
   "img2img_moreActions": "More actions",
-  "img2img_drawSketch": "Draw Sketch",
   "img2img_inpaint": "Inpaint",
-  "img2img_inpaintStrength": "Inpaint Strength",
-  "img2img_inpaintStrengthHint": "Higher values make the masked area diverge more from the current source image",
-  "img2img_inpaintPendingHint": "Click Inpaint to open the canvas, mark the region you want to repaint with brush, eraser, or selection tools, then return here and use the main generate button.",
-  "img2img_inpaintReadyHint": "Mask loaded. The next generation will repaint only the masked area.",
   "img2img_inpaintMaskReady": "Inpaint mask is ready",
   "generation_variationOriginal": "ORIGINAL",
   "generation_requestCostInvalid": "This request exceeds the supported limits. Reduce the image size or steps.",
@@ -526,8 +389,6 @@
   "img2img_directorEmotion": "Fix Emotion",
   "img2img_directorDeclutter": "Declutter",
   "img2img_enhance": "Enhance",
-  "img2img_enhanceMagnitude": "Magnitude",
-  "img2img_enhanceUpscaleAmount": "Upscale Amount",
   "img2img_enhanceMax": "Max✨",
   "img2img_novelAiCloudUpscale": "NovelAI cloud upscale (fixed 2x)",
   "img2img_novelAiCloudUpscaleTitle": "NovelAI cloud upscale",
@@ -538,7 +399,6 @@
   "img2img_upscaleRegularModel": "Regular Model",
   "img2img_upscaleModel": "Upscale Model",
   "img2img_startUpscale": "Start Upscale",
-  "img2img_novelAiUpscaleComplete": "NovelAI upscale complete",
   "img2img_decodeSourceFailed": "Failed to decode source image",
   "editor_tolerance": "Tolerance",
   "editor_intensity": "Intensity",
@@ -550,17 +410,7 @@
   "editor_undo": "Undo",
   "editor_redo": "Redo",
   "editor_clearLayer": "Clear Layer",
-  "editor_toolBrush": "Brush",
-  "editor_toolEraser": "Eraser",
   "editor_toolFill": "Fill",
-  "editor_toolMagicWand": "Magic Wand",
-  "editor_magicWandMode": "Selection method",
-  "editor_magicWandSmartObject": "Smart object (EfficientViT)",
-  "editor_magicWandColorArea": "Color area (flood fill)",
-  "editor_magicWandSmartHelp": "Click the object to select. The first use downloads the approximately 133 MiB EfficientViT-SAM L0 model from MIT Han Lab (Apache-2.0), then keeps it locally.",
-  "editor_magicWandColorHelp": "Click a contiguous region of similar color. This works best on flat, clean boundaries and requires no model download.",
-  "editor_magicWandInvert": "Invert result",
-  "editor_toolLine": "Line",
   "editor_toolRectSelect": "Rectangle",
   "editor_toolEllipseSelect": "Ellipse",
   "editor_toolLassoSelect": "Lasso",
@@ -568,11 +418,7 @@
   "editor_toolCloneStamp": "Clone Stamp",
   "editor_toolBlur": "Blur",
   "editor_layers": "Layers",
-  "editor_fillClosedRegion": "Fill Closed Region",
   "editor_resetMask": "Reset Mask",
-  "editor_zoomIn": "Zoom In",
-  "editor_zoomOut": "Zoom Out",
-  "editor_fitToWindow": "Fit to Window",
   "editor_effectBrightness": "Brightness",
   "editor_effectSaturation": "Saturation",
   "editor_changeCanvasSize": "Change Canvas Size",
@@ -606,44 +452,6 @@
     }
   },
   "editor_canvasSizeTitle": "Canvas Size",
-  "editor_presetSize": "Preset Size",
-  "editor_customSize": "Custom",
-  "editor_contentHandling": "Content Handling",
-  "editor_contentCrop": "Crop",
-  "editor_contentPad": "Pad",
-  "editor_contentStretch": "Stretch",
-  "editor_width": "Width",
-  "editor_height": "Height",
-  "editor_lockAspectRatio": "Lock aspect ratio",
-  "editor_unlockAspectRatio": "Unlock aspect ratio",
-  "editor_sizePreview": "Size Preview",
-  "editor_originalSize": "Original",
-  "editor_newSize": "New Size",
-  "editor_cropModeDescription": "Crop mode - keep aspect ratio and crop",
-  "editor_padModeDescription": "Pad mode - keep aspect ratio and pad",
-  "editor_stretchModeDescription": "Stretch mode - stretch to fill",
-  "editor_canvasPresetSquare": "Square {size}",
-  "@editor_canvasPresetSquare": {
-    "placeholders": {
-      "size": {}
-    }
-  },
-  "editor_canvasPresetLandscape": "Landscape {ratio}",
-  "@editor_canvasPresetLandscape": {
-    "placeholders": {
-      "ratio": {}
-    }
-  },
-  "editor_canvasPresetPortrait": "Portrait {ratio}",
-  "@editor_canvasPresetPortrait": {
-    "placeholders": {
-      "ratio": {}
-    }
-  },
-  "editor_canvasPresetNaiPortrait": "NAI Portrait",
-  "editor_canvasPresetNaiLandscape": "NAI Landscape",
-  "editor_canvasPresetFullHd": "Full HD 16:9",
-  "editor_colorPanelTitle": "Color",
   "editor_colorPickerTitle": "Choose Color",
   "editor_brushSettings": "Brush Settings",
   "editor_eraserSettings": "Eraser Settings",
@@ -660,28 +468,6 @@
   "layer_moveUp": "Move Up",
   "layer_moveDown": "Move Down",
   "vibe_title": "Vibe Transfer",
-  "vibe_description": "Change the image, keep the vision.",
-  "vibe_addFromFileTitle": "Add from File",
-  "vibe_addFromFileSubtitle": "PNG, JPG, Vibe files",
-  "vibe_addFromLibraryTitle": "Import from Library",
-  "vibe_addFromLibrarySubtitle": "Select from Vibe Library",
-  "vibe_addReference": "Add Reference",
-  "vibe_clearAll": "Clear All",
-  "vibe_cleared": "Cleared {count} vibes",
-  "@vibe_cleared": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "vibe_referenceStrength": "Ref Strength",
-  "vibe_infoExtraction": "Information Extracted",
-  "vibe_remove": "Remove",
-  "reference_enabled": "Enabled",
-  "reference_enable": "Enable reference",
-  "reference_disable": "Disable reference",
-  "vibe_normalize": "Normalize Reference Strength Values",
   "vibe_sourceType_png": "PNG",
   "vibe_sourceType_v4vibe": "V4 Vibe",
   "vibe_sourceType_bundle": "Bundle",
@@ -689,8 +475,6 @@
   "vibe_sourceType": "Source",
   "vibe_info": "Vibe Info",
   "vibe_name": "Name",
-  "character_buttonLabel": "Char/Position",
-  "character_addCharacter": "Add Character",
   "character_number": "Character {index}",
   "@character_number": {
     "placeholders": {
@@ -728,7 +512,6 @@
       "error": {}
     }
   },
-  "onlineGallery_login": "Login",
   "onlineGallery_pleaseLogin": "Please login first",
   "mediaType_video": "Video",
   "mediaType_gif": "GIF",
@@ -756,27 +539,6 @@
   "onlineGallery_ratingSensitive": "Sensitive",
   "onlineGallery_ratingQuestionable": "Questionable",
   "onlineGallery_ratingExplicit": "Explicit",
-  "onlineGallery_blacklistTitle": "Online Gallery Blacklist",
-  "onlineGallery_blacklistSubtitle": "Images containing blacklisted tags will be hidden directly in the online gallery.",
-  "onlineGallery_addBlacklistTagHint": "Add blacklist tag",
-  "onlineGallery_noLocalBlacklistTags": "No local blacklist tags",
-  "onlineGallery_autoSyncOnStartup": "Auto-sync on startup",
-  "onlineGallery_autoSyncOnStartupSubtitle": "Enabled by default; you can turn it off at any time",
-  "onlineGallery_lastSyncFailed": "Last sync failed: {error}",
-  "@onlineGallery_lastSyncFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "onlineGallery_neverSyncedBlacklist": "Danbooru blacklist has not been synced yet",
-  "onlineGallery_lastSync": "Last sync: {time}",
-  "@onlineGallery_lastSync": {
-    "placeholders": {
-      "time": {}
-    }
-  },
-  "onlineGallery_blacklistSettingsTitle": "Online Gallery Blacklist Settings",
-  "onlineGallery_blacklistLoginHint": "You are not logged in to Danbooru. The local blacklist still works, but syncing requires login.",
   "onlineGallery_downloadSelectedCompleted": "Download complete: {success} succeeded, {failed} failed",
   "@onlineGallery_downloadSelectedCompleted": {
     "placeholders": {
@@ -801,7 +563,6 @@
   "onlineGallery_detailNotFound": "This work does not exist or has been removed.",
   "onlineGallery_imageUnavailable": "This image is currently unavailable.",
   "onlineGallery_gelbooruReadOnly": "Read-only favorites",
-  "tooltip_fullscreenEdit": "Fullscreen Edit",
   "tooltip_decreaseWeight": "Decrease Weight [-5%]",
   "tooltip_increaseWeight": "Increase Weight [+5%]",
   "tooltip_resetWeight": "Click to reset to 100%",
@@ -837,9 +598,7 @@
   "gelbooru_unknownError": "Gelbooru verification failed. Try again later.",
   "tag_addTag": "Add Tag",
   "qualityTags_label": "Quality",
-  "transparentBackground_tooltip": "Adds \"transparent background\" to the prompt and generates images with an alpha channel (V5 only)",
   "qualityTags_positive": "Quality (Prompt)",
-  "qualityTags_negative": "Quality (Undesired Content)",
   "qualityTags_disabled": "Quality tags disabled\nClick to enable",
   "qualityTags_addToEnd": "Add to prompt end:",
   "qualityTags_addToStart": "Add to prompt start:",
@@ -858,22 +617,6 @@
   "ucPreset_disabled": "Undesired content preset disabled",
   "ucPreset_addToNegative": "Add to Undesired Content:",
   "ucPreset_nsfwHint": "💡 To generate adult content, add nsfw to your prompt. The nsfw tag will be auto-removed from Undesired Content",
-  "generation_imageCount": "Number of Images",
-  "generation_requestCountTooltip": "Requests: each click sends N generation requests",
-  "generation_imageCountTotal": "{requests} requests × {perRequest} images = {total} total",
-  "@generation_imageCountTotal": {
-    "placeholders": {
-      "requests": {
-        "type": "int"
-      },
-      "perRequest": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
   "warmup_networkCheck": "Checking network connection...",
   "warmup_networkCheck_noProxy": "Cannot connect to NovelAI, please enable VPN or proxy settings",
   "warmup_networkCheck_noSystemProxy": "Proxy enabled but no system proxy detected, please enable VPN",
@@ -938,17 +681,6 @@
   "warmup_fetchingCharacterTags": "Fetching character tags...",
   "warmup_fetchingCopyrightTags": "Fetching copyright tags...",
   "warmup_fetchingMetaTags": "Fetching meta tags...",
-  "resolution_groupNormal": "NORMAL",
-  "resolution_groupLarge": "LARGE",
-  "resolution_groupWallpaper": "WALLPAPER",
-  "resolution_groupSmall": "SMALL",
-  "resolution_groupCustom": "CUSTOM",
-  "resolution_typePortrait": "Portrait",
-  "resolution_typeLandscape": "Landscape",
-  "resolution_typeSquare": "Square",
-  "resolution_typeCustom": "Custom",
-  "resolution_width": "Width",
-  "resolution_height": "Height",
   "api_error_429": "Concurrency limit reached",
   "api_error_429_hint": "Too many requests. Please wait and try again (common with shared accounts)",
   "api_error_401": "Authentication failed",
@@ -965,113 +697,15 @@
   "api_error_network_hint": "Cannot connect to server. Please check your network",
   "drop_processing": "Preparing image",
   "drop_processingSubtitle": "Choose a use after loading",
-  "characterEditor_clearAll": "Clear All",
   "characterEditor_clearAllTitle": "Clear All Characters",
   "characterEditor_clearAllConfirm": "Are you sure you want to delete all characters? This action cannot be undone.",
   "characterEditor_nameHint": "Enter character name",
-  "characterEditor_enabled": "Enabled",
   "characterEditor_negativePromptHint": "Enter Undesired Content for this character...",
-  "characterCanvas_title": "Character Positions",
-  "characterCanvas_finishEditing": "Finish Editing Positions",
-  "@characterCanvas_finishEditing": {
-    "description": "Button that exits character position editing"
-  },
   "characterCanvas_aiChoice": "AI's Choice",
   "characterCanvas_custom": "Custom",
-  "characterCanvas_aiHint": "AI will place all characters automatically",
-  "characterCanvas_dragHint": "Drag anchors to position characters; release to apply",
-  "characterEditor_genderFemale": "Female",
-  "characterEditor_genderMale": "Male",
-  "characterEditor_genderOther": "Other",
-  "characterEditor_addFemale": "F",
-  "characterEditor_addMale": "M",
-  "characterEditor_addOther": "Other",
-  "characterEditor_moveUp": "Move Up",
-  "characterEditor_moveDown": "Move Down",
-  "toolbar_fullscreenEdit": "Fullscreen Edit",
-  "characterTooltip_noCharacters": "No characters configured",
-  "characterTooltip_clickToConfig": "Click to configure multi-character prompts",
-  "characterTooltip_globalAiLabel": "Global AI Position:",
-  "characterTooltip_enabled": "Enabled",
-  "characterTooltip_disabled": "Disabled",
-  "characterTooltip_positionAi": "AI",
-  "characterTooltip_disabledLabel": "Disabled",
-  "characterTooltip_promptLabel": "Prompt",
-  "characterTooltip_negativeLabel": "Undesired Content",
-  "characterTooltip_notSet": "Not set",
-  "characterTooltip_summary": "{total} characters ({enabled} enabled)",
-  "@characterTooltip_summary": {
-    "placeholders": {
-      "total": {},
-      "enabled": {}
-    }
-  },
-  "characterTooltip_viewFullConfig": "Click for full configuration",
-  "globalSettings_saveFailed": "Save failed: {error}",
-  "@globalSettings_saveFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
   "nav_generate": "Generate",
   "nav_gallery": "Gallery",
   "nav_settings": "Settings",
-  "sync_preparing": "Preparing to sync...",
-  "sync_fetching": "Fetching {category}...",
-  "@sync_fetching": {
-    "placeholders": {
-      "category": {}
-    }
-  },
-  "sync_processing": "Processing data...",
-  "sync_saving": "Saving...",
-  "sync_completed": "Sync completed, {count} tags",
-  "@sync_completed": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "sync_failed": "Sync failed: {error}",
-  "@sync_failed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "sync_extracting": "Extracting {poolName} tags...",
-  "@sync_extracting": {
-    "placeholders": {
-      "poolName": {}
-    }
-  },
-  "sync_merging": "Merging tags...",
-  "sync_fetching_tags": "Fetching {groupName} tag popularity...",
-  "@sync_fetching_tags": {
-    "placeholders": {
-      "groupName": {}
-    }
-  },
-  "sync_filtering": "Filtering tags...",
-  "sync_done": "Sync completed",
-  "time_just_now": "Just now",
-  "time_minutes_ago": "{n} minutes ago",
-  "@time_minutes_ago": {
-    "placeholders": {
-      "n": {}
-    }
-  },
-  "time_hours_ago": "{n} hours ago",
-  "@time_hours_ago": {
-    "placeholders": {
-      "n": {}
-    }
-  },
-  "time_days_ago": "{n} days ago",
-  "@time_days_ago": {
-    "placeholders": {
-      "n": {}
-    }
-  },
-  "time_never_synced": "Never synced",
   "vibeParseFailed": "Failed to parse Vibe file",
   "localGallery_progressiveLoadError": "Failed to load image",
   "localGallery_unknownError": "Unknown error",
@@ -1083,7 +717,10 @@
   },
   "localGallery_indexingLocalImages": "Indexing local images...",
   "localGallery_emptyTitle": "No local images",
-  "localGallery_emptySubtitle": "Generated images will be saved here",
+  "localGallery_emptyFavorites": "No favorite images yet",
+  "localGallery_emptyScope": "No images here yet",
+  "localGallery_noNaiHere": "No NAI images to show here",
+  "localGallery_showNonNai": "Show non-NAI images",
   "localGallery_noMatchingResults": "No matching results",
   "localGallery_title": "Local Gallery",
   "localGallery_allImages": "All Images",
@@ -1099,17 +736,6 @@
   "localGallery_sortFieldName": "File name",
   "localGallery_sortFieldSize": "File size",
   "localGallery_sortFieldDimensions": "Image size",
-  "localGallery_aboutColumns": "≈ {count} columns",
-  "@localGallery_aboutColumns": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "localGallery_columnWidth": "Column width",
-  "localGallery_thumbnailQualitySd": "Standard",
-  "localGallery_thumbnailQualityHd": "High",
-  "settings_galleryThumbnailQuality": "Local gallery quality",
-  "settings_galleryThumbnailQualitySubtitle": "Thumbnail display quality; defaults to High",
   "localGallery_naiOnlyTooltip": "Only show NAI-generated images",
   "localGallery_naiVersionFilterTooltip": "Filter by NAI model version",
   "localGallery_masonryViewLabel": "Waterfall",
@@ -1623,46 +1249,6 @@
   "promptToken_characterNegative": "Character Undesired Content",
   "common_rename": "Rename",
   "tagLibrary_tags": "Tags",
-  "settings_network": "Network",
-  "settings_enableProxy": "Enable Proxy",
-  "settings_proxyEnabled": "Enabled",
-  "settings_proxyDisabled": "Direct connection",
-  "settings_proxyTrafficDisclosure": "When proxy is enabled, NovelAI API traffic, including authentication requests, is sent through the system or manual proxy. Use only proxies you trust.",
-  "settings_proxyMode": "Proxy Mode",
-  "settings_proxyModeAuto": "Auto-detect system proxy",
-  "settings_proxyModeManual": "Manual configuration",
-  "settings_auto": "Auto",
-  "settings_manual": "Manual",
-  "settings_proxyHost": "Proxy Host",
-  "settings_proxyPort": "Port",
-  "settings_proxyNotDetected": "No system proxy detected",
-  "settings_testConnection": "Test Connection",
-  "settings_testConnectionHint": "Click to test if proxy is working",
-  "settings_testSuccess": "Connection successful ({latency}ms)",
-  "@settings_testSuccess": {
-    "placeholders": {
-      "latency": {}
-    }
-  },
-  "settings_testFailed": "Connection failed: {error}",
-  "@settings_testFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "settings_proxyRestartHint": "Proxy settings changed, restart recommended",
-  "settings_enablePromptWeightScroll": "Adjust prompt weight with mouse wheel",
-  "settings_enablePromptWeightScrollSubtitle": "When prompt text is selected, hold the chosen modifier + wheel to adjust weight; a bare wheel scrolls the page as usual.",
-  "settings_weightScrollModifierAlt": "Alt",
-  "settings_weightScrollModifierCtrl": "Ctrl",
-  "settings_weightScrollModifierShift": "Shift",
-  "settings_weightScrollModifierNone": "None (legacy)",
-  "unit_seconds": "seconds",
-  "settings_notificationSound": "Completion Sound",
-  "settings_notificationSoundSubtitle": "Play the completion sound only while the window is unfocused",
-  "settings_notificationCustomSound": "Custom Sound",
-  "settings_notificationSelectSound": "Select Sound",
-  "settings_notificationResetSound": "Reset to Default",
   "resetToDefault": "Reset to Default",
   "metadataImport_title": "Select Parameters to Import",
   "metadataImport_promptsSection": "Prompts",
@@ -1859,38 +1445,18 @@
   "drop_useAsRawImage": "Use as Raw Image",
   "drop_dragToImg2ImgOrOther": "Drag to Image2Image or another target",
   "preciseRef_title": "Precise Reference",
-  "preciseRef_subtitle": "Tie generation to a character or style reference",
-  "preciseRef_description": "Add reference images and set type and parameters. Multiple references can be used simultaneously.",
-  "preciseRef_addReference": "Add Reference",
-  "preciseRef_clearAll": "Clear All",
-  "preciseRef_remove": "Remove",
-  "preciseRef_referenceType": "Reference Type",
   "preciseRef_importTitle": "Import Precise Reference",
   "preciseRef_importTypePrompt": "What should this image be used to reference?",
   "preciseRef_importTypeHint": "Select a type to import",
   "preciseRef_characterDescription": "Reference the character’s appearance and features",
   "preciseRef_styleDescription": "Reference colors, brushwork, and visual texture",
   "preciseRef_characterAndStyleDescription": "Reference both the character and visual style",
-  "preciseRef_strength": "Strength",
-  "preciseRef_fidelity": "Fidelity",
   "preciseRef_v4Only": "This feature requires V4+ models",
   "preciseRef_typeCharacter": "Character",
   "preciseRef_typeStyle": "Style",
   "preciseRef_typeCharacterAndStyle": "Character + Style",
-  "preciseRef_costHint": "Using Precise Reference consumes extra Anlas",
-  "preciseRef_costBadge": "Uses Anlas",
-  "preciseRef_dropToAdd": "Release to add precise reference",
-  "preciseRef_dropNoReadableImage": "The drop source did not provide a readable image file or image link",
   "preciseRef_addedCount": "Added {count} precise references",
   "@preciseRef_addedCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "preciseRef_removedCount": "Removed {count} precise references",
-  "@preciseRef_removedCount": {
     "placeholders": {
       "count": {
         "type": "int"
@@ -1912,8 +1478,6 @@
       "failed": {}
     }
   },
-  "vibeLibrary_save": "Save to Library",
-  "vibeLibrary_import": "Import Vibe",
   "vibeLibrary_sendToGeneration": "Send to Generation",
   "vibeLibrary_maxVibesReached": "Maximum limit reached (16 vibes)",
   "vibeLibrary_bundleReadFailed": "Failed to read bundle file, using single file mode",
@@ -1994,51 +1558,6 @@
       }
     }
   },
-  "vibe_export_title": "Export Vibe",
-  "vibe_selector_recent": "Recent",
-  "vibe_export_dialogTitle": "Export {count} Vibes",
-  "@vibe_export_dialogTitle": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "vibe_export_chooseMethod": "Choose how to export the vibes",
-  "vibe_export_asBundle": "As Bundle",
-  "vibe_export_individually": "Individually",
-  "vibe_export_noData": "No data to export",
-  "vibe_export_success": "Export successful",
-  "vibe_export_failed": "Export failed",
-  "vibe_export_skipped": "Skipped {count} vibes without data",
-  "@vibe_export_skipped": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "vibe_export_bundleSuccess": "Bundle exported: {count} vibes",
-  "@vibe_export_bundleSuccess": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "vibe_export_selectToEmbed": "Select vibes to embed",
-  "vibe_export_pngRequired": "PNG file required",
-  "vibe_export_noEmbeddableData": "No embeddable data",
-  "vibe_export_embedSuccess": "Embedded {count} vibes into image",
-  "@vibe_export_embedSuccess": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "vibe_export_embedFailed": "Embed failed",
-  "vibe_embedToImage": "Embed to Image",
   "vibe_import_noEncodingData": "No encoding data",
   "vibe_import_encodingCost": "Encoding will cost 2 Anlas",
   "vibe_import_confirmCost": "Continue and consume Anlas?",
@@ -2113,29 +1632,11 @@
     }
   },
   "vibe_saveToLibrary_tagHint": "Enter a tag, then press Add",
-  "vibe_maxReached": "Maximum 16 vibes reached",
   "vibe_addedCount": "Added {count} vibes",
   "@vibe_addedCount": {
     "placeholders": {
       "count": {
         "type": "int"
-      }
-    }
-  },
-  "vibe_statusEncoded": "Encoded",
-  "vibe_statusEncoding": "Encoding...",
-  "vibe_statusPendingEncode": "Encode (2 Anlas)",
-  "vibe_encodeDialogTitle": "Confirm Vibe Encoding",
-  "vibe_encodeDialogMessage": "Encode this image for generation?",
-  "vibe_encodeCostWarning": "This will cost 2 Anlas (credits)",
-  "vibe_encodeButton": "Encode",
-  "vibe_encodeSuccess": "Vibe encoded successfully!",
-  "vibe_encodeFailed": "Vibe encoding failed, please retry",
-  "vibe_encodeError": "Encoding failed: {error}",
-  "@vibe_encodeError": {
-    "placeholders": {
-      "error": {
-        "type": "String"
       }
     }
   },
@@ -2149,92 +1650,8 @@
   "shortcut_action_vibe_detail_rename": "Rename",
   "tray_show": "Show Window",
   "tray_exit": "Exit",
-  "settings_shortcutsSubtitle": "Customize keyboard shortcuts",
-  "settings_openFolder": "Open folder",
-  "settings_openFolderFailed": "Failed to open folder",
-  "settings_vibePathSaved": "Vibe library path saved",
   "settings_selectFolderFailed": "Failed to select folder",
-  "settings_hivePathSaved": "Data storage path saved, effective after restart",
-  "settings_restartRequiredTitle": "Restart Required",
-  "settings_changePathConfirm": "After changing the data storage path, the app needs to restart to take effect.\\n\\nThe new path will take effect on the next startup. Continue?",
-  "settings_resetPathConfirm": "After resetting the data storage path, the app needs to restart to take effect.\\n\\nThe default path will take effect on the next startup. Continue?",
-  "settings_kritaBridgeEnable": "Enable local bridge",
-  "settings_kritaBridgeDisabledText": "Off by default; listens only on local 127.0.0.1 when enabled",
-  "settings_kritaBridgeStartingText": "Starting local bridge service...",
-  "settings_kritaBridgeListeningText": "Waiting for an external Agent or Krita",
-  "settings_kritaBridgeConnectedText": "Krita plugin connected",
-  "settings_kritaBridgeErrorText": "Startup failed, check the error message",
-  "settings_kritaBridgeRegenerateSession": "Regenerate Session",
-  "settings_kritaBridgeDiscoveryFile": "Discovery File",
-  "settings_kritaBridgeWaitingEndpoint": "Waiting for local WebSocket listener",
-  "settings_kritaBridgeClient": "Client: {client}",
-  "@settings_kritaBridgeClient": {
-    "placeholders": {
-      "client": {}
-    }
-  },
-  "settings_fontScale": "Interface scale",
-  "settings_fontScale_previewSmall": "光影落在画布上。",
-  "settings_fontScale_previewMedium": "色から物語が生まれる。",
-  "settings_fontScale_previewLarge": "Let colors tell a story.",
-  "settings_fontScale_done": "Done",
-  "settings_historyClickBehavior": "History click behavior",
-  "settings_historyClickBehavior_classic": "Classic",
-  "settings_historyClickBehavior_classicDescription": "Click a history image to open its details",
-  "settings_historyClickBehavior_linked": "Linked preview",
-  "settings_historyClickBehavior_linkedDescription": "Click to switch the central preview, double-click or hold for details, and browse with Left/Right",
-  "settings_outputViewer": "Output viewer",
-  "settings_outputViewer_canvas": "Free canvas",
-  "settings_outputViewer_canvasDescription": "NAI5-style infinite canvas: all generated images laid out by batch, middle/Shift+left drag to pan, Ctrl+wheel to zoom, WASD/f/q to navigate",
-  "settings_outputViewer_simple": "Simple view",
-  "settings_outputViewer_simpleDescription": "Classic centered/grid preview for low-spec machines or the familiar layout",
-  "settings_canvasLockCamera": "Lock canvas camera",
-  "settings_canvasLockCameraDescription": "Disables wheel zoom/pan, drag panning, WASD and other manual camera input; auto-select and navigation jumps still work",
-  "settings_canvasReducedMotion": "Reduce canvas motion",
-  "settings_canvasReducedMotionDescription": "Camera flights, zooms and inertia become instant, reducing animation",
   "image_viewDetail": "View details",
-  "settings_defaultImagesPath": "Default (Documents/NAI_Launcher/images/)",
-  "settings_defaultHivePath": "Default (./user-data/hive/)",
-  "settings_protectionFeatures": "Protection Features",
-  "settings_stripMetadataTitle": "Remove all metadata when copying or dragging",
-  "settings_stripMetadataSubtitle": "Create a sanitized copy, remove PNG text chunks, EXIF, and NAI steganographic watermark data, and avoid exposing the original path while dragging.",
-  "settings_confirmDangerousActionsTitle": "Double-confirm dangerous asset actions",
-  "settings_confirmDangerousActionsSubtitle": "Deleting, moving, or batch-moving local assets will show an additional protection confirmation.",
-  "settings_warnExternalImageSendTitle": "Confirm before sending to external services",
-  "settings_warnExternalImageSendSubtitle": "Confirm before local images cross the app boundary to LLMs, NovelAI, ComfyUI, or similar services.",
-  "settings_preventOverwriteTitle": "Avoid overwriting existing files on export",
-  "settings_preventOverwriteSubtitle": "Automatically number duplicate export or package paths to avoid replacing existing assets by mistake.",
-  "settings_warnHighAnlasCostTitle": "High Anlas cost warning",
-  "settings_warnHighAnlasCostSubtitle": "Show a confirmation before generation when the estimated single request cost reaches {threshold} Anlas.",
-  "@settings_warnHighAnlasCostSubtitle": {
-    "placeholders": {
-      "threshold": {}
-    }
-  },
-  "settings_highAnlasCostThresholdTitle": "Anlas Warning Threshold",
-  "settings_setHighAnlasCostThresholdTitle": "Set Anlas Warning Threshold",
-  "settings_threshold": "Threshold",
-  "settings_highAnlasCostThresholdHelper": "Show a confirmation when the estimated single generation cost reaches or exceeds this value.",
-  "settings_limitGenerationIntervalTitle": "Limit generation frequency",
-  "settings_limitGenerationIntervalSubtitle": "Require the configured minimum time between generation starts. The Generate button is disabled during the cooldown.",
-  "settings_generationIntervalTitle": "Generation interval",
-  "settings_generationIntervalValue": "{seconds} seconds",
-  "@settings_generationIntervalValue": {
-    "placeholders": {
-      "seconds": {}
-    }
-  },
-  "settings_setGenerationIntervalTitle": "Set Generation Interval",
-  "settings_generationIntervalHelper": "Enter 1–3600 seconds. The cooldown starts when generation begins.",
-  "settings_generationIntervalJitterTitle": "Interval jitter",
-  "settings_generationIntervalJitterValue": "±{percent}%",
-  "@settings_generationIntervalJitterValue": {
-    "placeholders": {
-      "percent": {}
-    }
-  },
-  "settings_setGenerationIntervalJitterTitle": "Set Interval Jitter",
-  "settings_generationIntervalJitterHelper": "Each cooldown is drawn at random from base interval ± this percentage, so the pacing is less mechanical. Enter 0–50; 0 disables jitter.",
   "settings_confirmExternalSendTitle": "Protection Mode: Confirm External Send",
   "settings_confirmExternalSendContent": "About to send {count} local image(s) to {target}. The image data will leave the local app boundary. Confirm this is expected.",
   "@settings_confirmExternalSendContent": {
@@ -2246,212 +1663,10 @@
   "settings_confirmExternalSend": "Send",
   "settings_highAnlasCostTitle": "Anlas usage reminder",
   "settings_continueGeneration": "Continue Generation",
-  "dataSource_syncNow": "Sync Now",
-  "settings_comfyUiEnable": "Enable ComfyUI Integration",
-  "settings_comfyUiDisabledSubtitle": "When disabled, local upscale and other ComfyUI features are hidden",
-  "settings_comfyUiServerUrl": "Server URL",
-  "settings_comfyUiConnectionSuccess": "Connection successful",
-  "settings_comfyUiConnectionSuccessFull": "ComfyUI connection successful",
-  "settings_comfyUiConnectionFailed": "Connection failed: {error}",
-  "@settings_comfyUiConnectionFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "settings_comfyUiConnected": "Connected",
-  "settings_comfyUiDisconnect": "Disconnect",
-  "settings_comfyUiNoResponse": "Server did not respond",
-  "settings_comfyUiStatusDisconnected": "Disconnected",
-  "settings_comfyUiStatusConnecting": "Connecting...",
-  "settings_comfyUiStatusConnected": "Connected",
-  "settings_comfyUiStatusError": "Connection error",
-  "settings_comfyUiCategoryEnhance": "Enhance/Upscale",
-  "settings_comfyUiCategoryImg2Img": "Image2Image",
-  "settings_comfyUiCategoryInpaint": "Inpaint",
-  "settings_comfyUiCategoryTxt2Img": "Text-to-Image",
-  "settings_comfyUiCategoryCustom": "Custom",
-  "comfyWorkflow_seedvr2UpscaleName": "SeedVR2 Upscale",
-  "comfyWorkflow_seedvr2UpscaleDescription": "Upscale with the SeedVR2 AI model. Produces high-quality results.",
-  "comfyWorkflow_seedvr2TiledUpscaleName": "SeedVR2 Tiled Upscale",
-  "comfyWorkflow_seedvr2TiledUpscaleDescription": "Use SeedVR2TilingUpscaler for tiled upscale to reduce VRAM pressure on large images.",
-  "comfyWorkflow_modelUpscaleName": "ComfyUI Standard Upscale Model",
-  "comfyWorkflow_modelUpscaleDescription": "Load a standard upscale model with ComfyUI UpscaleModelLoader, then correct the final scale with Lanczos.",
-  "comfyWorkflow_rtxUpscaleName": "RTX Upscale",
-  "comfyWorkflow_rtxUpscaleDescription": "Use the Nvidia RTX Video Super Resolution node for local upscaling.",
-  "comfyWorkflowSlot_inputImage": "Input Image",
-  "comfyWorkflowSlot_targetShortSide": "Target Short Side",
-  "comfyWorkflowSlot_targetLongSide": "Target Long Side",
-  "comfyWorkflowSlot_upscaleModel": "Upscale Model",
-  "comfyWorkflowSlot_randomSeed": "Random Seed",
-  "comfyWorkflowSlot_outputImage": "Output Image",
-  "comfyWorkflowSlot_tileWidth": "Tile Width",
-  "comfyWorkflowSlot_tileHeight": "Tile Height",
-  "comfyWorkflowSlot_tileUpscaleResolution": "Tile Upscale Resolution",
-  "comfyWorkflowSlot_targetWidth": "Target Width",
-  "comfyWorkflowSlot_targetHeight": "Target Height",
-  "comfyWorkflowSlot_scale": "Scale",
-  "comfyWorkflow_parameters": "Parameters",
-  "comfyWorkflow_selectImage": "Click to select image",
-  "comfyWorkflow_pickImageFailed": "Failed to select image: {error}",
-  "@comfyWorkflow_pickImageFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "comfyWorkflow_useResult": "Use Result",
-  "comfyWorkflow_execute": "Run",
-  "comfyWorkflow_uploadingImage": "Uploading image...",
-  "comfyWorkflow_queued": "Queued...",
-  "comfyWorkflow_runningSteps": "Processing {current}/{total}",
-  "@comfyWorkflow_runningSteps": {
-    "placeholders": {
-      "current": {},
-      "total": {}
-    }
-  },
-  "comfyWorkflow_processing": "Processing...",
-  "comfyWorkflow_complete": "Complete",
-  "comfyWorkflow_imageCount": "{count} images",
-  "@comfyWorkflow_imageCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "cacheStats_title": "Cache Statistics",
-  "cacheStats_autoRefreshUpdated": "Auto refresh · Last updated: {time}",
-  "@cacheStats_autoRefreshUpdated": {
-    "placeholders": {
-      "time": {}
-    }
-  },
-  "cacheStats_secondsAgo": "{seconds} seconds ago",
-  "@cacheStats_secondsAgo": {
-    "placeholders": {
-      "seconds": {}
-    }
-  },
-  "cacheStats_resetStats": "Reset statistics",
-  "cacheStats_statsReset": "Statistics reset",
-  "cacheStats_l1Memory": "L1 Memory Cache",
-  "cacheStats_l2Hive": "L2 Hive Cache",
-  "cacheStats_l3Sqlite": "L3 SQLite Database",
   "galleryCache_rescanTitle": "Rescan Gallery",
   "galleryCache_rescanContent": "This will:\n\n1. Check data consistency and mark missing files\n2. Scan new and changed files\n3. Retry metadata extraction that failed before, including failed records\n\nThis will not clear existing data or delete image files.",
-  "galleryCache_startScan": "Start Scan",
   "galleryCache_scanAlreadyRunning": "A scan task is already running. Please wait for it to finish.",
-  "galleryCache_preparing": "Preparing...",
   "galleryCache_noGalleryFolder": "Gallery folder is not set",
-  "galleryCache_scanningPhase": "Scanning {processed}/{total}...",
-  "@galleryCache_scanningPhase": {
-    "placeholders": {
-      "processed": {},
-      "total": {}
-    }
-  },
-  "galleryCache_scanComplete": "Scan complete",
-  "galleryCache_scanFailed": "Scan failed: {error}",
-  "@galleryCache_scanFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "galleryCache_rescan": "Rescan",
-  "galleryCache_rescanSubtitle": "Check data consistency, find missing files, and extract metadata",
-  "galleryCache_scanning": "Scanning...",
-  "galleryCache_scanAction": "Scan",
-  "galleryCache_evictThumbnailsTitle": "Clean Thumbnail Cache",
-  "galleryCache_evictThumbnailsSubtitle": "Evict least-recently-used .thumbs files over the limit (originals untouched)",
-  "galleryCache_evictThumbnailsContent": "Evicts the on-disk thumbnail cache over its limit, least recently used first.\n\nOnly .thumb.jpg files inside .thumbs directories are deleted; original images are never removed or modified. Removed thumbnails will be regenerated on demand the next time you browse.",
-  "galleryCache_evictThumbnailsStart": "Clean Now",
-  "galleryCache_evictThumbnailsRunning": "Cleaning thumbnail cache...",
-  "galleryCache_evictThumbnailsDone": "Removed {count} thumbnails, freed {size} MB",
-  "@galleryCache_evictThumbnailsDone": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      },
-      "size": {
-        "type": "String"
-      }
-    }
-  },
-  "galleryCache_evictThumbnailsNone": "Thumbnail cache is under the limit; nothing to clean",
-  "galleryCache_evictThumbnailsFailed": "Failed to clean thumbnail cache: {error}",
-  "@galleryCache_evictThumbnailsFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "workflowImport_title": "Import ComfyUI Workflow",
-  "workflowImport_step": "Step {current}/4: {title}",
-  "@workflowImport_step": {
-    "placeholders": {
-      "current": {},
-      "title": {}
-    }
-  },
-  "workflowImport_stepFile": "Select Workflow File",
-  "workflowImport_stepInfo": "Workflow Info",
-  "workflowImport_stepSlots": "Confirm Slot Config",
-  "workflowImport_stepDone": "Complete Import",
-  "workflowImport_previous": "Previous",
-  "workflowImport_next": "Next",
-  "workflowImport_finish": "Finish Import",
-  "workflowImport_defaultName": "Custom Workflow",
-  "workflowImport_fileInstructions": "Select a workflow_api.json file exported from ComfyUI.\n\nIn ComfyUI, open the menu and choose Export (API format) to get this file.",
-  "workflowImport_nodeCount": "{count} nodes",
-  "@workflowImport_nodeCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "workflowImport_reselect": "Click to choose another file",
-  "workflowImport_selectWorkflowApi": "Click to select workflow_api.json",
-  "workflowImport_invalidTopLevel": "Invalid file format: top level should be a JSON object",
-  "workflowImport_noComfyNodes": "No ComfyUI nodes detected. Make sure this is an API-format export.",
-  "workflowImport_readFailed": "Failed to read file: {error}",
-  "@workflowImport_readFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "workflowImport_analysisResult": "Automatic Analysis Result",
-  "workflowImport_inputImageNodes": "Input image nodes",
-  "workflowImport_adjustableParams": "Adjustable parameters",
-  "workflowImport_outputNodes": "Output nodes",
-  "workflowImport_totalNodes": "Total nodes",
-  "workflowImport_countUnit": "{count}",
-  "@workflowImport_countUnit": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "workflowImport_workflowName": "Workflow Name *",
-  "workflowImport_description": "Description",
-  "workflowImport_category": "Category",
-  "workflowImport_slotsHint": "Select the slots to expose in the UI. Input and output slots should usually stay enabled; parameters that users do not need to adjust can be disabled.",
-  "workflowImport_inputSection": "Input",
-  "workflowImport_outputSection": "Output",
-  "workflowImport_parameterSection": "Parameters",
-  "workflowImport_noSlotsWarning": "No usable slots were detected. This workflow may not integrate correctly.\nMake sure the workflow includes LoadImage and SaveImage/SaveImageWebsocket nodes.",
-  "workflowImport_nodeRef": "Node {node}",
-  "@workflowImport_nodeRef": {
-    "placeholders": {
-      "node": {}
-    }
-  },
-  "workflowImport_confirmTitle": "About to import this workflow",
-  "workflowImport_name": "Name",
-  "workflowImport_inputSlots": "Input Slots",
-  "workflowImport_parameterSlots": "Parameter Slots",
-  "workflowImport_outputSlots": "Output Slots",
-  "workflowImport_afterImportHint": "After import, it can be used from the ComfyUI workflow list on the generation screen.",
-  "workflowImport_success": "Workflow \"{name}\" imported",
-  "@workflowImport_success": {
-    "placeholders": {
-      "name": {}
-    }
-  },
   "shortcut_settings_help": "View shortcut help",
   "shortcut_settings_show_in_menus": "Show in menus",
   "shortcut_settings_defaultShortcut": "Default: {shortcut}",
@@ -2477,7 +1692,6 @@
   "toast_kritaNotConnected": "Krita is not connected. Enable the bridge in Settings and connect the plugin first.",
   "toast_sentToKrita": "Image sent to Krita",
   "toast_kritaUnsupportedImageFormat": "This image format cannot be sent to Krita. Use a common image format.",
-  "toast_dropNoReadableImageOrVibe": "The drop source did not provide a readable image or Vibe file",
   "toast_saveDirNotSet": "Save directory is not set",
   "toast_savedTo": "Saved to {path}",
   "@toast_savedTo": {
@@ -2532,24 +1746,10 @@
     }
   },
   "toast_savePreviewFailed": "Failed to save preview image",
-  "common_justNow": "Just now",
-  "common_minutesAgo": "{minutes} minutes ago",
-  "@common_minutesAgo": {
-    "placeholders": {
-      "minutes": {}
-    }
-  },
-  "common_hoursAgo": "{hours} hours ago",
-  "@common_hoursAgo": {
-    "placeholders": {
-      "hours": {}
-    }
-  },
   "common_expand": "Expand",
   "common_collapse": "Collapse",
   "detail_parsingMetadata": "Parsing metadata...",
   "detail_noMetadata": "This image has no metadata",
-  "detail_metadata": "Metadata",
   "detail_modifiedTime": "Modified",
   "detail_fileSize": "File Size",
   "detail_noContent": "(No content)",
@@ -2580,16 +1780,7 @@
   "comfyImport_syntaxPipe": "Pipe format",
   "comfyImport_syntaxUnknown": "Unknown syntax",
   "comfyImport_globalPrompt": "Global Prompt",
-  "checkForUpdate": "Check for Updates",
-  "neverChecked": "Never checked",
-  "lastCheckedAt": "Last checked: {time}",
-  "@lastCheckedAt": {
-    "placeholders": {
-      "time": {}
-    }
-  },
   "includePrereleaseUpdates": "Include Prerelease Versions",
-  "includePrereleaseUpdatesDescription": "Include beta/alpha versions when checking for updates",
   "updateAvailable": "Update Available",
   "updateChecking": "Checking for updates...",
   "updateDownloading": "Downloading update...",
@@ -2648,18 +1839,6 @@
   "updateNoticeReadySubtitle": "The package is verified and ready to install on restart",
   "updateNoticeFailed": "The previous update did not finish",
   "updateViewDetails": "View Update",
-  "updateSettingsAvailable": "v{version} is available; select to view details",
-  "@updateSettingsAvailable": {
-    "placeholders": {
-      "version": {}
-    }
-  },
-  "updateSettingsReady": "v{version} is downloaded; select to install",
-  "@updateSettingsReady": {
-    "placeholders": {
-      "version": {}
-    }
-  },
   "goToDownload": "Go to Download",
   "cannotOpenUrl": "Cannot open link",
   "model3d_editorTitle": "3D Model Layer",
@@ -2702,37 +1881,10 @@
       }
     }
   },
-  "preciseRefLib_importFailedCount": "{count} images could not be imported into the Precise Reference Library",
-  "@preciseRefLib_importFailedCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "preciseRefLib_fromLibrary": "From Library",
-  "preciseRefLib_saveCurrentToLibrary": "Save to Library",
-  "preciseRefLib_saveCurrentCount": "Saved {count} references to library",
-  "@preciseRefLib_saveCurrentCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "img2img_fromPreciseRefLibrary": "From Precise Ref Library",
   "localGallery_saveToPreciseRefLibrary": "Save to Precise Ref Library",
   "drop_saveToPreciseRefLibrary": "Save to Precise Ref Library",
   "common_enabled": "Enabled",
   "common_disabled": "Disabled",
-  "bulkAction_selectedCount": "{count} selected",
-  "@bulkAction_selectedCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "comfyTask_errorConnectionFailed": "Unable to connect to the ComfyUI server",
   "comfyTask_errorConnectionUnavailable": "The ComfyUI connection is unavailable",
   "comfyTask_errorExecutionFailedGeneric": "ComfyUI execution failed",
@@ -2753,10 +1905,6 @@
       }
     }
   },
-  "comfyWorkflowSlot_vaeEncodeTileSize": "VAE encode tile size",
-  "comfyWorkflowSlot_vaeDecodeTileSize": "VAE decode tile size",
-  "comfyWorkflowSlot_blocksToSwap": "Blocks to swap",
-  "comfyWorkflowSlot_swapIoComponents": "Swap I/O components",
   "localGallery_firstIndexHint": "Detected {count} images. The initial index may take a few minutes; you can continue using the app.",
   "@localGallery_firstIndexHint": {
     "placeholders": {
@@ -2824,7 +1972,6 @@
     }
   },
   "common_clickToRetry": "Click to retry",
-  "common_opening": "Opening...",
   "common_swap": "Swap",
   "drop_saveVibeBundle": "Save Vibe Bundle",
   "vibe_import_overwriteOriginalParams": "Replace Original Vibe Parameters",
@@ -2854,32 +2001,6 @@
   },
   "galleryScan_organizingGallery": "Organizing gallery",
   "galleryScan_processing": "Processing",
-  "imagePicker_dropReadFailed": "Failed to read the dropped image: {error}",
-  "@imagePicker_dropReadFailed": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "imagePicker_dropNoReadableImage": "The dropped data does not contain a readable image file or image URL",
-  "imagePicker_fileDataUnavailable": "Unable to read file data",
-  "imagePicker_fileSelectionFailed": "Failed to select file: {error}",
-  "@imagePicker_fileSelectionFailed": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "imagePicker_directorySelectionFailed": "Failed to select directory: {error}",
-  "@imagePicker_directorySelectionFailed": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
   "editor_shiftEdges": "Shift Edges",
   "editor_edgeLeft": "Left",
   "editor_edgeRight": "Right",
@@ -2887,7 +2008,6 @@
   "editor_edgeBottom": "Bottom",
   "editor_enterNumber": "Enter a number",
   "onlineGallery_videoLoadFailed": "Failed to load video",
-  "vibe_releaseToAddStyleReference": "Release to add style reference",
   "router_pageNotFound": "Page not found: {error}",
   "@router_pageNotFound": {
     "placeholders": {
@@ -2897,12 +2017,19 @@
     }
   },
   "autocomplete_resultLimit": "Result count",
-  "autocomplete_relatedTagsTitle": "Tag Expansion",
-  "autocomplete_relatedTagsSubtitle": "Hold Ctrl (⌘ on Mac) and click or drag-select to search tags and see related suggestions.",
   "tagExpansion_searchHint": "Search tags or aliases",
   "tagExpansion_relatedTitle": "Related tags",
   "tagExpansion_empty": "Type to search local tags",
   "tagExpansion_noResults": "No local tags found",
+  "tagExpansion_searchingRelated": "No exact local match. Searching for related tags…",
+  "tagExpansion_matchedAlias": "Matched alias: {alias}",
+  "@tagExpansion_matchedAlias": {
+    "placeholders": {
+      "alias": {
+        "type": "String"
+      }
+    }
+  },
   "tagExpansion_insert": "Insert tag",
   "tagExpansion_showRelated": "Show related tags",
   "tagExpansion_localOnly": "Local only",
@@ -2910,37 +2037,6 @@
   "tagExpansion_tabComplete": "Tab to complete:",
   "tagExpansion_wikiTitle": "Tag wiki",
   "tagExpansion_wikiUnavailable": "No local article for this tag yet.",
-  "autocomplete_cooccurrence": "Offline related-tag database",
-  "autocomplete_entryCount": "{count} entries",
-  "@autocomplete_entryCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "autocomplete_clearDanbooruCache": "Clear Danbooru cache",
-  "autocomplete_clearAiCache": "Clear AI translation cache",
-  "autocomplete_cacheCleared": "Cleared {count} cached entries",
-  "@autocomplete_cacheCleared": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "autocomplete_baseCatalog": "Base Danbooru catalog",
-  "autocomplete_catalogStatus": "{count} tags · data version {version}",
-  "@autocomplete_catalogStatus": {
-    "placeholders": {
-      "count": {
-        "type": "String"
-      },
-      "version": {
-        "type": "String"
-      }
-    }
-  },
   "promptBlockLibrary_allBlocks": "All blocks",
   "promptBlockLibrary_unnamedBlock": "Untitled block",
   "promptBlockLibrary_useCount": "Used {count} times",
@@ -3105,10 +2201,7 @@
     }
   },
   "styleExplore_adoptBlockEmpty": "The selected candidates have no artist strings or positive prompts to save",
-  "promptBlockEditor_library": "Block library",
   "promptBlockPicker_title": "Select Block",
-  "promptBlockLibrary_adjustThumbnailTitle": "Adjust Thumbnail Display Range",
-  "promptBlockLibrary_dragToMove": "Drag to move, scroll or pinch to zoom",
   "promptBlockLibrary_saveToLibrary": "Save to Block Library",
   "promptBlockLibrary_droppedImage": "Dropped Image",
   "promptBlockLibrary_createBlockFromImage": "Create New Block",
@@ -3138,8 +2231,6 @@
     }
   },
   "subscriptionExpired": "Expired",
-  "subscriptionGracePeriod": "Grace period",
-  "subscriptionTierNone": "No subscription",
   "settings_modelsAndInterfaces": "Models & APIs",
   "tips_kind_guide": "Tip",
   "tips_kind_trick": "Pro tip",
@@ -3179,7 +2270,7 @@
   "@tips_studio_guide_6": {
     "description": "Weight scroll modifier (settings_enablePromptWeightScrollSubtitle)."
   },
-  "tips_studio_guide_7": "Press F1 any time for the shortcut list. Ctrl+1, Ctrl+2 and Ctrl+3 jump between Generate, Gallery and Online Gallery, and Ctrl+, opens Settings. Every shortcut can be remapped in Settings.",
+  "tips_studio_guide_7": "Open the shortcut list to see the current keys for Generate, Gallery, Online Gallery and Settings. You can change these bindings in Settings.",
   "@tips_studio_guide_7": {
     "description": "Default shortcuts: showShortcutHelp f1, navigateTo* ctrl+1/2/3, settings ctrl+comma."
   },
@@ -3912,8 +3003,6 @@
   "img2img_generated": "Generated",
   "img2img_blend": "Blend",
   "img2img_enhanceAction": "Enhance!",
-  "img2img_showAdvanced": "Show Advanced",
-  "img2img_hideAdvanced": "Hide Advanced",
   "promptToken_usage": "Token usage: {used} / {limit}",
   "promptToken_promptShare": "This prompt: {used} tokens; total usage: {total} / {limit}",
   "promptToken_blockReferenceHint": "This block's progress is a guide; the total depends on how blocks are combined.",
@@ -3994,16 +3083,6 @@
   "wiki_openFull": "Open in Tag Wiki",
   "shortcut_action_vibe_detail_prev_sub_vibe": "Previous sub-Vibe",
   "shortcut_action_vibe_detail_next_sub_vibe": "Next sub-Vibe",
-  "settings_addAccountsSwitchBetweenThem": "Add accounts to switch between them here.",
-  "settings_current": "Current",
-  "settings_emailLogin": "Email login",
-  "settings_signedIn": "Signed in",
-  "settings_switch": "Switch",
-  "settings_accountActions": "Account actions",
-  "settings_editProfile": "Edit profile",
-  "settings_setDefault": "Set as default",
-  "settings_credentialsUpdated": "Credentials updated",
-  "settings_updateCredentials": "Update credentials",
   "settings_accountDetails": "Account details",
   "settings_localAccountProfile": "Local account profile",
   "settings_setDefault2": "Set default",
@@ -4011,136 +3090,15 @@
   "settings_updateCredentials2": "Update credentials",
   "settings_checking": "Checking…",
   "settings_enterNewSignInToken": "Enter a new sign-in token. This account updates after validation.",
-  "auth_notSignedIn": "Not signed in",
-  "settings_tagExpansion": "Tag expansion",
-  "settings_tagDictionaries": "Tag dictionaries",
-  "settings_cacheMaintenance": "Cache maintenance",
-  "settings_clear": "Clear",
-  "settings_autoRefresh": "Auto refresh",
-  "settings_searchFonts": "Search fonts",
-  "settings_couldNotLoadFonts": "Could not load fonts",
-  "settings_recommended": "Recommended",
-  "settings_included": "Included",
-  "settings_systemFonts": "System fonts",
-  "settings_fontPreview": "Font preview",
-  "settings_onlineFontsLoadAfterApplying": "Online fonts load after applying; preview uses the interface font.",
-  "settings_saving": "Saving",
-  "settings_howGeneratedImagesSaved": "How generated images are saved",
-  "settings_assetsDisplay": "Assets & display",
-  "settings_vibeLocationThumbnailQuality": "Vibe location and thumbnail quality",
-  "settings_applicationData": "Application data",
-  "settings_gallerySources": "Gallery sources",
-  "settings_manageAdditionalGalleryFolders": "Manage additional gallery folders",
-  "settings_default": "Default",
-  "settings_keyboard": "Keyboard",
-  "settings_customizeFrequentlyUsedActions": "Customize frequently used actions",
-  "settings_manageShortcuts": "Manage shortcuts",
-  "settings_costReminders": "Cost reminders",
-  "settings_requestPacing": "Request pacing",
-  "settings_notificationsSound": "Notifications & sound",
-  "settings_lockCanvasCamera": "Lock canvas camera",
-  "settings_dictionariesCache": "Dictionaries & cache",
-  "settings_defaultAccount2": "Default account",
-  "settings_signInAutomatically": "Sign in automatically",
-  "settings_signInCredentials": "Sign-in credentials",
-  "settings_translationInterfaces": "Translation interfaces",
-  "settings_presetsBuiltInRules": "Presets & built-in rules",
-  "settings_preferenceBackupRestore": "Preference backup & restore",
-  "settings_searchSettingsFeatures": "Search settings and features",
-  "settings_noMatchingSettings": "No matching settings",
-  "settings_change": "Change",
-  "settings_couldNotPlaySoundCheck": "Could not play the sound. Check the audio file.",
-  "settings_useDefaultCompletionSound": "Use the default completion sound",
-  "settings_soundPreview": "Sound preview",
-  "settings_listenCurrentCompletionSound": "Listen to the current completion sound",
-  "settings_playSound": "Play sound",
   "settings_searchResults": "Search results",
-  "settings_promptInput": "Prompt input",
-  "settings_manageTranslationModelsRules": "Manage translation models & rules",
-  "settings_browsing": "Browsing",
-  "settings_chooseHowViewImages": "Choose how to view images",
-  "settings_canvasControls": "Canvas controls",
-  "settings_keepViewSteady": "Keep the view steady",
-  "settings_appearance2": "Appearance",
-  "settings_chooseLightDarkWorkspace": "Choose a light or dark workspace",
-  "settings_textLanguage": "Text & language",
-  "settings_makeReadingComfortable": "Make reading comfortable",
-  "settings_adjustSettingsPagesDialogsOnly": "Resize text, icons and controls throughout the app. Image resolution stays the same.",
-  "settings_motionNotifications": "Motion & notifications",
-  "settings_reduceDistractionsKnowWorkFinishes": "Reduce distractions, know when work finishes",
-  "settings_notificationStyle": "Notification style",
-  "settings_notificationsAppearUpperRightWrap": "Notifications appear at the upper right, wrap long messages, and close when progress tasks finish.",
-  "settings_preview": "Preview",
-  "settings_versionUpdates": "Version & updates",
-  "settings_currentVersionUpdateOptions": "Current version and update options",
-  "settings_diagnosticsResources": "Diagnostics & resources",
-  "settings_logsFontsOpenSourceProject": "Logs, fonts and the open-source project",
-  "settings_viewLicenses": "View licenses",
-  "settings_openProject": "Open project",
-  "settings_actionIncomplete": "Action incomplete",
-  "settings_exportPreferences": "Export preferences",
-  "settings_preferencesExported": "Preferences exported",
-  "settings_noAutomaticBackupYet": "No automatic backup yet",
-  "settings_restorePreviousPreferences": "Restore previous preferences",
   "settings_importPreferences": "Import preferences",
-  "settings_apply": "Apply",
-  "settings_preferencesAppliedPreviousSettingsBacked": "Preferences applied; previous settings backed up",
-  "settings_restoreDefaultPreferences": "Restore default preferences",
-  "settings_choosePreferencesResetCurrentSettings": "Choose the preferences to reset. Current settings will be backed up.",
-  "settings_appearanceSoundControls": "Appearance, sound & controls",
-  "settings_inputAutocomplete": "Input & autocomplete",
-  "settings_privacyGenerationProtection": "Privacy & generation protection",
-  "settings_moveAppearanceControlsInputProtection": "Move appearance, controls, input and protection preferences between devices.",
-  "settings_rollbackCopySavedBeforeImport": "A rollback copy is saved before an import or reset.",
-  "settings_resetSelectedScopeWhileKeeping": "Reset a selected scope while keeping accounts, models, libraries and creative work.",
-  "settings_chooseScope": "Choose scope",
-  "settings_preferenceManagement": "Preference management",
-  "settings_backupMigrationRecovery": "Backup, migration and recovery",
-  "settings_generalAppearance": "General & appearance",
-  "settings_makeWorkspaceComfortableReadUse": "Make the workspace comfortable to read and use.",
-  "settings_controlsShortcuts": "Controls & shortcuts",
-  "settings_chooseInteractionCanvasControlsKeyboard": "Choose interaction, canvas controls and keyboard shortcuts.",
-  "settings_generationPrompts": "Generation & prompts",
-  "settings_managePromptInputGenerationReminders": "Manage prompt input, generation reminders and request pacing.",
-  "settings_galleryFiles": "Gallery & files",
-  "settings_manageImageSavingGallerySources": "Manage image saving, gallery sources and display.",
-  "settings_manageTagDictionariesIndexesCache": "Manage tag dictionaries, indexes and cache maintenance.",
-  "settings_novelaiAccounts": "NovelAI accounts",
-  "settings_viewAccountManageSignIn": "View your account and manage sign-in and the default account.",
-  "settings_connectionsIntegrations": "Connections & integrations",
-  "settings_manageExternalToolsBridgesNetwork": "Manage external tools, bridges and network settings.",
-  "settings_privacySharing2": "Privacy & sharing",
-  "settings_controlSharedInformationConfirmationBefore": "Control shared information and confirmation before sensitive actions.",
-  "settings_aboutDiagnostics": "About & diagnostics",
-  "settings_updatesLogsProjectInformation": "Updates, logs and project information.",
-  "settings_searchSettings": "Search settings",
-  "settings_preferences": "Preferences",
-  "settings_creationResources": "Creation & resources",
-  "settings_servicesConnections": "Services & connections",
-  "settings_safetyMaintenance": "Safety & maintenance",
-  "settings_subscriptionActive": "Subscription active",
-  "settings_availableBalance": "Available balance",
-  "settings_subscriptionExpiry2": "Subscription expiry",
-  "settings_subscriptionDetailsUnavailable": "Subscription details are unavailable",
-  "settings_loadingSubscriptionDetails": "Loading subscription details…",
-  "settings_localDataStaysAvailableAfter": "Local data stays available after expiry.",
-  "settings_records": "records",
   "settings_hitRate": "Hit rate",
-  "settings_images": "images",
-  "settings_cacheOverview": "Cache overview",
-  "settings_loginPreferences": "Login preferences",
-  "settings_preselectedSignInPage": "Preselected on the sign-in page.",
-  "settings_noAccounts": "No accounts",
-  "settings_useLastSessionOffNext": "Use the last session. When off, the next launch opens sign-in.",
-  "settings_couldNotSaveLoginPreference": "Could not save the login preference.",
-  "settings_loginPreferencesUnavailable": "Login preferences are unavailable.",
   "settings_applyPreferencesConfirm": "Apply {count} preferences. Current preferences are backed up automatically and can be recovered from “Restore previous preferences”. Accounts, secrets, drafts, libraries and model configurations are kept separately.",
   "@settings_applyPreferencesConfirm": {
     "placeholders": {
       "count": {}
     }
   },
-  "settings_restore": "Restore",
   "wiki_translating": "Translating",
   "wiki_back": "Back",
   "wiki_readingTranslation": "Translation",
@@ -4543,7 +3501,6 @@
       "count": {}
     }
   },
-  "settings_positiveIntegerRequired": "Enter an integer greater than 0",
   "modelSettings_testingPreset": "Testing preset",
   "modelHealth_lastUpdated": "Last updated: {time}",
   "@modelHealth_lastUpdated": {
@@ -4712,33 +3669,7 @@
   "modelOverrides_valueTypes": "Supports strings, numbers, booleans, arrays and objects",
   "modelOverrides_addBodyField": "Add body field",
   "modelOverrides_addHeader": "Add header",
-  "promptTranslation_translating": "Translating",
-  "promptTranslation_needsModel": "Translate · configure a model first",
-  "promptTranslation_withRoute": "Translate · {provider} / {model}",
-  "@promptTranslation_withRoute": {
-    "placeholders": {
-      "provider": {},
-      "model": {}
-    }
-  },
-  "promptTranslation_actions": "Translation actions",
-  "promptTranslation_promptChanged": "The prompt changed; new edits were not overwritten",
-  "promptTranslation_nothingToTranslate": "There is no plain text to translate",
-  "promptTranslation_failed": "Translation failed: {error}",
-  "@promptTranslation_failed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "promptTranslation_setupTitle": "Configure a translation model first",
-  "promptTranslation_setupBody": "Translation needs an explicitly selected service and model. Go to Settings → Integrations → Models & APIs, add a service and fetch its model list, then choose a model for prompt translation.",
-  "promptTranslation_later": "Later",
-  "promptTranslation_openSettings": "Open settings",
-  "promptTranslation_toolTitle": "Translate",
-  "promptTranslation_noModel": "No model configured",
-  "promptTranslation_configureModel": "Configure translation model",
   "promptTranslation_translateNew": "Translate new content",
-  "promptTranslation_undoRestore": "Undo the restore and bring translation blocks back",
   "promptTranslation_restoreAll": "Restore all translation blocks to original text",
   "promptTranslation_tutorial": "How it works",
   "promptReading_mode": "Lightweight translation",
@@ -5178,7 +4109,6 @@
   "settings_highAnlasCostEstimate": "Estimated usage",
   "settings_highAnlasCostThresholdLabel": "Reminder threshold",
   "settings_highAnlasCostQuestion": "Continue with this generation?",
-  "bridge_title": "Local bridge",
   "bridge_agent": "External Agent",
   "bridge_agentHint": "Copy the instructions to an Agent that can run local commands.",
   "bridge_synced": "Current content confirmed",
@@ -5318,8 +4248,6 @@
   "localUpscale_downloadProgress": "Downloading model…",
   "localUpscale_importModel": "Import model",
   "localUpscale_modelOperationFailed": "Model operation failed. Check your connection, file permissions and free disk space, then retry.",
-  "settings_localUpscale": "Local upscaling",
-  "settings_localUpscaleDescription": "Manage local upscaling models and components.",
   "localUpscale_noCuda": "A CUDA-capable NVIDIA GPU and a compatible driver are required.",
   "localUpscale_noRtx": "RTX Video is unavailable. Check your NVIDIA RTX GPU and driver.",
   "localUpscale_encoding": "Encoding image…",
@@ -5377,7 +4305,6 @@
   "localUpscale_installingComponent": "Downloading component…",
   "upscale_settings": "Upscale settings",
   "upscale_cloudCost": "Estimated {cost} Anlas · 2×",
-  "enhance_localAfterGeneration": "Automatically upscale each generated image locally.",
   "enhance_localAction": "Generate and upscale locally",
   "@upscale_cloudCost": {
     "placeholders": {
@@ -5388,31 +4315,8 @@
   },
   "localUpscale_stop": "Stop upscaling",
   "localUpscale_scrollDown": "Scroll down",
-  "wiki_exampleImages": "Example image",
   "wiki_exampleImagesUnavailable": "Example images are temporarily unavailable",
-  "generation_perRequestLabel": "Images",
-  "generation_perRequestTooltip": "Images per request (1–4)",
-  "generation_repeatLabel": "Repeat",
-  "generation_referenceUpload": "Upload",
-  "generation_seedPinnedLabel": "Seed · Fixed",
-  "generation_paramsDrawerTooltip": "More parameters",
-  "library_sizeSmall": "Small",
-  "library_sizeMedium": "Medium",
-  "library_sizeLarge": "Large",
-  "library_currentModel": "Current model",
-  "library_available": "Available",
   "library_unavailable": "Unavailable",
-  "library_inGeneration": "In generation",
-  "library_selectedCount": "{count} selected",
-  "library_invertSelection": "Invert selection",
-  "library_more": "More",
-  "@library_selectedCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "viewer_fit": "Fit",
   "viewer_showInfo": "Show information panel (I)",
   "viewer_hideInfo": "Hide information panel (I)",
@@ -5429,18 +4333,6 @@
         "type": "String"
       }
     }
-  },
-  "styleExplore_openBlockLibrary": "Open block library",
-  "@styleExplore_openBlockLibrary": {
-    "description": "Style exploration workbench: styleExplore_openBlockLibrary"
-  },
-  "styleExplore_drawCountLabel": "Draw",
-  "@styleExplore_drawCountLabel": {
-    "description": "Style exploration workbench: styleExplore_drawCountLabel"
-  },
-  "styleExplore_drawCountSuffix": "images · one at a time",
-  "@styleExplore_drawCountSuffix": {
-    "description": "Style exploration workbench: styleExplore_drawCountSuffix"
   },
   "styleExplore_appliedToEditor": "Applied to editor",
   "@styleExplore_appliedToEditor": {
@@ -8793,22 +7685,8 @@
   "naiAgent_chatGptError": "Could not connect to ChatGPT. Try again or sign in again.",
   "naiAgent_chatGptUsingPlan": "Using ChatGPT plan",
   "naiAgent_chatGptManageUsage": "Manage usage",
-  "naiAgent_settings": "Agent settings",
   "naiAgent_chooseModel": "Choose model",
   "naiAgent_interrupted": "The previous run was interrupted and was not resent.",
-  "naiAgent_systemPrompt": "System prompt",
-  "naiAgent_promptHelp": "Custom text replaces the default prompt. The app appends its tool map. Existing history stays intact; later requests use the new text.",
-  "naiAgent_restoreDefault": "Restore default",
-  "naiAgent_showEffective": "View effective prompt",
-  "naiAgent_useGlobal": "Use global prompt",
-  "naiAgent_save": "Save",
-  "naiAgent_runLimit": "Model requests per run",
-  "naiAgent_enterSends": "Enter sends; Shift+Enter adds a line",
-  "naiAgent_dataFolder": "Workspace data directory",
-  "naiAgent_openFolder": "Open folder",
-  "naiAgent_toolsManuals": "Tools and skills",
-  "naiAgent_toolsHint": "Read current state, images, prompts and workspace files on demand. Detailed Studio usage lives in skills such as nai-studio and nai-prompt, loaded only when needed.",
-  "naiAgent_unknownCost": "Actual cost is set by the provider",
   "naiAgent_error": "Operation failed. Check model settings or workspace files.",
   "naiAgent_emptyResponse": "The model finished without returning text or a tool call. Retry or check the model output settings.",
   "naiAgent_imageRequestTooLarge": "This image batch is too large or could not be processed. Send fewer images, reduce their size, or try another format.",
@@ -8838,9 +7716,6 @@
   "naiAgent_imageLimit": "Invalid image format or image exceeds upload limits.",
   "naiAgent_composerNotEmpty": "Save or send the current input before restoring this message.",
   "naiAgent_runtimeMissing": "Agent runtime is missing. Install the complete update package.",
-  "naiAgent_usage": "Model usage",
-  "naiAgent_globalScope": "Global default",
-  "naiAgent_workspaceScope": "Current workspace",
   "naiAgent_generationLocalEnhance": "Local upscale after generation: {model} ×{scale}",
   "@naiAgent_generationLocalEnhance": {
     "placeholders": {
@@ -8875,22 +7750,7 @@
       }
     }
   },
-  "naiAgent_extensions": "Extensions",
-  "naiAgent_interactionExtension": "Studio interaction",
-  "naiAgent_extensionRequired": "Built in · Required",
-  "naiAgent_interactionExtensionHint": "Read current Studio state on demand and collect answers through question cards.",
-  "naiAgent_extensionAddFile": "Add extension file",
-  "naiAgent_extensionAddFolder": "Add extension folder",
-  "naiAgent_extensionsHint": "Extensions load separately in each workspace. Changes apply on the next send after the current task ends. External extensions run local code; choose trusted sources.",
   "naiAgent_extensionError": "Extension failed",
-  "naiAgent_extensionCompatibility": "Supports local Pi extensions and package folders, tools, commands and standard dialogs. Terminal-only custom UI is not rendered on desktop.",
-  "naiAgent_instructions": "Instructions",
-  "naiAgent_globalInstructions": "Global instructions",
-  "naiAgent_globalInstructionsHelp": "Shared by every workspace. Use for language, style or task preferences. Leave blank to disable this part.",
-  "naiAgent_systemPromptPrefix": "System prompt prefix",
-  "naiAgent_systemPromptPrefixHelp": "Inserted before the NAI Agent base prompt, keeping the base prompt and tool map. Leave blank to disable this part.",
-  "naiAgent_instructionOrder": "Order: prefix → base prompt → global instructions → workspace rules. Applies to subsequent requests.",
-  "naiAgent_saveInstructions": "Save instructions",
   "naiAgent_mcpBuiltin": "NAI Studio · Built-in tools",
   "naiAgent_mcpBuiltinHint": "Prompt, block, wiki, image, history, reference, generation and settings tools. Discovered on demand by default; existing backups, version checks and user confirmations still apply.",
   "naiAgent_mcpAdd": "Add MCP server",
@@ -8976,153 +7836,18 @@
   "channel_weekday5": "Fri",
   "channel_weekday6": "Sat",
   "channel_weekday7": "Sun",
-  "rag_title": "RAG vector system",
-  "rag_description": "Manage local retrieval, models and contextual tag suggestions",
-  "rag_enabled": "Enable RAG",
-  "rag_enabledHint": "Enable local semantic retrieval. Preview and start the first index explicitly.",
-  "rag_status": "Shared vector pool",
-  "rag_off": "Disabled",
-  "rag_loading": "Preparing local models",
-  "rag_empty": "Models connected; index not built",
-  "rag_ready": "Semantic retrieval ready",
   "rag_partial": "Partly ready; ordinary search covers the rest",
-  "rag_building": "Building index",
-  "rag_paused": "Indexing paused; existing index remains searchable",
   "rag_unavailable": "RAG unavailable; ordinary search remains available",
-  "rag_operationFailed": "Operation failed. Check model paths and the separate runtime.",
-  "rag_indexCounts": "Indexed {indexed} / {total} items",
-  "@rag_indexCounts": {
-    "placeholders": {
-      "indexed": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "rag_storage": "Index storage: {size} MiB",
-  "@rag_storage": {
-    "placeholders": {
-      "size": {
-        "type": "String"
-      }
-    }
-  },
-  "rag_refresh": "Refresh status",
-  "rag_embeddingPath": "EmbeddingGemma 2 model directory",
-  "rag_notConfigured": "Not configured",
-  "rag_choose": "Choose",
-  "rag_modelMode": "Model capabilities",
-  "rag_modelModeHint": "Gemma 2 handles text and image retrieval. Audio is disabled.",
-  "rag_discover": "Find local models",
   "rag_modelsMissing": "Models not found. Choose downloaded model directories.",
-  "rag_pythonPath": "Separate Python runtime",
-  "rag_runtime": "Inference runtime",
-  "rag_runtimeHint": "Use a dedicated environment. Existing upscale components are unchanged. Select model weights separately.",
-  "rag_installRuntime": "Install separate runtime",
-  "rag_installHint": "Download Python and inference dependencies. CUDA requires several GB and a compatible NVIDIA GPU; CPU needs a smaller download. Model weights are separate.",
-  "rag_installing": "Installing runtime",
-  "rag_device": "Device",
-  "rag_auto": "Automatic",
-  "rag_tagsEnabled": "Semantic tag search & suggestions",
   "rag_tagsHint": "Search tags by name or description. Empty queries use local cooccurrence suggestions.",
-  "rag_buildIndex": "Preview and build index",
-  "rag_plan": "Index {total} tags with aliases and existing local descriptions. Initial processing may take time; pause is supported and completed parts are usable.",
-  "@rag_plan": {
-    "placeholders": {
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "rag_start": "Start indexing",
-  "rag_pause": "Pause indexing",
-  "rag_resume": "Resume indexing",
-  "rag_rebuild": "Rebuild index",
-  "rag_clear": "Clear index",
-  "rag_clearHint": "Delete this derived index while keeping source content and models. Rebuild before using it again.",
-  "rag_futureSources": "Tag suggestions, Wiki, prompt blocks and multimodal gallery search are connected. Workspace and Agent retrieval will follow.",
   "rag_badgeHint": "Local semantic search is ready",
-  "rag_wikiEnabled": "Wiki semantic search",
-  "rag_wikiHint": "Index local article text. Exact names come first; semantic matches supplement them. Preview and start the first index separately.",
-  "rag_blocksEnabled": "Prompt block semantic search",
-  "rag_blocksHint": "Index saved, active block titles, tags and positive/negative text. Images and unsaved drafts are excluded.",
-  "rag_textPlan": "Index {documents} saved documents as {total} text passages. Start this first build explicitly; later updates are incremental. Pause anytime and search completed passages.",
-  "rag_textCounts": "Indexed {indexed} / {total} text passages",
-  "@rag_textPlan": {
-    "placeholders": {
-      "documents": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "@rag_textCounts": {
-    "placeholders": {
-      "indexed": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "rag_galleryEnabled": "Gallery multimodal search",
-  "rag_galleryHint": "Index visual content from registered gallery folders and existing NAI parameters as separate text. Originals stay unchanged; other software metadata is not parsed.",
-  "rag_galleryPlan": "Index {images} active gallery images and {parameters} NAI parameter passages. Start this first build explicitly; later updates are incremental. Visual and text indices are separate and pausable.",
-  "rag_galleryCounts": "Images {indexed} / {images}; NAI passages {parameters}; skipped images {skipped}",
   "rag_galleryMixed": "Combined search",
   "rag_galleryVisual": "Visual content only",
   "rag_galleryParameters": "NAI parameters only",
   "rag_galleryChooseImage": "Choose an image to find similar",
   "rag_galleryClearImage": "Clear query image",
   "rag_gallerySearchOptions": "Gallery RAG search options",
-  "@rag_galleryPlan": {
-    "placeholders": {
-      "images": {
-        "type": "int"
-      },
-      "parameters": {
-        "type": "int"
-      }
-    }
-  },
-  "@rag_galleryCounts": {
-    "placeholders": {
-      "indexed": {
-        "type": "int"
-      },
-      "images": {
-        "type": "int"
-      },
-      "parameters": {
-        "type": "int"
-      },
-      "skipped": {
-        "type": "int"
-      }
-    }
-  },
-  "rag_downloadModel": "Download model",
-  "rag_modelDownloading": "Downloading model",
-  "rag_modelVerifying": "Verifying model",
-  "rag_downloadProgress": "{done} / {total} MB",
-  "rag_poolHint": "Enabled sources share one vector pool. New content and saved translations update incrementally.",
   "rag_runtimeReady": "Runtime ready",
-  "rag_runtimeCheck": "Check runtime",
-  "rag_runtimeExisting": "Checking existing runtime",
-  "rag_runtimeDownload": "Downloading setup tool",
-  "rag_runtimeCreate": "Preparing Python runtime",
-  "rag_runtimeCuda": "Installing CUDA inference packages",
-  "rag_runtimePackages": "Installing inference dependencies",
-  "rag_runtimeVerify": "Verifying runtime compatibility",
-  "rag_runtimeElapsed": "{seconds}s in this step",
-  "rag_useRuntime": "Use existing runtime",
-  "@rag_downloadProgress": {"placeholders": {"done": {"type": "String"}, "total": {"type": "String"}}},
-  "@rag_runtimeElapsed": {"placeholders": {"seconds": {"type": "int"}}},
   "set_title": "Settings",
   "set_search": "Search settings",
   "set_searchResults": "Search results",
@@ -10052,7 +8777,6 @@
   "set_agRemoveMcp": "Remove server",
   "set_agRemoveExt": "Remove extension",
   "set_rgDesc": "Local RAG for tag suggestions, wiki, prompt blocks and similar images. Nothing is uploaded.",
-  "set_rgReady": "Semantic search ready",
   "set_rgOff": "Semantic search off",
   "set_rgPartial": "Some sources building",
   "set_rgAllDone": "All indexed",
@@ -10128,11 +8852,6 @@
       "n": {}
     }
   },
-  "set_rgStartupTitle": "Prepare your local index",
-  "set_rgStartupBody": "Before building or resuming an index, Studio prepares the local runtime, models, and existing data.",
-  "set_rgStartupWaitTitle": "This may take a few minutes or longer",
-  "set_rgStartupWaitBody": "Progress counts may stay unchanged during preparation. Please wait.",
-  "set_rgStartupFrequency": "Shown once per Studio session",
   "set_rgLoading": "Loading indexes",
   "set_rgOpening": "Connecting to the local worker and reading existing indexes.",
   "set_rgLoadingSaved": "Loading the saved search index.",
@@ -10248,7 +8967,7 @@
       "n": {}
     }
   },
-  "set_upNoGpu": "No discrete GPU detected",
+  "set_upNoGpu": "NVIDIA GPU information unavailable",
   "set_upLocal": "Upscale on this PC without spending Anlas.",
   "set_upEsrgan": "Standard models",
   "set_upEsrganSub": "Real-ESRGAN NCNN, 4×, fast, works on any Vulkan GPU.",
@@ -11554,6 +10273,27 @@
       }
     }
   },
+  "set_stDraftBackups": "Generation draft backups",
+  "resourceWindow_retryPage": "Next page failed to load · Retry",
+  "set_rgSuspended": "Search temporarily paused",
+  "set_rgNoSearchable": "No searchable content yet",
+  "set_rgSearchableCount": "{count}/{total} sources searchable",
+  "set_rgWaitRetry": "The index is busy. Try again shortly.",
+  "set_rgCheckSource": "Check the source path and read permissions, then retry.",
+  "set_rgCheckDevice": "CUDA is unavailable. Check the device settings and retry.",
+  "set_rgRetryDownload": "Model download failed. Check your connection and retry the download.",
+  "set_rgRefreshRetry": "The local search service did not respond. Refresh its status and retry.",
+  "set_rgOperationFailed": "The local search operation failed. Refresh its status and retry.",
+  "@set_rgSearchableCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "set_stOther": "Other files",
   "set_stIncomplete": "Some folders could not be read; totals are partial. Hover a category to see its sources.",
   "set_stSliceIncomplete": "Partially read",
@@ -11607,6 +10347,8 @@
     }
   },
   "prompt_autocompleteTitle": "Complete",
+  "prompt_spellingSuggestion": "Spelling suggestion",
+  "prompt_spellingHint": "Tab to accept · Enter for a new line · Esc to dismiss",
   "prompt_autocompleteHint": "↑↓ move · → related · ← back · Tab / Enter complete · Esc close",
   "prompt_autocompleteHintRelated": "↑↓ move · ← back · Tab / Enter to add · Esc close related",
   "resourceWindow_show": "Open resource window",

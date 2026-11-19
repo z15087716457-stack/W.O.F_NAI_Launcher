@@ -69,6 +69,42 @@ void main() {
     },
   );
 
+  for (final (input, comma, expected) in [
+    ('1.2::long hiar::', true, '1.2::long hair::, '),
+    ('1.2::long hiar::', false, '1.2::long hair::'),
+    ('1.2::long hiar::, sky', true, '1.2::long hair::, sky'),
+  ]) {
+    testWidgets('accept correction after closing weight $input comma=$comma', (
+      tester,
+    ) async {
+      const correction = CompletionCandidate(
+        canonicalTag: 'long_hair',
+        category: TagCategory.general,
+        postCount: 1,
+        matchKind: CompletionMatchKind.spelling,
+        sources: {CompletionSourceKind.base},
+      );
+      final controller = PromptAutocompleteController(
+        enabled: true,
+        search: (query) async => [
+          if (query.token == 'long_hiar') correction,
+          ...candidates,
+        ],
+      );
+      addTearDown(controller.dispose);
+      controller.update(
+        editing(input, '1.2::long hiar::'.length),
+        locale: 'zh',
+      );
+      await tester.pump(const Duration(milliseconds: 120));
+      expect(controller.value.candidates, [correction]);
+      expect(controller.accept(0, comma)!.text, expected);
+      controller.update(editing('1.2::long hair::'), locale: 'zh');
+      await tester.pump(const Duration(milliseconds: 120));
+      expect(controller.value.visible, false);
+    });
+  }
+
   for (final (text, caret, comma, expected) in [
     ('bl', 2, true, 'blue eyes, blue hair, '),
     ('bl', 2, false, 'blue eyes, blue hair'),

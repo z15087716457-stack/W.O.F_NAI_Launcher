@@ -56,11 +56,37 @@ void main() {
       expect(entries[2].title, contains('Choose an outfit?'));
       expect(entries[2].subtitle, contains('No hat'));
       expect(entries[2].blockIndex, 2);
-      expect(entries.every((e) => !e.beforeCompaction), true);
     },
   );
   test(
-    'compacted archive keeps original chronology and targets the retained summary',
+    'same-time turns and identical summaries jump to their own positions',
+    () {
+      final marker = AgentCompactionBlock(summary: 'Summary', at: start);
+      final entries = agentHistoryEntries([
+        AgentTurn(
+          id: 'first',
+          user: AgentUserMessage(text: 'first', at: start),
+          reply: AgentReply(blocks: [marker]),
+        ),
+        AgentTurn(
+          id: 'second',
+          user: AgentUserMessage(text: 'second', at: start),
+          reply: AgentReply(
+            blocks: [const AgentTextBlock('reply'), marker, qa],
+          ),
+        ),
+      ]);
+      expect(entries.map((e) => (e.turnId, e.blockIndex)), [
+        ('first', 0),
+        ('first', null),
+        ('second', 1),
+        ('second', null),
+        ('second', 2),
+      ]);
+    },
+  );
+  test(
+    'full branch keeps pre-compaction cards reachable at their actual turns',
     () {
       final compact = AgentCompactionBlock(
         summary: 'Summary text',
@@ -68,53 +94,21 @@ void main() {
         at: start.add(const Duration(minutes: 3)),
         auto: true,
       );
-      final archived = [
+      final entries = agentHistoryEntries([
         turn(1, [qa]),
         turn(2, [compact]),
         turn(4, [const AgentPromptSetBlock(setId: 's', revision: 2)]),
-      ];
-      final current = [
-        turn(4, [compact, const AgentPromptSetBlock(setId: 's', revision: 2)]),
-      ];
-      final entries = agentHistoryEntries(current, archive: archived);
-      expect(entries.map((e) => e.kind), [
-        AgentHistoryKind.user,
-        AgentHistoryKind.questions,
-        AgentHistoryKind.user,
-        AgentHistoryKind.compaction,
-        AgentHistoryKind.user,
-        AgentHistoryKind.card,
       ]);
-      expect(
-        entries
-            .take(3)
-            .every(
-              (e) =>
-                  e.beforeCompaction && e.turnId == 't4' && e.blockIndex == 0,
-            ),
-        true,
-      );
-      final marker = entries.singleWhere(
-        (e) => e.kind == AgentHistoryKind.compaction,
-      );
-      expect(marker.auto, true);
-      expect(marker.tokensBefore, 131000);
-      expect(entries.last.blockIndex, 1);
-      expect(entries.last.beforeCompaction, false);
-      expect(
-        filterAgentHistory(entries, kind: AgentHistoryKind.user),
-        hasLength(3),
-      );
-      expect(
-        filterAgentHistory(
-          entries,
-          kind: AgentHistoryKind.questions,
-          query: 'BLUE',
-        ),
-        hasLength(1),
-      );
-      expect(filterAgentHistory(entries, query: 'summary'), [marker]);
-      expect(filterAgentHistory(entries, query: 'missing'), isEmpty);
+      expect(entries.map((e) => (e.kind, e.turnId, e.blockIndex)), [
+        (AgentHistoryKind.user, 't1', null),
+        (AgentHistoryKind.questions, 't1', 0),
+        (AgentHistoryKind.user, 't2', null),
+        (AgentHistoryKind.compaction, 't2', 0),
+        (AgentHistoryKind.user, 't4', null),
+        (AgentHistoryKind.card, 't4', 0),
+      ]);
+      expect(entries[3].auto, true);
+      expect(entries[3].tokensBefore, 131000);
     },
   );
 }

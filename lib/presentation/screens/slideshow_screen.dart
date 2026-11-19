@@ -41,21 +41,32 @@ class SlideshowScreen extends ConsumerStatefulWidget {
 
 class _SlideshowScreenState extends ConsumerState<SlideshowScreen> {
   late int _currentIndex;
-  late FocusNode _focusNode;
+  final _focusNode = FocusNode();
   Timer? _autoPlayTimer;
-  bool _isPlaying = false;
+  bool get _isPlaying => _autoPlayTimer != null;
   static const Duration _autoPlayInterval = Duration(seconds: 3);
 
   @override
   void initState() {
     super.initState();
-    _currentIndex = widget.initialIndex.clamp(0, widget.images.length - 1);
-    _focusNode = FocusNode();
+    _currentIndex = widget.images.isEmpty
+        ? 0
+        : widget.initialIndex.clamp(0, widget.images.length - 1);
+  }
 
-    // 请求焦点以接收键盘事件
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _focusNode.requestFocus();
-    });
+  @override
+  void didUpdateWidget(covariant SlideshowScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.images.isEmpty) {
+      _currentIndex = 0;
+      _autoPlayTimer?.cancel();
+      _autoPlayTimer = null;
+    } else {
+      final target = oldWidget.initialIndex == widget.initialIndex
+          ? _currentIndex
+          : widget.initialIndex;
+      _currentIndex = target.clamp(0, widget.images.length - 1);
+    }
   }
 
   @override
@@ -66,63 +77,29 @@ class _SlideshowScreenState extends ConsumerState<SlideshowScreen> {
     super.dispose();
   }
 
-  /// 开始自动播放
-  void _startAutoPlay() {
-    if (_autoPlayTimer != null) return;
-
-    setState(() {
-      _isPlaying = true;
-    });
-
-    _autoPlayTimer = Timer.periodic(_autoPlayInterval, (timer) {
-      if (mounted) {
-        _nextImage();
-      } else {
-        timer.cancel();
-      }
-    });
-  }
-
-  /// 停止自动播放
-  void _stopAutoPlay() {
-    _autoPlayTimer?.cancel();
-    _autoPlayTimer = null;
-
-    if (mounted) {
-      setState(() {
-        _isPlaying = false;
-      });
-    }
-  }
-
-  /// 切换自动播放状态
   void _toggleAutoPlay() {
-    if (_isPlaying) {
-      _stopAutoPlay();
-    } else {
-      _startAutoPlay();
-    }
-  }
-
-  /// 上一张图片
-  void _previousImage() {
     if (widget.images.isEmpty) return;
-
     setState(() {
-      _currentIndex = (_currentIndex - 1) % widget.images.length;
+      if (_isPlaying) {
+        _autoPlayTimer!.cancel();
+        _autoPlayTimer = null;
+      } else {
+        _autoPlayTimer = Timer.periodic(
+          _autoPlayInterval,
+          (_) => _step(1, manual: false),
+        );
+      }
     });
   }
 
-  /// 下一张图片
-  void _nextImage() {
+  void _step(int delta, {bool manual = true}) {
     if (widget.images.isEmpty) return;
-
     setState(() {
-      _currentIndex = (_currentIndex + 1) % widget.images.length;
-      // 用户手动切换时停止自动播放
-      if (_isPlaying) {
-        _stopAutoPlay();
+      if (manual) {
+        _autoPlayTimer?.cancel();
+        _autoPlayTimer = null;
       }
+      _currentIndex = (_currentIndex + delta) % widget.images.length;
     });
   }
 
@@ -132,10 +109,10 @@ class _SlideshowScreenState extends ConsumerState<SlideshowScreen> {
 
     switch (event.logicalKey) {
       case LogicalKeyboardKey.arrowLeft:
-        _previousImage();
+        _step(-1);
         break;
       case LogicalKeyboardKey.arrowRight:
-        _nextImage();
+        _step(1);
         break;
       case LogicalKeyboardKey.space:
         _toggleAutoPlay();
@@ -156,7 +133,7 @@ class _SlideshowScreenState extends ConsumerState<SlideshowScreen> {
     // 无图片时显示提示
     if (widget.images.isEmpty) {
       return Scaffold(
-        backgroundColor: Colors.black,
+        appBar: AppBar(leading: const CloseButton()),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -182,6 +159,7 @@ class _SlideshowScreenState extends ConsumerState<SlideshowScreen> {
     final currentImage = widget.images[_currentIndex];
 
     return KeyboardListener(
+      autofocus: true,
       focusNode: _focusNode,
       onKeyEvent: _handleKeyEvent,
       child: Scaffold(
@@ -259,10 +237,7 @@ class _SlideshowScreenState extends ConsumerState<SlideshowScreen> {
                     const Spacer(),
                     // 退出按钮
                     IconButton(
-                      icon: Icon(
-                        Icons.close,
-                        color: theme.colorScheme.onSurface,
-                      ),
+                      icon: const Icon(Icons.close, color: Colors.white),
                       tooltip: l10n.slideshow_exit,
                       onPressed: () => Navigator.of(context).pop(),
                     ),
@@ -295,19 +270,16 @@ class _SlideshowScreenState extends ConsumerState<SlideshowScreen> {
                   children: [
                     // 上一张按钮
                     IconButton(
-                      icon: Icon(
-                        Icons.arrow_back_ios,
-                        color: theme.colorScheme.onSurface,
-                      ),
+                      icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
                       tooltip: l10n.slideshow_previous,
-                      onPressed: _previousImage,
+                      onPressed: () => _step(-1),
                     ),
                     const Spacer(),
                     // 播放/暂停按钮
                     IconButton(
                       icon: Icon(
                         _isPlaying ? Icons.pause : Icons.play_arrow,
-                        color: theme.colorScheme.onSurface,
+                        color: Colors.white,
                       ),
                       tooltip: _isPlaying
                           ? l10n.slideshow_pause
@@ -317,12 +289,9 @@ class _SlideshowScreenState extends ConsumerState<SlideshowScreen> {
                     const Spacer(),
                     // 下一张按钮
                     IconButton(
-                      icon: Icon(
-                        Icons.arrow_forward_ios,
-                        color: theme.colorScheme.onSurface,
-                      ),
+                      icon: const Icon(Icons.arrow_forward_ios, color: Colors.white),
                       tooltip: l10n.slideshow_next,
-                      onPressed: _nextImage,
+                      onPressed: () => _step(1),
                     ),
                   ],
                 ),

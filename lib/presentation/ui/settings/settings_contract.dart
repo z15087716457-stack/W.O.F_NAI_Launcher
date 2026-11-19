@@ -835,6 +835,7 @@ class SettingsGenerationData {
 
 enum SettingsStorageKind {
   images,
+  draftBackups,
   upscaleModels,
   vibes,
   preciseRefs,
@@ -1521,6 +1522,7 @@ class SettingsRagSource {
     this.total = 0,
     this.secondary,
     this.known = true,
+    this.searchable = false,
     this.skipped = 0,
     this.error,
     this.upgradeAvailable = false,
@@ -1534,6 +1536,7 @@ class SettingsRagSource {
 
   /// False until the worker has returned an authoritative index status.
   final bool known;
+  final bool searchable;
   final int done;
   final int total;
 
@@ -1673,6 +1676,7 @@ class SettingsRagData {
     this.plan,
     this.preparing,
     this.initializing = false,
+    this.suspended = false,
     this.initializationPhase = '',
     this.initializationProcessed = 0,
     this.initializationTotal = 0,
@@ -1718,6 +1722,7 @@ class SettingsRagData {
   /// A user-requested index preview/start/resume is awaiting the local worker.
   final SettingsRagSourceKind? preparing;
   final bool initializing;
+  final bool suspended;
   final String initializationPhase;
   final int initializationProcessed, initializationTotal;
 
@@ -1802,6 +1807,8 @@ class SettingsUpscaleData {
   const SettingsUpscaleData({
     this.busy = false,
     this.gpuName,
+    this.checkingGpu = false,
+    this.modelsKnown = true,
     this.vramGb = 0,
     this.caps = const {},
     this.cudaVersion = '',
@@ -1813,7 +1820,8 @@ class SettingsUpscaleData {
 
   final bool busy;
 
-  /// 显卡检测（新增）；null = 没检测到独显。
+  final bool checkingGpu;
+  final bool modelsKnown;
   final String? gpuName;
   final int vramGb;
   final Set<SettingsGpuCap> caps;
@@ -1905,6 +1913,7 @@ class SettingsEndpoint {
 class SettingsNetworkData {
   const SettingsNetworkData({
     this.systemProxy,
+    this.checkedViaProxy = false,
     this.endpoints = const [],
     this.checking = false,
     this.checkedAt,
@@ -1912,6 +1921,7 @@ class SettingsNetworkData {
 
   /// 检测到的系统代理，例如 `127.0.0.1:7897`。
   final String? systemProxy;
+  final bool checkedViaProxy;
   final List<SettingsEndpoint> endpoints;
   final bool checking;
   final DateTime? checkedAt;
@@ -2322,7 +2332,7 @@ class SettingsActions {
   /// “建立索引 / 继续建立”：先统计，把结果填进 [SettingsRagData.plan]（统计中 `loading: true`），不直接开始。
   final ValueChanged<SettingsRagSourceKind> onRagBuild;
 
-  /// “重建 / 重试”：同 [onRagBuild]，计划带 `rebuild: true`。
+  /// “重建”在来源下方展示带有清理说明的计划。
   final ValueChanged<SettingsRagSourceKind> onRagRebuild;
 
   /// 用户在计划卡上点了“开始”：按当前 [SettingsRagData.plan] 开始建库，然后清掉 plan。
