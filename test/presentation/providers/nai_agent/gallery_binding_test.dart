@@ -217,7 +217,8 @@ void main() {
       backupDraft: (_) async => '',
       writeDraft: (_) => [],
       readImage: (_) => null,
-      loadImageById: binding.loadImage,
+      loadImageById: (id, token, {preview = false}) =>
+          binding.loadImage(id, token),
       allowsImages: true,
     );
     final read = await tools.execute('image_read', {
@@ -329,7 +330,8 @@ void main() {
         backupDraft: (_) async => '',
         writeDraft: (_) => [],
         readImage: (_) => null,
-        loadImageById: binding.loadImage,
+        loadImageById: (id, token, {preview = false}) =>
+            binding.loadImage(id, token),
         allowsImages: false,
       );
       final original = await tools.loadImage({

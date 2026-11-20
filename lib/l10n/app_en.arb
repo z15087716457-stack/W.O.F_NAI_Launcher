@@ -615,7 +615,7 @@
   "ucPreset_badAnatomy": "Bad Anatomy",
   "ucPreset_none": "None",
   "ucPreset_disabled": "Undesired content preset disabled",
-  "ucPreset_addToNegative": "Add to Undesired Content:",
+  "ucPreset_addToNegative": "Added to the beginning of Undesired Content:",
   "ucPreset_nsfwHint": "💡 To generate adult content, add nsfw to your prompt. The nsfw tag will be auto-removed from Undesired Content",
   "warmup_networkCheck": "Checking network connection...",
   "warmup_networkCheck_noProxy": "Cannot connect to NovelAI, please enable VPN or proxy settings",
@@ -4858,14 +4858,7 @@
       "count": {}
     }
   },
-  "online_authorSaved": "{count} saved · artist saved {date}",
-  "@online_authorSaved": {
-    "placeholders": {
-      "count": {},
-      "date": {}
-    }
-  },
-  "online_authorAllWorks": "All works on AI TAG",
+  "online_authorAllWorks": "All works",
   "online_unfavAuthor": "Remove artist",
   "online_favAuthor": "Save artist",
   "online_dragHint": "Drag cards onto a collection to move them; right-click → Move / Unfavorite",
@@ -10019,6 +10012,8 @@
   "ag_psCharacter": "Character {index}",
   "@ag_psCharacter": {"placeholders": {"index": {"type": "int"}}},
   "ag_psNegative": "Negative",
+  "ag_psPromptsOnly": "Import prompts only",
+  "ag_psWithSettings": "Import with settings",
   "ag_psImport": "Import to canvas",
   "ag_psImportTip": "Writes the main prompt, characters and negative; parameters and references stay as they are",
   "ag_psImported": "Imported “{title}” into the prompt",

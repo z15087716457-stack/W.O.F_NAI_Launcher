@@ -148,7 +148,6 @@ class RecordingOnlineActions {
     onRenameCollection: (id, name) => _c('rename:$id:$name'),
     onDeleteCollection: (id) => _c('delete:$id'),
     onMoveToCollection: (keys, id) => moves.add((keys, id)),
-    onAuthorWorks: (id) => _c('authorWorks:$id'),
     onUnfavoriteAuthor: (id) => _c('unfavAuthor:$id'),
     onReturn: () => _c('return'),
     onBlacklistAdd: (t) => _c('blAdd:$t'),

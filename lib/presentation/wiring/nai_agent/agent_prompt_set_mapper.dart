@@ -10,6 +10,7 @@ AgentPromptSet agentPromptSetData(
   AgentResources resources,
   Map<String, AgentImage> registry, {
   int? unitAnlas,
+  int Function(Map<String, dynamic>)? estimateCard,
   int? importedIndex,
   bool canUndoImport = false,
   int? busyIndex,
@@ -24,7 +25,7 @@ AgentPromptSet agentPromptSetData(
               (entry['y'] as num).toDouble(),
             ),
   ];
-  final shared = value['shared'] as Map;
+  final shared = value['shared'] as Map? ?? const {};
   final images = <int, List<AgentImage>>{};
   for (final entry in (value['images'] as Map? ?? {}).entries) {
     final index = int.tryParse(entry.key.toString());
@@ -69,6 +70,18 @@ AgentPromptSet agentPromptSetData(
     items: [
       for (final item in value['items'] as List)
         AgentPromptSetItem(
+          estimatedAnlas: item['generation'] == null
+              ? unitAnlas
+              : estimateCard?.call(
+                  (item['generation'] as Map).cast<String, dynamic>(),
+                ),
+          cardId: item['card_id'] as String?,
+          negative: item['negative'] as String? ?? '',
+          characterNegatives: (item['character_negatives'] as List? ?? [])
+              .cast<String>(),
+          useCoords: item['use_coords'] as bool?,
+          generation:
+              (item['generation'] as Map?)?.cast<String, dynamic>() ?? const {},
           icon: item['icon'] as String,
           title: item['title'] as String,
           note: item['note'] as String? ?? '',
@@ -81,7 +94,9 @@ AgentPromptSet agentPromptSetData(
     images: images,
     unitAnlas: unitAnlas,
     importedIndex:
-        importedIndex != null && importedIndex < (value['items'] as List).length
+        importedIndex != null &&
+            importedIndex >= 0 &&
+            importedIndex < (value['items'] as List).length
         ? importedIndex
         : null,
     canUndoImport: canUndoImport,

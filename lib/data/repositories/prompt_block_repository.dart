@@ -363,6 +363,29 @@ class PromptBlockRepository {
     return updateFolder(folder.copyWith(parentId: newParentId));
   }
 
+  /// 将文件夹插到目标同级，父级和目标层顺序一起保存。
+  Future<void> insertFolderBeside(
+    String folderId,
+    String siblingId, {
+    required bool after,
+  }) async {
+    if (folderId == siblingId) return;
+    final folders = await _storage.getFolders();
+    final folder = folders.firstWhere((f) => f.id == folderId);
+    final sibling = folders.firstWhere((f) => f.id == siblingId);
+    if (folders.wouldCreateCycle(folderId, sibling.parentId)) {
+      throw ArgumentError('Moving a Prompt block folder would create a cycle');
+    }
+    final ordered = folders.childrenOf(sibling.parentId)
+      ..removeWhere((f) => f.id == folderId);
+    final index = ordered.indexWhere((f) => f.id == siblingId);
+    ordered.insert(
+      after ? index + 1 : index,
+      folder.copyWith(parentId: sibling.parentId),
+    );
+    await _writeFolderOrder(ordered);
+  }
+
   /// 同级重排块。传入的 ID 必须完整覆盖该层级的直属块。
   Future<void> reorderBlocks(
     String? folderId,
@@ -407,14 +430,20 @@ class PromptBlockRepository {
     final byId = <String, PromptBlockFolder>{
       for (final folder in siblings) folder.id: folder,
     };
+    await _writeFolderOrder([
+      for (final id in orderedFolderIds) byId[id]!,
+    ], beforeWrite: beforeWrite);
+  }
+
+  Future<void> _writeFolderOrder(
+    List<PromptBlockFolder> folders, {
+    void Function()? beforeWrite,
+  }) async {
     final now = DateTime.now();
-    await _storage.putFolders(
-      orderedFolderIds.asMap().entries.map(
-        (entry) =>
-            byId[entry.value]!.copyWith(sortOrder: entry.key, updatedAt: now),
-      ),
-      beforeWrite: beforeWrite,
-    );
+    await _storage.putFolders([
+      for (final (index, folder) in folders.indexed)
+        folder.copyWith(sortOrder: index, updatedAt: now),
+    ], beforeWrite: beforeWrite);
   }
 
   /// 删除文件夹树，并按明确模式处理其中内容。

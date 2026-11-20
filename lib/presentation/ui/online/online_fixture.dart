@@ -116,13 +116,13 @@ abstract final class OnlineFixture {
   ];
 
   static const _authors = [
-    ('LaraZoa', 'c08', 24),
-    ('にくまん', 'c16', 19),
-    ('2000年的寂寞', 'c14', 17),
-    ('進捗ダメです', 'c05', 12),
-    ('ブラツ', 'c10', 9),
-    ('Thx', 'c02', 7),
-    ('haha', 'c12', 5),
+    ('LaraZoa', 'c08', 124),
+    ('にくまん', 'c16', 119),
+    ('2000年的寂寞', 'c14', 117),
+    ('進捗ダメです', 'c05', 112),
+    ('ブラツ', 'c10', 109),
+    ('Thx', 'c02', 107),
+    ('haha', 'c12', 105),
   ];
 
   static const prompt =
@@ -219,7 +219,7 @@ abstract final class OnlineFixture {
     OnlineImageLoader? image,
     Set<int> favorited = const {4},
     bool ranked = false,
-    String? author,
+    OnlineFavoriteAuthor? author,
   }) {
     final load = image ?? gradient;
     return [
@@ -233,8 +233,8 @@ abstract final class OnlineFixture {
             width: w,
             height: h,
             title: t,
-            author: author ?? a,
-            authorId: a.hashCode & 0xFFFF,
+            author: author?.name ?? a,
+            authorId: author?.id ?? (a.hashCode & 0xFFFF),
             views: v,
             favorites: f,
             mediaCount: n,
@@ -295,9 +295,8 @@ abstract final class OnlineFixture {
           OnlineFavoriteAuthor(
             id: 100 + i,
             name: n,
-            count: c,
+            workCount: 100 + i == authorId ? c : null,
             avatar: load(k),
-            savedAt: DateTime(2026, 8, 12),
           ),
       ],
       collectionId: collectionId,
@@ -336,24 +335,24 @@ abstract final class OnlineFixture {
             image: load(k),
             width: k == w.key ? w.width : 1000,
             height: k == w.key ? w.height : 1471,
+            prompt: prompt,
+            negative: negative,
+            params: OnlineParams(
+              model: 'NAI Diffusion V4.5 Full',
+              shortModel: w.model,
+              width: 832,
+              height: 1216,
+              seed: 1313949686,
+              sampler: 'Euler Ancestral',
+              steps: 28,
+              cfg: 5,
+            ),
           ),
       ],
       createdAt: DateTime(2026, 9, 28),
-      prompt: prompt,
-      negative: negative,
-      params: const OnlineParams(
-        model: 'NAI Diffusion V4.5 Full',
-        width: 832,
-        height: 1216,
-        seed: 1313949686,
-        sampler: 'Euler Ancestral',
-        steps: 28,
-        cfg: 5,
-      ),
       siteTags: siteTags,
       authorSavedCount: 12,
       authorAvatar: load('c20'),
-      canSendParams: true,
     );
   }
 
@@ -409,17 +408,19 @@ abstract final class OnlineFixture {
   }) {
     final booru = source != OnlineSource.aiTag;
     final ranked = mode == OnlineMode.ranking;
-    final fav = mode == OnlineMode.favorites && !booru;
+    final saved = booru
+        ? null
+        : favorites(
+            image: image,
+            collectionId: collectionId,
+            authorId: authorId,
+          );
+    final profile = saved?.author;
+    final fav = mode == OnlineMode.favorites && !booru && profile == null;
     final works = booru
         ? booruPosts(image: image, ranked: ranked)
-        : fav && authorId != null
-        ? [
-            for (final (i, w) in aiTagWorks(
-              image: image,
-              author: 'LaraZoa',
-            ).indexed)
-              if (i % 3 != 1) w,
-          ]
+        : profile != null
+        ? aiTagWorks(image: image, author: profile)
         : fav
         ? (() {
             final all = aiTagWorks(image: image, favorited: const {});
@@ -433,6 +434,7 @@ abstract final class OnlineFixture {
                   height: w.height,
                   title: w.title,
                   author: w.author,
+                  authorId: w.authorId,
                   views: w.views,
                   favorites: w.favorites,
                   mediaCount: w.mediaCount,
@@ -458,7 +460,8 @@ abstract final class OnlineFixture {
     return OnlineViewData(
       source: source,
       sources: statuses ?? sources,
-      mode: mode,
+      mode: profile == null ? mode : OnlineMode.search,
+      canReturn: profile != null,
       query:
           query ??
           (booru
@@ -478,13 +481,7 @@ abstract final class OnlineFixture {
           ),
       ranking: OnlineRanking(months: months, date: DateTime(2026, 10, 5)),
       recent: recent,
-      favorites: source == OnlineSource.aiTag
-          ? favorites(
-              image: image,
-              collectionId: collectionId,
-              authorId: authorId,
-            )
-          : null,
+      favorites: saved,
       blacklist: blacklist,
       list: l,
       selectedKey: selected?.key,

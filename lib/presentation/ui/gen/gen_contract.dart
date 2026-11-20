@@ -376,6 +376,7 @@ class GenPromptData with _GenValue {
     this.negativeSupported = true,
     this.positiveTokens = const GenTokens(0, 512),
     this.negativeTokens = const GenTokens(0, 512),
+    this.presetHint,
     this.qualityPresets = const [],
     this.qualityPreset,
     this.ucPresets = const [],
@@ -397,6 +398,9 @@ class GenPromptData with _GenValue {
   /// 质量词预设（`qualityPresetNotifierProvider`），正面页签底部右侧的下拉。
   final List<GenOption> qualityPresets;
   final String? qualityPreset;
+
+  /// 当前页签中所选预设的注入位置与词串；无有效词串时为空。
+  final GenPreviewSection? presetHint;
 
   /// 负面预设（`ucPresetNotifierProvider`），负面页签底部右侧的下拉。
   final List<GenOption> ucPresets;
@@ -422,6 +426,7 @@ class GenPromptData with _GenValue {
     negativeSupported,
     positiveTokens,
     negativeTokens,
+    presetHint,
     qualityPresets,
     qualityPreset,
     ucPresets,

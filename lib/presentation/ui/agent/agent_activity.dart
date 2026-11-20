@@ -23,6 +23,7 @@ AgentActivityKind agentActivityKind(String tool) => switch (tool) {
   'block_query' ||
   'settings_read' ||
   'gallery_query' ||
+  'online_gallery' ||
   'reference_library' ||
   'studio_search' ||
   'read' => AgentActivityKind.read,

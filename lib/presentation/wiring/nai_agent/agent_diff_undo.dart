@@ -8,6 +8,8 @@ import '../../providers/character_prompt_provider.dart';
 import '../../providers/krita/bridge_draft_snapshot.dart';
 import '../../providers/krita/bridge_draft_writer.dart';
 import '../../providers/pill_workspace_provider.dart';
+import '../../providers/quality_preset_provider.dart';
+import '../../providers/uc_preset_provider.dart';
 import 'agent_thread_mapper.dart';
 
 /// Checks both sides of the asynchronous backup; no await is allowed between
@@ -32,6 +34,7 @@ class _Plan {
   final patch = <String, dynamic>{};
   final documents = <String, PillDocument>{};
   CharacterPromptConfig? characters;
+  String? customQualityId, customUcId;
 }
 
 class AgentDiffUndo {
@@ -93,6 +96,14 @@ class AgentDiffUndo {
         for (final key in diff.params) {
           if (!fields.containsKey(key)) return false;
           plan.patch[key] = fields[key];
+          if (key == 'quality_preset' || key == 'uc_preset') {
+            final preset = agentMap(docs[key]);
+            final id = agentMap(preset['selected'])['id'] as String?;
+            if (key == 'quality_preset' && preset['mode'] == 'custom') {
+              plan.customQualityId = id;
+            }
+            if (key == 'uc_preset') plan.customUcId = id;
+          }
         }
         continue;
       }
@@ -152,6 +163,12 @@ class AgentDiffUndo {
       },
       apply: () {
         ref.read(bridgeDraftWriterProvider)(plan.patch);
+        if (plan.customQualityId case final id?) {
+          ref.read(qualityPresetNotifierProvider.notifier).setCustomEntry(id);
+        }
+        if (plan.customUcId case final id?) {
+          ref.read(ucPresetNotifierProvider.notifier).setCustomEntry(id);
+        }
         if (plan.characters case final config?) {
           ref
               .read(characterPromptNotifierProvider.notifier)

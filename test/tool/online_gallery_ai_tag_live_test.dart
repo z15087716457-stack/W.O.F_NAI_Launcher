@@ -3,14 +3,22 @@ import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:dio/dio.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:logger/logger.dart';
 import 'package:nai_launcher/core/cache/danbooru_image_cache_manager.dart';
+import 'package:nai_launcher/core/nai_agent/agent_tool.dart';
 import 'package:nai_launcher/core/utils/app_logger.dart';
 import 'package:nai_launcher/data/datasources/remote/online_gallery/ai_tag_gallery_source_adapter.dart';
 import 'package:nai_launcher/data/models/online_gallery/gallery_item.dart';
 import 'package:nai_launcher/data/models/online_gallery/gallery_source.dart';
 import 'package:nai_launcher/data/repositories/online_favorites_repository.dart';
+import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_studio_provider.dart';
+import 'package:nai_launcher/presentation/providers/online_gallery_provider.dart';
+import 'package:nai_launcher/presentation/providers/online_favorites_provider.dart'
+    show OnlineFavoritesState;
+import 'package:nai_launcher/presentation/wiring/online_mapping.dart';
+import 'package:path/path.dart' as p;
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -79,6 +87,37 @@ void main() {
             stdout.writeln(
               'DETAIL work=$_workId media-count=${detail.media.length}',
             );
+            final pages = onlineDetail(
+              detail,
+              const OnlineFavoritesState(),
+            ).media;
+            expect(pages.length, detail.media.length);
+            for (final (index, original) in detail.media.indexed) {
+              expect(
+                pages[index].prompt,
+                original.prompt,
+                reason: 'page ${index + 1}',
+              );
+              expect(
+                pages[index].negative,
+                original.negativePrompt,
+                reason: 'page ${index + 1}',
+              );
+              expect(
+                pages[index].params?.seed,
+                original.naiMetadata?.seed,
+                reason: 'page ${index + 1}',
+              );
+            }
+            final distinct = pages
+                .map((p) => p.prompt)
+                .whereType<String>()
+                .toSet()
+                .length;
+            stdout.writeln(
+              'Page metadata verified: ${pages.length} pages, $distinct distinct positive prompts'
+              '${pages.length >= 4 ? ", page 4 differs from cover: ${pages[3].prompt != pages.first.prompt}" : ""}',
+            );
             final media = detail.media.first;
             for (final (label, url) in [
               ('detail-main', media.displayUrl),
@@ -127,6 +166,90 @@ void main() {
               headers: onlineGalleryImageHeadersForUrl(url),
             );
             expect(cachedFile.path, file.path);
+
+            final container = ProviderContainer(
+              overrides: [
+                onlineGallerySourceAdaptersProvider.overrideWith(
+                  (ref) => {GallerySourceId.aiTag: adapter},
+                ),
+              ],
+            );
+            try {
+              final studio = container.read(naiAgentStudioFactoryProvider)(
+                directory.absolute,
+                directory.absolute,
+                true,
+              );
+              final token = NaiAgentCancellation();
+              final search = await studio.execute('online_gallery', {
+                'action': 'search',
+                'source': 'ai_tag',
+                'limit': 1,
+              }, token);
+              expect(search['details']['source'], 'ai_tag');
+              expect(search['details']['items'], isA<List>());
+              final online = await studio.execute('online_gallery', {
+                'action': 'detail',
+                'image_id': 'online:ai_tag:$_workId:1',
+              }, token);
+              final pageMetadata = online['details'] as Map;
+              final id = pageMetadata['image_id'];
+              final sourceMetadata = detail.media.first.naiMetadata;
+              expect(
+                pageMetadata,
+                containsPair('use_coords', sourceMetadata?.characterUseCoords),
+              );
+              if (sourceMetadata?.characterUseCoords == true) {
+                expect(pageMetadata['positions'], [
+                  for (final character in sourceMetadata!.characterInfos)
+                    if (character.centerX == null || character.centerY == null)
+                      null
+                    else
+                      {'x': character.centerX, 'y': character.centerY},
+                ]);
+              } else {
+                expect(pageMetadata.containsKey('positions'), isFalse);
+              }
+              if (sourceMetadata?.seed != null) {
+                expect(
+                  pageMetadata['generation']['seed'],
+                  sourceMetadata!.seed,
+                );
+              }
+              stdout.writeln(
+                'Agent page modes: custom=${detail.media.where((m) => m.naiMetadata?.characterUseCoords == true).length}, auto=${detail.media.where((m) => m.naiMetadata?.characterUseCoords == false).length}, total=${detail.media.length}',
+              );
+              expect(online['details']['page_count'], detail.media.length);
+              final view = await studio.execute('image_read', {
+                'image_id': id,
+              }, token);
+              expect(view['content'].last['type'], 'image');
+              expect(
+                view['details']['metadata']['use_coords'],
+                pageMetadata['use_coords'],
+              );
+              expect(
+                view['details']['metadata']['positions'],
+                pageMetadata['positions'],
+              );
+              final download = await studio.execute('online_gallery', {
+                'action': 'download',
+                'image_id': id,
+              }, token);
+              expect(download['details']['ok'], isTrue);
+              final path =
+                  download['details']['files'].single['path'] as String;
+              expect(p.isRelative(path), isTrue);
+              expect(
+                await File(p.join(directory.path, path)).readAsBytes(),
+                bytes,
+              );
+              stdout.writeln(
+                'Agent search/detail/image_read/workspace download: verified bytes=${bytes.length}',
+              );
+            } finally {
+              container.dispose();
+            }
             final codec = await ui.instantiateImageCodec(bytes);
             try {
               final frame = await codec.getNextFrame();

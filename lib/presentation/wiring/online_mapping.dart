@@ -102,6 +102,14 @@ String onlineError(
   _ => l10n.common_error,
 };
 
+String? _shortModel(String? model) => switch (model) {
+  final String m when m.contains('diffusion-5') => 'V5',
+  final String m when m.contains('diffusion-4-5') => 'V4.5',
+  final String m when m.contains('diffusion-4') => 'V4',
+  final String m when m.contains('diffusion-3') => 'V3',
+  _ => model,
+};
+
 OnlineWork onlineWork(
   GalleryItem item, {
   GalleryDetail? detail,
@@ -111,15 +119,6 @@ OnlineWork onlineWork(
   final metadata =
       detail?.media.firstOrNull?.naiMetadata ?? resolved.cover.naiMetadata;
   final model = metadata?.model;
-  final shortModel = model == null
-      ? null
-      : switch (model) {
-          final String m when m.contains('diffusion-5') => 'V5',
-          final String m when m.contains('diffusion-4-5') => 'V4.5',
-          final String m when m.contains('diffusion-4') => 'V4',
-          final String m when m.contains('diffusion-3') => 'V3',
-          _ => model,
-        };
   final ai = item.sourceId == GallerySourceId.aiTag;
   return OnlineWork(
     key: item.stableKey,
@@ -136,7 +135,7 @@ OnlineWork onlineWork(
     rating: onlineRating(resolved.rating),
     mediaCount: resolved.mediaCount,
     rank: resolved.rank,
-    model: shortModel,
+    model: _shortModel(model),
     favorited: favorited,
     mediaLabel: resolved.mediaTypeLabel,
   );
@@ -148,8 +147,6 @@ OnlineDetail onlineDetail(
   String? Function(String)? translation,
 }) {
   final item = detail.item;
-  final metadata = detail.media.firstOrNull?.naiMetadata;
-  final model = metadata?.model;
   final authorEntries = saved.entries.where(
     (entry) => entry.item.uploaderId == item.uploaderId,
   );
@@ -182,25 +179,27 @@ OnlineDetail onlineDetail(
           ),
           width: media.width,
           height: media.height,
+          prompt: media.prompt,
+          negative: media.negativePrompt,
+          params: switch (media.naiMetadata) {
+            final metadata? => OnlineParams(
+              model:
+                  ImageModels.modelDisplayNames[metadata.model] ??
+                  metadata.model ??
+                  metadata.source,
+              shortModel: _shortModel(metadata.model),
+              width: metadata.width,
+              height: metadata.height,
+              seed: metadata.seed,
+              sampler: metadata.displaySampler,
+              steps: metadata.steps,
+              cfg: metadata.scale,
+            ),
+            null => null,
+          },
         ),
     ],
     createdAt: DateTime.tryParse(item.createdAt),
-    prompt: detail.media.firstOrNull?.prompt ?? detail.prompt,
-    negative: detail.media.firstOrNull?.negativePrompt ?? detail.negativePrompt,
-    params: metadata == null
-        ? null
-        : OnlineParams(
-            model:
-                ImageModels.modelDisplayNames[model] ??
-                model ??
-                metadata.source,
-            width: metadata.width,
-            height: metadata.height,
-            seed: metadata.seed,
-            sampler: metadata.displaySampler,
-            steps: metadata.steps,
-            cfg: metadata.scale,
-          ),
     siteTags: item.sourceId == GallerySourceId.aiTag ? item.tags : const [],
     tagGroups: item.sourceId == GallerySourceId.aiTag
         ? const {}
@@ -219,24 +218,20 @@ OnlineDetail onlineDetail(
     ),
     authorSavedCount: authorEntries.length,
     authorAvatar: onlineImage(authorEntries.firstOrNull?.item.previewUrl ?? ''),
-    canSendParams: metadata != null && item.sourceId == GallerySourceId.aiTag,
   );
 }
 
 List<GalleryItem> onlineLocalFavorites(
   favorites.OnlineFavoritesState saved, {
   String? collectionId,
-  int? authorId,
   String filter = '',
 }) {
   final query = filter.trim().toLowerCase();
   return [
     for (final entry in saved.entries)
-      if ((authorId != null
-              ? entry.item.uploaderId == authorId
-              : collectionId == null ||
-                    entry.collectionId ==
-                        (collectionId.isEmpty ? null : collectionId)) &&
+      if ((collectionId == null ||
+              entry.collectionId ==
+                  (collectionId.isEmpty ? null : collectionId)) &&
           (query.isEmpty ||
               [
                 entry.item.title ?? '',
@@ -274,7 +269,6 @@ OnlineViewData onlineViewData({
       ? onlineLocalFavorites(
           saved,
           collectionId: collectionId,
-          authorId: authorId,
           filter: favoritesFilter,
         )
       : state.posts;
@@ -374,12 +368,7 @@ OnlineViewData onlineViewData({
                 OnlineFavoriteAuthor(
                   id: author.authorId,
                   name: author.authorName,
-                  savedAt: author.savedAt,
-                  count: saved.entries
-                      .where(
-                        (entry) => entry.item.uploaderId == author.authorId,
-                      )
-                      .length,
+                  workCount: author.authorId == authorId ? cache.total : null,
                   avatar: onlineImage(
                     saved.entries
                             .where(
@@ -403,7 +392,7 @@ OnlineViewData onlineViewData({
     ),
     list: OnlineList(
       key: local
-          ? '${state.currentCacheKey}:$collectionId:$authorId:$favoritesFilter'
+          ? '${state.currentCacheKey}:$collectionId:$favoritesFilter'
           : state.currentCacheKey,
       items: [
         for (final item in items)

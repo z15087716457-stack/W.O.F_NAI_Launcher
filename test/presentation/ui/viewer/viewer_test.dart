@@ -1,6 +1,7 @@
 // 大图查看器交互：每个回调、快捷键和界面自己的状态（缩放、抽屉、快捷键表、确认框、计时器）。
 import 'dart:io';
 import 'dart:ui' as ui;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -507,6 +508,77 @@ void main() {
     expect(find.text('C3'), findsWidgets);
     await done(t);
   });
+
+  testWidgets(
+    '鼠标框选复制提示词片段，取消选择后复制主提示词',
+    (t) async {
+      final writes = <String>[];
+      final messenger = t.binding.defaultBinaryMessenger;
+      messenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
+        if (call.method == 'Clipboard.setData') {
+          writes.add((call.arguments as Map)['text'] as String);
+        }
+        return null;
+      });
+      addTearDown(
+        () => messenger.setMockMethodCallHandler(SystemChannels.platform, null),
+      );
+      await pump(t, ViewerFixture.gallery(current: '09', list: ['09']));
+      final modifier = defaultTargetPlatform == TargetPlatform.macOS
+          ? LogicalKeyboardKey.metaLeft
+          : LogicalKeyboardKey.controlLeft;
+      Future<void> copy() async {
+        await t.sendKeyDownEvent(modifier);
+        await t.sendKeyEvent(LogicalKeyboardKey.keyC);
+        await t.sendKeyUpEvent(modifier);
+        await t.pumpAndSettle();
+      }
+
+      final mouse = await t.createGesture(kind: PointerDeviceKind.mouse);
+      await mouse.addPointer();
+      for (final (section, selected) in [
+        ('prompt', 'artist:shion(mirudakemann)::,0.6::artist:ciloranko'),
+        ('character-0', 'from side,skull'),
+        ('negative', 'artistic error, film grain'),
+      ]) {
+        final rich = find.descendant(
+          of: find.byKey(Key('viewer-info-$section')),
+          matching: find.byWidgetPredicate(
+            (w) => w is RichText && w.text.toPlainText().contains(selected),
+          ),
+        );
+        await t.ensureVisible(rich);
+        await t.pumpAndSettle();
+        final paragraph = t.renderObject<RenderParagraph>(rich);
+        final start = paragraph.text.toPlainText().indexOf(selected);
+        Offset caret(int offset) => paragraph.localToGlobal(
+          paragraph.getOffsetForCaret(TextPosition(offset: offset), Rect.zero) +
+              const Offset(0, 6),
+        );
+        await mouse.down(caret(start));
+        await mouse.moveTo(caret(start + selected.length));
+        await mouse.up();
+        await t.pump();
+        await copy();
+        expect(writes, [selected]);
+        expect(rec.calls.where((c) => c.startsWith('copy:')), isEmpty);
+        writes.clear();
+        await t.pump(kDoubleTapTimeout);
+        await mouse.down(caret(start));
+        await mouse.up();
+      }
+      await t.pump();
+      await copy();
+      expect(rec.calls.last, 'copy:09:prompt');
+      expect(writes, isEmpty);
+      await mouse.removePointer();
+      await done(t);
+    },
+    variant: const TargetPlatformVariant({
+      TargetPlatform.windows,
+      TargetPlatform.macOS,
+    }),
+  );
 
   testWidgets('译文替换原文显示；失败显示原因', (t) async {
     await pump(

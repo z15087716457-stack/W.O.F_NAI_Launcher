@@ -157,32 +157,42 @@ void main() {
     },
   );
 
-  testWidgets(
-    'changing the work discards a late translation even when its prompt is identical',
-    (t) async {
-      final pending = Completer<PillDocument>();
-      late PillDocument original;
-      Future<PillDocument> translate(PillDocument document, String _) {
-        original = document;
-        return pending.future;
-      }
+  for (final sameWork in [false, true]) {
+    testWidgets(
+      'changing the ${sameWork ? 'page' : 'work'} discards a late translation even when its prompt is identical',
+      (t) async {
+        final pending = Completer<PillDocument>();
+        late PillDocument original;
+        Future<PillDocument> translate(PillDocument document, String _) {
+          original = document;
+          return pending.future;
+        }
 
-      await page(t, translator: translate);
-      final positive = section('online-insp-prompt');
-      await enter(t, positive);
-      await t.tap(action(positive));
-      await t.pump();
-      await page(
-        t,
-        data: OnlineFixture.view(selectedKey: 'c03'),
-        translator: translate,
-      );
-      pending.complete(_translated(original));
-      await t.pumpAndSettle();
-      expect(find.text('翻译结果'), findsNothing);
-      expect(t.takeException(), isNull);
-    },
-  );
+        await page(t, translator: translate);
+        final positive = section('online-insp-prompt');
+        await enter(t, positive);
+        await t.tap(action(positive));
+        await t.pump();
+        if (sameWork) {
+          final strip = section('online-insp-film');
+          await t.ensureVisible(strip);
+          await t.pump();
+          await t.tapAt(t.getTopLeft(strip) + const Offset(72, 22));
+          await t.pump();
+        } else {
+          await page(
+            t,
+            data: OnlineFixture.view(selectedKey: 'c03'),
+            translator: translate,
+          );
+        }
+        pending.complete(_translated(original));
+        await t.pumpAndSettle();
+        expect(find.text('翻译结果'), findsNothing);
+        expect(t.takeException(), isNull);
+      },
+    );
+  }
 
   testWidgets(
     'Booru grouped tags have explicit translation without changing search names',

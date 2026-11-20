@@ -516,7 +516,7 @@ class _OnlineCardState extends State<OnlineCard> {
         label: s.promptQuery ? l10n.online_copyPrompt : l10n.online_copyTags,
         onTap: () => a.onCopyPrompt([w.key]),
       ),
-      if (w.author != null && s.promptQuery)
+      if (w.author != null && s.promptQuery && !scope.data.showsAuthorOf(w))
         OnlineMenuItem(
           glyph: UiGlyphs.user,
           label: l10n.online_onlyAuthor,
@@ -1236,7 +1236,8 @@ class OnlineEmptyState extends StatelessWidget {
     final query = s.promptQuery
         ? [q.work, q.prompt].where((x) => x.isNotEmpty).join(', ')
         : q.tags.join(' ');
-    final suggestions = fav
+    final author = data.favorites?.author;
+    final suggestions = fav || author != null
         ? const <Widget>[]
         : [
             if (s.promptQuery && f.naiOnly)
@@ -1278,16 +1279,19 @@ class OnlineEmptyState extends StatelessWidget {
               Text(
                 fav
                     ? l10n.online_favEmpty
+                    : author != null
+                    ? l10n.online_emptyTitle(author.name)
                     : query.isEmpty
                     ? l10n.online_emptyTitleNoQuery
                     : l10n.online_emptyTitle(query),
                 textAlign: TextAlign.center,
                 style: UiText.sans(15, weight: FontWeight.w700, color: c.ink),
               ),
-              Text(
-                fav ? l10n.online_favEmptyHint : l10n.online_emptyHint,
-                style: UiText.sans(12, color: c.muted),
-              ),
+              if (author == null)
+                Text(
+                  fav ? l10n.online_favEmptyHint : l10n.online_emptyHint,
+                  style: UiText.sans(12, color: c.muted),
+                ),
               if (suggestions.isNotEmpty)
                 Wrap(spacing: 8, runSpacing: 8, children: suggestions),
             ],

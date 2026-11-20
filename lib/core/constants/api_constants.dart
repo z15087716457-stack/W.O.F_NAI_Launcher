@@ -478,6 +478,9 @@ class QualityTags {
     };
   }
 
+  static bool prependsToPrompt(String model) =>
+      ImageModels.resolveBaseModel(model) == ImageModels.furryDiffusion;
+
   /// 将质量标签应用到提示词。
   static String applyQualityTags(
     String prompt,
@@ -490,7 +493,7 @@ class QualityTags {
     final trimmedPrompt = prompt.trim();
     if (trimmedPrompt.isEmpty) return tags;
 
-    if (ImageModels.resolveBaseModel(model) == ImageModels.furryDiffusion) {
+    if (prependsToPrompt(model)) {
       return '$tags, $trimmedPrompt';
     }
 
@@ -966,13 +969,12 @@ class UcPresets {
     String model,
     int ucPreset,
   ) {
-    var effectiveNegative = applyPresetByInt(negativePrompt, model, ucPreset);
-
-    // 如果正面提示词包含 nsfw，则从负面提示词中移除 nsfw
-    if (containsNsfwTag(positivePrompt)) {
-      effectiveNegative = removeNsfwTag(effectiveNegative);
-    }
-
-    return effectiveNegative;
+    return filterForPositivePrompt(
+      applyPresetByInt(negativePrompt, model, ucPreset),
+      positivePrompt,
+    );
   }
+
+  static String filterForPositivePrompt(String negative, String positive) =>
+      containsNsfwTag(positive) ? removeNsfwTag(negative) : negative;
 }

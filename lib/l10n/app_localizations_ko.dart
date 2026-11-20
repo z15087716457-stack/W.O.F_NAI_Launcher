@@ -1452,7 +1452,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get ucPreset_disabled => '네거티브 프리셋이 꺼져 있습니다';
 
   @override
-  String get ucPreset_addToNegative => '네거티브에 추가:';
+  String get ucPreset_addToNegative => '네거티브 프롬프트 맨 앞에 추가:';
 
   @override
   String get ucPreset_nsfwHint =>
@@ -8666,12 +8666,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String online_authorSaved(Object count, Object date) {
-    return '$count장 저장 · $date 작가 저장';
-  }
-
-  @override
-  String get online_authorAllWorks => 'AI TAG에서 모든 작품 보기';
+  String get online_authorAllWorks => '전체 작품';
 
   @override
   String get online_unfavAuthor => '작가 저장 해제';
@@ -18897,6 +18892,12 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get ag_psNegative => '네거티브';
+
+  @override
+  String get ag_psPromptsOnly => '프롬프트만 적용';
+
+  @override
+  String get ag_psWithSettings => '설정과 함께 적용';
 
   @override
   String get ag_psImport => '캔버스로 가져오기';

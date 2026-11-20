@@ -1,22 +1,9 @@
-# Prompt sets
+# Prompt cards
 
-Use `prompt_set` for one 2–24-item card (story scenes, outfits, variations). Labels and notes use the user's language; notes stay within 1–2 sentences. Prompts use English before V5; V5 can use another language for clarity. Icons may repeat. Set `ordered=true` for sequences. Put stable style/quality/appearance/negative in `shared`, differences in `items`; positive character additions align with shared characters by index.
+- `create` takes `kind`, `kind_icon`, `title`, `unit`, `ordered` and `items` (1–24 complete cards).
+- `read` takes `set_id` and returns the cards and current `revision`.
+- `update` takes `set_id`, `expected_revision` and either a complete replacement `card` with its existing `card_id`, or all the `create` fields to replace the set. Images follow `card_id` across edits and reordering.
 
-Optional character positions use 0–1 (x right, y down); omit when placement is unspecified.
+Each card has its own cast. Importing `characters: []` clears the draft’s characters. Character negatives and positions align with `characters` by index. With `use_coords: true`, centers use 0–1 coordinates from the top left and entries may be null. With `false`, the model chooses placement.
 
-`shared.positions` and `items[].positions` are arrays aligned with `shared.characters` (no longer than it): each entry is null or `{x, y}`. Effective position = item entry ?? shared entry ?? none.
-
-```javascript
-text(await tools.mcp__nai_studio__prompt_set({
-  action: 'create', kind: 'Storyboard', kind_icon: 'film', title: 'After the rain', unit: 'scene', ordered: true,
-  shared: {main: 'best quality, cinematic lighting, 1girl', characters: ['silver hair, blue eyes'], negative: 'lowres, text'},
-  items: [
-    {icon: 'rain', title: 'Rain', note: 'She runs for cover.', main: 'rain, street', characters: ['running']},
-    {icon: 'coffee', title: 'Shelter', note: 'A warm cafe is still open.', main: 'cafe, warm light', characters: ['holding mug']}
-  ]
-}));
-```
-
-Keep the returned `set_id/revision`. Edit in one CodeMode execution: read, patch the requested fields and update the same ID with `expected_revision` and full content. Summarize the changes; generated images remain attached to their items.
-
-Each Import click applies one item. A human Generate click authorizes one image of that item without another confirmation; native price/balance/readiness checks remain. Model-initiated generation uses Studio quote confirmation. Creating or updating a card only changes the card.
+Import with settings applies the keys present in `generation`. [AI TAG page metadata](gallery.md) uses the same format.

@@ -25,6 +25,7 @@ ExternalToolAccess externalToolAccess(String name, Map<String, dynamic> args) {
     'snapshot': {'list', 'read'},
     'reference_manage': {'list'},
     'reference_library': {'query', 'read', 'categories'},
+    'online_gallery': {'current', 'search', 'detail'},
     'gallery_manage': {
       'read',
       'trash',

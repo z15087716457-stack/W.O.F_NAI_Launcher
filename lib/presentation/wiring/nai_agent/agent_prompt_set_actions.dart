@@ -5,9 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../core/constants/model_spec.dart';
 import '../../../core/nai_agent/agent_tool.dart';
 import '../../../core/krita/bridge_draft_guard.dart';
-import '../../../data/models/image/image_params.dart' hide CharacterPrompt;
 import '../../../data/models/character/character_prompt.dart';
 import '../../providers/character_prompt_provider.dart';
 import '../../../core/nai_agent/generation_tools.dart';
@@ -24,7 +24,8 @@ import 'agent_diff_undo.dart';
 import 'agent_thread_mapper.dart';
 
 class AgentPromptSetImport {
-  const AgentPromptSetImport(this.index, this.restores);
+  const AgentPromptSetImport(this.index, this.restores, {this.cardId});
+  final String? cardId;
   final int index;
   final List<AgentDiffRestore> restores;
   String get version => restores.first.version;
@@ -39,9 +40,32 @@ class AgentPromptSetActions {
   AgentPromptSetActions(this.ref);
   final Ref ref;
 
+  int estimateCard(Map<String, dynamic> settings) {
+    final current = ref.read(generationParamsNotifierProvider);
+    // These are the card fields used by the native single-image quote.
+    final effective = current.copyWith(
+      model: settings['model'] ?? current.model,
+      width: settings['width'] ?? current.width,
+      height: settings['height'] ?? current.height,
+      steps: settings['steps'] ?? current.steps,
+      smea: settings['smea'] ?? current.smea,
+      smeaDyn: settings['smea_dyn'] ?? current.smeaDyn,
+      smeaAuto: settings['smea_auto'] ?? current.smeaAuto,
+      nSamples: 1,
+    );
+    return readBridgeBilling(ref, effective)['estimated_anlas'] as int;
+  }
+
   Map<String, dynamic> merged(Map<String, dynamic> set, int index) {
-    final shared = set['shared'] as Map,
-        item = (set['items'] as List)[index] as Map;
+    final item = (set['items'] as List)[index] as Map;
+    final shared = set['shared'] as Map?;
+    if (shared == null) {
+      return {
+        'prompt': item['main'] ?? '',
+        'negative_prompt': item['negative'] ?? '',
+        'characters': (item['characters'] as List? ?? const []).cast<String>(),
+      };
+    }
     final chars = (shared['characters'] as List? ?? []).cast<String>();
     final additions = (item['characters'] as List? ?? []).cast<String>();
     return {
@@ -66,6 +90,7 @@ class AgentPromptSetActions {
     int index,
     void Function(String) toast, {
     void Function()? check,
+    bool includeSettings = false,
   }) async {
     void guard() {
       check?.call();
@@ -83,11 +108,19 @@ class AgentPromptSetActions {
     CharacterPromptConfig? nextCharacters;
     final patch = merged(set, index);
     final prompts = patch.remove('characters') as List<String>;
-    final model = ref.read(generationParamsNotifierProvider).modelSpec;
+    final item = (set['items'] as List)[index] as Map;
+    final independent = set['shared'] == null;
+    if (includeSettings && item['generation'] != null) {
+      patch.addAll(Map<String, dynamic>.from(item['generation']));
+    }
+    final model = ModelSpecs.of(
+      patch['model'] as String? ??
+          ref.read(generationParamsNotifierProvider).model,
+    );
     final allowed = model.characterPrompts ? model.maxCharacters : 0;
     final positions = effectiveAgentPromptSetPositions(
-      set['shared'] as Map,
-      (set['items'] as List)[index] as Map,
+      set['shared'] as Map? ?? item,
+      item,
     );
     // V4/V4.5 accept coordinates too; freeformCharacterPosition is V5-only.
     final importPositions =
@@ -97,7 +130,23 @@ class AgentPromptSetActions {
     } else if (prompts.length > allowed) {
       toast(currentL10n.ag_psTooManyCharacters(allowed));
     }
-    if (prompts.isNotEmpty && allowed > 0) {
+    if (independent) {
+      final custom =
+          model.isV4OrLater && (item['use_coords'] as bool? ?? importPositions);
+      final negatives = item['character_negatives'] as List? ?? const [];
+      patch['use_coords'] = custom;
+      patch['characters'] = [
+        for (final (j, prompt) in prompts.take(allowed).indexed)
+          {
+            'prompt': prompt,
+            'uc': negatives.elementAtOrNull(j) ?? '',
+            if (custom && positions[j] != null) ...{
+              'x': positions[j]!.x,
+              'y': positions[j]!.y,
+            },
+          },
+      ];
+    } else if (prompts.isNotEmpty && allowed > 0) {
       final chars = agentMaps(
         before.fields['characters'],
       ).map((c) => Map<String, dynamic>.of(c)).toList();
@@ -162,16 +211,29 @@ class AgentPromptSetActions {
     );
     if (!ok) return null;
     final version = ref.read(bridgeDraftVersionProvider);
+    final backup =
+        jsonDecode(jsonEncode(before.toJson())) as Map<String, dynamic>;
+    final params = {
+      ...patch.keys.where(promptCardGenerationKeys.contains),
+      if (patch.containsKey('model')) 'sampler',
+    };
     return AgentPromptSetImport(index, [
-      for (final field in patch.keys)
+      if (params.isNotEmpty)
+        AgentDiffRestore(
+          id: 'prompt-set/${set['set_id']}/params',
+          version: version,
+          backup: backup,
+          field: 'params',
+          params: params.toList(),
+        ),
+      for (final field in patch.keys.where((key) => !params.contains(key)))
         AgentDiffRestore(
           id: 'prompt-set/${set['set_id']}/$field',
           version: version,
-          backup:
-              jsonDecode(jsonEncode(before.toJson())) as Map<String, dynamic>,
+          backup: backup,
           field: field,
         ),
-    ]);
+    ], cardId: item['card_id'] as String?);
   }
 
   CharacterPrompt _importCharacter(
@@ -196,16 +258,21 @@ class AgentPromptSetActions {
           ),
         );
 
-  Future<void> saveBlock(Map<String, dynamic> set) async {
+  Future<void> saveBlock(Map<String, dynamic> set, {int? index}) async {
     final atoms = [
-      for (var i = 0; i < (set['items'] as List).length; i++)
-        merged(set, i)['prompt'] as String,
+      if (index != null)
+        merged(set, index)['prompt'] as String
+      else
+        for (var i = 0; i < (set['items'] as List).length; i++)
+          merged(set, i)['prompt'] as String,
     ];
     await ref.read(promptBlockLibraryNotifierProvider.future);
     await ref
         .read(promptBlockLibraryNotifierProvider.notifier)
         .createBlock(
-          title: set['title'] as String,
+          title:
+              (index == null ? set['title'] : set['items'][index]['title'])
+                  as String,
           content: atoms.join(', '),
           atoms: atoms,
           folderId: null,
@@ -213,20 +280,31 @@ class AgentPromptSetActions {
   }
 
   String copyText(Map<String, dynamic> set, int index) {
+    final item = (set['items'] as List)[index] as Map;
     final value = merged(set, index);
     final chars = value['characters'] as List<String>;
     final positions = effectiveAgentPromptSetPositions(
-      set['shared'] as Map,
-      (set['items'] as List)[index] as Map,
+      set['shared'] as Map? ?? item,
+      item,
     );
     String coordinates(int j) {
-      final p = positions[j];
+      final p = item['use_coords'] == false ? null : positions[j];
       return p == null
           ? ''
           : ' @ (${p.x.toStringAsFixed(2)}, ${p.y.toStringAsFixed(2)})';
     }
 
-    return '# ${index + 1}. ${(set['items'] as List)[index]['title']}\n${value['prompt']}\n${[for (var j = 0; j < chars.length; j++) '[character ${j + 1}] ${chars[j]}${coordinates(j)}'].join('\n')}\n[negative] ${value['negative_prompt']}';
+    final negatives = item['character_negatives'] as List? ?? const [];
+    String character(int j) {
+      return [
+        '[character ${j + 1}] ${chars[j]}${coordinates(j)}',
+        if (negatives.elementAtOrNull(j) case final String uc
+            when uc.isNotEmpty)
+          '[character ${j + 1} negative] $uc',
+      ].join('\n');
+    }
+
+    return '# ${index + 1}. ${(set['items'] as List)[index]['title']}\n${value['prompt']}\n${[for (var j = 0; j < chars.length; j++) character(j)].join('\n')}\n[negative] ${value['negative_prompt']}';
   }
 
   Future<void> copy(Map<String, dynamic> set, int? index) => Clipboard.setData(
@@ -285,6 +363,7 @@ Future<void> recordAgentPromptSetImages({
   required AgentWorkspace workspace,
   required String setId,
   required int index,
+  String? cardId,
   required Map<String, dynamic> result,
   required void Function() check,
 }) async {
@@ -317,6 +396,6 @@ Future<void> recordAgentPromptSetImages({
   if (images.isNotEmpty) {
     await NaiAgentPromptSets(
       workspace.agentDirectory,
-    ).appendImages(setId, index, images);
+    ).appendImages(setId, index, images, cardId: cardId);
   }
 }

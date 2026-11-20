@@ -37,6 +37,8 @@ import 'package:nai_launcher/presentation/providers/prompt_token_counter_provide
 import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_contract.dart';
 import 'package:nai_launcher/presentation/wiring/generation_data_wiring.dart';
+import 'package:nai_launcher/presentation/wiring/generation_backend.dart'
+    show generationNegativeTabProvider;
 import '../providers/krita/agent_bridge_draft_test.dart'
     show MemoryCharacters, MemoryDraftSettings, EmptyBlocks, OfflineAuth;
 
@@ -312,6 +314,61 @@ void main() {
       );
     },
   );
+  test('preset hint follows model, direction, active tab and effective UC', () {
+    final params = container.read(generationParamsNotifierProvider.notifier);
+    final quality = container.read(qualityPresetNotifierProvider.notifier);
+    final uc = container.read(ucPresetNotifierProvider.notifier);
+    GenPromptData prompt() => container.read(provider).prompt;
+    params.updateModel(ImageModels.animeDiffusionV5Full, persist: false);
+    quality.setNaiLight();
+    expect(
+      prompt().presetHint,
+      GenPreviewSection(
+        label: l.qualityTags_addToEnd,
+        text: QualityTags.v5Light,
+      ),
+    );
+    params.updateModel(ImageModels.furryDiffusion, persist: false);
+    expect(prompt().qualityPreset, 'standard');
+    expect(
+      prompt().presetHint,
+      GenPreviewSection(
+        label: l.qualityTags_addToStart,
+        text: 'masterpiece, best quality',
+      ),
+    );
+    quality.setNone();
+    expect(prompt().presetHint, isNull);
+    params.updateModel(ImageModels.animeDiffusionV45Full, persist: false);
+    container.read(generationNegativeTabProvider.notifier).state = true;
+    uc.setPresetType(UcPresetType.light);
+    expect(
+      prompt().presetHint,
+      GenPreviewSection(
+        label: l.ucPreset_addToNegative,
+        text: UcPresets.v45FullPresets[UcPresetType.light]!,
+      ),
+    );
+    uc.setPresetType(UcPresetType.none);
+    expect(prompt().presetHint, isNull);
+    final block = PromptBlock(
+      id: 'custom-uc',
+      title: 'Custom',
+      content: 'nsfw, lowres',
+      createdAt: DateTime(2026),
+      updatedAt: DateTime(2026),
+    );
+    final blocks =
+        container.read(promptBlockLibraryNotifierProvider.notifier) as _Blocks;
+    blocks.publish(block);
+    uc.setCustomEntry(block.id);
+    expect(prompt().presetHint?.text, 'nsfw, lowres');
+    params.updatePromptImmediately('nsfw, blue sky');
+    expect(prompt().presetHint?.text, 'lowres');
+    blocks.publish(block.copyWith(content: ''));
+    expect(prompt().presetHint, isNull);
+  });
+
   test('cached UI follows edits to a referenced library block', () {
     final block = PromptBlock(
       id: 'quality',
@@ -330,7 +387,15 @@ void main() {
       container.read(provider).prompt.positivePreview.map((s) => s.text),
       contains(contains('first custom quality')),
     );
+    expect(
+      container.read(provider).prompt.presetHint?.text,
+      'first custom quality',
+    );
     library.publish(block.copyWith(content: 'revised custom quality'));
+    expect(
+      container.read(provider).prompt.presetHint?.text,
+      'revised custom quality',
+    );
     expect(
       container.read(provider).prompt.positivePreview.map((s) => s.text),
       contains(contains('revised custom quality')),

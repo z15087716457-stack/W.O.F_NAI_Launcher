@@ -26,13 +26,13 @@ Call `await tools.mcp__nai_studio__<name>({...})`. Serialize dependent writes; b
 
 | Task | Tool | Details |
 |---|---|---|
-| Story / outfit / variation prompt sets | `prompt_set` | [prompt-sets.md](references/prompt-sets.md) |
+| Prompt cards | `prompt_set` | [prompt-sets.md](references/prompt-sets.md) |
 | Edit prompts | `prompt_update` | `nai-prompt` skill |
 | Quote / generate / stop | `generation_prepare`, `generation_run`, `generation_cancel` | [generation.md](references/generation.md) |
 | Variations, enhance, upscale, Pixel Snap, cloud tools | `image_generate`, `image_tool` | [image-tools.md](references/image-tools.md) |
 | Style exploration | `explore_manage` | [explore.md](references/explore.md) |
 | Semantic gallery / blocks / Wiki / tags search | `studio_search` | [search.md](references/search.md) |
-| Pictures, collections, folders and files | `gallery_query`, `gallery_manage` | [gallery.md](references/gallery.md) |
+| Pictures, collections, folders and files | `gallery_query`, `gallery_manage`, `online_gallery` | [gallery.md](references/gallery.md) |
 | Source, mask, Vibe and precise references | `reference_manage`, `reference_library` | [references.md](references/references.md) |
 | Prompt blocks and library | `block_query`, `block_manage` | [blocks.md](references/blocks.md) |
 | Tags, related tags, Wiki text and examples | `tag_query`, `tag_related`, `wiki_query` | [lookup.md](references/lookup.md) |

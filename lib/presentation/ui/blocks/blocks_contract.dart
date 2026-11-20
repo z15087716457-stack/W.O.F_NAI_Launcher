@@ -659,6 +659,7 @@ class BlocksLibraryActions {
     required this.onToggleFolder,
     required this.onMoveFolder,
     required this.onReorderFolder,
+    required this.onInsertFolderBeside,
     required this.onCreateCollection,
     required this.onRenameCollection,
     required this.onDeleteCollection,
@@ -762,6 +763,8 @@ class BlocksLibraryActions {
 
   /// 同级上移（−1）/ 下移（+1）。
   final void Function(String id, int delta) onReorderFolder;
+  final void Function(String id, String siblingId, {required bool after})
+  onInsertFolderBeside;
   final Future<String?> Function(String name, {String? parentId, bool isFolder})
   onCreateCollection;
   final void Function(String id, String name) onRenameCollection;
@@ -814,6 +817,7 @@ class BlocksLibraryActions {
     onToggleFolder: (_, _) {},
     onMoveFolder: (_, _) {},
     onReorderFolder: (_, _) {},
+    onInsertFolderBeside: (_, _, {required after}) {},
     onCreateCollection: (_, {parentId, isFolder = false}) async => null,
     onRenameCollection: (_, _) {},
     onDeleteCollection: (_) {},

@@ -1453,7 +1453,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get ucPreset_disabled => '除外したい要素プリセットが無効です';
 
   @override
-  String get ucPreset_addToNegative => '除外したい要素に追加:';
+  String get ucPreset_addToNegative => '除外したい要素の先頭に追加:';
 
   @override
   String get ucPreset_nsfwHint =>
@@ -8646,12 +8646,7 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String online_authorSaved(Object count, Object date) {
-    return '$count 枚保存 · $date に作者を保存';
-  }
-
-  @override
-  String get online_authorAllWorks => 'AI TAG で全作品を見る';
+  String get online_authorAllWorks => 'すべての作品';
 
   @override
   String get online_unfavAuthor => '作者の保存を解除';
@@ -18829,6 +18824,12 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get ag_psNegative => 'ネガティブ';
+
+  @override
+  String get ag_psPromptsOnly => 'プロンプトのみ適用';
+
+  @override
+  String get ag_psWithSettings => '設定も適用';
 
   @override
   String get ag_psImport => 'キャンバスに読み込む';

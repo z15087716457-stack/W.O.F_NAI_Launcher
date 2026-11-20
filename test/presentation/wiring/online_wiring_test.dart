@@ -1,7 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:nai_launcher/data/datasources/remote/online_gallery/gallery_source_adapter.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -28,6 +31,7 @@ import 'package:nai_launcher/presentation/providers/online_favorites_provider.da
     as fav;
 import 'package:nai_launcher/presentation/providers/online_gallery_blacklist_provider.dart';
 import 'package:nai_launcher/presentation/providers/online_gallery_provider.dart';
+import 'package:nai_launcher/presentation/providers/online_gallery_media_provider.dart';
 import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
 import 'package:nai_launcher/presentation/ui/online/online_contract.dart';
 import 'package:nai_launcher/presentation/ui/online/online_page.dart';
@@ -92,7 +96,7 @@ void main() {
       _actions(tester).onSelect('ai_tag:2');
       second.complete(harness.gallery.detail(_items[1]));
       await tester.pumpAndSettle();
-      expect(_data(tester).detail!.prompt, 'prompt2');
+      expect(_data(tester).detail!.media.single.prompt, 'prompt2');
       first.complete(harness.gallery.detail(_items[0]));
       await tester.pumpAndSettle();
       expect(_data(tester).detail!.key, 'ai_tag:2');
@@ -100,6 +104,80 @@ void main() {
       await tester.pumpAndSettle();
       expect(_data(tester).selectedKey, isNull);
       expect(_data(tester).detail, isNull);
+    },
+  );
+
+  testWidgets('inspector follows the selected page for prompts and copy', (
+    tester,
+  ) async {
+    final harness = await _pump(tester);
+    _actions(tester).onSelect('ai_tag:1');
+    await tester.pumpAndSettle();
+    expect(find.text('prompt1', findRichText: true), findsOneWidget);
+    final strip = find.byKey(const Key('online-insp-film'));
+    await tester.tapAt(tester.getTopLeft(strip) + const Offset(72, 22));
+    await tester.pumpAndSettle();
+    expect(harness.container.read(onlineGallerySelectionProvider).page, 2);
+    expect(find.text('second page', findRichText: true), findsOneWidget);
+    expect(find.text('prompt1', findRichText: true), findsNothing);
+    await tester.tap(find.byKey(const Key('online-insp-copy')));
+    await tester.pumpAndSettle();
+    expect(harness.platform.copied, ['second page']);
+    expect(find.text('second negative', findRichText: true), findsOneWidget);
+    expect(find.text('98765'), findsOneWidget);
+    final target =
+        harness.container.read(onlineGenerationTargetProvider) as _Target;
+    _actions(tester).onSend('ai_tag:1', OnlineSendMode.withParams);
+    await tester.pumpAndSettle();
+    expect(target.calls.single, (
+      'ai_tag:1',
+      OnlineSendMode.withParams,
+      true,
+      1,
+    ));
+
+    await tester.tapAt(tester.getTopLeft(strip) + const Offset(122, 22));
+    await tester.pumpAndSettle();
+    expect(find.text('这张图没有 Prompt'), findsOneWidget);
+    expect(find.byKey(const Key('online-insp-negative')), findsNothing);
+    expect(find.byKey(const Key('online-insp-params')), findsNothing);
+    await tester.tap(find.byKey(const Key('online-insp-copy')));
+    await tester.pumpAndSettle();
+    expect(harness.platform.copied, ['second page']);
+
+    await tester.tapAt(tester.getTopLeft(strip) + const Offset(22, 22));
+    await tester.pumpAndSettle();
+    expect(find.text('prompt1', findRichText: true), findsOneWidget);
+  });
+
+  testWidgets(
+    'viewer page selection is available to Agent and clears on search',
+    (tester) async {
+      final harness = await _pump(tester);
+      final selection = harness.container.read(onlineGallerySelectionProvider);
+      _actions(tester).onSelect('ai_tag:1');
+      await tester.pumpAndSettle();
+      final controller = tester
+          .widget<OnlineScope>(find.byType(OnlineScope))
+          .controller;
+      controller.openViewer('ai_tag:1');
+      await tester.pumpAndSettle();
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pumpAndSettle();
+      expect(selection.item?.id, 1);
+      expect(selection.page, 2);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyC);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.pumpAndSettle();
+      expect(harness.platform.copied, ['second page']);
+      controller.openViewer('ai_tag:2');
+      await tester.pumpAndSettle();
+      expect(selection.item?.id, 2);
+      expect(selection.page, 1);
+      _actions(tester).onSearch(const OnlineQuery(work: 'changed'));
+      await tester.pumpAndSettle();
+      expect(selection.item, isNull);
     },
   );
 
@@ -142,6 +220,50 @@ void main() {
       expect(harness.favorites.toggled, [2]);
       expect(harness.favorites.moves, [(1, 'new'), (2, 'new')]);
       expect(harness.favorites.created, ['new set']);
+    },
+  );
+
+  testWidgets(
+    'saved author opens their complete remote catalog and returns to the filtered collection',
+    (tester) async {
+      final harness = await _pump(tester, source: _AuthorSource());
+      harness.favorites.seedAuthors();
+      Future<void> tap(String key) async {
+        await tester.tap(find.byKey(Key(key)));
+        await tester.pumpAndSettle();
+      }
+
+      await tap('online-mode-favorites');
+      await tap('online-collection-');
+      _actions(tester).onSearch(const OnlineQuery(favoritesFilter: 'first'));
+      await tester.pumpAndSettle();
+      expect(_data(tester).list.items.single.id, 1);
+      // No work by author 9 is saved. Their two online pages must still be reachable.
+      await tap('online-author-9');
+      expect(_data(tester).favorites?.author?.workCount, 2);
+      expect(_data(tester).recent, isEmpty);
+      expect(_data(tester).list.items.first.id, 901);
+      expect(_data(tester).list.items.first.favorited, false);
+      _actions(tester).onLoadMore();
+      await tester.pumpAndSettle();
+      expect(_data(tester).list.items.map((w) => w.id), [901, 902]);
+      expect(_data(tester).list.hasMore, false);
+      await tap('online-author-8');
+      expect(_data(tester).list.items.first.id, 801);
+      await tap('online-return');
+      expect(_data(tester).mode, OnlineMode.favorites);
+      expect(_data(tester).favorites?.collectionId, '');
+      expect(_data(tester).query.favoritesFilter, 'first');
+      expect(_data(tester).list.items.single.id, 1);
+      await tap('online-author-8');
+      await tap('online-mode-search');
+      expect(_data(tester).query.work, isEmpty);
+      expect(_data(tester).favorites?.author, isNull);
+      await tap('online-mode-favorites');
+      await tap('online-author-9');
+      await tap('online-author-unfav');
+      expect(find.byKey(const Key('online-author-9')), findsNothing);
+      expect(_data(tester).list.items.single.id, 1);
     },
   );
 
@@ -258,7 +380,7 @@ void main() {
         expect(
           (harness.container.read(onlineGenerationTargetProvider) as _Target)
               .calls,
-          [('ai_tag:2', mode, true)],
+          [('ai_tag:2', mode, true, 0)],
         );
         expect(_data(tester).send.remembered, mode);
         expect(harness.platform.generated, 1);
@@ -309,7 +431,10 @@ OnlineActions _actions(WidgetTester tester) =>
 OnlineViewData _data(WidgetTester tester) =>
     tester.widget<OnlineGalleryPage>(find.byType(OnlineGalleryPage)).data;
 
-Future<_Harness> _pump(WidgetTester tester) async {
+Future<_Harness> _pump(
+  WidgetTester tester, {
+  GallerySourceAdapter? source,
+}) async {
   tester.view.devicePixelRatio = 1;
   tester.view.physicalSize = const Size(1600, 1000);
   addTearDown(tester.view.resetPhysicalSize);
@@ -320,7 +445,12 @@ Future<_Harness> _pump(WidgetTester tester) async {
   late _Blacklist blacklist;
   final container = ProviderContainer(
     overrides: [
-      onlineGalleryNotifierProvider.overrideWith(() => gallery),
+      if (source == null)
+        onlineGalleryNotifierProvider.overrideWith(() => gallery)
+      else
+        onlineGallerySourceAdaptersProvider.overrideWithValue({
+          source.sourceId: source,
+        }),
       fav.onlineFavoritesNotifierProvider.overrideWith((ref) => favorites),
       onlineGalleryPlatformProvider.overrideWithValue(platform),
       onlineGenerationTargetProvider.overrideWith(_Target.new),
@@ -377,6 +507,8 @@ const _items = [
     id: 1,
     sourceId: GallerySourceId.aiTag,
     title: 'first',
+    mediaCount: 3,
+    tags: ['work tag'],
     author: 'artist',
     uploaderId: 8,
   ),
@@ -389,9 +521,38 @@ const _items = [
   ),
 ];
 
+class _AuthorSource extends GallerySourceAdapter {
+  @override
+  GallerySourceId get sourceId => GallerySourceId.aiTag;
+  @override
+  Future<GalleryPage> search(
+    GallerySearchRequest request, {
+    CancelToken? cancelToken,
+  }) async {
+    final author = int.tryParse(request.query);
+    final page = int.parse(request.cursor);
+    return GalleryPage(
+      items: [
+        if (author != null)
+          GalleryItem(
+            id: author * 100 + page,
+            sourceId: sourceId,
+            uploaderId: author,
+            author: 'Artist $author',
+            aiType: 'Other',
+          ),
+      ],
+      cursor: request.cursor,
+      nextCursor: author != null && page == 1 ? '2' : null,
+      hasMore: author != null && page == 1,
+      total: author == null ? 0 : 2,
+    );
+  }
+}
+
 class _Target extends OnlineGenerationTarget {
   _Target(Ref ref) : super(ref, const OnlineDraftBackup());
-  final calls = <(String, OnlineSendMode, bool)>[];
+  final calls = <(String, OnlineSendMode, bool, int)>[];
   @override
   OnlineGenerationSnapshot capture() =>
       const OnlineGenerationSnapshot('v', 'p', 'j');
@@ -399,10 +560,11 @@ class _Target extends OnlineGenerationTarget {
   Future<void> apply(
     GalleryDetail detail,
     OnlineSendMode mode, {
+    int mediaIndex = 0,
     required OnlineGenerationSnapshot snapshot,
     required bool Function() alive,
   }) async {
-    calls.add((detail.item.stableKey, mode, alive()));
+    calls.add((detail.item.stableKey, mode, alive(), mediaIndex));
   }
 }
 
@@ -463,6 +625,15 @@ class _Gallery extends OnlineGalleryNotifier {
           model: 'nai-diffusion-5-full',
         ),
       ),
+      if (item.id == 1) ...const [
+        GalleryMedia(
+          id: 'p1',
+          prompt: 'second page',
+          negativePrompt: 'second negative',
+          naiMetadata: NaiImageMetadata(prompt: 'second page', seed: 98765),
+        ),
+        GalleryMedia(id: 'p2'),
+      ],
     ],
   );
   @override
@@ -487,6 +658,35 @@ class _Favorites extends fav.OnlineFavoritesNotifier {
       favoritedWorkIds: {1},
     );
   }
+  void seedAuthors() {
+    state = state.copyWith(
+      authors: [
+        for (final id in [8, 9])
+          repository.OnlineFavoriteAuthor(
+            source: GallerySourceId.aiTag,
+            authorId: id,
+            authorName: 'Artist $id',
+            savedAt: DateTime(2026),
+          ),
+      ],
+      entries: [
+        repository.OnlineFavoriteEntry(
+          item: _items.first,
+          collectionId: null,
+          savedAt: DateTime(2026),
+        ),
+      ],
+    );
+  }
+
+  @override
+  Future<bool> removeAuthor(int id) async {
+    state = state.copyWith(
+      authors: state.authors.where((a) => a.authorId != id).toList(),
+    );
+    return true;
+  }
+
   final toggled = <int>[];
   final moves = <(int, String?)>[];
   final created = <String>[];

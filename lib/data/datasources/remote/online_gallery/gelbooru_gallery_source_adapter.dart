@@ -48,7 +48,21 @@ class GelbooruGallerySourceAdapter implements GallerySourceAdapter {
     GalleryItem item, {
     CancelToken? cancelToken,
   }) async {
-    return GalleryDetail(item: item, media: [item.cover]);
+    if (item.hasValidPreview) {
+      return GalleryDetail(item: item, media: [item.cover]);
+    }
+    final page = await search(
+      GallerySearchRequest(cursor: '1', pageSize: 1, query: 'id:${item.id}'),
+      cancelToken: cancelToken,
+    );
+    final post = page.items.where((post) => post.id == item.id).firstOrNull;
+    if (post == null) {
+      throw const GallerySourceException(
+        GallerySourceErrorCode.detailNotFound,
+        source: GallerySourceId.gelbooru,
+      );
+    }
+    return GalleryDetail(item: post, media: [post.cover]);
   }
 
   @override

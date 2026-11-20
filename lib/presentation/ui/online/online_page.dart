@@ -175,6 +175,7 @@ class _OnlineGalleryPageState extends State<OnlineGalleryPage>
   void setMedia(String workKey, int index) => setState(() {
     _mediaKey = workKey;
     _media = index;
+    _actions.onMediaChanged?.call(workKey, index);
   });
 
   @override
@@ -183,7 +184,7 @@ class _OnlineGalleryPageState extends State<OnlineGalleryPage>
     final detail = _data.detail?.key == key ? _data.detail : null;
     if (remembered != null &&
         (remembered != OnlineSendMode.withParams ||
-            (detail?.canSendParams ?? false))) {
+            (detail?.canSendParams(mediaIndex(key)) ?? false))) {
       _actions.onSend(key, remembered);
     } else {
       chooseSend(key, anchor);

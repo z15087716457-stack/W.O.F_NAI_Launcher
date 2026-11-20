@@ -59,6 +59,17 @@ class OnlineToolbar extends StatelessWidget {
       if (booruRank && !ctrl.picking) ...[
         const _RankScaleNav(),
         const Spacer(),
+      ] else if (data.favorites?.author != null) ...[
+        UiBtn(
+          key: const Key('online-return'),
+          tone: UiBtnTone.ghost,
+          onTap: a.onReturn,
+          children: [
+            const UiGlyph(UiGlyphs.chevronLeft, size: 14),
+            Text(l10n.online_returnPrev),
+          ],
+        ),
+        const Spacer(),
       ] else
         const Expanded(child: OnlineSearchBox()),
       if (login)
@@ -768,11 +779,7 @@ class _OnlineFilterRowState extends State<OnlineFilterRow> {
   Widget build(BuildContext context) {
     final scope = OnlineScope.of(context);
     final data = scope.data;
-    final fav = data.favorites;
-    final author =
-        data.mode == OnlineMode.favorites && data.status.favoritesLocal
-        ? fav?.author
-        : null;
+    final author = data.favorites?.author;
     return UiPopover(
       anchor: _pop == _RowPop.none ? null : _anchor,
       onDismiss: _close,
@@ -1110,26 +1117,15 @@ class _AuthorHeader extends StatelessWidget {
                   style: UiText.sans(15, weight: FontWeight.w700, color: c.ink),
                 ),
                 Text(
-                  l10n.online_authorSaved(
-                    author.count,
-                    author.savedAt == null
-                        ? '—'
-                        : OnlineFormat.date(author.savedAt!),
-                  ),
+                  author.workCount == null
+                      ? l10n.online_authorAllWorks
+                      : '${l10n.online_authorAllWorks} · ${author.workCount}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: UiText.sans(12, color: c.muted),
                 ),
               ],
             ),
-          ),
-          UiBtn(
-            key: const Key('online-author-works'),
-            onTap: () => a.onAuthorWorks(author.id),
-            children: [
-              const UiGlyph(UiGlyphs.search, size: 14),
-              Text(l10n.online_authorAllWorks),
-            ],
           ),
           UiBtn(
             key: const Key('online-author-unfav'),

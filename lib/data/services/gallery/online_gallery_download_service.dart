@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:path/path.dart' as p;
 
@@ -55,18 +56,7 @@ class OnlineGalleryDownloadService {
             if (media.downloadUrl.isEmpty) {
               throw StateError('Media URL is empty');
             }
-            final extension =
-                media.extension ??
-                p
-                    .extension(Uri.parse(media.downloadUrl).path)
-                    .replaceFirst('.', '');
-            final safeExtension =
-                RegExp(r'^[a-zA-Z0-9]{1,8}$').hasMatch(extension)
-                ? extension
-                : 'webp';
-            final name =
-                '${item.sourceId.key}_${item.id}_p${(index + 1).toString().padLeft(2, '0')}.$safeExtension';
-            await saveMedia(media, directory, name);
+            await saveMedia(media, directory, fileName(item, media, index));
             success++;
           } catch (_) {
             failed++;
@@ -79,12 +69,30 @@ class OnlineGalleryDownloadService {
     return (success, failed);
   }
 
+  static String fileName(GalleryItem item, GalleryMedia media, int index) {
+    final extension =
+        media.extension ??
+        p.extension(Uri.parse(media.downloadUrl).path).replaceFirst('.', '');
+    final safeExtension = RegExp(r'^[a-zA-Z0-9]{1,8}$').hasMatch(extension)
+        ? extension
+        : 'webp';
+    return '${item.sourceId.key}_${item.id}_p${(index + 1).toString().padLeft(2, '0')}.$safeExtension';
+  }
+
   Future<void> saveMedia(
     GalleryMedia media,
     String directory,
     String name,
   ) async {
     final bytes = await mediaBytes(media);
+    await saveBytes(bytes, directory, name);
+  }
+
+  Future<String> saveBytes(
+    List<int> bytes,
+    String directory,
+    String name,
+  ) async {
     for (var suffix = 0; ; suffix++) {
       final candidate = p.join(
         directory,
@@ -105,15 +113,18 @@ class OnlineGalleryDownloadService {
         await file.delete();
         rethrow;
       }
-      return;
+      return file.path;
     }
   }
 
-  Future<List<int>> mediaBytes(GalleryMedia media) async {
+  Future<List<int>> mediaBytes(GalleryMedia media) =>
+      bytesForUrl(media.downloadUrl);
+
+  Future<Uint8List> bytesForUrl(String url) async {
     final source = await DanbooruImageCacheManager.instance.getSingleFile(
-      media.downloadUrl,
-      key: onlineGalleryImageCacheKeyForUrl(media.downloadUrl),
-      headers: onlineGalleryImageHeadersForUrl(media.downloadUrl),
+      url,
+      key: onlineGalleryImageCacheKeyForUrl(url),
+      headers: onlineGalleryImageHeadersForUrl(url),
     );
     return source.readAsBytes();
   }

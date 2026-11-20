@@ -2769,7 +2769,7 @@ abstract class AppLocalizations {
   /// No description provided for @ucPreset_addToNegative.
   ///
   /// In en, this message translates to:
-  /// **'Add to Undesired Content:'**
+  /// **'Added to the beginning of Undesired Content:'**
   String get ucPreset_addToNegative;
 
   /// No description provided for @ucPreset_nsfwHint.
@@ -15446,16 +15446,10 @@ abstract class AppLocalizations {
   /// **'{count}'**
   String online_countImages(Object count);
 
-  /// No description provided for @online_authorSaved.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} saved · artist saved {date}'**
-  String online_authorSaved(Object count, Object date);
-
   /// No description provided for @online_authorAllWorks.
   ///
   /// In en, this message translates to:
-  /// **'All works on AI TAG'**
+  /// **'All works'**
   String get online_authorAllWorks;
 
   /// No description provided for @online_unfavAuthor.
@@ -33814,6 +33808,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Negative'**
   String get ag_psNegative;
+
+  /// No description provided for @ag_psPromptsOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Import prompts only'**
+  String get ag_psPromptsOnly;
+
+  /// No description provided for @ag_psWithSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Import with settings'**
+  String get ag_psWithSettings;
 
   /// No description provided for @ag_psImport.
   ///

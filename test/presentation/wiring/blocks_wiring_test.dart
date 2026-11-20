@@ -465,6 +465,11 @@ void main() {
       a.onReorderFolder(folder, -1);
       await flush(tester);
       expect(backend.library.collectionById(collection)!.blockIds, isEmpty);
+      a.onInsertFolderBeside(folder, parent!, after: false);
+      await flush(tester);
+      expect(backend.library.folderById(folder)!.parentId, isNull);
+      final roots = backend.library.foldersIn(null).map((f) => f.id).toList();
+      expect(roots.indexOf(folder) + 1, roots.indexOf(parent));
       expect(tester.takeException(), isNull);
     },
   );

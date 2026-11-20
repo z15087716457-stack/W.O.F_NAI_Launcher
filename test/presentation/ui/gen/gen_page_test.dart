@@ -4,6 +4,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nai_launcher/core/constants/api_constants.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_contract.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_parts.dart'
     show GenIb, GenTokenBar;
@@ -215,6 +216,105 @@ void main() {
       expect(r.last('onTransparentChanged'), 'onTransparentChanged(true)');
       await pump(t, GenFixture.view(v45: true));
       expect(find.byKey(const Key('gen-transparent')), findsNothing);
+    });
+
+    testWidgets('preset tooltip opens above the chip and yields to its menu', (
+      t,
+    ) async {
+      final base = GenFixture.view();
+      const hint = GenPreviewSection(
+        label: '添加到提示词末尾',
+        text: 'very aesthetic, masterpiece, no text',
+      );
+      await pump(
+        t,
+        base.copyWith(
+          prompt: const GenPromptData(
+            qualityPresets: GenFixture.qualityPresets,
+            qualityPreset: 'standard',
+            presetHint: hint,
+          ),
+        ),
+      );
+      final chip = find.byKey(const Key('gen-preset'));
+      final mouse = await t.createGesture(kind: PointerDeviceKind.mouse);
+      await mouse.addPointer(location: Offset.zero);
+      await mouse.moveTo(t.getCenter(chip));
+      await t.pump(const Duration(milliseconds: 400));
+      await t.pumpAndSettle();
+      final tip = find.text(
+        '添加到提示词末尾\nvery aesthetic, masterpiece, no text',
+        findRichText: true,
+      );
+      expect(t.getRect(tip).bottom, lessThan(t.getRect(chip).top));
+      await captureUiuxRegion(
+        t,
+        find.byKey(const Key('gen-capture')),
+        'preset-hover',
+        t.getRect(tip).expandToInclude(t.getRect(chip)).inflate(20),
+      );
+      await mouse.moveTo(Offset.zero);
+      await t.pumpAndSettle();
+      expect(tip, findsNothing);
+      await mouse.moveTo(t.getCenter(chip));
+      await t.pump(const Duration(milliseconds: 400));
+      await t.pumpAndSettle();
+      await tapKey(t, 'gen-preset');
+      expect(tip, findsNothing);
+      await t.tap(find.text('无').last);
+      await t.pumpAndSettle();
+      expect(r.last('onQualityPreset'), 'onQualityPreset(none)');
+      await mouse.removePointer();
+    });
+
+    testWidgets('long UC preset wraps above the chip and None has no hint', (
+      t,
+    ) async {
+      final text = UcPresets.v45FullPresets[UcPresetType.heavy]!;
+      final l = AppLocalizationsZh();
+      final hint = GenPreviewSection(
+        label: l.ucPreset_addToNegative,
+        text: text,
+      );
+      Future<void> show(String id, GenPreviewSection? section) => pumpGen(
+        t,
+        window: 880,
+        dark: true,
+        data: GenFixture.view().copyWith(
+          prompt: GenPromptData(
+            negative: true,
+            ucPresets: GenFixture.ucPresets,
+            ucPreset: id,
+            presetHint: section,
+          ),
+        ),
+      );
+      await show('heavy', hint);
+      final chip = find.byKey(const Key('gen-preset'));
+      final mouse = await t.createGesture(kind: PointerDeviceKind.mouse);
+      await mouse.addPointer(location: Offset.zero);
+      addTearDown(mouse.removePointer);
+      await mouse.moveTo(t.getCenter(chip));
+      await t.pump(const Duration(milliseconds: 400));
+      await t.pumpAndSettle();
+      final tip = find.text('${hint.label}\n$text', findRichText: true);
+      final rect = t.getRect(tip);
+      expect(rect.height, greaterThan(50));
+      expect(rect.left, greaterThanOrEqualTo(0));
+      expect(rect.right, lessThanOrEqualTo(t.view.physicalSize.width));
+      expect(rect.bottom, lessThan(t.getRect(chip).top));
+      await captureUiuxRegion(
+        t,
+        find.byKey(const Key('gen-capture')),
+        'uc-hover',
+        rect.expandToInclude(t.getRect(chip)).inflate(18),
+      );
+      await show('none', null);
+      expect(tip, findsNothing);
+      expect(
+        find.ancestor(of: chip, matching: find.byType(Tooltip)),
+        findsNothing,
+      );
     });
 
     testWidgets('质量词预设菜单', (t) async {

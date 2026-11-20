@@ -1168,49 +1168,23 @@ class OnlineGalleryNotifier extends _$OnlineGalleryNotifier {
             cancelToken: _cancelToken,
           );
         } else {
-          final query = sourceId == GallerySourceId.aiTag
-              ? buildAiTagSearchQuery(
-                  state.searchQuery,
-                  state.aiTagModelVersion,
-                )
-              : buildOnlineGallerySearchQuery(
-                  state.searchQuery,
-                  fuzzyMatch: state.fuzzySearchEnabled,
-                );
-          page = await adapter.search(
-            GallerySearchRequest(
-              cursor: requestCursor,
-              pageSize: sourceId == GallerySourceId.aiTag
-                  ? (aiTagConfig?.pageSize ?? 60)
-                  : _pageSize,
-              query: query,
-              prompt: state.promptQuery,
-              timeRange: state.aiTagTimeRange,
-              ratings: state.selectedRatings,
-              dateStart: state.dateRangeStart,
-              dateEnd: state.dateRangeEnd,
-              blacklistTags: blacklist,
-            ),
+          page = await searchPage(
+            source: sourceId,
+            query: state.searchQuery,
+            prompt: state.promptQuery,
+            cursor: requestCursor,
+            aiTagPageSize: aiTagConfig?.pageSize,
+            blacklist: blacklist,
             cancelToken: _cancelToken,
           );
         }
         if (!_isCurrentRequest(generation, cacheKey)) return;
         // AiTag「仅 NAI」客户端过滤：整页被滤空时复用下方
         // filteredEmptyPage 逻辑继续拉下一页（与黑名单过滤同通道）。
-        if (sourceId == GallerySourceId.aiTag && state.aiTagNaiOnly) {
-          final naiItems = page.items
-              .where((item) => isAiTagNaiWork(item.aiType))
-              .toList(growable: false);
-          if (naiItems.length != page.items.length) {
-            page = GalleryPage(
-              items: naiItems,
-              cursor: page.cursor,
-              nextCursor: page.nextCursor,
-              hasMore: page.hasMore,
-              total: page.total,
-              rawItemCount: page.rawItemCount,
-            );
-          }
+        if (state.viewMode == GalleryViewMode.popular &&
+            sourceId == GallerySourceId.aiTag &&
+            state.aiTagNaiOnly) {
+          page = _naiOnly(page);
         }
         final nextCursor = page.nextCursor;
         final filteredEmptyPage = page.rawItemCount > 0 && page.items.isEmpty;
@@ -1430,6 +1404,59 @@ class OnlineGalleryNotifier extends _$OnlineGalleryNotifier {
           );
         })
         .toList(growable: false);
+  }
+
+  /// Fetch one source page with its saved filters, without navigating the gallery.
+  Future<GalleryPage> searchPage({
+    required GallerySourceId source,
+    required String query,
+    required String prompt,
+    required String cursor,
+    required Set<String> blacklist,
+    int? aiTagPageSize,
+    CancelToken? cancelToken,
+  }) async {
+    final filters = state.currentSourceId == source
+        ? state
+        : _sourceStates[source] ?? const OnlineGalleryState();
+    final aiTag = source == GallerySourceId.aiTag;
+    final page = await _adapters[source]!.search(
+      GallerySearchRequest(
+        cursor: cursor,
+        pageSize: aiTag
+            ? (aiTagPageSize ?? filters.aiTagConfig?.pageSize ?? 60)
+            : _pageSize,
+        query: aiTag
+            ? buildAiTagSearchQuery(query, filters.aiTagModelVersion)
+            : buildOnlineGallerySearchQuery(
+                query,
+                fuzzyMatch: filters.fuzzySearchEnabled,
+              ),
+        prompt: prompt,
+        timeRange: filters.aiTagTimeRange,
+        ratings: filters.selectedRatings,
+        dateStart: filters.dateRangeStart,
+        dateEnd: filters.dateRangeEnd,
+        blacklistTags: blacklist,
+      ),
+      cancelToken: cancelToken,
+    );
+    return aiTag && filters.aiTagNaiOnly ? _naiOnly(page) : page;
+  }
+
+  GalleryPage _naiOnly(GalleryPage page) {
+    final items = page.items
+        .where((item) => isAiTagNaiWork(item.aiType))
+        .toList();
+    if (items.length == page.items.length) return page;
+    return GalleryPage(
+      items: items,
+      cursor: page.cursor,
+      nextCursor: page.nextCursor,
+      hasMore: page.hasMore,
+      total: page.total,
+      rawItemCount: page.rawItemCount,
+    );
   }
 
   Future<GalleryDetail> loadDetail(

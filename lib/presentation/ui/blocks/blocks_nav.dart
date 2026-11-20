@@ -15,8 +15,12 @@ import 'blocks_contract.dart';
 import 'blocks_parts.dart';
 import 'blocks_page.dart';
 
+enum _FolderZone { before, inside, after }
+
+typedef _FolderDrop = ({String id, _FolderZone zone});
+
 /// 左栏 240：标题 52 · 全部 / 最近使用 / 收藏 · 收藏集 · 文件夹（未分类 + 树）· 标签 · 底部“导入 / 导出”44。
-/// 卡片可以拖到收藏集和文件夹上（松手选移动还是复制），文件夹可以拖进别的文件夹。
+/// 卡片可以拖到收藏集和文件夹上（松手选移动还是复制），文件夹拖到边缘可插入同级，拖到中央可移入。
 class BlocksNav extends StatefulWidget {
   const BlocksNav({super.key});
 
@@ -28,6 +32,18 @@ class _BlocksNavState extends State<BlocksNav> {
   /// 正在内联输入的那一行：`folder:<id>` 重命名、`new-folder:<parentId>` 新建、
   /// `collection:<id>` / `new-collection` 同理、`tag:<name>` 改标签名。
   String? _editing;
+  // The floating drag label lives in a separate OverlayEntry from the folder tree.
+  final _folderDrop = ValueNotifier<_FolderDrop?>(null);
+
+  void _setFolderDrop(_FolderDrop? value) {
+    if (_folderDrop.value != value) setState(() => _folderDrop.value = value);
+  }
+
+  @override
+  void dispose() {
+    _folderDrop.dispose();
+    super.dispose();
+  }
 
   void _edit(String? v) => setState(() => _editing = v);
 
@@ -191,91 +207,192 @@ class _BlocksNavState extends State<BlocksNav> {
       if (f.hasChildren && !f.expanded) hidden.add(f.id);
     }
 
-    Widget folderRow(BlocksFolder f) {
+    final foldersById = {for (final f in visible) f.id: f};
+    final drop = _folderDrop.value;
+    final target = foldersById[drop?.id];
+    final zone = drop?.zone;
+    int? insertionIndex;
+    if (target != null && zone != _FolderZone.inside) {
+      var index = visible.indexOf(target);
+      if (zone == _FolderZone.after) {
+        // A sibling follows the entire visible subtree.
+        index++;
+        while (index < visible.length && visible[index].depth > target.depth) {
+          index++;
+        }
+      }
+      insertionIndex = index;
+    }
+
+    Widget folderRow(BlocksFolder f, int index, double gapBelow) {
       if (_editing == 'folder:${f.id}') {
-        return input(
-          f.name,
-          l10n.blocks_folderName,
-          (v) => a.onRenameFolder(f.id, v),
-          indent: f.depth * 16.0,
+        return Padding(
+          padding: EdgeInsets.only(bottom: gapBelow),
+          child: input(
+            f.name,
+            l10n.blocks_folderName,
+            (v) => a.onRenameFolder(f.id, v),
+            indent: f.depth * 16.0,
+          ),
         );
       }
-      final row = DragTarget<BlocksFolderDrag>(
-        onWillAcceptWithDetails: (e) => e.data.id != f.id,
-        onAcceptWithDetails: (e) => a.onMoveFolder(e.data.id, f.id),
-        builder: (context, folderCand, _) => cardTarget(
-          onDrop: (ids, at) => dropCards(ids, at, folderId: f.id),
-          builder: (hover) => UiNavItem(
-            key: Key('blocks-folder-${f.id}'),
-            indent: f.depth * 16.0,
-            leading: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SizedBox(
-                  width: 14,
-                  child: f.hasChildren
-                      ? UiPressable(
-                          key: Key('blocks-folder-toggle-${f.id}'),
-                          onTap: () => a.onToggleFolder(f.id, !f.expanded),
-                          builder: (_, h) => UiGlyph(
-                            f.expanded
-                                ? UiGlyphs.chevronDown
-                                : UiGlyphs.chevronRight,
-                            size: 12,
-                            color: h ? c.ink : c.faint,
-                          ),
-                        )
-                      : null,
+      bool accepts(BlocksFolderDrag drag) {
+        for (
+          BlocksFolder? parent = f;
+          parent != null;
+          parent = foldersById[parent.parentId]
+        ) {
+          if (parent.id == drag.id) return false;
+        }
+        return true;
+      }
+
+      final inside = target?.id == f.id && zone == _FolderZone.inside;
+      final row = Builder(
+        builder: (rowContext) {
+          _FolderZone zoneAt(Offset global) {
+            final box = rowContext.findRenderObject()! as RenderBox;
+            final y = box.globalToLocal(global).dy;
+            if (y < 6) return _FolderZone.before;
+            if (y >= box.size.height - 6) return _FolderZone.after;
+            return _FolderZone.inside;
+          }
+
+          return DragTarget<BlocksFolderDrag>(
+            onWillAcceptWithDetails: (e) => accepts(e.data),
+            onMove: (e) {
+              if (accepts(e.data)) {
+                _setFolderDrop((id: f.id, zone: zoneAt(e.offset)));
+              }
+            },
+            onLeave: (_) {
+              if (_folderDrop.value?.id == f.id) _setFolderDrop(null);
+            },
+            onAcceptWithDetails: (e) {
+              final landing = zoneAt(e.offset);
+              _setFolderDrop(null);
+              if (landing == _FolderZone.inside) {
+                a.onMoveFolder(e.data.id, f.id);
+              } else {
+                a.onInsertFolderBeside(
+                  e.data.id,
+                  f.id,
+                  after: landing == _FolderZone.after,
+                );
+              }
+            },
+            builder: (context, _, _) => cardTarget(
+              onDrop: (ids, at) => dropCards(ids, at, folderId: f.id),
+              builder: (hover) => Padding(
+                padding: EdgeInsets.only(bottom: gapBelow),
+                child: UiNavItem(
+                  key: Key('blocks-folder-${f.id}'),
+                  indent: f.depth * 16.0,
+                  leading: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        width: 14,
+                        child: f.hasChildren
+                            ? UiPressable(
+                                key: Key('blocks-folder-toggle-${f.id}'),
+                                onTap: () =>
+                                    a.onToggleFolder(f.id, !f.expanded),
+                                builder: (_, h) => UiGlyph(
+                                  f.expanded
+                                      ? UiGlyphs.chevronDown
+                                      : UiGlyphs.chevronRight,
+                                  size: 12,
+                                  color: h ? c.ink : c.faint,
+                                ),
+                              )
+                            : null,
+                      ),
+                      const SizedBox(width: 2),
+                      UiGlyph(
+                        UiGlyphs.folder,
+                        size: 15,
+                        color: hover || inside ? c.accent : c.muted,
+                      ),
+                    ],
+                  ),
+                  label: f.name,
+                  selected: d.scope == BlocksScope.folder(f.id),
+                  drop: hover || inside,
+                  suppressHighlight:
+                      insertionIndex != null &&
+                      (index == insertionIndex ||
+                          index + 1 == insertionIndex ||
+                          f.id == target?.id),
+                  trailing: UiNavCount(f.count),
+                  onTap: () => a.onScopeChanged(BlocksScope.folder(f.id)),
+                  onSecondaryTap: (at) =>
+                      ctrl.openMenu(UiPopoverAnchor(at), folderMenu(f)),
                 ),
-                const SizedBox(width: 2),
-                UiGlyph(
-                  UiGlyphs.folder,
-                  size: 15,
-                  color: hover || folderCand.isNotEmpty ? c.accent : c.muted,
-                ),
-              ],
+              ),
             ),
-            label: f.name,
-            selected: d.scope == BlocksScope.folder(f.id),
-            drop: hover || folderCand.isNotEmpty,
-            trailing: UiNavCount(f.count),
-            onTap: () => a.onScopeChanged(BlocksScope.folder(f.id)),
-            onSecondaryTap: (at) =>
-                ctrl.openMenu(UiPopoverAnchor(at), folderMenu(f)),
-          ),
-        ),
+          );
+        },
       );
       return Draggable<BlocksFolderDrag>(
+        key: ValueKey(f.id),
         data: BlocksFolderDrag(f.id),
         dragAnchorStrategy: pointerDragAnchorStrategy,
-        feedback: Material(
-          type: MaterialType.transparency,
-          child: Container(
-            height: 28,
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            decoration: BoxDecoration(
-              color: c.raised,
-              borderRadius: BorderRadius.circular(7),
-              border: Border.all(color: c.line),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x24000000),
-                  blurRadius: 12,
-                  offset: Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              spacing: 6,
-              children: [
-                UiGlyph(UiGlyphs.folder, size: 14, color: c.muted),
-                Text(f.name, style: UiText.sans(12.5, color: c.ink)),
-              ],
+        feedback: ValueListenableBuilder(
+          valueListenable: _folderDrop,
+          builder: (_, drop, label) =>
+              drop == null || drop.zone == _FolderZone.inside
+              ? label!
+              : const SizedBox.shrink(),
+          child: Material(
+            type: MaterialType.transparency,
+            child: Container(
+              height: 28,
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              decoration: BoxDecoration(
+                color: c.raised,
+                borderRadius: BorderRadius.circular(7),
+                border: Border.all(color: c.line),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x24000000),
+                    blurRadius: 12,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                spacing: 6,
+                children: [
+                  UiGlyph(UiGlyphs.folder, size: 14, color: c.muted),
+                  Text(f.name, style: UiText.sans(12.5, color: c.ink)),
+                ],
+              ),
             ),
           ),
         ),
-        child: row,
+        child: Stack(
+          children: [
+            row,
+            if (target != null &&
+                insertionIndex ==
+                    (zone == _FolderZone.before ? index : index + 1))
+              Positioned(
+                left: 18 + target.depth * 16.0,
+                right: 8,
+                top: zone == _FolderZone.before ? 0 : null,
+                bottom: zone == _FolderZone.after ? 0 : null,
+                height: 2,
+                child: IgnorePointer(
+                  child: ColoredBox(
+                    key: const Key('blocks-folder-insertion-line'),
+                    color: c.brand,
+                  ),
+                ),
+              ),
+          ],
+        ),
       );
     }
 
@@ -411,21 +528,36 @@ class _BlocksNavState extends State<BlocksNav> {
           ),
           label: l10n.blocks_uncategorized,
           selected: d.scope == const BlocksScope.uncategorized(),
+          suppressHighlight: insertionIndex == 0,
           drop: hover,
           trailing: UiNavCount(empty ? null : d.counts.uncategorized),
           onTap: () => a.onScopeChanged(const BlocksScope.uncategorized()),
         ),
       ),
-      for (final f in visible) ...[
-        folderRow(f),
-        if (newFolderParent == f.id)
-          input(
-            '',
-            l10n.blocks_folderName,
-            (v) => a.onCreateFolder(v, parentId: f.id),
-            indent: (f.depth + 1) * 16.0,
-          ),
-      ],
+      if (visible.isNotEmpty)
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (final (index, f) in visible.indexed) ...[
+              // Include the one-pixel separator in the row's drag hit area.
+              folderRow(
+                f,
+                index,
+                f != visible.last || newFolderParent == f.id ? 1 : 0,
+              ),
+              if (newFolderParent == f.id)
+                Padding(
+                  padding: EdgeInsets.only(bottom: f == visible.last ? 0 : 1),
+                  child: input(
+                    '',
+                    l10n.blocks_folderName,
+                    (v) => a.onCreateFolder(v, parentId: f.id),
+                    indent: (f.depth + 1) * 16.0,
+                  ),
+                ),
+            ],
+          ],
+        ),
       if (newFolderParent == '')
         input('', l10n.blocks_folderName, (v) => a.onCreateFolder(v)),
       if (d.tags.isNotEmpty) ...[

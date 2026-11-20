@@ -25,7 +25,7 @@ async function fixture({ mode = 'readonly', tool = 'write', params = { path: 'ta
     cwd: join(root, 'workspace'), agentDir: join(root, 'agent'), systemPrompt: 'Synthetic permission test.',
     config: { providerId: 'permissions', modelId: 'test', protocol: 'openaiChatCompletions', baseUrl: 'http://127.0.0.1:' + server.address().port, tools: true,
       permissionMode: mode, permissionLabels: { title: 'APPROVE', once: 'ONCE', session: 'SESSION', deny: 'DENY' } },
-    extraToolNames: ['snapshot', 'gallery_manage'],
+    extraToolNames: ['snapshot', 'gallery_manage', 'online_gallery'],
     executeTool: async (name, id, input, signal) => {
       calls.push({ name, id, input });
       if (execute) return execute(name, id, input, signal);
@@ -110,6 +110,18 @@ test('official CodeMode has no direct Node, file or network APIs', async () => {
     assert.match(text, /fetch[^a-z]+undefined/);
     assert.match(text, /blocked[^a-z]+true/);
   } finally { await f.close(); }
+});
+
+test('read-only CodeMode permits online gallery search and blocks downloads', async () => {
+  for (const action of ['search', 'download']) {
+    const f = await fixture({tool:'codemode', params:{code:
+      'text(await tools.mcp__nai_studio__online_gallery({action:' + JSON.stringify(action) + '}));'}});
+    try {
+      await f.session.prompt('Use the synthetic online gallery tool.');
+      assert.deepEqual(f.calls.map(call => call.name), action === 'search' ? ['online_gallery'] : []);
+      if (action === 'download') assert.match(JSON.stringify(f.session.messages), /read.only|readonly/i);
+    } finally { await f.close(); }
+  }
 });
 
 test('auto mode requires approval for a nested gallery deletion', async () => {

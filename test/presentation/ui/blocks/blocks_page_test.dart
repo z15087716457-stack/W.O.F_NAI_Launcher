@@ -15,10 +15,12 @@ import 'package:nai_launcher/presentation/ui/blocks/blocks_quick.dart';
 import 'package:nai_launcher/presentation/ui/kit/ui_block_pill.dart';
 
 import '../../../helpers/studio_capture_fonts.dart';
+import '../../../helpers/uiux_frontend_capture.dart';
 import 'blocks_test_harness.dart';
 
 void main() {
-  if (Platform.environment['CAPTURE_BLOCKS_PANEL'] != null) {
+  if (Platform.environment['CAPTURE_BLOCKS_PANEL'] != null ||
+      Platform.environment['UIUX_FRONTEND_CAPTURE_DIR'] != null) {
     setUpAll(loadStudioCaptureFonts);
   }
   late RecordingBlocks rec;
@@ -39,10 +41,12 @@ void main() {
     WidgetTester t, {
     BlocksLibraryViewData? data,
     double window = 1600,
+    bool dark = false,
   }) => pumpBlocks(
     t,
     BlocksLibraryPage(data: data ?? view(), actions: rec.library),
     window: window,
+    dark: dark,
   );
 
   Future<void> key(
@@ -347,6 +351,121 @@ void main() {
         ),
         ['1999 改', 'color', 'dots'],
       );
+    });
+
+    testWidgets('folder edges mark the saved sibling depth and center nests', (
+      t,
+    ) async {
+      await lib(
+        t,
+        dark: true,
+        data: BlocksLibraryViewData(
+          now: BlocksFixture.now,
+          scope: const BlocksScope.folder('B'),
+          folders: const [
+            BlocksFolder(
+              id: 'A',
+              name: '画师块',
+              count: 0,
+              hasChildren: true,
+              expanded: true,
+            ),
+            BlocksFolder(
+              id: 'child',
+              name: '个人喜爱',
+              count: 0,
+              parentId: 'A',
+              depth: 1,
+            ),
+            BlocksFolder(id: 'B', name: '画风', count: 0),
+          ],
+        ),
+      );
+      Finder row(String id) => find.byKey(Key('blocks-folder-$id'));
+      final line = find.byKey(const Key('blocks-folder-insertion-line'));
+      Color? fill(String id) {
+        final container = t.widget<Container>(
+          find.descendant(of: row(id), matching: find.byType(Container)).first,
+        );
+        return (container.decoration as BoxDecoration?)?.color;
+      }
+
+      final g = await t.createGesture(kind: PointerDeviceKind.mouse);
+      await g.addPointer();
+      addTearDown(g.removePointer);
+      Future<void> drag(String source, Offset to) async {
+        final from = t.getCenter(row(source));
+        await g.moveTo(from);
+        await g.down(from);
+        await g.moveBy(const Offset(20, 0));
+        await g.moveTo(to);
+        await t.pump();
+      }
+
+      final a = t.getRect(row('A'));
+      final child = t.getRect(row('child'));
+      final draggedName = find.text('画风');
+      final restingLabels = draggedName.evaluate().length;
+      final selectedFill = fill('B');
+      expect(selectedFill, isNotNull);
+      await drag('B', a.bottomCenter - const Offset(0, 2));
+      expect(t.getRect(line).bottom, t.getRect(row('B')).top);
+      expect(t.getSize(line).height, 2);
+      expect(draggedName, findsNWidgets(restingLabels));
+      expect(fill('B'), isNull);
+      expect(fill('A'), isNull);
+      final rootLeft = t.getRect(line).left;
+      await captureUiuxRegion(
+        t,
+        find.byKey(const Key('blocks-capture')),
+        'folder-insert',
+        a.expandToInclude(t.getRect(row('B'))).inflate(8),
+      );
+      await g.up();
+      await t.pump();
+      expect(rec.calls.last, 'insertBeside:B:A:true');
+      expect(draggedName, findsNWidgets(restingLabels));
+      expect(fill('B'), selectedFill);
+      await drag('B', child.topCenter + const Offset(0, 2));
+      expect(t.getRect(line).top, child.top);
+      expect(fill('child'), isNull);
+      expect(fill('B'), selectedFill);
+      expect(t.getRect(line).left, rootLeft + 16);
+      await g.moveTo(child.bottomCenter - const Offset(0, 2));
+      await t.pump();
+      expect(fill('child'), isNull);
+      expect(fill('B'), isNull);
+      await captureUiuxRegion(
+        t,
+        find.byKey(const Key('blocks-capture')),
+        'folder-gap',
+        a.expandToInclude(t.getRect(row('B'))).inflate(8),
+      );
+      await g.moveTo(child.bottomCenter + const Offset(0, .5));
+      await t.pump();
+      expect(t.getRect(line).bottom, t.getRect(row('B')).top);
+      expect(t.getRect(line).left, rootLeft + 16);
+      await g.moveTo(child.center);
+      await t.pump();
+      expect(line, findsNothing);
+      expect(fill('child'), isNotNull);
+      expect(draggedName, findsNWidgets(restingLabels + 1));
+      expect(fill('B'), selectedFill);
+      await g.moveTo(child.bottomCenter - const Offset(0, 2));
+      await t.pump();
+      expect(line, findsOneWidget);
+      expect(draggedName, findsNWidgets(restingLabels));
+      await g.moveTo(child.center);
+      await t.pump();
+      await g.up();
+      await t.pump();
+      expect(rec.calls.last, 'moveFolder:B:child');
+      final calls = rec.calls.length;
+      await drag('A', child.topCenter + const Offset(0, 2));
+      expect(line, findsNothing);
+      await g.up();
+      await t.pump();
+      expect(rec.calls.length, calls);
     });
 
     testWidgets('把卡片拖到文件夹：松手选移动或复制；拖到收藏集：加入', (t) async {

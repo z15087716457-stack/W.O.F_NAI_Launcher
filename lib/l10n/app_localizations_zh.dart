@@ -8485,12 +8485,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String online_authorSaved(Object count, Object date) {
-    return '收藏了 $count 张 · 收藏作者于 $date';
-  }
-
-  @override
-  String get online_authorAllWorks => '在 AI TAG 看 TA 的全部作品';
+  String get online_authorAllWorks => '全部作品';
 
   @override
   String get online_unfavAuthor => '取消收藏作者';
@@ -18618,6 +18613,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ag_psNegative => '负面';
 
   @override
+  String get ag_psPromptsOnly => '只导入提示词';
+
+  @override
+  String get ag_psWithSettings => '连同参数导入';
+
+  @override
   String get ag_psImport => '导入画布';
 
   @override
@@ -28006,12 +28007,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
-  String online_authorSaved(Object count, Object date) {
-    return '收藏了 $count 張 · 收藏作者於 $date';
-  }
-
-  @override
-  String get online_authorAllWorks => '在 AI TAG 看 TA 的全部作品';
+  String get online_authorAllWorks => '全部作品';
 
   @override
   String get online_unfavAuthor => '取消收藏作者';
@@ -38137,6 +38133,12 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get ag_psNegative => '負面';
+
+  @override
+  String get ag_psPromptsOnly => '只匯入提示詞';
+
+  @override
+  String get ag_psWithSettings => '連同參數匯入';
 
   @override
   String get ag_psImport => '匯入畫布';

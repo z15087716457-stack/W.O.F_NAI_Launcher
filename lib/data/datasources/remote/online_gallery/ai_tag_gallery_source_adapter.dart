@@ -356,8 +356,6 @@ class AiTagGallerySourceAdapter implements GallerySourceAdapter {
       return GalleryDetail(
         item: detailedItem,
         media: List.unmodifiable(media),
-        prompt: media.first.prompt,
-        negativePrompt: media.first.negativePrompt,
         description: detailedItem.description,
         rawSourceMetadata: payload.map(
           (key, value) => MapEntry(key, value as Object?),

@@ -491,18 +491,18 @@ class GalleryDetail {
   const GalleryDetail({
     required this.item,
     required this.media,
-    this.prompt,
-    this.negativePrompt,
     this.description,
     this.rawSourceMetadata = const {},
   });
 
   final GalleryItem item;
   final List<GalleryMedia> media;
-  final String? prompt;
-  final String? negativePrompt;
   final String? description;
   final Map<String, dynamic> rawSourceMetadata;
+
+  String? promptForMedia(int index) => item.sourceId == GallerySourceId.aiTag
+      ? media.elementAtOrNull(index)?.prompt
+      : item.tags.join(', ');
 }
 
 class GalleryPage {

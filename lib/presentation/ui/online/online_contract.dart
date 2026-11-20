@@ -35,7 +35,7 @@ enum OnlineSendMode {
   promptOnly,
 
   /// 提示词 + 生成参数：走本地图库“复用参数”同一条链
-  /// （`MetadataImportCoordinator.applyOfficialSelection`）。只有 [OnlineDetail.canSendParams] 时可选。
+  /// （`MetadataImportCoordinator.applyOfficialSelection`）。当前图片有 [OnlineMedia.params] 时可选。
   withParams,
 }
 
@@ -180,6 +180,9 @@ class OnlineViewData {
   /// 设置里的“减少动态效果”；系统级的界面自己读 `MediaQuery`。
   final bool reducedMotion;
 
+  bool showsAuthorOf(OnlineWork work) =>
+      work.authorId != null && favorites?.authorId == work.authorId;
+
   OnlineSourceStatus get status => sources.firstWhere(
     (s) => s.source == source,
     orElse: () => OnlineSourceStatus(source: source),
@@ -308,7 +311,7 @@ class OnlineFavorites {
   /// 正在看的子集：null = 全部，[ungroupedId] = 未分组，其余是子集 id。
   final String? collectionId;
 
-  /// 正在只看的收藏作者；非 null 时卡片墙上方显示作者头部，优先于 [collectionId]。
+  /// 正在浏览在线作品的收藏作者。返回收藏后恢复 [collectionId]。
   final int? authorId;
 
   OnlineFavoriteAuthor? get author =>
@@ -332,20 +335,18 @@ class OnlineFavoriteAuthor {
   const OnlineFavoriteAuthor({
     required this.id,
     required this.name,
-    this.count = 0,
+    this.workCount,
     this.avatar,
-    this.savedAt,
   });
 
   final int id;
   final String name;
 
-  /// 收藏里这个作者的作品数。
-  final int count;
+  /// 图源返回的作者作品总数，尚未获取时为空。
+  final int? workCount;
 
   /// 头像：用收藏里这个作者第一张作品的缩略图；null 时界面写首字。
   final ImageProvider? avatar;
-  final DateTime? savedAt;
 }
 
 @immutable
@@ -492,9 +493,6 @@ class OnlineDetail {
     this.error,
     this.media = const [],
     this.createdAt,
-    this.prompt,
-    this.negative,
-    this.params,
     this.siteTags = const [],
     this.tagGroups = const {},
     this.fileType,
@@ -502,7 +500,6 @@ class OnlineDetail {
     this.authorFavorited = false,
     this.authorSavedCount = 0,
     this.authorAvatar,
-    this.canSendParams = false,
   });
 
   final String key;
@@ -514,13 +511,6 @@ class OnlineDetail {
   /// 这件作品的所有图（AI TAG 多图；Danbooru 系只有一张）。
   final List<OnlineMedia> media;
   final DateTime? createdAt;
-
-  /// 正向 / 负面。Danbooru 系没有，界面显示分组标签。
-  final String? prompt;
-  final String? negative;
-
-  /// 生成参数（AI TAG 解析出的 `NaiImageMetadata`）；null 时不显示参数格。
-  final OnlineParams? params;
 
   /// AI TAG 站点标签（点一下加入作品搜索）。
   final List<String> siteTags;
@@ -537,19 +527,30 @@ class OnlineDetail {
   final int authorSavedCount;
   final ImageProvider? authorAvatar;
 
-  /// “提示词 + 生成参数”可用（有 `naiMetadata`）。
-  final bool canSendParams;
+  bool canSendParams(int mediaIndex) =>
+      media.elementAtOrNull(mediaIndex)?.params != null;
 }
 
 @immutable
 class OnlineMedia {
-  const OnlineMedia({this.thumb, this.image, this.width = 0, this.height = 0});
+  const OnlineMedia({
+    this.thumb,
+    this.image,
+    this.width = 0,
+    this.height = 0,
+    this.prompt,
+    this.negative,
+    this.params,
+  });
 
   /// 缩略图（胶片条）和大图（`displayUrl`）。
   final ImageProvider? thumb;
   final ImageProvider? image;
   final int width;
   final int height;
+  final String? prompt;
+  final String? negative;
+  final OnlineParams? params;
 
   double get aspect => width > 0 && height > 0 ? width / height : 1;
 }
@@ -558,6 +559,7 @@ class OnlineMedia {
 class OnlineParams {
   const OnlineParams({
     this.model,
+    this.shortModel,
     this.width,
     this.height,
     this.seed,
@@ -568,6 +570,7 @@ class OnlineParams {
 
   /// 显示名（`NAI Diffusion V4.5 Full`）。
   final String? model;
+  final String? shortModel;
   final int? width;
   final int? height;
   final int? seed;
@@ -645,7 +648,6 @@ class OnlineActions {
     required this.onRenameCollection,
     required this.onDeleteCollection,
     required this.onMoveToCollection,
-    required this.onAuthorWorks,
     required this.onUnfavoriteAuthor,
     required this.onReturn,
     required this.onBlacklistAdd,
@@ -655,6 +657,7 @@ class OnlineActions {
     required this.onSidebarChanged,
     required this.onInspectorChanged,
     required this.onSelect,
+    this.onMediaChanged,
     required this.onLoadMore,
     required this.onRetryPage,
     required this.onRetry,
@@ -709,7 +712,7 @@ class OnlineActions {
   final ValueChanged<OnlineRankScale> onRankScaleChanged;
   final ValueChanged<DateTime> onRankDateChanged;
 
-  /// AI TAG 收藏：选子集（null 全部，[OnlineFavorites.ungroupedId] 未分组）/ 只看某个收藏作者。
+  /// AI TAG 收藏：选子集（null 全部，[OnlineFavorites.ungroupedId] 未分组）/ 打开收藏作者的在线作品页。
   final ValueChanged<String?> onCollectionSelected;
   final ValueChanged<int> onAuthorSelected;
 
@@ -722,8 +725,7 @@ class OnlineActions {
   final void Function(List<String> keys, String? collectionId)
   onMoveToCollection;
 
-  /// 作者头部：在 AI TAG 看 TA 的全部作品（以前的“查看此作者”）/ 取消收藏作者。
-  final ValueChanged<int> onAuthorWorks;
+  /// 从作者作品页取消收藏作者。
   final ValueChanged<int> onUnfavoriteAuthor;
 
   /// 返回只看 TA 之前的结果（`returnFromAiTagAuthorSearch`）。
@@ -739,6 +741,7 @@ class OnlineActions {
 
   /// 单击卡片 / 方向键 / 大图里切作品：检查器换成这张，接线方开始拉详情。
   final ValueChanged<String> onSelect;
+  final void Function(String key, int index)? onMediaChanged;
 
   /// 滚到距底 200 以内（`loadMore`）。界面在 [OnlineList.hasMore] 且没在加载时才回调。
   final VoidCallback onLoadMore;
@@ -814,7 +817,6 @@ class OnlineActions {
     onRenameCollection: (_, _) {},
     onDeleteCollection: (_) {},
     onMoveToCollection: (_, _) {},
-    onAuthorWorks: (_) {},
     onUnfavoriteAuthor: (_) {},
     onReturn: () {},
     onBlacklistAdd: (_) {},

@@ -15,6 +15,8 @@ import 'package:nai_launcher/data/repositories/prompt_block_repository.dart';
 import 'package:nai_launcher/data/services/nai_agent/agent_workspace_store.dart';
 import 'package:nai_launcher/data/services/vibe_library_storage_service.dart';
 import 'package:nai_launcher/presentation/providers/character_prompt_provider.dart';
+import 'package:nai_launcher/presentation/providers/quality_preset_provider.dart';
+import 'package:nai_launcher/presentation/providers/uc_preset_provider.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
 import 'package:nai_launcher/presentation/providers/krita/bridge_draft_snapshot.dart';
 import 'package:nai_launcher/presentation/providers/krita/bridge_draft_writer.dart';
@@ -65,6 +67,113 @@ void main() {
     await Hive.close();
     await root.delete(recursive: true);
   });
+  test(
+    'independent scene replaces the whole cast, optionally applies only supplied settings and undoes both',
+    () async {
+      final service = container.read(agentPromptSetActionsProvider);
+      final params = container.read(generationParamsNotifierProvider.notifier);
+      params.updateModel(ImageModels.animeDiffusionV45Full);
+      params.updateSeed(145);
+      final set = <String, dynamic>{
+        'set_id': 'test',
+        'items': [
+          {
+            'card_id': 'cast',
+            'title': 'Cast',
+            'main': 'two people',
+            'negative': 'text',
+            'characters': ['first', 'second'],
+            'character_negatives': ['hat', 'scarf'],
+            'use_coords': true,
+            'positions': [
+              {'x': .2, 'y': .4},
+              {'x': .8, 'y': .7},
+            ],
+            'generation': {
+              'width': 1216,
+              'seed': 0,
+              'steps': 24,
+              'quality_preset': 'light',
+              'uc_preset': 1,
+            },
+          },
+          {
+            'card_id': 'empty',
+            'title': 'Landscape',
+            'main': 'lake',
+            'characters': [],
+            'use_coords': false,
+            'generation': {'seed': 6},
+          },
+        ],
+      };
+      final originalHeight = container
+          .read(generationParamsNotifierProvider)
+          .height;
+      await service.importItem(workspace, set, 0, (_) {});
+      expect(container.read(generationParamsNotifierProvider).seed, 145);
+      final cast = container.read(characterPromptNotifierProvider);
+      expect(cast.characters.map((c) => c.negativePrompt), ['hat', 'scarf']);
+      expect(cast.characters.last.customPosition!.column, .8);
+      container
+          .read(qualityPresetNotifierProvider.notifier)
+          .setCustomEntry('test-quality');
+      container
+          .read(ucPresetNotifierProvider.notifier)
+          .setCustomEntry('test-uc');
+      final withSettings = (await service.importItem(
+        workspace,
+        set,
+        0,
+        (_) {},
+        includeSettings: true,
+      ))!;
+      final applied = container.read(generationParamsNotifierProvider);
+      expect(
+        [applied.width, applied.height, applied.seed, applied.steps],
+        [1216, originalHeight, 0, 24],
+      );
+      expect(
+        await container
+            .read(agentDiffUndoProvider)
+            .restoreAll(withSettings.restores, workspace.agentDirectory),
+        true,
+      );
+      expect(container.read(generationParamsNotifierProvider).seed, 145);
+      expect(
+        container.read(qualityPresetNotifierProvider).customEntryId,
+        'test-quality',
+      );
+      expect(container.read(ucPresetNotifierProvider).customEntryId, 'test-uc');
+      final empty = (await service.importItem(
+        workspace,
+        set,
+        1,
+        (_) {},
+        includeSettings: true,
+      ))!;
+      expect(
+        container.read(characterPromptNotifierProvider).characters,
+        isEmpty,
+      );
+      expect(
+        container.read(characterPromptNotifierProvider).globalAiChoice,
+        true,
+      );
+      expect(container.read(generationParamsNotifierProvider).seed, 6);
+      expect(
+        await container
+            .read(agentDiffUndoProvider)
+            .restoreAll(empty.restores, workspace.agentDirectory),
+        true,
+      );
+      expect(
+        container.read(characterPromptNotifierProvider).characters,
+        cast.characters,
+      );
+      expect(container.read(generationParamsNotifierProvider).seed, 145);
+    },
+  );
   test(
     'import touches only prompts; preserves character settings/extras and undo restores all pill documents',
     () async {

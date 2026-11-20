@@ -110,7 +110,7 @@ void main() {
       backupDraft: (_) async => '',
       writeDraft: (_) => [],
       readImage: (_) => null,
-      loadImageById: images.load,
+      loadImageById: (id, token, {preview = false}) => images.load(id, token),
       domainTools: {
         'wiki_query': (p, t) => knowledge['wiki_query']!('wiki_query', p, t),
       },

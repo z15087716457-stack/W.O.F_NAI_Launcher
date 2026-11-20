@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/api_constants.dart';
+import '../../core/enums/quality_tag_preset.dart';
 import '../../core/constants/model_display.dart';
 import '../../core/constants/model_spec.dart';
 import '../../core/shortcuts/default_shortcuts.dart';
@@ -363,8 +364,21 @@ final generationViewDataProvider = Provider.autoDispose
             characters: spec.characterPrompts ? projectedCharacters : const [],
             resolveAliases: resolver.resolveAliases,
           );
+      final positivePayload = payload(PromptTokenCountTarget.positive);
+      final negativePayload = payload(PromptTokenCountTarget.negative);
+      final showUc = spec.customNegativePrompt && negative;
+      final presetText = (showUc ? negativePayload : positivePayload)
+          .breakdown[1]
+          .texts
+          .join(', ')
+          .trim();
+      final nativePrefix =
+          quality.usesNativePreset &&
+          QualityTags.prependsToPrompt(params.model);
       List<GenPreviewSection> sections(PromptTokenCountTarget target) {
-        final content = payload(target);
+        final content = target == PromptTokenCountTarget.positive
+            ? positivePayload
+            : negativePayload;
         return [
           GenPreviewSection(
             label: target == PromptTokenCountTarget.positive
@@ -494,7 +508,17 @@ final generationViewDataProvider = Provider.autoDispose
         ),
         layout: generationLayoutView(layout),
         prompt: GenPromptData(
-          negative: spec.customNegativePrompt && negative,
+          negative: showUc,
+          presetHint: presetText.isEmpty
+              ? null
+              : GenPreviewSection(
+                  label: showUc
+                      ? l.ucPreset_addToNegative
+                      : nativePrefix
+                      ? l.qualityTags_addToStart
+                      : l.qualityTags_addToEnd,
+                  text: presetText,
+                ),
           negativeSupported: spec.customNegativePrompt,
           positiveTokens: tokens(positive),
           negativeTokens: tokens(negativeUsage),
@@ -508,6 +532,8 @@ final generationViewDataProvider = Provider.autoDispose
           ],
           qualityPreset: quality.isCustom
               ? 'block:${quality.customEntryId}'
+              : !spec.isV5 && quality.nativePreset == QualityTagPreset.light
+              ? QualityTagPreset.standard.name
               : quality.nativePreset.name,
           ucPresets: [
             for (final type in UcPresets.getPresetsForModel(params.model).keys)
@@ -518,7 +544,10 @@ final generationViewDataProvider = Provider.autoDispose
           ],
           ucPreset: uc.isCustom
               ? 'block:${uc.customEntryId}'
-              : uc.presetType.name,
+              : UcPresets.effectiveTypeForModel(
+                  params.model,
+                  uc.presetType,
+                ).name,
           transparent: spec.transparency ? params.transparentBackground : null,
           positivePreview: sections(PromptTokenCountTarget.positive),
           negativePreview: sections(PromptTokenCountTarget.negative),

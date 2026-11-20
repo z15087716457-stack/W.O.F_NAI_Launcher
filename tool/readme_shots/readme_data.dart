@@ -445,27 +445,27 @@ class ReadmeData {
       selectedKey: works.first.key,
       detail: OnlineDetail(
         key: works.first.key,
-        prompt: prompt,
-        negative: negative,
         siteTags: const ['starry sky', 'long hair', 'flowers'],
-        canSendParams: true,
         media: [
           OnlineMedia(
             image: works.first.thumb,
             thumb: works.first.thumb,
             width: 832,
             height: 1216,
+            prompt: prompt,
+            negative: negative,
+            params: const OnlineParams(
+              model: 'V5 Full',
+              shortModel: 'V5',
+              width: 832,
+              height: 1216,
+              seed: 194200001,
+              steps: 28,
+              cfg: 5,
+              sampler: 'Euler Ancestral',
+            ),
           ),
         ],
-        params: const OnlineParams(
-          model: 'V5 Full',
-          width: 832,
-          height: 1216,
-          seed: 194200001,
-          steps: 28,
-          cfg: 5,
-          sampler: 'Euler Ancestral',
-        ),
       ),
     );
   }

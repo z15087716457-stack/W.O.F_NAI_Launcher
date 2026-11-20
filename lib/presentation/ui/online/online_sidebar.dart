@@ -47,7 +47,9 @@ class _OnlineSidebarState extends State<OnlineSidebar> {
     final data = scope.data;
     final a = scope.actions;
     final status = data.status;
-    final localFav = data.mode == OnlineMode.favorites && status.favoritesLocal;
+    final localFav =
+        (data.mode == OnlineMode.favorites || data.favorites?.author != null) &&
+        status.favoritesLocal;
     return UiPopover(
       anchor: _pop == _SidePop.none ? null : _anchor,
       onDismiss: _close,
@@ -305,7 +307,6 @@ class _OnlineSidebarState extends State<OnlineSidebar> {
           leading: OnlineAvatar(name: au.name, image: au.avatar, size: 22),
           label: au.name,
           selected: fav.authorId == au.id,
-          trailing: count(au.count),
           onTap: () => a.onAuthorSelected(au.id),
         ),
       const SizedBox(height: 8),
@@ -400,6 +401,8 @@ class _ModeList extends StatelessWidget {
     final l10n = context.l10n;
     final s = data.status;
     final ai = s.promptQuery;
+    final profile = data.favorites?.author != null;
+    final selectedMode = profile ? OnlineMode.favorites : data.mode;
     Widget item(
       OnlineMode mode,
       String glyph,
@@ -412,14 +415,14 @@ class _ModeList extends StatelessWidget {
         key: Key('online-mode-${mode.name}'),
         glyph: glyph,
         label: label,
-        selected: data.mode == mode,
+        selected: selectedMode == mode,
         disabled: !enabled,
         trailing:
             trailing ??
             (reason == null
                 ? null
                 : Text(reason, style: UiText.sans(11, color: c.faint))),
-        onTap: enabled && data.mode != mode
+        onTap: enabled && (selectedMode != mode || profile)
             ? () => actions.onModeChanged(mode)
             : (enabled ? () {} : null),
       );

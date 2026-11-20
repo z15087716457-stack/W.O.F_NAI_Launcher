@@ -10,12 +10,13 @@ const readActions = {
   snapshot: new Set(['list', 'read']),
   reference_manage: new Set(['list']),
   reference_library: new Set(['query', 'read', 'categories']),
+  online_gallery: new Set(['current', 'search', 'detail']),
   gallery_manage: new Set(['read', 'trash', 'collections', 'collection_members', 'folders']),
   image_tool: new Set(['list', 'status', 'cancel', 'prepare']),
   image_generate: new Set(['prepare', 'status', 'cancel']),
   explore_manage: new Set(['list', 'read', 'status', 'prepare', 'pause', 'cancel']),
 };
-const edits = new Set(['write', 'edit', 'prompt_update', 'prompt_set', 'snapshot', 'block_manage', 'settings_update', 'reference_manage', 'reference_library', 'gallery_manage', 'image_tool', 'image_generate', 'explore_manage']);
+const edits = new Set(['write', 'edit', 'prompt_update', 'prompt_set', 'snapshot', 'block_manage', 'settings_update', 'reference_manage', 'reference_library', 'gallery_manage', 'online_gallery', 'image_tool', 'image_generate', 'explore_manage']);
 const destructive = /(?:^|_)(?:delete|delete_empty|move|move_file|remove)(?:$|_)/;
 
 export async function canonical(path) {

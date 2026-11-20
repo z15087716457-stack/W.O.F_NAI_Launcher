@@ -365,7 +365,9 @@ PromptTokenCountPayload _buildNegativeTokenCountPayload({
       qualityContent ?? _qualityPresetContent(model, resolvedQualityMode);
   final resolvedUcPresetContent =
       ucPresetContent ??
-      UcPresets.getPresetContent(model, resolvedUcPresetType);
+      (useCustomUcPreset
+          ? ''
+          : UcPresets.getPresetContent(model, resolvedUcPresetType));
   final presetResolution = resolvePromptPresetSettings(
     model: model,
     prompt: resolvedPrompt,
@@ -402,7 +404,12 @@ PromptTokenCountPayload _buildNegativeTokenCountPayload({
       ),
       PromptTokenCountBreakdownGroup(
         label: '负面预设',
-        texts: [resolvedUcPresetContent.trim()],
+        texts: [
+          UcPresets.filterForPositivePrompt(
+            resolvedUcPresetContent.trim(),
+            presetResolution.prompt,
+          ),
+        ],
       ),
       PromptTokenCountBreakdownGroup(label: '角色负面', texts: extraTexts),
     ],

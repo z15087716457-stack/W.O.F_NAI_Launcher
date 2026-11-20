@@ -51,15 +51,25 @@ const blockInlineKind = E(['temporary','translation']);
 const promptSetIcon = E(promptSetIcons);
 const promptSetPositions = Type.Optional(Type.Array(Type.Union([Type.Null(), Type.Object({
   x:Type.Number({minimum:0,maximum:1}), y:Type.Number({minimum:0,maximum:1})
-}, {additionalProperties:false})]), {maxItems:6}));
+}, {additionalProperties:false})]), {maxItems:32}));
+const cardCharacters = Type.Optional(Type.Array(Type.String({maxLength:8192}), {maxItems:32}));
+const promptCard = Type.Object({
+  card_id:Type.String({pattern:'^[A-Za-z0-9_-]{1,64}$'}), icon:promptSetIcon, title:Type.String({minLength:1,maxLength:40}),
+  note:Type.Optional(Type.String({maxLength:240})), main:Type.Optional(Type.String({maxLength:16384})),
+  negative:Type.Optional(Type.String({maxLength:16384})), characters:cardCharacters, character_negatives:cardCharacters,
+  use_coords:Type.Optional(Type.Boolean()), positions:promptSetPositions,
+  generation:Type.Optional(Type.Object({
+    model:Type.Optional(Type.String({minLength:1})), width:Type.Optional(Type.Integer({minimum:1,maximum:8192})), height:Type.Optional(Type.Integer({minimum:1,maximum:8192})),
+    steps:Type.Optional(Type.Integer({minimum:1,maximum:50})), cfg_scale:Type.Optional(Type.Number({minimum:0})),
+    sampler:Type.Optional(Type.String({minLength:1})), noise_schedule:Type.Optional(Type.String({minLength:1})),
+    cfg_rescale:Type.Optional(Type.Number({minimum:0,maximum:1})), seed:Type.Optional(Type.Integer({minimum:-1,maximum:4294967295})),
+    quality_preset:Type.Optional(E(['standard','light','none'])), uc_preset:Type.Optional(E([0,1,2,3,7,8,9])),
+    smea_auto:Type.Optional(Type.Boolean()), smea:Type.Optional(Type.Boolean()), smea_dyn:Type.Optional(Type.Boolean()), variety_plus:Type.Optional(Type.Boolean()),
+  }, {additionalProperties:false})),
+}, {additionalProperties:false});
 const promptSetContent = {kind: Type.String({minLength:1,maxLength:24}), kind_icon: promptSetIcon,
-      title: Type.String({minLength:1,maxLength:60}), unit: Type.String({minLength:1,maxLength:8}), ordered: Type.Boolean(),
-      shared: Type.Object({ positions: promptSetPositions, main: Type.Optional(Type.String({maxLength:2000})),
-        characters: Type.Optional(Type.Array(Type.String({maxLength:1000}), {maxItems:6})),
-        negative: Type.Optional(Type.String({maxLength:2000})) }),
-      items: Type.Array(Type.Object({positions:promptSetPositions, icon:promptSetIcon, title:Type.String({minLength:1,maxLength:40}),
-        note:Type.Optional(Type.String({maxLength:240})), main:Type.Optional(Type.String({maxLength:1000})),
-        characters:Type.Optional(Type.Array(Type.String({maxLength:600}), {maxItems:6}))}), {minItems:2,maxItems:24})};
+  title: Type.String({minLength:1,maxLength:60}), unit: Type.String({minLength:1,maxLength:8}), ordered: Type.Boolean(),
+  items:Type.Array(promptCard,{minItems:1,maxItems:24})};
 
 // Only names supplied by the production Dart binding are enabled. Usage guidance
 // lives in skills/nai-studio; schemas and descriptions stay beside the executors.
@@ -72,13 +82,12 @@ export const domainTools = [
       limit:Type.Optional(Type.Integer({minimum:1,maximum:50}))}, {additionalProperties:false}),
   },
   { name: 'prompt_set',
-    description: 'Create/read/update one 2–24-item prompt card. Put stable style/appearance/negative in shared and item differences in items; character additions align by index. Labels use the user\'s language; prompts use English before V5. Icons from the enum, repeats allowed. Update the same set_id with expected_revision and full content. Human Generate clicks authorize one item image; model runs follow the Studio confirmation policy. Fields and workflow: skills/nai-studio/references/prompt-sets.md.',
-    // One object instead of a create/update/read union: the content (with two 79-icon enums) is
-    // declared once. Dart enforces per-action requirements (set_id, expected_revision, content).
+    description: 'Create, read or update independent prompt cards with optional generation settings. On update, card replaces one card and items replaces the set. See skills/nai-studio/references/prompt-sets.md.',
     parameters: Type.Object({action:E(['create','update','read']),
       set_id:Type.Optional(Type.String({pattern:'^[a-f0-9]{12}$'})),
       expected_revision:Type.Optional(Type.Integer({minimum:1})),
-      ...Object.fromEntries(Object.entries(promptSetContent).map(([k,v])=>[k,Type.Optional(v)]))}),
+      card:Type.Optional(promptCard),
+      ...Object.fromEntries(Object.entries(promptSetContent).map(([k,v])=>[k,Type.Optional(v)]))},{additionalProperties:false}),
   },
   { name: 'snapshot',
     description: 'Save, list, read or restore complete Studio generation configurations (prompts, characters, blocks, references, source/mask, enhance/upscale settings). load needs expected_version from fresh studio_context(scope=draft) and backs up first; changed library blocks restore as independent copies. read omits image data. Default list limit 20.',
@@ -168,6 +177,17 @@ export const domainTools = [
   { name: 'generation_cancel',
     description: 'Cancel this chat\'s active generation (optional run_id). Finished images stay; no refund guarantee.',
     parameters: Type.Object({run_id: Type.Optional(Type.String())}),
+  },
+  { name: 'online_gallery',
+    description: 'Studio online gallery. current reads the selected work and displayed page. search uses the current or specified source and gallery filters without changing the UI; continue with next_cursor and the same query. detail reads page-specific metadata. View returned online image_id with image_read. download saves the original only when requested; workspace returns reusable relative paths, library saves into a configured gallery folder. Pages are 1-based; all_pages downloads an entire work. See references/gallery.md.',
+    parameters: Type.Object({
+      action: E(['current', 'search', 'detail', 'download']),
+      source: Type.Optional(E(['ai_tag','danbooru','safebooru','gelbooru'])),
+      query: Type.Optional(Type.String({maxLength:500})), prompt: Type.Optional(Type.String({maxLength:500})),
+      cursor: Type.Optional(Type.String({maxLength:80})), limit: Type.Optional(Type.Integer({minimum:1,maximum:20})),
+      image_id: Type.Optional(Type.String({minLength:1})), page: Type.Optional(Type.Integer({minimum:1})),
+      destination: Type.Optional(E(['workspace','library'])), all_pages: Type.Optional(Type.Boolean()),
+    }, {additionalProperties:false}),
   },
   { name: 'gallery_query',
     description: 'Find canvas/history images (default) or local gallery (scope=library). image_id returns full metadata; selected = current canvas selection. Library filters: text, tags, models, favorites, inclusive YYYY-MM-DD dates; newest first. Returns gallery:<ID> for image_read. Default limit 30.',

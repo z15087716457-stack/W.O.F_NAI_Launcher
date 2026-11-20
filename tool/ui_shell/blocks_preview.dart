@@ -454,6 +454,8 @@ class BlocksPreviewSim extends ChangeNotifier {
       'onToggleFolder($id, $v)',
     ),
     onMoveFolder: (id, parent) => log('onMoveFolder($id, $parent)'),
+    onInsertFolderBeside: (id, sibling, {required after}) =>
+        log('onInsertFolderBeside($id, $sibling, $after)'),
     onReorderFolder: (id, delta) => log('onReorderFolder($id, $delta)'),
     onCreateCollection: (name, {parentId, isFolder = false}) async {
       final id = 'k-new${++_seq}';

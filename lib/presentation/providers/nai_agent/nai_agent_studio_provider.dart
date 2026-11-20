@@ -18,6 +18,7 @@ import 'nai_agent_generation_binding.dart';
 import 'nai_agent_source_generation_binding.dart';
 import 'nai_agent_image_tool_binding.dart';
 import 'nai_agent_gallery_binding.dart';
+import 'nai_agent_online_gallery.dart';
 import 'nai_agent_search_binding.dart';
 import 'nai_agent_reference_binding.dart';
 import 'nai_agent_reference_library_binding.dart';
@@ -48,6 +49,7 @@ final naiAgentStudioFactoryProvider = Provider<NaiAgentStudioFactory>((ref) {
     owner,
   }) {
     NaiAgentImage? image(String id) {
+      if (id.startsWith('online:')) return null;
       if (id.startsWith('draft:')) {
         final params = ref.read(generationParamsNotifierProvider);
         final match = RegExp(r'^draft:(vibe|precise):(\d+)$').firstMatch(id);
@@ -98,6 +100,7 @@ final naiAgentStudioFactoryProvider = Provider<NaiAgentStudioFactory>((ref) {
       loadImage: (params, token) => studio.loadImage(params, token),
     );
     final settings = bindNaiAgentSettings(ref, workspace, () => alive);
+    final online = NaiAgentOnlineGallery(ref, workspace, () => alive);
     final wikiImages = NaiAgentWikiImages(ref, () => alive);
     final exploration = NaiAgentExploreBinding(
       ref,
@@ -169,6 +172,7 @@ final naiAgentStudioFactoryProvider = Provider<NaiAgentStudioFactory>((ref) {
         if (sourceGeneration != null)
           'image_generate': sourceGeneration.execute,
         'gallery_query': gallery.query,
+        'online_gallery': online.execute,
         'studio_search': search.search,
         'gallery_manage': gallery.manage,
         'reference_manage': references.execute,
@@ -296,7 +300,9 @@ final naiAgentStudioFactoryProvider = Provider<NaiAgentStudioFactory>((ref) {
       backupDraft: (draft) => backupBridgeDraft(data, draft),
       writeDraft: ref.read(bridgeDraftWriterProvider),
       readImage: image,
-      loadImageById: (id, token) => id.startsWith('wiki:')
+      loadImageById: (id, token, {preview = false}) => id.startsWith('online:')
+          ? online.loadImage(id, token, preview: preview)
+          : id.startsWith('wiki:')
           ? wikiImages.load(id, token)
           : id.startsWith('explore:')
           ? exploration.loadImage(id, token)

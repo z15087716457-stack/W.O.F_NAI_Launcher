@@ -1487,7 +1487,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ucPreset_disabled => 'Undesired content preset disabled';
 
   @override
-  String get ucPreset_addToNegative => 'Add to Undesired Content:';
+  String get ucPreset_addToNegative =>
+      'Added to the beginning of Undesired Content:';
 
   @override
   String get ucPreset_nsfwHint =>
@@ -8933,12 +8934,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String online_authorSaved(Object count, Object date) {
-    return '$count saved · artist saved $date';
-  }
-
-  @override
-  String get online_authorAllWorks => 'All works on AI TAG';
+  String get online_authorAllWorks => 'All works';
 
   @override
   String get online_unfavAuthor => 'Remove artist';
@@ -19512,6 +19508,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ag_psNegative => 'Negative';
+
+  @override
+  String get ag_psPromptsOnly => 'Import prompts only';
+
+  @override
+  String get ag_psWithSettings => 'Import with settings';
 
   @override
   String get ag_psImport => 'Import to canvas';

@@ -138,6 +138,8 @@ class RecordingBlocks {
     onDeleteFolder: (id) => _c('deleteFolder:$id'),
     onToggleFolder: (id, v) => _c('toggleFolder:$id:$v'),
     onMoveFolder: (id, p) => _c('moveFolder:$id:$p'),
+    onInsertFolderBeside: (id, sibling, {required after}) =>
+        _c('insertBeside:$id:$sibling:$after'),
     onReorderFolder: (id, d) => _c('reorderFolder:$id:$d'),
     onCreateCollection: (name, {parentId, isFolder = false}) async {
       _c('createCollection:$name');

@@ -338,40 +338,33 @@ void main() {
     },
   );
 
-  test(
-    'favorites filtering respects all, ungrouped, subsets, author and text',
-    () {
-      final saved = favorites.OnlineFavoritesState(
-        entries: [
-          repository.OnlineFavoriteEntry(
-            item: const GalleryItem(
-              id: 1,
-              title: 'Sunset',
-              uploaderId: 8,
-              tags: ['solo'],
-            ),
-            collectionId: null,
-            savedAt: DateTime(2026),
+  test('favorites filtering respects all, ungrouped, subsets and text', () {
+    final saved = favorites.OnlineFavoritesState(
+      entries: [
+        repository.OnlineFavoriteEntry(
+          item: const GalleryItem(
+            id: 1,
+            title: 'Sunset',
+            uploaderId: 8,
+            tags: ['solo'],
           ),
-          repository.OnlineFavoriteEntry(
-            item: const GalleryItem(id: 2, author: 'Artist', uploaderId: 9),
-            collectionId: 'set',
-            savedAt: DateTime(2026),
-          ),
-        ],
-      );
-      expect(onlineLocalFavorites(saved), hasLength(2));
-      expect(onlineLocalFavorites(saved, collectionId: '').single.id, 1);
-      expect(onlineLocalFavorites(saved, collectionId: 'set').single.id, 2);
-      expect(
-        onlineLocalFavorites(saved, collectionId: 'set', authorId: 8).single.id,
-        1,
-      );
-      expect(onlineLocalFavorites(saved, filter: 'SUN').single.id, 1);
-      expect(onlineLocalFavorites(saved, filter: 'solo').single.id, 1);
-      expect(onlineLocalFavorites(saved, filter: 'artist').single.id, 2);
-    },
-  );
+          collectionId: null,
+          savedAt: DateTime(2026),
+        ),
+        repository.OnlineFavoriteEntry(
+          item: const GalleryItem(id: 2, author: 'Artist', uploaderId: 9),
+          collectionId: 'set',
+          savedAt: DateTime(2026),
+        ),
+      ],
+    );
+    expect(onlineLocalFavorites(saved), hasLength(2));
+    expect(onlineLocalFavorites(saved, collectionId: '').single.id, 1);
+    expect(onlineLocalFavorites(saved, collectionId: 'set').single.id, 2);
+    expect(onlineLocalFavorites(saved, filter: 'SUN').single.id, 1);
+    expect(onlineLocalFavorites(saved, filter: 'solo').single.id, 1);
+    expect(onlineLocalFavorites(saved, filter: 'artist').single.id, 2);
+  });
 
   test('detail retains full metadata and uses the shared image cache', () {
     const media = GalleryMedia(
@@ -402,11 +395,11 @@ void main() {
       media: [media],
     );
     final mapped = onlineDetail(detail, const favorites.OnlineFavoritesState());
-    expect(mapped.canSendParams, isTrue);
-    expect(mapped.params!.model, 'NAI Diffusion V5 (Full)');
-    expect(mapped.params!.seed, 123);
-    expect(mapped.params!.sampler, 'Euler Ancestral');
-    expect(mapped.negative, '');
+    expect(mapped.media.single.params, isNotNull);
+    expect(mapped.media.single.params!.model, 'NAI Diffusion V5 (Full)');
+    expect(mapped.media.single.params!.seed, 123);
+    expect(mapped.media.single.params!.sampler, 'Euler Ancestral');
+    expect(mapped.media.single.negative, '');
     expect(mapped.media.single.image, isA<CachedNetworkImageProvider>());
     expect(media.copyWith(width: 1024).naiMetadata, media.naiMetadata);
     final restored = GalleryItem.fromSnapshotJson(

@@ -111,9 +111,9 @@ void main() {
         final card = cards().single;
         expect(card.data!.title, 'Rain');
         expect(card.data!.items[1].note, 'Changed');
-        expect(card.data!.shared.positions, [const Offset(.25, .6)]);
+        expect(card.data!.shared.positions, isEmpty);
         expect(card.data!.items[0].positions, [const Offset(.25, .6)]);
-        expect(card.data!.items[1].positions, isEmpty);
+        expect(card.data!.items[1].positions, [const Offset(.25, .6)]);
         expect(
           card.data!.items[1].positionAt(card.data!.shared, 0),
           const Offset(.25, .6),

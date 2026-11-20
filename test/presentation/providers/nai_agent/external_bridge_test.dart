@@ -705,7 +705,9 @@ void main() {
         final init = await rpc(1, 'initialize');
         expect(init['result']['capabilities']['tools'], isNotNull);
         final list = await rpc(2, 'tools/list');
-        expect(list['result']['tools'], hasLength(26));
+        final tools = list['result']['tools'] as List;
+        expect(tools, hasLength(27));
+        expect(tools.map((tool) => tool['name']), contains('online_gallery'));
         final card = await rpc(3, 'tools/call', {
           'name': 'prompt_set',
           'arguments': promptSetInput(),

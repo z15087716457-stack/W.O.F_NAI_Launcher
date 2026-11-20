@@ -5,6 +5,8 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:path/path.dart' as p;
 
+import '../constants/api_constants.dart';
+import '../krita/bridge_draft_guard.dart';
 import 'agent_tool.dart';
 import 'prompt_set_icons.dart';
 
@@ -34,6 +36,61 @@ List<AgentPromptSetPosition?> effectiveAgentPromptSetPositions(
         _ => null,
       },
   ];
+}
+
+const promptCardGenerationKeys = {
+  'model',
+  'width',
+  'height',
+  'steps',
+  'cfg_scale',
+  'seed',
+  'sampler',
+  'noise_schedule',
+  'cfg_rescale',
+  'smea_auto',
+  'smea',
+  'smea_dyn',
+  'variety_plus',
+  'quality_preset',
+  'uc_preset',
+};
+
+/// Materialize legacy shared lanes at the storage boundary. Card IDs survive
+/// subsequent edits and keep image history with its card across reordering.
+Map<String, dynamic> independentPromptSet(Map<String, dynamic> value) {
+  final shared = value['shared'] as Map?;
+  if (shared == null) return value;
+  final base = (shared['characters'] as List? ?? const []).cast<String>();
+  return {
+    for (final e in value.entries)
+      if (e.key != 'shared') e.key: e.value,
+    'items': [
+      for (final (index, item) in (value['items'] as List).cast<Map>().indexed)
+        () {
+          final extra = (item['characters'] as List? ?? const [])
+              .cast<String>();
+          final positions = effectiveAgentPromptSetPositions(shared, item);
+          return {
+            ...item,
+            'card_id': 'legacy-$index',
+            'main': mergeAgentPrompt(shared['main'] ?? '', item['main'] ?? ''),
+            'negative': shared['negative'] ?? '',
+            'characters': [
+              for (var j = 0; j < base.length; j++)
+                mergeAgentPrompt(base[j], extra.elementAtOrNull(j) ?? ''),
+            ],
+            if (positions.any((p) => p != null)) ...{
+              'use_coords': true,
+              'positions': [
+                for (final p in positions)
+                  if (p == null) null else {'x': p.x, 'y': p.y},
+              ],
+            },
+          };
+        }(),
+    ],
+  };
 }
 
 /// Validation and persistence are independent of the UI and the Pi session.
@@ -94,8 +151,8 @@ class NaiAgentPromptSets {
     if (value['set_id'] != id) {
       throw const FormatException('Set identity mismatch');
     }
-    validate(value);
-    final items = value['items'] as List;
+    final content = independentPromptSet(validate(value));
+    final items = content['items'] as List;
     if (value['revision'] is! int ||
         (value['revision'] as int) < 1 ||
         value['changed_items'] is! List ||
@@ -124,15 +181,23 @@ class NaiAgentPromptSets {
         }
       }
     }
-    return value;
+    value.remove('shared');
+    return {...value, ...content};
   }
 
   Future<void> _write(Map<String, dynamic> value) async {
     final dir = await _directory();
     final target = File(p.join(dir.path, '${value['set_id']}.json'));
     final temp = File('${target.path}.${Random.secure().nextInt(1 << 32)}.tmp');
+    final bytes = utf8.encode(jsonEncode(value));
+    if (bytes.length > 4 * 1024 * 1024) {
+      throw const NaiAgentToolError(
+        'invalid_prompt_set',
+        'Prompt set exceeds 4 MiB',
+      );
+    }
     try {
-      await temp.writeAsString(jsonEncode(value), flush: true);
+      await temp.writeAsBytes(bytes, flush: true);
       await temp.rename(target.path);
     } finally {
       if (await temp.exists()) await temp.delete();
@@ -197,22 +262,115 @@ class NaiAgentPromptSets {
       ];
     }
 
+    Map<String, dynamic> independentItem(Map item) {
+      final id = string(item, 'card_id', 64, required: true);
+      if (!RegExp(r'^[a-zA-Z0-9_-]+$').hasMatch(id)) invalid('card_id');
+      final chars = characters(item, 8192, 32);
+      final negatives = item['character_negatives'] ?? const [];
+      if (negatives is! List ||
+          negatives.length > chars.length ||
+          negatives.any((n) => n is! String || n.runes.length > 8192)) {
+        invalid('character_negatives');
+      }
+      final coords = item['use_coords'];
+      if (coords != null && coords is! bool) invalid('use_coords');
+      final points = item.containsKey('positions')
+          ? positions(item, chars.length)
+          : null;
+      final settings = item['generation'];
+      if (settings != null) {
+        if (settings is! Map<String, dynamic> ||
+            settings.keys.any((k) => !promptCardGenerationKeys.contains(k))) {
+          invalid('generation');
+        }
+        try {
+          validateBridgePatch(settings);
+        } on FormatException catch (e) {
+          invalid(e.message);
+        }
+        if (settings['model'] case final String model
+            when !ImageModels.allModels.contains(model)) {
+          invalid('generation.model');
+        }
+        if (settings['steps'] case final num n when n > 50) {
+          invalid('generation.steps');
+        }
+        if (settings['cfg_scale'] case final num n when n < 0) {
+          invalid('generation.cfg_scale');
+        }
+        if (settings['cfg_rescale'] case final num n when n < 0 || n > 1) {
+          invalid('generation.cfg_rescale');
+        }
+        if (settings['seed'] case final num n when n < -1 || n > 4294967295) {
+          invalid('generation.seed');
+        }
+        if (settings['uc_preset'] case final num n
+            when !{0, 1, 2, 3, 7, 8, 9}.contains(n)) {
+          invalid('generation.uc_preset');
+        }
+      }
+      return {
+        'card_id': id,
+        'icon': icon(item, 'icon'),
+        'title': string(item, 'title', 40, required: true),
+        'note': string(item, 'note', 240),
+        'main': string(item, 'main', 16384),
+        'negative': string(item, 'negative', 16384),
+        'characters': chars,
+        if (negatives.isNotEmpty)
+          'character_negatives': negatives.cast<String>(),
+        if (coords != null || (points?.any((p) => p != null) ?? false))
+          'use_coords': coords ?? true,
+        if (points != null && coords != false) 'positions': points,
+        if (settings is Map && settings.isNotEmpty)
+          'generation': {
+            for (final e in settings.entries)
+              e.key:
+                  const {
+                    'width',
+                    'height',
+                    'steps',
+                    'uc_preset',
+                    'seed',
+                  }.contains(e.key)
+                  ? (e.value as num).toInt()
+                  : e.value,
+          },
+      };
+    }
+
     final shared = input['shared'];
     final items = input['items'];
-    if (shared is! Map ||
+    if ((shared != null && shared is! Map) ||
         items is! List ||
-        items.length < 2 ||
+        items.length < (shared == null ? 1 : 2) ||
         items.length > 24 ||
         input['ordered'] is! bool) {
       invalid('shared/items/ordered');
     }
-    final chars = characters(shared, 1000, 6);
-    return {
+    final header = {
       'kind': string(input, 'kind', 24, required: true),
       'kind_icon': icon(input, 'kind_icon'),
       'title': string(input, 'title', 60, required: true),
       'unit': string(input, 'unit', 8, required: true),
       'ordered': input['ordered'],
+    };
+    if (shared == null) {
+      final cards = [
+        for (final item in items)
+          if (item is Map) independentItem(item) else invalid('item'),
+      ];
+      if (cards.map((c) => c['card_id']).toSet().length != cards.length) {
+        invalid('duplicate card_id');
+      }
+      return {...header, 'items': cards};
+    }
+    if (items.any((item) => item is Map && item.containsKey('card_id'))) {
+      invalid('mixed shared and independent cards');
+    }
+    final chars = characters(shared as Map, 1000, 6);
+    return {
+      ...header,
       'shared': {
         'main': string(shared, 'main', 2000),
         'characters': chars,
@@ -278,24 +436,39 @@ class NaiAgentPromptSets {
         'Read the set and retry with its current expected_revision',
       );
     }
-    final content = validate(params);
+    var input = params;
+    if (params.containsKey('card')) {
+      final card = params['card'];
+      if (old == null || card is! Map || params.containsKey('items')) {
+        throw const NaiAgentToolError(
+          'invalid_prompt_set',
+          'Use card only for a single-card update',
+        );
+      }
+      final items = List.of(old['items'] as List);
+      final index = items.indexWhere(
+        (item) => item['card_id'] == card['card_id'],
+      );
+      if (index < 0) {
+        throw const NaiAgentToolError(
+          'card_missing',
+          'Read the set for its current card IDs',
+        );
+      }
+      items[index] = card;
+      input = {...old, 'items': items};
+    }
+    final content = independentPromptSet(validate(input));
     final items = content['items'] as List;
-    final previousContent = old == null ? null : validate(old);
-    final previous = previousContent?['items'] as List? ?? [];
+    final previous = old?['items'] as List? ?? const [];
+    final byId = {for (final (i, card) in previous.indexed) card['card_id']: i};
     final changed = [
       if (old != null)
-        for (var i = 0; i < items.length; i++)
-          if (i >= previous.length ||
-              !const DeepCollectionEquality().equals(items[i], previous[i]) ||
+        for (final (i, card) in items.indexed)
+          if (byId[card['card_id']] == null ||
               !const DeepCollectionEquality().equals(
-                effectiveAgentPromptSetPositions(
-                  content['shared'] as Map,
-                  items[i] as Map,
-                ),
-                effectiveAgentPromptSetPositions(
-                  previousContent!['shared'] as Map,
-                  previous[i] as Map,
-                ),
+                card,
+                previous[byId[card['card_id']]!],
               ))
             i,
     ];
@@ -320,9 +493,10 @@ class NaiAgentPromptSets {
       ...content,
       'changed_items': changed,
       'images': {
-        for (final e in (old?['images'] as Map? ?? {}).entries)
-          if ((int.tryParse(e.key.toString()) ?? items.length) < items.length)
-            e.key.toString(): e.value,
+        for (final (i, card) in items.indexed)
+          if (old?['images']?['${byId[card['card_id']]}']
+              case final List images)
+            '$i': images,
       },
     };
     token.check();
@@ -340,9 +514,15 @@ class NaiAgentPromptSets {
   Future<void> appendImages(
     String id,
     int index,
-    List<Map<String, dynamic>> images,
-  ) => _locked(() async {
+    List<Map<String, dynamic>> images, {
+    String? cardId,
+  }) => _locked(() async {
     final value = await read(id);
+    if (value != null && cardId != null) {
+      index = (value['items'] as List).indexWhere(
+        (card) => card['card_id'] == cardId,
+      );
+    }
     if (value == null ||
         index < 0 ||
         index >= (value['items'] as List).length) {

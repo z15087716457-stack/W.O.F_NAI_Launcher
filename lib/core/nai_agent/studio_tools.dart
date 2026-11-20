@@ -39,7 +39,11 @@ class NaiAgentStudioTools {
   final Future<String> Function(BridgeDraftSnapshot) backupDraft;
   final List<String> Function(Map<String, dynamic>) writeDraft;
   final NaiAgentImage? Function(String) readImage;
-  final Future<NaiAgentImage?> Function(String, NaiAgentCancellation)?
+  final Future<NaiAgentImage?> Function(
+    String,
+    NaiAgentCancellation, {
+    bool preview,
+  })?
   loadImageById;
   final bool allowsImages;
   final NaiAgentVisionAccess visionAccess;
@@ -221,7 +225,7 @@ class NaiAgentStudioTools {
         visionAccess.unavailableMessage,
       );
     }
-    final image = await loadImage(params, cancellation);
+    final image = await loadImage(params, cancellation, preview: !metadataOnly);
     final size = NaiResolutionAdapter.readImageSize(image.bytes)!;
     final mime = _mime(image.bytes)!;
     final metadata = image.metadata ?? readNaiAttachmentMetadata(image.bytes);
@@ -278,8 +282,9 @@ class NaiAgentStudioTools {
   /// deliberately separate, so reference/source setup never uses a thumbnail.
   Future<NaiAgentImage> loadImage(
     Map<String, dynamic> params,
-    NaiAgentCancellation cancellation,
-  ) async {
+    NaiAgentCancellation cancellation, {
+    bool preview = false,
+  }) async {
     cancellation.check();
     if (!isAlive()) {
       throw const NaiAgentToolError('closed', 'Studio binding closed');
@@ -297,7 +302,7 @@ class NaiAgentStudioTools {
     if (imageId is String) {
       final selected =
           readImage(imageId) ??
-          await loadImageById?.call(imageId, cancellation);
+          await loadImageById?.call(imageId, cancellation, preview: preview);
       if (selected == null) {
         throw const NaiAgentToolError(
           'image_missing',

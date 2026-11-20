@@ -87,6 +87,26 @@ void main() {
     );
   }
 
+  for (final mode in OnlineSendMode.values) {
+    test('$mode imports the selected image from a multi-page work', () async {
+      final target = container.read(onlineGenerationTargetProvider);
+      await target.apply(
+        _detail,
+        mode,
+        mediaIndex: 1,
+        snapshot: target.capture(),
+        alive: () => true,
+      );
+      final params = container.read(generationParamsNotifierProvider);
+      expect(params.prompt, 'second prompt');
+      expect(params.negativePrompt, 'second negative');
+      if (mode == OnlineSendMode.withParams) {
+        expect(params.seed, 456);
+        expect(params.characters.single.prompt, 'second character');
+      }
+    });
+  }
+
   test(
     'withParams uses official import, replaces characters and clears stale pending text',
     () async {
@@ -198,6 +218,28 @@ void main() {
     },
   );
 
+  test(
+    'sending a page without a prompt preserves the draft despite work tags',
+    () async {
+      final target = container.read(onlineGenerationTargetProvider);
+      await expectLater(
+        target.apply(
+          _detail,
+          OnlineSendMode.replace,
+          mediaIndex: 2,
+          snapshot: target.capture(),
+          alive: () => true,
+        ),
+        throwsStateError,
+      );
+      expect(backup.snapshots, isEmpty);
+      expect(
+        container.read(generationParamsNotifierProvider).prompt,
+        'existing draft',
+      );
+    },
+  );
+
   test('missing metadata does not silently downgrade withParams', () async {
     final target = container.read(onlineGenerationTargetProvider);
     await expectLater(
@@ -255,7 +297,7 @@ void main() {
 }
 
 const _detail = GalleryDetail(
-  item: GalleryItem(id: 1, sourceId: GallerySourceId.aiTag),
+  item: GalleryItem(id: 1, sourceId: GallerySourceId.aiTag, tags: ['work tag']),
   media: [
     GalleryMedia(
       id: 'p0',
@@ -274,6 +316,19 @@ const _detail = GalleryDetail(
         characterPrompts: ['1girl, blue hair'],
       ),
     ),
+    GalleryMedia(
+      id: 'p1',
+      prompt: 'second prompt',
+      negativePrompt: 'second negative',
+      naiMetadata: NaiImageMetadata(
+        prompt: 'second prompt',
+        negativePrompt: 'second negative',
+        model: 'nai-diffusion-5-full',
+        seed: 456,
+        characterPrompts: ['second character'],
+      ),
+    ),
+    GalleryMedia(id: 'p2'),
   ],
 );
 

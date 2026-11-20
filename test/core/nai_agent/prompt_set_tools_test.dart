@@ -114,15 +114,15 @@ void main() {
       final id = created['set_id'] as String;
       final restarted = NaiAgentPromptSets(dir);
       final stored = (await restarted.read(id))!;
-      expect(stored['shared']['positions'], input['shared']['positions']);
-      expect(stored['items'][0]['positions'], input['items'][0]['positions']);
-      expect(
-        effectiveAgentPromptSetPositions(
-          stored['shared'] as Map,
-          stored['items'][0] as Map,
-        ),
-        [(x: 0.0, y: 1.0), (x: 1.0, y: 0.0)],
-      );
+      expect(stored.containsKey('shared'), isFalse);
+      expect(stored['items'][0]['positions'], [
+        {'x': 0.0, 'y': 1.0},
+        {'x': 1.0, 'y': 0.0},
+      ]);
+      expect(stored['items'][1]['positions'], [
+        null,
+        {'x': 1.0, 'y': 0.0},
+      ]);
       final read =
           (await restarted.execute({
                 'action': 'read',
@@ -155,6 +155,88 @@ void main() {
         0,
         1,
       ]); // Explicit item null inherits too.
+    },
+  );
+  test(
+    'loading a historical file materializes lanes without rewriting it',
+    () async {
+      const id = 'abcdef123456';
+      final stored = {
+        ...NaiAgentPromptSets.validate(promptSetInput()),
+        'set_id': id,
+        'revision': 1,
+        'images': {},
+        'changed_items': [],
+      };
+      final folder = Directory('${dir.path}/prompt-sets')..createSync();
+      final file = File('${folder.path}/$id.json')
+        ..writeAsStringSync(jsonEncode(stored));
+      final original = file.readAsStringSync();
+      final set = (await sets.read(id))!;
+      expect(set.containsKey('shared'), false);
+      expect(set['items'][0]['characters'], ['silver hair, running']);
+      expect(set['items'][1]['negative'], 'lowres');
+      expect(file.readAsStringSync(), original);
+      final card = {
+        ...Map<String, dynamic>.from(set['items'][1]),
+        'characters': <String>[],
+      };
+      await sets.execute({
+        'action': 'update',
+        'set_id': id,
+        'expected_revision': 1,
+        'card': card,
+      }, NaiAgentCancellation());
+      final migrated = jsonDecode(file.readAsStringSync());
+      expect(migrated.containsKey('shared'), false);
+      expect(migrated['items'][0], set['items'][0]);
+    },
+  );
+  test(
+    'single-card edits and image history follow stable IDs on reorder',
+    () async {
+      final source = independentPromptSet(
+        NaiAgentPromptSets.validate(promptSetInput()),
+      );
+      final cards = source['items'] as List;
+      final first = {
+        ...Map<String, dynamic>.from(cards.first as Map),
+        'generation': {'seed': 0, 'steps': 28},
+      };
+      final token = NaiAgentCancellation();
+      final created = (await sets.execute({
+        ...source,
+        'action': 'create',
+        'items': [first],
+      }, token))['details'];
+      final id = created['set_id'] as String;
+      await sets.appendImages(id, 0, [
+        {'path': 'old.png', 'created_at': 'then'},
+      ]);
+      await sets.execute({
+        ...source,
+        'action': 'update',
+        'set_id': id,
+        'expected_revision': 1,
+        'items': [cards.last, first],
+      }, token);
+      final edit = {...first, 'characters': <String>[], 'main': 'empty street'};
+      await sets.execute({
+        'action': 'update',
+        'set_id': id,
+        'expected_revision': 2,
+        'card': edit,
+      }, token);
+      await sets.appendImages(id, 0, [
+        {'path': 'late.png', 'created_at': 'now'},
+      ], cardId: first['card_id']);
+      final value = (await NaiAgentPromptSets(dir).read(id))!;
+      expect(value['items'][0], cards.last);
+      expect(value['items'][1]['characters'], isEmpty);
+      expect(value['changed_items'], [1]);
+      expect(value['images']['1'].length, 2);
+      expect(value['items'][1]['generation']['seed'], 0);
+      expect(value['images']['0'], isNull);
     },
   );
   test(

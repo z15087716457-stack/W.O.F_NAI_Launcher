@@ -225,6 +225,7 @@ class OnlineDetailBody extends StatelessWidget {
             ),
           ]
         : d.media;
+    final current = mediaList[media.clamp(0, mediaList.length - 1)];
     final total = ai ? w.mediaCount : 1;
 
     final children = <Widget>[];
@@ -237,7 +238,7 @@ class OnlineDetailBody extends StatelessWidget {
           children: [
             _Preview(
               height: ai ? 290 : 300,
-              media: mediaList[media.clamp(0, mediaList.length - 1)],
+              media: current,
               index: media,
               total: total,
               loading: d.loading,
@@ -344,14 +345,16 @@ class OnlineDetailBody extends StatelessWidget {
                   OnlineFormat.count(w.favorites!),
                   big: true,
                 ),
-              if (w.model != null) UiMini(w.model!),
+              if ((d.loading ? w.model : current.params?.shortModel)
+                  case final model?)
+                UiMini(model),
             ],
           ),
         ],
       ),
     );
 
-    if (w.author != null) {
+    if (w.author != null && !scope.data.showsAuthorOf(w)) {
       children.add(
         Container(
           key: const Key('online-insp-author'),
@@ -423,7 +426,7 @@ class OnlineDetailBody extends StatelessWidget {
         ),
       );
     } else {
-      final p = d.params;
+      final p = current.params;
       if (p != null) {
         children.add(
           _Section(
@@ -433,7 +436,7 @@ class OnlineDetailBody extends StatelessWidget {
           ),
         );
       }
-      if (d.prompt == null || d.prompt!.isEmpty) {
+      if (current.prompt == null || current.prompt!.isEmpty) {
         children.add(
           Text(l10n.online_noPrompt, style: UiText.sans(12, color: c.faint)),
         );
@@ -442,22 +445,22 @@ class OnlineDetailBody extends StatelessWidget {
           _Section(
             key: const Key('online-insp-prompt'),
             title: l10n.online_prompt,
-            copy: d.prompt,
-            translationText: d.prompt,
-            translationId: '${d.key}-positive',
-            child: _PromptText(text: d.prompt!),
+            copy: current.prompt,
+            translationText: current.prompt,
+            translationId: '${d.key}-$media-positive',
+            child: _PromptText(text: current.prompt!),
           ),
         );
       }
-      if (d.negative != null && d.negative!.isNotEmpty) {
+      if (current.negative != null && current.negative!.isNotEmpty) {
         children.add(
           _Section(
             key: const Key('online-insp-negative'),
             title: l10n.online_negative,
-            copy: d.negative,
-            translationText: d.negative,
-            translationId: '${d.key}-negative',
-            child: _PromptText(text: d.negative!, clamp: true),
+            copy: current.negative,
+            translationText: current.negative,
+            translationId: '${d.key}-$media-negative',
+            child: _PromptText(text: current.negative!, clamp: true),
           ),
         );
       }

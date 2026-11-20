@@ -262,7 +262,7 @@ void main() {
       readImage: (id) => {'selected', 'draft:source', 'history-id'}.contains(id)
           ? NaiAgentImage(id: id, bytes: png)
           : null,
-      loadImageById: (id, token) async =>
+      loadImageById: (id, token, {preview = false}) async =>
           id == 'gallery:1' ? NaiAgentImage(id: id, bytes: png) : null,
     );
     binding = container.read(provider);

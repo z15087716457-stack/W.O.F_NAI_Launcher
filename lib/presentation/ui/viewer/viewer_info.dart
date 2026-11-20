@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../core/utils/localization_extension.dart';
+import '../../../core/utils/primary_activator.dart';
 import '../../widgets/common/studio_icons.dart';
 import '../../widgets/common/translation_icon.dart';
 import '../../widgets/navigation/window_chrome_layout.dart';
@@ -179,6 +181,7 @@ class _Body extends StatefulWidget {
 }
 
 class _BodyState extends State<_Body> {
+  var _hasSelection = false;
   var _promptFull = false;
   var _negFull = false;
   var _promptOver = false;
@@ -287,14 +290,28 @@ class _BodyState extends State<_Body> {
         colors: const [Colors.black, Colors.black, Colors.transparent],
       ).createShader(b),
       blendMode: BlendMode.dstIn,
-      child: SelectionArea(
-        child: SingleChildScrollView(
-          key: const Key('viewer-info-scroll'),
-          padding: const EdgeInsets.fromLTRB(16, 2, 16, 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            spacing: 14,
-            children: children,
+      child: Shortcuts(
+        shortcuts: _hasSelection
+            ? const {
+                PrimaryActivator(LogicalKeyboardKey.keyC):
+                    CopySelectionTextIntent.copy,
+              }
+            : const {},
+        child: SelectionArea(
+          onSelectionChanged: (content) {
+            final selected = content?.plainText.isNotEmpty ?? false;
+            if (selected != _hasSelection) {
+              setState(() => _hasSelection = selected);
+            }
+          },
+          child: SingleChildScrollView(
+            key: const Key('viewer-info-scroll'),
+            padding: const EdgeInsets.fromLTRB(16, 2, 16, 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: 14,
+              children: children,
+            ),
           ),
         ),
       ),

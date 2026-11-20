@@ -688,6 +688,15 @@ class PromptBlockLibraryNotifier extends _$PromptBlockLibraryNotifier {
   Future<void> reorderBlocks(String? folderId, List<String> orderedIds) =>
       _mutate((repository) => repository.reorderBlocks(folderId, orderedIds));
 
+  Future<void> insertFolderBeside(
+    String folderId,
+    String siblingId, {
+    required bool after,
+  }) => _mutate(
+    (repository) =>
+        repository.insertFolderBeside(folderId, siblingId, after: after),
+  );
+
   Future<void> reorderFolders(String? parentId, List<String> orderedIds) =>
       _mutate((repository) => repository.reorderFolders(parentId, orderedIds));
 

@@ -162,12 +162,13 @@ class _OnlineSendPopoverState extends State<OnlineSendPopover> {
     final data = scope.data;
     final send = data.send;
     final detail = data.detail?.key == widget.workKey ? data.detail : null;
-    final params = detail?.canSendParams ?? false;
-    final mode =
-        _mode ??
-        (send.remembered == OnlineSendMode.withParams && !params
-            ? OnlineSendMode.replace
-            : send.remembered ?? OnlineSendMode.replace);
+    final params =
+        detail?.canSendParams(scope.controller.mediaIndex(widget.workKey)) ??
+        false;
+    final preferred = _mode ?? send.remembered ?? OnlineSendMode.replace;
+    final mode = preferred == OnlineSendMode.withParams && !params
+        ? OnlineSendMode.replace
+        : preferred;
 
     Widget option(OnlineSendMode m, String title, String desc) {
       final enabled = m != OnlineSendMode.withParams || params;

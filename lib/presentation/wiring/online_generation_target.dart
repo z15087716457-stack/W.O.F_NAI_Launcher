@@ -85,13 +85,13 @@ class OnlineGenerationTarget {
   Future<void> apply(
     GalleryDetail detail,
     OnlineSendMode mode, {
+    int mediaIndex = 0,
     required OnlineGenerationSnapshot snapshot,
     required bool Function() alive,
   }) async {
-    final media = detail.media.firstOrNull;
-    final prompt =
-        media?.prompt ?? detail.prompt ?? detail.item.tags.join(', ');
-    final negative = media?.negativePrompt ?? detail.negativePrompt ?? '';
+    final media = detail.media.elementAtOrNull(mediaIndex);
+    final prompt = detail.promptForMedia(mediaIndex) ?? '';
+    final negative = media?.negativePrompt ?? '';
     final metadata = media?.naiMetadata;
     if (mode == OnlineSendMode.withParams && metadata == null) {
       throw StateError(currentL10n.onlineGallery_noTagInfo);

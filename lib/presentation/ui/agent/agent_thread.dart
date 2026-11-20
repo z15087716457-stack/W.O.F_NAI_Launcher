@@ -1152,7 +1152,14 @@ Widget _promptSetView(BuildContext context, AgentPromptSetBlock block) =>
         final scope = AgentScope.controlsOf(context),
             callback = AgentScope.controlsOf(context).actions.onPromptSetAction;
         if (callback != null) {
-          await scope.run(() => callback(block.setId, index, action));
+          await scope.run(
+            () => callback(
+              block.setId,
+              index,
+              action,
+              block.data?.items[index].cardId,
+            ),
+          );
         }
       },
       onEdit: (text) => AgentScope.controlsOf(context).insert(text),
@@ -2396,6 +2403,7 @@ String agentToolLabel(AppLocalizations l, String tool) => switch (tool) {
   'generation_run' => l.ag_tool_generation_run,
   'generation_cancel' => l.ag_tool_generation_cancel,
   'gallery_query' => l.ag_tool_gallery_query,
+  'online_gallery' => l.navShell_page_onlineGallery,
   'gallery_manage' => l.ag_tool_gallery_manage,
   'reference_manage' => l.ag_tool_reference_manage,
   'reference_library' => l.ag_tool_reference_library,

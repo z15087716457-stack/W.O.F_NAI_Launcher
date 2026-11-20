@@ -18,6 +18,7 @@ const naiAgentToolNames = [
   'generation_run',
   'generation_cancel',
   'gallery_query',
+  'online_gallery',
   'studio_search',
   'gallery_manage',
   'reference_manage',

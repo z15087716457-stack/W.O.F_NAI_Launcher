@@ -439,6 +439,9 @@ class _BlocksLibraryWiringState extends ConsumerState<BlocksLibraryWiring> {
       onMoveFolder: (id, parent) => queued(() async {
         await backend.notifier.moveFolder(id, parent);
       }),
+      onInsertFolderBeside: (id, sibling, {required after}) => queued(
+        () => backend.notifier.insertFolderBeside(id, sibling, after: after),
+      ),
       onReorderFolder: (id, delta) => queued(() async {
         final folder = backend.library.folderById(id);
         if (folder == null || (delta != -1 && delta != 1)) return;

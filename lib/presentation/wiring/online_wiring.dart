@@ -21,6 +21,7 @@ import '../providers/character_prompt_provider.dart';
 import '../providers/image_generation_provider.dart';
 import '../providers/online_favorites_provider.dart';
 import '../providers/online_gallery_blacklist_provider.dart';
+import '../providers/online_gallery_media_provider.dart';
 import '../providers/online_gallery_preferences_provider.dart';
 import '../providers/online_gallery_provider.dart';
 import '../router/app_router.dart';
@@ -34,13 +35,12 @@ import 'online_generation_target.dart';
 import 'online_mapping.dart';
 import 'online_prompt_translation.dart';
 
+export '../providers/online_gallery_media_provider.dart'
+    show onlineGalleryDownloadServiceProvider;
+
 final onlineGalleryPlatformProvider = Provider<OnlineGalleryPlatform>(
   (ref) => const OnlineGalleryPlatform(),
 );
-final onlineGalleryDownloadServiceProvider =
-    Provider<OnlineGalleryDownloadService>(
-      (ref) => const OnlineGalleryDownloadService(),
-    );
 
 class OnlineGalleryPlatform {
   const OnlineGalleryPlatform();
@@ -144,6 +144,7 @@ class OnlineWiring extends ConsumerStatefulWidget {
 
 class _OnlineWiringState extends ConsumerState<OnlineWiring>
     with VisibleTagReadings<OnlineWiring> {
+  late final _displayed = ref.read(onlineGallerySelectionProvider);
   String? _selectedKey;
   String? _selectionCacheKey;
   GalleryDetail? _detail;
@@ -183,6 +184,12 @@ class _OnlineWiringState extends ConsumerState<OnlineWiring>
     );
   }
 
+  @override
+  void dispose() {
+    _displayed.select(null);
+    super.dispose();
+  }
+
   void _run(Future<dynamic> Function() operation) {
     if (!mounted) return;
     unawaited(() async {
@@ -205,7 +212,7 @@ class _OnlineWiringState extends ConsumerState<OnlineWiring>
       state.viewMode == GalleryViewMode.favorites &&
       state.currentSourceId == GallerySourceId.aiTag;
   String _localKey(OnlineGalleryState state) =>
-      '${state.currentCacheKey}:$_collectionId:$_authorId:$_favoritesFilter';
+      '${state.currentCacheKey}:$_collectionId:$_favoritesFilter';
 
   List<GalleryItem> _items() {
     final state = ref.read(onlineGalleryNotifierProvider);
@@ -213,7 +220,6 @@ class _OnlineWiringState extends ConsumerState<OnlineWiring>
         ? onlineLocalFavorites(
             ref.read(onlineFavoritesNotifierProvider),
             collectionId: _collectionId,
-            authorId: _authorId,
             filter: _favoritesFilter,
           )
         : state.posts;
@@ -305,19 +311,32 @@ class _OnlineWiringState extends ConsumerState<OnlineWiring>
     ];
   }
 
-  Future<void> _authorWorks(int id, {String? name}) async {
-    if (id <= 0) return;
+  void _returnFromAuthor() {
+    _authorId = null;
+    _clearSelection();
+    _gallery.returnFromAiTagAuthorSearch();
+  }
+
+  Future<void> _authorWorks(
+    int id, {
+    String? name,
+    bool profile = false,
+  }) async {
+    if (id <= 0 || (profile && _authorId == id)) return;
+    _authorId = profile ? id : null;
     final state = ref.read(onlineGalleryNotifierProvider);
     _clearSelection();
-    _run(
-      () => _preferences.addRecent(
-        OnlineSource.aiTag,
-        OnlineRecent(
-          kind: OnlineRecentKind.author,
-          text: name == null || name.isEmpty ? '$id' : '$id · $name',
+    if (!profile) {
+      _run(
+        () => _preferences.addRecent(
+          OnlineSource.aiTag,
+          OnlineRecent(
+            kind: OnlineRecentKind.author,
+            text: name == null || name.isEmpty ? '$id' : '$id · $name',
+          ),
         ),
-      ),
-    );
+      );
+    }
     await _gallery.searchAiTagAuthor(
       id,
       drafts: OnlineGalleryQueryDrafts(
@@ -330,10 +349,20 @@ class _OnlineWiringState extends ConsumerState<OnlineWiring>
   }
 
   Future<void> _tagTap(String tag) async {
+    final fromProfile = _authorId != null;
+    if (fromProfile) _returnFromAuthor();
     final state = ref.read(onlineGalleryNotifierProvider);
     final ranking = state.viewMode == GalleryViewMode.popular;
-    final work = ranking ? state.popularQuery : state.searchQuery;
-    final prompt = ranking ? state.popularPromptQuery : state.promptQuery;
+    final work = fromProfile
+        ? ''
+        : ranking
+        ? state.popularQuery
+        : state.searchQuery;
+    final prompt = fromProfile
+        ? ''
+        : ranking
+        ? state.popularPromptQuery
+        : state.promptQuery;
     final tags = work
         .split(RegExp(r'\s+'))
         .where((value) => value.isNotEmpty)
@@ -449,18 +478,19 @@ class _OnlineWiringState extends ConsumerState<OnlineWiring>
     final gallery = _gallery;
     final platform = _platform;
     final text = <String>[];
+    final mediaIndex = keys.length == 1 ? _displayed.indexFor(keys.single) : 0;
     for (final item in items) {
       if (!mounted) return;
-      final detail = item.sourceId == GallerySourceId.aiTag
-          ? await gallery.loadDetail(item)
-          : null;
-      text.add(
-        detail?.media.firstOrNull?.prompt ??
-            detail?.prompt ??
-            item.tags.join(', '),
-      );
+      final prompt = item.sourceId == GallerySourceId.aiTag
+          ? (await gallery.loadDetail(item)).promptForMedia(mediaIndex)
+          : item.tags.join(', ');
+      if (prompt != null && prompt.isNotEmpty) text.add(prompt);
     }
-    if (!mounted || text.isEmpty) return;
+    if (!mounted || items.isEmpty) return;
+    if (text.isEmpty) {
+      AppToast.warning(context, context.l10n.online_noPrompt);
+      return;
+    }
     await platform.copy(text.join('\n\n'));
     if (mounted) AppToast.success(context, context.l10n.onlineGallery_copied);
   }
@@ -473,6 +503,7 @@ class _OnlineWiringState extends ConsumerState<OnlineWiring>
     final item = _item(key);
     if (item == null || _sending) return;
     final target = ref.read(onlineGenerationTargetProvider);
+    final mediaIndex = _displayed.indexFor(key);
     final snapshot = target.capture();
     final gallery = _gallery;
     final platform = _platform;
@@ -485,6 +516,7 @@ class _OnlineWiringState extends ConsumerState<OnlineWiring>
       await target.apply(
         detail,
         mode,
+        mediaIndex: mediaIndex,
         snapshot: snapshot,
         alive: () => mounted && generation == _sendGeneration,
       );
@@ -558,6 +590,7 @@ class _OnlineWiringState extends ConsumerState<OnlineWiring>
     final selected = _selectionCacheKey == cacheKey
         ? _items().where((item) => item.stableKey == _selectedKey).firstOrNull
         : null;
+    _displayed.select(selected);
     observeTagReadings(
       selected == null || selected.sourceId == GallerySourceId.aiTag
           ? const []
@@ -572,7 +605,11 @@ class _OnlineWiringState extends ConsumerState<OnlineWiring>
       gelbooru: ref.watch(gelbooruAuthProvider),
       l10n: context.l10n,
       collectionId: _collectionId,
-      authorId: _authorId,
+      authorId:
+          state.viewMode == GalleryViewMode.search &&
+              state.searchQuery == '$_authorId'
+          ? _authorId
+          : null,
       favoritesFilter: _favoritesFilter,
       selectedKey: selected?.stableKey,
       detail: selected == null
@@ -598,11 +635,11 @@ class _OnlineWiringState extends ConsumerState<OnlineWiring>
         actions: OnlineActions(
           translationBuilder: buildOnlineTranslation,
           onSourceChanged: (source) => _run(() {
-            _clearSelection();
+            _returnFromAuthor();
             return _gallery.setActiveSource(gallerySource(source));
           }),
           onModeChanged: (mode) => _run(() {
-            _clearSelection();
+            _returnFromAuthor();
             return _gallery.setViewMode(galleryMode(mode));
           }),
           onSearch: (query) => _run(() => _search(query)),
@@ -633,18 +670,11 @@ class _OnlineWiringState extends ConsumerState<OnlineWiring>
           onRankDateChanged: (value) =>
               _run(() => _gallery.setPopularDate(value)),
           onCollectionSelected: (value) => _run(() async {
-            _clearSelection();
-            setState(() {
-              _collectionId = value;
-              _authorId = null;
-            });
+            _returnFromAuthor();
+            setState(() => _collectionId = value);
             await _gallery.setViewMode(GalleryViewMode.favorites);
           }),
-          onAuthorSelected: (value) => _run(() async {
-            _clearSelection();
-            setState(() => _authorId = value);
-            await _gallery.setViewMode(GalleryViewMode.favorites);
-          }),
+          onAuthorSelected: (id) => _run(() => _authorWorks(id, profile: true)),
           onCreateCollection: (name) async =>
               mounted ? _favorites.createCollection(name) : '',
           onRenameCollection: (id, name) =>
@@ -670,20 +700,14 @@ class _OnlineWiringState extends ConsumerState<OnlineWiring>
               );
             }
           }),
-          onAuthorWorks: (id) => _run(
-            () => _authorWorks(
-              id,
-              name: saved.authors
-                  .where((author) => author.authorId == id)
-                  .firstOrNull
-                  ?.authorName,
-            ),
-          ),
-          onUnfavoriteAuthor: (id) => _run(() => _favorites.removeAuthor(id)),
-          onReturn: () => _run(() async {
-            _clearSelection();
-            _gallery.returnFromAiTagAuthorSearch();
+          onUnfavoriteAuthor: (id) => _run(() async {
+            if (await _favorites.removeAuthor(id) &&
+                mounted &&
+                _authorId == id) {
+              _returnFromAuthor();
+            }
           }),
+          onReturn: () => _run(() async => _returnFromAuthor()),
           onBlacklistAdd: (tag) => _run(() async {
             final gallery = _gallery;
             await ref
@@ -713,6 +737,7 @@ class _OnlineWiringState extends ConsumerState<OnlineWiring>
           onInspectorChanged: (value) =>
               _run(() => _preferences.setInspector(value)),
           onSelect: (key) => _run(() => _select(key)),
+          onMediaChanged: _displayed.setMedia,
           onLoadMore: () => _run(() => _gallery.loadMore()),
           onRetryPage: () => _run(() => _gallery.retryAppend()),
           onRetry: () => _run(
@@ -756,12 +781,20 @@ class _OnlineWiringState extends ConsumerState<OnlineWiring>
             if (item != null &&
                 item.sourceId == GallerySourceId.aiTag &&
                 item.uploaderId > 0) {
-              await _favorites.toggleAuthor(item.uploaderId, item.author ?? '');
+              final followed = await _favorites.toggleAuthor(
+                item.uploaderId,
+                item.author ?? '',
+              );
+              if (!followed && mounted && _authorId == item.uploaderId) {
+                _returnFromAuthor();
+              }
             }
           }),
           onOnlyAuthor: (key) => _run(() async {
             final item = _item(key);
-            if (item != null && item.sourceId == GallerySourceId.aiTag) {
+            if (item != null &&
+                item.sourceId == GallerySourceId.aiTag &&
+                _authorId != item.uploaderId) {
               await _authorWorks(item.uploaderId, name: item.author);
             }
           }),

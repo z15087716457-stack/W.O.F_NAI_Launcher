@@ -338,12 +338,14 @@ class _PromptToolsStripState extends State<_PromptToolsStrip> {
 class _PreviewTip extends StatelessWidget {
   const _PreviewTip({
     required this.sections,
-    required this.title,
+    this.title,
     required this.child,
     this.disabledHint,
+    this.preferAbove = false,
   });
   final List<GenPreviewSection> sections;
-  final String title;
+  final String? title;
+  final bool preferAbove;
   final Widget child;
   final String? disabledHint;
 
@@ -355,7 +357,9 @@ class _PreviewTip extends StatelessWidget {
     if (sections.isEmpty) return child;
     final c = context.ui;
     return Tooltip(
-      waitDuration: const Duration(milliseconds: 600),
+      waitDuration: Duration(milliseconds: preferAbove ? 250 : 600),
+      preferBelow: preferAbove ? false : null,
+      ignorePointer: true,
       constraints: const BoxConstraints(maxWidth: 420),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
@@ -365,13 +369,15 @@ class _PreviewTip extends StatelessWidget {
       richMessage: TextSpan(
         style: UiText.sans(12, color: c.tipInk, height: 1.5),
         children: [
-          TextSpan(
-            text: title,
-            style: UiText.sans(12, weight: FontWeight.w700, color: c.tipInk),
-          ),
+          if (title != null)
+            TextSpan(
+              text: title,
+              style: UiText.sans(12, weight: FontWeight.w700, color: c.tipInk),
+            ),
           for (final s in sections) ...[
             TextSpan(
-              text: '\n${s.label}\n',
+              text:
+                  '${title == null && s == sections.first ? '' : '\n'}${s.label}\n',
               style: UiText.sans(
                 11,
                 weight: FontWeight.w600,
@@ -914,40 +920,50 @@ class _PromptFoot extends StatelessWidget {
           if (p.transparent case final on?) _Transparent(on: on),
           const Spacer(),
           Builder(
-            builder: (context) => UiPressable(
-              key: const Key('gen-preset'),
-              onTap: presets.isEmpty
-                  ? null
-                  : () => scope.controller.openMenu(
-                      genAbove(context, dy: 4, right: true),
-                      [
-                        for (final x in presets)
-                          UiMenuItem(
-                            label: x.label,
-                            trailing: x.detail,
-                            checked: x.id == current,
-                            onTap: () => p.negative
-                                ? scope.actions.onUcPreset(x.id)
-                                : scope.actions.onQualityPreset(x.id),
-                          ),
-                      ],
-                      tag: #preset,
-                      width: 220,
-                    ),
-              builder: (context, hover) => Row(
-                spacing: 4,
-                children: [
-                  Text(
-                    '${p.negative ? l.gen_ucPreset : l.gen_qualityPreset}: $label',
-                    style: UiText.sans(
-                      11,
-                      color: hover ? c.ink : GenFormat.ink55(c),
-                    ),
-                  ),
-                  UiGlyph(UiGlyphs.chevronDown, size: 11, color: c.muted),
+            builder: (context) {
+              final hint = p.presetHint;
+              return _PreviewTip(
+                preferAbove: true,
+                sections: [
+                  if (hint != null && scope.controller.popoverTag != #preset)
+                    hint,
                 ],
-              ),
-            ),
+                child: UiPressable(
+                  key: const Key('gen-preset'),
+                  onTap: presets.isEmpty
+                      ? null
+                      : () => scope.controller.openMenu(
+                          genAbove(context, dy: 4, right: true),
+                          [
+                            for (final x in presets)
+                              UiMenuItem(
+                                label: x.label,
+                                trailing: x.detail,
+                                checked: x.id == current,
+                                onTap: () => p.negative
+                                    ? scope.actions.onUcPreset(x.id)
+                                    : scope.actions.onQualityPreset(x.id),
+                              ),
+                          ],
+                          tag: #preset,
+                          width: 220,
+                        ),
+                  builder: (context, hover) => Row(
+                    spacing: 4,
+                    children: [
+                      Text(
+                        '${p.negative ? l.gen_ucPreset : l.gen_qualityPreset}: $label',
+                        style: UiText.sans(
+                          11,
+                          color: hover ? c.ink : GenFormat.ink55(c),
+                        ),
+                      ),
+                      UiGlyph(UiGlyphs.chevronDown, size: 11, color: c.muted),
+                    ],
+                  ),
+                ),
+              );
+            },
           ),
         ],
       ),

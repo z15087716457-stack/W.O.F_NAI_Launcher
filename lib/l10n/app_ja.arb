@@ -666,7 +666,7 @@
   "ucPreset_badAnatomy": "不正確な体の構造",
   "ucPreset_none": "なし",
   "ucPreset_disabled": "除外したい要素プリセットが無効です",
-  "ucPreset_addToNegative": "除外したい要素に追加:",
+  "ucPreset_addToNegative": "除外したい要素の先頭に追加:",
   "ucPreset_nsfwHint": "💡 アダルト コンテンツを生成するには、プロンプトに nsfw を追加します。nsfw タグは除外したい要素から自動的に削除されます",
   "warmup_networkCheck": "ネットワーク接続を確認しています...",
   "warmup_networkCheck_noProxy": "NovelAI に接続できません。VPN またはプロキシ設定を有効にしてください",
@@ -4910,14 +4910,7 @@
       "count": {}
     }
   },
-  "online_authorSaved": "{count} 枚保存 · {date} に作者を保存",
-  "@online_authorSaved": {
-    "placeholders": {
-      "count": {},
-      "date": {}
-    }
-  },
-  "online_authorAllWorks": "AI TAG で全作品を見る",
+  "online_authorAllWorks": "すべての作品",
   "online_unfavAuthor": "作者の保存を解除",
   "online_favAuthor": "作者を保存",
   "online_dragHint": "カードを左のコレクションへドラッグで移動。右クリック → 移動 / 解除",
@@ -10059,6 +10052,8 @@
   "ag_psCharacter": "キャラクター {index}",
   "@ag_psCharacter": {"placeholders": {"index": {"type": "int"}}},
   "ag_psNegative": "ネガティブ",
+  "ag_psPromptsOnly": "プロンプトのみ適用",
+  "ag_psWithSettings": "設定も適用",
   "ag_psImport": "キャンバスに読み込む",
   "ag_psImportTip": "メインプロンプト・キャラクター・ネガティブを書き込みます。パラメータと参照画像は変わりません",
   "ag_psImported": "「{title}」をプロンプトに書き込みました",

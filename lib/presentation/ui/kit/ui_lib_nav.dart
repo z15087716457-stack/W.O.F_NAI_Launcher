@@ -19,6 +19,7 @@ class UiNavItem extends StatelessWidget {
     this.trailing,
     this.selected = false,
     this.drop = false,
+    this.suppressHighlight = false,
     this.indent = 0,
     this.onTap,
     this.onSecondaryTap,
@@ -32,6 +33,7 @@ class UiNavItem extends StatelessWidget {
   final Widget? trailing;
   final bool selected;
   final bool drop;
+  final bool suppressHighlight;
   final double indent;
   final VoidCallback? onTap;
   final ValueChanged<Offset>? onSecondaryTap;
@@ -50,15 +52,19 @@ class UiNavItem extends StatelessWidget {
           builder: (context, hover) => Container(
             height: 32,
             padding: EdgeInsets.only(left: 10 + indent, right: 10),
-            decoration: BoxDecoration(
-              color: drop
-                  ? c.accent.withValues(alpha: .10)
-                  : selected
-                  ? c.control
-                  : (hover ? c.hover : null),
-              borderRadius: BorderRadius.circular(7),
-              border: drop ? Border.all(color: c.accent, width: 1.5) : null,
-            ),
+            decoration: suppressHighlight
+                ? null
+                : BoxDecoration(
+                    color: drop
+                        ? c.accent.withValues(alpha: .10)
+                        : selected
+                        ? c.control
+                        : (hover ? c.hover : null),
+                    borderRadius: BorderRadius.circular(7),
+                    border: drop
+                        ? Border.all(color: c.accent, width: 1.5)
+                        : null,
+                  ),
             child: Row(
               spacing: 9,
               children: [

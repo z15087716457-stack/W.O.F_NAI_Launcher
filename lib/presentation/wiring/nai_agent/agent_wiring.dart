@@ -92,7 +92,7 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
   AgentThreadMapping? _mapping;
   final _recentImages = <String, AgentImage>{};
   final _promptImports = <String, AgentPromptSetImport>{};
-  final _promptBusy = <String, int>{};
+  final _promptBusy = <String, String>{};
   final _promptTokens = <NaiAgentCancellation>{};
   String? _promptOwner;
 
@@ -103,8 +103,9 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
     AgentChatRuntime r,
     String id,
     int index,
-    AgentPromptSetAction action,
-  ) async {
+    AgentPromptSetAction action, [
+    String? cardId,
+  ]) async {
     final key = _promptKey(r, id);
     final service = ref.read(agentPromptSetActionsProvider);
     void toast(String text) {
@@ -125,25 +126,35 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
     }
     if (_promptBusy.containsKey(key)) return false;
     final set = await NaiAgentPromptSets(r.workspace.agentDirectory).read(id);
+    if (set != null && cardId != null) {
+      index = (set['items'] as List).indexWhere(
+        (item) => item['card_id'] == cardId,
+      );
+    }
     if (!mounted ||
         !identical(controller.selected, r) ||
         set == null ||
+        index < 0 ||
         index >= (set['items'] as List).length) {
       return false;
     }
     if (_promptBusy.containsKey(key)) return false;
     switch (action) {
       case AgentPromptSetAction.import:
+      case AgentPromptSetAction.importWithParams:
       case AgentPromptSetAction.generate:
         final token = NaiAgentCancellation();
         _promptTokens.add(token);
-        setState(() => _promptBusy[key] = index);
+        setState(
+          () => _promptBusy[key] = set['items'][index]['card_id'] as String,
+        );
         try {
           final imported = await service.importItem(
             r.workspace,
             set,
             index,
             toast,
+            includeSettings: action != AgentPromptSetAction.import,
             check: token.check,
           );
           if (imported == null) return false;
@@ -168,6 +179,7 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
               workspace: r.workspace,
               setId: id,
               index: index,
+              cardId: set['items'][index]['card_id'] as String?,
               result: agentMap(response['details']),
               check: token.check,
             );
@@ -183,12 +195,12 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
           if (mounted) setState(() => _revision++);
         }
       case AgentPromptSetAction.saveBlock:
-        await service.saveBlock(set);
+        await service.saveBlock(set, index: index);
         if (!mounted) return true;
         toast(
           context.l10n.ag_psSavedBlock(
-            set['title'] as String,
-            (set['items'] as List).length,
+            set['items'][index]['title'] as String,
+            1,
           ),
         );
         return true;
@@ -652,22 +664,31 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
             preferences: ref.watch(agentPreferencesProvider),
             promptSetView: (value, images) {
               final id = value['set_id'] as String;
-              final imported = _promptImports[_promptKey(r, id)];
+              final key = _promptKey(r, id);
+              final imported = _promptImports[key];
+              int? cardIndex(String? cardId) => cardId == null
+                  ? null
+                  : (value['items'] as List).indexWhere(
+                      (item) => item['card_id'] == cardId,
+                    );
               return agentPromptSetData(
                 value,
                 r.workspace,
                 _resources,
                 images,
                 unitAnlas: promptPrice,
+                estimateCard: promptPrice == null
+                    ? null
+                    : ref.read(agentPromptSetActionsProvider).estimateCard,
                 aspect:
                     draft?.width != null &&
                         draft?.height != null &&
                         draft!.height! > 0
                     ? draft.width! / draft.height!
                     : null,
-                importedIndex: imported?.index,
+                importedIndex: cardIndex(imported?.cardId) ?? imported?.index,
                 canUndoImport: imported != null && imported.version == version,
-                busyIndex: _promptBusy[_promptKey(r, id)],
+                busyIndex: cardIndex(_promptBusy[key]),
               );
             },
           );
@@ -1010,8 +1031,8 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
               await c.showExternal(unreadExternal);
               await ref.read(naiAgentWindowControllerProvider).open();
             }),
-      onPromptSetAction: (id, index, action) async =>
-          r != null && await _promptAction(r, id, index, action),
+      onPromptSetAction: (id, index, action, [cardId]) async =>
+          r != null && await _promptAction(r, id, index, action, cardId),
       onClose: () =>
           _background(ref.read(naiAgentWindowControllerProvider).close),
       onNewChat: () => _run(c.createChat),

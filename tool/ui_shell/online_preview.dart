@@ -197,6 +197,7 @@ class OnlinePreviewSim extends ChangeNotifier {
     height: w.height,
     title: w.title,
     author: w.author,
+    authorId: w.authorId,
     views: w.views,
     favorites: w.favorites,
     score: w.score,
@@ -209,11 +210,15 @@ class OnlinePreviewSim extends ChangeNotifier {
 
   OnlineActions get actions => OnlineActions(
     onSourceChanged: (s) => _set(() {
+      author = null;
+      canReturn = false;
       source = s;
       selected = null;
       pages = 1;
     }),
     onModeChanged: (m) => _set(() {
+      author = null;
+      canReturn = false;
       _modes[source] = m;
       pages = 1;
       selected = null;
@@ -290,8 +295,16 @@ class OnlinePreviewSim extends ChangeNotifier {
     onCollectionSelected: (id) => _set(() {
       collection = id;
       author = null;
+      _modes[source] = OnlineMode.favorites;
+      canReturn = false;
     }),
-    onAuthorSelected: (id) => _set(() => author = id),
+    onAuthorSelected: (id) => _set(() {
+      author = id;
+      _modes[source] = OnlineMode.search;
+      selected = null;
+      pages = 1;
+      canReturn = true;
+    }),
     onCreateCollection: (name) async {
       final id = 'c${collections.length}';
       _set(
@@ -313,14 +326,14 @@ class OnlinePreviewSim extends ChangeNotifier {
       if (collection == id) collection = null;
     }),
     onMoveToCollection: (keys, id) => log('onMoveToCollection($keys → $id)'),
-    onAuthorWorks: (id) => _set(() {
-      _modes[source] = OnlineMode.search;
-      _queries[source] = const OnlineQuery(work: 'LaraZoa');
+    onUnfavoriteAuthor: (id) => _set(() {
       author = null;
-      canReturn = true;
+      _modes[source] = OnlineMode.favorites;
+      canReturn = false;
     }),
-    onUnfavoriteAuthor: (id) => _set(() => author = null),
     onReturn: () => _set(() {
+      if (author != null) _modes[source] = OnlineMode.favorites;
+      author = null;
       _queries[source] = const OnlineQuery(work: 'ocean');
       canReturn = false;
     }),

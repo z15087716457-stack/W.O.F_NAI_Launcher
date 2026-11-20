@@ -5,6 +5,7 @@ import 'package:hive/hive.dart';
 
 import 'package:nai_launcher/core/storage/prompt_block_storage.dart';
 import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
+import 'package:nai_launcher/data/models/prompt_block/prompt_block_folder.dart';
 import 'package:nai_launcher/data/repositories/prompt_block_repository.dart';
 
 void main() {
@@ -151,6 +152,38 @@ void main() {
           .map((folder) => folder.id),
       [third.id, first.id, second.id],
     );
+  });
+
+  test('insert beside persists parent and sibling order together', () async {
+    final a = await repository.createFolder(name: 'A');
+    final b = await repository.createFolder(name: 'B');
+    final child = await repository.createFolder(name: 'child', parentId: a.id);
+    final nested = await repository.createFolder(
+      name: 'nested',
+      parentId: child.id,
+    );
+
+    await repository.insertFolderBeside(b.id, a.id, after: false);
+    expect((await storage.getFolders()).childrenOf(null).map((f) => f.id), [
+      b.id,
+      a.id,
+    ]);
+    await repository.insertFolderBeside(b.id, child.id, after: true);
+    expect((await storage.getFolders()).childrenOf(a.id).map((f) => f.id), [
+      child.id,
+      b.id,
+    ]);
+    await expectLater(
+      repository.insertFolderBeside(a.id, nested.id, after: false),
+      throwsArgumentError,
+    );
+    await repository.insertFolderBeside(child.id, a.id, after: false);
+    await storage.close();
+    await storage.init();
+    final saved = await storage.getFolders();
+    expect(saved.childrenOf(null).map((f) => f.id), [child.id, a.id]);
+    expect(saved.childrenOf(a.id).single.id, b.id);
+    expect(saved.childrenOf(child.id).single.id, nested.id);
   });
 
   test('moving a folder into its descendant is rejected', () async {

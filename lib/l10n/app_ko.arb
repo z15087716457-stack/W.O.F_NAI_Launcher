@@ -666,7 +666,7 @@
   "ucPreset_badAnatomy": "잘못된 해부학",
   "ucPreset_none": "없음",
   "ucPreset_disabled": "네거티브 프리셋이 꺼져 있습니다",
-  "ucPreset_addToNegative": "네거티브에 추가:",
+  "ucPreset_addToNegative": "네거티브 프롬프트 맨 앞에 추가:",
   "ucPreset_nsfwHint": "💡 성인 콘텐츠를 생성하려면 프롬프트에 nsfw를 추가하세요. 네거티브의 nsfw 태그는 자동으로 제거됩니다",
   "warmup_networkCheck": "네트워크 연결 확인 중...",
   "warmup_networkCheck_noProxy": "NovelAI에 연결할 수 없습니다. VPN을 켜거나 프록시를 설정하세요",
@@ -4910,14 +4910,7 @@
       "count": {}
     }
   },
-  "online_authorSaved": "{count}장 저장 · {date} 작가 저장",
-  "@online_authorSaved": {
-    "placeholders": {
-      "count": {},
-      "date": {}
-    }
-  },
-  "online_authorAllWorks": "AI TAG에서 모든 작품 보기",
+  "online_authorAllWorks": "전체 작품",
   "online_unfavAuthor": "작가 저장 해제",
   "online_favAuthor": "작가 저장",
   "online_dragHint": "카드를 왼쪽 컬렉션으로 끌면 이동; 우클릭 → 이동 / 해제",
@@ -10059,6 +10052,8 @@
   "ag_psCharacter": "캐릭터 {index}",
   "@ag_psCharacter": {"placeholders": {"index": {"type": "int"}}},
   "ag_psNegative": "네거티브",
+  "ag_psPromptsOnly": "프롬프트만 적용",
+  "ag_psWithSettings": "설정과 함께 적용",
   "ag_psImport": "캔버스로 가져오기",
   "ag_psImportTip": "메인 프롬프트, 캐릭터, 네거티브만 씁니다. 파라미터와 참조 이미지는 그대로입니다",
   "ag_psImported": "‘{title}’을(를) 프롬프트에 넣었습니다",

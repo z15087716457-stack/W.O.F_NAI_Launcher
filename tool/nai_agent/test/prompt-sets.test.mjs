@@ -7,23 +7,23 @@ import { createNaiInteractionExtension } from '../lib/extensions/interaction.mjs
 import { createNaiPermissions } from '../lib/extensions/permissions.mjs';
 
 const content = {kind:'Storyboard', kind_icon:'film', title:'Rain', unit:'scene', ordered:true,
-  shared:{main:'best quality',characters:['silver hair']},
-  items:[{icon:'rain',title:'Rain',characters:['running']},{icon:'coffee',title:'Cafe'}]};
+  items:[{card_id:'rain',icon:'rain',title:'Rain',characters:['silver hair, running']},{card_id:'cafe',icon:'coffee',title:'Cafe'}]};
 
 test('prompt_set schema bounds and exact Dart icon catalog (action requirements are enforced in Dart)', async () => {
   const tool = domainTools.find(t => t.name === 'prompt_set');
   assert.ok(tool.description.length <= 600);
-  assert.match(tool.description, /repeats allowed/);
   assert.ok(Value.Check(tool.parameters, {action:'create', ...content,
     items:content.items.map(item => ({...item, icon:'heart'}))}));
-  const guide = await readFile(new URL('../skills/nai-studio/references/prompt-sets.md', import.meta.url), 'utf8');
-  assert.match(guide, /Icons may repeat/);
   const schema = tool.parameters;
   assert.ok(Value.Check(schema,{action:'create',...content}));
   assert.ok(Value.Check(schema,{action:'read',set_id:'012345abcdef'}));
   assert.ok(Value.Check(schema,{action:'update',set_id:'012345abcdef',expected_revision:1,...content}));
+  const single = {...content.items[0], generation:{seed:0, cfg_scale:5.5, width:832}};
+  assert.ok(Value.Check(schema,{action:'create',...content,items:[single]}));
+  assert.ok(Value.Check(schema,{action:'update',set_id:'012345abcdef',expected_revision:1,card:single}));
   for (const bad of [
-    {action:'create',...content,items:content.items.slice(0,1)},
+    {action:'create',...content,items:[]},
+    {action:'create',...content,items:[{...single,generation:{seed:'0'}}]},
     {action:'create',...content,items:Array(25).fill(content.items[0])},
     {action:'create',...content,kind_icon:'alien'},
     {action:'create',...content,items:[{icon:'alien',title:'x'},content.items[1]]},
@@ -42,7 +42,7 @@ test('prompt_set schema bounds and exact Dart icon catalog (action requirements 
   for (const name of legacy) assert.match(glyphs,new RegExp("'"+name+"' => AgentGlyphs\\."));
   assert.match(glyphs, /UiExtraIcons\.paths\[name\] \?\? AgentGlyphs\.book/);
   for (const icon of extra) {
-    assert.ok(Value.Check(schema,{action:'create',...content,kind_icon:icon,items:[{icon,title:'x'},content.items[1]]}), icon);
+    assert.ok(Value.Check(schema,{action:'create',...content,kind_icon:icon,items:[{card_id:'one',icon,title:'x'},content.items[1]]}), icon);
   }
 });
 
@@ -51,13 +51,12 @@ test('prompt_set accepts optional per-character positions and rejects invalid sh
   for (const action of ['create', 'update']) {
     const base = {action, set_id:'012345abcdef', expected_revision:1, ...content};
     for (const positions of [[], [null], [{x:0,y:1}], [{x:0.25,y:0.75}]]) {
-      const value = {...base, shared:{...content.shared, positions},
+      const value = {...base,
         items:[{...content.items[0], positions}, content.items[1]]};
       assert.equal(Value.Check(schema,value),true,JSON.stringify(value));
     }
     for (const positions of [null, {}, [0], [[0,1]], [{x:0}], [{x:0,y:1,z:0}],
-      [{x:-0.01,y:0}], [{x:0,y:1.01}], [{x:'0',y:0}], [{x:NaN,y:0}], [{x:0,y:Infinity}], Array(7).fill(null)]) {
-      assert.equal(Value.Check(schema,{...base,shared:{...content.shared,positions}}),false);
+      [{x:-0.01,y:0}], [{x:0,y:1.01}], [{x:'0',y:0}], [{x:NaN,y:0}], [{x:0,y:Infinity}], Array(33).fill(null)]) {
       assert.equal(Value.Check(schema,{...base,items:[{...content.items[0],positions},content.items[1]]}),false);
     }
   }

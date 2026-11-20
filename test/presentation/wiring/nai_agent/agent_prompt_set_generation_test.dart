@@ -98,9 +98,26 @@ void main() {
       addTearDown(subscription.close);
       final tools = container.read(agentPromptSetGenerationProvider(key));
       final set = (await sets.read(id))!;
-      await container
-          .read(agentPromptSetActionsProvider)
-          .importItem(workspace, set, 0, (_) {});
+      final service = container.read(agentPromptSetActionsProvider);
+      final settings = <String, dynamic>{
+        'width': 1024,
+        'height': 1536,
+        'steps': 36,
+        'seed': 73,
+      };
+      set['items'][0]['generation'] = settings;
+      final price = service.estimateCard(settings);
+      await service.importItem(
+        workspace,
+        set,
+        0,
+        (_) {},
+        includeSettings: true,
+      );
+      expect(
+        price,
+        tools.readInput({'requests': 1, 'images_per_request': 1}).estimate,
+      );
       // Even when the main draft asks for many images, the card authorizes one.
       final params = container.read(generationParamsNotifierProvider);
       container
@@ -123,6 +140,11 @@ void main() {
       expect(approvals.forChat('idle-chat'), isEmpty);
       expect(native.requests.single.nSamples, 1);
       expect(native.sizes, [1]);
+      final image = native.requests.single;
+      expect(
+        [image.width, image.height, image.steps, image.seed],
+        [1024, 1536, 36, 73],
+      );
       native.finish();
       final result = (await future)['details'] as Map<String, dynamic>;
       expect(result['balance_before_anlas'], 10000);

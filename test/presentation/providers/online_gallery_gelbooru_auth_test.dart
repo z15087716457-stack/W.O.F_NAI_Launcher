@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/core/storage/secure_storage_service.dart';
 import 'package:nai_launcher/data/datasources/remote/danbooru_api_service.dart';
 import 'package:nai_launcher/data/datasources/remote/gelbooru_api_service.dart';
+import 'package:nai_launcher/data/datasources/remote/online_gallery/gallery_source_adapter.dart';
 import 'package:nai_launcher/data/models/online_gallery/danbooru_post.dart';
 import 'package:nai_launcher/data/models/online_gallery/gelbooru_credentials.dart';
 import 'package:nai_launcher/data/services/gelbooru_auth_service.dart';
@@ -69,6 +70,35 @@ void main() {
     expect(httpAdapter.requests.first.queryParameters['page'], 'post');
     expect(container.read(onlineGalleryNotifierProvider).posts, hasLength(1));
   });
+
+  test(
+    'public Gelbooru IDs resolve to the exact preview without an original',
+    () async {
+      final http = _GalleryHttpAdapter();
+      final container = createContainer(httpAdapter: http);
+      addTearDown(container.dispose);
+      final gallery = container.read(onlineGalleryNotifierProvider.notifier);
+      final detail = await gallery.loadDetail(
+        const DanbooruPost(id: 14416915, site: 'gelbooru'),
+      );
+      expect(
+        http.requests.first.queryParameters['tags'],
+        contains('id:14416915'),
+      );
+      expect(detail.media.single.previewUrl, endsWith('/14416915.jpg'));
+      expect(detail.item.fileUrl, isNull);
+      await expectLater(
+        gallery.loadDetail(const DanbooruPost(id: 9, site: 'gelbooru')),
+        throwsA(
+          isA<GallerySourceException>().having(
+            (e) => e.code,
+            'code',
+            GallerySourceErrorCode.detailNotFound,
+          ),
+        ),
+      );
+    },
+  );
 
   test(
     'valid credentials use one DAPI call and skip dimension probes',

@@ -30,7 +30,8 @@ test('stdio initialization and listing are offline and reuse exact internal sche
   const native = studioTools(() => {}, [...domainTools.map(t => t.name), 'ask_user']);
   const business = list.result.tools.filter(t => !['studio_session', 'studio_skills'].includes(t.name));
   assert.deepEqual(business, JSON.parse(JSON.stringify(native.map(t => ({ name:t.name,description:t.description,inputSchema:t.parameters })))));
-  assert.equal(business.length, 24);
+  assert.equal(business.length, 25);
+  assert.ok(business.some(tool => tool.name === 'online_gallery'));
   assert.ok(!business.some(t => ['read','write','edit','bash','agent_manage'].includes(t.name)));
 }));
 test('missing Studio connection is a visible tool error; unknown methods use JSON-RPC errors', async () => fixture(async send => {

@@ -668,16 +668,18 @@ void main() {
       expect(rec.moves.single.$2, 'color');
     });
 
-    testWidgets('只看收藏作者：头部两个操作', (t) async {
+    testWidgets('作者作品页：显示在线作品总数，可切换作者、返回或取消收藏作者', (t) async {
       await pumpOnline(
         t,
         data: OnlineFixture.view(mode: OnlineMode.favorites, authorId: 100),
         actions: rec.actions,
       );
-      expect(find.text('收藏了 24 张 · 收藏作者于 2026-08-12'), findsOneWidget);
-      await tap(t, 'online-author-works');
+      expect(find.text('全部作品 · 124'), findsOneWidget);
+      expect(find.byKey(const Key('online-insp-only-author')), findsNothing);
+      await tap(t, 'online-author-101');
+      await tap(t, 'online-return');
       await tap(t, 'online-author-unfav');
-      expect(rec.calls, ['authorWorks:100', 'unfavAuthor:100']);
+      expect(rec.calls, ['author:101', 'return', 'unfavAuthor:100']);
     });
 
     testWidgets('Danbooru 收藏未登录：登录和 API Key 说明', (t) async {

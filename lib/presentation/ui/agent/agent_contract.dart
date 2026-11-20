@@ -329,12 +329,23 @@ class AgentPromptSetItem {
   const AgentPromptSetItem({
     required this.icon,
     required this.title,
+    this.cardId,
+    this.negative = '',
+    this.characterNegatives = const [],
+    this.useCoords,
+    this.generation = const {},
+    this.estimatedAnlas,
     this.note = '',
     this.main = '',
     this.characters = const [],
     this.positions = const [],
   });
-  final String icon, title, note, main;
+  final String icon, title, note, main, negative;
+  final String? cardId;
+  final List<String> characterNegatives;
+  final bool? useCoords;
+  final Map<String, dynamic> generation;
+  final int? estimatedAnlas;
   final List<String> characters;
   final List<Offset?> positions;
 
@@ -343,7 +354,12 @@ class AgentPromptSetItem {
       (index < shared.positions.length ? shared.positions[index] : null);
 
   List<AgentPositionMark> positionMarks(AgentPromptSetShared shared) => [
-    for (var j = 0; j < shared.characters.length; j++)
+    for (
+      var j = 0;
+      useCoords != false &&
+          j < (cardId == null ? shared.characters.length : characters.length);
+      j++
+    )
       if (positionAt(shared, j) case final position?)
         AgentPositionMark(index: j, after: position, added: true),
   ];
@@ -395,6 +411,7 @@ final class AgentPromptSetBlock extends AgentBlock {
 
 enum AgentPromptSetAction {
   import,
+  importWithParams,
   generate,
   undo,
   saveBlock,
@@ -1460,8 +1477,9 @@ class AgentActions {
   final Future<bool> Function(
     String setId,
     int index,
-    AgentPromptSetAction action,
-  )?
+    AgentPromptSetAction action, [
+    String? cardId,
+  ])?
   onPromptSetAction;
 
   final Future<bool> Function(AgentSlashCommand command)? onSelectSlashCommand;

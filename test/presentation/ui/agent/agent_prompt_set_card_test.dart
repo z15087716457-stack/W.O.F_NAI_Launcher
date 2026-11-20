@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/rendering.dart';
@@ -62,6 +64,137 @@ void main() {
     await t.pumpAndSettle();
   }
 
+  for (final dark in [false, true]) {
+    testWidgets(
+      '15 independent scenes page in one 320px deck with per-scene actions, dark=$dark',
+      (t) async {
+        final cards = AgentPromptSet(
+          setId: 'deck',
+          revision: 1,
+          kind: '分镜',
+          kindIcon: 'film',
+          title: '雨后',
+          unit: '幕',
+          ordered: true,
+          shared: const AgentPromptSetShared(),
+          items: [
+            const AgentPromptSetItem(
+              cardId: 'street',
+              icon: 'rain',
+              title: '雨后的街角',
+              note: '她停下脚步，看向街对面的灯。',
+              main: 'rain, evening',
+              characters: ['silver hair'],
+              characterNegatives: ['hat'],
+              generation: {
+                'model': 'nai-diffusion-4-5-full',
+                'width': 832,
+                'height': 1216,
+                'sampler': 'k_dpmpp_2m',
+                'steps': 28,
+                'cfg_scale': 5.5,
+                'seed': 14703682,
+              },
+            ),
+            const AgentPromptSetItem(
+              cardId: 'cafe',
+              icon: 'coffee',
+              title: '空无一人的咖啡馆',
+              main: 'empty cafe',
+            ),
+            for (var i = 3; i <= 15; i++)
+              AgentPromptSetItem(
+                cardId: 'scene-$i',
+                icon: 'film',
+                title: '场景 $i',
+              ),
+          ],
+        );
+        await pump(t, width: 320, dark: dark, data: cards);
+        expect(find.byType(AgentPromptSetCard), findsOneWidget);
+        expect(find.text('1 / 15'), findsOneWidget);
+        expect(find.text('雨后的街角'), findsOneWidget);
+        expect(find.text('空无一人的咖啡馆'), findsNothing);
+        expect(key('settings'), findsOneWidget);
+        expect(key('import'), findsOneWidget);
+        await tap(t, 'settings');
+        expect(find.text('832 × 1216'), findsOneWidget);
+        expect(find.text('14703682'), findsOneWidget);
+        await tap(t, 'import-settings');
+        expect(calls.single, (0, AgentPromptSetAction.importWithParams));
+        expect(t.takeException(), isNull);
+        if (const bool.fromEnvironment('CAPTURE_PROMPT_CARDS')) {
+          final boundary = t.renderObject<RenderRepaintBoundary>(
+            find.byKey(const Key('prompt-set-capture')),
+          );
+          await t.runAsync(() async {
+            final image = await boundary.toImage();
+            final bytes = await image.toByteData(
+              format: ui.ImageByteFormat.png,
+            );
+            final dir = Directory('.dart_tool/prompt-deck-preview')
+              ..createSync(recursive: true);
+            File(
+              '${dir.path}/${dark ? 'dark' : 'light'}.png',
+            ).writeAsBytesSync(bytes!.buffer.asUint8List());
+            image.dispose();
+          });
+        }
+        await tap(t, 'next');
+        expect(find.text('2 / 15'), findsOneWidget);
+        expect(find.text('空无一人的咖啡馆'), findsOneWidget);
+        expect(key('settings'), findsNothing);
+        expect(find.text('14703682'), findsNothing);
+        await tap(t, 'prompt');
+        expect(find.text('empty cafe'), findsOneWidget);
+        expect(find.text('silver hair'), findsNothing);
+        await tap(t, 'import');
+        expect(calls.last, (1, AgentPromptSetAction.import));
+        await tap(t, 'prev');
+        expect(find.text('silver hair'), findsOneWidget);
+        expect(find.text('14703682'), findsNothing);
+        await tap(t, 'overview');
+        await t.tap(find.text('场景 15'));
+        await t.pumpAndSettle();
+        expect(find.text('15 / 15'), findsOneWidget);
+        await tap(t, 'import');
+        expect(calls.last, (14, AgentPromptSetAction.import));
+        expect(t.takeException(), isNull);
+      },
+    );
+  }
+  testWidgets(
+    'selection follows the card on reorder and a lone scene stays compact',
+    (t) async {
+      AgentPromptSet revision(List<String> ids) => AgentPromptSet(
+        setId: 'deck',
+        revision: 1,
+        kind: '分镜',
+        kindIcon: 'film',
+        title: '雨后',
+        unit: '幕',
+        ordered: true,
+        shared: const AgentPromptSetShared(),
+        items: [
+          for (final id in ids)
+            AgentPromptSetItem(cardId: id, icon: 'film', title: id),
+        ],
+      );
+      await pump(t, data: revision(['a', 'b', 'c']));
+      await tap(t, 'next');
+      await pump(t, data: revision(['a', 'c', 'b']));
+      expect(find.text('b'), findsOneWidget);
+      expect(find.text('3 / 3'), findsOneWidget);
+      await tap(t, 'overview');
+      await pump(t, data: revision(['c']));
+      expect(find.text('c'), findsOneWidget);
+      for (final control in ['prev', 'next', 'overview', 'dot-0']) {
+        expect(key(control), findsNothing);
+      }
+      await tap(t, 'import');
+      expect(calls.single, (0, AgentPromptSetAction.import));
+    },
+  );
   testWidgets('arrows, dots, focus keyboard, overview and revision', (t) async {
     await pump(t);
     expect(find.text('大雨'), findsOneWidget);

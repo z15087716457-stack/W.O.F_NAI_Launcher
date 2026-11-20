@@ -4910,14 +4910,7 @@
       "count": {}
     }
   },
-  "online_authorSaved": "收藏了 {count} 张 · 收藏作者于 {date}",
-  "@online_authorSaved": {
-    "placeholders": {
-      "count": {},
-      "date": {}
-    }
-  },
-  "online_authorAllWorks": "在 AI TAG 看 TA 的全部作品",
+  "online_authorAllWorks": "全部作品",
   "online_unfavAuthor": "取消收藏作者",
   "online_favAuthor": "收藏作者",
   "online_dragHint": "把卡片拖到左边的子集就是移动；右键 → 移到子集 / 取消收藏",
@@ -10059,6 +10052,8 @@
   "ag_psCharacter": "角色 {index}",
   "@ag_psCharacter": {"placeholders": {"index": {"type": "int"}}},
   "ag_psNegative": "负面",
+  "ag_psPromptsOnly": "只导入提示词",
+  "ag_psWithSettings": "连同参数导入",
   "ag_psImport": "导入画布",
   "ag_psImportTip": "写入主提示词、角色和负面；参数和参考图不变",
   "ag_psImported": "已把「{title}」写入提示词",
