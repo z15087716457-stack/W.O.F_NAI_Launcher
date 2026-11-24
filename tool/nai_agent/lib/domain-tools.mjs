@@ -82,7 +82,7 @@ export const domainTools = [
       limit:Type.Optional(Type.Integer({minimum:1,maximum:50}))}, {additionalProperties:false}),
   },
   { name: 'prompt_set',
-    description: 'Create, read or update independent prompt cards with optional generation settings. On update, card replaces one card and items replaces the set. See skills/nai-studio/references/prompt-sets.md.',
+    description: 'Create, read or update independent prompt cards with optional generation settings. On update, card replaces one card and items replaces the set. Importing a card replaces the draft main/negative prompt and characters; empty fields clear them. generation noise_schedule, smea*, variety_plus are V4/V4.5-only. See skills/nai-studio/references/prompt-sets.md.',
     parameters: Type.Object({action:E(['create','update','read']),
       set_id:Type.Optional(Type.String({pattern:'^[a-f0-9]{12}$'})),
       expected_revision:Type.Optional(Type.Integer({minimum:1})),
@@ -129,7 +129,7 @@ export const domainTools = [
     }),
   },
   { name: 'block_manage',
-    description: 'Manage the prompt block library and inline instances. Temporary and translation instances need no library entry; translations keep source for generation and zh for reading. instance_convert wraps existing text without changing generation text. Writes use expected_version, expected_library_version or expected_draft_version from the corresponding read. Action fields, positioning and merge/split workflows: skills/nai-studio/references/blocks.md.',
+    description: 'Manage the prompt block library and inline instances. Temporary and translation instances need no library entry; translations keep source for generation and zh for reading. instance_convert wraps existing text without changing generation text. instance.icon takes a temporary icon key and instance.settings only native setting keys (blocks.md). Writes use expected_version, expected_library_version or expected_draft_version from the corresponding read. Action fields, positioning and merge/split workflows: skills/nai-studio/references/blocks.md.',
     parameters: Type.Object({
       action: E(['create', 'update', 'delete', 'insert', 'instance_create', 'instance_convert', 'instance_update', 'instance_unwrap', 'instance_delete', 'instance_promote', 'folder_create', 'folder_update', 'folder_move', 'folder_delete', 'folder_reorder', 'block_reorder', 'collection_create', 'collection_update', 'collection_move', 'collection_delete', 'collection_reorder', 'collection_add', 'collection_remove']),
       id: Type.Optional(Type.String()), expected_version: Type.Optional(Type.String()),
@@ -179,7 +179,7 @@ export const domainTools = [
     parameters: Type.Object({run_id: Type.Optional(Type.String())}),
   },
   { name: 'online_gallery',
-    description: 'Studio online gallery. current reads the selected work and displayed page. search uses the current or specified source and gallery filters without changing the UI; continue with next_cursor and the same query. detail reads page-specific metadata. View returned online image_id with image_read. download saves the original only when requested; workspace returns reusable relative paths, library saves into a configured gallery folder. Pages are 1-based; all_pages downloads an entire work. See references/gallery.md.',
+    description: 'Studio online gallery. current reads the selected work and displayed page. search uses the current or specified source and gallery filters without changing the UI; continue by passing the returned next_cursor as cursor with the same query. detail reads page-specific metadata. View returned online image_id with image_read. download saves the original only when requested; workspace returns reusable relative paths, library saves into a configured gallery folder. Pages are 1-based; all_pages downloads an entire work. See references/gallery.md.',
     parameters: Type.Object({
       action: E(['current', 'search', 'detail', 'download']),
       source: Type.Optional(E(['ai_tag','danbooru','safebooru','gelbooru'])),
@@ -225,7 +225,7 @@ export const domainTools = [
     }),
   },
   { name: 'gallery_manage',
-    description: 'Manage gallery images, collections and physical folders. Use expected_image_version from read, expected_collection_version from collections and expected_folder_version from folders. move_file/copy_file accept one image or 1–50 image_ids with expected_image_versions and absolute target_folder. At most ONE Studio confirmation per call. Action fields, collection limits, batch reorganization and partial results: skills/nai-studio/references/gallery.md.',
+    description: 'Manage gallery images, collections and physical folders. Use expected_image_version from read, expected_collection_version from collections and expected_folder_version from folders. move_file/copy_file accept one image or 1–50 image_ids with expected_image_versions and absolute target_folder; collection_add/remove take 1–20 image_ids. At most ONE Studio confirmation per call. Action fields, collection limits, batch reorganization and partial results: skills/nai-studio/references/gallery.md.',
     parameters: Type.Object({
       action: E(['read', 'update', 'delete', 'restore', 'export', 'trash', 'collections', 'collection_members', 'collection_create', 'collection_update', 'collection_delete', 'collection_reorder', 'collection_add', 'collection_remove', 'folders', 'folder_create', 'folder_rename', 'folder_move', 'folder_delete_empty', 'folder_sync', 'move_file', 'copy_file']),
       scope: Type.Optional(E(['history', 'library'])),
@@ -254,7 +254,7 @@ export const domainTools = [
     }),
   },
   { name: 'reference_manage',
-    description: 'Current draft source image, mask, Vibe and precise references. list returns indices, draft_version and draft:* image IDs. Writes need expected_draft_version; image actions take one image_id or workspace path. set_source enters img2img (use_image_size default true); set_mask (source-sized, white=repaint, optional focus_region) enters inpainting; clear_mask/clear_source step back. Vibe: strength free, info_extracted 0.01–1, max 16, encoded at generation. Precise: type default character, strength/fidelity 0–10. update/remove by index. generation_prepare quotes encoding costs.',
+    description: 'Current draft source image, mask, Vibe and precise references. list returns indices, draft_version and draft:* image IDs. Writes need expected_draft_version; image actions take one image_id or workspace path. set_source enters img2img (use_image_size default true); set_mask (source-sized, white=repaint, optional focus_region) enters inpainting; clear_mask/clear_source step back. Vibe: strength free, info_extracted 0.01–1, max 16, encoded at generation. Precise: type default character, strength/fidelity 0–10. V5: no Vibe/precise. update/remove by index. generation_prepare quotes encoding.',
     parameters: Type.Object({
       action: Type.Optional(E(['list','set_source','clear_source','set_mask','clear_mask','add_vibe','update_vibe','remove_vibe','clear_vibes','add_precise','update_precise','remove_precise','clear_precise'])),
       expected_draft_version: Type.Optional(Type.String()),
@@ -269,7 +269,7 @@ export const domainTools = [
     }),
   },
   { name: 'reference_library',
-    description: 'Reusable Vibe/precise library: query, read, apply, import, save, export, update, delete; Vibe categories. apply needs expected_draft_version + expected_entry_version (bundles must fit 16 references); update/delete need expected_entry_version and back up; category writes need expected_category_version. Bundle fields use child_index. encoding_required means apply, generate, then save. Paths are workspace-relative.',
+    description: 'Reusable Vibe/precise library: query, read, apply, import, save, export, update, delete; Vibe categories. apply needs expected_draft_version + expected_entry_version (bundles must fit 16 references); update/delete need expected_entry_version and back up; category writes need expected_category_version. Bundle fields use child_index. encoding_required means apply, generate, then save. apply fails with reference_unsupported on V5 models. Paths are workspace-relative.',
     parameters: Type.Object({
       kind: Type.Optional(E(['vibe','precise'])),
       action: Type.Optional(E(['query','read','apply','import','save','export','update','delete','categories','category_create','category_update','category_delete'])),
@@ -292,7 +292,7 @@ export const domainTools = [
     }),
   },
   { name: 'image_tool',
-    description: 'Local and cloud image tools; draft unchanged. list: models, methods, scales, SeedVR2 defaults. upscale(model_id, scale 1–4, one image_id or path) and pixel_snap(pixel options) run locally for free; status/cancel(job_id). Cloud tools (cloud_upscale, removeBackground, extractLineArt, toSketch, colorize, fixEmotion, declutter): prepare freezes source/prompt/price, run(quote_id) follows the Studio confirmation policy. Outputs go to workspace .W.O.F/outputs/ and history. Use image_generate for variations/enhance.',
+    description: 'Local and cloud image tools; draft unchanged. list: models, methods, scales, SeedVR2 defaults. upscale(model_id, scale 1–4, one image_id or path) and pixel_snap(pixel options) run locally for free; status/cancel(job_id). seedvr2.blocksToSwap is 0–32 (0–36 for 7B models). Cloud tools (cloud_upscale, removeBackground, extractLineArt, toSketch, colorize, fixEmotion, declutter): prepare freezes source/prompt/price, run(quote_id) follows the Studio confirmation policy. Outputs go to workspace .W.O.F/outputs/ and history. Use image_generate for variations/enhance.',
     parameters: Type.Object({
       action: E(['list', 'status', 'upscale', 'cancel', 'pixel_snap', 'prepare', 'run']),
       tool: Type.Optional(E(['cloud_upscale','removeBackground','extractLineArt','toSketch','colorize','fixEmotion','declutter'])),

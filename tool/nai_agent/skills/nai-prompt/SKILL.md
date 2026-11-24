@@ -5,7 +5,7 @@ description: Write or revise NovelAI prompts in the Studio draft - main/negative
 
 # Writing NAI prompts
 
-1. Call `studio_context(scope=draft)` and note the full model ID, workflow, raw editable fields, characters, block documents and `field_versions`.
+1. Call `studio_context(scope=draft)` and note the full model ID, raw editable fields, characters, block documents and `field_versions`. The img2img/inpaint workflow is reported by `reference_manage(action=list)`.
 2. Read the reference for the model family:
    - V4 / V4.5 and earlier: [models-v4.md](references/models-v4.md)
    - V5 / N5 (`nai-diffusion-5*`): [models-v5.md](references/models-v5.md)

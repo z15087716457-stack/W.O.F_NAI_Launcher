@@ -2,7 +2,7 @@
 
 ## reference_manage (current draft)
 
-Manages the current source image, mask, inpaint area, Vibe and precise references. Call `list` first: it returns current indices, `draft_version` and `draft:*` image IDs for `image_read`. Writes need `expected_draft_version`, back up the full configuration and use native workflows. Vibe encoding is deferred until generation.
+Manages the current source image, mask, inpaint area, Vibe and precise references. Source image and mask work on every image model; V5 (`nai-diffusion-5*`) has no Vibe Transfer and no precise references, so those actions return `reference_unsupported`. Call `list` first: it returns current indices, `draft_version` and `draft:*` image IDs for `image_read`. Writes need `expected_draft_version`, back up the full configuration and use native workflows. Vibe encoding is deferred until generation.
 
 ## reference_library (reusable library)
 

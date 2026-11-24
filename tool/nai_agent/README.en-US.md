@@ -2,7 +2,7 @@
 
 # NAI Agent runtime host
 
-This is the production business host using official Pi 1.5.2 directly. The adjacent nai_agent_sdk_probe retains stage A mock verification. Keep the exact npm lockfile and PI-LICENSE with the source.
+This is the production business host using official Pi 1.5.2 directly. Keep the exact npm lockfile and PI-LICENSE with the source.
 
 Run npm ci --ignore-scripts --no-audit --no-fund, then npm test in this directory. Node >=22.19.0 is required. Release packages bundle Node 24.18.0, pinned dependencies, licenses and built-in skills (skills/nai-studio, skills/nai-prompt) under Studio's tools/nai-agent. Production uses only its bundled Node and host.mjs; users do not need to install Node or Pi.
 

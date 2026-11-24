@@ -12923,8 +12923,8 @@ abstract class AppLocalizations {
   /// No description provided for @bridge_guide.
   ///
   /// In en, this message translates to:
-  /// **'Use the local bridge to assist with W.O.F NAI Studio.\nClient: {clientPath}\n\n1. Quote the path correctly for your shell. Run status --name <your-name> and verify success; copying these instructions does not connect.\n2. Run get --name <your-name> --out current.json. Editable original text is in _draft.fields; field_versions protect against concurrent edits. Other fields may include effective quality tags. Do not duplicate them into the original text.\n3. Change only user-authorized fields. Save a patch to changes.json, then run set-json changes.json --base current.json --name <your-name>. Studio backs up and rechecks the edited fields. On conflict, stop and read again; never automatically overwrite newer user edits. Verify readback. characters replaces the entire list: preserve unrelated names, enabled flags, positions, and IDs. Reference images are currently read-only.\n4. Connecting or editing does not authorize generation. Only after an explicit generation request, run quote --out quote.json --name <your-name> and report the estimated Anlas price and cached account balance; server billing is authoritative. After authorization and reporting, run gen --quote quote.json --authorized --name <your-name>. One image per request; a changed draft invalidates the quote.\n5. Each command disconnects when done. Krita can remain connected. Wait on busy and avoid immediate retry loops after errors. Stop generation in Studio, use Ctrl+C, or cancel <request_id> --name <same-name> using the returned request ID. Never print the discovery-file session secret.\n'**
-  String bridge_guide(Object clientPath);
+  /// **'Use the local bridge to assist with W.O.F NAI Studio.\nClient: {clientPath}\n\n1. Quote the path correctly for your shell. Run status --name <your-name> and verify success; copying these instructions does not connect.\n2. Run get --name <your-name> --out current.json. Editable original text is in _draft.fields; field_versions protect against concurrent edits. Other fields may include effective quality tags. Do not duplicate them into the original text.\n3. Change only user-authorized fields. Save a patch to changes.json, then run set-json changes.json --base current.json --name <your-name>. Studio backs up and rechecks the edited fields. On conflict, stop and read again; never automatically overwrite newer user edits. Verify readback. characters replaces the entire list: preserve unrelated names, enabled flags, positions, and IDs. Reference images are currently read-only.\n4. Connecting or editing does not authorize generation. Only after an explicit generation request, run quote --out quote.json --name <your-name> and report the estimated Anlas price and cached account balance; server billing is authoritative. After authorization and reporting, run gen --quote quote.json --authorized --name <your-name>. One image per request; a changed draft invalidates the quote.\n5. Each command disconnects when done. Krita can remain connected. Wait on busy and avoid immediate retry loops after errors. Stop generation in Studio, use Ctrl+C, or cancel <request_id> --name <same-name> using the returned request ID. Never print the discovery-file session secret.\n6. Prompt cards, blocks, gallery, references, settings and other business tools are not in this client. Use the business tools entry in the same package: {nodePath} {scriptPath}. Run it with --help first. CLI calls look like --client <your-name> --session-file task.json --summary \"<task>\" --call <tool> --args args.json; MCP hosts can start it over stdio instead. Begin by reading the skill with key builtin/nai-studio through --call studio_skills. A new session returns Studio guidance (studio_guidance); follow it.\n'**
+  String bridge_guide(Object clientPath, Object nodePath, Object scriptPath);
 
   /// No description provided for @editor_drawMask.
   ///
@@ -29536,6 +29536,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enable the Krita bridge above to use this feature.'**
   String get set_brAgentsRequiresKrita;
+
+  /// No description provided for @set_brGuidance.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Studio guidance to external agents'**
+  String get set_brGuidance;
+
+  /// No description provided for @set_brGuidanceSub.
+  ///
+  /// In en, this message translates to:
+  /// **'When an external agent connects, send the external base prompt, the system prompt prefix, your global instructions and the enabled skill list. Turn off to offer tools only.'**
+  String get set_brGuidanceSub;
 
   /// No description provided for @set_brLocal.
   ///

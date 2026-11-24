@@ -21,6 +21,26 @@ const tools = [
 ];
 const active = new Map();
 const textResult = value => ({ content: [{ type: 'text', text: JSON.stringify(value) }] });
+const baseInstructions = 'Use studio_session to label each logical task. List/read relevant studio_skills. Studio paid operations require the native user confirmation; never bypass it. Full conversation and inference remain in this external client.';
+function formatGuidance(guidance) {
+  if (!guidance?.instructions) return '';
+  const skills = (guidance.skills ?? []).map(s => `- ${s.key} (${s.mode}): ${s.description ?? ''}`.trimEnd());
+  return [guidance.instructions,
+    ...(skills.length ? [`Enabled Studio skills (read with studio_skills key=<key>):\n${skills.join('\n')}`] : [])].join('\n\n');
+}
+// Studio may be closed while the host starts; initialization then stays offline.
+async function initialInstructions() {
+  const pending = bridge.guidance();
+  pending.catch(() => {});
+  let timer;
+  try {
+    const guidance = await Promise.race([pending,
+      new Promise(resolve => { timer = setTimeout(resolve, 3000); })]);
+    const text = guidance?.enabled ? formatGuidance(guidance) : '';
+    return text ? `${baseInstructions}\n\n${text}` : baseInstructions;
+  } catch { return baseInstructions; }
+  finally { clearTimeout(timer); }
+}
 async function call(name, args, id, signal) {
   if (name === 'studio_session') {
     if (args.action === 'end') return textResult(await bridge.end());
@@ -51,7 +71,7 @@ async function dispatch(message) {
       case 'initialize':
         respond({ protocolVersion: '2025-11-25', capabilities: { tools: {}, resources: {} },
           serverInfo: { name: 'nai-studio', version: '1.0.0' },
-          instructions: 'Use studio_session to label each logical task. List/read relevant studio_skills. Studio paid operations require the native user confirmation; never bypass it. Full conversation and inference remain in this external client.' }); return;
+          instructions: await initialInstructions() }); return;
       case 'ping': respond({}); return;
       case 'tools/list': respond({ tools }); return;
       case 'tools/call': {
@@ -82,7 +102,30 @@ async function dispatch(message) {
   }
 }
 
-if (option('--call')) {
+const usage = `W.O.F NAI Studio business tools (prompt cards, blocks, gallery, references, settings, generation)
+  node external-mcp.mjs --client NAME                start an MCP stdio server (default mode)
+  node external-mcp.mjs --list                       list tool names and descriptions (offline)
+  node external-mcp.mjs --schema TOOL                print one tool's input schema (offline)
+  node external-mcp.mjs --client NAME --session-file FILE [--summary TEXT] --call TOOL [--args FILE|JSON]
+Options: --workspace ID, --discovery FILE. --args takes a JSON file path or inline JSON starting with "{".
+Start with --call studio_skills --args '{"key":"builtin/nai-studio"}' and read that skill before business calls.
+CLI output is ASCII-escaped JSON. Paid operations always go through Studio's native confirmation.
+`;
+// ASCII-only JSON survives shells that decode stdout with a legacy code page.
+const writeJson = value => process.stdout.write(JSON.stringify(value).replace(/[\u007f-\uffff]/g,
+  c => '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0')) + '\n');
+const readArgs = async value => !value ? {} :
+  JSON.parse(value.trimStart().startsWith('{') ? value : await readFile(value, 'utf8'));
+
+if (argv.includes('--help') || argv.includes('-h')) {
+  process.stdout.write(usage);
+} else if (argv.includes('--list')) {
+  writeJson(tools.map(t => ({ name: t.name, description: t.description })));
+} else if (argv.includes('--schema')) {
+  const tool = tools.find(t => t.name === option('--schema'));
+  if (tool) writeJson(tool);
+  else { process.stderr.write('Unknown tool; use --list\n'); process.exitCode = 1; }
+} else if (option('--call')) {
   try {
     const sessionFile = option('--session-file');
     if (!sessionFile) throw new Error('--session-file is required for CLI calls');
@@ -93,8 +136,11 @@ if (option('--call')) {
       summary: option('--summary') });
     await writeFile(sessionFile, JSON.stringify({ session_id: opened.session_id,
       workspace_id: opened.workspace_id, client: opened.client }, null, 2) + '\n');
-    const args = option('--args') ? JSON.parse(await readFile(option('--args'), 'utf8')) : {};
-    process.stdout.write(JSON.stringify(await call(option('--call'), args, randomUUID())) + '\n');
+    const args = await readArgs(option('--args'));
+    const result = await call(option('--call'), args, randomUUID());
+    // A new logical session is where the host first learns Studio's rules.
+    if (!session && opened.guidance) result.studio_guidance = { ...opened.guidance, text: formatGuidance(opened.guidance) };
+    writeJson(result);
   } catch (error) { process.stderr.write(error.message + '\n'); process.exitCode = 1; }
   finally { bridge.close(); }
 } else {

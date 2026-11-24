@@ -13,17 +13,17 @@ import 'package:path/path.dart' as p;
 import 'package:uuid/uuid.dart';
 import 'package:collection/collection.dart';
 
-const naiAgentDefaultPromptVersion = '2026-11-15.1';
+const naiAgentDefaultPromptVersion = '2026-11-24.1';
 const _defaultSystemPromptZh = '''
 你是 NAI Agent，运行在 W.O.F NAI Studio 里的通用助手，用用户的语言回复。
 你有一个工作区，可以读写文件、运行命令，什么任务都能做：写作、整理资料、分析问题，或者 Studio 里的生图创作。
-做 Studio 相关的事时：用 studio_context 查看当前草稿、参数和图片；业务操作通过 codemode 调用 mcp__nai_studio，用法见 nai-studio skill；写提示词前读 nai-prompt skill。生成和花费 Anlas 遵循 Studio 的确认策略：完全权限下免费操作免确认，付费默认确认，用户可在 Agent 设置中关闭付费确认。
+做 Studio 相关的事时：用 studio_context 查看当前草稿和参数，看图用 image_read；业务操作通过 codemode 调用 mcp__nai_studio，用法见 nai-studio skill；写提示词前读 nai-prompt skill。生成和花费 Anlas 遵循 Studio 的确认策略：完全权限下免费操作免确认，付费默认确认，用户可在 Agent 设置中关闭付费确认。
 需要用户补充信息或做选择时，可以用 ask_user 提问。
 ''';
 const _defaultSystemPromptEn = '''
 You are NAI Agent, a general-purpose assistant running inside W.O.F NAI Studio. Reply in the user's language.
 You have a workspace where you can read and write files and run commands, so any task is fair game: writing, organizing material, analysis, or image creation in Studio.
-For Studio work: use studio_context to see the current draft, parameters and images; Studio operations go through codemode calling mcp__nai_studio, see the nai-studio skill; read the nai-prompt skill before writing prompts. Generation and Anlas spending follow Studio's confirmation policy: Full access skips free-action confirmation; paid actions require confirmation unless the user disables it in Agent settings.
+For Studio work: use studio_context to see the current draft and parameters, and image_read to view images; Studio operations go through codemode calling mcp__nai_studio, see the nai-studio skill; read the nai-prompt skill before writing prompts. Generation and Anlas spending follow Studio's confirmation policy: Full access skips free-action confirmation; paid actions require confirmation unless the user disables it in Agent settings.
 When you need more information or a decision from the user, you can ask with ask_user.
 ''';
 
@@ -33,6 +33,47 @@ String naiAgentDefaultSystemPromptFor(AppLanguage language) =>
     language.isChinese ? _defaultSystemPromptZh : _defaultSystemPromptEn;
 String get naiAgentDefaultSystemPrompt =>
     naiAgentDefaultSystemPromptFor(currentAppLanguage);
+
+const _externalPromptZh = '''
+你正以外部 Agent 身份接入 W.O.F NAI Studio。对话、推理和文件操作由你所在的宿主承担；Studio 提供业务工具、Skill 和产物记录，不代跑 read/write/edit/bash。
+- 每个逻辑任务先用 studio_session(action=open, summary=用户请求) 打开会话；同一会话的调用逐个进行，不要并发。
+- 做 Studio 业务前读 nai-studio Skill（studio_skills key=builtin/nai-studio）；写或改提示词前读 nai-prompt Skill，并按目标模型选用对应规则。
+- 先用 studio_context 查看当前草稿和参数（看图用 image_read）再动手；只改用户授权的内容。写入沿用 Studio 的备份与版本核对，遇到冲突重新读取，不覆盖用户的新修改。
+- 权限遵循 Studio 当前设置：只读模式拦截写入，询问模式逐项确认；被拒绝的操作不要换方式重试。生成和其他花费 Anlas 的操作必须走 Studio 原生报价与确认，先向用户说明单价和余额。
+- 提示词卡（prompt_set）导入时会整体替换草稿的主提示词、负面和角色列表，卡片里留空的字段会清空对应内容。
+- 需要用户补充信息或做选择时，可以用 ask_user 在 Studio 里提问。
+''';
+const _externalPromptEn = '''
+You are connected to W.O.F NAI Studio as an external agent. Your host owns the conversation, reasoning and file operations; Studio provides business tools, skills and artifact records, and does not run read/write/edit/bash for you.
+- Open each logical task with studio_session(action=open, summary=<user request>); make calls in one session one at a time, never concurrently.
+- Read the nai-studio skill (studio_skills key=builtin/nai-studio) before Studio work; read the nai-prompt skill before writing or editing prompts and follow the rules for the target model.
+- Inspect the current draft and parameters with studio_context (view images with image_read) before acting, and change only what the user authorized. Writes keep Studio's backup and version checks; on a conflict, read again instead of overwriting the user's newer edits.
+- Permissions follow Studio's current settings: read-only blocks writes and ask mode confirms each change; do not retry a denied operation another way. Generation and any other Anlas spending must go through Studio's native quote and confirmation; tell the user the price and balance first.
+- Importing a prompt card (prompt_set) replaces the draft's main prompt, negative prompt and character list as a whole; fields left empty on the card clear that content.
+- When you need more information or a decision from the user, you can ask in Studio with ask_user.
+''';
+
+/// Base prompt for hosts outside Studio; Pi-only tooling is omitted.
+String naiAgentExternalPromptFor(AppLanguage language) =>
+    language.isChinese ? _externalPromptZh : _externalPromptEn;
+
+/// What an external session receives: prefix, external base and the user's
+/// global instructions. The internal base prompt and chat prefixes stay with Pi.
+String naiAgentExternalInstructions(
+  AgentSettings settings,
+  AgentWorkspace? workspace,
+) {
+  final zh = currentAppLanguage.isChinese;
+  final prefix =
+      workspace?.customSystemPromptPrefix ?? settings.systemPromptPrefix;
+  return [
+    if (prefix.trim().isNotEmpty) prefix.trim(),
+    naiAgentExternalPromptFor(currentAppLanguage).trim(),
+    if (settings.globalInstructions.trim().isNotEmpty)
+      '${zh ? '用户的全局指令：' : 'User global instructions:'}\n'
+          '${settings.globalInstructions.trim()}',
+  ].join('\n\n');
+}
 
 /// Skill names follow the Agent Skills spec; the folder name is the identity.
 final naiAgentSkillName = RegExp(r'^[a-z0-9]+(?:-[a-z0-9]+)*$');
@@ -91,6 +132,7 @@ class AgentSettings {
     this.mcpServers = const [],
     this.studioMcpEnabled = true,
     this.studioMcpExposure = 'codemode',
+    this.externalGuidance = true,
     this.disabledSkills = const [],
     this.skillModes = const {},
   });
@@ -119,6 +161,10 @@ class AgentSettings {
   final List<AgentMcpServer> mcpServers;
   final bool studioMcpEnabled;
   final String studioMcpExposure;
+
+  /// External bridge sessions receive [naiAgentExternalInstructions] and the
+  /// enabled skill catalog.
+  final bool externalGuidance;
 
   /// `<global|workspace>/<name>` keys the user switched off; built-ins stay on.
   final List<String> disabledSkills;
@@ -168,6 +214,7 @@ class AgentSettings {
     'mcpServers': mcpServers.map((server) => server.toJson()).toList(),
     'studioMcpEnabled': studioMcpEnabled,
     'studioMcpExposure': studioMcpExposure,
+    'externalGuidance': externalGuidance,
     'disabledSkills': disabledSkills,
     'skillModes': skillModes,
   };
@@ -208,6 +255,7 @@ class AgentSettings {
     studioMcpExposure: naiAgentMcpExposures.contains(value['studioMcpExposure'])
         ? value['studioMcpExposure'] as String
         : 'codemode',
+    externalGuidance: value['externalGuidance'] != false,
     mcpServers: List.unmodifiable([
       for (final server in value['mcpServers'] as List? ?? [])
         AgentMcpServer.fromJson(Map<String, dynamic>.from(server as Map)),

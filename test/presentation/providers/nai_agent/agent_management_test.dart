@@ -239,6 +239,8 @@ void main() {
       final read = await run({'resource': 'settings'});
       for (final changes in [
         {'permissionMode': 'unknown'},
+        {'permissionMode': 'bypass'},
+        {'permissionMode': 'ask'},
         {'cacheWarming': 'always'},
         {'enterToSend': 'true'},
         {'maxRequestsPerRun': 0},

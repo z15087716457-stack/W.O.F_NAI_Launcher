@@ -160,6 +160,7 @@ final settingsValuesProvider = Provider<SettingsValues>((ref) {
     SettingKey.seedInputNoise: seed.inputNoise,
     SettingKey.seedLatentNoise: seed.latentNoise,
     SettingKey.kritaBridge: ref.watch(kritaBridgeNotifierProvider).enabled,
+    SettingKey.agentExternalGuidance: agent.externalGuidance,
     SettingKey.comfyEnabled: comfy.enabled,
     SettingKey.comfyUrl: comfy.serverUrl,
     SettingKey.proxyEnabled: proxy.enabled,
@@ -449,6 +450,10 @@ class SettingsValueStore {
             .setLocalSeedvr2Options(id, next);
       case SettingKey.kritaBridge:
         await ref.read(kritaBridgeNotifierProvider.notifier).setEnabled(b);
+      case SettingKey.agentExternalGuidance:
+        await ref.read(settingsAgentBackendProvider).update({
+          'externalGuidance': b,
+        });
       case SettingKey.comfyEnabled:
         await storage.setSetting(StorageKeys.comfyuiEnabled, b);
         ref.invalidate(comfyUISettingsProvider);

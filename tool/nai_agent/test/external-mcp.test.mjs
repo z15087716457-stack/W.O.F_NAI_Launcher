@@ -26,6 +26,8 @@ test('stdio initialization and listing are offline and reuse exact internal sche
   const init = await send({ jsonrpc:'2.0', id:1, method:'initialize', params:{ protocolVersion:'2025-11-25' } });
   assert.equal(init.result.protocolVersion, '2025-11-25');
   assert.deepEqual(init.result.capabilities, { tools:{}, resources:{} });
+  assert.match(init.result.instructions, /^Use studio_session/);
+  assert.doesNotMatch(init.result.instructions, /Enabled Studio skills/);
   const list = await send({ jsonrpc:'2.0', id:2, method:'tools/list' });
   const native = studioTools(() => {}, [...domainTools.map(t => t.name), 'ask_user']);
   const business = list.result.tools.filter(t => !['studio_session', 'studio_skills'].includes(t.name));
@@ -34,6 +36,27 @@ test('stdio initialization and listing are offline and reuse exact internal sche
   assert.ok(business.some(tool => tool.name === 'online_gallery'));
   assert.ok(!business.some(t => ['read','write','edit','bash','agent_manage'].includes(t.name)));
 }));
+test('CLI help, list and schema run offline without entering MCP mode', async () => {
+  const run = args => new Promise(resolve => {
+    const child = spawn(process.execPath, ['external-mcp.mjs', ...args]);
+    let out = '', err = '';
+    child.stdout.setEncoding('utf8').on('data', value => { out += value; });
+    child.stderr.setEncoding('utf8').on('data', value => { err += value; });
+    child.on('exit', code => resolve({ code, out, err }));
+    child.stdin.end();
+  });
+  const help = await run(['--help']);
+  assert.equal(help.code, 0); assert.match(help.out, /--call TOOL/); assert.match(help.out, /builtin\/nai-studio/);
+  const list = await run(['--list']);
+  assert.equal(list.code, 0);
+  const names = JSON.parse(list.out).map(t => t.name);
+  assert.equal(names.length, 27); assert.ok(names.includes('prompt_set') && names.includes('studio_session'));
+  const schema = JSON.parse((await run(['--schema', 'prompt_set'])).out);
+  assert.equal(schema.name, 'prompt_set'); assert.equal(schema.inputSchema.type, 'object');
+  assert.match(schema.description, /empty fields clear/);
+  const missing = await run(['--schema', 'nope']);
+  assert.equal(missing.code, 1); assert.match(missing.err, /--list/);
+});
 test('missing Studio connection is a visible tool error; unknown methods use JSON-RPC errors', async () => fixture(async send => {
   const value = await send({ jsonrpc:'2.0', id:3, method:'tools/call', params:{ name:'studio_context', arguments:{} } });
   assert.equal(value.result.isError,true); assert.match(value.result.content[0].text,/ENOENT/);

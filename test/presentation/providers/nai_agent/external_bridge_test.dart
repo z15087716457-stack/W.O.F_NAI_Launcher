@@ -278,7 +278,7 @@ void main() {
     },
   );
   test(
-    'native prompt-set cards persist, map and reveal once; manual close stays closed',
+    'native prompt-set cards persist and map; a new card reopens a manually closed panel',
     () async {
       final response = await request('call', {
         'name': 'prompt_set',
@@ -299,21 +299,27 @@ void main() {
       await resources.settle();
       resources.dispose();
       await container.read(naiAgentWindowControllerProvider).close();
+      await request('call', {'name': 'settings_update', 'arguments': {}});
+      expect(opens, 1);
+      expect(runtime.external!.unread, isTrue);
+      final notice = runtime.external!.notice;
+      expect(notice!.title, isNull);
       await request('call', {
         'name': 'prompt_set',
         'arguments': promptSetInput(),
       });
-      expect(opens, 1);
-      expect(runtime.external!.unread, isTrue);
-      expect(runtime.external!.notice!.title, 'Rain');
-      final notice = runtime.external!.notice;
+      expect(opens, 2);
+      expect(controller.settings.panelExpanded, isTrue);
+      expect(controller.selected, same(runtime));
+      expect(runtime.external!.unread, isFalse);
+      expect(runtime.external!.notice, isNull);
       await request('call', {'name': 'studio_context', 'arguments': {}});
-      expect(runtime.external!.notice, same(notice));
+      expect(runtime.external!.unread, isFalse);
       final saved = await store.readExternalChat(
         runtime.workspace.id,
         runtime.chat.id,
       );
-      expect(saved['calls'], hasLength(3));
+      expect(saved['calls'], hasLength(4));
       expect(
         (await store.listChats(
           runtime.workspace.id,
@@ -323,7 +329,7 @@ void main() {
     },
   );
   test(
-    'a meaningful write keeps a typed internal draft selected and marks external unread',
+    'a new card expands the panel but keeps a typed internal draft selected',
     () async {
       final previous = controller.selected!;
       previous.composer = const AgentComposerState(text: 'Keep this');
@@ -332,7 +338,7 @@ void main() {
         'arguments': promptSetInput(),
       });
       expect(controller.selected, same(previous));
-      expect(opens, 0);
+      expect(opens, 1);
       expect(getRuntime().external!.unread, isTrue);
       expect(previous.composer.text, 'Keep this');
       await controller.showExternal(getRuntime());
@@ -398,6 +404,44 @@ void main() {
         'permissions_changed',
       );
       expect(executed, 0);
+    },
+  );
+  test(
+    'sessions carry external guidance with the user prefix, global instructions and skills',
+    () async {
+      await store.patchSettings({
+        'systemPromptPrefix': 'PREFIX-LINE',
+        'globalInstructions': 'GLOBAL-LINE',
+        'customSystemPrompt': 'INTERNAL-ONLY',
+      });
+      final opened = (await request('session', {
+        'summary': 'Guided',
+      }))['result'];
+      final guidance = opened['guidance'] as Map;
+      final text = guidance['instructions'] as String;
+      expect(text, startsWith('PREFIX-LINE'));
+      expect(text, contains('studio_session'));
+      expect(text, contains('prompt_set'));
+      expect(
+        text.indexOf('GLOBAL-LINE'),
+        greaterThan(text.indexOf('prompt_set')),
+      );
+      expect(text, isNot(contains('INTERNAL-ONLY')));
+      expect(text, isNot(contains('codemode')));
+      expect((guidance['skills'] as List).map((s) => s['key']), [
+        'builtin/test',
+      ]);
+      final direct = (await request('guidance'))['result'];
+      expect(direct['enabled'], isTrue);
+      expect(direct['instructions'], text);
+      expect(
+        (await request('guidance', {'workspace_id': 'missing'}))['code'],
+        'workspace_missing',
+      );
+      await store.patchSettings({'externalGuidance': false});
+      final plain = (await request('session', {'summary': 'Plain'}))['result'];
+      expect(plain, isNot(contains('guidance')));
+      expect((await request('guidance'))['result'], {'enabled': false});
     },
   );
   test(
@@ -570,14 +614,18 @@ void main() {
           'CLI task',
           '--call',
           name,
-          if (name == 'prompt_set') ...['--args', arguments.path],
+          '--args',
+          name == 'prompt_set' ? arguments.path : '{"scope": "summary"}',
         ]);
         expect(result.exitCode, 0, reason: result.stderr as String);
         expect(result.stderr, isEmpty);
-        expect(
-          (jsonDecode(result.stdout as String) as Map)['isError'],
-          isNot(true),
-        );
+        final output = jsonDecode(result.stdout as String) as Map;
+        expect(output['isError'], isNot(true));
+        if (previous == null) {
+          expect(output['studio_guidance']['text'], contains('builtin/test'));
+        } else {
+          expect(output, isNot(contains('studio_guidance')));
+        }
         final session = jsonDecode(sessionFile.readAsStringSync()) as Map;
         expect(
           session.keys,
@@ -704,6 +752,8 @@ void main() {
       try {
         final init = await rpc(1, 'initialize');
         expect(init['result']['capabilities']['tools'], isNotNull);
+        expect(init['result']['instructions'], contains('studio_session'));
+        expect(init['result']['instructions'], contains('builtin/test'));
         final list = await rpc(2, 'tools/list');
         final tools = list['result']['tools'] as List;
         expect(tools, hasLength(27));

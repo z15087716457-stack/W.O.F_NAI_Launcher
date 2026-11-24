@@ -603,6 +603,12 @@ class NaiAgentManagement {
             'project_rules': p.join(workspace.directory.path, 'AGENTS.md'),
           };
         } else if (action == 'update') {
+          if (changes.containsKey('permissionMode')) {
+            // The permission mode is the user's guardrail over this tool.
+            throw const FormatException(
+              'permissionMode is user-only; ask the user to change it in Settings',
+            );
+          }
           if (changes.isEmpty || changes.keys.any((k) => !keys.contains(k))) {
             throw const FormatException('Use fields returned by read');
           }
@@ -612,12 +618,6 @@ class NaiAgentManagement {
           for (final entry in changes.entries) {
             final value = entry.value;
             final valid = switch (entry.key) {
-              'permissionMode' => const {
-                'auto',
-                'ask',
-                'readonly',
-                'bypass',
-              }.contains(value),
               'cacheWarming' => const {
                 'off',
                 'streaming',

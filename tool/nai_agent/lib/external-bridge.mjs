@@ -67,6 +67,8 @@ export class ExternalBridge {
       this.socket.send(JSON.stringify({ type: 'agent_request', id, payload: { operation, ...payload } }));
     });
   }
+  // Session-free read of the instructions and skill catalog Studio offers externally.
+  guidance() { return this.request('guidance', { workspace_id: this.workspace }); }
   async open({ session_id, workspace_id = this.workspace, summary } = {}) {
     const session = await this.request('session', { session_id, workspace_id, summary });
     this.session = session;

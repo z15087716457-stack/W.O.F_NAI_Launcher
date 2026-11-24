@@ -200,6 +200,12 @@ class SettingsBridgesPage extends StatelessWidget {
                 ],
               ),
             ),
+            SettingKeyRow(
+              SettingKey.agentExternalGuidance,
+              title: l.set_brGuidance,
+              subtitle: l.set_brGuidanceSub,
+              control: const SetSwitch(SettingKey.agentExternalGuidance),
+            ),
             if (b.activity.isNotEmpty)
               SettingsBlock(
                 child: Column(

@@ -90,6 +90,7 @@ class KritaBridgeProtocol {
               'end',
               'skills',
               'skill_read',
+              'guidance',
             }.contains(operation)) {
           return _invalid(id, 'Invalid Agent operation');
         }

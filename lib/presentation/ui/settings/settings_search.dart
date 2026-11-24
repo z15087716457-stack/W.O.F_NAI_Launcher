@@ -91,6 +91,7 @@ String settingTitle(BuildContext context, SettingKey k) {
     SettingKey.seedInputNoise => l.set_upInputNoise,
     SettingKey.seedLatentNoise => l.set_upLatentNoise,
     SettingKey.kritaBridge => l.set_brKrita,
+    SettingKey.agentExternalGuidance => l.set_brGuidance,
     SettingKey.comfyEnabled => l.set_brComfyEnable,
     SettingKey.comfyUrl => l.set_brComfyUrl,
     SettingKey.proxyEnabled => l.set_nwUse,
@@ -162,6 +163,7 @@ String settingSection(BuildContext context, SettingKey k) {
     SettingKey.seedInputNoise ||
     SettingKey.seedLatentNoise => 'SeedVR2',
     SettingKey.kritaBridge => 'Krita',
+    SettingKey.agentExternalGuidance => l.set_brAgents,
     SettingKey.comfyEnabled || SettingKey.comfyUrl => 'ComfyUI',
     SettingKey.proxyEnabled ||
     SettingKey.proxyMode ||
@@ -218,6 +220,8 @@ const _synonyms = <SettingKey, String>{
   SettingKey.agentSkipPaidConfirmation:
       'anlas cost paid confirmation full access bypass 付费 确认 完全权限',
   SettingKey.intervalSeconds: 'delay rate limit',
+  SettingKey.agentExternalGuidance:
+      'external agent mcp guidance instructions skills prompt 外部 指引 提示词',
   SettingKey.themeMode: 'dark light theme',
   SettingKey.proxyEnabled: 'proxy http socks',
   SettingKey.proxyHost: 'proxy',

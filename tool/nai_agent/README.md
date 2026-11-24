@@ -2,7 +2,7 @@
 
 # NAI Agent 运行宿主
 
-直接使用官方 Pi 1.5.2。此目录是生产业务宿主；阶段 A 的模拟验证保留在相邻 nai_agent_sdk_probe。固定的 npm lockfile 和 PI-LICENSE 随源码保留，不能直接换成其他版本的示例。
+直接使用官方 Pi 1.5.2。此目录是生产业务宿主。固定的 npm lockfile 和 PI-LICENSE 随源码保留，不能直接换成其他版本的示例。
 
 在本目录运行 npm ci --ignore-scripts --no-audit --no-fund 和 npm test。Node 需要 >=22.19.0。发布包将 Node 24.18.0、固定依赖、许可与内置 Skill（skills/nai-studio、skills/nai-prompt）放在 Studio 的 tools/nai-agent；调用方只使用包内 Node 和 host.mjs，不依赖用户安装 Node 或 Pi。
 

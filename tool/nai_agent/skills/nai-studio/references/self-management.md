@@ -8,7 +8,7 @@ Discover native `agent_manage` through codemode `searchTools` or `tool_search`. 
 | `extensions` | `read`; `add(source=absolute file/directory)`; `enable/disable/remove(id=path)`; `refresh` |
 | `packages` | `read`; `install/update/uninstall/enable/disable(source, scope)`; source is a Pi npm, git or local package specification |
 | `mcp` | `read`; `add(name, changes=config)`; `update(id, changes=patch)`; `enable/disable/remove(id)`; `test/reconnect/login/logout(id)`; an unsaved test accepts `name` and `changes` |
-| `settings` | `read`; `update(changes, expected_version)` using the returned version; `read` also returns defaults |
+| `settings` | `read`; `update(changes, expected_version)` using the returned version; `read` also returns defaults. `permissionMode` is read-only here: only the user changes it in Settings |
 | `instructions` | `read/update` manages the workspace base prompt by default (`customSystemPrompt: null` restores inheritance); `scope: global` manages shared settings. Use file tools for workspace/project rule paths, then `refresh` |
 | `templates` | `read` returns paths and commands; edit files, then `refresh` |
 

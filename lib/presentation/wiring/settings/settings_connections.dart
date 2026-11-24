@@ -210,7 +210,7 @@ class SettingsConnectionActions {
       throw StateError('Bridge client is unavailable');
     }
     await Clipboard.setData(
-      ClipboardData(text: context.l10n.bridge_guide(bundle.path)),
+      ClipboardData(text: bridgeTakeoverGuide(context.l10n, bundle.path)),
     );
   }
 

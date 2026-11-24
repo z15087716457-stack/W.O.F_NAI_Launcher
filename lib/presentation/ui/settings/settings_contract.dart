@@ -125,6 +125,7 @@ enum SettingKey {
   seedLatentNoise, // 0–1
   // 桥接
   kritaBridge,
+  agentExternalGuidance,
   comfyEnabled,
   comfyUrl,
   // 网络
@@ -372,6 +373,11 @@ class SettingSpec {
       defaultValue: 0.0,
     ),
     SettingKey.kritaBridge: SettingSpec._(_t, _br, defaultValue: false),
+    SettingKey.agentExternalGuidance: SettingSpec._(
+      _t,
+      _br,
+      defaultValue: true,
+    ),
     SettingKey.comfyEnabled: SettingSpec._(_t, _br, defaultValue: false),
     SettingKey.comfyUrl: SettingSpec._(
       _x,

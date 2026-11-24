@@ -30,6 +30,16 @@ final bridgeClientBundleProvider = FutureProvider<BridgeClientBundle>((
   return BridgeClientBundle(path, available: await File(path).exists());
 });
 
+/// Takeover text, naming the bundled business-tool adapter beside the client.
+String bridgeTakeoverGuide(AppLocalizations l, String clientPath) {
+  final dir = '${File(clientPath).parent.path}/nai-agent';
+  return l.bridge_guide(
+    clientPath,
+    '$dir/node${Platform.isWindows ? '.exe' : ''}',
+    '$dir/external-mcp.mjs',
+  );
+}
+
 String bridgeOperationLabel(AppLocalizations l, String operation) =>
     switch (operation) {
       'get_params' => l.bridge_read,
@@ -239,7 +249,7 @@ class BridgeAgentPanel extends ConsumerWidget {
             onPressed: bundle?.available == true
                 ? () async {
                     await Clipboard.setData(
-                      ClipboardData(text: l.bridge_guide(bundle!.path)),
+                      ClipboardData(text: bridgeTakeoverGuide(l, bundle!.path)),
                     );
                     if (context.mounted) {
                       AppToast.success(context, l.bridge_copied);
@@ -260,7 +270,9 @@ class BridgeAgentPanel extends ConsumerWidget {
                     content: SizedBox(
                       width: 580,
                       child: SingleChildScrollView(
-                        child: SelectableText(l.bridge_guide(bundle!.path)),
+                        child: SelectableText(
+                          bridgeTakeoverGuide(l, bundle!.path),
+                        ),
                       ),
                     ),
                     actions: [

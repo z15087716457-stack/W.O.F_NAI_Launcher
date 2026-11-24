@@ -10,7 +10,7 @@ Scopes: `main`, `negative`, `char:<ID>:pos|neg`. Versions: `expected_version` fr
 - Types: `temporary` (has `temp`), `translation`, otherwise a library reference. Library-free instances have `blockId:""`. Missing `needsReview` means false; missing `languageCode` means `zh`.
 - Temporary fields: `title`, `color`, `icon` (keys below); omitted color/icon use native defaults. Translations carry `source` (sent to generation) and `zh` (reading only), with `language_code` from the schema.
 - Temporary blocks accept `instance.translations:[{source,zh,language_code?}]`, usually one whole-content translation. Sources match complete substrings in content order; empty arrays clear readings. Conversion preserves complete translation blocks, content edits retain matching readings, promotion preserves the combined reading.
-- Create/convert options: `enabled` only. Library-free blocks have no negative side: create a separate block in the negative scope.
+- Create/convert options: `enabled` only. `instance_update` `settings` accepts only the native setting keys returned with an instance's settings (roll `mode`/`order`, `weight*` −3..3, other numbers 0..1, counts 0..9999). Library-free blocks have no negative side: create a separate block in the negative scope.
 - Convert segments need `title` (temporary) or `zh` (translation); selected text fills content/source.
 - `instance_update`: content edits change that occurrence into a temporary block, leaving the library entry intact. Display fields apply to library-free temps; translation and content edits are separate. Source-only changes mark readings for review.
 - `instance_unwrap` expands the generation text; `instance_delete` removes the occurrence. `instance_promote` saves a temporary block to the library, defaulting to its title/color/icon.
@@ -36,11 +36,11 @@ No dedicated actions; compose them. Each write returns the next `draft_version`,
 
 ## Library
 
-`create(changes.title/content)`, `update(id, changes)`, `delete(id)` and `insert(id)` manage entries and insert them into a prompt.
+`create(changes.title/content)`, `update(id, changes)`, `delete(id)` and `insert(id)` manage entries and insert them into a prompt. Editable `changes` fields: `title`, `content`, `negativeContent`, `atoms`, `negativeAtoms`, `folderId`, `color`, `appearance`, `iconName`, `tags`, `isFavorite`, `sortOrder`, `generationSettings`, `thumbnail`, `thumbnailOffsetX/Y`, `thumbnailScale` and the `readingTranslation*` fields returned by `block_query(id)`.
 
 `changes.thumbnail: {image_id:"..."}` or `{path:"workspace/relative/image.png"}` copies a cover into managed storage, retaining other preview images; `null` clears the entire gallery. `thumbnailOffsetX/Y` (-1..1, left/top to right/bottom) and `thumbnailScale` (1..3) select the cover's visible area, using the native editor's coordinates. New covers default to center/1x; omit thumbnail to adjust only its framing. Read current framing and version with `block_query(id)`. Additional gallery entries appear as `additionalThumbnails` in queries; manage these in the block editor, not through `changes`.
 
-`changes.generationSettings`: model, width, height, steps, scale, sampler, noiseSchedule, cfgRescale, qualityPreset (`standard/light/none`), ucPreset (`0/1/2/3/7/8/9`), qualityCustomBlockId/ucCustomBlockId (library IDs replacing native presets). Content edits clear obsolete atom pools unless new atoms are given.
+`changes.generationSettings`: model, width, height, steps, scale, sampler, noiseSchedule, cfgRescale, qualityPreset (`standard/light/none`), ucPreset (`0/1/2/3/7/8/9`), qualityCustomBlockId/ucCustomBlockId (library IDs replacing native presets). `noiseSchedule` only applies to V4/V4.5 models. Content edits clear obsolete atom pools unless new atoms are given.
 
 Folders/collections: create/update with `changes.name/parentId/sortOrder` (collection_create also `isFolder`); `parent_id` null = root; reorders take every sibling in `ordered_ids`; folder_delete needs an empty folder; collection_delete keeps the blocks; collection_add/remove take `id` + `block_id`.
 

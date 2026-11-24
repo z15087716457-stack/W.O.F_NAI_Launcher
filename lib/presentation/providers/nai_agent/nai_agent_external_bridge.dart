@@ -12,6 +12,7 @@ import '../../../core/nai_agent/external_session.dart';
 import '../../../core/nai_agent/generation_tools.dart';
 import '../../../core/nai_agent/tool_catalog.dart';
 import '../../../core/utils/localization_extension.dart';
+import '../../../data/services/nai_agent/agent_workspace_store.dart';
 import 'nai_agent_questions.dart';
 import 'nai_agent_skills_provider.dart';
 import 'nai_agent_studio_provider.dart';
@@ -98,6 +99,21 @@ class NaiAgentExternalBridge implements BridgeAgentService {
     KritaAgentMessage message,
   ) async {
     final args = message.payload;
+    if (message.operation == 'guidance') {
+      final workspaceId =
+          _string(args, 'workspace_id') ?? controller.selectedWorkspace!.id;
+      final workspace = controller.workspaces
+          .where((w) => w.id == workspaceId)
+          .firstOrNull;
+      if (workspace == null) {
+        throw const NaiAgentToolError(
+          'workspace_missing',
+          'Studio workspace not found',
+        );
+      }
+      final guidance = await _guidance(workspace);
+      return {'enabled': guidance != null, ...?guidance};
+    }
     if (message.operation == 'session') {
       final workspaceId =
           _string(args, 'workspace_id') ?? controller.selectedWorkspace!.id;
@@ -128,6 +144,7 @@ class NaiAgentExternalBridge implements BridgeAgentService {
         }
       };
       controller.externalChanged(runtime);
+      final guidance = await _guidance(runtime.workspace);
       return {
         'session_id': runtime.chat.id,
         'workspace_id': workspaceId,
@@ -136,6 +153,7 @@ class NaiAgentExternalBridge implements BridgeAgentService {
         'tools': naiAgentToolNames
             .where((n) => !const {'read', 'write', 'edit', 'bash'}.contains(n))
             .toList(),
+        if (guidance != null) 'guidance': guidance,
       };
     }
     final runtime = _owned(client, args);
@@ -155,24 +173,10 @@ class NaiAgentExternalBridge implements BridgeAgentService {
       return {'cancelled': true};
     }
     if (message.operation == 'skills' || message.operation == 'skill_read') {
-      final inventory = await ref.read(
-        naiAgentSkillsProvider(runtime.workspace.id).future,
-      );
-      final skills = inventory.skills
-          .where((s) => s.enabled && s.state == 'active')
-          .toList();
+      final skills = await _activeSkills(runtime.workspace.id);
       if (message.operation == 'skills') {
         return {
-          'skills': [
-            for (final skill in skills)
-              {
-                'key': skill.key,
-                'name': skill.name,
-                'description': skill.description,
-                'mode': skill.mode,
-                'source': skill.source,
-              },
-          ],
+          'skills': [for (final skill in skills) _skillJson(skill)],
         };
       }
       final key = _string(args, 'key');
@@ -193,6 +197,68 @@ class NaiAgentExternalBridge implements BridgeAgentService {
       };
     }
     return _call(client, runtime, message);
+  }
+
+  Future<List<NaiAgentSkill>> _activeSkills(String workspaceId) async {
+    final inventory = await ref.read(
+      naiAgentSkillsProvider(workspaceId).future,
+    );
+    return inventory.skills
+        .where((s) => s.enabled && s.state == 'active')
+        .toList();
+  }
+
+  Map<String, dynamic> _skillJson(NaiAgentSkill skill) => {
+    'key': skill.key,
+    'name': skill.name,
+    'description': skill.description,
+    'mode': skill.mode,
+    'source': skill.source,
+  };
+
+  Future<Map<String, dynamic>?> _guidance(AgentWorkspace workspace) async {
+    final settings = await controller.store.readSettings();
+    if (!settings.externalGuidance) return null;
+    return {
+      'instructions': naiAgentExternalInstructions(settings, workspace),
+      'skills': [
+        for (final skill in await _activeSkills(workspace.id))
+          _skillJson(skill),
+      ],
+    };
+  }
+
+  static bool _producesCard(
+    String name,
+    Map<String, dynamic> args,
+    Map<String, dynamic> result,
+  ) {
+    final details = result['details'];
+    return name == 'prompt_set' &&
+        args['action'] != 'read' &&
+        result['isError'] != true &&
+        details is Map &&
+        details['ok'] != false &&
+        details['set_id'] is String;
+  }
+
+  /// A new card is worth showing even after the panel was closed by hand; a
+  /// busy internal chat stays selected and the external session is marked.
+  Future<void> _revealCard(AgentChatRuntime runtime) async {
+    runtime.external!.revealed = true;
+    final current = controller.selected;
+    final keepCurrent =
+        current != null &&
+        current != runtime &&
+        (current.running ||
+            current.composer.text.isNotEmpty ||
+            current.composer.attachments.isNotEmpty);
+    if (!keepCurrent && current != runtime) {
+      await controller.showExternal(runtime);
+    }
+    if (!controller.settings.panelExpanded) {
+      await ref.read(naiAgentWindowControllerProvider).open();
+    }
   }
 
   Future<void> _reveal(AgentChatRuntime runtime) async {
@@ -337,6 +403,13 @@ class NaiAgentExternalBridge implements BridgeAgentService {
           ),
         );
         call.result = await studio.execute(name, raw, token);
+        if (_producesCard(name, raw, call.result!)) {
+          try {
+            await _revealCard(runtime);
+          } catch (_) {
+            // The card is already persisted; showing it is best effort.
+          }
+        }
       }
     } on NaiAgentToolError catch (error) {
       call.result = {...naiAgentTextResult(error.toJson()), 'isError': true};

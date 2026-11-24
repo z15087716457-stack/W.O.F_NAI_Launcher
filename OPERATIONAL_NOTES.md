@@ -45,7 +45,7 @@
 ## 桥接与参数
 
 - 外部会话收起通知位于画布底部两条悬浮条之间，按真实条宽避让，空间不足时上移一行；结果仅显示约五秒，角标保留。执行中收起后按完成时状态发布，取消和部分失败遵守原生结果，不把查询、恢复或连接状态刷新当作新产物。[通知与回归](docs/external-agent-canvas-notice-2026-11-13.md)
-- 外部 Skill／业务工具入口为随 Agent 运行包提供的 `external-mcp.mjs`（stdio MCP 或 `--call` 命令行），共享本机桥接鉴权，能力 `agent_tools_v1`。推理由外部承担，24 个 Studio 工具直接复用原生 binding；Skill 读取遵守启用与优先级，付费操作走原生确认。会话独立标识、记录／恢复及接入示例见 [外部会话](docs/external-agent-session-2026-11-13.md)。
+- 外部 Skill／业务工具入口为随 Agent 运行包提供的 `external-mcp.mjs`（stdio MCP 或 `--call` 命令行），共享本机桥接鉴权，能力 `agent_tools_v1`。推理由外部承担，25 个 Studio 业务工具（另有 `studio_session`、`studio_skills`）直接复用原生 binding；Skill 读取遵守启用与优先级，付费操作走原生确认。会话独立标识、记录／恢复及接入示例见 [外部会话](docs/external-agent-session-2026-11-13.md)。`externalGuidance`（默认开）向外部会话下发外部版基础提示词、前缀、全局指令和 Skill 清单；外部生成提示词卡时收起的侧栏自动展开，见 [指引下发](docs/external-agent-guidance-2026-11-24.md)。
 - 设置页的外部 Agent 操作区按 `SettingKey.kritaBridge` 灰显与禁用，关闭时显示开启上方 Krita 桥接的本地化提示。依赖共享桥接服务的 enabled 状态，不能用 `kritaConnected`（插件连接）作门槛；桥接监听时即允许独立 Agent 接管。
 - 外部 Agent/Krita 成图登记时优先保留响应原始 NAI 元数据；实际尺寸不同时仅对齐参数层宽高，保留角色正负词／坐标、信封、未知字段及独立 PNG 头字段。缺少 NAI 元数据才从本次显式请求构建完整角色信息，不能用当前草稿覆盖原成图 Comment。见 [角色元数据丢失修复](docs/external-agent-character-metadata-2026-10-29.md)。
 - 本机桌面运行包与开发源码分开；实际运行目录从工作区接手说明读取，当前为旧源码根下 `build/windows-glass-preview/runner/Release/nai_launcher.exe`。标准 Windows Release 是构建产物，不是可直接覆盖的 Glass 桌面包。

@@ -11,7 +11,7 @@
 PowerShell 示例（按实际安装路径替换）：
 
 ```powershell
-$studioBridge = 'C:\Your Studio	ools\studio-bridge.exe'
+$studioBridge = 'C:\Your Studio\tools\studio-bridge.exe'
 & $studioBridge status --name Codex
 & $studioBridge get --name Codex --out current.json
 & $studioBridge set steps=28 --base current.json --name Codex
@@ -22,6 +22,20 @@ $studioBridge = 'C:\Your Studio	ools\studio-bridge.exe'
 
 写入前验证整个修改、备份完整可编辑状态，再比较目标字段的最新版本。积木结构与当前质量词 / 负面预设选择变化也算冲突；模型变化同时检查采样器。备份失败、冲突或生成忙碌均不写入。备份位于发现文件同级 `draft-backups/`，回复包含 `backup_path`；`set` 命令还返回当前回读。恢复备份应先读取当前状态并逐字段确认，不直接盲覆。
 
+## 业务工具入口
+
+`studio-bridge.exe` 只负责草稿读写、估价和生图。提示词卡、积木、图库、参考、设置等业务工具在同一 `tools/` 下的 `nai-agent/external-mcp.mjs`，用包内 `nai-agent/node.exe` 运行，共享同一本机桥接鉴权；需开启 NAI Agent 的 Studio 业务工具组。`studio-bridge.exe --help` 提示该入口，`status` 在 Studio 支持 `agent_tools_v1` 时返回 `business_tools`（node、script、help 命令）。
+
+```powershell
+$node = 'C:\Your Studio\tools\nai-agent\node.exe'
+$mcp = 'C:\Your Studio\tools\nai-agent\external-mcp.mjs'
+& $node $mcp --help
+& $node $mcp --list
+& $node $mcp --schema prompt_set
+& $node $mcp --client Codex --session-file task.json --summary "换装卡组" --call studio_skills --args args.json
+```
+
+`--args` 接受 JSON 文件路径或以 `{` 开头的内联 JSON；PowerShell 里内联 JSON 的引号容易被改写，优先用文件。命令行输出为 ASCII 转义 JSON。MCP 接入与会话记录见[外部会话](external-agent-session-2026-11-13.md)，Studio 指引下发见[指引下发](external-agent-guidance-2026-11-24.md)。
 ## 报价与生成
 
 接入和填参不授权生成。只有用户明确要求生成，才先报价、报告预计单价和当前已载入余额，然后执行：

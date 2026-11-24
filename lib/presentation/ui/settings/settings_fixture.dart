@@ -54,6 +54,7 @@ abstract final class SettingsFixture {
     SettingKey.ragEnabled: true,
     SettingKey.ragEmbedPath: r'E:\models\embeddinggemma-2',
     SettingKey.kritaBridge: true,
+    SettingKey.agentExternalGuidance: true,
     SettingKey.comfyEnabled: true,
     SettingKey.proxyEnabled: true,
     SettingKey.proxyMode: 'manual',

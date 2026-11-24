@@ -15,6 +15,10 @@ Options: --timeout SECONDS (default 30, generation 180), --discovery FILE
 Writes require the snapshot used to plan the edit. Generation requires an
 explicit user instruction and a prior quote; report its price and balance first.
 Only one image is generated. status/get/quote never generate or edit a draft.
+
+Prompt cards, blocks, gallery, references and settings are Studio business
+tools in the same package: tools/nai-agent/external-mcp.mjs, run with the
+bundled tools/nai-agent/node(.exe). Run it with --help; status lists the paths.
 ''';
 
 Future<void> main(List<String> args) async {
@@ -116,11 +120,15 @@ Future<int> studioBridgeMain(
       timeout,
     );
     if (command == 'status') {
+      final business = bridge.capabilities.contains('agent_tools_v1')
+          ? _businessTools()
+          : null;
       out(
         jsonEncode({
           'type': 'connected',
           'client': name,
           'capabilities': bridge.capabilities,
+          if (business != null) 'business_tools': business,
         }),
       );
       return 0;
@@ -349,6 +357,21 @@ class _Bridge {
     await socket.close();
     await events.cancel();
   }
+}
+
+/// The packaged adapter beside this executable; absent in source runs.
+Map<String, String>? _businessTools() {
+  final dir = File(Platform.resolvedExecutable).parent.path;
+  final node = '$dir/nai-agent/node${Platform.isWindows ? '.exe' : ''}';
+  final script = '$dir/nai-agent/external-mcp.mjs';
+  if (!File(node).existsSync() || !File(script).existsSync()) return null;
+  return {
+    'node': node,
+    'script': script,
+    'help': '"$node" "$script" --help',
+    'first_step':
+        'Read the nai-studio skill: --call studio_skills --args {"key":"builtin/nai-studio"}',
+  };
 }
 
 String _discoveryPath() {
