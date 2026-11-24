@@ -183,7 +183,7 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
               result: agentMap(response['details']),
               check: token.check,
             );
-            _resources.refreshPromptSets();
+            await _resources.reloadPromptSet(r.workspace, id);
           }
           return true;
         } on NaiAgentToolError catch (error) {

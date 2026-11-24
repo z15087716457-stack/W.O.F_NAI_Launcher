@@ -42,7 +42,7 @@ class _AgentPromptSetCardState extends State<AgentPromptSetCard> {
     super.didUpdateWidget(oldWidget);
     final items = widget.data?.items;
     if (items == null) return;
-    final previousId = oldWidget.data?.items[_index].cardId;
+    final previousId = oldWidget.data?.items.elementAtOrNull(_index)?.cardId;
     if (previousId != null &&
         items.elementAtOrNull(_index)?.cardId != previousId) {
       final moved = items.indexWhere((item) => item.cardId == previousId);

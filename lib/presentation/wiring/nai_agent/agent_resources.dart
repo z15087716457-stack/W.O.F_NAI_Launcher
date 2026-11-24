@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:isolate';
+import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:image/image.dart' as img;
 
@@ -29,6 +30,10 @@ class AgentResources {
   final _images = <String, MemoryImage?>{};
   final _promptSets = <String, Map<String, dynamic>?>{};
   final _setRevisions = <String, int>{};
+  final _promptSetRequired = <String, int>{};
+  final _promptSetLoaded = <String, int>{};
+  var _promptSetVersion = 0;
+  var _promptSetAllRequired = 0;
   final _setWatchers = <String, StreamSubscription<FileSystemEvent>>{};
   final _snapshots = <String, Map<String, dynamic>?>{};
   final _rules = <String, String>{};
@@ -44,9 +49,43 @@ class AgentResources {
     }
   }
 
+  Directory _promptSetDir(store.AgentWorkspace workspace) =>
+      Directory(p.join(workspace.agentDirectory.path, 'prompt-sets'));
+
+  String _promptSetKey(Directory dir, String setId) =>
+      p.join(dir.path, '$setId.json');
+
   void refreshPromptSets() {
     revision++;
-    _promptSets.clear();
+    _promptSetAllRequired = ++_promptSetVersion;
+  }
+
+  void refreshPromptSet(store.AgentWorkspace workspace, String setId) {
+    if (!NaiAgentPromptSets.idPattern.hasMatch(setId)) return;
+    final key = _promptSetKey(_promptSetDir(workspace), setId);
+    revision++;
+    _promptSetRequired[key] = ++_promptSetVersion;
+  }
+
+  Future<void> reloadPromptSet(
+    store.AgentWorkspace workspace,
+    String setId,
+  ) async {
+    if (!NaiAgentPromptSets.idPattern.hasMatch(setId) || _disposed) return;
+    final key = _promptSetKey(_promptSetDir(workspace), setId);
+    final started = ++_promptSetVersion;
+    _promptSetRequired[key] = started;
+    try {
+      final value = await NaiAgentPromptSets(
+        workspace.agentDirectory,
+      ).read(setId);
+      if (_disposed) return;
+      _promptSets[key] = value;
+      _promptSetLoaded[key] = started;
+      revision++;
+    } catch (_) {
+      // Next promptSet() call can retry if the write was still settling.
+    }
   }
 
   Map<String, dynamic>? promptSet(
@@ -55,30 +94,56 @@ class AgentResources {
     int? revision,
   }) {
     if (!NaiAgentPromptSets.idPattern.hasMatch(setId)) return null;
-    final key = '${workspace.agentDirectory.path}/prompt-sets/$setId.json';
+    final dir = _promptSetDir(workspace);
+    final key = _promptSetKey(dir, setId);
     if (revision != null && _setRevisions[key] != revision) {
       _setRevisions[key] = revision;
-      _promptSets.remove(key);
+      _promptSetRequired[key] = ++_promptSetVersion;
     }
-    if (!_promptSets.containsKey(key)) {
-      _promptSets[key] = null;
+    final required = math.max(
+      _promptSetAllRequired,
+      _promptSetRequired[key] ?? 0,
+    );
+    final needsLoad =
+        !_promptSets.containsKey(key) ||
+        (_promptSetLoaded[key] ?? -1) < required;
+    if (needsLoad) {
+      // Preserve any previously loaded card while re-reading from disk so
+      // stacked cards never collapse to missing placeholders mid-scroll.
+      _promptSets.putIfAbsent(key, () => null);
       _load('set/$key', () async {
-        _promptSets[key] = await NaiAgentPromptSets(
-          workspace.agentDirectory,
-        ).read(setId);
-        // null was cached before loading; revision changes invalidate it.
-        final dir = Directory(p.dirname(key));
+        final started = _promptSetVersion;
+        try {
+          _promptSets[key] = await NaiAgentPromptSets(
+            workspace.agentDirectory,
+          ).read(setId);
+        } finally {
+          _promptSetLoaded[key] = started;
+        }
         if (!_setWatchers.containsKey(dir.path) &&
             await dir.exists() &&
             !_disposed) {
           _setWatchers[dir.path] = dir.watch().listen(
             (event) {
-              if (!event.path.endsWith('.json') &&
-                  !(event is FileSystemMoveEvent &&
-                      (event.destination?.endsWith('.json') ?? false))) {
-                return;
+              final moved = event is FileSystemMoveEvent
+                  ? event.destination
+                  : null;
+              final paths = [event.path, if (moved != null) moved];
+              final jsonPaths = paths
+                  .where((item) => item.endsWith('.json'))
+                  .toList();
+              if (jsonPaths.isEmpty) return;
+              final next = ++_promptSetVersion;
+              var targeted = false;
+              for (final path in jsonPaths) {
+                final changedId = p.basenameWithoutExtension(path);
+                if (NaiAgentPromptSets.idPattern.hasMatch(changedId)) {
+                  _promptSetRequired[_promptSetKey(dir, changedId)] = next;
+                  targeted = true;
+                }
               }
-              _promptSets.clear();
+              if (!targeted) _promptSetAllRequired = next;
+              this.revision++;
               if (!_disposed) changed();
             },
             onError: (Object _) {

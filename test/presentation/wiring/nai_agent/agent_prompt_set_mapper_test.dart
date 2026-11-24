@@ -193,6 +193,80 @@ void main() {
     }
     expect(latest?['title'], 'Changed on disk');
   });
+  test(
+    'refresh, revision bump and disk updates keep cached sets non-null during reload',
+    () async {
+      final firstId =
+          (await sets.execute(
+                promptSetInput(),
+                NaiAgentCancellation(),
+              ))['details']['set_id']
+              as String;
+      final secondInput = promptSetInput()..['title'] = 'Second Deck';
+      final secondId =
+          (await sets.execute(
+                secondInput,
+                NaiAgentCancellation(),
+              ))['details']['set_id']
+              as String;
+      resources.promptSet(runtime.workspace, firstId, revision: 1);
+      resources.promptSet(runtime.workspace, secondId, revision: 1);
+      await resources.settle();
+      expect(resources.promptSet(runtime.workspace, firstId)!['title'], 'Rain');
+      expect(
+        resources.promptSet(runtime.workspace, secondId)!['title'],
+        'Second Deck',
+      );
+
+      final update = promptSetInput()
+        ..addAll({
+          'action': 'update',
+          'set_id': firstId,
+          'expected_revision': 1,
+          'title': 'Updated Deck',
+        });
+      await sets.execute(update, NaiAgentCancellation());
+
+      // Bulk refresh keeps existing data synchronously while reloading.
+      resources.refreshPromptSets();
+      expect(
+        resources.promptSet(runtime.workspace, firstId, revision: 2),
+        isNotNull,
+      );
+      expect(
+        resources.promptSet(runtime.workspace, secondId, revision: 1),
+        isNotNull,
+      );
+      await resources.settle();
+      expect(
+        resources.promptSet(runtime.workspace, firstId, revision: 2)!['title'],
+        'Updated Deck',
+      );
+      expect(
+        resources.promptSet(runtime.workspace, secondId, revision: 1)!['title'],
+        'Second Deck',
+      );
+
+      // Targeted reload updates only the changed set in place without nulling siblings.
+      final update2 = promptSetInput()
+        ..addAll({
+          'action': 'update',
+          'set_id': firstId,
+          'expected_revision': 2,
+          'title': 'In-Place Deck',
+        });
+      await sets.execute(update2, NaiAgentCancellation());
+      await resources.reloadPromptSet(runtime.workspace, firstId);
+      expect(
+        resources.promptSet(runtime.workspace, firstId, revision: 3)!['title'],
+        'In-Place Deck',
+      );
+      expect(
+        resources.promptSet(runtime.workspace, secondId, revision: 1)!['title'],
+        'Second Deck',
+      );
+    },
+  );
   test('read result never emits a card', () {
     runtime.messages = [
       {

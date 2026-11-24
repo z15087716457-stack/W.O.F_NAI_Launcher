@@ -20,6 +20,7 @@ import 'package:nai_launcher/presentation/providers/image_generation_provider.da
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_generation_approvals.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/ui/agent/agent_contract.dart';
+import 'package:nai_launcher/presentation/ui/agent/agent_prompt_set_card.dart';
 import 'package:nai_launcher/presentation/wiring/nai_agent/agent_prompt_set_actions.dart';
 import 'package:nai_launcher/presentation/wiring/nai_agent/agent_prompt_set_mapper.dart';
 import 'package:nai_launcher/presentation/wiring/nai_agent/agent_resources.dart';
@@ -326,6 +327,184 @@ void main() {
       expect(restarted['images']['1'], isNull);
       expect(tester.takeException(), isNull);
       // No app navigation, running model turn or extra approval was needed.
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
+
+  testWidgets(
+    'generating from a lower stacked prompt-set card preserves scroll position and selected item',
+    (tester) async {
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final native = (await tester.runAsync(
+        () async =>
+            container.read(imageGenerationNotifierProvider.notifier)
+                as ControlledAgentGeneration,
+      ))!;
+      final setIds = <String>[];
+      final messages = <Map<String, dynamic>>[];
+      await tester.runAsync(() async {
+        for (var i = 0; i < 10; i++) {
+          final input = promptSetInput()..['title'] = 'Deck $i';
+          final details =
+              (await sets.execute(input, NaiAgentCancellation()))['details']
+                  as Map<String, dynamic>;
+          final setId = details['set_id'] as String;
+          setIds.add(setId);
+          messages.addAll([
+            {'role': 'user', 'content': 'Create deck $i'},
+            {
+              'role': 'assistant',
+              'content': [
+                {
+                  'type': 'toolCall',
+                  'id': 'ps-call-$i',
+                  'name': 'prompt_set',
+                  'arguments': {'action': 'create'},
+                },
+              ],
+            },
+            {
+              'role': 'toolResult',
+              'toolCallId': 'ps-call-$i',
+              'details': details,
+            },
+          ]);
+        }
+      });
+      harness.c.selected!.messages = messages;
+      harness.c.selected!.uiRevision++;
+      await harness.pump(tester, height: 620);
+      // Alternate real I/O ticks with fake-zone pumps so multi-await disk
+      // reads in AgentResources finish and lay out every prompt-set card.
+      for (var i = 0; i < 40; i++) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 10)),
+        );
+        await tester.pump();
+        final mountedCards = find
+            .byType(AgentPromptSetCard)
+            .evaluate()
+            .map((e) => e.widget as AgentPromptSetCard)
+            .toList();
+        if (mountedCards.isNotEmpty &&
+            mountedCards.every((card) => card.data != null)) {
+          break;
+        }
+      }
+      for (var i = 0; i < 6; i++) {
+        await tester.pump();
+      }
+      final scrollable = find.descendant(
+        of: find.byKey(const Key('agent-thread')),
+        matching: find.byType(Scrollable),
+      );
+      ScrollPosition position() =>
+          tester.state<ScrollableState>(scrollable).position;
+      expect(position().maxScrollExtent, greaterThan(1000));
+      // Scroll from bottom up to card #6 (away from bottom so _follow is false).
+      final targetCard = find.byKey(Key('agent-ps-${setIds[6]}'));
+      for (var step = 0; step < 40 && targetCard.evaluate().isEmpty; step++) {
+        final next = (position().pixels - 180).clamp(
+          0.0,
+          position().maxScrollExtent,
+        );
+        position().jumpTo(next);
+        await tester.pump();
+      }
+      expect(targetCard, findsOneWidget);
+      await tester.ensureVisible(targetCard);
+      await tester.pumpAndSettle();
+      // Keep the viewport away from the bottom edge so auto-follow stays off.
+      expect(position().maxScrollExtent - position().pixels, greaterThan(150));
+      // Switch card #6 to its second item before generating.
+      final nextButton = find.descendant(
+        of: targetCard,
+        matching: find.byKey(const Key('agent-ps-next')),
+      );
+      await tester.ensureVisible(nextButton);
+      await tester.pumpAndSettle();
+      await tester.tap(nextButton);
+      await tester.pumpAndSettle();
+      expect(
+        find.descendant(of: targetCard, matching: find.text('2 / 2')),
+        findsOneWidget,
+      );
+
+      final generateButton = find.descendant(
+        of: targetCard,
+        matching: find.byKey(const Key('agent-ps-generate')),
+      );
+      await tester.ensureVisible(generateButton);
+      await tester.pumpAndSettle();
+      final scrollBefore = position().pixels;
+      expect(scrollBefore, greaterThan(500));
+
+      await tester.tap(generateButton);
+      await tester.pump();
+      for (var i = 0; i < 40 && native.requests.isEmpty; i++) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 10)),
+        );
+        await tester.pump();
+      }
+      expect(native.requests, hasLength(1));
+      await tester.runAsync(() async => native.finish());
+      Map<String, dynamic>? updated;
+      for (var i = 0; i < 80; i++) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 15)),
+        );
+        await tester.pump();
+        final cards = find
+            .byType(AgentPromptSetCard)
+            .evaluate()
+            .map((e) => e.widget as AgentPromptSetCard);
+        expect(
+          cards.every((card) => card.data != null),
+          isTrue,
+          reason: 'No prompt-set card should collapse to null during refresh',
+        );
+        updated = await tester.runAsync<Map<String, dynamic>?>(
+          () => NaiAgentPromptSets(workspace.agentDirectory).read(setIds[6]),
+        );
+        final cardWidget = tester.widget<AgentPromptSetCard>(
+          find.byKey(ValueKey('prompt-set-${setIds[6]}')),
+        );
+        if ((updated?['images'] as Map?)?['1'] != null &&
+            cardWidget.data?.busyIndex == null) {
+          break;
+        }
+      }
+      // Pump a few more frames so dir.watch() events also settle cleanly.
+      for (var i = 0; i < 10; i++) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 15)),
+        );
+        await tester.pump();
+        final cards = find
+            .byType(AgentPromptSetCard)
+            .evaluate()
+            .map((e) => e.widget as AgentPromptSetCard);
+        expect(
+          cards.every((card) => card.data != null),
+          isTrue,
+          reason: 'dir.watch() refresh must keep all cards non-null',
+        );
+      }
+      // Must never collapse to missing placeholders or bounce back to the top.
+      expect(position().pixels, closeTo(scrollBefore, 120));
+      expect(targetCard, findsOneWidget);
+      expect(
+        find.descendant(of: targetCard, matching: find.text('2 / 2')),
+        findsOneWidget,
+      );
+      expect(
+        updated?['images']?['1'],
+        hasLength(1),
+        reason: 'images=${updated?['images']}',
+      );
+      expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());
     },
   );
