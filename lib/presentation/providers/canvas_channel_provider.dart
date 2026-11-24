@@ -30,25 +30,52 @@ class CanvasChannelNotifier extends Notifier<ChannelSettings> {
           .getSetting<Object>(StorageKeys.canvasChannelPreferences);
       final value = raw is String ? jsonDecode(raw) : raw;
       if (value is! Map) return ChannelSettings(seed: seed);
-      final pool = {
-        for (final theme in ChannelTheme.values)
-          if (value['pool'] is List &&
-              (value['pool'] as List).contains(theme.name))
-            theme,
-        // v1 只认识前六个主题：旧随机池里没有后来加的主题，并入后新主题才会出现
-        if (value['version'] == 1) ..._addedAfterV1,
-      };
-      return ChannelSettings(
-        mode: _named(ChannelMode.values, value['mode'], ChannelMode.random),
-        fixed: _named(ChannelTheme.values, value['fixed'], ChannelTheme.stars),
-        pool: Set.unmodifiable(
-          pool.length >= 2 ? pool : ChannelSettings.allThemes,
-        ),
-        level: _named(
+      final storedVersion = value['version'];
+      final isLegacy = storedVersion is! int || storedVersion < _version;
+
+      final ChannelTheme fixed;
+      final Set<ChannelTheme> pool;
+      final ChannelLevel level;
+
+      if (isLegacy) {
+        // v1 / v2 旧矢量主题平滑迁移到 v3 新 5 套字符艺术主题
+        fixed = _migrateLegacyTheme(value['fixed']);
+        pool = ChannelSettings.allThemes;
+        final storedLevel = value['level'];
+        // 若用户显式调过「淡」则保留；旧默认「标准」或缺失值平滑升级为新默认「浓」
+        level = storedLevel == ChannelLevel.soft.name
+            ? ChannelLevel.soft
+            : ChannelLevel.strong;
+      } else {
+        fixed = _parseTheme(value['fixed']) ?? ChannelTheme.pelagic;
+        final parsedPool = <ChannelTheme>{};
+        if (value['pool'] is List) {
+          for (final item in value['pool'] as List) {
+            final parsed = _parseTheme(item);
+            if (parsed != null) parsedPool.add(parsed);
+          }
+        }
+        pool = Set.unmodifiable(
+          parsedPool.length >= 2 ? parsedPool : ChannelSettings.allThemes,
+        );
+        level = _named(
           ChannelLevel.values,
           value['level'],
-          ChannelLevel.standard,
-        ),
+          ChannelLevel.strong,
+        );
+      }
+
+      final rawSide = value['sideTransparency'];
+      final sideTransparency = rawSide is num && rawSide.isFinite
+          ? (rawSide.toDouble().clamp(0.0, 1.0) * 100).round() / 100.0
+          : ChannelSettings.defaultSideTransparency;
+
+      return ChannelSettings(
+        mode: _named(ChannelMode.values, value['mode'], ChannelMode.random),
+        fixed: fixed,
+        pool: pool,
+        level: level,
+        sideTransparency: sideTransparency,
         ruler: value['ruler'] is bool ? value['ruler'] as bool : true,
         motion: value['motion'] is bool ? value['motion'] as bool : true,
         seed: seed,
@@ -71,6 +98,8 @@ class CanvasChannelNotifier extends Notifier<ChannelSettings> {
       pool: Set.unmodifiable(
         value.pool.length >= 2 ? value.pool : ChannelSettings.allThemes,
       ),
+      sideTransparency:
+          (value.sideTransparency.clamp(0.0, 1.0) * 100).round() / 100.0,
     );
     state = next;
     final payload = jsonEncode({
@@ -82,6 +111,7 @@ class CanvasChannelNotifier extends Notifier<ChannelSettings> {
           if (next.pool.contains(theme)) theme.name,
       ],
       'level': next.level.name,
+      'sideTransparency': next.sideTransparency,
       'ruler': next.ruler,
       'motion': next.motion,
     });
@@ -101,16 +131,26 @@ class CanvasChannelNotifier extends Notifier<ChannelSettings> {
   }
 }
 
-const _version = 2;
+const _version = 3;
 
-/// 存储 v1 之后新增的主题。
-const _addedAfterV1 = [
-  ChannelTheme.caliber,
-  ChannelTheme.strata,
-  ChannelTheme.metro,
-  ChannelTheme.score,
-  ChannelTheme.luna,
-];
+ChannelTheme? _parseTheme(Object? raw) => switch (raw) {
+  'pelagic' => ChannelTheme.pelagic,
+  'nimbus' => ChannelTheme.nimbus,
+  'cumulus' => ChannelTheme.cumulus,
+  'aurora' || 'singularity' => ChannelTheme.aurora,
+  'strata' => ChannelTheme.strata,
+  _ => null,
+};
+
+ChannelTheme _migrateLegacyTheme(Object? raw) => switch (raw) {
+  'pelagic' || 'abyss' || 'wave' => ChannelTheme.pelagic,
+  'nimbus' || 'herb' || 'score' => ChannelTheme.nimbus,
+  'cumulus' || 'circuit' || 'arcade' || 'caliber' || 'metro' =>
+    ChannelTheme.cumulus,
+  'aurora' || 'singularity' || 'stars' || 'luna' => ChannelTheme.aurora,
+  'strata' => ChannelTheme.strata,
+  _ => ChannelTheme.pelagic,
+};
 
 T _named<T extends Enum>(List<T> values, Object? name, T fallback) =>
     values.where((value) => value.name == name).firstOrNull ?? fallback;

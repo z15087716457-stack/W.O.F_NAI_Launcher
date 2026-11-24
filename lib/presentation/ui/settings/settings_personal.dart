@@ -1088,14 +1088,20 @@ class _ChannelSectionState extends State<_ChannelSection> {
           ),
         ),
         row(
-          'channelRuler',
-          l.set_cvRuler,
-          l.set_cvRulerSub,
-          ch.ruler != _def.ruler,
-          () => set(ch.copyWith(ruler: _def.ruler)),
-          SettingsSwitch(
-            value: ch.ruler,
-            onChanged: (x) => set(ch.copyWith(ruler: x)),
+          'channelSideTransparency',
+          l.set_cvSideTransparency,
+          l.set_cvSideTransparencySub,
+          (ch.sideTransparency - _def.sideTransparency).abs() > 0.001,
+          () => set(ch.copyWith(sideTransparency: _def.sideTransparency)),
+          SettingsSlider(
+            key: const Key('slider-channelSideTransparency'),
+            value: ch.sideTransparency * 100,
+            min: 0,
+            max: 100,
+            step: 5,
+            ticks: 5,
+            label: (v) => '${v.round()}%',
+            onChanged: (v) => set(ch.copyWith(sideTransparency: v / 100)),
           ),
         ),
         row(

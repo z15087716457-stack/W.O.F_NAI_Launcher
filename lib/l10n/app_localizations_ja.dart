@@ -13966,76 +13966,36 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get channel_themeCircuit => '回路';
+  String get channel_themePelagic => '深海浮遊';
 
   @override
-  String get channel_themeStars => '星図';
+  String get channel_themeNimbus => '暮光雲海';
 
   @override
-  String get channel_themeHerb => '植物標本';
+  String get channel_themeCumulus => '晴空雲海';
 
   @override
-  String get channel_themeArcade => '回廊';
+  String get channel_themeAurora => 'オーロラ雪原';
 
   @override
-  String get channel_themeAbyss => '深海';
+  String get channel_themeStrata => '声紋潮汐';
 
   @override
-  String get channel_themeWave => '青海波';
+  String get channel_descPelagic =>
+      '発光クラゲと 3D で羽ばたくマンタが点字の霧と深海を漂い、スクロールで水深が変わります';
 
   @override
-  String get channel_descCircuit =>
-      '両側を 2 本ずつバスが下り、分岐・パッド・チップが並びます。待機中は光がバスを流れます';
+  String get channel_descNimbus => '紫金の夕暮れに湧き立つ積乱雲と銀縁の前方散乱光をハーフトーン文字で描きます';
 
   @override
-  String get channel_descStars => '星、星座線、目盛りリング、赤緯スケール。待機中は明るい星がかすかに瞬きます';
+  String get channel_descCumulus => '澄んだ青空に広がる白い積雲と陽光のハイライト、淡い影が風に乗って流れます';
 
   @override
-  String get channel_descHerb => '墨線の標本が両側から伸び、葉・花・テープ・番号ラベル付き。待機中は風に揺れます';
-
-  @override
-  String get channel_descArcade => '大聖堂の平面図。画像は身廊を進み、両側に柱・リブヴォールト・窓・通り芯・寸法線';
-
-  @override
-  String get channel_descAbyss => '下るほど深く（古く）なります。深度計、等深線、昇る泡、降るマリンスノー';
-
-  @override
-  String get channel_descWave => '和柄の波が両側に集まり、朱の日輪と霞を添えます。待機中は光が波を渡ります';
-
-  @override
-  String get channel_themeCaliber => 'ムーブメント';
-
-  @override
-  String get channel_themeStrata => '地層';
-
-  @override
-  String get channel_themeMetro => '地下鉄';
-
-  @override
-  String get channel_themeScore => '楽譜';
-
-  @override
-  String get channel_themeLuna => '月相';
-
-  @override
-  String get channel_descCaliber =>
-      '受け板、コート・ド・ジュネーブ、輪列。スクロールで歯車が実際の歯数比で噛み合い回ります。各区間のテンプは待機中に時を刻みます';
+  String get channel_descAurora => '翡翠と菫色の二層オーロラが極夜に揺らめき、雪山とトウヒ林の谷間を細雪が舞います';
 
   @override
   String get channel_descStrata =>
-      '下るほど古くなります。地質年代柱、地層、その時代の化石。ドリルが視点と一緒に掘り進みます';
-
-  @override
-  String get channel_descMetro =>
-      '両側に路線図。45° の曲がり、乗換駅、駅名。列車が視点の横を走り、最寄り駅が点灯します';
-
-  @override
-  String get channel_descScore =>
-      '縦書きの五線譜が下へ続き、再生線が画面中央で通過した音符を光らせます。各区間のレコードはスクロールで回ります';
-
-  @override
-  String get channel_descLuna =>
-      '1 日 1 行の月齢カレンダーと潮汐曲線。大きな月が視点を追い、スクロールで満ち欠けします';
+      '隠面消去を備えた 3D 潮汐リッジと発光等高線、山頂の標高ラベルがうねりとともに変化します';
 
   @override
   String get channel_title => 'ビジュアルチャンネル';
@@ -14090,6 +14050,12 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get channel_motionSub => 'ごく軽い動き。生成中は自動で止まります';
+
+  @override
+  String get channel_sideTransparency => 'サイドバー透過度';
+
+  @override
+  String get channel_sideTransparencySub => '左右パネルの背景透過量（0% で不透明）';
 
   @override
   String channel_batch(String time, int count) {
@@ -14964,6 +14930,12 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get set_cvMotionSub => '生成中と「動きを減らす」オンのときは停止';
+
+  @override
+  String get set_cvSideTransparency => 'サイドバー透過度';
+
+  @override
+  String get set_cvSideTransparencySub => '左右パネルから動的背景が透ける量を調整します（0% で不透明）';
 
   @override
   String get set_cvOps => 'キャンバス操作';

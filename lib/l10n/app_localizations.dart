@@ -25031,137 +25031,65 @@ abstract class AppLocalizations {
   /// **'Added {added} images; {failed} failed.'**
   String naiAgent_importResult(int added, int failed);
 
-  /// No description provided for @channel_themeCircuit.
+  /// No description provided for @channel_themePelagic.
   ///
   /// In en, this message translates to:
-  /// **'Circuit'**
-  String get channel_themeCircuit;
+  /// **'Pelagic'**
+  String get channel_themePelagic;
 
-  /// No description provided for @channel_themeStars.
+  /// No description provided for @channel_themeNimbus.
   ///
   /// In en, this message translates to:
-  /// **'Star atlas'**
-  String get channel_themeStars;
+  /// **'Nimbus Dusk'**
+  String get channel_themeNimbus;
 
-  /// No description provided for @channel_themeHerb.
+  /// No description provided for @channel_themeCumulus.
   ///
   /// In en, this message translates to:
-  /// **'Herbarium'**
-  String get channel_themeHerb;
+  /// **'Cumulus Sky'**
+  String get channel_themeCumulus;
 
-  /// No description provided for @channel_themeArcade.
+  /// No description provided for @channel_themeAurora.
   ///
   /// In en, this message translates to:
-  /// **'Arcade'**
-  String get channel_themeArcade;
-
-  /// No description provided for @channel_themeAbyss.
-  ///
-  /// In en, this message translates to:
-  /// **'Abyss'**
-  String get channel_themeAbyss;
-
-  /// No description provided for @channel_themeWave.
-  ///
-  /// In en, this message translates to:
-  /// **'Seigaiha'**
-  String get channel_themeWave;
-
-  /// No description provided for @channel_descCircuit.
-  ///
-  /// In en, this message translates to:
-  /// **'Two buses run down each side with branches, pads and chips; light pulses flow along them when idle'**
-  String get channel_descCircuit;
-
-  /// No description provided for @channel_descStars.
-  ///
-  /// In en, this message translates to:
-  /// **'Stars, constellation lines, graduated rings and a declination scale; bright stars twinkle when idle'**
-  String get channel_descStars;
-
-  /// No description provided for @channel_descHerb.
-  ///
-  /// In en, this message translates to:
-  /// **'Ink specimens grow from both sides with leaves, flowers, tape and numbered labels; they sway when idle'**
-  String get channel_descHerb;
-
-  /// No description provided for @channel_descArcade.
-  ///
-  /// In en, this message translates to:
-  /// **'A cathedral floor plan: images walk the nave, flanked by piers, rib vaults, windows, grid marks and dimensions'**
-  String get channel_descArcade;
-
-  /// No description provided for @channel_descAbyss.
-  ///
-  /// In en, this message translates to:
-  /// **'Deeper as you go down (older): depth gauge, isobaths, rising bubbles and falling marine snow'**
-  String get channel_descAbyss;
-
-  /// No description provided for @channel_descWave.
-  ///
-  /// In en, this message translates to:
-  /// **'Japanese wave patterns gather on both sides with a red sun and mist bands; light sweeps across them when idle'**
-  String get channel_descWave;
-
-  /// No description provided for @channel_themeCaliber.
-  ///
-  /// In en, this message translates to:
-  /// **'Caliber'**
-  String get channel_themeCaliber;
+  /// **'Aurora Snowfield'**
+  String get channel_themeAurora;
 
   /// No description provided for @channel_themeStrata.
   ///
   /// In en, this message translates to:
-  /// **'Strata'**
+  /// **'Acoustic Strata'**
   String get channel_themeStrata;
 
-  /// No description provided for @channel_themeMetro.
+  /// No description provided for @channel_descPelagic.
   ///
   /// In en, this message translates to:
-  /// **'Metro'**
-  String get channel_themeMetro;
+  /// **'Bioluminescent ASCII jellyfish and a 3D gliding manta ray drift through deep ocean currents with depth parallax'**
+  String get channel_descPelagic;
 
-  /// No description provided for @channel_themeScore.
+  /// No description provided for @channel_descNimbus.
   ///
   /// In en, this message translates to:
-  /// **'Score'**
-  String get channel_themeScore;
+  /// **'Towering twilight cumulus clouds with forward-scattered golden silver-lining rendered in halftone blocks'**
+  String get channel_descNimbus;
 
-  /// No description provided for @channel_themeLuna.
+  /// No description provided for @channel_descCumulus.
   ///
   /// In en, this message translates to:
-  /// **'Luna'**
-  String get channel_themeLuna;
+  /// **'Sunlit snow-white cumulus clouds billowing across a crisp cobalt sky with layered atmospheric shading'**
+  String get channel_descCumulus;
 
-  /// No description provided for @channel_descCaliber.
+  /// No description provided for @channel_descAurora.
   ///
   /// In en, this message translates to:
-  /// **'Bridges, Geneva stripes and gear trains that mesh at true ratios as you scroll; each section has a balance wheel that ticks when idle'**
-  String get channel_descCaliber;
+  /// **'Twin emerald-violet aurora curtains sweep above sculpted snow valleys, spruce flanks, and drifting parallax snow'**
+  String get channel_descAurora;
 
   /// No description provided for @channel_descStrata.
   ///
   /// In en, this message translates to:
-  /// **'Older as you go down: a geologic time column, rock layers and period fossils; a drill bores down with the view'**
+  /// **'True horizon-occluded 3D tidal wave ridges with luminous iso-elevation contours and peak callouts'**
   String get channel_descStrata;
-
-  /// No description provided for @channel_descMetro.
-  ///
-  /// In en, this message translates to:
-  /// **'Metro line maps with 45° turns, interchanges and station names; a train rides beside the view and lights the nearest stop'**
-  String get channel_descMetro;
-
-  /// No description provided for @channel_descScore.
-  ///
-  /// In en, this message translates to:
-  /// **'Vertical staves run downward; the playhead stays mid-view and lights the notes it passes; each section spins a record as you scroll'**
-  String get channel_descScore;
-
-  /// No description provided for @channel_descLuna.
-  ///
-  /// In en, this message translates to:
-  /// **'A one-day-per-row moon calendar and a tide curve; a large moon follows the view and waxes or wanes as you scroll'**
-  String get channel_descLuna;
 
   /// No description provided for @channel_title.
   ///
@@ -25270,6 +25198,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Subtle animation, paused while generating'**
   String get channel_motionSub;
+
+  /// No description provided for @channel_sideTransparency.
+  ///
+  /// In en, this message translates to:
+  /// **'Side panel translucency'**
+  String get channel_sideTransparency;
+
+  /// No description provided for @channel_sideTransparencySub.
+  ///
+  /// In en, this message translates to:
+  /// **'How much background shows through side panels (0% solid)'**
+  String get channel_sideTransparencySub;
 
   /// No description provided for @channel_batch.
   ///
@@ -26812,6 +26752,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pauses while generating or when reduce motion is on'**
   String get set_cvMotionSub;
+
+  /// No description provided for @set_cvSideTransparency.
+  ///
+  /// In en, this message translates to:
+  /// **'Side panel translucency'**
+  String get set_cvSideTransparency;
+
+  /// No description provided for @set_cvSideTransparencySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Controls how much of the live backdrop shows through the left and right panels (0% opaque)'**
+  String get set_cvSideTransparencySub;
 
   /// No description provided for @set_cvOps.
   ///

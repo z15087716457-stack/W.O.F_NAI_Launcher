@@ -31,10 +31,10 @@ void main() {
     });
 
     test('池子过滤；少于两个时用全部', () {
-      final pool = {ChannelTheme.stars, ChannelTheme.wave};
+      final pool = {ChannelTheme.pelagic, ChannelTheme.cumulus};
       expect(ChannelEnv.orderFor(pool, 3).toSet(), pool);
       expect(
-        ChannelEnv.orderFor({ChannelTheme.herb}, 3).toSet(),
+        ChannelEnv.orderFor({ChannelTheme.nimbus}, 3).toSet(),
         ChannelSettings.allThemes,
       );
     });
@@ -68,11 +68,11 @@ void main() {
 
     test('固定模式：每段同一主题、权重恒为 1', () {
       final env = ChannelEnv.of(
-        channelSettings(mode: ChannelMode.fixed, fixed: ChannelTheme.abyss),
+        channelSettings(mode: ChannelMode.fixed, fixed: ChannelTheme.pelagic),
       );
       expect(
         {for (var k = -3; k < 3; k++) env.themeOf(k)},
-        {ChannelTheme.abyss},
+        {ChannelTheme.pelagic},
       );
       expect(env.weight(1, ChannelGeo.zoneStart(1)), 1);
     });
@@ -139,14 +139,21 @@ void main() {
 
       await tapKey(t, 'channel-mode-fixed');
       expect(calls.last, contains('ChannelSettings(fixed,'));
-      await tapKey(t, 'channel-card-arcade');
-      expect(calls.last, contains('fixed: arcade'));
-      expect(find.textContaining('俯视的教堂平面图'), findsOneWidget);
+      await tapKey(t, 'channel-card-aurora');
+      expect(calls.last, contains('fixed: aurora'));
+      expect(find.textContaining('翡翠紫罗兰极光'), findsOneWidget);
 
-      await tapKey(t, 'channel-level-strong');
-      expect(calls.last, contains('strong,'));
-      await tapKey(t, 'channel-ruler');
-      expect(calls.last, contains('ruler: false'));
+      await tapKey(t, 'channel-level-soft');
+      expect(calls.last, contains('soft,'));
+      expect(find.byKey(const Key('channel-side-transparency-slider')), findsOneWidget);
+      expect(find.text('45%'), findsOneWidget);
+      await t.tapAt(
+        t.getTopLeft(find.byKey(const Key('channel-side-transparency-slider'))) +
+            const Offset(2, 8),
+      );
+      await t.pumpAndSettle();
+      expect(calls.last, contains('sideTransparency: 0%'));
+      expect(find.byKey(const Key('channel-ruler')), findsNothing);
       await tapKey(t, 'channel-motion');
       expect(calls.last, contains('motion: false'));
     });
@@ -155,20 +162,20 @@ void main() {
       final calls = await pumpChannel(
         t,
         settings: channelSettings(
-          pool: {ChannelTheme.stars, ChannelTheme.herb, ChannelTheme.wave},
+          pool: {ChannelTheme.pelagic, ChannelTheme.nimbus, ChannelTheme.cumulus},
         ),
       );
       await _openDisplay(t);
-      await tapKey(t, 'channel-card-wave');
-      expect(calls.last, contains('pool: [stars, herb]'));
+      await tapKey(t, 'channel-card-cumulus');
+      expect(calls.last, contains('pool: [pelagic, nimbus]'));
       final n = calls.length;
-      await tapKey(t, 'channel-card-herb');
+      await tapKey(t, 'channel-card-nimbus');
       expect(calls.length, n, reason: '只剩两个时不再去掉');
       expect(find.text('随机至少保留两个主题'), findsOneWidget);
       await t.pump(const Duration(seconds: 2));
       expect(find.text('随机至少保留两个主题'), findsNothing);
-      await tapKey(t, 'channel-card-circuit');
-      expect(calls.last, contains('pool: [circuit, stars, herb]'));
+      await tapKey(t, 'channel-card-strata');
+      expect(calls.last, contains('pool: [pelagic, nimbus, strata]'));
 
       await tapKey(t, 'channel-reroll');
       // 整数匹配：新种子可能以同样的数字开头（例如 7 → 734271340）。
@@ -184,10 +191,10 @@ void main() {
       expect(find.text('关闭后保留现在的像素底纹'), findsOneWidget);
       final n = calls.length;
       await t.tap(
-        find.byKey(const Key('channel-card-stars')),
+        find.byKey(const Key('channel-card-pelagic')),
         warnIfMissed: false,
       );
-      await t.tap(find.byKey(const Key('channel-ruler')), warnIfMissed: false);
+      await t.tap(find.byKey(const Key('channel-motion')), warnIfMissed: false);
       await t.pumpAndSettle();
       expect(calls.length, n);
       await tapKey(t, 'channel-mode-random');

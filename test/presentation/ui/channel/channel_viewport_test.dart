@@ -28,24 +28,20 @@ Future<Uint8List> _welcomeFrame(
   final colors = UiColors.fromTheme(
     dark ? ThemeData.dark() : ThemeData.light(),
   );
+  final camera = ChannelCamera.welcome(viewport);
   if (reference) {
-    final factor = viewport.width / 922;
-    final height = viewport.height / factor;
-    canvas.scale(factor);
     paintChannelScene(
       canvas,
-      Size(922, height),
+      viewport,
       ChannelSceneSpec(
         env: ChannelEnv.of(settings),
-        camera: ChannelCamera(
-          offset: Offset(461, 50 + (height - 1000) / 2),
-          scale: 880 / 1216,
-        ),
+        camera: camera,
         dark: dark,
         base: colors.bg,
-        level: 1,
+        level: settings.level.factor,
         seed: 7,
         names: const {},
+        welcome: true,
       ),
     );
   } else {
@@ -53,7 +49,7 @@ Future<Uint8List> _welcomeFrame(
     ChannelBackdropPainter(
       data: ChannelViewData(
         settings: settings,
-        camera: ChannelCamera.welcome(viewport),
+        camera: camera,
         now: DateTime(2026),
         welcome: true,
       ),
@@ -82,10 +78,11 @@ void main() {
   setUpAll(loadStudioCaptureFonts);
 
   for (final theme in ChannelTheme.values) {
-    test('welcome composition scales as a whole for ${theme.name}', () async {
+    test('welcome renders at 1:1 native glyph pitch across narrow and wide viewports for ${theme.name}', () async {
       for (final (dark, viewport) in [
-        (false, const Size(160, 460)),
+        (false, const Size(380, 880)),
         (true, const Size(691, 514)),
+        (true, const Size(1920, 1080)),
       ]) {
         final reference = await _welcomeFrame(
           theme,

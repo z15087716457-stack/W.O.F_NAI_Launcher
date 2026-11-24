@@ -3,8 +3,8 @@ import 'package:flutter/painting.dart';
 import 'channel_contract.dart';
 import 'channel_geometry.dart';
 
-/// 每个主题的配色（原型 THEMES）：底色、线稿色、点缀色，各分浅色 / 深色；[swatch] 是设置卡片、
-/// 刻度条、全局地图上的色块。底色只是很淡地染在画布底上，按段权重混进去。
+/// 每个字符艺术主题的配色基调（浅色 / 深色）：
+/// 底色用于段间渐变过渡与图片光台融合，[swatch] 是设置卡片、全局地图上的色块。
 class ChannelPalette {
   const ChannelPalette({
     required this.swatch,
@@ -18,7 +18,7 @@ class ChannelPalette {
   final Color swatch;
   final (Color, Color) bg;
 
-  /// 段尾的底色（深海：越往下越深），null = 整段同一底色。
+  /// 段尾/深处的第二底色，null = 整段同一底色。
   final (Color, Color)? bg2;
   final (Color, Color) ink;
   final (Color, Color) accent;
@@ -31,84 +31,45 @@ class ChannelPalette {
   Color accentOf(bool dark) => dark ? accent.$2 : accent.$1;
 
   static ChannelPalette of(ChannelTheme t) => switch (t) {
-    ChannelTheme.circuit => const ChannelPalette(
-      swatch: Color(0xFF3B82F6),
-      bg: (Color(0xFFF7F9FC), Color(0xFF0D1217)),
-      ink: (Color(0xFF3A506C), Color(0xFF8AAACE)),
-      accent: (Color(0xFF0064E2), Color(0xFF50A8FF)),
-      code: 'CIRCUIT',
+    ChannelTheme.pelagic => const ChannelPalette(
+      swatch: Color(0xFF38BDF8),
+      bg: (Color(0xFFF3F8FD), Color(0xFF06101C)),
+      bg2: (Color(0xFFE5EFF8), Color(0xFF03070F)),
+      ink: (Color(0xFF1A527A), Color(0xFF72D6F4)),
+      accent: (Color(0xFF0E7490), Color(0xFF67E8F9)),
+      code: 'PELAGIC',
     ),
-    ChannelTheme.stars => const ChannelPalette(
-      swatch: Color(0xFF6D5DFC),
-      bg: (Color(0xFFF7F7FB), Color(0xFF0A0C15)),
-      ink: (Color(0xFF2C345C), Color(0xFFC0CAF2)),
-      accent: (Color(0xFFC47828), Color(0xFFFFD496)),
-      code: 'ATLAS',
+    ChannelTheme.nimbus => const ChannelPalette(
+      swatch: Color(0xFFF472B6),
+      bg: (Color(0xFFF4EFF8), Color(0xFF0F132A)),
+      bg2: (Color(0xFFFCEFE8), Color(0xFF2B1B3B)),
+      ink: (Color(0xFF6B3F7A), Color(0xFFF5B8CC)),
+      accent: (Color(0xFFD97757), Color(0xFFFDE68A)),
+      code: 'NIMBUS',
     ),
-    ChannelTheme.herb => const ChannelPalette(
-      swatch: Color(0xFF6B8A3A),
-      bg: (Color(0xFFFBFAF3), Color(0xFF10110D)),
-      ink: (Color(0xFF54603A), Color(0xFFACBE92)),
-      accent: (Color(0xFFB25C4A), Color(0xFFE49882)),
-      code: 'HERBARIUM',
+    ChannelTheme.cumulus => const ChannelPalette(
+      swatch: Color(0xFF2563EB),
+      bg: (Color(0xFF2A6BE4), Color(0xFF123482)),
+      bg2: (Color(0xFF8EC0FB), Color(0xFF2A62C8)),
+      ink: (Color(0xFFFFFFFF), Color(0xFFEAF4FF)),
+      accent: (Color(0xFF1D4ED8), Color(0xFF93C5FD)),
+      code: 'CUMULUS',
     ),
-    ChannelTheme.arcade => const ChannelPalette(
-      swatch: Color(0xFFB07048),
-      bg: (Color(0xFFF9F7F3), Color(0xFF0D1219)),
-      ink: (Color(0xFF504A44), Color(0xFF96B4DA)),
-      accent: (Color(0xFFBA5838), Color(0xFFF09870)),
-      code: 'ARCADE',
-    ),
-    ChannelTheme.abyss => const ChannelPalette(
-      swatch: Color(0xFF0E7490),
-      bg: (Color(0xFFF3F8FA), Color(0xFF09131A)),
-      bg2: (Color(0xFFE3EDF2), Color(0xFF03080C)),
-      ink: (Color(0xFF225874), Color(0xFF6CBAD6)),
-      accent: (Color(0xFF008AA0), Color(0xFF5AE6DC)),
-      code: 'ABYSS',
-    ),
-    ChannelTheme.wave => const ChannelPalette(
-      swatch: Color(0xFFD6452F),
-      bg: (Color(0xFFF7F9FA), Color(0xFF0B0F13)),
-      ink: (Color(0xFF244874), Color(0xFF80A6D0)),
-      accent: (Color(0xFFD44632), Color(0xFFE8624C)),
-      code: 'SEIGAIHA',
-    ),
-    ChannelTheme.caliber => const ChannelPalette(
-      swatch: Color(0xFF57534E),
-      bg: (Color(0xFFF8F7F5), Color(0xFF0F0F10)),
-      ink: (Color(0xFF484644), Color(0xFFACA8A2)),
-      accent: (Color(0xFFC81E46), Color(0xFFFF6080)),
-      code: 'CALIBER',
+    ChannelTheme.aurora => const ChannelPalette(
+      swatch: Color(0xFF34D399),
+      bg: (Color(0xFFDCECF9), Color(0xFF061322)),
+      bg2: (Color(0xFFC7E0F6), Color(0xFF0C2036)),
+      ink: (Color(0xFF0F5E6B), Color(0xFF7AFAD0)),
+      accent: (Color(0xFF6D28D9), Color(0xFFB484FF)),
+      code: 'AURORA',
     ),
     ChannelTheme.strata => const ChannelPalette(
-      swatch: Color(0xFFCA8A04),
-      bg: (Color(0xFFFBF8F1), Color(0xFF12100C)),
-      bg2: (Color(0xFFEFE4CF), Color(0xFF090705)),
-      ink: (Color(0xFF6E5432), Color(0xFFCCB288)),
-      accent: (Color(0xFFC4601C), Color(0xFFF8A85C)),
+      swatch: Color(0xFF2DD4BF),
+      bg: (Color(0xFFF4F6F1), Color(0xFF040D11)),
+      bg2: (Color(0xFFE7ECE2), Color(0xFF03070A)),
+      ink: (Color(0xFF145C56), Color(0xFF5EEAD4)),
+      accent: (Color(0xFFC2410C), Color(0xFFFEF08A)),
       code: 'STRATA',
-    ),
-    ChannelTheme.metro => const ChannelPalette(
-      swatch: Color(0xFF10B981),
-      bg: (Color(0xFFF7FAF9), Color(0xFF0B100F)),
-      ink: (Color(0xFF3C464C), Color(0xFF9CACB2)),
-      accent: (Color(0xFF009C68), Color(0xFF34DEA0)),
-      code: 'METRO',
-    ),
-    ChannelTheme.score => const ChannelPalette(
-      swatch: Color(0xFFC026D3),
-      bg: (Color(0xFFFBF9F5), Color(0xFF100E12)),
-      ink: (Color(0xFF383040), Color(0xFFC4BAD0)),
-      accent: (Color(0xFFA828BE), Color(0xFFE28CFF)),
-      code: 'SCORE',
-    ),
-    ChannelTheme.luna => const ChannelPalette(
-      swatch: Color(0xFF94A3B8),
-      bg: (Color(0xFFF6F7FA), Color(0xFF0A0D14)),
-      ink: (Color(0xFF3C4660), Color(0xFFB0BCD6)),
-      accent: (Color(0xFFB28A28), Color(0xFFFAE296)),
-      code: 'LUNA',
     ),
   };
 

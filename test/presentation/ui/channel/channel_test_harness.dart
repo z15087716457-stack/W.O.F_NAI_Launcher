@@ -14,21 +14,20 @@ export '../gen/gen_test_harness.dart' show tapKey, hoverOver, genRail;
 /// 固定种子：主题顺序与元素位置都固定，基准截图才稳定。
 const channelSeed = 7;
 
-/// 最早的六个主题。原基准截图按这个随机池录制；新主题另有 `goldens/v2/`。
+/// 当前全套五个字符艺术主题。
 const channelLegacyThemes = {
-  ChannelTheme.circuit,
-  ChannelTheme.stars,
-  ChannelTheme.herb,
-  ChannelTheme.arcade,
-  ChannelTheme.abyss,
-  ChannelTheme.wave,
+  ChannelTheme.pelagic,
+  ChannelTheme.nimbus,
+  ChannelTheme.cumulus,
+  ChannelTheme.aurora,
+  ChannelTheme.strata,
 };
 
 ChannelSettings channelSettings({
   ChannelMode mode = ChannelMode.random,
-  ChannelTheme fixed = ChannelTheme.stars,
+  ChannelTheme fixed = ChannelTheme.pelagic,
   Set<ChannelTheme> pool = channelLegacyThemes,
-  ChannelLevel level = ChannelLevel.standard,
+  ChannelLevel level = ChannelLevel.strong,
   bool ruler = true,
   bool motion = true,
 }) => ChannelSettings(

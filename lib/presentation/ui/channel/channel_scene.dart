@@ -3,33 +3,11 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/painting.dart';
 
+import 'channel_ascii_themes.dart';
 import 'channel_contract.dart';
 import 'channel_geometry.dart';
 import 'channel_paint.dart';
 import 'channel_palette.dart';
-import 'channel_themes_a.dart';
-import 'channel_themes_b.dart';
-import 'channel_themes_c.dart';
-import 'channel_themes_d.dart';
-import 'channel_themes_e.dart';
-
-typedef ChannelThemeDraw = void Function(ChannelPaint g);
-
-/// 主题 → 绘制函数。新主题：写一个 `void paintXxx(ChannelPaint g)`，在 [ChannelTheme] 加一项、
-/// 在 [ChannelPalette.of] 配色，再登记到这里；设置卡片、刻度条、过渡层、全局地图都会自动带上。
-const channelDraws = <ChannelTheme, ChannelThemeDraw>{
-  ChannelTheme.circuit: paintCircuit,
-  ChannelTheme.stars: paintStars,
-  ChannelTheme.herb: paintHerb,
-  ChannelTheme.arcade: paintArcade,
-  ChannelTheme.abyss: paintAbyss,
-  ChannelTheme.wave: paintWave,
-  ChannelTheme.caliber: paintCaliber,
-  ChannelTheme.strata: paintStrata,
-  ChannelTheme.metro: paintMetro,
-  ChannelTheme.score: paintScore,
-  ChannelTheme.luna: paintLuna,
-};
 
 /// 一帧通道场景的输入（不含图片光台和时间刻度）。
 class ChannelSceneSpec {
@@ -44,7 +22,9 @@ class ChannelSceneSpec {
     this.t = 0,
     this.motion = false,
     this.thumb = false,
+    this.welcome = false,
     this.pinboard,
+    this.stageCenterX,
   });
 
   final ChannelEnv env;
@@ -63,9 +43,15 @@ class ChannelSceneSpec {
   final double t;
   final bool motion;
 
-  /// 设置卡片缩略图：不画过渡层和地图，细节不随缩放隐藏。
+  /// 设置卡片缩略图：直接以标志性构图渲染完整主题，不画过渡层和地图。
   final bool thumb;
+
+  /// 空画布欢迎态：无需中央审图走廊压暗，完整呈现字符艺术舞台。
+  final bool welcome;
   final Rect? pinboard;
+
+  /// 全窗口模式下的主舞台水平中心（通常为中央画布中轴）。
+  final double? stageCenterX;
 
   double get decorScale => camera.scale * ChannelGeo.decorScale;
 
@@ -73,17 +59,50 @@ class ChannelSceneSpec {
       ChannelPalette.tint(env, decorY, base, dark, level);
 }
 
-/// 画底色 + 各段主题 + 过渡层 + 全局地图。“关闭”时什么都不画（下面是生图页原来的底纹）。
+/// 英雄初始相位（秒）：让静止帧与首帧默认处于最具美感的构图姿态。
+const double _heroBaseTime = 3.4;
+
+/// 画底色 + 字符艺术主题 + 过渡层 + 全局地图。“关闭”时什么都不画（下面是生图页原来的底纹）。
 void paintChannelScene(Canvas canvas, Size size, ChannelSceneSpec o) {
   if (o.env.off || size.isEmpty) return;
+
+  // 1. 缩略图模式：直接整块绘制该主题的标志性全景
+  if (o.thumb) {
+    canvas
+      ..save()
+      ..clipRect(Offset.zero & size);
+    paintAsciiTheme(
+      o.env.themeOf(0),
+      ChannelAsciiFrame(
+        canvas: canvas,
+        size: size,
+        dark: o.dark,
+        level: o.level,
+        t: _heroBaseTime + o.t,
+        scrollX: 0,
+        scrollY: 0,
+        seed: o.seed,
+        zoneAlpha: 1.0,
+        corridorCenterX: size.width * 0.5,
+        corridorHalfW: 0,
+        hasCorridor: false,
+        pinboardScreen: null,
+        stageCenterX: size.width * 0.5,
+        thumb: true,
+      ),
+    );
+    canvas.restore();
+    return;
+  }
+
   const k = ChannelGeo.decorScale;
   final view = o.camera.visibleWorldRect(size);
-  final vx0 = view.left / k, vx1 = view.right / k;
-  final vy0 = view.top / k, vy1 = view.bottom / k;
+  final vy0 = view.top / k;
+  final vy1 = view.bottom / k;
   final s = o.decorScale;
-  final det = o.thumb ? 1.0 : ChannelGeo.detail(o.camera.scale);
+  final det = ChannelGeo.detail(o.camera.scale);
 
-  // 底色：沿视口竖向取 17 个点混出渐变（段与段之间平滑过渡）
+  // 2. 底色渐变（缩放到全局地图或段间过渡时作为平滑衔接底板）
   canvas.drawRect(
     Offset.zero & size,
     Paint()
@@ -95,71 +114,92 @@ void paintChannelScene(Canvas canvas, Size size, ChannelSceneSpec o) {
       ),
   );
 
-  canvas
-    ..save()
-    ..clipRect(Offset.zero & size)
-    ..translate(o.camera.offset.dx, o.camera.offset.dy)
-    ..scale(s);
-  final gain = ChannelGeo.gain(o.dark);
-  final pin = o.pinboard == null
+  // 3. 屏幕空间字符艺术主题绘制（视差滚动与审图走廊与世界相机实时联动）
+  final centerDecorY = (vy0 + vy1) * 0.5;
+  // 空画布 welcome 态与最新首图焦点态（世界 y≈608）归零为视差基点，避免初始构图偏上裁切
+  final scrollY = o.welcome ? 0.0 : view.center.dy - 608.0;
+  final scrollX = o.welcome ? 0.0 : view.center.dx;
+  final corridorCenterX = o.camera.worldToScreen(Offset.zero).dx;
+  final corridorHalfW = 416.0 * o.camera.scale;
+  final stageCenterX = o.stageCenterX ?? size.width * 0.5;
+  final pinScreen = o.pinboard == null
       ? null
-      : Rect.fromLTRB(
-          o.pinboard!.left / k,
-          o.pinboard!.top / k,
-          o.pinboard!.right / k,
-          o.pinboard!.bottom / k,
-        ).inflate(240);
+      : Rect.fromPoints(
+          o.camera.worldToScreen(o.pinboard!.topLeft),
+          o.camera.worldToScreen(o.pinboard!.bottomRight),
+        ).inflate(28.0);
+
   if (det > 0) {
-    for (var z = ChannelGeo.zoneOf(vy0); z <= ChannelGeo.zoneOf(vy1); z++) {
-      final theme = o.env.themeOf(z);
-      final zs = ChannelGeo.zoneStart(z);
-      if (!o.env.fixed &&
-          math.min(vy1, zs + ChannelGeo.zone) - math.max(vy0, zs) < 1) {
-        continue;
-      }
-      final g = ChannelPaint(
-        canvas: canvas,
-        s: s,
-        k: z,
-        zs: zs,
-        t: o.t,
-        motion: o.motion,
-        dark: o.dark,
-        seed: o.seed,
-        camY: (vy0 + vy1) / 2,
-        x0: vx0,
-        x1: vx1,
-        y0: math.max(vy0, zs),
-        y1: math.min(vy1, zs + ChannelGeo.zone),
-        themeIndex: theme.index,
-        palette: ChannelPalette.of(theme),
-        alpha: (x, y) =>
-            o.env.weight(z, y) *
-            o.level *
-            gain *
-            det *
-            ChannelGeo.xfade(x) *
-            (pin != null && pin.contains(Offset(x, y)) ? 0.25 : 1),
-        bgAt: o.tint,
+    canvas
+      ..save()
+      ..clipRect(Offset.zero & size);
+
+    if (o.env.fixed) {
+      paintAsciiTheme(
+        o.env.themeOf(0),
+        ChannelAsciiFrame(
+          canvas: canvas,
+          size: size,
+          dark: o.dark,
+          level: o.level,
+          t: _heroBaseTime + o.t,
+          scrollX: scrollX,
+          scrollY: scrollY,
+          seed: o.seed,
+          zoneAlpha: det,
+          corridorCenterX: corridorCenterX,
+          corridorHalfW: corridorHalfW,
+          hasCorridor: false,
+          pinboardScreen: pinScreen,
+          stageCenterX: stageCenterX,
+          thumb: false,
+        ),
       );
-      canvas
-        ..save()
-        ..clipRect(
-          o.env.fixed
-              ? Rect.fromLTRB(vx0 - 10, vy0 - 10, vx1 + 10, vy1 + 10)
-              : Rect.fromLTWH(vx0 - 10, zs, vx1 - vx0 + 20, ChannelGeo.zone),
+    } else {
+      // 随机分段模式：以视口中心所在段为主舞台，按段权重平滑进出过渡层
+      final z = ChannelGeo.zoneOf(centerDecorY);
+      final w = o.env.weight(z, centerDecorY) * det;
+      if (w > 0.01) {
+        paintAsciiTheme(
+          o.env.themeOf(z),
+          ChannelAsciiFrame(
+            canvas: canvas,
+            size: size,
+            dark: o.dark,
+            level: o.level,
+            t: _heroBaseTime + o.t,
+            scrollX: scrollX,
+            scrollY: scrollY,
+            seed: o.seed ^ (z * 2654435761),
+            zoneAlpha: w,
+            corridorCenterX: corridorCenterX,
+            corridorHalfW: corridorHalfW,
+            hasCorridor: false,
+            pinboardScreen: pinScreen,
+            stageCenterX: stageCenterX,
+            thumb: false,
+          ),
         );
-      channelDraws[theme]!(g);
-      canvas.restore();
+      }
     }
-    if (!o.env.fixed && !o.thumb) {
+    canvas.restore();
+  }
+
+  // 4. 随机模式下的段过渡分隔线与全局地图（世界坐标锚定）
+  if (!o.env.fixed && (det > 0 || det < 1)) {
+    canvas
+      ..save()
+      ..clipRect(Offset.zero & size)
+      ..translate(o.camera.offset.dx, o.camera.offset.dy)
+      ..scale(s);
+    if (det > 0) {
       _paintTransitions(canvas, o, vy0, vy1, s, det);
     }
+    if (det < 1) {
+      _paintMap(canvas, o, vy0, vy1, s, det);
+    }
+    canvas.restore();
   }
-  if (!o.env.fixed && !o.thumb && det < 1) {
-    _paintMap(canvas, o, vy0, vy1, s, det);
-  }
-  canvas.restore();
 }
 
 /// 过渡层中线：两侧虚线，左边写“↑ 上一段 / ↓ 下一段”，右边写代号。
@@ -172,8 +212,8 @@ void _paintTransitions(
   double det,
 ) {
   const e = ChannelGeo.e;
-  final px = 1 / s, al = 0.5 * det;
-  // 字至少 13px（主题名），缩小时文字和间距一起按屏幕尺寸保底
+  final px = 1 / s;
+  final al = 0.5 * det;
   final m = math.max(1.0, 13 / (26 * ChannelText.boost * s));
   void label(
     String str,
@@ -202,8 +242,10 @@ void _paintTransitions(
   ) {
     final y = ChannelGeo.zoneStart(z);
     if (y < vy0 - 100 || y > vy1 + 100) continue;
-    final ta = o.env.themeOf(z - 1), tb = o.env.themeOf(z);
-    final a = ChannelPalette.of(ta), b = ChannelPalette.of(tb);
+    final ta = o.env.themeOf(z - 1);
+    final tb = o.env.themeOf(z);
+    final a = ChannelPalette.of(ta);
+    final b = ChannelPalette.of(tb);
     final dots = Paint()
       ..color = b.inkOf(o.dark).withValues(alpha: 0.22 * al)
       ..strokeWidth = px;
@@ -212,7 +254,8 @@ void _paintTransitions(
         canvas.drawLine(Offset(sd * x, y), Offset(sd * (x + 2 * px), y), dots);
       }
     }
-    final ia = a.inkOf(o.dark), ib = b.inkOf(o.dark);
+    final ia = a.inkOf(o.dark);
+    final ib = b.inkOf(o.dark);
     label(
       '↑ ${o.names[ta]}',
       -(e + 50),
@@ -259,10 +302,13 @@ void _paintMap(
   double s,
   double det,
 ) {
-  final u = 1 / s, al = 1 - det;
+  final u = 1 / s;
+  final al = 1 - det;
   for (var z = ChannelGeo.zoneOf(vy0); z <= ChannelGeo.zoneOf(vy1); z++) {
-    final theme = o.env.themeOf(z), p = ChannelPalette.of(theme);
-    final zs = ChannelGeo.zoneStart(z), cy = zs + ChannelGeo.zone / 2;
+    final theme = o.env.themeOf(z);
+    final p = ChannelPalette.of(theme);
+    final zs = ChannelGeo.zoneStart(z);
+    final cy = zs + ChannelGeo.zone / 2;
     canvas.drawRRect(
       RRect.fromRectAndRadius(
         Rect.fromLTWH(
@@ -275,7 +321,8 @@ void _paintMap(
       ),
       Paint()..color = p.swatch.withValues(alpha: 0.75 * al),
     );
-    final x = -ChannelGeo.m0 - 48 * u, ink = p.inkOf(o.dark);
+    final x = -ChannelGeo.m0 - 48 * u;
+    final ink = p.inkOf(o.dark);
     ChannelText.paint(
       canvas,
       o.names[theme] ?? '',

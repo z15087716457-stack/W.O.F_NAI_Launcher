@@ -17,6 +17,7 @@ class TipWelcome extends ConsumerStatefulWidget {
     required this.logoAspectRatio,
     required this.logoWidthFor,
     required this.logoBuilder,
+    this.backdropActive = false,
   });
 
   final TipSurface surface;
@@ -29,6 +30,9 @@ class TipWelcome extends ConsumerStatefulWidget {
 
   final Widget Function(double width) logoBuilder;
 
+  /// 画布背后开启了动态视觉通道背景时，为提示小字提供无框高对比字色与柔和文字阴影。
+  final bool backdropActive;
+
   @override
   ConsumerState<TipWelcome> createState() => _TipWelcomeState();
 }
@@ -38,8 +42,12 @@ class _TipWelcomeState extends ConsumerState<TipWelcome> {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final dark = theme.brightness == Brightness.dark;
+    final highContrast = MediaQuery.highContrastOf(context);
     final l10n = context.l10n;
+    final hasBackdrop = widget.backdropActive;
     return LayoutBuilder(
       builder: (context, constraints) {
         final available = math.max(0.0, constraints.maxWidth - 48);
@@ -54,6 +62,39 @@ class _TipWelcomeState extends ConsumerState<TipWelcome> {
                 24 + (constraints.maxHeight - 48 - logoHeight - 76) * .46,
               )
             : 24.0;
+        final labelColor = hasBackdrop
+            ? (dark
+                  ? Colors.white.withValues(alpha: highContrast ? .86 : .72)
+                  : scheme.onSurface.withValues(
+                      alpha: highContrast ? .82 : .64,
+                    ))
+            : scheme.onSurface.withValues(alpha: .32);
+        final bodyColor = hasBackdrop
+            ? (dark
+                  ? Colors.white.withValues(alpha: highContrast ? .98 : .90)
+                  : scheme.onSurface.withValues(
+                      alpha: highContrast ? .98 : .88,
+                    ))
+            : scheme.onSurface.withValues(alpha: .48);
+        final shadows = !hasBackdrop
+            ? null
+            : dark
+            ? const [
+                Shadow(
+                  color: Color(0xCC040814),
+                  blurRadius: 6,
+                  offset: Offset(0, 1),
+                ),
+                Shadow(
+                  color: Color(0x8A040814),
+                  blurRadius: 16,
+                  offset: Offset(0, 2),
+                ),
+              ]
+            : const [
+                Shadow(color: Color(0xEBFFFFFF), blurRadius: 6),
+                Shadow(color: Color(0xB3FFFFFF), blurRadius: 16),
+              ];
         final page = SingleChildScrollView(
           padding: EdgeInsets.fromLTRB(24, top, 24, 24),
           child: Center(
@@ -70,7 +111,8 @@ class _TipWelcomeState extends ConsumerState<TipWelcome> {
                     fontSize: 11,
                     letterSpacing: 1.8,
                     fontWeight: FontWeight.w600,
-                    color: scheme.onSurface.withValues(alpha: .32),
+                    color: labelColor,
+                    shadows: shadows,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -85,7 +127,8 @@ class _TipWelcomeState extends ConsumerState<TipWelcome> {
                     style: TextStyle(
                       fontSize: 14,
                       height: 1.6,
-                      color: scheme.onSurface.withValues(alpha: .48),
+                      color: bodyColor,
+                      shadows: shadows,
                     ),
                   ),
                 ),

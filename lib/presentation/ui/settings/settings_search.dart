@@ -455,6 +455,13 @@ List<SettingsHit> settingsIndex(BuildContext context) {
       l.set_cvChannelSub,
       'channel theme',
     ),
+    (
+      SettingsPageId.canvas,
+      'channelSideTransparency',
+      l.set_cvSideTransparency,
+      l.set_cvSideTransparencySub,
+      'side panel transparency opacity glass 侧栏 透明度 磨砂 玻璃',
+    ),
   ]) {
     hits.add(
       SettingsHit(

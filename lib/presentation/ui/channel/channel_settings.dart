@@ -7,6 +7,7 @@ import '../../../core/utils/localization_extension.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_controls.dart';
 import '../kit/ui_glyph.dart';
+import '../kit/ui_slider.dart';
 import '../kit/ui_text.dart';
 import 'channel_contract.dart';
 import 'channel_format.dart';
@@ -125,10 +126,10 @@ class _ChannelSettingsSectionState extends State<ChannelSettingsSection> {
           GridView(
             key: const Key('channel-cards'),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4,
+              crossAxisCount: 3,
               mainAxisSpacing: 6,
               crossAxisSpacing: 6,
-              mainAxisExtent: 66,
+              mainAxisExtent: 72,
             ),
             shrinkWrap: true,
             padding: EdgeInsets.zero,
@@ -168,14 +169,41 @@ class _ChannelSettingsSectionState extends State<ChannelSettingsSection> {
             ],
           ),
         ),
-        const SizedBox(height: 9),
+        const SizedBox(height: 10),
         dim(
-          _SwitchRow(
-            key: const Key('channel-ruler'),
-            title: l.channel_ruler,
-            sub: l.channel_rulerSub,
-            value: s.ruler,
-            onTap: () => _set(s.copyWith(ruler: !s.ruler)),
+          Column(
+            key: const Key('channel-side-transparency'),
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      l.channel_sideTransparency,
+                      style: UiText.sans(12.5, color: c.ink),
+                    ),
+                  ),
+                  Text(
+                    '${(s.sideTransparency * 100).round()}%',
+                    key: const Key('channel-side-transparency-value'),
+                    style: UiText.mono(
+                      11.5,
+                      weight: FontWeight.w500,
+                      color: c.muted,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              UiSlider(
+                key: const Key('channel-side-transparency-slider'),
+                value: s.sideTransparency,
+                defaultValue: ChannelSettings.defaultSideTransparency,
+                divisions: 20,
+                compact: true,
+                onChanged: (v) => _set(s.copyWith(sideTransparency: v)),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 9),
@@ -527,7 +555,7 @@ class ChannelSwatchName extends StatelessWidget {
   }
 }
 
-/// 主题缩略图：装饰坐标里第 0 段 42% 处、图片右侧的一小块，缩放 0.15。
+/// 主题缩略图：以标志性全景构图渲染该字符艺术主题。
 class ChannelThumbPainter extends CustomPainter {
   ChannelThumbPainter({
     required this.theme,
@@ -543,24 +571,15 @@ class ChannelThumbPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    const k = ChannelGeo.decorScale, decor = 0.15;
-    final world = Offset(
-      (ChannelGeo.e + 250) * k,
-      (ChannelGeo.zoneStart(0) + ChannelGeo.zone * 0.42) * k,
-    );
-    const scale = decor / k;
     paintChannelScene(
       canvas,
       size,
       ChannelSceneSpec(
         env: ChannelEnv.single(theme),
-        camera: ChannelCamera(
-          offset: size.center(Offset.zero) - world * scale,
-          scale: scale,
-        ),
+        camera: ChannelCamera(offset: size.center(Offset.zero), scale: 1),
         dark: dark,
         base: base,
-        level: 1,
+        level: ChannelLevel.strong.factor,
         seed: seed,
         names: const {},
         thumb: true,

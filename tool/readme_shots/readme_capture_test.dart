@@ -153,7 +153,7 @@ Widget promptEditor(ReadmeData d, GenEditorTarget target) {
 Widget generation(
   ReadmeData d, {
   String scene = 'hero',
-  ChannelTheme theme = ChannelTheme.stars,
+  ChannelTheme theme = ChannelTheme.aurora,
 }) {
   final settings = ChannelSettings(
     mode: ChannelMode.fixed,
@@ -562,12 +562,12 @@ void main() {
               ].contains(name) ||
               name.startsWith('theme-')) {
             final theme = switch (name) {
-              'theme-circuit' => ChannelTheme.circuit,
-              'theme-abyss' => ChannelTheme.abyss,
-              'theme-metro' => ChannelTheme.metro,
-              'theme-score' => ChannelTheme.score,
-              'theme-moon' => ChannelTheme.luna,
-              _ => ChannelTheme.stars,
+              'theme-pelagic' || 'theme-abyss' => ChannelTheme.pelagic,
+              'theme-nimbus' || 'theme-score' => ChannelTheme.nimbus,
+              'theme-cumulus' || 'theme-circuit' => ChannelTheme.cumulus,
+              'theme-strata' || 'theme-metro' => ChannelTheme.strata,
+              'theme-aurora' || 'theme-moon' => ChannelTheme.aurora,
+              _ => ChannelTheme.aurora,
             };
             page = name.startsWith('theme-')
                 ? Center(
@@ -585,12 +585,11 @@ void main() {
                         ),
                         images: (key) => key == 'canvas'
                             ? images.fileImage(switch (theme) {
-                                ChannelTheme.circuit => 's09.jpg',
-                                ChannelTheme.abyss => 's13.jpg',
-                                ChannelTheme.metro => 's15.jpg',
-                                ChannelTheme.score => 's16.jpg',
-                                ChannelTheme.luna => 's17.jpg',
-                                _ => 's07.jpg',
+                                ChannelTheme.cumulus => 's09.jpg',
+                                ChannelTheme.pelagic => 's13.jpg',
+                                ChannelTheme.strata => 's15.jpg',
+                                ChannelTheme.nimbus => 's16.jpg',
+                                ChannelTheme.aurora => 's17.jpg',
                               })
                             : images.channel(key),
                         focusScale: .82,

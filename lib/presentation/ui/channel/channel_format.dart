@@ -7,17 +7,11 @@ abstract final class ChannelFormat {
   static String name(BuildContext context, ChannelTheme t) {
     final l = context.l10n;
     return switch (t) {
-      ChannelTheme.circuit => l.channel_themeCircuit,
-      ChannelTheme.stars => l.channel_themeStars,
-      ChannelTheme.herb => l.channel_themeHerb,
-      ChannelTheme.arcade => l.channel_themeArcade,
-      ChannelTheme.abyss => l.channel_themeAbyss,
-      ChannelTheme.wave => l.channel_themeWave,
-      ChannelTheme.caliber => l.channel_themeCaliber,
+      ChannelTheme.pelagic => l.channel_themePelagic,
+      ChannelTheme.nimbus => l.channel_themeNimbus,
+      ChannelTheme.cumulus => l.channel_themeCumulus,
+      ChannelTheme.aurora => l.channel_themeAurora,
       ChannelTheme.strata => l.channel_themeStrata,
-      ChannelTheme.metro => l.channel_themeMetro,
-      ChannelTheme.score => l.channel_themeScore,
-      ChannelTheme.luna => l.channel_themeLuna,
     };
   }
 
@@ -29,17 +23,11 @@ abstract final class ChannelFormat {
   static String description(BuildContext context, ChannelTheme t) {
     final l = context.l10n;
     return switch (t) {
-      ChannelTheme.circuit => l.channel_descCircuit,
-      ChannelTheme.stars => l.channel_descStars,
-      ChannelTheme.herb => l.channel_descHerb,
-      ChannelTheme.arcade => l.channel_descArcade,
-      ChannelTheme.abyss => l.channel_descAbyss,
-      ChannelTheme.wave => l.channel_descWave,
-      ChannelTheme.caliber => l.channel_descCaliber,
+      ChannelTheme.pelagic => l.channel_descPelagic,
+      ChannelTheme.nimbus => l.channel_descNimbus,
+      ChannelTheme.cumulus => l.channel_descCumulus,
+      ChannelTheme.aurora => l.channel_descAurora,
       ChannelTheme.strata => l.channel_descStrata,
-      ChannelTheme.metro => l.channel_descMetro,
-      ChannelTheme.score => l.channel_descScore,
-      ChannelTheme.luna => l.channel_descLuna,
     };
   }
 

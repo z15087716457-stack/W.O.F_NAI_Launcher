@@ -13786,72 +13786,34 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get channel_themeCircuit => '像素电路';
+  String get channel_themePelagic => '深海浮游';
 
   @override
-  String get channel_themeStars => '星图';
+  String get channel_themeNimbus => '暮光云海';
 
   @override
-  String get channel_themeHerb => '植物标本';
+  String get channel_themeCumulus => '晴空云海';
 
   @override
-  String get channel_themeArcade => '回廊';
+  String get channel_themeAurora => '极光雪原';
 
   @override
-  String get channel_themeAbyss => '深海';
+  String get channel_themeStrata => '声纹潮汐';
 
   @override
-  String get channel_themeWave => '青海波';
+  String get channel_descPelagic => '盲文微雾与生物荧光水母、3D 振翅蝠鲼在深海缓缓游弋，随滚动改变潜深';
 
   @override
-  String get channel_descCircuit => '两侧各两条总线一路往下，分支、焊盘、芯片；空闲时有光点沿总线流动';
+  String get channel_descNimbus => '翻涌的塔状积雨云在紫金暮色中透出前向银边，以半色调字符勾勒体积光影';
 
   @override
-  String get channel_descStars => '星点、星座连线、刻度环和赤纬尺；亮星空闲时轻微闪烁';
+  String get channel_descCumulus => '湛蓝晴空下舒展翻涌的雪白积云，层次分明的云顶金光与淡蓝阴影随风飘移';
 
   @override
-  String get channel_descHerb => '墨线标本从两侧长出，叶片、花头、胶带和编号标签；空闲时随风轻摆';
+  String get channel_descAurora => '双幕翡翠紫罗兰极光在极夜天穹流转，雕塑感雪山谷与冷杉林间飘落分层细雪';
 
   @override
-  String get channel_descArcade => '俯视的教堂平面图：图片走在中殿里，两侧是立柱、肋拱、墙窗、轴号和尺寸线';
-
-  @override
-  String get channel_descAbyss => '越往下越深（越旧）：深度尺、等深线、上浮的气泡和飘落的海雪';
-
-  @override
-  String get channel_descWave => '和风波纹在两侧聚散，配一轮朱日和几道霞；空闲时有光沿波纹扫过';
-
-  @override
-  String get channel_themeCaliber => '机芯';
-
-  @override
-  String get channel_themeStrata => '地层';
-
-  @override
-  String get channel_themeMetro => '地铁';
-
-  @override
-  String get channel_themeScore => '乐谱';
-
-  @override
-  String get channel_themeLuna => '月相';
-
-  @override
-  String get channel_descCaliber =>
-      '夹板、日内瓦纹和齿轮串；滚动时齿轮按真实传动比啮合转动，每段一组摆轮游丝，空闲时滴答走动';
-
-  @override
-  String get channel_descStrata => '越往下越古老：左侧地质年代柱，两侧岩层和对应年代的化石；钻头跟着视口一路钻下去';
-
-  @override
-  String get channel_descMetro =>
-      '两侧是地铁线路图：45° 转弯、换乘站和站名；列车停在视口旁并点亮最近一站，另两条线空闲时自己跑';
-
-  @override
-  String get channel_descScore => '竖排五线谱一路往下，播放线停在视口中间，经过的音符会亮起；每段一张随滚动转动的唱片';
-
-  @override
-  String get channel_descLuna => '左侧一天一格的月相历，右侧潮汐曲线；一轮大月亮跟着视口走，滚动时盈亏随之变化';
+  String get channel_descStrata => '真隐藏面消除的 3D 潮汐山脊与发光等高线切面，随滚轮和波峰起伏呈现测绘标高';
 
   @override
   String get channel_title => '视觉通道';
@@ -13906,6 +13868,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get channel_motionSub => '很轻的动效，生成时自动暂停';
+
+  @override
+  String get channel_sideTransparency => '侧栏透明度';
+
+  @override
+  String get channel_sideTransparencySub => '两侧面板透出背景的程度，0% 为纯实底';
 
   @override
   String channel_batch(String time, int count) {
@@ -14779,6 +14747,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get set_cvMotionSub => '生成中和开启“减少动态效果”时自动暂停';
+
+  @override
+  String get set_cvSideTransparency => '侧栏透明度';
+
+  @override
+  String get set_cvSideTransparencySub => '调整左右面板透出画布动态背景的程度，0% 为完全不透';
 
   @override
   String get set_cvOps => '画布操作';
@@ -33308,72 +33282,34 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
-  String get channel_themeCircuit => '像素電路';
+  String get channel_themePelagic => '深海浮游';
 
   @override
-  String get channel_themeStars => '星圖';
+  String get channel_themeNimbus => '暮光雲海';
 
   @override
-  String get channel_themeHerb => '植物標本';
+  String get channel_themeCumulus => '晴空雲海';
 
   @override
-  String get channel_themeArcade => '迴廊';
+  String get channel_themeAurora => '極光雪原';
 
   @override
-  String get channel_themeAbyss => '深海';
+  String get channel_themeStrata => '聲紋潮汐';
 
   @override
-  String get channel_themeWave => '青海波';
+  String get channel_descPelagic => '盲文微霧與生物熒光水母、3D 振翅蝠鱝在深海緩緩游弋，隨滾動改變潛深';
 
   @override
-  String get channel_descCircuit => '兩側各兩條匯流排一路往下，分支、焊盤、晶片；空閒時有光點沿匯流排流動';
+  String get channel_descNimbus => '翻湧的塔狀積雨雲在紫金暮色中透出前向銀邊，以半色調字元勾勒體積光影';
 
   @override
-  String get channel_descStars => '星點、星座連線、刻度環和赤緯尺；亮星空閒時輕微閃爍';
+  String get channel_descCumulus => '湛藍晴空下舒展翻湧的雪白積雲，層次分明的雲頂金光與淡藍陰影隨風飄移';
 
   @override
-  String get channel_descHerb => '墨線標本從兩側長出，葉片、花頭、膠帶和編號標籤；空閒時隨風輕擺';
+  String get channel_descAurora => '雙幕翡翠紫羅蘭極光在極夜天穹流轉，雕塑感雪山谷與冷杉林間飄落分層細雪';
 
   @override
-  String get channel_descArcade => '俯視的教堂平面圖：圖片走在中殿裡，兩側是立柱、肋拱、牆窗、軸號和尺寸線';
-
-  @override
-  String get channel_descAbyss => '越往下越深（越舊）：深度尺、等深線、上浮的氣泡和飄落的海雪';
-
-  @override
-  String get channel_descWave => '和風波紋在兩側聚散，配一輪朱日和幾道霞；空閒時有光沿波紋掃過';
-
-  @override
-  String get channel_themeCaliber => '機芯';
-
-  @override
-  String get channel_themeStrata => '地層';
-
-  @override
-  String get channel_themeMetro => '地鐵';
-
-  @override
-  String get channel_themeScore => '樂譜';
-
-  @override
-  String get channel_themeLuna => '月相';
-
-  @override
-  String get channel_descCaliber =>
-      '夾板、日內瓦紋和齒輪串；滾動時齒輪按真實傳動比齧合轉動，每段一組擺輪遊絲，空閒時滴答走動';
-
-  @override
-  String get channel_descStrata => '越往下越古老：左側地質年代柱，兩側岩層和對應年代的化石；鑽頭跟著視口一路鑽下去';
-
-  @override
-  String get channel_descMetro =>
-      '兩側是地鐵線路圖：45° 轉彎、換乘站和站名；列車停在視口旁並點亮最近一站，另兩條線空閒時自己跑';
-
-  @override
-  String get channel_descScore => '豎排五線譜一路往下，播放線停在視口中間，經過的音符會亮起；每段一張隨滾動轉動的唱片';
-
-  @override
-  String get channel_descLuna => '左側一天一格的月相歷，右側潮汐曲線；一輪大月亮跟著視口走，滾動時盈虧隨之變化';
+  String get channel_descStrata => '真隱藏面消除的 3D 潮汐山脊與發光等高線切面，隨滾輪和波峰起伏呈現測繪標高';
 
   @override
   String get channel_title => '視覺通道';
@@ -33428,6 +33364,12 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get channel_motionSub => '很輕的動效，生成時自動暫停';
+
+  @override
+  String get channel_sideTransparency => '側欄透明度';
+
+  @override
+  String get channel_sideTransparencySub => '兩側面板透出背景的程度，0% 為純實底';
 
   @override
   String channel_batch(String time, int count) {
@@ -34301,6 +34243,12 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get set_cvMotionSub => '生成中和開啟“減少動態效果”時自動暫停';
+
+  @override
+  String get set_cvSideTransparency => '側欄透明度';
+
+  @override
+  String get set_cvSideTransparencySub => '調整左右面板透出畫布動態背景的程度，0% 為完全不透';
 
   @override
   String get set_cvOps => '畫布操作';

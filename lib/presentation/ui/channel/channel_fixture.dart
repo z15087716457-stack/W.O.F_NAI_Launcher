@@ -321,19 +321,46 @@ class _ChannelFixtureCanvasState extends State<ChannelFixtureCanvas> {
       cam.worldToScreen(at + t.rect.size.bottomRight(Offset.zero)),
     );
     final img = t.key == null ? null : images(t.key!);
+    final c = context.ui;
+    final hasChannel = widget.settings.mode != ChannelMode.off;
     return Positioned.fromRect(
       rect: r,
-      child: ClipRRect(
-        key: t.key == null ? const Key('channel-fixture-pending') : null,
-        borderRadius: BorderRadius.circular(6),
-        child: img == null
-            ? ColoredBox(color: context.ui.control)
-            : Image(
-                image: img,
-                fit: BoxFit.fill,
-                gaplessPlayback: true,
-                filterQuality: FilterQuality.medium,
-              ),
+      child: Container(
+        decoration: hasChannel && img != null
+            ? BoxDecoration(
+                border: Border.all(
+                  color: (c.dark ? Colors.white : Colors.black).withValues(
+                    alpha: c.dark ? 0.08 : 0.07,
+                  ),
+                  strokeAlign: BorderSide.strokeAlignOutside,
+                ),
+                borderRadius: BorderRadius.circular(6),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: c.dark ? 0.42 : 0.16),
+                    blurRadius: 16,
+                    blurStyle: BlurStyle.outer,
+                  ),
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: c.dark ? 0.24 : 0.09),
+                    blurRadius: 4,
+                    blurStyle: BlurStyle.outer,
+                  ),
+                ],
+              )
+            : null,
+        child: ClipRRect(
+          key: t.key == null ? const Key('channel-fixture-pending') : null,
+          borderRadius: BorderRadius.circular(6),
+          child: img == null
+              ? ColoredBox(color: c.control)
+              : Image(
+                  image: img,
+                  fit: BoxFit.fill,
+                  gaplessPlayback: true,
+                  filterQuality: FilterQuality.medium,
+                ),
+        ),
       ),
     );
   }

@@ -7,6 +7,8 @@ import 'package:flutter/services.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../widgets/navigation/window_chrome_layout.dart';
 import '../../widgets/common/drag_preview_divider.dart';
+import '../channel/channel_contract.dart';
+import '../channel/channel_layer.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_dialog.dart';
 import '../kit/ui_glyph.dart';
@@ -130,7 +132,11 @@ class GenScope extends InheritedModel<GenAspect> {
       data.canvas.positioning ? data.characters : null,
       data.canvas.positioning ? data.image : null,
     ),
-    GenAspect.canvasTile => (data.canvas.info?.tileId, data.canvas.backdrop),
+    GenAspect.canvasTile => (
+      data.canvas.info?.tileId,
+      data.canvas.backdrop,
+      data.canvas.channel?.mode == ChannelMode.off,
+    ),
     GenAspect.history => (
       data.history,
       data.layout,
@@ -484,24 +490,26 @@ class _GenLayoutRowState extends State<_GenLayoutRow> {
       return isLeft ? g.left : w - g.history;
     }
 
-    return Stack(
-      children: [
-        if (scope.slots.panelBackdrop case final backdrop?)
-          Positioned.fill(
-            child: IgnorePointer(
-              child: backdrop(
-                context,
-                Rect.fromLTWH(
-                  left + dock,
-                  0,
-                  keepHistory
-                      ? math.max(minimumCanvas, w - left - dock - history)
-                      : w - left - dock - history,
-                  size.height,
+    return ChannelHostBackdropScope(
+      active: scope.slots.panelBackdrop != null,
+      child: Stack(
+        children: [
+          if (scope.slots.panelBackdrop case final backdrop?)
+            Positioned.fill(
+              child: IgnorePointer(
+                child: backdrop(
+                  context,
+                  Rect.fromLTWH(
+                    left + dock,
+                    0,
+                    keepHistory
+                        ? math.max(minimumCanvas, w - left - dock - history)
+                        : w - left - dock - history,
+                    size.height,
+                  ),
                 ),
               ),
             ),
-          ),
         Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -657,6 +665,7 @@ class _GenLayoutRowState extends State<_GenLayoutRow> {
           color: context.ui.accent,
         ),
       ],
+      ),
     );
   }
 }

@@ -8,17 +8,43 @@ import '../kit/ui_colors.dart';
 import 'channel_contract.dart';
 import 'channel_format.dart';
 import 'channel_geometry.dart';
-import 'channel_paint.dart';
 import 'channel_scene.dart';
 
-/// 画在图块**下面**的通道层：底色、主题装饰、过渡层、全局地图、图片光台、时间刻度。
+/// 标记宿主页面已在最底层挂载贯通全窗口的统一动态通道背景。
+///
+/// 命中时，中央画布内的 [ChannelBackdrop] 仅绘制前景图片光台与时间刻度，
+/// 不再重复绘制或遮挡底层全窗口动态场景。
+class ChannelHostBackdropScope extends InheritedWidget {
+  const ChannelHostBackdropScope({
+    super.key,
+    required this.active,
+    required super.child,
+  });
+
+  final bool active;
+
+  static bool activeOf(BuildContext context) =>
+      context
+          .dependOnInheritedWidgetOfExactType<ChannelHostBackdropScope>()
+          ?.active ??
+      false;
+
+  @override
+  bool updateShouldNotify(ChannelHostBackdropScope oldWidget) =>
+      active != oldWidget.active;
+}
+
+/// 画在图块**下面**的通道层：底色、字符艺术主题、过渡层、全局地图、图片光台、时间刻度。
 ///
 /// 接线：放在画布引擎世界层（`CanvasWorldViewport`）的下面、铺满视口，传当前相机即可；
 /// 本层不接收指针。空闲微动由本层以约 30 帧的节拍推进，生成中、系统“减少动态效果”、
 /// 设置关掉微动或模式为“关闭”时停在静止帧。
 class ChannelBackdrop extends StatefulWidget {
-  const ChannelBackdrop({super.key, required this.data});
+  const ChannelBackdrop({super.key, required this.data, this.pass});
   final ChannelViewData data;
+
+  /// 指定固定绘制通道（`scene` 或 `annotations`）；留空时按需自动拆分。
+  final ChannelPaintPass? pass;
 
   @override
   State<ChannelBackdrop> createState() => _ChannelBackdropState();
@@ -38,6 +64,7 @@ class _ChannelBackdropState extends State<ChannelBackdrop> {
   Map<ChannelTheme, String> _names = const {};
 
   bool get _motion {
+    if (widget.pass == ChannelPaintPass.annotations) return false;
     final d = widget.data;
     return d.settings.motion &&
         !d.generating &&
@@ -125,7 +152,8 @@ class _ChannelBackdropState extends State<ChannelBackdrop> {
       _names = ChannelFormat.names(context);
     }
     final motion = _motion;
-    final split = motion && batches.isNotEmpty;
+    final fixedPass = widget.pass;
+    final split = fixedPass == null && motion && batches.isNotEmpty;
     Widget layer(Key key, ChannelPaintPass pass) => RepaintBoundary(
       child: CustomPaint(
         key: key,
@@ -142,10 +170,12 @@ class _ChannelBackdropState extends State<ChannelBackdrop> {
         ),
       ),
     );
-    final scene = layer(
-      const Key('channel-backdrop'),
-      split ? ChannelPaintPass.scene : ChannelPaintPass.all,
-    );
+    final primaryKey = fixedPass == ChannelPaintPass.annotations
+        ? const Key('channel-annotations')
+        : const Key('channel-backdrop');
+    final primaryPass =
+        fixedPass ?? (split ? ChannelPaintPass.scene : ChannelPaintPass.all);
+    final scene = layer(primaryKey, primaryPass);
     return IgnorePointer(
       child: split
           ? Stack(
@@ -198,24 +228,9 @@ class ChannelBackdropPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final camera = data.camera;
-    if (!data.welcome) {
-      _paintFrame(canvas, size, camera);
-      return;
-    }
-    final factor = camera.scale / ChannelCamera.welcomeZoom;
-    canvas
-      ..save()
-      ..scale(factor);
-    _paintFrame(
-      canvas,
-      size / factor,
-      ChannelCamera(
-        offset: camera.offset / factor,
-        scale: ChannelCamera.welcomeZoom,
-      ),
-    );
-    canvas.restore();
+    // 始终以 1:1 逻辑像素绘制字符艺术，避免大屏下 canvas.scale 放大字形位图变粗糙、
+    // 或窄窗下将字符缩成像素点；构图等比适配由主题内等比舞台坐标系负责。
+    _paintFrame(canvas, size, data.camera);
   }
 
   void _paintFrame(Canvas canvas, Size size, ChannelCamera cam) {
@@ -230,99 +245,14 @@ class ChannelBackdropPainter extends CustomPainter {
       names: names,
       t: time.value,
       motion: motion,
+      welcome: data.welcome,
       pinboard: data.pinboard,
+      stageCenterX: data.stageCenterX,
     );
     if (pass != ChannelPaintPass.annotations) {
       paintChannelScene(canvas, size, spec);
     }
-    if (pass == ChannelPaintPass.scene) return;
-    final view = cam.visibleWorldRect(size).inflate(200);
-    const k = ChannelGeo.decorScale;
-
-    // 图片光台：底色晕开压住装饰，图片永远是最清楚的那一层
-    if (!env.off) {
-      for (final b in data.batches) {
-        if (!b.rect.overlaps(view)) continue;
-        final r = Rect.fromPoints(
-          cam.worldToScreen(b.rect.topLeft),
-          cam.worldToScreen(b.rect.bottomRight),
-        );
-        final pc = spec.tint(b.rect.center.dy / k);
-        final soft = Paint()
-          ..color = pc
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 11);
-        canvas
-          ..drawRect(r.inflate(10), soft)
-          ..drawRect(r.inflate(10), soft)
-          ..drawRect(r.inflate(4), Paint()..color = pc);
-      }
-    }
-
-    // 时间刻度（屏幕尺寸固定，世界位置锚定）
-    if (!s.ruler || cam.scale <= 0.1) return;
-    final c = colors;
-    for (final (i, b) in data.batches.indexed) {
-      if (!b.rect.overlaps(view)) continue;
-      final tl = cam.worldToScreen(b.rect.topLeft);
-      if (i < labels.length && labels[i] != null) {
-        ChannelText.paint(
-          canvas,
-          labels[i]!,
-          Offset(tl.dx, tl.dy - 8),
-          11,
-          ChannelFont.mono,
-          c.muted,
-          weight: FontWeight.w500,
-        );
-      }
-      final day = i < days.length ? days[i] : null;
-      if (day == null) continue;
-      final dy = b.rect.top - dayGap;
-      final at = cam.worldToScreen(Offset(0, dy));
-      final half = ChannelGeo.dayLineHalf * cam.scale;
-      canvas.drawRect(
-        Rect.fromLTWH(at.dx - half, at.dy - 0.5, half * 2, 1),
-        Paint()
-          ..shader = LinearGradient(
-            colors: [
-              c.border.withValues(alpha: 0),
-              c.border,
-              c.border,
-              c.border.withValues(alpha: 0),
-            ],
-            stops: const [0, .3, .7, 1],
-          ).createShader(Rect.fromLTWH(at.dx - half, at.dy - 1, half * 2, 2)),
-      );
-      final tp = ChannelText.layout(
-        day,
-        11.5,
-        ChannelFont.sans,
-        c.ink,
-        FontWeight.w500,
-      );
-      final lx = cam.worldToScreen(const Offset(-416, 0)).dx;
-      final pill = RRect.fromRectAndRadius(
-        Rect.fromLTWH(lx - 2, at.dy - 11, tp.width + 20, 22),
-        const Radius.circular(11),
-      );
-      canvas
-        ..drawRRect(pill, Paint()..color = env.off ? c.bg : spec.tint(dy / k))
-        ..drawRRect(
-          pill,
-          Paint()
-            ..style = PaintingStyle.stroke
-            ..color = c.border,
-        );
-      ChannelText.paint(
-        canvas,
-        day,
-        Offset(lx + 8, at.dy + 4),
-        11.5,
-        ChannelFont.sans,
-        c.ink,
-        weight: FontWeight.w500,
-      );
-    }
+    // 图片四周不绘制外扩实色光台与冗余时间文字；图片边界由图块自身的轻柔贴边外阴影区分。
   }
 
   @override

@@ -897,11 +897,11 @@ abstract final class SettingsFixture {
         const ChannelSettings(
           seed: 20261014,
           pool: {
-            ChannelTheme.circuit,
-            ChannelTheme.stars,
-            ChannelTheme.herb,
-            ChannelTheme.arcade,
-            ChannelTheme.abyss,
+            ChannelTheme.pelagic,
+            ChannelTheme.nimbus,
+            ChannelTheme.cumulus,
+            ChannelTheme.aurora,
+            ChannelTheme.strata,
           },
         );
     if (fresh) {

@@ -112,7 +112,7 @@ void main() {
     final data = ChannelViewData(
       settings: const ChannelSettings(
         mode: ChannelMode.fixed,
-        fixed: ChannelTheme.stars,
+        fixed: ChannelTheme.pelagic,
       ),
       camera: const ChannelCamera(offset: Offset(400, 80), scale: .5),
       batches: const [

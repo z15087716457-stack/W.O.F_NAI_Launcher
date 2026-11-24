@@ -61,11 +61,12 @@ class _ChannelComparator extends GoldenFileComparator {
     return delegate.compare(Uint8List.fromList(img.encodePng(actual)), golden);
   }
 
-  /// Delivered PNGs stay locked; only the later-added `goldens/v2/` set
-  /// (new themes and the 11-card popover) may be recorded.
+  /// Delivered PNGs stay locked; only the versioned `goldens/v2/` and
+  /// `goldens/v3/` sets may be recorded.
   @override
   Future<void> update(Uri golden, Uint8List imageBytes) =>
-      golden.path.startsWith('goldens/v2/')
+      golden.path.startsWith('goldens/v2/') ||
+          golden.path.startsWith('goldens/v3/')
       ? delegate.update(golden, imageBytes)
       : throw UnsupportedError('The delivered channel goldens are locked.');
 }

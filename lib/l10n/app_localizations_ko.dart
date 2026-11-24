@@ -14001,81 +14001,39 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get channel_themeCircuit => '회로';
+  String get channel_themePelagic => '심해 부유';
 
   @override
-  String get channel_themeStars => '성도';
+  String get channel_themeNimbus => '황혼 운해';
 
   @override
-  String get channel_themeHerb => '식물 표본';
+  String get channel_themeCumulus => '맑은 구름바다';
 
   @override
-  String get channel_themeArcade => '회랑';
+  String get channel_themeAurora => '오로라 설원';
 
   @override
-  String get channel_themeAbyss => '심해';
+  String get channel_themeStrata => '성문 조석';
 
   @override
-  String get channel_themeWave => '청해파';
+  String get channel_descPelagic =>
+      '생물 발광 해파리와 3D 만타가오리가 점자 안개 속 심해를 유영하며 스크롤에 따라 수심이 변합니다';
 
   @override
-  String get channel_descCircuit =>
-      '양쪽에 버스가 두 줄씩 내려가며 분기·패드·칩이 붙습니다. 대기 중에는 빛이 버스를 따라 흐릅니다';
+  String get channel_descNimbus =>
+      '보랏빛과 금빛 황혼 속 솟아오르는 적란운과 전방 산란 은빛 테두리를 하프톤 문자로 표현합니다';
 
   @override
-  String get channel_descStars =>
-      '별, 별자리 선, 눈금 고리와 적위 눈금. 대기 중에는 밝은 별이 살짝 반짝입니다';
+  String get channel_descCumulus =>
+      '선명한 코발트빛 하늘 아래 펼쳐지는 순백의 적운과 부드러운 음영이 바람을 따라 흐릅니다';
 
   @override
-  String get channel_descHerb =>
-      '먹선 표본이 양쪽에서 자라며 잎·꽃·테이프·번호 라벨이 붙습니다. 대기 중에는 바람에 흔들립니다';
-
-  @override
-  String get channel_descArcade =>
-      '성당 평면도. 이미지는 신랑을 따라가고 양쪽에 기둥·리브 볼트·창·축 번호·치수선';
-
-  @override
-  String get channel_descAbyss =>
-      '내려갈수록 깊어집니다(오래될수록). 수심계, 등심선, 떠오르는 거품과 내리는 바다눈';
-
-  @override
-  String get channel_descWave =>
-      '일본풍 물결이 양쪽에 모이고 붉은 해와 안개 띠가 있습니다. 대기 중에는 빛이 물결을 훑습니다';
-
-  @override
-  String get channel_themeCaliber => '무브먼트';
-
-  @override
-  String get channel_themeStrata => '지층';
-
-  @override
-  String get channel_themeMetro => '지하철';
-
-  @override
-  String get channel_themeScore => '악보';
-
-  @override
-  String get channel_themeLuna => '달의 위상';
-
-  @override
-  String get channel_descCaliber =>
-      '브리지, 제네바 스트라이프와 기어 트레인. 스크롤하면 실제 기어비로 맞물려 돌고, 구간마다 밸런스 휠이 대기 중에 똑딱입니다';
+  String get channel_descAurora =>
+      '에메랄드와 바이올렛 빛 이중 오로라가 극야를 수놓고, 눈 덮인 계곡과 전나무 숲 사이로 눈발이 흩날립니다';
 
   @override
   String get channel_descStrata =>
-      '내려갈수록 오래됩니다. 지질 시대 기둥, 암석층과 시대별 화석. 드릴이 화면을 따라 파고듭니다';
-
-  @override
-  String get channel_descMetro =>
-      '양쪽에 지하철 노선도. 45° 회전, 환승역과 역명. 열차가 화면 옆을 달리며 가장 가까운 역을 밝힙니다';
-
-  @override
-  String get channel_descScore =>
-      '세로 오선보가 아래로 이어지고 재생선이 화면 가운데에서 지나간 음표를 밝힙니다. 구간마다 레코드가 스크롤에 따라 돕니다';
-
-  @override
-  String get channel_descLuna =>
-      '하루 한 칸의 달 위상 달력과 조석 곡선. 큰 달이 화면을 따라오며 스크롤할 때 차고 기웁니다';
+      '은면 제거 3D 조석 능선과 발광 등고선 단면, 봉우리 표고가 파동과 함께 움직입니다';
 
   @override
   String get channel_title => '비주얼 채널';
@@ -14130,6 +14088,12 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get channel_motionSub => '아주 가벼운 움직임. 생성 중에는 자동으로 멈춥니다';
+
+  @override
+  String get channel_sideTransparency => '사이드 패널 투명도';
+
+  @override
+  String get channel_sideTransparencySub => '양쪽 패널로 배경이 비치는 정도 (0%는 불투명)';
 
   @override
   String channel_batch(String time, int count) {
@@ -15009,6 +14973,13 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get set_cvMotionSub => '생성 중이거나 동작 줄이기를 켜면 멈춥니다';
+
+  @override
+  String get set_cvSideTransparency => '사이드 패널 투명도';
+
+  @override
+  String get set_cvSideTransparencySub =>
+      '좌우 패널 뒤로 동적 배경이 비치는 정도를 조절합니다 (0%는 완전 불투명)';
 
   @override
   String get set_cvOps => '캔버스 조작';

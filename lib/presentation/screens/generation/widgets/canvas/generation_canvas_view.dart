@@ -739,11 +739,18 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
                                   now: channelFeed.now,
                                   generating: channelFeed.generating,
                                 );
+                          final hostPaintsScene =
+                              ChannelHostBackdropScope.activeOf(context);
                           return Stack(
                             children: [
                               if (channel != null)
                                 Positioned.fill(
-                                  child: ChannelBackdrop(data: channel),
+                                  child: ChannelBackdrop(
+                                    data: channel,
+                                    pass: hostPaintsScene
+                                        ? ChannelPaintPass.annotations
+                                        : null,
+                                  ),
                                 )
                               else if (!widget.embedded)
                                 Positioned.fill(

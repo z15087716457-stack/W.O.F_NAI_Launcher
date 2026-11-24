@@ -14388,81 +14388,39 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get channel_themeCircuit => 'Circuit';
+  String get channel_themePelagic => 'Pelagic';
 
   @override
-  String get channel_themeStars => 'Star atlas';
+  String get channel_themeNimbus => 'Nimbus Dusk';
 
   @override
-  String get channel_themeHerb => 'Herbarium';
+  String get channel_themeCumulus => 'Cumulus Sky';
 
   @override
-  String get channel_themeArcade => 'Arcade';
+  String get channel_themeAurora => 'Aurora Snowfield';
 
   @override
-  String get channel_themeAbyss => 'Abyss';
+  String get channel_themeStrata => 'Acoustic Strata';
 
   @override
-  String get channel_themeWave => 'Seigaiha';
+  String get channel_descPelagic =>
+      'Bioluminescent ASCII jellyfish and a 3D gliding manta ray drift through deep ocean currents with depth parallax';
 
   @override
-  String get channel_descCircuit =>
-      'Two buses run down each side with branches, pads and chips; light pulses flow along them when idle';
+  String get channel_descNimbus =>
+      'Towering twilight cumulus clouds with forward-scattered golden silver-lining rendered in halftone blocks';
 
   @override
-  String get channel_descStars =>
-      'Stars, constellation lines, graduated rings and a declination scale; bright stars twinkle when idle';
+  String get channel_descCumulus =>
+      'Sunlit snow-white cumulus clouds billowing across a crisp cobalt sky with layered atmospheric shading';
 
   @override
-  String get channel_descHerb =>
-      'Ink specimens grow from both sides with leaves, flowers, tape and numbered labels; they sway when idle';
-
-  @override
-  String get channel_descArcade =>
-      'A cathedral floor plan: images walk the nave, flanked by piers, rib vaults, windows, grid marks and dimensions';
-
-  @override
-  String get channel_descAbyss =>
-      'Deeper as you go down (older): depth gauge, isobaths, rising bubbles and falling marine snow';
-
-  @override
-  String get channel_descWave =>
-      'Japanese wave patterns gather on both sides with a red sun and mist bands; light sweeps across them when idle';
-
-  @override
-  String get channel_themeCaliber => 'Caliber';
-
-  @override
-  String get channel_themeStrata => 'Strata';
-
-  @override
-  String get channel_themeMetro => 'Metro';
-
-  @override
-  String get channel_themeScore => 'Score';
-
-  @override
-  String get channel_themeLuna => 'Luna';
-
-  @override
-  String get channel_descCaliber =>
-      'Bridges, Geneva stripes and gear trains that mesh at true ratios as you scroll; each section has a balance wheel that ticks when idle';
+  String get channel_descAurora =>
+      'Twin emerald-violet aurora curtains sweep above sculpted snow valleys, spruce flanks, and drifting parallax snow';
 
   @override
   String get channel_descStrata =>
-      'Older as you go down: a geologic time column, rock layers and period fossils; a drill bores down with the view';
-
-  @override
-  String get channel_descMetro =>
-      'Metro line maps with 45° turns, interchanges and station names; a train rides beside the view and lights the nearest stop';
-
-  @override
-  String get channel_descScore =>
-      'Vertical staves run downward; the playhead stays mid-view and lights the notes it passes; each section spins a record as you scroll';
-
-  @override
-  String get channel_descLuna =>
-      'A one-day-per-row moon calendar and a tide curve; a large moon follows the view and waxes or wanes as you scroll';
+      'True horizon-occluded 3D tidal wave ridges with luminous iso-elevation contours and peak callouts';
 
   @override
   String get channel_title => 'Visual channel';
@@ -14518,6 +14476,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get channel_motionSub => 'Subtle animation, paused while generating';
+
+  @override
+  String get channel_sideTransparency => 'Side panel translucency';
+
+  @override
+  String get channel_sideTransparencySub =>
+      'How much background shows through side panels (0% solid)';
 
   @override
   String channel_batch(String time, int count) {
@@ -15417,6 +15382,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get set_cvMotionSub =>
       'Pauses while generating or when reduce motion is on';
+
+  @override
+  String get set_cvSideTransparency => 'Side panel translucency';
+
+  @override
+  String get set_cvSideTransparencySub =>
+      'Controls how much of the live backdrop shows through the left and right panels (0% opaque)';
 
   @override
   String get set_cvOps => 'Canvas controls';

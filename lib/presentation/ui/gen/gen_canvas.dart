@@ -10,6 +10,8 @@ import '../../../core/services/anlas_calculator.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../core/utils/inpaint_mask_utils.dart';
 import '../../widgets/navigation/window_chrome_layout.dart';
+import '../channel/channel_contract.dart';
+import '../channel/channel_layer.dart';
 import '../channel/channel_settings.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_controls.dart';
@@ -698,10 +700,36 @@ class _GenCanvasTileState extends State<GenCanvasTile> {
               ),
             ),
     };
+    final hasChannelBackdrop =
+        ChannelHostBackdropScope.activeOf(context) &&
+        scope.data.canvas.channel?.mode != ChannelMode.off;
     final tile = UiPressable(
       key: Key('gen-tile-${t.id}'),
       onTap: () => _tap(scope),
       builder: (context, hover) => Container(
+        decoration: hasChannelBackdrop && t.state == GenTileState.done
+            ? BoxDecoration(
+                border: Border.all(
+                  color: (c.dark ? Colors.white : Colors.black).withValues(
+                    alpha: c.dark ? 0.08 : 0.07,
+                  ),
+                  strokeAlign: BorderSide.strokeAlignOutside,
+                ),
+                borderRadius: BorderRadius.circular(6),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: c.dark ? 0.42 : 0.16),
+                    blurRadius: 16,
+                    blurStyle: BlurStyle.outer,
+                  ),
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: c.dark ? 0.24 : 0.09),
+                    blurRadius: 4,
+                    blurStyle: BlurStyle.outer,
+                  ),
+                ],
+              )
+            : null,
         foregroundDecoration: selection.contains(t.id)
             ? BoxDecoration(
                 border: Border.all(

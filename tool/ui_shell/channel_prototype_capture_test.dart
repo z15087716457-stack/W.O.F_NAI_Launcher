@@ -107,7 +107,7 @@ void main() {
       'pop-fixed',
       (t) => pop(
         t,
-        s: channelSettings(mode: ChannelMode.fixed, fixed: ChannelTheme.arcade),
+        s: channelSettings(mode: ChannelMode.fixed, fixed: ChannelTheme.aurora),
       ),
     ),
     ('pop-off', (t) => pop(t, s: channelSettings(mode: ChannelMode.off))),

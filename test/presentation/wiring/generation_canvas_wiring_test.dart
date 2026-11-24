@@ -116,32 +116,36 @@ void main() {
   );
 
   void expectPanelBackdropAligned(WidgetTester tester) {
-    final center = tester.widget<ChannelBackdrop>(canvasBackdrop()).data;
+    final centerWidget = tester.widget<ChannelBackdrop>(canvasBackdrop());
+    final center = centerWidget.data;
     final viewport = tester.getRect(find.byKey(const Key('gen-canvas')));
     final page = tester.getRect(find.byType(GenerationPage));
-    for (final name in ['left', 'right']) {
-      final scene = find.byKey(ValueKey('gen-panel-backdrop-$name'));
-      final side = tester.widget<ChannelBackdrop>(scene).data;
-      expect(
-        side.camera.offset,
-        center.camera.offset + viewport.topLeft - tester.getTopLeft(scene),
-      );
-      final panelWidth = name == 'left'
-          ? viewport.left - page.left
-          : page.right - viewport.right;
-      expect(tester.getSize(scene).width, panelWidth + 60);
-      expect(tester.getSize(scene).height, viewport.height + 60);
-      expect(side.camera.scale, center.camera.scale);
-      expect(side.welcome, center.welcome);
-      expect(side.settings.fixed, center.settings.fixed);
-      expect(side.settings.seed, center.settings.seed);
-      expect(side.settings.motion, isFalse);
-      expect(side.settings.ruler, isFalse);
-      expect(
-        find.ancestor(of: scene, matching: find.byType(ImageFiltered)),
-        findsOneWidget,
-      );
-    }
+    final stageFinder = find.byKey(const ValueKey('gen-panel-backdrop-stage'));
+    expect(stageFinder, findsOneWidget);
+    final stageWidget = tester.widget<ChannelBackdrop>(stageFinder);
+    final stage = stageWidget.data;
+    expect(centerWidget.pass, ChannelPaintPass.annotations);
+    expect(stageWidget.pass, ChannelPaintPass.scene);
+    expect(stage.camera.offset, center.camera.offset + viewport.topLeft);
+    expect(tester.getSize(stageFinder), page.size);
+    expect(stage.camera.scale, center.camera.scale);
+    expect(stage.welcome, center.welcome);
+    expect(stage.settings.fixed, center.settings.fixed);
+    expect(stage.settings.seed, center.settings.seed);
+    expect(stage.settings.motion, center.settings.motion);
+    expect(stage.settings.ruler, isFalse);
+    expect(
+      find.ancestor(of: stageFinder, matching: find.byType(ImageFiltered)),
+      findsNothing,
+    );
+    expect(
+      find.byKey(const ValueKey('gen-panel-veil-left')),
+      viewport.left > page.left ? findsOneWidget : findsNothing,
+    );
+    expect(
+      find.byKey(const ValueKey('gen-panel-veil-right')),
+      viewport.right < page.right ? findsOneWidget : findsNothing,
+    );
   }
 
   setUpAll(loadStudioCaptureFonts);
@@ -463,7 +467,7 @@ void main() {
   testWidgets('首张出图前保留同一背景和画布，出图后欢迎内容退场', (tester) async {
     publish(const ImageGenerationState());
     await pump(tester, fullPage: true);
-    expect(find.byType(ChannelBackdrop), findsNWidgets(3));
+    expect(find.byType(ChannelBackdrop), findsNWidgets(2));
     expectPanelBackdropAligned(tester);
     expect(find.byKey(const Key('tip-welcome-text')), findsOneWidget);
     final logo = find.byWidgetPredicate(
@@ -562,6 +566,12 @@ void main() {
           tester.view.physicalSize = Size(width, width == 2240 ? 1345 : 850);
           await tester.pumpAndSettle();
           expectWelcomeCentered(tester);
+          final tipStyle = tester
+              .widget<Text>(find.byKey(const Key('tip-welcome-text')))
+              .style;
+          expect(tipStyle?.shadows, isNotEmpty);
+          expect(tipStyle?.color?.a, greaterThan(0.8));
+          expect(find.byType(BackdropFilter), findsNothing);
           expect(tester.state(find.byType(GenerationCanvasView)), same(state));
           expect(tester.takeException(), isNull);
           await capture(
@@ -570,6 +580,36 @@ void main() {
           );
         }
       }
+      await settings.set(
+        container
+            .read(canvasChannelNotifierProvider)
+            .copyWith(mode: ChannelMode.off, motion: false),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<Text>(find.byKey(const Key('tip-welcome-text')))
+            .style
+            ?.shadows,
+        isNull,
+      );
+      await settings.set(
+        container
+            .read(canvasChannelNotifierProvider)
+            .copyWith(
+              mode: ChannelMode.fixed,
+              fixed: ChannelTheme.nimbus,
+              motion: false,
+            ),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<Text>(find.byKey(const Key('tip-welcome-text')))
+            .style
+            ?.shadows,
+        isNotEmpty,
+      );
       await wheel(tester, const Offset(200, 800));
       expectWelcomeCentered(tester);
       await tester.pumpWidget(const SizedBox());
@@ -582,19 +622,21 @@ void main() {
     });
   }
 
-  testWidgets('空态切换简洁查看器时两侧背景与舞台沿用同一构图', (tester) async {
+  testWidgets('空态切换简洁查看器时全窗背景无缝沿用同一构图', (tester) async {
     publish(const ImageGenerationState());
     await pump(tester, fullPage: true);
     final canvas = tester.widget<ChannelBackdrop>(canvasBackdrop()).data;
     final viewport = tester.getRect(find.byKey(const Key('gen-canvas')));
+    final page = tester.getRect(find.byType(GenerationPage));
     await container
         .read(simpleOutputViewerNotifierProvider.notifier)
         .setSimple(true);
     await tester.pumpAndSettle();
-    final center = find.byKey(const ValueKey('gen-panel-backdrop-center'));
-    final simple = tester.widget<ChannelBackdrop>(center).data;
-    expect(tester.getRect(center), viewport);
-    expect(simple.camera, canvas.camera);
+    final stage = find.byKey(const ValueKey('gen-panel-backdrop-stage'));
+    final simple = tester.widget<ChannelBackdrop>(stage).data;
+    expect(tester.getRect(stage), page);
+    expect(simple.camera.offset, canvas.camera.offset + viewport.topLeft);
+    expect(simple.camera.scale, canvas.camera.scale);
     expect(simple.welcome, isTrue);
     expect(find.byKey(const Key('tip-welcome-text')), findsOneWidget);
     expect(tester.takeException(), isNull);
@@ -602,7 +644,7 @@ void main() {
         .read(simpleOutputViewerNotifierProvider.notifier)
         .setSimple(false);
     await tester.pumpAndSettle();
-    expect(center, findsNothing);
+    expect(stage, findsOneWidget);
     expectWelcomeCentered(tester);
   });
 
@@ -1080,12 +1122,12 @@ void main() {
         .read(simpleOutputViewerNotifierProvider.notifier)
         .setSimple(true);
     await tester.pumpAndSettle();
-    final simpleCenter = find.byKey(
-      const ValueKey('gen-panel-backdrop-center'),
+    final simpleStage = find.byKey(
+      const ValueKey('gen-panel-backdrop-stage'),
     );
-    expect(simpleCenter, findsOneWidget);
+    expect(simpleStage, findsOneWidget);
     expect(
-      find.ancestor(of: simpleCenter, matching: find.byType(ImageFiltered)),
+      find.ancestor(of: simpleStage, matching: find.byType(ImageFiltered)),
       findsNothing,
     );
     bars();
@@ -1093,15 +1135,12 @@ void main() {
         .read(simpleOutputViewerNotifierProvider.notifier)
         .setSimple(false);
     await tester.pumpAndSettle();
-    expect(simpleCenter, findsNothing);
     expectPanelBackdropAligned(tester);
     await capture(tester, 'full-page-light');
     await pump(tester, fullPage: true, highContrast: true);
-    expect(find.byKey(const ValueKey('gen-panel-backdrop-left')), findsNothing);
-    expect(
-      find.byKey(const ValueKey('gen-panel-backdrop-right')),
-      findsNothing,
-    );
+    expect(find.byKey(const ValueKey('gen-panel-veil-left')), findsNothing);
+    expect(find.byKey(const ValueKey('gen-panel-veil-right')), findsNothing);
+    expect(simpleStage, findsOneWidget);
     bars();
     expect(find.byType(BackdropFilter), findsNothing);
     for (final name in ['gen-bar-top', 'gen-bar-info', 'gen-bar-actions']) {

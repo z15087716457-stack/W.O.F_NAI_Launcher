@@ -56,9 +56,10 @@ void main() {
           .read(canvasChannelNotifierProvider)
           .copyWith(
             mode: ChannelMode.fixed,
-            fixed: ChannelTheme.wave,
-            pool: {ChannelTheme.wave, ChannelTheme.herb},
-            level: ChannelLevel.strong,
+            fixed: ChannelTheme.cumulus,
+            pool: {ChannelTheme.cumulus, ChannelTheme.nimbus},
+            level: ChannelLevel.standard,
+            sideTransparency: 0.25,
             ruler: false,
             motion: false,
             seed: 999,
@@ -68,6 +69,8 @@ void main() {
       final saved =
           jsonDecode(box.get(StorageKeys.canvasChannelPreferences) as String)
               as Map;
+      expect(saved['version'], 3);
+      expect(saved['sideTransparency'], 0.25);
       expect(saved.containsKey('seed'), isFalse);
       expect(box.get('unrelated'), 'preserved');
       first.dispose();
@@ -93,10 +96,12 @@ void main() {
     'broken-json',
     '[]',
     jsonEncode({
+      'version': 3,
       'mode': 'future',
       'fixed': 9,
-      'pool': ['stars', 'stars', 'removed'],
+      'pool': ['pelagic', 'pelagic', 'removed'],
       'level': false,
+      'sideTransparency': 'opaque',
       'ruler': 3,
       'motion': 'false',
       'seed': 99,
@@ -114,33 +119,69 @@ void main() {
     });
   }
 
-  test('v1 random pool gains themes added later; v2 pool is kept as saved', () {
+  test('v1 and v2 vector settings migrate cleanly to v3 ASCII themes', () {
     final storage = MemoryDraftSettings();
     storage.values[StorageKeys.canvasChannelPreferences] = jsonEncode({
       'version': 1,
+      'mode': 'fixed',
+      'fixed': 'stars',
       'pool': ['stars', 'wave'],
+      'level': 'standard',
+      'ruler': false,
+      'motion': false,
     });
     final v1 = _container(storage, 5);
     addTearDown(v1.dispose);
-    expect(v1.read(canvasChannelNotifierProvider).pool, {
-      ChannelTheme.stars,
-      ChannelTheme.wave,
-      ChannelTheme.caliber,
-      ChannelTheme.strata,
-      ChannelTheme.metro,
-      ChannelTheme.score,
-      ChannelTheme.luna,
-    });
+    expect(
+      v1.read(canvasChannelNotifierProvider),
+      const ChannelSettings(
+        mode: ChannelMode.fixed,
+        fixed: ChannelTheme.aurora,
+        pool: ChannelSettings.allThemes,
+        level: ChannelLevel.strong,
+        ruler: false,
+        motion: false,
+        seed: 5,
+      ),
+    );
+
     storage.values[StorageKeys.canvasChannelPreferences] = jsonEncode({
       'version': 2,
+      'mode': 'off',
+      'fixed': 'circuit',
       'pool': ['stars', 'luna'],
+      'level': 'soft',
     });
-    final v2 = _container(storage, 5);
+    final v2 = _container(storage, 8);
     addTearDown(v2.dispose);
-    expect(v2.read(canvasChannelNotifierProvider).pool, {
-      ChannelTheme.stars,
-      ChannelTheme.luna,
+    expect(
+      v2.read(canvasChannelNotifierProvider),
+      const ChannelSettings(
+        mode: ChannelMode.off,
+        fixed: ChannelTheme.cumulus,
+        pool: ChannelSettings.allThemes,
+        level: ChannelLevel.soft,
+        seed: 8,
+      ),
+    );
+
+    storage.values[StorageKeys.canvasChannelPreferences] = jsonEncode({
+      'version': 3,
+      'fixed': 'singularity',
+      'pool': ['pelagic', 'singularity', 'strata'],
+      'level': 'standard',
     });
+    final v3 = _container(storage, 9);
+    addTearDown(v3.dispose);
+    expect(
+      v3.read(canvasChannelNotifierProvider),
+      const ChannelSettings(
+        fixed: ChannelTheme.aurora,
+        pool: {ChannelTheme.pelagic, ChannelTheme.aurora, ChannelTheme.strata},
+        level: ChannelLevel.standard,
+        seed: 9,
+      ),
+    );
   });
 
   test(
@@ -153,7 +194,7 @@ void main() {
       final a = notifier.set(const ChannelSettings(mode: ChannelMode.off));
       final b = notifier.set(const ChannelSettings(level: ChannelLevel.soft));
       final c = notifier.set(
-        const ChannelSettings(fixed: ChannelTheme.abyss, seed: 77),
+        const ChannelSettings(fixed: ChannelTheme.pelagic, seed: 77),
       );
       await Future<void>.delayed(Duration.zero);
       expect(storage.calls, 1);
@@ -165,7 +206,7 @@ void main() {
       addTearDown(restored.dispose);
       expect(
         restored.read(canvasChannelNotifierProvider),
-        const ChannelSettings(fixed: ChannelTheme.abyss, seed: 2),
+        const ChannelSettings(fixed: ChannelTheme.pelagic, seed: 2),
       );
     },
   );
