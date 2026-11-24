@@ -107,7 +107,7 @@ const usage = `W.O.F NAI Studio business tools (prompt cards, blocks, gallery, r
   node external-mcp.mjs --list                       list tool names and descriptions (offline)
   node external-mcp.mjs --schema TOOL                print one tool's input schema (offline)
   node external-mcp.mjs --client NAME --session-file FILE [--summary TEXT] --call TOOL [--args FILE|JSON]
-Options: --workspace ID, --discovery FILE. --args takes a JSON file path or inline JSON starting with "{".
+Options: --workspace ID, --discovery FILE. --args takes a JSON file path or inline JSON starting with "{" (on Windows PowerShell, prefer a JSON file).
 Start with --call studio_skills --args '{"key":"builtin/nai-studio"}' and read that skill before business calls.
 CLI output is ASCII-escaped JSON. Paid operations always go through Studio's native confirmation.
 `;
@@ -127,8 +127,14 @@ if (argv.includes('--help') || argv.includes('-h')) {
   else { process.stderr.write('Unknown tool; use --list\n'); process.exitCode = 1; }
 } else if (option('--call')) {
   try {
+    const toolName = option('--call');
     const sessionFile = option('--session-file');
     if (!sessionFile) throw new Error('--session-file is required for CLI calls');
+    if (!tools.some(t => t.name === toolName)) throw new Error('Unknown Studio tool');
+    const args = await readArgs(option('--args'));
+    if (args === null || typeof args !== 'object' || Array.isArray(args)) {
+      throw new Error('--args must be a JSON object');
+    }
     let session;
     try { session = JSON.parse(await readFile(sessionFile, 'utf8')); }
     catch (error) { if (error.code !== 'ENOENT') throw error; }
@@ -136,8 +142,7 @@ if (argv.includes('--help') || argv.includes('-h')) {
       summary: option('--summary') });
     await writeFile(sessionFile, JSON.stringify({ session_id: opened.session_id,
       workspace_id: opened.workspace_id, client: opened.client }, null, 2) + '\n');
-    const args = await readArgs(option('--args'));
-    const result = await call(option('--call'), args, randomUUID());
+    const result = await call(toolName, args, randomUUID());
     // A new logical session is where the host first learns Studio's rules.
     if (!session && opened.guidance) result.studio_guidance = { ...opened.guidance, text: formatGuidance(opened.guidance) };
     writeJson(result);

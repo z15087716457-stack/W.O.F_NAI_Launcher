@@ -111,7 +111,9 @@ class NaiAgentExternalBridge implements BridgeAgentService {
           'Studio workspace not found',
         );
       }
-      final guidance = await _guidance(workspace);
+      final guidance = await _guidance(
+        await controller.store.getWorkspace(workspace.id),
+      );
       return {'enabled': guidance != null, ...?guidance};
     }
     if (message.operation == 'session') {
@@ -144,7 +146,9 @@ class NaiAgentExternalBridge implements BridgeAgentService {
         }
       };
       controller.externalChanged(runtime);
-      final guidance = await _guidance(runtime.workspace);
+      final guidance = await _guidance(
+        await controller.store.getWorkspace(runtime.workspace.id),
+      );
       return {
         'session_id': runtime.chat.id,
         'workspace_id': workspaceId,

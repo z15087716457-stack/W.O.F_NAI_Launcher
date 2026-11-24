@@ -13858,12 +13858,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get channel_levelStrong => '浓';
 
   @override
-  String get channel_ruler => '时间刻度';
-
-  @override
-  String get channel_rulerSub => '批次时间和日期分隔';
-
-  @override
   String get channel_motion => '空闲微动';
 
   @override
@@ -13871,9 +13865,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get channel_sideTransparency => '侧栏透明度';
-
-  @override
-  String get channel_sideTransparencySub => '两侧面板透出背景的程度，0% 为纯实底';
 
   @override
   String channel_batch(String time, int count) {
@@ -14735,12 +14726,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get set_cvLevel => '浓淡';
-
-  @override
-  String get set_cvRuler => '时间刻度';
-
-  @override
-  String get set_cvRulerSub => '批次时间和日期分隔';
 
   @override
   String get set_cvMotion => '空闲微动';
@@ -33361,12 +33346,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get channel_levelStrong => '濃';
 
   @override
-  String get channel_ruler => '時間刻度';
-
-  @override
-  String get channel_rulerSub => '批次時間和日期分隔';
-
-  @override
   String get channel_motion => '空閒微動';
 
   @override
@@ -33374,9 +33353,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get channel_sideTransparency => '側欄透明度';
-
-  @override
-  String get channel_sideTransparencySub => '兩側面板透出背景的程度，0% 為純實底';
 
   @override
   String channel_batch(String time, int count) {
@@ -34238,12 +34214,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get set_cvLevel => '濃淡';
-
-  @override
-  String get set_cvRuler => '時間刻度';
-
-  @override
-  String get set_cvRulerSub => '批次時間和日期分隔';
 
   @override
   String get set_cvMotion => '空閒微動';

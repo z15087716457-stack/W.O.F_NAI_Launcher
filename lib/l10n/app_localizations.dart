@@ -25175,18 +25175,6 @@ abstract class AppLocalizations {
   /// **'Bold'**
   String get channel_levelStrong;
 
-  /// No description provided for @channel_ruler.
-  ///
-  /// In en, this message translates to:
-  /// **'Time marks'**
-  String get channel_ruler;
-
-  /// No description provided for @channel_rulerSub.
-  ///
-  /// In en, this message translates to:
-  /// **'Batch times and date dividers'**
-  String get channel_rulerSub;
-
   /// No description provided for @channel_motion.
   ///
   /// In en, this message translates to:
@@ -25204,12 +25192,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Side panel translucency'**
   String get channel_sideTransparency;
-
-  /// No description provided for @channel_sideTransparencySub.
-  ///
-  /// In en, this message translates to:
-  /// **'How much background shows through side panels (0% solid)'**
-  String get channel_sideTransparencySub;
 
   /// No description provided for @channel_batch.
   ///
@@ -26728,18 +26710,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Intensity'**
   String get set_cvLevel;
-
-  /// No description provided for @set_cvRuler.
-  ///
-  /// In en, this message translates to:
-  /// **'Time ruler'**
-  String get set_cvRuler;
-
-  /// No description provided for @set_cvRulerSub.
-  ///
-  /// In en, this message translates to:
-  /// **'Batch times and date dividers'**
-  String get set_cvRulerSub;
 
   /// No description provided for @set_cvMotion.
   ///

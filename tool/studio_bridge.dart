@@ -361,16 +361,18 @@ class _Bridge {
 
 /// The packaged adapter beside this executable; absent in source runs.
 Map<String, String>? _businessTools() {
+  final sep = Platform.pathSeparator;
   final dir = File(Platform.resolvedExecutable).parent.path;
-  final node = '$dir/nai-agent/node${Platform.isWindows ? '.exe' : ''}';
-  final script = '$dir/nai-agent/external-mcp.mjs';
+  final agentDir = '$dir${sep}nai-agent';
+  final node = '$agentDir${sep}node${Platform.isWindows ? '.exe' : ''}';
+  final script = '$agentDir${sep}external-mcp.mjs';
   if (!File(node).existsSync() || !File(script).existsSync()) return null;
   return {
     'node': node,
     'script': script,
     'help': '"$node" "$script" --help',
     'first_step':
-        'Read the nai-studio skill: --call studio_skills --args {"key":"builtin/nai-studio"}',
+        'Run --help, then read builtin/nai-studio via --client <name> --session-file task.json --call studio_skills --args args.json ({"key":"builtin/nai-studio"})',
   };
 }
 

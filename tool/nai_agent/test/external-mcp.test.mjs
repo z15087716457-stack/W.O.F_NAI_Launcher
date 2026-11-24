@@ -56,6 +56,10 @@ test('CLI help, list and schema run offline without entering MCP mode', async ()
   assert.match(schema.description, /empty fields clear/);
   const missing = await run(['--schema', 'nope']);
   assert.equal(missing.code, 1); assert.match(missing.err, /--list/);
+  const badTool = await run(['--session-file', 'nonexistent-session.json', '--call', 'nope']);
+  assert.equal(badTool.code, 1); assert.match(badTool.err, /Unknown Studio tool/);
+  const badArgs = await run(['--session-file', 'nonexistent-session.json', '--call', 'studio_skills', '--args', '{broken']);
+  assert.equal(badArgs.code, 1); assert.ok(badArgs.err.trim().length > 0);
 });
 test('missing Studio connection is a visible tool error; unknown methods use JSON-RPC errors', async () => fixture(async send => {
   const value = await send({ jsonrpc:'2.0', id:3, method:'tools/call', params:{ name:'studio_context', arguments:{} } });

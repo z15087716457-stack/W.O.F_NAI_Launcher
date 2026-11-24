@@ -14040,12 +14040,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get channel_levelStrong => '濃';
 
   @override
-  String get channel_ruler => '時刻目盛り';
-
-  @override
-  String get channel_rulerSub => 'バッチ時刻と日付の区切り';
-
-  @override
   String get channel_motion => 'アイドル時の動き';
 
   @override
@@ -14053,9 +14047,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get channel_sideTransparency => 'サイドバー透過度';
-
-  @override
-  String get channel_sideTransparencySub => '左右パネルの背景透過量（0% で不透明）';
 
   @override
   String channel_batch(String time, int count) {
@@ -14918,12 +14909,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get set_cvLevel => '濃さ';
-
-  @override
-  String get set_cvRuler => 'タイムスケール';
-
-  @override
-  String get set_cvRulerSub => 'バッチ時刻と日付の区切り';
 
   @override
   String get set_cvMotion => 'アイドル時の動き';

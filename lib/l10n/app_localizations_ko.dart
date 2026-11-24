@@ -14078,12 +14078,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get channel_levelStrong => '진하게';
 
   @override
-  String get channel_ruler => '시간 눈금';
-
-  @override
-  String get channel_rulerSub => '배치 시간과 날짜 구분선';
-
-  @override
   String get channel_motion => '대기 중 움직임';
 
   @override
@@ -14091,9 +14085,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get channel_sideTransparency => '사이드 패널 투명도';
-
-  @override
-  String get channel_sideTransparencySub => '양쪽 패널로 배경이 비치는 정도 (0%는 불투명)';
 
   @override
   String channel_batch(String time, int count) {
@@ -14961,12 +14952,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get set_cvLevel => '농도';
-
-  @override
-  String get set_cvRuler => '시간 눈금';
-
-  @override
-  String get set_cvRulerSub => '배치 시간과 날짜 구분선';
 
   @override
   String get set_cvMotion => '대기 중 움직임';

@@ -7881,12 +7881,9 @@
   "channel_levelSoft": "淡",
   "channel_levelStandard": "標準",
   "channel_levelStrong": "濃",
-  "channel_ruler": "時間刻度",
-  "channel_rulerSub": "批次時間和日期分隔",
   "channel_motion": "空閒微動",
   "channel_motionSub": "很輕的動效，生成時自動暫停",
   "channel_sideTransparency": "側欄透明度",
-  "channel_sideTransparencySub": "兩側面板透出背景的程度，0% 為純實底",
   "channel_batch": "{time} · {count} 張",
   "@channel_batch": {
     "placeholders": {
@@ -8428,8 +8425,6 @@
     }
   },
   "set_cvLevel": "濃淡",
-  "set_cvRuler": "時間刻度",
-  "set_cvRulerSub": "批次時間和日期分隔",
   "set_cvMotion": "空閒微動",
   "set_cvMotionSub": "生成中和開啟“減少動態效果”時自動暫停",
   "set_cvSideTransparency": "側欄透明度",

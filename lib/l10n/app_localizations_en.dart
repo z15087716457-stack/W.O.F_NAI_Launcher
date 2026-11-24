@@ -14466,12 +14466,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get channel_levelStrong => 'Bold';
 
   @override
-  String get channel_ruler => 'Time marks';
-
-  @override
-  String get channel_rulerSub => 'Batch times and date dividers';
-
-  @override
   String get channel_motion => 'Idle motion';
 
   @override
@@ -14479,10 +14473,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get channel_sideTransparency => 'Side panel translucency';
-
-  @override
-  String get channel_sideTransparencySub =>
-      'How much background shows through side panels (0% solid)';
 
   @override
   String channel_batch(String time, int count) {
@@ -15369,12 +15359,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get set_cvLevel => 'Intensity';
-
-  @override
-  String get set_cvRuler => 'Time ruler';
-
-  @override
-  String get set_cvRulerSub => 'Batch times and date dividers';
 
   @override
   String get set_cvMotion => 'Idle motion';

@@ -25,18 +25,20 @@ class BridgeClientBundle {
 final bridgeClientBundleProvider = FutureProvider<BridgeClientBundle>((
   ref,
 ) async {
+  final sep = Platform.pathSeparator;
   final path =
-      '${AppBundlePaths.toolsDirectory}/studio-bridge${Platform.isWindows ? '.exe' : ''}';
+      '${AppBundlePaths.toolsDirectory}${sep}studio-bridge${Platform.isWindows ? '.exe' : ''}';
   return BridgeClientBundle(path, available: await File(path).exists());
 });
 
 /// Takeover text, naming the bundled business-tool adapter beside the client.
 String bridgeTakeoverGuide(AppLocalizations l, String clientPath) {
-  final dir = '${File(clientPath).parent.path}/nai-agent';
+  final sep = Platform.pathSeparator;
+  final dir = '${File(clientPath).parent.path}${sep}nai-agent';
   return l.bridge_guide(
     clientPath,
-    '$dir/node${Platform.isWindows ? '.exe' : ''}',
-    '$dir/external-mcp.mjs',
+    '$dir${sep}node${Platform.isWindows ? '.exe' : ''}',
+    '$dir${sep}external-mcp.mjs',
   );
 }
 

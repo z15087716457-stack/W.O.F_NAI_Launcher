@@ -434,6 +434,18 @@ void main() {
       final direct = (await request('guidance'))['result'];
       expect(direct['enabled'], isTrue);
       expect(direct['instructions'], text);
+      await controller.setWorkspacePrompt('WS-PREFIX-NEW', prefix: true);
+      final resumed = (await request('session', {
+        'session_id': opened['session_id'],
+      }))['result'];
+      expect(
+        resumed['guidance']['instructions'] as String,
+        startsWith('WS-PREFIX-NEW'),
+      );
+      expect(
+        (await request('guidance'))['result']['instructions'] as String,
+        startsWith('WS-PREFIX-NEW'),
+      );
       expect(
         (await request('guidance', {'workspace_id': 'missing'}))['code'],
         'workspace_missing',
@@ -600,6 +612,23 @@ void main() {
       final sessionFile = File('${root.path}/cli-session.json');
       final arguments = File('${root.path}/arguments.json')
         ..writeAsStringSync(jsonEncode(promptSetInput()));
+      final invalidFirst = await Process.run(agentTestNode, [
+        File('tool/nai_agent/external-mcp.mjs').absolute.path,
+        '--client',
+        'CLI tools',
+        '--discovery',
+        server.discoveryFile.path,
+        '--session-file',
+        sessionFile.path,
+        '--summary',
+        'CLI task',
+        '--call',
+        'studio_context',
+        '--args',
+        '{broken',
+      ]);
+      expect(invalidFirst.exitCode, isNonZero);
+      expect(sessionFile.existsSync(), isFalse);
       String? previous;
       for (final name in ['studio_context', 'prompt_set']) {
         final result = await Process.run(agentTestNode, [
