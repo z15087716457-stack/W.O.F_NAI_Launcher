@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:collection/collection.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hive/hive.dart';
 
@@ -258,7 +259,13 @@ class NaiImageMetadata with _$NaiImageMetadata {
         preciseReferenceImages: base.preciseReferenceImages.isEmpty
             ? reparsed.preciseReferenceImages
             : base.preciseReferenceImages,
-        preciseReferenceTypes: base.preciseReferenceTypes.isEmpty
+        preciseReferenceTypes:
+            base.preciseReferenceTypes.isEmpty ||
+                (reparsed.preciseReferenceTypes.isNotEmpty &&
+                    const ListEquality<String>().equals(
+                      base.preciseReferenceImages,
+                      reparsed.preciseReferenceImages,
+                    ))
             ? reparsed.preciseReferenceTypes
             : base.preciseReferenceTypes,
         preciseReferenceStrengths: base.preciseReferenceStrengths.isEmpty
@@ -1096,7 +1103,7 @@ class NaiImageMetadata with _$NaiImageMetadata {
       if (image is! String || image.isEmpty) continue;
 
       images.add(image);
-      types.add(_extractPreciseType(descriptions, i).toApiString());
+      types.add(_extractPreciseCaption(descriptions, i));
       referenceStrengths.add(i < strengths.length ? strengths[i] : 1.0);
       final secondary = i < secondaryStrengths.length
           ? secondaryStrengths[i]
@@ -1112,32 +1119,18 @@ class NaiImageMetadata with _$NaiImageMetadata {
     );
   }
 
-  static PreciseRefType _extractPreciseType(dynamic descriptions, int index) {
-    if (descriptions is! List || index >= descriptions.length) {
-      return PreciseRefType.character;
-    }
-    final description = descriptions[index];
-    if (description is Map<String, dynamic>) {
-      final caption = description['caption'];
-      if (caption is Map<String, dynamic>) {
-        return _parsePreciseRefType(caption['base_caption'] as String?);
+  static String _extractPreciseCaption(dynamic descriptions, int index) {
+    if (descriptions is List && index < descriptions.length) {
+      final description = descriptions[index];
+      if (description is Map<String, dynamic>) {
+        final caption = description['caption'];
+        if (caption is Map<String, dynamic> &&
+            caption['base_caption'] is String) {
+          return caption['base_caption'] as String;
+        }
       }
     }
-    return PreciseRefType.character;
-  }
-
-  static PreciseRefType _parsePreciseRefType(String? value) {
-    switch (value?.trim().toLowerCase()) {
-      case 'style':
-        return PreciseRefType.style;
-      case 'character&style':
-      case 'character_and_style':
-      case 'character and style':
-        return PreciseRefType.characterAndStyle;
-      case 'character':
-      default:
-        return PreciseRefType.character;
-    }
+    return PreciseRefType.character.toApiString();
   }
 
   static dynamic _firstPresent(Map<String, dynamic> data, List<String> keys) {
@@ -1459,13 +1452,14 @@ class NaiImageMetadata with _$NaiImageMetadata {
         final image = Uint8List.fromList(
           base64Decode(preciseReferenceImages[i]),
         );
-        final type = i < preciseReferenceTypes.length
-            ? _parsePreciseRefType(preciseReferenceTypes[i])
-            : PreciseRefType.character;
+        final parsed = PreciseRefTypeExtension.parseApiCaption(
+          i < preciseReferenceTypes.length ? preciseReferenceTypes[i] : null,
+        );
         results.add(
           PreciseReference(
             image: image,
-            type: type,
+            type: parsed.type,
+            preferSameOutfit: parsed.preferSameOutfit,
             strength: i < preciseReferenceStrengths.length
                 ? preciseReferenceStrengths[i]
                 : 1.0,

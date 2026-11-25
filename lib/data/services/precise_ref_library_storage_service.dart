@@ -195,6 +195,7 @@ class PreciseRefLibraryStorageService {
     PreciseRefType type = PreciseRefType.characterAndStyle,
     double strength = 1.0,
     double fidelity = 1.0,
+    bool? preferSameOutfit,
   }) async {
     await init();
     final extension = detectImageExtension(bytes);
@@ -215,6 +216,7 @@ class PreciseRefLibraryStorageService {
       type: type,
       strength: strength,
       fidelity: fidelity,
+      preferSameOutfit: preferSameOutfit,
     );
 
     var metadataWritten = false;
@@ -257,6 +259,8 @@ class PreciseRefLibraryStorageService {
     PreciseRefType? type,
     double? strength,
     double? fidelity,
+    bool? preferSameOutfit,
+    bool resetPreferSameOutfit = false,
   }) async {
     await init();
     final entry = _entriesBox!.get(id);
@@ -270,6 +274,11 @@ class PreciseRefLibraryStorageService {
       typeIndex: type?.index ?? entry.typeIndex,
       strength: strength ?? entry.strength,
       fidelity: fidelity ?? entry.fidelity,
+      preferSameOutfit:
+          preferSameOutfit ??
+          (resetPreferSameOutfit || (type != null && type != entry.type)
+              ? null
+              : entry.preferSameOutfit),
     );
     await _entriesBox!.put(id, updated);
     return updated;

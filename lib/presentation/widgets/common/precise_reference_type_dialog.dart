@@ -125,6 +125,7 @@ class PreciseReferenceTypeDialog extends StatelessWidget {
                                     style: l.preciseRef_typeStyle,
                                     characterAndStyle:
                                         l.preciseRef_typeCharacterAndStyle,
+                                    outfit: l.preciseRef_typeOutfit,
                                   ),
                                   description: switch (type) {
                                     PreciseRefType.character =>
@@ -133,6 +134,8 @@ class PreciseReferenceTypeDialog extends StatelessWidget {
                                       l.preciseRef_styleDescription,
                                     PreciseRefType.characterAndStyle =>
                                       l.preciseRef_characterAndStyleDescription,
+                                    PreciseRefType.outfit =>
+                                      l.preciseRef_outfitDescription,
                                   },
                                 ),
                             ],

@@ -54,7 +54,8 @@ void main() {
         preciseReferences: [
           PreciseReference(
             image: precise,
-            type: PreciseRefType.style,
+            type: PreciseRefType.characterAndStyle,
+            preferSameOutfit: false,
             strength: 0.73,
             fidelity: 0.51,
             enabled: false,
@@ -84,6 +85,7 @@ void main() {
       expect(actual.vibeReferencesV4.single.rawImageData, pixels);
       expect(actual.vibeReferencesV4.single.thumbnail, pixels);
       expect(actual.preciseReferences.single.image, pixels);
+      expect(actual.preciseReferences.single.preferSameOutfit, isFalse);
       expect(
         NAIApiUtils.isKnownNormalizedPreciseReferencePng(
           actual.preciseReferences.single.image,
@@ -93,6 +95,16 @@ void main() {
       expect(actual.characters.single.position, 'B3');
     },
   );
+  test('legacy precise references continue to use the type defaults', () {
+    final original = ImageParams(
+      preciseReferences: [
+        PreciseReference(image: pixels, type: PreciseRefType.characterAndStyle),
+      ],
+    );
+    final restored = decodeAgentImageParams(encodeAgentImageParams(original));
+    expect(restored.preciseReferences.single.preferSameOutfit, isNull);
+    expect(restored.preciseReferences.single.effectivePreferSameOutfit, isTrue);
+  });
   test(
     'null references remain null rather than acquiring an image tool mode',
     () {

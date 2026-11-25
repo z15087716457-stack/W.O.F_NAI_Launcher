@@ -40,6 +40,8 @@ Map<String, dynamic> encodeAgentImageParams(ImageParams value) => {
         {
           'image': _image(reference.image),
           'type': reference.type.name,
+          if (reference.preferSameOutfit != null)
+            'preferSameOutfit': reference.preferSameOutfit,
           'strength': reference.strength,
           'fidelity': reference.fidelity,
           'enabled': reference.enabled,
@@ -87,6 +89,7 @@ ImageParams decodeAgentImageParams(Map<String, dynamic> value) {
           ? NAIApiUtils.markNormalizedPreciseReferencePng(bytes)
           : bytes,
       type: type,
+      preferSameOutfit: json['preferSameOutfit'] as bool?,
       strength: (json['strength'] as num).toDouble(),
       fidelity: (json['fidelity'] as num).toDouble(),
       enabled: json['enabled'] as bool,

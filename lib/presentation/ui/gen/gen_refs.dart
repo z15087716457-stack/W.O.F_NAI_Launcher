@@ -1036,7 +1036,16 @@ class _PreciseSection extends StatelessWidget {
     final p = refs.precise!;
     final l = context.l10n;
     final conflict = _conflict(refs);
-    final enabled = p.list.where((x) => x.enabled).length;
+    final active = p.suspendedForInpaint
+        ? 0
+        : p.list
+              .where(
+                (x) =>
+                    x.enabled &&
+                    (p.supportsOutfit || x.type != GenPreciseType.outfit),
+              )
+              .length;
+    final full = p.list.length >= p.max;
     void addMenu(BuildContext ctx) => scope.controller.openMenu(
       genBelow(ctx, dy: 4, right: true),
       [
@@ -1064,7 +1073,12 @@ class _PreciseSection extends StatelessWidget {
           key: const Key('gen-ref-precise-row'),
           icon: StudioIcons.referenceFocus,
           name: l.gen_precise,
-          desc: l.gen_preciseDesc,
+          desc: p.suspendedForInpaint
+              ? l.gen_preciseInpaintUnsupported
+              : p.hasUnsupportedOutfit
+              ? l.gen_preciseOutfitUnsupported
+              : l.gen_preciseDesc,
+          warn: p.suspendedForInpaint || p.hasUnsupportedOutfit,
           open: open,
           onToggle: onToggle,
           images: [for (final x in p.list.take(3)) x.thumb],
@@ -1081,8 +1095,8 @@ class _PreciseSection extends StatelessWidget {
               builder: (ctx) => _Hdb(
                 key: const Key('gen-precise-add'),
                 glyph: UiGlyphs.plus,
-                tooltip: l.gen_addPrecise,
-                onTap: () => addMenu(ctx),
+                tooltip: full ? l.gen_preciseLimit(p.max) : l.gen_addPrecise,
+                onTap: full ? null : () => addMenu(ctx),
               ),
             ),
           ],
@@ -1091,6 +1105,16 @@ class _PreciseSection extends StatelessWidget {
           _Body(
             key: const Key('gen-precise-body'),
             children: [
+              if (p.suspendedForInpaint)
+                _Warn(
+                  l.gen_preciseInpaintUnsupported,
+                  key: const Key('gen-precise-inpaint-warn'),
+                ),
+              if (!p.suspendedForInpaint && p.hasUnsupportedOutfit)
+                _Warn(
+                  l.gen_preciseOutfitUnsupported,
+                  key: const Key('gen-precise-outfit-warn'),
+                ),
               if (conflict)
                 _Warn(
                   l.gen_preciseConflict,
@@ -1149,7 +1173,7 @@ class _PreciseSection extends StatelessWidget {
                     UiGlyph(UiGlyphs.coin, size: 13, color: c.amber),
                     Expanded(
                       child: Text(
-                        l.gen_preciseCost(p.costEach, enabled * p.costEach),
+                        l.gen_preciseCost(p.costEach, active * p.costEach),
                         style: UiText.sans(11.5, color: c.muted),
                       ),
                     ),
@@ -1169,7 +1193,7 @@ class _PreciseSection extends StatelessWidget {
   }
 }
 
-/// 一个精准参考：44 方缩略图 │ 类型分段，强度 / 保真度 │ 启用、移除。
+/// 一个精准参考：44 方缩略图 │ 类型分段，(V5 同时参考服装开关)，强度 / (V4.5 保真度) │ 启用、移除。
 class _PreciseItem extends StatelessWidget {
   const _PreciseItem({required this.item});
   final GenPrecise item;
@@ -1180,9 +1204,21 @@ class _PreciseItem extends StatelessWidget {
     final scope = GenScope.of(context, GenAspect.refs);
     final a = scope.actions;
     final l = context.l10n;
+    final section = scope.data.refs.precise!;
     final p = item;
+    final types = section.supportsOutfit || p.type == GenPreciseType.outfit
+        ? GenPreciseType.values
+        : const [
+            GenPreciseType.character,
+            GenPreciseType.style,
+            GenPreciseType.both,
+          ];
+    final unsupported =
+        !section.supportsOutfit && p.type == GenPreciseType.outfit;
     GenPrecise copy({
       GenPreciseType? type,
+      bool? preferSameOutfit,
+      bool resetPreferSameOutfit = false,
       double? strength,
       double? fidelity,
       bool? enabled,
@@ -1190,6 +1226,9 @@ class _PreciseItem extends StatelessWidget {
       id: p.id,
       thumb: p.thumb,
       type: type ?? p.type,
+      preferSameOutfit: resetPreferSameOutfit
+          ? preferSameOutfit
+          : (preferSameOutfit ?? p.preferSameOutfit),
       strength: strength ?? p.strength,
       fidelity: fidelity ?? p.fidelity,
       enabled: enabled ?? p.enabled,
@@ -1206,7 +1245,7 @@ class _PreciseItem extends StatelessWidget {
         spacing: 10,
         children: [
           Opacity(
-            opacity: p.enabled ? 1 : .4,
+            opacity: p.enabled && !unsupported ? 1 : .4,
             child: Container(
               width: 44,
               height: 58,
@@ -1217,38 +1256,77 @@ class _PreciseItem extends StatelessWidget {
           ),
           Expanded(
             child: Opacity(
-              opacity: p.enabled ? 1 : .55,
+              opacity: p.enabled && !unsupported ? 1 : .55,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: 4,
                 children: [
-                  UiSeg<GenPreciseType>(
-                    key: Key('gen-precise-type-${p.id}'),
-                    values: GenPreciseType.values,
-                    selected: p.type,
-                    labelOf: (t) => GenFormat.preciseTypeLabel(context, t),
-                    onChanged: (t) => a.onPreciseChanged(copy(type: t)),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: UiSeg<GenPreciseType>(
+                      key: Key('gen-precise-type-${p.id}'),
+                      values: types,
+                      selected: p.type,
+                      labelOf: (t) => GenFormat.preciseTypeLabel(context, t),
+                      onChanged: (t) => a.onPreciseChanged(
+                        copy(
+                          type: t,
+                          preferSameOutfit: null,
+                          resetPreferSameOutfit: true,
+                        ),
+                      ),
+                    ),
                   ),
+                  if (section.supportsOutfit && p.supportsPreferSameOutfit)
+                    UiPressable(
+                      key: Key('gen-precise-outfit-toggle-${p.id}'),
+                      onTap: () => a.onPreciseChanged(
+                        copy(preferSameOutfit: !p.effectivePreferSameOutfit),
+                      ),
+                      builder: (context, _) => Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 1),
+                        child: Row(
+                          spacing: 6,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                l.gen_precisePreferSameOutfit,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: UiText.sans(11.5, color: c.muted),
+                              ),
+                            ),
+                            UiSwitch(value: p.effectivePreferSameOutfit),
+                          ],
+                        ),
+                      ),
+                    ),
                   GenSliderRow(
                     key: Key('gen-precise-strength-${p.id}'),
                     label: l.gen_strength,
                     labelWidth: 52,
                     compact: true,
                     value: p.strength,
+                    max: section.strengthMax,
+                    midpoint: section.strengthMax > 1 ? 1.0 : null,
+                    inputMin: -10,
                     inputMax: 10,
                     defaultValue: 1,
                     onChanged: (x) => a.onPreciseChanged(copy(strength: x)),
                   ),
-                  GenSliderRow(
-                    key: Key('gen-precise-fidelity-${p.id}'),
-                    label: l.gen_fidelity,
-                    labelWidth: 52,
-                    compact: true,
-                    value: p.fidelity,
-                    inputMax: 10,
-                    defaultValue: 1,
-                    onChanged: (x) => a.onPreciseChanged(copy(fidelity: x)),
-                  ),
+                  if (section.showFidelity)
+                    GenSliderRow(
+                      key: Key('gen-precise-fidelity-${p.id}'),
+                      label: l.gen_fidelity,
+                      labelWidth: 52,
+                      compact: true,
+                      value: p.fidelity,
+                      inputMin: -10,
+                      inputMax: 10,
+                      defaultValue: 1,
+                      onChanged: (x) => a.onPreciseChanged(copy(fidelity: x)),
+                    ),
                 ],
               ),
             ),

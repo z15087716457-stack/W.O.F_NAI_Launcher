@@ -20,6 +20,9 @@ Future<void> saveBytesToPreciseRefLibrary(
   Uint8List bytes, {
   String? suggestedName,
   PreciseRefType? type,
+  double strength = 1.0,
+  double fidelity = 1.0,
+  bool? preferSameOutfit,
 }) async {
   final name = (suggestedName == null || suggestedName.trim().isEmpty)
       ? defaultPreciseRefName()
@@ -32,6 +35,9 @@ Future<void> saveBytesToPreciseRefLibrary(
           bytes,
           name: name,
           type: type ?? PreciseRefType.characterAndStyle,
+          strength: strength,
+          fidelity: fidelity,
+          preferSameOutfit: preferSameOutfit,
         );
 
     if (!context.mounted) return;

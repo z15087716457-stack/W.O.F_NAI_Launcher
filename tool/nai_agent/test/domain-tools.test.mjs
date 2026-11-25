@@ -138,6 +138,19 @@ test('every domain tool description stays compact and schemas avoid anyOf enums'
   }
 });
 
+test('reference schemas expose V5 outfit and boolean outfit preference', () => {
+  const draft = domainTools.find(tool => tool.name === 'reference_manage');
+  const library = domainTools.find(tool => tool.name === 'reference_library');
+  assert.match(draft.description, /strength 0–5/);
+  assert.match(draft.description, /V5 suspends PR in inpaint/);
+  assert.equal(Value.Check(draft.parameters, { action: 'add_precise', type: 'outfit', strength: 5 }), true);
+  assert.equal(Value.Check(draft.parameters, { action: 'update_precise', type: 'character', prefer_same_outfit: false }), true);
+  assert.equal(Value.Check(draft.parameters, { action: 'update_precise', preferSameOutfit: 'yes' }), false);
+  assert.equal(Value.Check(library.parameters, { kind: 'precise', action: 'import', type: 'outfit' }), true);
+  assert.equal(Value.Check(library.parameters, { kind: 'precise', action: 'update', changes: { type: 'characterAndStyle', preferSameOutfit: true } }), true);
+  assert.equal(Value.Check(library.parameters, { kind: 'precise', action: 'update', changes: { prefer_same_outfit: 0 } }), false);
+});
+
 test('only registered domain tools enter the Pi tool list', async () => {
   const calls = [];
   const tools = studioTools(async (...args) => { calls.push(args); return { content: [{ type: 'text', text: 'saved' }] }; },

@@ -319,9 +319,17 @@ class AgentPromptSetActions {
   );
 }
 
+/// In-flight prompt-set card actions, keyed by `workspaceId/chatId/setId -> cardId`.
+/// Kept in Riverpod state so sidebar collapse or route changes never lose
+/// running card indicators or cancel an active generation.
+final agentPromptSetBusyProvider = StateProvider<Map<String, String>>(
+  (ref) => const {},
+);
+
 /// Separate binding for idle UI actions, still owned by the current chat.
-/// Approval has no dependency on a running Pi turn.
-final agentPromptSetGenerationProvider = Provider.autoDispose
+/// Approval has no dependency on a running Pi turn, and stays alive across
+/// sidebar/route rebuilds so in-flight card generations finish and persist.
+final agentPromptSetGenerationProvider = Provider
     .family<NaiAgentGenerationTools, (String, String, String)>((ref, key) {
       var alive = true;
       ref.onDispose(() => alive = false);

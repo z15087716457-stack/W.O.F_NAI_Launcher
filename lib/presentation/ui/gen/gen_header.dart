@@ -219,15 +219,20 @@ class _TurboButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scope = GenScope.of(context, GenAspect.header);
+    final blockedByPrecise = scope.data.turboBlockedByPrecise;
     final enabled =
-        scope.data.turbo != null && scope.actions.onTurboChanged != null;
+        scope.data.turbo != null &&
+        !blockedByPrecise &&
+        scope.actions.onTurboChanged != null;
     final active = scope.data.turbo == true;
     final c = context.ui;
     final l = context.l10n;
     return Padding(
       padding: const EdgeInsets.only(right: 3),
       child: Tooltip(
-        message: !enabled
+        message: blockedByPrecise
+            ? l.gen_turboBlockedByPrecise
+            : !enabled
             ? l.gen_turboUnavailable
             : active
             ? l.gen_turboDisable

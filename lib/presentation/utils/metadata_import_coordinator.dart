@@ -170,6 +170,7 @@ class MetadataImportCoordinator {
           type: reference.type,
           strength: reference.strength,
           fidelity: reference.fidelity,
+          preferSameOutfit: reference.preferSameOutfit,
         );
       }
       if (preciseReferences.isNotEmpty) appliedCount++;
@@ -393,6 +394,7 @@ class MetadataImportCoordinator {
             type: reference.type,
             strength: reference.strength,
             fidelity: reference.fidelity,
+            preferSameOutfit: reference.preferSameOutfit,
           );
         }
         count++;

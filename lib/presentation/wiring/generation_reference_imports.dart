@@ -25,12 +25,14 @@ class GenerationReferenceFile {
     this.type = PreciseRefType.character,
     this.strength = 1,
     this.fidelity = 1,
+    this.preferSameOutfit,
   });
   final String name;
   final Uint8List bytes;
   final PreciseRefType type;
   final double strength;
   final double fidelity;
+  final bool? preferSameOutfit;
 }
 
 final generationReferenceDecoderProvider = Provider<GenerationReferenceDecoder>(
@@ -42,6 +44,14 @@ final generationReferenceImportsProvider = Provider<GenerationReferenceImports>(
 
 class GenerationReferenceDecoder {
   const GenerationReferenceDecoder();
+
+  /// Production imports keep original image bytes in the draft and warm the
+  /// per-model normalization cache so V4.5 (letterbox) and V5 (97-bucket crop)
+  /// never pollute each other. Custom subclasses (e.g., tests) can override
+  /// [precise] to inject explicit normalization.
+  bool get usesCustomPreciseNormalization =>
+      runtimeType != GenerationReferenceDecoder;
+
   Future<List<VibeReference>> vibes(GenerationReferenceFile file) =>
       VibeFileParser.parseFile(file.name, file.bytes);
   Future<Uint8List> precise(GenerationReferenceFile file) =>
@@ -119,8 +129,15 @@ class GenerationReferenceImports {
         if (vibes.isEmpty) return;
         await write(() => _params.addVibeReferences(vibes));
       case GenDropTarget.precise:
+        final replace = replaceRequested?.call() == true;
+        final existing = replace ? 0 : params.preciseReferences.length;
+        if (existing + selected.length > ModelSpec.maxPreciseReferences) {
+          throw StateError(
+            currentL10n.gen_preciseLimit(ModelSpec.maxPreciseReferences),
+          );
+        }
         await write(() {
-          if (replaceRequested?.call() == true) {
+          if (replace) {
             _params.clearPreciseReferences();
           }
           for (final file in selected) {
@@ -130,7 +147,10 @@ class GenerationReferenceImports {
                 type: file.type,
                 strength: file.strength,
                 fidelity: file.fidelity,
-                normalize: (_) => decoder.precise(file),
+                preferSameOutfit: file.preferSameOutfit,
+                normalize: decoder.usesCustomPreciseNormalization
+                    ? (_) => decoder.precise(file)
+                    : null,
               ),
             );
           }

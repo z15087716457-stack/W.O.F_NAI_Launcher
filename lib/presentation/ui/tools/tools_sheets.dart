@@ -762,7 +762,7 @@ class _ToolsUpscaleSheetState extends State<ToolsUpscaleSheet> {
           key: const Key('tools-upscale-run'),
           tone: ToolsButtonTone.primary,
           onTap: canRun ? a.onRun : null,
-          cost: ToolsButtonCost(d.cost ?? 0),
+          cost: d.cost == null ? null : ToolsButtonCost(d.cost!),
           children: [Text(l.tools_upscale)],
         ),
       ],
@@ -835,9 +835,9 @@ class _BackendCard extends StatelessWidget {
                           ),
                         ),
                       ),
-                      if (b.cost == null)
+                      if (b.cost == 0)
                         UiMini(l.tools_free, foreground: c.ok)
-                      else
+                      else if (b.cost != null)
                         Container(
                           height: 18,
                           padding: const EdgeInsets.symmetric(horizontal: 6),

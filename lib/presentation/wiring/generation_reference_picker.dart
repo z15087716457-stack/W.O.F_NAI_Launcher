@@ -19,6 +19,7 @@ import '../ui/refs/refs_contract.dart';
 import '../ui/refs/refs_picker.dart';
 import '../widgets/common/app_toast.dart';
 import 'generation_reference_identity.dart';
+import 'refs_mapping.dart';
 
 final generationLibraryOriginsProvider = StateProvider<Map<String, String>>(
   (ref) => const {},
@@ -210,7 +211,8 @@ class _GenerationReferencePickerState
             inGeneration: used.contains(entry.id),
             strength: entry.strength,
             fidelity: entry.fidelity,
-            type: RefsPreciseType.values[entry.type.index],
+            type: refsPreciseType(entry.type),
+            preferSameOutfit: entry.preferSameOutfit,
             hasRaw: true,
             usedCount: entry.usedCount,
             lastUsed: entry.lastUsedAt,

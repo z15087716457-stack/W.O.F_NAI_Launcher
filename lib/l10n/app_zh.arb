@@ -3,13 +3,31 @@
   "set_importInstallationHelp": "在同一台电脑上恢复账号、偏好、快捷键和素材目录。选择旧版的安装目录或 user-data。",
   "set_importInstallationInvalid": "请选择另一份 Studio 安装目录，或其中包含 hive/settings.hive 的 user-data 文件夹。",
   "set_importInstallationPreview": "找到 {accounts} 个账号和 {prefs} 项偏好。已有账号会跳过；下列设置将应用到当前版本。素材继续从所列目录读取，请保留这些目录。",
-  "@set_importInstallationPreview": {"placeholders":{"accounts":{"type":"int"},"prefs":{"type":"int"}}},
+  "@set_importInstallationPreview": {
+    "placeholders": {
+      "accounts": {
+        "type": "int"
+      },
+      "prefs": {
+        "type": "int"
+      }
+    }
+  },
   "set_importMissingFolder": "找不到此目录。可选择新位置；留空将跳过。",
   "set_importCategoryBase": "图库分类目录",
   "set_importEmptyGallery": "旧版图库来源为空，迁移后会清空当前来源列表。",
   "set_importInstallationChanged": "预览期间目录设置已变更，请重新选择旧版目录。",
   "set_importInstallationDone": "已完成迁移，新增 {added} 个账号。其中 {missing} 个未找到可复用的登录凭据，可在账号页重新登录。",
-  "@set_importInstallationDone": {"placeholders":{"added":{"type":"int"},"missing":{"type":"int"}}},
+  "@set_importInstallationDone": {
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "missing": {
+        "type": "int"
+      }
+    }
+  },
   "@@locale": "zh",
   "@blocks_cropRange": {
     "placeholders": {
@@ -729,7 +747,7 @@
   "preciseRef_characterDescription": "参考人物的外观与特征",
   "preciseRef_styleDescription": "参考配色、笔触与画面质感",
   "preciseRef_characterAndStyleDescription": "同时参考人物特征与视觉风格",
-  "preciseRef_v4Only": "此功能需要 V4+ 模型",
+  "preciseRef_v4Only": "此功能需要 V5 或 V4.5 模型",
   "preciseRef_typeCharacter": "角色",
   "preciseRef_typeStyle": "风格",
   "preciseRef_typeCharacterAndStyle": "角色+风格",
@@ -3107,7 +3125,16 @@
   "wiki_imageHide": "收起词条配图",
   "wiki_imageLoadFailed": "配图暂时无法读取",
   "wiki_imageMore": "加载更多（{loaded}/{total}）",
-  "@wiki_imageMore": {"placeholders":{"loaded":{"type":"int"},"total":{"type":"int"}}},
+  "@wiki_imageMore": {
+    "placeholders": {
+      "loaded": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "wiki_withoutArticle": "暂无释义",
   "wiki_sortPopular": "按热度",
   "wiki_sortName": "按名称",
@@ -3883,7 +3910,11 @@
   "update_errorRateLimited": "GitHub 请求已达上限，请稍后重试。",
   "update_retryAt": "请在 {time}（本地时间）后重试。",
   "@update_retryAt": {
-    "placeholders": {"time": {"type": "String"}}
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
   },
   "update_errorCheckUnknown": "检查更新时发生未知错误",
   "update_errorLogPath": "日志：{path}",
@@ -4137,19 +4168,25 @@
   "imageUse_featureRecorded": "原图使用过{feature}。",
   "@imageUse_featureRecorded": {
     "placeholders": {
-      "feature": {"type": "String"}
+      "feature": {
+        "type": "String"
+      }
     }
   },
   "imageUse_referenceAvailable": "原图使用过{feature}，参考素材可通过“参考图”导入。",
   "@imageUse_referenceAvailable": {
     "placeholders": {
-      "feature": {"type": "String"}
+      "feature": {
+        "type": "String"
+      }
     }
   },
   "imageUse_referenceUnavailable": "原图使用过{feature}，仅保留使用记录，未附带可导入的参考素材。",
   "@imageUse_referenceUnavailable": {
     "placeholders": {
-      "feature": {"type": "String"}
+      "feature": {
+        "type": "String"
+      }
     }
   },
   "imageMenu_details": "详情",
@@ -5131,7 +5168,7 @@
       "type": {}
     }
   },
-  "refs_preciseOnlyV45": "只在 V4.5 可用",
+  "refs_preciseOnlyV45": "支持 V5 / V4.5",
   "refs_preciseCostNote": "每张 {cost} Anlas；和 Vibe 不能同时生效",
   "@refs_preciseCostNote": {
     "placeholders": {
@@ -5178,7 +5215,7 @@
       "model": {}
     }
   },
-  "refs_bannerPreciseBody": "库里的参考图照常整理；切到 V4.5 才能用于生成",
+  "refs_bannerPreciseBody": "库里的参考图照常整理；切到 V5 或 V4.5 才能用于生成",
   "refs_switchTo": "切到 {model}",
   "@refs_switchTo": {
     "placeholders": {
@@ -5247,7 +5284,7 @@
   "refs_emptyFromResultPrecise": "生图结果右键 → 存到精准参考库",
   "refs_emptyFromGallery": "本地图库也可以",
   "refs_emptyHelpTitle": "Vibe 和精准参考有什么区别？",
-  "refs_emptyHelpBody": "Vibe：借整体氛围和画风，可以叠很多张（V4 / V4.5，V5 没有）。精准参考：照着一张图的人物或画风来画，更准，每张 {cost} Anlas（只在 V4.5）。两者不能同时生效。",
+  "refs_emptyHelpBody": "Vibe：借整体氛围和画风，可以叠很多张（V4 / V4.5，V5 没有）。精准参考：照着一张图的人物、画风或服装来画，更准，每张 {cost} Anlas（支持 V5 / V4.5，服装参考仅 V5）。两者不能同时生效。",
   "@refs_emptyHelpBody": {
     "placeholders": {
       "cost": {}
@@ -5482,14 +5519,14 @@
   "refs_typeCharacter": "角色",
   "refs_typeStyle": "风格",
   "refs_typeBoth": "角色+风格",
-  "refs_typeCharacterDesc": "保留人物长相、发型和服装，画风跟提示词走",
+  "refs_typeCharacterDesc": "保留人物长相与发型（V5 可选是否同时参考服装），画风跟提示词走",
   "refs_typeStyleDesc": "只借画风、配色和笔触，不管画的是谁",
   "refs_typeBothDesc": "人物和画风都参考",
   "refs_preciseStrength": "参考强度",
   "refs_preciseStrengthDesc": "越高越像参考图",
   "refs_fidelity": "保真度",
   "refs_fidelityDesc": "越高越贴原图细节，越低越自由",
-  "refs_preciseDefaultsNote": "这里改的是默认值，发送时直接带上；数字框可以填超过 0–1 的值",
+  "refs_preciseDefaultsNote": "这里改的是默认值，发送时直接带上；V5 强度滑杆最高 5.0 且不使用保真度，数字框支持更广范围",
   "refs_showInFolderShort": "所在文件夹",
   "refs_pickHint": "勾选卡片后在这里批量设置",
   "refs_multiAddTitle": "一起加入生图页",
@@ -7203,8 +7240,8 @@
   "gen_vibeInfo": "信息提取",
   "gen_vibeInfoReencode": "已编码的 Vibe 改信息提取要重新编码",
   "gen_precise": "精准参考",
-  "gen_preciseDesc": "将生成绑定到角色或风格参考",
-  "gen_preciseDrop": "拖角色或风格参考图进来，或者",
+  "gen_preciseDesc": "将生成绑定到角色、风格或服装参考",
+  "gen_preciseDrop": "拖角色、风格或服装参考图进来，或者",
   "gen_preciseCharacter": "角色",
   "gen_preciseStyle": "风格",
   "gen_preciseBoth": "角色 + 风格",
@@ -7832,7 +7869,6 @@
   "channel_descStrata": "真隐藏面消除的 3D 潮汐山脊与发光等高线切面，随滚轮和波峰起伏呈现测绘标高",
   "channel_title": "视觉通道",
   "channel_subtitle": "滚动时两侧的装饰，只画在图片之外，不挡图",
-  "channel_paused": "生成中 · 动画已暂停",
   "channel_modeOff": "关闭",
   "channel_modeFixed": "固定一个",
   "channel_modeRandom": "每次随机",
@@ -7845,20 +7881,68 @@
   "channel_levelStandard": "标准",
   "channel_levelStrong": "浓",
   "channel_motion": "空闲微动",
-  "channel_motionSub": "很轻的动效，生成时自动暂停",
+  "channel_motionSub": "很轻的动效，始终保持柔和流动",
   "channel_sideTransparency": "侧栏透明度",
   "channel_batch": "{time} · {count} 张",
-  "@channel_batch": {"placeholders": {"time": {"type": "String"}, "count": {"type": "int"}}},
+  "@channel_batch": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "channel_batchNewest": "{time} · {count} 张 · 最新",
-  "@channel_batchNewest": {"placeholders": {"time": {"type": "String"}, "count": {"type": "int"}}},
+  "@channel_batchNewest": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "channel_batchPending": "生成中 · {count} 张",
-  "@channel_batchPending": {"placeholders": {"count": {"type": "int"}}},
+  "@channel_batchPending": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "channel_dayToday": "今天 · {date}",
-  "@channel_dayToday": {"placeholders": {"date": {"type": "String"}}},
+  "@channel_dayToday": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "channel_dayYesterday": "昨天 · {date}",
-  "@channel_dayYesterday": {"placeholders": {"date": {"type": "String"}}},
+  "@channel_dayYesterday": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "channel_monthDayWeek": "{month}月{day}日 {weekday}",
-  "@channel_monthDayWeek": {"placeholders": {"month": {"type": "int"}, "day": {"type": "int"}, "weekday": {"type": "String"}}},
+  "@channel_monthDayWeek": {
+    "placeholders": {
+      "month": {
+        "type": "int"
+      },
+      "day": {
+        "type": "int"
+      },
+      "weekday": {
+        "type": "String"
+      }
+    }
+  },
   "channel_weekday1": "周一",
   "channel_weekday2": "周二",
   "channel_weekday3": "周三",
@@ -8341,7 +8425,7 @@
   },
   "set_cvLevel": "浓淡",
   "set_cvMotion": "空闲微动",
-  "set_cvMotionSub": "生成中和开启“减少动态效果”时自动暂停",
+  "set_cvMotionSub": "开启“减少动态效果”时自动暂停",
   "set_cvSideTransparency": "侧栏透明度",
   "set_cvSideTransparencySub": "调整左右面板透出画布动态背景的程度，0% 为完全不透",
   "set_cvOps": "画布操作",
@@ -8541,7 +8625,13 @@
   "set_stSave": "保存",
   "set_stSavePath": "生成图片保存目录",
   "set_stSavePathSub": "自动和手动保存的实际目录：\n{path}",
-  "@set_stSavePathSub": {"placeholders": {"path": {"type": "String"}}},
+  "@set_stSavePathSub": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
   "set_stAutoSave": "自动保存",
   "set_stAutoSaveSub": "生成完成后立即写入保存位置；关掉后只留在画布和历史里",
   "set_stAssets": "素材与显示",
@@ -8607,21 +8697,44 @@
   "set_dcLatest": "已是最新",
   "set_dcUpdatesAvailable": "有可用更新",
   "set_dcLastChecked": "上次检查 {when}",
-  "@set_dcLastChecked": {"placeholders": {"when": {}}},
+  "@set_dcLastChecked": {
+    "placeholders": {
+      "when": {}
+    }
+  },
   "set_dcRefreshWiki": "刷新 Wiki",
   "set_dcRefreshWikiTip": "下载当前 Wiki 数据，更新此前未同步的已有正文；保留个人译文。",
   "set_dcChanged": "新增 {added} 条，更新 {updated} 条，已保存在本地",
-  "@set_dcChanged": {"placeholders": {"added": {}, "updated": {}}},
+  "@set_dcChanged": {
+    "placeholders": {
+      "added": {},
+      "updated": {}
+    }
+  },
   "set_dcRagSyncTip": "如已使用语义检索，请重启 Studio 后手动同步相应来源的索引。",
   "set_dcUpdateTags": "更新 Tag",
   "set_dcUpdateWiki": "更新 Wiki",
   "set_dcSources": "可用数据：Tag {tagDate} · Wiki {wikiDate}",
-  "@set_dcSources": {"placeholders": {"tagDate": {}, "wikiDate": {}}},
+  "@set_dcSources": {
+    "placeholders": {
+      "tagDate": {},
+      "wikiDate": {}
+    }
+  },
   "set_dcDownloading": "正在下载 {received} / {total}",
-  "@set_dcDownloading": {"placeholders": {"received": {}, "total": {}}},
+  "@set_dcDownloading": {
+    "placeholders": {
+      "received": {},
+      "total": {}
+    }
+  },
   "set_dcVerifying": "正在校验下载内容…",
   "set_dcImporting": "正在补充本地数据 · 已读取 {n} 条",
-  "@set_dcImporting": {"placeholders": {"n": {}}},
+  "@set_dcImporting": {
+    "placeholders": {
+      "n": {}
+    }
+  },
   "set_dcPublishing": "正在切换数据版本…",
   "set_dcUpdateFailed": "补充失败，已保留原数据。可重试。",
   "set_dcUpdateCancelled": "已取消，原数据保持可用。",
@@ -8886,7 +8999,17 @@
   "set_rgOpening": "正在连接本地工作进程，读取已有索引。",
   "set_rgLoadingSaved": "正在载入已保存的检索索引。",
   "set_rgRestoring": "正在恢复检索索引 {done} / {total}，已有向量会直接复用。",
-  "@set_rgRestoring": {"description": "Actual local ANN recovery progress; existing embeddings are reused.", "placeholders": {"done": {"type": "String"}, "total": {"type": "String"}}},
+  "@set_rgRestoring": {
+    "description": "Actual local ANN recovery progress; existing embeddings are reused.",
+    "placeholders": {
+      "done": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
   "set_rgSaving": "正在保存恢复后的检索索引。",
   "set_rgReadingSources": "正在读取各来源的索引状态。",
   "set_rgLoadingTimeout": "索引载入长时间没有进展或已达到时间上限，请重试。已有数据保留。",
@@ -8917,9 +9040,21 @@
   "set_rgCleanupLegacy": "清理旧标签索引",
   "set_rgUpgradeNotice": "标签检索方案已升级，需要按新方案建立索引。Wiki、提示词块和图库索引可继续使用。",
   "set_rgUpgradePlan": "确认后按新版方案建立标签索引，完成并校验后清理旧标签索引（约 {size}）。升级期间临时占用更多空间，可暂停续建；其他来源及翻译资料保留。",
-  "@set_rgUpgradePlan": {"placeholders": {"size": {"type": "String"}}},
+  "@set_rgUpgradePlan": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
   "set_rgCleanupPlan": "清理旧标签索引（约 {size}），保留新版标签索引、其他来源及翻译资料。",
-  "@set_rgCleanupPlan": {"placeholders": {"size": {"type": "String"}}},
+  "@set_rgCleanupPlan": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
   "set_rgUpgradeCleaning": "新版标签索引已就绪，正在清理旧标签索引…",
   "set_rgUpgradeCleanupFailed": "新版检索可用，旧索引清理未完成，请重试清理。",
   "set_rgUpgradeBadge": "需升级",
@@ -8958,7 +9093,13 @@
   "set_rgEnvNeedsUpdate": "需要更新",
   "set_rgEnvUpdate": "更新环境",
   "set_rgEnvDependencies": "需要补齐或更新依赖：{packages}。现有索引会保留。",
-  "@set_rgEnvDependencies": {"placeholders": {"packages": {"type": "String"}}},
+  "@set_rgEnvDependencies": {
+    "placeholders": {
+      "packages": {
+        "type": "String"
+      }
+    }
+  },
   "set_rgEnvPythonVersion": "需要 Python 3.12，请更新运行环境或选择兼容的解释器。现有索引会保留。",
   "set_rgEnvCheckFailed": "检测失败",
   "set_rgEnvImportFailed": "依赖加载失败，请重新检测或修复运行环境。现有索引会保留。",
@@ -9313,9 +9454,18 @@
   "set_accBalanceUnread": "余额未读取",
   "set_agBase": "内置系统提示词",
   "set_agBaseGlobalState": "全局：{state}",
-  "@set_agBaseGlobalState": {"placeholders": {"state": {}}},
+  "@set_agBaseGlobalState": {
+    "placeholders": {
+      "state": {}
+    }
+  },
   "set_agBaseWsState": "工作区「{name}」：{state}",
-  "@set_agBaseWsState": {"placeholders": {"name": {}, "state": {}}},
+  "@set_agBaseWsState": {
+    "placeholders": {
+      "name": {},
+      "state": {}
+    }
+  },
   "set_agBaseBuiltin": "内置",
   "set_agBaseCustom": "已自定义",
   "set_agBaseInherit": "沿用全局",
@@ -9324,7 +9474,11 @@
   "set_agBaseCollapse": "收起",
   "set_agScopeGlobal": "全局",
   "set_agScopeWorkspace": "工作区 · {name}",
-  "@set_agScopeWorkspace": {"placeholders": {"name": {}}},
+  "@set_agScopeWorkspace": {
+    "placeholders": {
+      "name": {}
+    }
+  },
   "set_agBaseUseGlobalOn": "这个工作区沿用全局提示词；关掉才能单独编辑",
   "set_agBaseUseGlobalOff": "这个工作区使用单独的提示词；打开则改回沿用全局",
   "set_agBaseHint": "可用自定义内容替换内置系统提示词，拼在“内置提示词前”的内容之后；工具地图由应用追加。全局和工作区分开保存，已有聊天保持原样。",
@@ -9473,7 +9627,19 @@
   "ag_greetHint": "Agent 会先看草稿再动手；花 Anlas 前一定先问你。",
   "ag_draftEyebrow": "当前草稿",
   "ag_draftCounts": "角色 {characters} · {blocks} 个积木 · 参考图 {references}",
-  "@ag_draftCounts": {"placeholders": {"characters": {"type": "int"}, "blocks": {"type": "int"}, "references": {"type": "int"}}},
+  "@ag_draftCounts": {
+    "placeholders": {
+      "characters": {
+        "type": "int"
+      },
+      "blocks": {
+        "type": "int"
+      },
+      "references": {
+        "type": "int"
+      }
+    }
+  },
   "ag_taskReview": "检查草稿",
   "ag_taskReviewHint": "找冲突、冗余和模型不认的写法",
   "ag_taskReviewPrompt": "检查当前草稿和参数，找出冲突、冗余和当前模型不认的写法，先不要修改。",
@@ -9500,11 +9666,29 @@
   "ag_delete": "删除",
   "ag_deleteWorkspaceTitle": "删除工作区？",
   "ag_deleteWorkspaceBody": "工作区「{name}」和里面的全部对话会移进回收区，可以撤销。生成的图片仍保留在图库和历史中。",
-  "@ag_deleteWorkspaceBody": {"placeholders": {"name": {"type": "String"}}},
+  "@ag_deleteWorkspaceBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "ag_chatDeleted": "已删除「{title}」",
-  "@ag_chatDeleted": {"placeholders": {"title": {"type": "String"}}},
+  "@ag_chatDeleted": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "ag_workspaceDeleted": "已删除工作区「{name}」",
-  "@ag_workspaceDeleted": {"placeholders": {"name": {"type": "String"}}},
+  "@ag_workspaceDeleted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "ag_chatsContent": "内容匹配",
   "ag_chatsSearching": "正在搜索对话内容…",
   "ag_imageVibe": "设为 Vibe",
@@ -9527,7 +9711,16 @@
   "ag_sloganExternal": "和外部工具对暗号…\n等外面回话…",
   "ag_foldDone": "已处理",
   "ag_foldTimes": "{label} {count} 次",
-  "@ag_foldTimes": {"placeholders": {"label": {"type": "String"}, "count": {"type": "int"}}},
+  "@ag_foldTimes": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_kindThink": "思考",
   "ag_kindRead": "读取",
   "ag_kindRun": "运行命令",
@@ -9537,7 +9730,13 @@
   "ag_kindExternal": "外部工具",
   "ag_kindAsk": "问你",
   "ag_limitTitle": "已达到单次任务步数上限（{count} 步）",
-  "@ag_limitTitle": {"placeholders": {"count": {"type": "int"}}},
+  "@ag_limitTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_limitBody": "进度已保存，点“继续”接着做。上限可以在设置里调整。",
   "ag_limitContinue": "继续",
   "ag_limitAdjust": "调整上限",
@@ -9545,49 +9744,184 @@
   "ag_diffExpand": "展开全部",
   "ag_diffCollapse": "收起",
   "ag_readImages": "查看图片 · {count} 张",
-  "@ag_readImages": {"placeholders": {"count": {"type": "int"}}},
+  "@ag_readImages": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_turnTook": "用时 {time}",
-  "@ag_turnTook": {"placeholders": {"time": {"type": "String"}}},
+  "@ag_turnTook": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "ag_turnAnlas": "{anlas} Anlas",
-  "@ag_turnAnlas": {"placeholders": {"anlas": {"type": "String"}}},
+  "@ag_turnAnlas": {
+    "placeholders": {
+      "anlas": {
+        "type": "String"
+      }
+    }
+  },
   "ag_turnChanges": "改动 {count} 处",
-  "@ag_turnChanges": {"placeholders": {"count": {"type": "int"}}},
+  "@ag_turnChanges": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_turnTools": "工具 {count} 次",
-  "@ag_turnTools": {"placeholders": {"count": {"type": "int"}}},
+  "@ag_turnTools": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_turnTokens": "输入 {input} · 输出 {output} token",
-  "@ag_turnTokens": {"placeholders": {"input": {"type": "String"}, "output": {"type": "String"}}},
+  "@ag_turnTokens": {
+    "placeholders": {
+      "input": {
+        "type": "String"
+      },
+      "output": {
+        "type": "String"
+      }
+    }
+  },
   "ag_settingsTitle": "应用设置",
   "ag_settingsGo": "去设置",
   "ag_tagCopied": "已复制 {tag}",
-  "@ag_tagCopied": {"placeholders": {"tag": {"type": "String"}}},
+  "@ag_tagCopied": {
+    "placeholders": {
+      "tag": {
+        "type": "String"
+      }
+    }
+  },
   "ag_tagCount": "{count} 张作品",
-  "@ag_tagCount": {"placeholders": {"count": {"type": "String"}}},
+  "@ag_tagCount": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
   "ag_galleryFavorite": "已收藏 {count} 张",
-  "@ag_galleryFavorite": {"placeholders": {"count": {"type": "int"}}},
+  "@ag_galleryFavorite": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_galleryUnfavorite": "已取消收藏 {count} 张",
-  "@ag_galleryUnfavorite": {"placeholders": {"count": {"type": "int"}}},
+  "@ag_galleryUnfavorite": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_galleryTags": "已改标签 {count} 张",
-  "@ag_galleryTags": {"placeholders": {"count": {"type": "int"}}},
+  "@ag_galleryTags": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_galleryMove": "已移动 {count} 张到「{target}」",
-  "@ag_galleryMove": {"placeholders": {"count": {"type": "int"}, "target": {"type": "String"}}},
+  "@ag_galleryMove": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
   "ag_galleryCopy": "已复制 {count} 张到「{target}」",
-  "@ag_galleryCopy": {"placeholders": {"count": {"type": "int"}, "target": {"type": "String"}}},
+  "@ag_galleryCopy": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
   "ag_galleryDelete": "已移到回收区 {count} 张",
-  "@ag_galleryDelete": {"placeholders": {"count": {"type": "int"}}},
+  "@ag_galleryDelete": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_galleryRestore": "已恢复 {count} 张",
-  "@ag_galleryRestore": {"placeholders": {"count": {"type": "int"}}},
+  "@ag_galleryRestore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_galleryCollectionAdd": "已加入集合「{target}」{count} 张",
-  "@ag_galleryCollectionAdd": {"placeholders": {"count": {"type": "int"}, "target": {"type": "String"}}},
+  "@ag_galleryCollectionAdd": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
   "ag_galleryCollectionRemove": "已移出集合「{target}」{count} 张",
-  "@ag_galleryCollectionRemove": {"placeholders": {"count": {"type": "int"}, "target": {"type": "String"}}},
+  "@ag_galleryCollectionRemove": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
   "ag_galleryExport": "已导出 {count} 张",
-  "@ag_galleryExport": {"placeholders": {"count": {"type": "int"}}},
+  "@ag_galleryExport": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_galleryMore": "+{count}",
-  "@ag_galleryMore": {"placeholders": {"count": {"type": "int"}}},
+  "@ag_galleryMore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_compacted": "之前的对话已压缩",
   "ag_compactedAuto": "上下文快满了，之前的对话已自动压缩",
   "ag_compactedTokens": "原 {tokens} token",
-  "@ag_compactedTokens": {"placeholders": {"tokens": {"type": "String"}}},
+  "@ag_compactedTokens": {
+    "placeholders": {
+      "tokens": {
+        "type": "String"
+      }
+    }
+  },
   "ag_compactedShow": "看摘要",
   "ag_compactedHide": "收起摘要",
   "ag_editResend": "发送",
@@ -9597,7 +9931,16 @@
   "set_agTrashSub": "删除的对话、工作区和 Skill 先放进回收区，可以恢复；彻底删除后不能找回。",
   "set_agTrashManage": "管理",
   "set_agTrashSummary": "{count} 项 · {size}",
-  "@set_agTrashSummary": {"placeholders": {"count": {"type": "int"}, "size": {"type": "String"}}},
+  "@set_agTrashSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
   "set_agTrashEmpty": "回收区是空的",
   "set_agTrashAll": "全部",
   "set_agTrashChats": "对话",
@@ -9608,24 +9951,63 @@
   "set_agTrashPurgeAll": "清空回收区",
   "set_agTrashPurgeTitle": "彻底删除？",
   "set_agTrashPurgeBody": "「{name}」会从磁盘上删除，不能找回。",
-  "@set_agTrashPurgeBody": {"placeholders": {"name": {"type": "String"}}},
+  "@set_agTrashPurgeBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "set_agTrashPurgeAllBody": "回收区里的 {count} 项会从磁盘上删除，不能找回。",
-  "@set_agTrashPurgeAllBody": {"placeholders": {"count": {"type": "int"}}},
+  "@set_agTrashPurgeAllBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "set_agTrashRestored": "已恢复「{name}」",
-  "@set_agTrashRestored": {"placeholders": {"name": {"type": "String"}}},
+  "@set_agTrashRestored": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "set_agTrashPurged": "已彻底删除「{name}」",
-  "@set_agTrashPurged": {"placeholders": {"name": {"type": "String"}}},
+  "@set_agTrashPurged": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "set_agTrashNeedWorkspace": "所属工作区也在回收区里，先恢复工作区",
   "set_agTrashRestoreFailed": "恢复失败：原位置已有同名内容",
   "set_agTrashGoneWorkspace": "已删除的工作区",
   "set_agSkillRemoveBody": "「{name}」会移进回收区，之后可以在 Agent 设置的「回收区」里恢复或彻底删除。",
-  "@set_agSkillRemoveBody": {"placeholders": {"name": {"type": "String"}}},
+  "@set_agSkillRemoveBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "set_agSkillName": "名称",
   "set_agSkillNewHelp": "只用小写字母、数字和连字符，例如 watercolor-style。建好后会打开它的文件夹，编辑里面的 SKILL.md 即可。",
   "set_agSkillCreate": "创建",
   "set_agSkillAddConfirm": "添加",
   "set_agPromptStats": "{chars} 字符 · 约 {tokens} token",
-  "@set_agPromptStats": {"placeholders": {"chars": {"type": "String"}, "tokens": {"type": "String"}}},
+  "@set_agPromptStats": {
+    "placeholders": {
+      "chars": {
+        "type": "String"
+      },
+      "tokens": {
+        "type": "String"
+      }
+    }
+  },
   "set_agFinalLive": "当前会话实际发给模型的完整系统提示词。",
   "set_agBuiltinSub": "Studio 内置的基础提示词，随版本更新。",
   "set_agMcpEditTitle": "编辑 MCP 服务器",
@@ -9649,7 +10031,13 @@
   "ag_stepArguments": "参数",
   "ag_stepResult": "结果",
   "ag_stepsMore": "还有 {count} 步",
-  "@ag_stepsMore": {"placeholders": {"count": {"type": "int"}}},
+  "@ag_stepsMore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_tool_studio_context": "读取当前草稿",
   "ag_tool_image_read": "查看图片",
   "ag_tool_prompt_update": "改写提示词",
@@ -9737,40 +10125,112 @@
   "ag_diffLocked": "草稿已再次修改",
   "ag_diffUndo": "撤销",
   "ag_diffCounts": "+{added} −{removed}",
-  "@ag_diffCounts": {"placeholders": {"added": {"type": "int"}, "removed": {"type": "int"}}},
+  "@ag_diffCounts": {
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "removed": {
+        "type": "int"
+      }
+    }
+  },
   "ag_outputs": "本次产物",
   "ag_anlasSpent": "已用 {anlas} Anlas",
-  "@ag_anlasSpent": {"placeholders": {"anlas": {"type": "String"}}},
+  "@ag_anlasSpent": {
+    "placeholders": {
+      "anlas": {
+        "type": "String"
+      }
+    }
+  },
   "ag_imageReveal": "在历史中显示",
   "ag_imageAttach": "附到输入框",
   "ag_imageZoom": "放大查看",
   "ag_askHint": "按 1–{count}",
-  "@ag_askHint": {"placeholders": {"count": {"type": "int"}}},
+  "@ag_askHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_askOther": "其他想法…",
   "ag_askSubmit": "回答",
   "ag_askSkip": "跳过",
   "ag_approvalTitle": "需要你允许 · {tool}",
-  "@ag_approvalTitle": {"placeholders": {"tool": {"type": "String"}}},
+  "@ag_approvalTitle": {
+    "placeholders": {
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
   "ag_gateTitle": "需要你确认 · {action}",
-  "@ag_gateTitle": {"placeholders": {"action": {"type": "String"}}},
+  "@ag_gateTitle": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
   "ag_gateText2img": "生成 {count} 张",
-  "@ag_gateText2img": {"placeholders": {"count": {"type": "int"}}},
+  "@ag_gateText2img": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_gateImg2img": "图生图 {count} 张",
-  "@ag_gateImg2img": {"placeholders": {"count": {"type": "int"}}},
+  "@ag_gateImg2img": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_gateInpaint": "重绘 {count} 张",
-  "@ag_gateInpaint": {"placeholders": {"count": {"type": "int"}}},
+  "@ag_gateInpaint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_gateVariations": "变体 {count} 张",
-  "@ag_gateVariations": {"placeholders": {"count": {"type": "int"}}},
+  "@ag_gateVariations": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_gateEnhance": "增强",
   "ag_gateModelSize": "模型 · 尺寸",
   "ag_gateRequests": "请求",
   "ag_gateRequestsValue": "{requests} 次 × {batch} 张",
-  "@ag_gateRequestsValue": {"placeholders": {"requests": {"type": "int"}, "batch": {"type": "int"}}},
+  "@ag_gateRequestsValue": {
+    "placeholders": {
+      "requests": {
+        "type": "int"
+      },
+      "batch": {
+        "type": "int"
+      }
+    }
+  },
   "ag_gateUnit": "单价",
   "ag_gateEncoding": "参考图编码",
   "ag_gateAccount": "账号",
   "ag_gateTotal": "合计 · 余额 {balance}",
-  "@ag_gateTotal": {"placeholders": {"balance": {"type": "String"}}},
+  "@ag_gateTotal": {
+    "placeholders": {
+      "balance": {
+        "type": "String"
+      }
+    }
+  },
   "ag_gateTotalNoBalance": "合计",
   "ag_gateConfirm": "确认并生成",
   "ag_gateConfirmTool": "确认并执行",
@@ -9780,7 +10240,13 @@
   "ag_placeholder": "告诉 Agent 要做什么 · @ 引用 · / 技能",
   "ag_dropHint": "松开以附加到这条消息",
   "ag_importing": "正在添加 {count} 张图片…",
-  "@ag_importing": {"placeholders": {"count": {"type": "int"}}},
+  "@ag_importing": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_attach": "添加图片",
   "ag_attachFile": "从文件选择…",
   "ag_attachCanvas": "附上画布当前图片",
@@ -9851,7 +10317,13 @@
   "ag_usageContext": "当前上下文 · 估算",
   "ag_usageUnknown": "等模型返回用量后显示",
   "ag_usageRemaining": "剩余 {tokens}",
-  "@ag_usageRemaining": {"placeholders": {"tokens": {"type": "String"}}},
+  "@ag_usageRemaining": {
+    "placeholders": {
+      "tokens": {
+        "type": "String"
+      }
+    }
+  },
   "ag_usageSession": "本聊天累计",
   "ag_usageInput": "输入",
   "ag_usageOutput": "输出",
@@ -9862,13 +10334,37 @@
   "ag_usageCost": "费用以服务商账单为准",
   "ag_usageCompact": "压缩上下文",
   "ag_shelfAll": "全部 {count}",
-  "@ag_shelfAll": {"placeholders": {"count": {"type": "int"}}},
+  "@ag_shelfAll": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_shelfGenerated": "生成 {count}",
-  "@ag_shelfGenerated": {"placeholders": {"count": {"type": "int"}}},
+  "@ag_shelfGenerated": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_shelfAttachments": "附件 {count}",
-  "@ag_shelfAttachments": {"placeholders": {"count": {"type": "int"}}},
+  "@ag_shelfAttachments": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_shelfFiles": "文件 {count}",
-  "@ag_shelfFiles": {"placeholders": {"count": {"type": "int"}}},
+  "@ag_shelfFiles": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_shelfFilesTitle": "文件",
   "ag_shelfHint": "点图放大 · 拖到画布",
   "ag_shelfEmpty": "这个聊天还没有产物",
@@ -9965,36 +10461,71 @@
   "mp_copyId": "复制模型 ID",
   "mp_removeModel": "移除模型",
   "mp_removeTitle": "移除模型“{id}”？",
-  "@mp_removeTitle": {"placeholders": {"id": {}}},
+  "@mp_removeTitle": {
+    "placeholders": {
+      "id": {}
+    }
+  },
   "mp_removeBody": "用到它的功能会回落到其他可用模型。",
   "mp_catalogId": "模型 ID",
   "mp_catalogCtx": "上下文",
   "mp_catalogPrice": "输入 / 输出 · 百万",
   "mp_catalogFooter": "匹配 {n} 个 · 共 {total} 个 · {when} 获取",
-  "@mp_catalogFooter": {"placeholders": {"n": {}, "total": {}, "when": {}}},
+  "@mp_catalogFooter": {
+    "placeholders": {
+      "n": {},
+      "total": {},
+      "when": {}
+    }
+  },
   "mp_catalogMore": "还有 {n} 个，输入筛选缩小范围",
-  "@mp_catalogMore": {"placeholders": {"n": {}}},
+  "@mp_catalogMore": {
+    "placeholders": {
+      "n": {}
+    }
+  },
   "mp_catalogIdle": "还没读取过目录",
   "mp_catalogIdleSub": "用已保存的地址和 Key 读取这个服务商提供的模型",
   "mp_catalogLoading": "正在读取模型目录…",
   "mp_catalogFailed": "目录不可用：{error}",
-  "@mp_catalogFailed": {"placeholders": {"error": {}}},
+  "@mp_catalogFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
   "mp_fetch": "获取列表",
   "mp_noMatch": "没有匹配的模型",
   "mp_picked": "已选 {n} 个",
-  "@mp_picked": {"placeholders": {"n": {}}},
+  "@mp_picked": {
+    "placeholders": {
+      "n": {}
+    }
+  },
   "mp_pickEmpty": "在左边勾选要添加的模型",
   "mp_pickHint": "能力、上下文和思考档位按本地目录预填，添加后可在右侧逐项调整。",
   "mp_addPicked": "添加 {n} 个模型",
-  "@mp_addPicked": {"placeholders": {"n": {}}},
+  "@mp_addPicked": {
+    "placeholders": {
+      "n": {}
+    }
+  },
   "mp_new": "新",
   "mp_unsaved": "{name} 有 {n} 项修改未保存",
-  "@mp_unsaved": {"placeholders": {"name": {}, "n": {}}},
+  "@mp_unsaved": {
+    "placeholders": {
+      "name": {},
+      "n": {}
+    }
+  },
   "mp_saving": "正在保存…",
   "mp_conflict": "配置已在别处修改：已合并最新值，确认后再保存",
   "mp_saveFailed": "保存失败，修改已保留",
   "mp_invalid": "有 {n} 处需要修正",
-  "@mp_invalid": {"placeholders": {"n": {}}},
+  "@mp_invalid": {
+    "placeholders": {
+      "n": {}
+    }
+  },
   "mp_leaveBody": "服务商配置还没保存，离开这一页会丢掉修改。",
   "mp_show": "显示",
   "mp_hide": "隐藏",
@@ -10028,41 +10559,131 @@
   "mp_errorRateLimit": "请求过于频繁",
   "ag_tool_prompt_set": "提示词组",
   "ag_psCount": "{count} {unit}",
-  "@ag_psCount": {"placeholders": {"count": {"type": "int"}, "unit": {"type": "String"}}},
+  "@ag_psCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
   "ag_psPosition": "第 {index} {unit} / 共 {count} {unit}",
-  "@ag_psPosition": {"placeholders": {"index": {"type": "int"}, "count": {"type": "int"}, "unit": {"type": "String"}}},
+  "@ag_psPosition": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
   "ag_psOverview": "总览全部",
   "ag_psSingle": "回到单项",
   "ag_psPrompt": "提示词",
   "ag_psShared": "共同设定",
   "ag_psThisItem": "这一{unit}",
-  "@ag_psThisItem": {"placeholders": {"unit": {"type": "String"}}},
+  "@ag_psThisItem": {
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
   "ag_psMain": "主提示词",
   "ag_psCharacter": "角色 {index}",
-  "@ag_psCharacter": {"placeholders": {"index": {"type": "int"}}},
+  "@ag_psCharacter": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
   "ag_psNegative": "负面",
   "ag_psPromptsOnly": "只导入提示词",
   "ag_psWithSettings": "连同参数导入",
   "ag_psImport": "导入画布",
   "ag_psImportTip": "写入主提示词、角色和负面；参数和参考图不变",
   "ag_psImported": "已把「{title}」写入提示词",
-  "@ag_psImported": {"placeholders": {"title": {"type": "String"}}},
+  "@ag_psImported": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "ag_psGenerate": "生成",
   "ag_psGenerating": "生成中",
   "ag_psRevision": "v{revision} · 已改 {count} 项",
-  "@ag_psRevision": {"placeholders": {"revision": {"type": "int"}, "count": {"type": "int"}}},
+  "@ag_psRevision": {
+    "placeholders": {
+      "revision": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_psSaveBlock": "存成积木",
   "ag_psSavedBlock": "已存成积木「{title}」· {count} 项",
-  "@ag_psSavedBlock": {"placeholders": {"title": {"type": "String"}, "count": {"type": "int"}}},
+  "@ag_psSavedBlock": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_psCopyItem": "复制这一{unit}的提示词",
-  "@ag_psCopyItem": {"placeholders": {"unit": {"type": "String"}}},
+  "@ag_psCopyItem": {
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
   "ag_psCopyAll": "复制全部",
   "ag_psEditItem": "让 Agent 修改这一{unit}",
-  "@ag_psEditItem": {"placeholders": {"unit": {"type": "String"}}},
+  "@ag_psEditItem": {
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
   "ag_psEditDraft": "修改「{title}」第 {index} {unit}（{item}）：",
-  "@ag_psEditDraft": {"placeholders": {"title": {"type": "String"}, "index": {"type": "int"}, "unit": {"type": "String"}, "item": {"type": "String"}}},
+  "@ag_psEditDraft": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "index": {
+        "type": "int"
+      },
+      "unit": {
+        "type": "String"
+      },
+      "item": {
+        "type": "String"
+      }
+    }
+  },
   "ag_psTooManyCharacters": "当前模型最多支持 {count} 个角色",
-  "@ag_psTooManyCharacters": {"placeholders": {"count": {"type": "int"}}},
+  "@ag_psTooManyCharacters": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_psNoCharacters": "当前模型不支持角色提示词",
   "ag_psMissing": "这张卡的数据已不在",
   "startup_dataTitle": "无法准备应用数据",
@@ -10531,5 +11152,26 @@
   "set_agRulesView": "查看",
   "set_agRulesMissing": "此工作区尚未创建 AGENTS.md",
   "set_agRulesEmpty": "AGENTS.md 暂无内容",
-  "set_agRulesLoadFailed": "无法读取 AGENTS.md，请检查文件权限。"
+  "set_agRulesLoadFailed": "无法读取 AGENTS.md，请检查文件权限。",
+  "preciseRef_typeOutfit": "服装",
+  "preciseRef_outfitDescription": "仅参考图片中的服装与穿搭（V5 专属）",
+  "preciseRef_preferSameOutfit": "同时参考服装",
+  "refs_typeOutfit": "服装",
+  "refs_typeOutfitDesc": "只借服装与穿搭设计，人物和画风跟提示词走（仅 V5 可用）",
+  "refs_preferSameOutfit": "同时参考服装",
+  "refs_preferSameOutfitDesc": "V5 下开启时更贴近参考图角色的服装",
+  "gen_preciseOutfit": "服装",
+  "gen_precisePreferSameOutfit": "同时参考服装",
+  "gen_preciseInpaintUnsupported": "当前模型的局部重绘暂不支持精准参考，本次发送将忽略参考图且不计费。",
+  "gen_preciseOutfitUnsupported": "当前模型不支持服装参考，服装条目本次将被跳过且不计费。",
+  "gen_preciseLimit": "最多可添加 {count} 张精准参考",
+  "@gen_preciseLimit": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "gen_turboBlockedByPrecise": "精准参考仅支持通常模式（V5 Full），移除或停用精准参考后才能开启 Turbo",
+  "gen_turboSwitchedOffForPrecise": "精准参考需要通常模式，已自动切回 V5 Full"
 }

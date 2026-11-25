@@ -617,7 +617,7 @@ class GenVibesData with _GenValue {
   List<Object?> get _values => [list, max, freeCount, extraCost, normalize];
 }
 
-enum GenPreciseType { character, style, both }
+enum GenPreciseType { character, style, both, outfit }
 
 /// 一个精准参考（`PreciseReference`）。
 @immutable
@@ -626,6 +626,7 @@ class GenPrecise with _GenValue {
     required this.id,
     required this.thumb,
     this.type = GenPreciseType.character,
+    this.preferSameOutfit,
     this.strength = 1,
     this.fidelity = 1,
     this.enabled = true,
@@ -634,22 +635,77 @@ class GenPrecise with _GenValue {
   final String id;
   final ImageProvider thumb;
   final GenPreciseType type;
+
+  /// V5「同时参考服装」开关（null = 按类型默认：角色关、角色+风格开）。
+  final bool? preferSameOutfit;
   final double strength;
   final double fidelity;
   final bool enabled;
+
+  bool get supportsPreferSameOutfit =>
+      type == GenPreciseType.character || type == GenPreciseType.both;
+
+  bool get effectivePreferSameOutfit =>
+      preferSameOutfit ?? type == GenPreciseType.both;
+
   @override
-  List<Object?> get _values => [id, thumb, type, strength, fidelity, enabled];
+  List<Object?> get _values => [
+    id,
+    thumb,
+    type,
+    preferSameOutfit,
+    strength,
+    fidelity,
+    enabled,
+  ];
 }
 
 @immutable
 class GenPreciseData with _GenValue {
-  const GenPreciseData({this.list = const [], this.costEach = 5});
+  const GenPreciseData({
+    this.list = const [],
+    this.costEach = 5,
+    this.max = 16,
+    this.supportsOutfit = false,
+    this.showFidelity = true,
+    this.strengthMax = 1,
+    this.suspendedForInpaint = false,
+    this.hasUnsupportedOutfit = false,
+  });
   final List<GenPrecise> list;
 
   /// 每张多少 Anlas（`AnlasCalculator`）。
   final int costEach;
+
+  /// 单次最多多少张精准参考（官方上限 16）。
+  final int max;
+
+  /// 模型是否支持服装参考与「同时参考服装」（V5 = true，V4.5 = false）。
+  final bool supportsOutfit;
+
+  /// 是否显示保真度滑杆（V4.5 = true，V5 = false）。
+  final bool showFidelity;
+
+  /// 强度滑杆上限（V5 = 5.0，V4.5 = 1.0）。
+  final double strengthMax;
+
+  /// 局部重绘中且当前模型不支持重绘精准参考（V5）。
+  final bool suspendedForInpaint;
+
+  /// 当前模型不支持服装参考，但列表中有启用的服装条目（V4.5）。
+  final bool hasUnsupportedOutfit;
+
   @override
-  List<Object?> get _values => [list, costEach];
+  List<Object?> get _values => [
+    list,
+    costEach,
+    max,
+    supportsOutfit,
+    showFidelity,
+    strengthMax,
+    suspendedForInpaint,
+    hasUnsupportedOutfit,
+  ];
 }
 
 @immutable
@@ -1300,6 +1356,7 @@ class GenViewData with _GenValue {
     this.displayModel,
     this.turboVisible = false,
     this.turbo,
+    this.turboBlockedByPrecise = false,
     this.furry,
     this.quota = const GenQuota(),
     this.layout = const GenLayout(),
@@ -1326,6 +1383,9 @@ class GenViewData with _GenValue {
 
   /// null = unavailable, false = Full, true = Turbo (Medium Effort).
   final bool? turbo;
+
+  /// 精准参考启用时禁用 Turbo（Medium Effort）。
+  final bool turboBlockedByPrecise;
 
   /// Anime / Furry 模式（`params.furryMode`）；null = 当前模型没有这一格（`spec.v4Prompts`）。
   final bool? furry;
@@ -1356,6 +1416,7 @@ class GenViewData with _GenValue {
     bool? turboVisible,
     bool? turbo,
     bool clearTurbo = false,
+    bool? turboBlockedByPrecise,
     bool? furry,
     bool clearFurry = false,
     GenQuota? quota,
@@ -1375,6 +1436,7 @@ class GenViewData with _GenValue {
     displayModel: displayModel ?? this.displayModel,
     turboVisible: turboVisible ?? this.turboVisible,
     turbo: clearTurbo ? null : (turbo ?? this.turbo),
+    turboBlockedByPrecise: turboBlockedByPrecise ?? this.turboBlockedByPrecise,
     furry: clearFurry ? null : (furry ?? this.furry),
     quota: quota ?? this.quota,
     layout: layout ?? this.layout,
@@ -1395,6 +1457,7 @@ class GenViewData with _GenValue {
     displayModel,
     turboVisible,
     turbo,
+    turboBlockedByPrecise,
     furry,
     quota,
     layout,

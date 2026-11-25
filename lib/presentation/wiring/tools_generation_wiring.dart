@@ -113,7 +113,7 @@ ToolsUpscaleData toolsUpscaleView(Ref ref, GeneratedImage image) {
       ? l.localUpscale_busy
       : cloud
       ? cloudCost < 0
-            ? l.localUpscale_sizeLimit
+            ? l.img2img_cloudUpscaleSizeLimit
             : null
       : !windows
       ? l.localUpscale_unsupportedPlatform
@@ -143,6 +143,7 @@ ToolsUpscaleData toolsUpscaleView(Ref ref, GeneratedImage image) {
         id: 'local',
         title: l.localUpscale_local,
         detail: l.localUpscale_description,
+        cost: 0,
         enabled: windows,
       ),
       ToolsUpscaleBackend(
@@ -245,7 +246,7 @@ ToolsUpscaleData toolsUpscaleView(Ref ref, GeneratedImage image) {
               decimals: 2,
             ),
           ],
-    cost: cloud && cloudCost >= 0 ? cloudCost : null,
+    cost: cloud ? (cloudCost < 0 ? null : cloudCost) : 0,
     running: running,
     blocked: blocked,
   );

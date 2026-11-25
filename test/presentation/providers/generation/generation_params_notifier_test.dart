@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:image/image.dart' as img;
+import 'package:nai_launcher/core/constants/api_constants.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/core/utils/inpaint_focus_region.dart';
 import 'package:nai_launcher/core/enums/precise_ref_type.dart';
@@ -673,12 +674,13 @@ void main() {
     ], recordUsage: false);
     notifier.addPreciseReference(
       preciseBytes,
-      type: PreciseRefType.style,
+      type: PreciseRefType.characterAndStyle,
       strength: 1.5,
       fidelity: 1.5,
       isNormalizedPng: true,
     );
-    notifier.updatePreciseReference(0, enabled: false);
+    notifier.updatePreciseReference(0, enabled: false, preferSameOutfit: false);
+    notifier.addPreciseReference(imageBytes, type: PreciseRefType.outfit);
     await notifier.saveGenerationState();
 
     expect(storage.generationStateJson, isNotNull);
@@ -704,9 +706,12 @@ void main() {
     expect(restoredVibe.bundleSource, 'bundle-a');
     expect(restoredVibe.enabled, isFalse);
 
-    final restoredPrecise = restored.preciseReferences.single;
+    final [restoredPrecise, outfit] = restored.preciseReferences;
     expect(restoredPrecise.image, preciseBytes);
-    expect(restoredPrecise.type, PreciseRefType.style);
+    expect(restoredPrecise.type, PreciseRefType.characterAndStyle);
+    expect(restoredPrecise.preferSameOutfit, isFalse);
+    expect(outfit.type, PreciseRefType.outfit);
+    expect(outfit.preferSameOutfit, isNull);
     expect(restoredPrecise.strength, 1.5);
     expect(restoredPrecise.fidelity, 1.5);
     expect(restoredPrecise.enabled, isFalse);
@@ -717,7 +722,7 @@ void main() {
   });
 
   test(
-    'addPreciseReferenceFromImage stores request-ready normalized PNG',
+    'addPreciseReferenceFromImage keeps raw data across V4.5 and V5 switches',
     () async {
       final container = ProviderContainer(
         overrides: [
@@ -732,28 +737,128 @@ void main() {
         generationParamsNotifierProvider.notifier,
       );
 
+      notifier.updateModel(ImageModels.animeDiffusionV45Full);
+      final raw = _validPngBytes(width: 8, height: 4);
       await notifier.addPreciseReferenceFromImage(
-        _validPngBytes(width: 8, height: 4),
+        raw,
         type: PreciseRefType.character,
         strength: 0.7,
         fidelity: 0.9,
+        preferSameOutfit: true,
       );
 
       final reference = container
           .read(generationParamsNotifierProvider)
           .preciseReferences
           .single;
-      final decoded = img.decodeImage(reference.image);
+      expect(reference.image, raw);
+      expect(
+        NAIApiUtils.isKnownNormalizedPreciseReferencePng(reference.image),
+        isFalse,
+      );
+      var model = container.read(generationParamsNotifierProvider).modelSpec;
+      final v45 = img.decodePng(
+        await NAIApiUtils.normalizePreciseReferenceForModel(
+          reference.image,
+          model,
+        ),
+      )!;
+      expect((v45.width, v45.height), (1536, 1024));
+      notifier.updateModel(ImageModels.animeDiffusionV5Full);
+      final updated = container.read(generationParamsNotifierProvider);
+      model = updated.modelSpec;
+      final v5 = img.decodePng(
+        await NAIApiUtils.normalizePreciseReferenceForModel(
+          reference.image,
+          model,
+        ),
+      )!;
+      expect((v5.width, v5.height), (1408, 704));
+      expect(updated.preciseReferences.single.image, same(reference.image));
+      expect(reference.type, PreciseRefType.character);
+      expect(reference.strength, 0.7);
+      expect(reference.fidelity, 0.9);
+      expect(reference.preferSameOutfit, isTrue);
+    },
+  );
 
+  test(
+    'Turbo falls back on add, enable, model selection and leaving inpaint',
+    () async {
+      final container = ProviderContainer(
+        overrides: [
+          vibeLibraryStorageServiceProvider.overrideWithValue(
+            _FakeGenerationStateStorage(),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+      final writer = container.read(generationParamsNotifierProvider.notifier);
+      ImageParams read() => container.read(generationParamsNotifierProvider);
+      const turbo = ImageModels.animeDiffusionV5FullMedium;
+      const full = ImageModels.animeDiffusionV5Full;
+      writer.updateModel(turbo);
+      writer.addPreciseReference(
+        _validPngBytes(width: 8, height: 4),
+        type: PreciseRefType.outfit,
+      );
+      expect(read().model, full);
+      writer.updateModel(turbo);
+      expect(read().model, full);
+      writer.updatePreciseReference(0, enabled: false);
+      writer.updateModel(turbo);
+      expect(read().model, turbo);
+      writer.updatePreciseReference(0, enabled: true);
+      expect(read().model, full);
+
+      for (final exitInpaint in [
+        writer.clearInpainting,
+        () => writer.updateAction(ImageGenerationAction.img2img),
+        () => writer.updateAction(ImageGenerationAction.generate),
+      ]) {
+        writer.updateAction(ImageGenerationAction.infill);
+        writer.updateModel(turbo);
+        expect(read().model, turbo);
+        expect(read().preciseReferencesSuspendedForInpaint, isTrue);
+        exitInpaint();
+        expect(read().model, full);
+        expect(read().hasEffectivePreciseReferences, isTrue);
+      }
+      await writer.saveGenerationState();
+    },
+  );
+
+  test(
+    'an explicit custom normalization callback still replaces staged bytes',
+    () async {
+      final container = ProviderContainer(
+        overrides: [
+          vibeLibraryStorageServiceProvider.overrideWithValue(
+            _FakeGenerationStateStorage(),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+      final writer = container.read(generationParamsNotifierProvider.notifier);
+      final raw = _validPngBytes(width: 4, height: 4);
+      final normalized = _validPngBytes(width: 8, height: 8);
+      await writer.addPreciseReferenceFromImage(
+        raw,
+        type: PreciseRefType.character,
+        normalize: (staged) async {
+          expect(staged, raw);
+          return normalized;
+        },
+      );
+      final reference = container
+          .read(generationParamsNotifierProvider)
+          .preciseReferences
+          .single;
+      expect(reference.image, same(normalized));
       expect(
         NAIApiUtils.isKnownNormalizedPreciseReferencePng(reference.image),
         isTrue,
       );
-      expect(decoded, isNotNull);
-      expect('${decoded!.width}x${decoded.height}', '1536x1024');
-      expect(reference.type, PreciseRefType.character);
-      expect(reference.strength, 0.7);
-      expect(reference.fidelity, 0.9);
     },
   );
 }

@@ -76,7 +76,7 @@ void main() {
           ),
         ],
         preciseReferenceImages: [base64Encode(preciseBytes)],
-        preciseReferenceTypes: const ['character&style'],
+        preciseReferenceTypes: const ['character&style_anyoutfit'],
         preciseReferenceStrengths: const [0.8],
         preciseReferenceFidelities: const [0.9],
       );
@@ -108,6 +108,7 @@ void main() {
         PreciseRefType.characterAndStyle,
       );
       expect(params.preciseReferences.single.strength, 0.8);
+      expect(params.preciseReferences.single.preferSameOutfit, isFalse);
       expect(params.preciseReferences.single.fidelity, 0.9);
       expect(characters.characters, hasLength(1));
       expect(characters.characters.single.prompt, '1girl, blue hair');

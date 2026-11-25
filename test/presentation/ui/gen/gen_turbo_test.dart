@@ -205,4 +205,60 @@ void main() {
       expect(find.byType(GenHeader), findsOneWidget);
     },
   );
+
+  testWidgets('Turbo button is disabled when blocked by active precise references', (
+    t,
+  ) async {
+    final recorder = GenRecorder();
+    await pumpGen(
+      t,
+      data: data(turbo: false).copyWith(turboBlockedByPrecise: true),
+      actions: recorder.actions,
+    );
+    await t.tap(find.byKey(const Key('gen-turbo')));
+    await t.pumpAndSettle();
+    expect(recorder.calls.where((s) => s.startsWith('onTurboChanged')), isEmpty);
+    expect(t.takeException(), isNull);
+  });
+
+  testWidgets('V5 precise reference section renders outfit type, prefer-same-outfit toggle, 0-5 strength, hides fidelity, and shows inpaint warning', (
+    t,
+  ) async {
+    final recorder = GenRecorder();
+    final thumb = GenFixture.view().canvas.focus!.tiles.first.image!;
+    await pumpGen(
+      t,
+      data: data(turbo: false).copyWith(
+        refs: GenRefsData(
+          precise: GenPreciseData(
+            supportsOutfit: true,
+            showFidelity: false,
+            strengthMax: 5.0,
+            suspendedForInpaint: true,
+            list: [
+              GenPrecise(
+                id: 'p1',
+                thumb: thumb,
+                type: GenPreciseType.character,
+                strength: 2.0,
+              ),
+            ],
+          ),
+        ),
+      ),
+      actions: recorder.actions,
+    );
+    await tapKey(t, 'gen-ref-precise-row');
+    expect(find.byKey(const Key('gen-precise-inpaint-warn')), findsOneWidget);
+    expect(find.byKey(const Key('gen-precise-outfit-toggle-p1')), findsOneWidget);
+    expect(find.byKey(const Key('gen-precise-fidelity-p1')), findsNothing);
+    expect(find.text('服装'), findsOneWidget);
+
+    await tapKey(t, 'gen-precise-outfit-toggle-p1');
+    expect(
+      recorder.calls.where((s) => s.startsWith('onPreciseChanged')),
+      hasLength(1),
+    );
+    expect(t.takeException(), isNull);
+  });
 }

@@ -28,6 +28,12 @@ class ModelSpec {
     required this.vibetransfer,
     required this.encodedVibes,
     required this.characterReferences,
+    this.charRefInpainting = false,
+    this.resizeCharacterReferences = false,
+    this.bucketCharacterReferences = false,
+    this.characterReferenceFidelity = false,
+    this.characterReferenceStrengthMax = 1.0,
+    this.outfitReferences = false,
     required this.noiseSchedule,
     required this.varietyPlus,
     required this.smea,
@@ -70,6 +76,14 @@ class ModelSpec {
 
   /// 支持 Character Reference。
   final bool characterReferences;
+  final bool charRefInpainting;
+  final bool resizeCharacterReferences;
+  final bool bucketCharacterReferences;
+  final bool characterReferenceFidelity;
+  final double characterReferenceStrengthMax;
+  final bool outfitReferences;
+
+  static const maxPreciseReferences = 16;
 
   /// 支持自定义噪声调度。V5 固定由服务端决定。
   final bool noiseSchedule;
@@ -167,6 +181,9 @@ class ModelSpecs {
     vibetransfer: true,
     encodedVibes: true,
     characterReferences: true,
+    charRefInpainting: true,
+    resizeCharacterReferences: true,
+    characterReferenceFidelity: true,
     noiseSchedule: true,
     varietyPlus: true,
     smea: false,
@@ -192,7 +209,10 @@ class ModelSpecs {
     maxCharacters: 32,
     vibetransfer: false,
     encodedVibes: false,
-    characterReferences: false,
+    characterReferences: true,
+    bucketCharacterReferences: true,
+    characterReferenceStrengthMax: 5.0,
+    outfitReferences: true,
     noiseSchedule: false,
     varietyPlus: false,
     smea: false,
@@ -238,6 +258,12 @@ class ModelSpecs {
     vibetransfer: base.vibetransfer,
     encodedVibes: base.encodedVibes,
     characterReferences: base.characterReferences,
+    charRefInpainting: base.charRefInpainting,
+    resizeCharacterReferences: base.resizeCharacterReferences,
+    bucketCharacterReferences: base.bucketCharacterReferences,
+    characterReferenceFidelity: base.characterReferenceFidelity,
+    characterReferenceStrengthMax: base.characterReferenceStrengthMax,
+    outfitReferences: base.outfitReferences,
     noiseSchedule: base.noiseSchedule,
     varietyPlus: base.varietyPlus,
     smea: base.smea,

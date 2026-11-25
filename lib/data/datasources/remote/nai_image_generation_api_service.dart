@@ -164,17 +164,15 @@ class NAIImageGenerationApiService {
     // NovelAI 官方说明 Precise Reference 与 Vibe Transfer 不兼容。
     // 当前策略是保留 Precise Reference，并在请求构建阶段跳过 Vibe Transfer。
     final hasVibes = effectiveParams.hasVibeReferencesV4;
-    if (hasVibes && effectiveParams.hasPreciseReferences) {
+    if (hasVibes && effectiveParams.hasEffectivePreciseReferences) {
       AppLogger.d(
         'Both Vibe Transfer and Precise Reference are enabled; skipping vibe payload in favor of Precise Reference',
         'ImgGen',
       );
     }
 
-    // Precise Reference 仅 V4.5 模型支持，其他模型时忽略数据。
-    final effectivePreciseRefs = effectiveParams.isV45Model
-        ? effectiveParams.enabledPreciseReferences
-        : <PreciseReference>[];
+    final effectivePreciseRefs =
+        effectiveParams.effectivePreciseReferencesForRequest;
 
     final cancelToken = CancelToken();
     _currentCancelToken = cancelToken;
@@ -189,7 +187,6 @@ class NAIImageGenerationApiService {
       final requestBuildResult = await NAIImageRequestBuilder(
         params: effectiveParams,
         encodeVibe: _enhancementService.encodeVibe,
-        preciseReferences: effectivePreciseRefs,
       ).build(sampler: effectiveSampler);
 
       final vibeEncodingMap = requestBuildResult.vibeEncodingMap;
@@ -427,17 +424,15 @@ class NAIImageGenerationApiService {
     // NovelAI 官方说明 Precise Reference 与 Vibe Transfer 不兼容。
     // 当前策略是保留 Precise Reference，并在请求构建阶段跳过 Vibe Transfer。
     final hasVibes = effectiveParams.hasVibeReferencesV4;
-    if (hasVibes && effectiveParams.hasPreciseReferences) {
+    if (hasVibes && effectiveParams.hasEffectivePreciseReferences) {
       AppLogger.d(
         'Both Vibe Transfer and Precise Reference are enabled (stream); skipping vibe payload in favor of Precise Reference',
         'ImgGen',
       );
     }
 
-    // Precise Reference 仅 V4.5 模型支持，其他模型时忽略数据。
-    final effectivePreciseRefs = effectiveParams.isV45Model
-        ? effectiveParams.enabledPreciseReferences
-        : <PreciseReference>[];
+    final effectivePreciseRefs =
+        effectiveParams.effectivePreciseReferencesForRequest;
 
     try {
       if (cancelToken.isCancelled) {
@@ -449,7 +444,6 @@ class NAIImageGenerationApiService {
       final requestBuildResult = await NAIImageRequestBuilder(
         params: effectiveParams,
         encodeVibe: _enhancementService.encodeVibe,
-        preciseReferences: effectivePreciseRefs,
       ).build(sampler: effectiveParams.sampler, isStream: true);
       buildStopwatch.stop();
       if (_enablePipelineTracing) {

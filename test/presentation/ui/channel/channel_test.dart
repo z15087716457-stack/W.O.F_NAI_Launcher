@@ -201,10 +201,10 @@ void main() {
       expect(calls.last, contains('ChannelSettings(random,'));
     });
 
-    testWidgets('生成中写“动画已暂停”', (t) async {
+    testWidgets('生成中不显示“动画已暂停”', (t) async {
       await pumpChannel(t, generating: true);
       await _openDisplay(t);
-      expect(find.text('生成中 · 动画已暂停'), findsOneWidget);
+      expect(find.text('生成中 · 动画已暂停'), findsNothing);
     });
   });
 
@@ -222,7 +222,7 @@ void main() {
       expect(after.top, lessThan(before.top));
     });
 
-    testWidgets('空闲微动按节拍推进，生成中停', (t) async {
+    testWidgets('空闲微动按节拍推进，生成中继续推进', (t) async {
       Widget host({required bool generating}) => MaterialApp(
         theme: GeistTheme.light,
         home: MediaQuery(
@@ -250,8 +250,8 @@ void main() {
       final time = painter.time.value;
       expect(time, closeTo(.066, .0001));
       await t.pumpWidget(host(generating: true));
-      await t.pump(const Duration(seconds: 1));
-      expect(painter.time.value, time);
+      await t.pump(const Duration(milliseconds: 99));
+      expect(painter.time.value, greaterThan(time));
     });
 
     testWidgets('所有主题在各种缩放、明暗、钉板下都能画', (t) async {

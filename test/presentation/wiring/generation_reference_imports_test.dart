@@ -529,4 +529,64 @@ void main() {
       isEmpty,
     );
   });
+
+  test(
+    'production decoder keeps raw bytes intact, preserves preferSameOutfit, and enforces 16-ref limit',
+    () async {
+      final prodContainer = ProviderContainer(
+        overrides: [
+          localStorageServiceProvider.overrideWithValue(MemoryDraftSettings()),
+          characterPromptRepositoryProvider.overrideWithValue(MemoryCharacters()),
+          promptBlockLibraryNotifierProvider.overrideWith(EmptyBlocks.new),
+          imageGenerationNotifierProvider.overrideWith(RecordingGeneration.new),
+          authNotifierProvider.overrideWith(SwitchingAuth.new),
+          subscriptionNotifierProvider.overrideWith(DataSubscription.new),
+          generationPlatformProvider.overrideWithValue(platform),
+          vibeLibraryStorageServiceProvider.overrideWithValue(storage),
+        ],
+      );
+      addTearDown(prodContainer.dispose);
+      await prodContainer.read(promptBlockLibraryNotifierProvider.future);
+      prodContainer
+          .read(generationParamsNotifierProvider.notifier)
+          .updateModel(ImageModels.animeDiffusionV5Full);
+      final prodImports = prodContainer.read(generationReferenceImportsProvider);
+      final rawPng = Uint8List.fromList(
+        img.encodePng(img.Image(width: 64, height: 32)),
+      );
+      await prodImports.files(
+        GenDropTarget.precise,
+        () async => [
+          GenerationReferenceFile(
+            'hero.png',
+            rawPng,
+            preferSameOutfit: true,
+          ),
+        ],
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      final added = prodContainer
+          .read(generationParamsNotifierProvider)
+          .preciseReferences
+          .single;
+      // Original bytes remain intact (not overwritten with letterboxed PNG).
+      expect(added.image, rawPng);
+      expect(added.preferSameOutfit, isTrue);
+
+      await expectLater(
+        prodImports.files(
+          GenDropTarget.precise,
+          () async => [
+            for (var i = 0; i < 16; i++)
+              GenerationReferenceFile('extra-$i.png', rawPng),
+          ],
+        ),
+        throwsStateError,
+      );
+      expect(
+        prodContainer.read(generationParamsNotifierProvider).preciseReferences,
+        hasLength(1),
+      );
+    },
+  );
 }

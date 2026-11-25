@@ -10,6 +10,7 @@ void main() {
   /// 需要显式注册能力的模型（V4 及更高版本，含 inpainting 变体）。
   const registeredBaseModels = [
     ImageModels.animeDiffusionV5Full,
+    ImageModels.animeDiffusionV5FullMedium,
     ImageModels.animeDiffusionV5Curated,
     ImageModels.animeDiffusionV45Full,
     ImageModels.animeDiffusionV45Curated,
@@ -89,10 +90,9 @@ void main() {
       expect(spec.billingVersion, 5);
     });
 
-    test('drops vibe transfer, precise reference and noise schedule', () {
+    test('drops vibe transfer and noise schedule', () {
       expect(spec.vibetransfer, isFalse);
       expect(spec.encodedVibes, isFalse);
-      expect(spec.characterReferences, isFalse);
       expect(spec.noiseSchedule, isFalse);
       expect(spec.varietyPlus, isFalse);
     });
@@ -108,6 +108,26 @@ void main() {
       expect(ImageModels.isV4Model(ImageModels.animeDiffusionV5Full), isTrue);
       expect(ImageModels.isV45Model(ImageModels.animeDiffusionV5Full), isFalse);
     });
+  });
+
+  test('precise reference flags follow the model family and variant', () {
+    for (final model in [
+      ...registeredBaseModels,
+      ...registeredBaseModels.map(ImageModels.resolveInpaintingModel),
+      ImageModels.animeDiffusionV3,
+    ]) {
+      final spec = ModelSpecs.of(model);
+      final v45 = ImageModels.isV45Model(model);
+      final v5 = ImageModels.isV5Model(model);
+      expect(spec.characterReferences, v45 || v5, reason: model);
+      expect(spec.charRefInpainting, v45, reason: model);
+      expect(spec.resizeCharacterReferences, v45, reason: model);
+      expect(spec.bucketCharacterReferences, v5, reason: model);
+      expect(spec.characterReferenceFidelity, v45, reason: model);
+      expect(spec.characterReferenceStrengthMax, v5 ? 5.0 : 1.0, reason: model);
+      expect(spec.outfitReferences, v5, reason: model);
+    }
+    expect(ModelSpec.maxPreciseReferences, 16);
   });
 
   group('V4 family capabilities', () {

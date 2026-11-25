@@ -4,9 +4,11 @@ import 'dart:io';
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/constants/model_spec.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../core/utils/image_save_utils.dart';
 import '../../../../data/models/gallery/nai_image_metadata.dart';
+import '../../../../data/models/image/image_params.dart';
 import '../../../../data/repositories/gallery_folder_repository.dart';
 import '../../../../data/services/image_metadata_service.dart';
 import '../../../../data/services/gallery/gallery_file_changes.dart';
@@ -306,19 +308,44 @@ class GenerationSaveService {
       };
     }
 
-    if (metadata.preciseReferenceImages.isNotEmpty) {
+    final model = metadata.model ?? metadata.sourceModel;
+    final spec = model == null ? null : ModelSpecs.of(model);
+    final preciseReferences = spec != null && spec.characterReferences
+        ? ImageParams(
+            model: spec.id,
+            action: metadata.usedInpainting
+                ? ImageGenerationAction.infill
+                : ImageGenerationAction.generate,
+            preciseReferences: metadata.preciseReferences,
+          ).effectivePreciseReferencesForRequest
+        : null;
+    final referenceImages = preciseReferences == null
+        ? metadata.preciseReferenceImages
+        : preciseReferences
+              .map((reference) => base64Encode(reference.image))
+              .toList();
+    if (referenceImages.isNotEmpty) {
+      final captions = preciseReferences == null
+          ? metadata.preciseReferenceTypes
+          : preciseReferences.map((reference) => reference.toApiCaption(spec!));
+      final strengths = preciseReferences == null
+          ? metadata.preciseReferenceStrengths
+          : preciseReferences.map((reference) => reference.strength).toList();
+      final fidelities = preciseReferences == null
+          ? metadata.preciseReferenceFidelities
+          : preciseReferences.map(
+              (reference) => reference.effectiveFidelity(spec!),
+            );
       commentJson.addAll({
-        'director_reference_images': metadata.preciseReferenceImages,
+        'director_reference_images': referenceImages,
         'director_reference_descriptions': [
-          for (final type in metadata.preciseReferenceTypes)
+          for (final type in captions)
             {
               'caption': {'base_caption': type, 'char_captions': []},
             },
         ],
-        'director_reference_strength_values':
-            metadata.preciseReferenceStrengths,
-        'director_reference_secondary_strength_values': metadata
-            .preciseReferenceFidelities
+        'director_reference_strength_values': strengths,
+        'director_reference_secondary_strength_values': fidelities
             .map((value) => 1.0 - value)
             .toList(),
       });

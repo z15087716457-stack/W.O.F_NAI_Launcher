@@ -477,6 +477,7 @@ class _MainShellState extends ConsumerState<MainShell> {
     // - 其他索引不保活，切换时销毁重建
     // 索引随 AppBranch 枚举顺序联动，插入/删除分支时无需改字面量
     const keepAliveBranches = {
+      AppBranch.generation,
       AppBranch.localGallery,
       AppBranch.onlineGallery,
       AppBranch.vibeLibrary,

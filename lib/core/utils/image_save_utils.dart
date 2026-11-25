@@ -9,8 +9,8 @@ import '../../data/models/image/image_params.dart';
 import '../../data/services/image_metadata_service.dart';
 import '../../data/services/metadata/unified_metadata_parser.dart';
 import '../constants/api_constants.dart';
-import '../enums/precise_ref_type.dart';
 import '../enums/quality_tag_preset.dart';
+import '../services/effective_vibe_references.dart';
 import 'app_logger.dart';
 import 'gallery_storage_layout.dart';
 import 'prompt_semantics_utils.dart';
@@ -36,6 +36,7 @@ class ImageSaveUtils {
     List<Map<String, dynamic>>? charNegCaptions,
     bool useCoords = false,
   }) {
+    final spec = params.modelSpec;
     final commentJson = <String, dynamic>{
       'prompt': params.prompt,
       'uc': params.negativePrompt,
@@ -90,37 +91,48 @@ class ImageSaveUtils {
       };
     }
 
-    // Vibe Transfer 数据（关键！之前缺失）
-    if (params.hasVibeReferencesV4) {
-      final validVibes = params.enabledVibeReferencesV4
-          .where((v) => v.vibeEncoding.isNotEmpty)
+    final validVibes = effectiveVibeReferences(
+      params,
+      spec,
+    ).where((vibe) => vibe.vibeEncoding.isNotEmpty).toList();
+    if (validVibes.isNotEmpty) {
+      commentJson['reference_image_multiple'] = validVibes
+          .map((v) => v.vibeEncoding)
           .toList();
-
-      if (validVibes.isNotEmpty) {
-        commentJson['reference_image_multiple'] = validVibes
-            .map((v) => v.vibeEncoding)
-            .toList();
-        commentJson['reference_strength_multiple'] = validVibes
-            .map((v) => v.strength)
-            .toList();
-        commentJson['reference_information_extracted_multiple'] = validVibes
-            .map((v) => v.infoExtracted)
-            .toList();
-      }
+      commentJson['reference_strength_multiple'] = validVibes
+          .map((v) => v.strength)
+          .toList();
+      commentJson['reference_information_extracted_multiple'] = validVibes
+          .map((v) => v.infoExtracted)
+          .toList();
     }
 
-    // Precise Reference 数据
-    if (params.hasPreciseReferences) {
-      final preciseReferences = params.enabledPreciseReferences;
+    // 只记录参与本次请求的精准参考配置，避免嵌入过大的参考图。
+    final preciseReferences = params.effectivePreciseReferencesForRequest;
+    if (preciseReferences.isNotEmpty) {
       commentJson['use_precise_ref'] = true;
-      commentJson['precise_ref_type'] = preciseReferences.first.type
-          .toApiString();
-      // 注意：Precise Reference 的图像数据不直接存入元数据，
-      // 因为可能很大。这里只记录配置信息
+      commentJson['precise_ref_type'] = preciseReferences.first.toApiCaption(
+        spec,
+      );
+      commentJson['director_reference_descriptions'] = [
+        for (final reference in preciseReferences)
+          {
+            'caption': {
+              'base_caption': reference.toApiCaption(spec),
+              'char_captions': [],
+            },
+          },
+      ];
+      commentJson['director_reference_strength_values'] = [
+        for (final reference in preciseReferences) reference.strength,
+      ];
+      commentJson['director_reference_secondary_strength_values'] = [
+        for (final reference in preciseReferences)
+          1.0 - reference.effectiveFidelity(spec),
+      ];
     }
 
-    // V4.5 参数
-    if (params.isV45Model) {
+    if (spec.varietyPlus) {
       commentJson['variety_plus'] = params.varietyPlus;
     }
 

@@ -795,6 +795,12 @@ class ResourceLibraryBackend implements ResourceWindowBackend {
               count: all.where((e) => e.type == RefsPreciseType.both).length,
               icon: 'typeBoth',
             ),
+            _group(
+              'type:outfit',
+              l.refs_typeOutfit,
+              count: all.where((e) => e.type == RefsPreciseType.outfit).length,
+              icon: 'typeOutfit',
+            ),
           ]),
         );
       }
@@ -1011,6 +1017,7 @@ class ResourceLibraryBackend implements ResourceWindowBackend {
               RefsPreciseType.character => currentL10n.refs_typeCharacter,
               RefsPreciseType.style => currentL10n.refs_typeStyle,
               RefsPreciseType.both => currentL10n.refs_typeBoth,
+              RefsPreciseType.outfit => currentL10n.refs_typeOutfit,
             },
       'positive': e.tags.join(', '),
     };

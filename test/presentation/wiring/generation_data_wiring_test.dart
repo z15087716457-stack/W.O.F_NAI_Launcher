@@ -472,7 +472,11 @@ void main() {
     expect(data.characters!.freeform, isTrue);
     expect(data.prompt.transparent, isFalse);
     expect(data.refs.vibes, isNull);
-    expect(data.refs.precise, isNull);
+    expect(data.refs.precise, isNotNull);
+    expect(data.refs.precise!.supportsOutfit, isTrue);
+    expect(data.refs.precise!.showFidelity, isFalse);
+    expect(data.refs.precise!.strengthMax, 5.0);
+    expect(data.turboBlockedByPrecise, isFalse);
     expect(data.prompt.translate.route, 'Local · test-model');
 
     final account = container.read(subscriptionNotifierProvider).subscription!;

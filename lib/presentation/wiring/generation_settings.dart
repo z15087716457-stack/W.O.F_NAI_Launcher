@@ -77,10 +77,11 @@ class GenerationSettings {
     if (ImageModels.allModels.contains(value)) _params.updateModel(value);
   });
   Future<void> turbo(bool value) => _editDraft(() {
-    final current = ref.read(generationParamsNotifierProvider).model;
+    final params = ref.read(generationParamsNotifierProvider);
+    if (value && params.hasEffectivePreciseReferences) return;
     final target = value
-        ? ImageModels.turboModelForModel(current)
-        : ImageModels.baseModelForTurboModel(current);
+        ? ImageModels.turboModelForModel(params.model)
+        : ImageModels.baseModelForTurboModel(params.model);
     if (target != null) _params.updateModel(target);
   });
   Future<void> furry(bool value) => _editDraft(() {

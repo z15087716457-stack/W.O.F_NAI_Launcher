@@ -187,7 +187,14 @@ extension _ReferenceLibraryManagement on NaiAgentReferenceLibraryBinding {
                     'strength',
                     'info_extracted',
                   }
-                : {'name', 'favorite', 'type', 'strength', 'fidelity'},
+                : {
+                    'name',
+                    'favorite',
+                    'type',
+                    'strength',
+                    'fidelity',
+                    ...preciseOutfitPreferenceFields,
+                  },
           )
         : <String, dynamic>{};
     for (final field in ['strength', 'info_extracted', 'fidelity']) {
@@ -220,6 +227,13 @@ extension _ReferenceLibraryManagement on NaiAgentReferenceLibraryBinding {
         'Invalid favorite/type/category/tags',
       );
     }
+    final preciseType = PreciseRefType.values.asNameMap()[changes['type']];
+    final preferSameOutfit = kind == 'precise'
+        ? readPreciseOutfitPreference(
+            changes,
+            preciseType ?? data.precise!.type,
+          )
+        : null;
     final child = p['child_index'];
     final parameters =
         changes.containsKey('strength') ||
@@ -291,9 +305,10 @@ extension _ReferenceLibraryManagement on NaiAgentReferenceLibraryBinding {
           preciseValue = await preciseStorage!.updateEntry(
             id,
             name: changes['name'] as String?,
-            type: PreciseRefType.values.asNameMap()[changes['type']],
+            type: preciseType,
             strength: (changes['strength'] as num?)?.toDouble(),
             fidelity: (changes['fidelity'] as num?)?.toDouble(),
+            preferSameOutfit: preferSameOutfit,
           );
           if (preciseValue == null) throw StateError('entry_missing');
           applied.addAll(changes.keys.where((k) => k != 'favorite'));

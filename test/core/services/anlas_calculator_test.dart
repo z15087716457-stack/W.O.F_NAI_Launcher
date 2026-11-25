@@ -421,9 +421,10 @@ void main() {
       expect(AnlasCalculator.resolveVibeReferenceExtraCost(params), 0);
     });
 
-    test('charges two Anlas for every Vibe after the fourth per request', () {
+    test('charges two Anlas per image for every Vibe after the fourth', () {
       final params = ImageParams(
         model: model,
+        nSamples: 3,
         vibeReferencesV4: List.generate(
           6,
           (index) => VibeReference(
@@ -435,6 +436,7 @@ void main() {
       );
 
       expect(AnlasCalculator.resolveVibeReferenceExtraCost(params), 4);
+      expect(AnlasCalculator.calculate(params, isOpus: true), 12);
     });
 
     test('does not charge Vibe extras for inpainting', () {
@@ -456,6 +458,54 @@ void main() {
   });
 
   group('Opus 免费与 PR 附加费（PR 不取消免费资格）', () {
+    test(
+      'V5 precise cost applies per sample and survives Opus free base pricing',
+      () {
+        final references = [
+          PreciseReference(image: Uint8List(1), type: PreciseRefType.character),
+          PreciseReference(image: Uint8List(1), type: PreciseRefType.outfit),
+          PreciseReference(
+            image: Uint8List(1),
+            type: PreciseRefType.style,
+            enabled: false,
+          ),
+        ];
+        for (final model in [
+          'nai-diffusion-5-full',
+          'nai-diffusion-5-curated',
+          'nai-diffusion-5-full-medium',
+        ]) {
+          final params = ImageParams(
+            model: model,
+            nSamples: 2,
+            preciseReferences: references,
+          );
+          expect(AnlasCalculator.resolvePreciseReferenceExtraCost(params), 10);
+          expect(AnlasCalculator.calculate(params, isOpus: true), 20);
+          expect(
+            AnlasCalculator.calculate(
+              params,
+              isOpus: true,
+              opusUsageExhausted: true,
+            ),
+            80,
+          );
+          final inpaint = params.copyWith(action: ImageGenerationAction.infill);
+          expect(AnlasCalculator.resolvePreciseReferenceExtraCost(inpaint), 0);
+          expect(AnlasCalculator.calculate(inpaint, isOpus: true), 0);
+        }
+        final v45 = ImageParams(
+          model: model,
+          preciseReferences: [references[1]],
+          vibeReferencesV4: const [
+            VibeReference(displayName: 'vibe', vibeEncoding: ''),
+          ],
+        );
+        expect(AnlasCalculator.resolvePreciseReferenceExtraCost(v45), 0);
+        expect(AnlasCalculator.usesVibeReferences(v45), isTrue);
+      },
+    );
+
     int prCost({
       int width = 832,
       int height = 1216,

@@ -206,6 +206,7 @@ Widget resourceGroupIcon(
     ResourceGroupIcon.typeCharacter => RefsPreciseType.character,
     ResourceGroupIcon.typeStyle => RefsPreciseType.style,
     ResourceGroupIcon.typeBoth => RefsPreciseType.both,
+    ResourceGroupIcon.typeOutfit => RefsPreciseType.outfit,
     _ => null,
   };
   if (type != null) {

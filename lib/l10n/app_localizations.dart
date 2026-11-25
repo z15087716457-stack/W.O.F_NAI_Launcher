@@ -5468,7 +5468,7 @@ abstract class AppLocalizations {
   /// No description provided for @preciseRef_v4Only.
   ///
   /// In en, this message translates to:
-  /// **'This feature requires V4+ models'**
+  /// **'This feature requires V5 or V4.5 models'**
   String get preciseRef_v4Only;
 
   /// No description provided for @preciseRef_typeCharacter.
@@ -16234,7 +16234,7 @@ abstract class AppLocalizations {
   /// No description provided for @refs_preciseOnlyV45.
   ///
   /// In en, this message translates to:
-  /// **'V4.5 only'**
+  /// **'V5 & V4.5'**
   String get refs_preciseOnlyV45;
 
   /// No description provided for @refs_preciseCostNote.
@@ -16426,7 +16426,7 @@ abstract class AppLocalizations {
   /// No description provided for @refs_bannerPreciseBody.
   ///
   /// In en, this message translates to:
-  /// **'You can still organize references; switch to V4.5 to generate with them'**
+  /// **'You can still organize references; switch to V5 or V4.5 to generate with them'**
   String get refs_bannerPreciseBody;
 
   /// No description provided for @refs_switchTo.
@@ -16678,7 +16678,7 @@ abstract class AppLocalizations {
   /// No description provided for @refs_emptyHelpBody.
   ///
   /// In en, this message translates to:
-  /// **'Vibe borrows the overall mood and style and can be stacked (V4 / V4.5, not V5). Precise Reference follows one image’s character or style more closely, {cost} Anlas each (V4.5 only). The two cannot be used together.'**
+  /// **'Vibe borrows the overall mood and style and can be stacked (V4 / V4.5, not V5). Precise Reference follows an image’s character, style or outfit more closely, {cost} Anlas each (V5 & V4.5; outfit is V5 only). The two cannot be used together.'**
   String refs_emptyHelpBody(Object cost);
 
   /// No description provided for @refs_dropTitle.
@@ -17116,7 +17116,7 @@ abstract class AppLocalizations {
   /// No description provided for @refs_typeCharacterDesc.
   ///
   /// In en, this message translates to:
-  /// **'Keeps the character’s face, hair and outfit; style follows the prompt'**
+  /// **'Keeps the character’s appearance (outfit toggle on V5); style follows the prompt'**
   String get refs_typeCharacterDesc;
 
   /// No description provided for @refs_typeStyleDesc.
@@ -17158,7 +17158,7 @@ abstract class AppLocalizations {
   /// No description provided for @refs_preciseDefaultsNote.
   ///
   /// In en, this message translates to:
-  /// **'These are the defaults used when sending; the number box accepts values beyond 0–1'**
+  /// **'These are default values applied on send; on V5 strength goes up to 5.0 and Fidelity is unused'**
   String get refs_preciseDefaultsNote;
 
   /// No description provided for @refs_showInFolderShort.
@@ -22400,13 +22400,13 @@ abstract class AppLocalizations {
   /// No description provided for @gen_preciseDesc.
   ///
   /// In en, this message translates to:
-  /// **'Anchor the result to a character or style'**
+  /// **'Bind generation to character, style, or outfit references'**
   String get gen_preciseDesc;
 
   /// No description provided for @gen_preciseDrop.
   ///
   /// In en, this message translates to:
-  /// **'Drop a character or style reference, or'**
+  /// **'Drop character, style, or outfit reference images here, or'**
   String get gen_preciseDrop;
 
   /// No description provided for @gen_preciseCharacter.
@@ -25103,12 +25103,6 @@ abstract class AppLocalizations {
   /// **'Decorations on both sides as you scroll — drawn only outside your images'**
   String get channel_subtitle;
 
-  /// No description provided for @channel_paused.
-  ///
-  /// In en, this message translates to:
-  /// **'Generating · motion paused'**
-  String get channel_paused;
-
   /// No description provided for @channel_modeOff.
   ///
   /// In en, this message translates to:
@@ -25184,7 +25178,7 @@ abstract class AppLocalizations {
   /// No description provided for @channel_motionSub.
   ///
   /// In en, this message translates to:
-  /// **'Subtle animation, paused while generating'**
+  /// **'Subtle ambient animation'**
   String get channel_motionSub;
 
   /// No description provided for @channel_sideTransparency.
@@ -26720,7 +26714,7 @@ abstract class AppLocalizations {
   /// No description provided for @set_cvMotionSub.
   ///
   /// In en, this message translates to:
-  /// **'Pauses while generating or when reduce motion is on'**
+  /// **'Pauses when reduce motion is on'**
   String get set_cvMotionSub;
 
   /// No description provided for @set_cvSideTransparency.
@@ -35380,6 +35374,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unable to read AGENTS.md. Check file permissions.'**
   String get set_agRulesLoadFailed;
+
+  /// No description provided for @preciseRef_typeOutfit.
+  ///
+  /// In en, this message translates to:
+  /// **'Outfit'**
+  String get preciseRef_typeOutfit;
+
+  /// No description provided for @preciseRef_outfitDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference the outfit from this image (V5 only)'**
+  String get preciseRef_outfitDescription;
+
+  /// No description provided for @preciseRef_preferSameOutfit.
+  ///
+  /// In en, this message translates to:
+  /// **'Prefer same outfit'**
+  String get preciseRef_preferSameOutfit;
+
+  /// No description provided for @refs_typeOutfit.
+  ///
+  /// In en, this message translates to:
+  /// **'Outfit'**
+  String get refs_typeOutfit;
+
+  /// No description provided for @refs_typeOutfitDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Copies the outfit while character and style follow the prompt (V5 only)'**
+  String get refs_typeOutfitDesc;
+
+  /// No description provided for @refs_preferSameOutfit.
+  ///
+  /// In en, this message translates to:
+  /// **'Prefer same outfit'**
+  String get refs_preferSameOutfit;
+
+  /// No description provided for @refs_preferSameOutfitDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'On V5, follows the reference character’s outfit more closely'**
+  String get refs_preferSameOutfitDesc;
+
+  /// No description provided for @gen_preciseOutfit.
+  ///
+  /// In en, this message translates to:
+  /// **'Outfit'**
+  String get gen_preciseOutfit;
+
+  /// No description provided for @gen_precisePreferSameOutfit.
+  ///
+  /// In en, this message translates to:
+  /// **'Prefer same outfit'**
+  String get gen_precisePreferSameOutfit;
+
+  /// No description provided for @gen_preciseInpaintUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Inpainting with Precise Reference is not yet supported on this model; references will be skipped and not billed.'**
+  String get gen_preciseInpaintUnsupported;
+
+  /// No description provided for @gen_preciseOutfitUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Outfit references aren’t supported by this model and will be skipped without billing.'**
+  String get gen_preciseOutfitUnsupported;
+
+  /// No description provided for @gen_preciseLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to {count} Precise References allowed'**
+  String gen_preciseLimit(int count);
+
+  /// No description provided for @gen_turboBlockedByPrecise.
+  ///
+  /// In en, this message translates to:
+  /// **'Precise Reference requires High effort (V5 Full). Remove or pause Precise References to use Turbo.'**
+  String get gen_turboBlockedByPrecise;
+
+  /// No description provided for @gen_turboSwitchedOffForPrecise.
+  ///
+  /// In en, this message translates to:
+  /// **'Precise Reference needs High effort — switched back to V5 Full'**
+  String get gen_turboSwitchedOffForPrecise;
 }
 
 class _AppLocalizationsDelegate

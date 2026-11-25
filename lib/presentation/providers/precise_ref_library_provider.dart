@@ -199,6 +199,7 @@ class PreciseRefLibraryNotifier extends _$PreciseRefLibraryNotifier {
     PreciseRefType type = PreciseRefType.characterAndStyle,
     double strength = 1.0,
     double fidelity = 1.0,
+    bool? preferSameOutfit,
   }) async {
     await _ensureInitialized();
     try {
@@ -208,6 +209,7 @@ class PreciseRefLibraryNotifier extends _$PreciseRefLibraryNotifier {
         type: type,
         strength: strength,
         fidelity: fidelity,
+        preferSameOutfit: preferSameOutfit,
       );
       state = state.copyWith(entries: [...state.entries, entry], error: null);
       _applyFilters();
@@ -291,6 +293,8 @@ class PreciseRefLibraryNotifier extends _$PreciseRefLibraryNotifier {
     PreciseRefType? type,
     double? strength,
     double? fidelity,
+    bool? preferSameOutfit,
+    bool resetPreferSameOutfit = false,
   }) async {
     await _ensureInitialized();
     final updated = await _storage.updateEntry(
@@ -299,6 +303,8 @@ class PreciseRefLibraryNotifier extends _$PreciseRefLibraryNotifier {
       type: type,
       strength: strength,
       fidelity: fidelity,
+      preferSameOutfit: preferSameOutfit,
+      resetPreferSameOutfit: resetPreferSameOutfit,
     );
     if (updated != null) {
       _replaceEntryInState(updated);

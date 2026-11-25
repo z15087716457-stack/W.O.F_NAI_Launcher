@@ -108,6 +108,7 @@ void main() {
       expect(find.text('Character'), findsOneWidget);
       expect(find.text('Style'), findsOneWidget);
       expect(find.text('Character + Style'), findsOneWidget);
+      expect(find.text('Outfit'), findsOneWidget);
       await tester.tap(
         find.byKey(ValueKey('precise-reference-type-${type.name}')),
       );
@@ -244,7 +245,7 @@ void main() {
           expect(bounds.top, greaterThanOrEqualTo(16));
           expect(bounds.bottom, lessThanOrEqualTo(layout.size.height - 16));
           if (layout.name == 'normal' && locale.languageCode == 'zh') {
-            expect(bounds.size, const Size(368, 370));
+            expect(bounds.size, const Size(368, 441));
           }
           final cancel = find.byKey(const Key('precise-reference-type-cancel'));
           expect(cancel.hitTestable(), findsOneWidget);

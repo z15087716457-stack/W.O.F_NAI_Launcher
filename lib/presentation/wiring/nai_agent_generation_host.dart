@@ -36,7 +36,8 @@ class NaiAgentGenerationHost extends ConsumerStatefulWidget {
 
 class _GenerationHostState extends ConsumerState<NaiAgentGenerationHost>
     with SingleTickerProviderStateMixin {
-  late final _reveal = AnimationController(
+  AnimationController? _revealController;
+  AnimationController get _reveal => _revealController ??= AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 280),
     reverseDuration: const Duration(milliseconds: 220),
@@ -53,7 +54,7 @@ class _GenerationHostState extends ConsumerState<NaiAgentGenerationHost>
   @override
   void dispose() {
     _preview.dispose();
-    _reveal.dispose();
+    _revealController?.dispose();
     super.dispose();
   }
 

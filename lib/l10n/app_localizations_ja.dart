@@ -2968,7 +2968,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get preciseRef_characterAndStyleDescription => '人物の特徴と画風の両方を参照';
 
   @override
-  String get preciseRef_v4Only => 'この機能には V4 以降のモデルが必要です';
+  String get preciseRef_v4Only => 'この機能には V5 または V4.5 モデルが必要です';
 
   @override
   String get preciseRef_typeCharacter => 'キャラ参照';
@@ -9079,7 +9079,7 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get refs_preciseOnlyV45 => 'V4.5 のみ';
+  String get refs_preciseOnlyV45 => 'V5 / V4.5 対応';
 
   @override
   String refs_preciseCostNote(Object cost) {
@@ -9182,7 +9182,8 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get refs_bannerPreciseBody => '参照画像の整理はできます。生成に使うには V4.5 に切り替えてください';
+  String get refs_bannerPreciseBody =>
+      '参照画像の整理はできます。生成に使うには V5 または V4.5 に切り替えてください';
 
   @override
   String refs_switchTo(Object model) {
@@ -9321,7 +9322,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String refs_emptyHelpBody(Object cost) {
-    return 'Vibe：全体の雰囲気や画風を借り、何枚も重ねられます（V4 / V4.5、V5 は非対応）。精密参照：1 枚の画像の人物や画風により忠実に描きます。1 枚 $cost Anlas（V4.5 のみ）。両者は同時に使えません。';
+    return 'Vibe：全体の雰囲気や画風を借り、何枚も重ねられます（V4 / V4.5、V5 は非対応）。精密参照：画像の人物・画風・衣装により忠実に描きます。1 枚 $cost Anlas（V5 / V4.5 対応、衣装参照は V5 専用）。両者は同時に使えません。';
   }
 
   @override
@@ -9596,7 +9597,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get refs_typeBoth => 'キャラ+画風';
 
   @override
-  String get refs_typeCharacterDesc => '人物の顔・髪型・服装を保ち、画風はプロンプトに従います';
+  String get refs_typeCharacterDesc => '人物の見た目を保ち（V5 では衣装参照を切替可）、画風はプロンプトに従います';
 
   @override
   String get refs_typeStyleDesc => '画風・配色・タッチのみを借ります（人物は問いません）';
@@ -9618,7 +9619,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get refs_preciseDefaultsNote =>
-      'ここで変えるのは既定値で、送信時にそのまま使われます。数値欄には 0–1 以外も入力できます';
+      'ここで変更した値は送信時の既定値になります。V5 では強度上限 5.0・忠実度は未使用です';
 
   @override
   String get refs_showInFolderShort => 'フォルダへ';
@@ -12579,10 +12580,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get gen_precise => '精密参照';
 
   @override
-  String get gen_preciseDesc => '生成をキャラや画風の参照に固定';
+  String get gen_preciseDesc => '生成をキャラ・絵柄・衣装の参照に固定';
 
   @override
-  String get gen_preciseDrop => 'キャラや画風の参照画像をドロップ、または';
+  String get gen_preciseDrop => 'キャラ・絵柄・衣装の参照画像をドロップ、または';
 
   @override
   String get gen_preciseCharacter => 'キャラ';
@@ -14004,9 +14005,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get channel_subtitle => 'スクロールすると両側に現れる装飾。画像の外側だけに描かれます';
 
   @override
-  String get channel_paused => '生成中 · アニメ一時停止';
-
-  @override
   String get channel_modeOff => 'オフ';
 
   @override
@@ -14043,7 +14041,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get channel_motion => 'アイドル時の動き';
 
   @override
-  String get channel_motionSub => 'ごく軽い動き。生成中は自動で止まります';
+  String get channel_motionSub => 'ごく軽い環境アニメーション';
 
   @override
   String get channel_sideTransparency => 'サイドバー透過度';
@@ -14914,7 +14912,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get set_cvMotion => 'アイドル時の動き';
 
   @override
-  String get set_cvMotionSub => '生成中と「動きを減らす」オンのときは停止';
+  String get set_cvMotionSub => '「動きを減らす」オンのときは停止';
 
   @override
   String get set_cvSideTransparency => 'サイドバー透過度';
@@ -19712,4 +19710,52 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get set_agRulesLoadFailed => 'AGENTS.md を読み取れません。ファイルのアクセス権を確認してください。';
+
+  @override
+  String get preciseRef_typeOutfit => '衣装参照';
+
+  @override
+  String get preciseRef_outfitDescription => '参照画像の衣装を再現（V5 専用）';
+
+  @override
+  String get preciseRef_preferSameOutfit => '衣装も参照する';
+
+  @override
+  String get refs_typeOutfit => '衣装';
+
+  @override
+  String get refs_typeOutfitDesc => '衣装のみを参照し、人物と画風はプロンプトに従います（V5 専用）';
+
+  @override
+  String get refs_preferSameOutfit => '衣装も参照する';
+
+  @override
+  String get refs_preferSameOutfitDesc => 'V5 でオンにすると参照キャラの衣装に近づきます';
+
+  @override
+  String get gen_preciseOutfit => '衣装';
+
+  @override
+  String get gen_precisePreferSameOutfit => '衣装も参照する';
+
+  @override
+  String get gen_preciseInpaintUnsupported =>
+      'このモデルのインペイントは精密参照に未対応です。参照画像は無視され、課金されません。';
+
+  @override
+  String get gen_preciseOutfitUnsupported =>
+      'このモデルは衣装参照に対応していないため、衣装参照はスキップされ課金されません。';
+
+  @override
+  String gen_preciseLimit(int count) {
+    return '精密参照は最大 $count 枚まで追加できます';
+  }
+
+  @override
+  String get gen_turboBlockedByPrecise =>
+      '精密参照は通常モード（V5 Full）専用です。Turbo を使うには精密参照を外すか一時停止してください';
+
+  @override
+  String get gen_turboSwitchedOffForPrecise =>
+      '精密参照は通常モードが必要なため、V5 Full に切り替えました';
 }

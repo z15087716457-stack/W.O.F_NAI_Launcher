@@ -956,7 +956,15 @@ class _TopBar extends StatelessWidget {
           selected: ring || cv.sheet == GenToolSheet.upscale,
           richTip: up.running
               ? tip(l.gen_upscaleStop, l.tools_tipUpscaleRunning)
-              : tip(l.gen_upscale, l.tools_tipUpscale, cost(up.cost)),
+              : tip(
+                  l.gen_upscale,
+                  up.selected == 'novelai' && !up.available
+                      ? l.img2img_cloudUpscaleSizeLimit
+                      : l.tools_tipUpscale,
+                  up.selected == 'novelai' && up.cost == null
+                      ? null
+                      : cost(up.cost),
+                ),
           onTap: up.running || (!busy && up.available)
               ? () => a.onUpscale(id)
               : null,

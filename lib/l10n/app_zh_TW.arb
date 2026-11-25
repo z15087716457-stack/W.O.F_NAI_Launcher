@@ -747,7 +747,7 @@
   "preciseRef_characterDescription": "參考人物的外觀與特徵",
   "preciseRef_styleDescription": "參考配色、筆觸與畫面質感",
   "preciseRef_characterAndStyleDescription": "同時參考人物特徵與視覺風格",
-  "preciseRef_v4Only": "此功能需要 V4+ 模型",
+  "preciseRef_v4Only": "此功能需要 V5 或 V4.5 模型",
   "preciseRef_typeCharacter": "角色",
   "preciseRef_typeStyle": "風格",
   "preciseRef_typeCharacterAndStyle": "角色+風格",
@@ -5168,7 +5168,7 @@
       "type": {}
     }
   },
-  "refs_preciseOnlyV45": "只在 V4.5 可用",
+  "refs_preciseOnlyV45": "支援 V5 / V4.5",
   "refs_preciseCostNote": "每張 {cost} Anlas；和 Vibe 不能同時生效",
   "@refs_preciseCostNote": {
     "placeholders": {
@@ -5215,7 +5215,7 @@
       "model": {}
     }
   },
-  "refs_bannerPreciseBody": "庫裡的參考圖照常整理；切到 V4.5 才能用於生成",
+  "refs_bannerPreciseBody": "庫裡的參考圖照常整理；切到 V5 或 V4.5 才能用於生成",
   "refs_switchTo": "切到 {model}",
   "@refs_switchTo": {
     "placeholders": {
@@ -5284,7 +5284,7 @@
   "refs_emptyFromResultPrecise": "生圖結果右鍵 → 存到精準參考庫",
   "refs_emptyFromGallery": "本地圖庫也可以",
   "refs_emptyHelpTitle": "Vibe 和精準參考有什麼區別？",
-  "refs_emptyHelpBody": "Vibe：借整體氛圍和畫風，可以疊很多張（V4 / V4.5，V5 沒有）。精準參考：照著一張圖的人物或畫風來畫，更準，每張 {cost} Anlas（只在 V4.5）。兩者不能同時生效。",
+  "refs_emptyHelpBody": "Vibe：借整體氛圍和畫風，可以疊很多張（V4 / V4.5，V5 沒有）。精準參考：照著一張圖的人物、畫風或服裝來畫，更準，每張 {cost} Anlas（支援 V5 / V4.5，服裝參考僅 V5）。兩者不能同時生效。",
   "@refs_emptyHelpBody": {
     "placeholders": {
       "cost": {}
@@ -5519,14 +5519,14 @@
   "refs_typeCharacter": "角色",
   "refs_typeStyle": "風格",
   "refs_typeBoth": "角色+風格",
-  "refs_typeCharacterDesc": "保留人物長相、髮型和服裝，畫風跟提示詞走",
+  "refs_typeCharacterDesc": "保留人物長相與髮型（V5 可選是否同時參考服裝），畫風跟提示詞走",
   "refs_typeStyleDesc": "只借畫風、配色和筆觸，不管畫的是誰",
   "refs_typeBothDesc": "人物和畫風都參考",
   "refs_preciseStrength": "參考強度",
   "refs_preciseStrengthDesc": "越高越像參考圖",
   "refs_fidelity": "保真度",
   "refs_fidelityDesc": "越高越貼原圖細節，越低越自由",
-  "refs_preciseDefaultsNote": "這裡改的是預設值，傳送時直接帶上；數字框可以填超過 0–1 的值",
+  "refs_preciseDefaultsNote": "這裡改的是預設值，傳送時直接帶上；V5 強度滑桿最高 5.0 且不使用保真度，數字框支援更廣範圍",
   "refs_showInFolderShort": "所在資料夾",
   "refs_pickHint": "勾選卡片後在這裡批次設定",
   "refs_multiAddTitle": "一起加入生圖頁",
@@ -7240,8 +7240,8 @@
   "gen_vibeInfo": "資訊提取",
   "gen_vibeInfoReencode": "已編碼的 Vibe 改資訊提取要重新編碼",
   "gen_precise": "精準參考",
-  "gen_preciseDesc": "將生成繫結到角色或風格參考",
-  "gen_preciseDrop": "拖角色或風格參考圖進來，或者",
+  "gen_preciseDesc": "將生成繫結到角色、風格或服裝參考",
+  "gen_preciseDrop": "拖角色、風格或服裝參考圖進來，或者",
   "gen_preciseCharacter": "角色",
   "gen_preciseStyle": "風格",
   "gen_preciseBoth": "角色 + 風格",
@@ -7869,7 +7869,6 @@
   "channel_descStrata": "真隱藏面消除的 3D 潮汐山脊與發光等高線切面，隨滾輪和波峰起伏呈現測繪標高",
   "channel_title": "視覺通道",
   "channel_subtitle": "滾動時兩側的裝飾，只畫在圖片之外，不擋圖",
-  "channel_paused": "生成中 · 動畫已暫停",
   "channel_modeOff": "關閉",
   "channel_modeFixed": "固定一個",
   "channel_modeRandom": "每次隨機",
@@ -7882,7 +7881,7 @@
   "channel_levelStandard": "標準",
   "channel_levelStrong": "濃",
   "channel_motion": "空閒微動",
-  "channel_motionSub": "很輕的動效，生成時自動暫停",
+  "channel_motionSub": "很輕的動效，始終保持柔和流動",
   "channel_sideTransparency": "側欄透明度",
   "channel_batch": "{time} · {count} 張",
   "@channel_batch": {
@@ -8426,7 +8425,7 @@
   },
   "set_cvLevel": "濃淡",
   "set_cvMotion": "空閒微動",
-  "set_cvMotionSub": "生成中和開啟“減少動態效果”時自動暫停",
+  "set_cvMotionSub": "開啟“減少動態效果”時自動暫停",
   "set_cvSideTransparency": "側欄透明度",
   "set_cvSideTransparencySub": "調整左右面板透出畫布動態背景的程度，0% 為完全不透",
   "set_cvOps": "畫布操作",
@@ -11153,5 +11152,26 @@
   "set_agRulesView": "檢視",
   "set_agRulesMissing": "此工作區尚未建立 AGENTS.md",
   "set_agRulesEmpty": "AGENTS.md 暫無內容",
-  "set_agRulesLoadFailed": "無法讀取 AGENTS.md，請檢查檔案權限。"
+  "set_agRulesLoadFailed": "無法讀取 AGENTS.md，請檢查檔案權限。",
+  "preciseRef_typeOutfit": "服裝",
+  "preciseRef_outfitDescription": "僅參考圖片中的服裝與穿搭（V5 專屬）",
+  "preciseRef_preferSameOutfit": "同時參考服裝",
+  "refs_typeOutfit": "服裝",
+  "refs_typeOutfitDesc": "只借服裝與穿搭設計，人物和畫風跟提示詞走（僅 V5 可用）",
+  "refs_preferSameOutfit": "同時參考服裝",
+  "refs_preferSameOutfitDesc": "V5 下開啟時更貼近參考圖角色的服裝",
+  "gen_preciseOutfit": "服裝",
+  "gen_precisePreferSameOutfit": "同時參考服裝",
+  "gen_preciseInpaintUnsupported": "當前模型的局部重繪暫不支援精準參考，本次傳送將忽略參考圖且不計費。",
+  "gen_preciseOutfitUnsupported": "當前模型不支援服裝參考，服裝條目本次將被跳過且不計費。",
+  "gen_preciseLimit": "最多可新增 {count} 張精準參考",
+  "@gen_preciseLimit": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "gen_turboBlockedByPrecise": "精準參考僅支援通常模式（V5 Full），移除或停用精準參考後才能開啟 Turbo",
+  "gen_turboSwitchedOffForPrecise": "精準參考需要通常模式，已自動切回 V5 Full"
 }

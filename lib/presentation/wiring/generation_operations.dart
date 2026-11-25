@@ -300,6 +300,7 @@ class GenerationOperations {
                     type: entry.type,
                     strength: entry.strength,
                     fidelity: entry.fidelity,
+                    preferSameOutfit: entry.preferSameOutfit,
                   ),
                 );
                 origins.add(key);
@@ -352,6 +353,9 @@ class GenerationOperations {
         context,
         value.image,
         type: value.type,
+        strength: value.strength,
+        fidelity: value.fidelity,
+        preferSameOutfit: value.preferSameOutfit,
       );
     }
   }

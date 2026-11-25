@@ -667,4 +667,35 @@ void main() {
       isEmpty,
     );
   });
+  test('页面切走（alive 变 false）若发生在确认后的异步备份期，不取消本次生成或重试', () async {
+    final generation =
+        container.read(imageGenerationNotifierProvider.notifier)
+            as RecordingGeneration;
+    platform.pending = Completer<void>();
+    var alive = true;
+    final running = backend.generate(
+      confirm: (_) async => true,
+      alive: () => alive,
+    );
+    await Future<void>.delayed(Duration.zero);
+    // Simulate switching away from the generation page while backupDraft runs.
+    alive = false;
+    platform.pending!.complete();
+    await running;
+    expect(generation.requests, hasLength(1));
+
+    // Same guarantee for retry after confirmation.
+    generation.fail(container.read(generationParamsNotifierProvider));
+    platform.pending = Completer<void>();
+    alive = true;
+    final retrying = backend.retry(
+      confirm: (_) async => true,
+      alive: () => alive,
+    );
+    await Future<void>.delayed(Duration.zero);
+    alive = false;
+    platform.pending!.complete();
+    await retrying;
+    expect(generation.retried, hasLength(1));
+  });
 }

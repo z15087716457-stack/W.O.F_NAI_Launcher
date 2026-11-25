@@ -1,12 +1,12 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/constants/model_spec.dart';
 import '../../../core/enums/precise_ref_type.dart';
 import '../../../core/nai_agent/agent_tool.dart';
 import '../../../core/nai_agent/generation_snapshot.dart';
 import '../../../core/nai_agent/studio_tools.dart';
 import '../../../core/utils/inpaint_focus_region.dart';
-import '../../../core/utils/nai_api_utils.dart';
 import '../../../core/utils/nai_resolution_adapter.dart';
 import '../../../data/models/image/image_params.dart';
 import '../../../data/models/vibe/vibe_reference.dart';
@@ -33,6 +33,58 @@ const _actions = {
 };
 const _imageActions = {'set_source', 'set_mask', 'add_vibe', 'add_precise'};
 const _sourceActions = {'set_source', 'clear_source', 'set_mask', 'clear_mask'};
+
+const preciseOutfitPreferenceFields = {
+  'prefer_same_outfit',
+  'preferSameOutfit',
+};
+
+bool? readPreciseOutfitPreference(
+  Map<String, dynamic> fields,
+  PreciseRefType type,
+) {
+  final keys = preciseOutfitPreferenceFields.where(fields.containsKey);
+  if (keys.isEmpty) return null;
+  if (keys.length == 1 && type.supportsPreferSameOutfit) {
+    final value = fields[keys.single];
+    if (value is bool) return value;
+  }
+  throw const NaiAgentToolError(
+    'invalid_reference',
+    'Provide one prefer_same_outfit boolean for character or characterAndStyle',
+  );
+}
+
+void _requirePreciseSupport(ImageParams image, PreciseRefType type) {
+  final spec = image.modelSpec;
+  if (!spec.characterReferences) {
+    throw const NaiAgentToolError(
+      'reference_unsupported',
+      'Current model does not support precise references',
+    );
+  }
+  if (image.action == ImageGenerationAction.infill && !spec.charRefInpainting) {
+    throw const NaiAgentToolError(
+      'reference_unsupported',
+      'Current model suspends precise references during inpainting',
+    );
+  }
+  if (type == PreciseRefType.outfit && !spec.outfitReferences) {
+    throw const NaiAgentToolError(
+      'reference_unsupported',
+      'Current model does not support outfit references',
+    );
+  }
+}
+
+void _requirePreciseCapacity(ImageParams image) {
+  if (image.preciseReferences.length >= ModelSpec.maxPreciseReferences) {
+    throw const NaiAgentToolError(
+      'reference_limit',
+      'Precise Reference supports at most ${ModelSpec.maxPreciseReferences} references',
+    );
+  }
+}
 
 double? _scalar(
   Map<String, dynamic> p,
@@ -75,6 +127,7 @@ class NaiAgentReferenceBinding {
     PreciseRefType preciseType = PreciseRefType.characterAndStyle,
     double preciseStrength = 1,
     double preciseFidelity = 1,
+    bool? precisePreferSameOutfit,
     required String expectedVersion,
     required NaiAgentCancellation token,
     required void Function() checkSource,
@@ -105,16 +158,19 @@ class NaiAgentReferenceBinding {
         'Unsupported model, empty Vibe list or 16-reference limit exceeded',
       );
     }
-    if (preciseImage != null && !before.modelSpec.characterReferences) {
-      throw const NaiAgentToolError(
-        'unsupported_model',
-        'Current model does not support precise references',
-      );
+    if (preciseImage != null) {
+      _requirePreciseSupport(before, preciseType);
+      _requirePreciseCapacity(before);
+      final spec = before.modelSpec;
+      if (spec.isV5 &&
+          (preciseStrength < 0 ||
+              preciseStrength > spec.characterReferenceStrengthMax)) {
+        throw const NaiAgentToolError(
+          'invalid_reference',
+          'V5 precise reference strength must be between 0 and 5',
+        );
+      }
     }
-    final normalized = preciseImage == null
-        ? null
-        : await NAIApiUtils.ensurePngFormatAsync(preciseImage);
-    check();
     final controller = ref.read(imageWorkflowControllerProvider.notifier);
     final backupImage = controller.snapshotDraftParams;
     final saved = await snapshots.save('Before Agent library reference apply', {
@@ -130,13 +186,13 @@ class NaiAgentReferenceBinding {
     check();
     final writer = ref.read(generationParamsNotifierProvider.notifier);
     if (vibes != null) writer.addVibeReferences(vibes, recordUsage: false);
-    if (normalized != null) {
+    if (preciseImage != null) {
       writer.addPreciseReference(
-        normalized,
+        preciseImage,
         type: preciseType,
         strength: preciseStrength,
         fidelity: preciseFidelity,
-        isNormalizedPng: true,
+        preferSameOutfit: precisePreferSameOutfit,
       );
     }
     return naiAgentTextResult({...summary(), 'backup_path': saved['path']});
@@ -163,23 +219,38 @@ class NaiAgentReferenceBinding {
     }
 
     final focus = image.inpaintFocusRegion;
-    final preciseActive =
-        image.modelSpec.characterReferences &&
-        image.preciseReferences.any((r) => r.enabled);
-    String? vibeReason(VibeReference vibe) => !image.modelSpec.vibetransfer
+    final spec = image.modelSpec;
+    final effectivePrecise = Set<PreciseReference>.identity()
+      ..addAll(image.effectivePreciseReferencesForRequest);
+    String? vibeReason(VibeReference vibe) => !spec.vibetransfer
         ? 'unsupported_model'
         : !vibe.enabled
         ? 'disabled'
-        : preciseActive
+        : effectivePrecise.isNotEmpty
         ? 'precise_reference_priority'
-        : image.action.name == 'infill'
+        : image.action == ImageGenerationAction.infill
         ? 'inpainting_excludes_vibe'
         : null;
+    String? preciseReason(PreciseReference reference) {
+      if (effectivePrecise.contains(reference)) return null;
+      if (!spec.characterReferences) return 'unsupported_model';
+      if (!reference.enabled) return 'disabled';
+      if (image.preciseReferencesSuspendedForInpaint) {
+        return 'inpainting_excludes_precise';
+      }
+      if (!reference.isSupportedBy(spec)) return 'outfit_unsupported';
+      return 'reference_limit';
+    }
+
     return {
       'draft_version': readBridgeDraft(ref).acknowledgementVersion,
       'model': image.model,
-      'supports_vibe': image.modelSpec.vibetransfer,
-      'supports_precise': image.modelSpec.characterReferences,
+      'supports_vibe': spec.vibetransfer,
+      'supports_precise': spec.characterReferences,
+      'outfit_references': spec.outfitReferences,
+      'char_ref_inpainting': spec.charRefInpainting,
+      'fidelity_supported': spec.characterReferenceFidelity,
+      'strength_max': spec.characterReferenceStrengthMax,
       'action': image.action.name,
       'workflow': ref.exists(imageWorkflowControllerProvider)
           ? ref.read(imageWorkflowControllerProvider).mode.name
@@ -228,10 +299,14 @@ class NaiAgentReferenceBinding {
               'draft:precise:$i',
             ),
             'enabled': image.preciseReferences[i].enabled,
-            'participates':
-                image.modelSpec.characterReferences &&
-                image.preciseReferences[i].enabled,
+            'participates': effectivePrecise.contains(
+              image.preciseReferences[i],
+            ),
+            'inactive_reason': preciseReason(image.preciseReferences[i]),
             'type': image.preciseReferences[i].type.name,
+            if (image.preciseReferences[i].type.supportsPreferSameOutfit)
+              'prefer_same_outfit':
+                  image.preciseReferences[i].effectivePreferSameOutfit,
             'strength': image.preciseReferences[i].strength,
             'fidelity': image.preciseReferences[i].fidelity,
           },
@@ -239,7 +314,8 @@ class NaiAgentReferenceBinding {
     };
   }
 
-  void _validate(String action, Map<String, dynamic> p, ImageParams image) {
+  bool? _validate(String action, Map<String, dynamic> p, ImageParams image) {
+    final writesPrecise = action == 'add_precise' || action == 'update_precise';
     final allowed = {
       'action',
       if (action != 'list') 'expected_draft_version',
@@ -248,9 +324,10 @@ class NaiAgentReferenceBinding {
       if (action == 'set_mask') 'focus_region',
       if (action.startsWith('add_') || action.startsWith('update_')) 'strength',
       if (action == 'add_vibe' || action == 'update_vibe') 'info_extracted',
-      if (action == 'add_precise' || action == 'update_precise') ...{
+      if (writesPrecise) ...{
         'type',
         'fidelity',
+        ...preciseOutfitPreferenceFields,
       },
       if (action.startsWith('update_') || action.startsWith('remove_')) 'index',
       if (action.startsWith('update_')) 'enabled',
@@ -270,16 +347,20 @@ class NaiAgentReferenceBinding {
       p,
       'strength',
       free: action.endsWith('_vibe'),
-      max: action.endsWith('_precise') ? 10 : 1,
+      max: writesPrecise
+          ? (image.modelSpec.isV5
+                ? image.modelSpec.characterReferenceStrengthMax
+                : 10)
+          : 1,
     );
     _scalar(p, 'noise');
-    _scalar(p, 'fidelity', max: action.endsWith('_precise') ? 10 : 1);
+    _scalar(p, 'fidelity', max: 10);
     _scalar(p, 'info_extracted', min: VibeReference.minInfoExtracted);
     if (p.containsKey('type') &&
         !PreciseRefType.values.asNameMap().containsKey(p['type'])) {
       throw const NaiAgentToolError(
         'invalid_reference',
-        'Use character, style or characterAndStyle',
+        'Use character, style, characterAndStyle or outfit',
       );
     }
     if (p.containsKey('name') &&
@@ -305,9 +386,7 @@ class NaiAgentReferenceBinding {
       }
     }
     if ((action == 'add_vibe' || action == 'update_vibe') &&
-            !image.modelSpec.vibetransfer ||
-        (action == 'add_precise' || action == 'update_precise') &&
-            !image.modelSpec.characterReferences) {
+        !image.modelSpec.vibetransfer) {
       throw const NaiAgentToolError(
         'reference_unsupported',
         'Current model does not support this reference',
@@ -325,6 +404,22 @@ class NaiAgentReferenceBinding {
         'Set a source image before its mask',
       );
     }
+    if (!writesPrecise) return null;
+    final type =
+        PreciseRefType.values.asNameMap()[p['type']] ??
+        (action == 'update_precise'
+            ? image.preciseReferences[p['index'] as int].type
+            : PreciseRefType.character);
+    _requirePreciseSupport(image, type);
+    if (action == 'add_precise') _requirePreciseCapacity(image);
+    if (p.containsKey('fidelity') &&
+        !image.modelSpec.characterReferenceFidelity) {
+      throw const NaiAgentToolError(
+        'reference_unsupported',
+        'Current model does not support precise reference fidelity',
+      );
+    }
+    return readPreciseOutfitPreference(p, type);
   }
 
   InpaintFocusRegion? _focus(Map<String, dynamic> p, Uint8List source) {
@@ -385,7 +480,7 @@ class NaiAgentReferenceBinding {
       );
     }
     final before = ref.read(generationParamsNotifierProvider);
-    _validate(action, p, before);
+    final preferSameOutfit = _validate(action, p, before);
     if (action == 'list') return naiAgentTextResult(summary());
     final draft = readBridgeDraft(ref);
     final expected = p['expected_draft_version'];
@@ -420,10 +515,6 @@ class NaiAgentReferenceBinding {
         if (p.containsKey('image_id')) 'image_id': p['image_id'],
         if (p.containsKey('path')) 'path': p['path'],
       }, token);
-    }
-    Uint8List? normalized;
-    if (action == 'add_precise') {
-      normalized = await NAIApiUtils.ensurePngFormatAsync(picture!.bytes);
     }
     InpaintFocusRegion? focus;
     if (action == 'set_mask') {
@@ -512,21 +603,22 @@ class NaiAgentReferenceBinding {
         writer.clearVibeReferences();
       case 'add_precise':
         writer.addPreciseReference(
-          normalized!,
+          picture!.bytes,
           type:
               PreciseRefType.values.asNameMap()[p['type']] ??
               PreciseRefType.character,
-          strength: _scalar(p, 'strength', max: 10) ?? 1,
-          fidelity: _scalar(p, 'fidelity', max: 10) ?? 1,
-          isNormalizedPng: true,
+          strength: (p['strength'] as num?)?.toDouble() ?? 1,
+          fidelity: (p['fidelity'] as num?)?.toDouble() ?? 1,
+          preferSameOutfit: preferSameOutfit,
         );
       case 'update_precise':
         writer.updatePreciseReference(
           p['index'] as int,
           type: PreciseRefType.values.asNameMap()[p['type']],
-          strength: _scalar(p, 'strength', max: 10),
-          fidelity: _scalar(p, 'fidelity', max: 10),
+          strength: (p['strength'] as num?)?.toDouble(),
+          fidelity: (p['fidelity'] as num?)?.toDouble(),
           enabled: p['enabled'] as bool?,
+          preferSameOutfit: preferSameOutfit,
         );
       case 'remove_precise':
         writer.removePreciseReference(p['index'] as int);

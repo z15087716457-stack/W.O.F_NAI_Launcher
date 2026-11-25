@@ -48,6 +48,7 @@ abstract final class ToolsFixture {
       id: 'local',
       title: '本机',
       detail: '用本机显卡 · 只支持 Windows',
+      cost: 0,
     ),
     ToolsUpscaleBackend(
       id: 'novelai',
@@ -136,7 +137,7 @@ abstract final class ToolsFixture {
                 ),
               ],
         advancedHint: 'SeedVR2 的显存分块、VAE 分块、噪声、种子',
-        cost: cloud ? 1 : null,
+        cost: cloud ? 1 : 0,
         blocked: missing ? '模型还没下载，先到“管理模型”里装好' : null,
       );
 

@@ -146,6 +146,8 @@ class NaiAgentReferenceLibraryBinding {
     'id': e.id,
     'name': e.name,
     'type': e.type.name,
+    if (e.type.supportsPreferSameOutfit)
+      'prefer_same_outfit': e.preferSameOutfit,
     'strength': e.strength,
     'fidelity': e.fidelity,
     'favorite': e.isFavorite,
@@ -443,7 +445,12 @@ class NaiAgentReferenceLibraryBinding {
         'path',
         'image_id',
         'name',
-        if (kind == 'precise') ...{'type', 'strength', 'fidelity'},
+        if (kind == 'precise') ...{
+          'type',
+          'strength',
+          'fidelity',
+          ...preciseOutfitPreferenceFields,
+        },
       },
       if (action == 'save') ...{'index', 'name', 'expected_draft_version'},
       if (action == 'export') 'name',
@@ -499,6 +506,7 @@ class NaiAgentReferenceLibraryBinding {
         'Invalid reference type/category',
       );
     }
+    final preferSameOutfit = readPreciseOutfitPreference(p, type);
     for (final k in ['strength', 'fidelity']) {
       if (p[k] != null && (p[k] is! num || !(p[k] as num).isFinite)) {
         throw const NaiAgentToolError(
@@ -609,6 +617,7 @@ class NaiAgentReferenceLibraryBinding {
               type: value.type,
               strength: value.strength,
               fidelity: value.fidelity,
+              preferSameOutfit: value.preferSameOutfit,
             ),
           );
         }
@@ -685,6 +694,7 @@ class NaiAgentReferenceLibraryBinding {
               data.precise?.fidelity ??
               (p['fidelity'] as num?)?.toDouble() ??
               1,
+          preferSameOutfit: data.precise?.preferSameOutfit ?? preferSameOutfit,
         );
         saved = _preciseEntry(entry);
       }
@@ -800,6 +810,7 @@ class NaiAgentReferenceLibraryBinding {
         preciseType: data.precise?.type ?? PreciseRefType.characterAndStyle,
         preciseStrength: data.precise?.strength ?? 1,
         preciseFidelity: data.precise?.fidelity ?? 1,
+        precisePreferSameOutfit: data.precise?.preferSameOutfit,
         expectedVersion: expected,
         token: token,
         checkSource: () => _live(token),

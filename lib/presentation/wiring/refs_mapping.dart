@@ -132,12 +132,14 @@ RefsPreciseType refsPreciseType(PreciseRefType value) => switch (value) {
   PreciseRefType.character => RefsPreciseType.character,
   PreciseRefType.style => RefsPreciseType.style,
   PreciseRefType.characterAndStyle => RefsPreciseType.both,
+  PreciseRefType.outfit => RefsPreciseType.outfit,
 };
 
 PreciseRefType preciseRefType(RefsPreciseType value) => switch (value) {
   RefsPreciseType.character => PreciseRefType.character,
   RefsPreciseType.style => PreciseRefType.style,
   RefsPreciseType.both => PreciseRefType.characterAndStyle,
+  RefsPreciseType.outfit => PreciseRefType.outfit,
 };
 
 RefsEntry mapVibeEntry(
@@ -185,6 +187,7 @@ RefsEntry mapPreciseEntry(
   strength: entry.strength,
   fidelity: entry.fidelity,
   type: refsPreciseType(entry.type),
+  preferSameOutfit: entry.preferSameOutfit,
   hasRaw: true,
   usedCount: entry.usedCount,
   lastUsed: entry.lastUsedAt,

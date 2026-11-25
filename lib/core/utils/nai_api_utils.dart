@@ -1,11 +1,127 @@
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:image/image.dart' as img;
 
+import '../constants/model_spec.dart';
 import '../network/error_mappers/api_error_mapper.dart';
 import 'app_logger.dart';
 import 'isolate_pool.dart';
+
+const v5PreciseReferenceBuckets = <(int, int)>[
+  (256, 4096),
+  (256, 4032),
+  (256, 3968),
+  (256, 3904),
+  (256, 3840),
+  (256, 3776),
+  (256, 3712),
+  (256, 3648),
+  (256, 3584),
+  (256, 3520),
+  (256, 3456),
+  (256, 3392),
+  (256, 3328),
+  (320, 3264),
+  (320, 3200),
+  (320, 3136),
+  (320, 3072),
+  (320, 3008),
+  (320, 2944),
+  (320, 2880),
+  (320, 2816),
+  (320, 2752),
+  (384, 2688),
+  (384, 2624),
+  (384, 2560),
+  (384, 2496),
+  (384, 2432),
+  (384, 2368),
+  (448, 2304),
+  (448, 2240),
+  (448, 2176),
+  (448, 2112),
+  (512, 2048),
+  (512, 1984),
+  (512, 1920),
+  (512, 1856),
+  (576, 1792),
+  (576, 1728),
+  (576, 1664),
+  (640, 1600),
+  (640, 1536),
+  (704, 1472),
+  (704, 1408),
+  (768, 1344),
+  (768, 1280),
+  (832, 1216),
+  (896, 1152),
+  (960, 1088),
+  (1024, 1024),
+  (1088, 960),
+  (1152, 896),
+  (1216, 832),
+  (1280, 768),
+  (1344, 768),
+  (1408, 704),
+  (1472, 704),
+  (1536, 640),
+  (1600, 640),
+  (1664, 576),
+  (1728, 576),
+  (1792, 576),
+  (1856, 512),
+  (1920, 512),
+  (1984, 512),
+  (2048, 512),
+  (2112, 448),
+  (2176, 448),
+  (2240, 448),
+  (2304, 448),
+  (2368, 384),
+  (2432, 384),
+  (2496, 384),
+  (2560, 384),
+  (2624, 384),
+  (2688, 384),
+  (2752, 320),
+  (2816, 320),
+  (2880, 320),
+  (2944, 320),
+  (3008, 320),
+  (3072, 320),
+  (3136, 320),
+  (3200, 320),
+  (3264, 320),
+  (3328, 256),
+  (3392, 256),
+  (3456, 256),
+  (3520, 256),
+  (3584, 256),
+  (3648, 256),
+  (3712, 256),
+  (3776, 256),
+  (3840, 256),
+  (3904, 256),
+  (3968, 256),
+  (4032, 256),
+  (4096, 256),
+];
+
+(int, int) computeV5PreciseReferenceBucket(int width, int height) {
+  final aspectLog = math.log(math.max(width, 1) / math.max(height, 1));
+  var best = v5PreciseReferenceBuckets.first;
+  var bestDistance = double.infinity;
+  for (final (w, h) in v5PreciseReferenceBuckets) {
+    final distance = (aspectLog - math.log(w / h)).abs();
+    if (distance < bestDistance) {
+      best = (w, h);
+      bestDistance = distance;
+    }
+  }
+  return best;
+}
 
 /// NAI API 工具类
 /// 提供 NovelAI API 相关的共享静态方法
@@ -25,6 +141,7 @@ class NAIApiUtils {
   }
 
   static final _preciseNormalizations = Expando<Future<Uint8List>>();
+  static final _bucketPreciseNormalizations = Expando<Future<Uint8List>>();
   static final _preciseIdentities = Expando<Object>();
 
   static Object preciseReferenceIdentity(Uint8List bytes) =>
@@ -44,11 +161,69 @@ class NAIApiUtils {
   }) {
     if (isKnownNormalizedPreciseReferencePng(image)) return Future.value(image);
     return _preciseNormalizations[image] ??=
-        Future.sync(
-          () => (normalize ?? ensurePngFormatAsync)(image),
-        ).then(markNormalizedPreciseReferencePng).whenComplete(() {
-          _preciseNormalizations[image] = null;
+        Future.sync(() => (normalize ?? ensurePngFormatAsync)(image))
+            .then(markNormalizedPreciseReferencePng)
+            .onError((Object error, StackTrace stackTrace) {
+              _preciseNormalizations[image] = null;
+              Error.throwWithStackTrace(error, stackTrace);
+            });
+  }
+
+  static Future<Uint8List> normalizePreciseReferenceForModel(
+    Uint8List image,
+    ModelSpec spec,
+  ) {
+    if (spec.resizeCharacterReferences) return normalizePreciseReference(image);
+    if (!spec.bucketCharacterReferences) return Future.value(image);
+    return _bucketPreciseNormalizations[image] ??= ComputeGate()
+        .runCompute(_bucketPreciseReference, image)
+        .then((bytes) => bytes ?? image)
+        .onError((Object error, StackTrace stackTrace) {
+          _bucketPreciseNormalizations[image] = null;
+          Error.throwWithStackTrace(error, stackTrace);
         });
+  }
+
+  /// A null result lets the caller reuse the original PNG across isolates.
+  static Uint8List? _bucketPreciseReference(Uint8List bytes) {
+    final decoder = img.findDecoderForData(bytes);
+    final decoded = decoder?.decode(bytes);
+    if (decoded == null) {
+      throw const FormatException('Invalid precise reference image');
+    }
+    final orientation = decoded.exif.imageIfd.orientation;
+    final image = orientation != null && orientation != 1
+        ? img.bakeOrientation(decoded)
+        : decoded;
+    final width = image.width;
+    final height = image.height;
+    final (bucketWidth, bucketHeight) = computeV5PreciseReferenceBucket(
+      width,
+      height,
+    );
+    if (width == bucketWidth && height == bucketHeight) {
+      return decoder is img.PngDecoder && identical(image, decoded)
+          ? null
+          : img.encodePng(image);
+    }
+    final scale = math.max(bucketWidth / width, bucketHeight / height);
+    final resizeWidth = math.max((width * scale + 0.5).floor(), bucketWidth);
+    final resizeHeight = math.max((height * scale + 0.5).floor(), bucketHeight);
+    final resized = img.copyResize(
+      image,
+      width: resizeWidth,
+      height: resizeHeight,
+      interpolation: img.Interpolation.cubic,
+    );
+    return img.encodePng(
+      img.copyCrop(
+        resized,
+        x: (resizeWidth - bucketWidth) ~/ 2,
+        y: (resizeHeight - bucketHeight) ~/ 2,
+        width: bucketWidth,
+        height: bucketHeight,
+      ),
+    );
   }
 
   /// 将 double 转换为 JSON 数值（整数或浮点数）

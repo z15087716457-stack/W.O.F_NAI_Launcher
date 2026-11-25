@@ -18,6 +18,45 @@ void main() {
   });
   tearDown(() async => root.delete(recursive: true));
 
+  test(
+    'rebuilds effective V5 and V4.5 precise metadata when raw JSON is absent',
+    () {
+      const metadata = NaiImageMetadata(
+        model: 'nai-diffusion-5-full',
+        preciseReferenceImages: ['YQ==', 'Yg==', 'Yw=='],
+        preciseReferenceTypes: [
+          'costume',
+          'character_mainoutfit',
+          'character&style_anyoutfit',
+        ],
+        preciseReferenceStrengths: [4.0, 3.0, 2.0],
+        preciseReferenceFidelities: [0.8, 0.5, 0.25],
+      );
+      final v5 = GenerationSaveService.buildCommentJsonFromMetadata(metadata);
+      expect(v5['director_reference_secondary_strength_values'], [
+        0.0,
+        0.0,
+        0.0,
+      ]);
+      expect(
+        NaiImageMetadata.fromNaiComment(v5).preciseReferenceTypes,
+        metadata.preciseReferenceTypes,
+      );
+      final v45 = GenerationSaveService.buildCommentJsonFromMetadata(
+        metadata.copyWith(model: 'nai-diffusion-4-5-full'),
+      );
+      expect(v45['director_reference_secondary_strength_values'], [0.5, 0.75]);
+      expect(NaiImageMetadata.fromNaiComment(v45).preciseReferenceTypes, [
+        'character',
+        'character&style',
+      ]);
+      final infill = GenerationSaveService.buildCommentJsonFromMetadata(
+        metadata.copyWith(usedInpainting: true),
+      );
+      expect(infill, isNot(contains('director_reference_images')));
+    },
+  );
+
   test('repeated and concurrent saves produce one identical file', () async {
     final image = GeneratedImageDetailData(id: 'same-image', imageBytes: png);
     final paths = await Future.wait([

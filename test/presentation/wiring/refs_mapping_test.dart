@@ -2,7 +2,9 @@ import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/core/constants/api_constants.dart';
+import 'package:nai_launcher/core/enums/precise_ref_type.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
+import 'package:nai_launcher/data/models/precise_ref/precise_ref_library_entry.dart';
 import 'package:nai_launcher/data/models/vibe/vibe_library_entry.dart';
 import 'package:nai_launcher/data/models/vibe/vibe_reference.dart';
 import 'package:nai_launcher/presentation/ui/refs/refs_contract.dart';
@@ -75,9 +77,35 @@ void main() {
   test('model capabilities come from model specs including V5', () {
     final v5 = refsModel(ImageModels.animeDiffusionV5Full);
     expect(v5.vibeUsable, isFalse);
-    expect(v5.preciseUsable, isFalse);
+    expect(v5.preciseUsable, isTrue);
     expect(v5.switchTarget, isNotNull);
     expect(refsModel(current).preciseUsable, isTrue);
+  });
+
+  test('precise reference mapping supports outfit type and preferSameOutfit', () {
+    expect(refsPreciseType(PreciseRefType.outfit), RefsPreciseType.outfit);
+    expect(preciseRefType(RefsPreciseType.outfit), PreciseRefType.outfit);
+    final mapped = mapPreciseEntry(
+      PreciseRefLibraryEntry.create(
+        id: 'outfit-1',
+        name: 'Knight Armor',
+        imagePath: '/tmp/armor.png',
+        type: PreciseRefType.character,
+        preferSameOutfit: true,
+        strength: 1.5,
+        fidelity: 0.8,
+        createdAt: DateTime(2026),
+      ),
+    );
+    expect(mapped.type, RefsPreciseType.character);
+    expect(mapped.preferSameOutfit, isTrue);
+    expect(mapped.effectivePreferSameOutfit, isTrue);
+    expect(
+      refsCounts([
+        const RefsEntry(key: 'o1', name: 'Armor', type: RefsPreciseType.outfit),
+      ]).types[RefsPreciseType.outfit],
+      1,
+    );
   });
 
   test('whole-library counts remain independent of filtering', () {

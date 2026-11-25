@@ -437,7 +437,7 @@ void main() {
           find.byType(RetainedBranchViewport, skipOffstage: false),
         )
         .toList();
-    expect(retained, hasLength(6));
+    expect(retained, hasLength(7));
     expect(retained.every((branch) => !branch.active), isTrue);
     final before = Map<int, int>.of(layouts);
     for (var i = 0; i < 8; i++) {

@@ -740,13 +740,51 @@ class RefsPreciseBody extends StatelessWidget {
             RefsSectionLabel(l10n.refs_referenceWhat),
             RefsTypeSeg(
               value: e.type,
-              onChanged: (t) =>
-                  a.onUpdateParams(e.key, RefsParamsPatch(type: t)),
+              onChanged: (t) => a.onUpdateParams(
+                e.key,
+                RefsParamsPatch(type: t),
+              ),
             ),
             Text(
               RefsFormat.typeDesc(context, e.type),
               style: UiText.sans(12, color: c.muted),
             ),
+            if (e.supportsPreferSameOutfit)
+              UiPressable(
+                key: const Key('refs-prefer-same-outfit'),
+                onTap: () => a.onUpdateParams(
+                  e.key,
+                  RefsParamsPatch(
+                    preferSameOutfit: !e.effectivePreferSameOutfit,
+                  ),
+                ),
+                builder: (context, _) => Row(
+                  spacing: 8,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        spacing: 2,
+                        children: [
+                          Text(
+                            l10n.refs_preferSameOutfit,
+                            style: UiText.sans(
+                              12.5,
+                              weight: FontWeight.w500,
+                              color: c.ink,
+                            ),
+                          ),
+                          Text(
+                            l10n.refs_preferSameOutfitDesc,
+                            style: UiText.sans(11, color: c.muted),
+                          ),
+                        ],
+                      ),
+                    ),
+                    UiSwitch(value: e.effectivePreferSameOutfit),
+                  ],
+                ),
+              ),
           ],
         ),
         Column(
@@ -758,7 +796,11 @@ class RefsPreciseBody extends StatelessWidget {
               key: const Key('refs-strength'),
               label: l10n.refs_preciseStrength,
               value: e.strength,
+              min: -10,
               max: 10,
+              sliderMax: 5,
+              midpoint: 1,
+              defaultValue: 1,
               desc: l10n.refs_preciseStrengthDesc,
               onChanged: (v) =>
                   a.onUpdateParams(e.key, RefsParamsPatch(strength: v)),
@@ -767,7 +809,9 @@ class RefsPreciseBody extends StatelessWidget {
               key: const Key('refs-fidelity'),
               label: l10n.refs_fidelity,
               value: e.fidelity,
+              min: -10,
               max: 10,
+              defaultValue: 1,
               desc: l10n.refs_fidelityDesc,
               onChanged: (v) =>
                   a.onUpdateParams(e.key, RefsParamsPatch(fidelity: v)),
@@ -846,11 +890,12 @@ class RefsTypeSeg extends StatelessWidget {
                 builder: (context, hover) {
                   final on = t == value;
                   final fg = on ? c.ink : (hover ? c.ink : c.muted);
-                  final label = Text(
+                    final label = Text(
                     RefsFormat.type(context, t),
                     maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: UiText.sans(
-                      12,
+                      11.5,
                       weight: on ? FontWeight.w600 : FontWeight.w400,
                       color: fg,
                     ),
@@ -862,6 +907,7 @@ class RefsTypeSeg extends StatelessWidget {
                   );
                   return Container(
                     height: tall ? 46 : 26,
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
                     decoration: BoxDecoration(
                       color: on ? c.raised : null,
                       borderRadius: BorderRadius.circular(5),
@@ -883,8 +929,8 @@ class RefsTypeSeg extends StatelessWidget {
                           )
                         : Row(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            spacing: 5,
-                            children: [glyph, label],
+                            spacing: 4,
+                            children: [glyph, Flexible(child: label)],
                           ),
                   );
                 },

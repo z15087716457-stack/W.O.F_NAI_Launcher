@@ -2920,7 +2920,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get preciseRef_characterAndStyleDescription => '同时参考人物特征与视觉风格';
 
   @override
-  String get preciseRef_v4Only => '此功能需要 V4+ 模型';
+  String get preciseRef_v4Only => '此功能需要 V5 或 V4.5 模型';
 
   @override
   String get preciseRef_typeCharacter => '角色';
@@ -8917,7 +8917,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get refs_preciseOnlyV45 => '只在 V4.5 可用';
+  String get refs_preciseOnlyV45 => '支持 V5 / V4.5';
 
   @override
   String refs_preciseCostNote(Object cost) {
@@ -9019,7 +9019,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get refs_bannerPreciseBody => '库里的参考图照常整理；切到 V4.5 才能用于生成';
+  String get refs_bannerPreciseBody => '库里的参考图照常整理；切到 V5 或 V4.5 才能用于生成';
 
   @override
   String refs_switchTo(Object model) {
@@ -9158,7 +9158,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String refs_emptyHelpBody(Object cost) {
-    return 'Vibe：借整体氛围和画风，可以叠很多张（V4 / V4.5，V5 没有）。精准参考：照着一张图的人物或画风来画，更准，每张 $cost Anlas（只在 V4.5）。两者不能同时生效。';
+    return 'Vibe：借整体氛围和画风，可以叠很多张（V4 / V4.5，V5 没有）。精准参考：照着一张图的人物、画风或服装来画，更准，每张 $cost Anlas（支持 V5 / V4.5，服装参考仅 V5）。两者不能同时生效。';
   }
 
   @override
@@ -9432,7 +9432,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get refs_typeBoth => '角色+风格';
 
   @override
-  String get refs_typeCharacterDesc => '保留人物长相、发型和服装，画风跟提示词走';
+  String get refs_typeCharacterDesc => '保留人物长相与发型（V5 可选是否同时参考服装），画风跟提示词走';
 
   @override
   String get refs_typeStyleDesc => '只借画风、配色和笔触，不管画的是谁';
@@ -9453,7 +9453,8 @@ class AppLocalizationsZh extends AppLocalizations {
   String get refs_fidelityDesc => '越高越贴原图细节，越低越自由';
 
   @override
-  String get refs_preciseDefaultsNote => '这里改的是默认值，发送时直接带上；数字框可以填超过 0–1 的值';
+  String get refs_preciseDefaultsNote =>
+      '这里改的是默认值，发送时直接带上；V5 强度滑杆最高 5.0 且不使用保真度，数字框支持更广范围';
 
   @override
   String get refs_showInFolderShort => '所在文件夹';
@@ -12405,10 +12406,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get gen_precise => '精准参考';
 
   @override
-  String get gen_preciseDesc => '将生成绑定到角色或风格参考';
+  String get gen_preciseDesc => '将生成绑定到角色、风格或服装参考';
 
   @override
-  String get gen_preciseDrop => '拖角色或风格参考图进来，或者';
+  String get gen_preciseDrop => '拖角色、风格或服装参考图进来，或者';
 
   @override
   String get gen_preciseCharacter => '角色';
@@ -13822,9 +13823,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get channel_subtitle => '滚动时两侧的装饰，只画在图片之外，不挡图';
 
   @override
-  String get channel_paused => '生成中 · 动画已暂停';
-
-  @override
   String get channel_modeOff => '关闭';
 
   @override
@@ -13861,7 +13859,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get channel_motion => '空闲微动';
 
   @override
-  String get channel_motionSub => '很轻的动效，生成时自动暂停';
+  String get channel_motionSub => '很轻的动效，始终保持柔和流动';
 
   @override
   String get channel_sideTransparency => '侧栏透明度';
@@ -14731,7 +14729,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_cvMotion => '空闲微动';
 
   @override
-  String get set_cvMotionSub => '生成中和开启“减少动态效果”时自动暂停';
+  String get set_cvMotionSub => '开启“减少动态效果”时自动暂停';
 
   @override
   String get set_cvSideTransparency => '侧栏透明度';
@@ -19490,6 +19488,52 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get set_agRulesLoadFailed => '无法读取 AGENTS.md，请检查文件权限。';
+
+  @override
+  String get preciseRef_typeOutfit => '服装';
+
+  @override
+  String get preciseRef_outfitDescription => '仅参考图片中的服装与穿搭（V5 专属）';
+
+  @override
+  String get preciseRef_preferSameOutfit => '同时参考服装';
+
+  @override
+  String get refs_typeOutfit => '服装';
+
+  @override
+  String get refs_typeOutfitDesc => '只借服装与穿搭设计，人物和画风跟提示词走（仅 V5 可用）';
+
+  @override
+  String get refs_preferSameOutfit => '同时参考服装';
+
+  @override
+  String get refs_preferSameOutfitDesc => 'V5 下开启时更贴近参考图角色的服装';
+
+  @override
+  String get gen_preciseOutfit => '服装';
+
+  @override
+  String get gen_precisePreferSameOutfit => '同时参考服装';
+
+  @override
+  String get gen_preciseInpaintUnsupported =>
+      '当前模型的局部重绘暂不支持精准参考，本次发送将忽略参考图且不计费。';
+
+  @override
+  String get gen_preciseOutfitUnsupported => '当前模型不支持服装参考，服装条目本次将被跳过且不计费。';
+
+  @override
+  String gen_preciseLimit(int count) {
+    return '最多可添加 $count 张精准参考';
+  }
+
+  @override
+  String get gen_turboBlockedByPrecise =>
+      '精准参考仅支持通常模式（V5 Full），移除或停用精准参考后才能开启 Turbo';
+
+  @override
+  String get gen_turboSwitchedOffForPrecise => '精准参考需要通常模式，已自动切回 V5 Full';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -22408,7 +22452,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get preciseRef_characterAndStyleDescription => '同時參考人物特徵與視覺風格';
 
   @override
-  String get preciseRef_v4Only => '此功能需要 V4+ 模型';
+  String get preciseRef_v4Only => '此功能需要 V5 或 V4.5 模型';
 
   @override
   String get preciseRef_typeCharacter => '角色';
@@ -28405,7 +28449,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
-  String get refs_preciseOnlyV45 => '只在 V4.5 可用';
+  String get refs_preciseOnlyV45 => '支援 V5 / V4.5';
 
   @override
   String refs_preciseCostNote(Object cost) {
@@ -28507,7 +28551,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
-  String get refs_bannerPreciseBody => '庫裡的參考圖照常整理；切到 V4.5 才能用於生成';
+  String get refs_bannerPreciseBody => '庫裡的參考圖照常整理；切到 V5 或 V4.5 才能用於生成';
 
   @override
   String refs_switchTo(Object model) {
@@ -28646,7 +28690,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String refs_emptyHelpBody(Object cost) {
-    return 'Vibe：借整體氛圍和畫風，可以疊很多張（V4 / V4.5，V5 沒有）。精準參考：照著一張圖的人物或畫風來畫，更準，每張 $cost Anlas（只在 V4.5）。兩者不能同時生效。';
+    return 'Vibe：借整體氛圍和畫風，可以疊很多張（V4 / V4.5，V5 沒有）。精準參考：照著一張圖的人物、畫風或服裝來畫，更準，每張 $cost Anlas（支援 V5 / V4.5，服裝參考僅 V5）。兩者不能同時生效。';
   }
 
   @override
@@ -28920,7 +28964,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get refs_typeBoth => '角色+風格';
 
   @override
-  String get refs_typeCharacterDesc => '保留人物長相、髮型和服裝，畫風跟提示詞走';
+  String get refs_typeCharacterDesc => '保留人物長相與髮型（V5 可選是否同時參考服裝），畫風跟提示詞走';
 
   @override
   String get refs_typeStyleDesc => '只借畫風、配色和筆觸，不管畫的是誰';
@@ -28941,7 +28985,8 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get refs_fidelityDesc => '越高越貼原圖細節，越低越自由';
 
   @override
-  String get refs_preciseDefaultsNote => '這裡改的是預設值，傳送時直接帶上；數字框可以填超過 0–1 的值';
+  String get refs_preciseDefaultsNote =>
+      '這裡改的是預設值，傳送時直接帶上；V5 強度滑桿最高 5.0 且不使用保真度，數字框支援更廣範圍';
 
   @override
   String get refs_showInFolderShort => '所在資料夾';
@@ -31893,10 +31938,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get gen_precise => '精準參考';
 
   @override
-  String get gen_preciseDesc => '將生成繫結到角色或風格參考';
+  String get gen_preciseDesc => '將生成繫結到角色、風格或服裝參考';
 
   @override
-  String get gen_preciseDrop => '拖角色或風格參考圖進來，或者';
+  String get gen_preciseDrop => '拖角色、風格或服裝參考圖進來，或者';
 
   @override
   String get gen_preciseCharacter => '角色';
@@ -33310,9 +33355,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get channel_subtitle => '滾動時兩側的裝飾，只畫在圖片之外，不擋圖';
 
   @override
-  String get channel_paused => '生成中 · 動畫已暫停';
-
-  @override
   String get channel_modeOff => '關閉';
 
   @override
@@ -33349,7 +33391,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get channel_motion => '空閒微動';
 
   @override
-  String get channel_motionSub => '很輕的動效，生成時自動暫停';
+  String get channel_motionSub => '很輕的動效，始終保持柔和流動';
 
   @override
   String get channel_sideTransparency => '側欄透明度';
@@ -34219,7 +34261,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get set_cvMotion => '空閒微動';
 
   @override
-  String get set_cvMotionSub => '生成中和開啟“減少動態效果”時自動暫停';
+  String get set_cvMotionSub => '開啟“減少動態效果”時自動暫停';
 
   @override
   String get set_cvSideTransparency => '側欄透明度';
@@ -38978,4 +39020,50 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get set_agRulesLoadFailed => '無法讀取 AGENTS.md，請檢查檔案權限。';
+
+  @override
+  String get preciseRef_typeOutfit => '服裝';
+
+  @override
+  String get preciseRef_outfitDescription => '僅參考圖片中的服裝與穿搭（V5 專屬）';
+
+  @override
+  String get preciseRef_preferSameOutfit => '同時參考服裝';
+
+  @override
+  String get refs_typeOutfit => '服裝';
+
+  @override
+  String get refs_typeOutfitDesc => '只借服裝與穿搭設計，人物和畫風跟提示詞走（僅 V5 可用）';
+
+  @override
+  String get refs_preferSameOutfit => '同時參考服裝';
+
+  @override
+  String get refs_preferSameOutfitDesc => 'V5 下開啟時更貼近參考圖角色的服裝';
+
+  @override
+  String get gen_preciseOutfit => '服裝';
+
+  @override
+  String get gen_precisePreferSameOutfit => '同時參考服裝';
+
+  @override
+  String get gen_preciseInpaintUnsupported =>
+      '當前模型的局部重繪暫不支援精準參考，本次傳送將忽略參考圖且不計費。';
+
+  @override
+  String get gen_preciseOutfitUnsupported => '當前模型不支援服裝參考，服裝條目本次將被跳過且不計費。';
+
+  @override
+  String gen_preciseLimit(int count) {
+    return '最多可新增 $count 張精準參考';
+  }
+
+  @override
+  String get gen_turboBlockedByPrecise =>
+      '精準參考僅支援通常模式（V5 Full），移除或停用精準參考後才能開啟 Turbo';
+
+  @override
+  String get gen_turboSwitchedOffForPrecise => '精準參考需要通常模式，已自動切回 V5 Full';
 }

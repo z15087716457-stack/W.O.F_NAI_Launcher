@@ -508,4 +508,42 @@ void main() {
       await tester.pumpWidget(const SizedBox());
     },
   );
+
+  testWidgets(
+    'unmounting AgentWiring mid prompt-set generation does not cancel or drop the result',
+    (tester) async {
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final native = (await tester.runAsync(
+        () async =>
+            container.read(imageGenerationNotifierProvider.notifier)
+                as ControlledAgentGeneration,
+      ))!;
+      await harness.pump(tester);
+      final action = harness.panel(tester).actions.onPromptSetAction!;
+      late Future<bool> running;
+      await tester.runAsync(() async {
+        running = action(id, 0, AgentPromptSetAction.generate);
+        await waitForAgentStart(native);
+      });
+      // Busy state is held in a container-scoped provider.
+      expect(container.read(agentPromptSetBusyProvider), isNotEmpty);
+
+      // Unmount AgentWiring (e.g. closing sidebar or switching route/chat).
+      await tester.pumpWidget(const SizedBox());
+      await tester.pump();
+      expect(native.cancels, 0);
+
+      await tester.runAsync(() async {
+        native.finish();
+        expect(await running, isTrue);
+      });
+      expect(native.cancels, 0);
+      expect(container.read(agentPromptSetBusyProvider), isEmpty);
+      final persisted = (await tester.runAsync(
+        () => NaiAgentPromptSets(workspace.agentDirectory).read(id),
+      ))!;
+      expect(persisted['images']['0'], hasLength(1));
+    },
+  );
 }

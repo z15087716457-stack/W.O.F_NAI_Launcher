@@ -289,16 +289,27 @@ class RefsGenerationTarget {
         prepared.add((entry: entry, bytes: bytes));
       }
       if (prepared.isEmpty) return const RefsSendResult(0);
+      final before = ref
+          .read(generationParamsNotifierProvider)
+          .preciseReferences;
+      final available =
+          ModelSpec.maxPreciseReferences - (replace ? 0 : before.length);
+      final truncated = prepared.length > available;
+      final toAdd = available <= 0
+          ? const <({PreciseRefLibraryEntry entry, Uint8List bytes})>[]
+          : prepared.take(available).toList(growable: false);
+      if (toAdd.isEmpty) return RefsSendResult(0, truncated: truncated);
       await _commit(snapshot, alive, () {
         final params = ref.read(generationParamsNotifierProvider.notifier);
         if (replace) params.clearPreciseReferences();
-        for (final item in prepared) {
+        for (final item in toAdd) {
           unawaited(
             params.addPreciseReferenceFromImage(
               item.bytes,
               type: item.entry.type,
               strength: item.entry.strength,
               fidelity: item.entry.fidelity,
+              preferSameOutfit: item.entry.preferSameOutfit,
               onNormalized: (_, after) {
                 _origins[after] = item.entry.id;
                 preciseOrigins[refsBytesFingerprint(after.image)] =
@@ -314,12 +325,12 @@ class RefsGenerationTarget {
           preciseOrigins[refsBytesFingerprint(item.bytes)] = item.entry.id;
         }
       });
-      for (final entry in entries) {
+      for (final item in toAdd) {
         await ref
             .read(preciseRefLibraryNotifierProvider.notifier)
-            .recordUsage(entry.id);
+            .recordUsage(item.entry.id);
       }
-      return RefsSendResult(prepared.length);
+      return RefsSendResult(toAdd.length, truncated: truncated);
     } finally {
       _writing = false;
     }

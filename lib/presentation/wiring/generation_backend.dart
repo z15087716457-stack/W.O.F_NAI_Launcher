@@ -209,12 +209,11 @@ class GenerationBackend {
       final cost = quote();
       final intent = _intentRevision;
       final encodingRevision = _encodingRevision;
-      bool valid() =>
+      bool validState() =>
           !_disposed &&
           encodingRevision == _encodingRevision &&
           ref.read(generationEncodingReferencesProvider).isEmpty &&
           intent == _intentRevision &&
-          alive?.call() != false &&
           !busy &&
           !ref.read(generationCooldownProvider).isActive &&
           request == ref.read(generationRequestParamsProvider) &&
@@ -226,11 +225,12 @@ class GenerationBackend {
           cost == quote();
       if (!await confirm(cost) ||
           cost == AnlasCalculator.invalidCost ||
-          !valid()) {
+          alive?.call() == false ||
+          !validState()) {
         return;
       }
       await ref.read(generationPlatformProvider).backupDraft(_snapshot());
-      if (!valid()) return;
+      if (!validState()) return;
       onStarted?.call();
       await ref
           .read(imageGenerationNotifierProvider.notifier)
@@ -259,7 +259,6 @@ class GenerationBackend {
             GenerationStatus.error) {
       return;
     }
-    final write = captureDraft(alive: alive);
     final account = _accountRevision;
     final intent = _intentRevision;
     final encoding = _encodingRevision;
@@ -272,9 +271,8 @@ class GenerationBackend {
       request.count,
     );
     final quoted = cost();
-    bool valid() =>
+    bool validState() =>
         !_disposed &&
-        alive?.call() != false &&
         !busy &&
         account == _accountRevision &&
         intent == _intentRevision &&
@@ -287,11 +285,13 @@ class GenerationBackend {
     try {
       if (!await confirm(quoted) ||
           quoted == AnlasCalculator.invalidCost ||
-          !valid()) {
+          alive?.call() == false ||
+          !validState()) {
         return;
       }
+      final write = captureDraft();
       await write(() {});
-      if (valid()) await notifier.retry(request);
+      if (validState()) await notifier.retry(request);
     } finally {
       _launching = false;
     }

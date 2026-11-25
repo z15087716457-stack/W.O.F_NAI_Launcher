@@ -82,6 +82,12 @@ GenRefsData generationRefsView(
         : null,
     precise: spec.characterReferences
         ? GenPreciseData(
+            max: ModelSpec.maxPreciseReferences,
+            supportsOutfit: spec.outfitReferences,
+            showFidelity: spec.characterReferenceFidelity,
+            strengthMax: spec.characterReferenceStrengthMax,
+            suspendedForInpaint: params.preciseReferencesSuspendedForInpaint,
+            hasUnsupportedOutfit: params.hasUnsupportedOutfitReferences,
             list: [
               for (
                 var index = 0;
@@ -95,7 +101,10 @@ GenRefsData generationRefsView(
                     PreciseRefType.character => GenPreciseType.character,
                     PreciseRefType.style => GenPreciseType.style,
                     PreciseRefType.characterAndStyle => GenPreciseType.both,
+                    PreciseRefType.outfit => GenPreciseType.outfit,
                   },
+                  preferSameOutfit:
+                      params.preciseReferences[index].preferSameOutfit,
                   strength: params.preciseReferences[index].strength,
                   fidelity: params.preciseReferences[index].fidelity,
                   enabled: params.preciseReferences[index].enabled,
@@ -183,13 +192,18 @@ class GenerationReferences {
     }
     return _backend.mutate(() {
       if (!_spec.characterReferences) return;
+      final typeChanged = previous == null || value.type != previous.type;
+      final outfitChanged =
+          previous == null ||
+          value.preferSameOutfit != previous.preferSameOutfit;
       _params.updatePreciseReference(
         _index(value.id, precise: true),
-        type: previous == null || value.type != previous.type
+        type: typeChanged
             ? switch (value.type) {
                 GenPreciseType.character => PreciseRefType.character,
                 GenPreciseType.style => PreciseRefType.style,
                 GenPreciseType.both => PreciseRefType.characterAndStyle,
+                GenPreciseType.outfit => PreciseRefType.outfit,
               }
             : null,
         strength: previous == null || value.strength != previous.strength
@@ -201,6 +215,9 @@ class GenerationReferences {
         enabled: previous == null || value.enabled != previous.enabled
             ? value.enabled
             : null,
+        preferSameOutfit: outfitChanged ? value.preferSameOutfit : null,
+        resetPreferSameOutfit:
+            outfitChanged && value.preferSameOutfit == null,
       );
     });
   }

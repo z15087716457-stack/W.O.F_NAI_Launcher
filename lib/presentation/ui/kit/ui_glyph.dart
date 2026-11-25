@@ -135,6 +135,8 @@ abstract final class UiGlyphs {
       'M12 3a9 9 0 000 18c1 0 1.6-.7 1.6-1.5 0-.4-.2-.8-.4-1-.3-.3-.4-.6-.4-1 0-.8.7-1.5 1.5-1.5H16a5 5 0 005-5c0-4.4-4-8-9-8zM7.5 12h.01M9.5 8h.01M14.5 8h.01M17 12h.01';
   static const personStar =
       'M9 11a3.5 3.5 0 100-7 3.5 3.5 0 000 7zM3 20a6 6 0 0112 0M17 4l1.2 2.6L21 7l-2 2 .5 2.8L17 10.5 14.5 11.8 15 9l-2-2 2.8-.4z';
+  static const outfit =
+      'M12 6a2 2 0 112-2c0 1.5-2 1.8-2 3.2L4 13a2 2 0 001.2 3.6h13.6A2 2 0 0020 13l-8-5.8';
   static const picture = 'M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4M15 9h.01';
   static const arrowLeft = 'M19 12H5M11 6l-6 6 6 6';
 

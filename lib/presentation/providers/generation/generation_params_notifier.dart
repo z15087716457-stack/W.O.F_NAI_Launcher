@@ -252,17 +252,21 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
 
   /// 更新模型
   void updateModel(String model, {bool persist = true}) {
+    final compatible = state
+        .copyWith(model: model)
+        .withCompatiblePreciseReferenceModel;
     // 当前采样器不被新模型族支持时归位到推荐采样器
     // （如切到 V5 时残留的 DDIM/DPM++ SDE）
     final sampler =
         Samplers.samplersForModel(
-          ImageModels.baseModelForTurboModel(model) ?? model,
+          ImageModels.baseModelForTurboModel(compatible.model) ??
+              compatible.model,
         ).contains(state.sampler)
         ? state.sampler
         : Samplers.kEulerAncestral;
-    state = state.copyWith(model: model, sampler: sampler);
+    state = compatible.copyWith(sampler: sampler);
     if (persist) {
-      _storage.setDefaultModel(model);
+      _storage.setDefaultModel(compatible.model);
       _storage.setDefaultSampler(sampler);
     }
   }
@@ -365,7 +369,7 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
     _restoreSavedVibes = false;
     _restoreSavedPreciseRefs = false;
     _restoreSavedNormalize = false;
-    state = snapshot.copyWith(
+    state = snapshot.withCompatiblePreciseReferenceModel.copyWith(
       advancedOptionsExpanded: state.advancedOptionsExpanded,
     );
     _storage.setDefaultModel(state.model);
@@ -388,7 +392,15 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
 
   /// 更新生成动作
   void updateAction(ImageGenerationAction action) {
-    state = state.copyWith(action: action);
+    _applyPreciseCompatibleState(state.copyWith(action: action));
+  }
+
+  void _applyPreciseCompatibleState(ImageParams next) {
+    final compatible = next.withCompatiblePreciseReferenceModel;
+    state = compatible;
+    if (compatible.model != next.model) {
+      _storage.setDefaultModel(compatible.model);
+    }
   }
 
   // ==================== img2img 参数 ====================
@@ -406,19 +418,21 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
   /// Restore only fields temporarily owned by an image tool. Prompt, seed,
   /// sampler and reference edits made while the panel was open stay current.
   void restoreImageToolFields(ImageParams snapshot) {
-    state = state.copyWith(
-      sourceImage: snapshot.sourceImage,
-      maskImage: snapshot.maskImage,
-      inpaintFocusRegion: snapshot.inpaintFocusRegion,
-      width: snapshot.width,
-      height: snapshot.height,
-      action: snapshot.action,
-      strength: snapshot.strength,
-      noise: snapshot.noise,
-      inpaintStrength: snapshot.inpaintStrength,
-      isOutpaint: snapshot.isOutpaint,
-      enhanceWorkflow: snapshot.enhanceWorkflow,
-      upscaledEnhance: snapshot.upscaledEnhance,
+    _applyPreciseCompatibleState(
+      state.copyWith(
+        sourceImage: snapshot.sourceImage,
+        maskImage: snapshot.maskImage,
+        inpaintFocusRegion: snapshot.inpaintFocusRegion,
+        width: snapshot.width,
+        height: snapshot.height,
+        action: snapshot.action,
+        strength: snapshot.strength,
+        noise: snapshot.noise,
+        inpaintStrength: snapshot.inpaintStrength,
+        isOutpaint: snapshot.isOutpaint,
+        enhanceWorkflow: snapshot.enhanceWorkflow,
+        upscaledEnhance: snapshot.upscaledEnhance,
+      ),
     );
   }
 
@@ -447,14 +461,16 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
 
   /// 清除 img2img 设置
   void clearImg2Img() {
-    state = state.copyWith(
-      action: ImageGenerationAction.generate,
-      sourceImage: null,
-      inpaintFocusRegion: null,
-      strength: 0.7,
-      noise: 0.0,
-      inpaintStrength: 1.0,
-      isOutpaint: false,
+    _applyPreciseCompatibleState(
+      state.copyWith(
+        action: ImageGenerationAction.generate,
+        sourceImage: null,
+        inpaintFocusRegion: null,
+        strength: 0.7,
+        noise: 0.0,
+        inpaintStrength: 1.0,
+        isOutpaint: false,
+      ),
     );
   }
 
@@ -467,13 +483,15 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
 
   /// 清除 Inpainting 设置
   void clearInpainting() {
-    state = state.copyWith(
-      action: ImageGenerationAction.generate,
-      sourceImage: null,
-      maskImage: null,
-      inpaintFocusRegion: null,
-      inpaintStrength: 1.0,
-      isOutpaint: false,
+    _applyPreciseCompatibleState(
+      state.copyWith(
+        action: ImageGenerationAction.generate,
+        sourceImage: null,
+        maskImage: null,
+        inpaintFocusRegion: null,
+        inpaintStrength: 1.0,
+        isOutpaint: false,
+      ),
     );
   }
 
@@ -1158,38 +1176,48 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
     required PreciseRefType type,
     double strength = 1.0,
     double fidelity = 1.0,
+    bool? preferSameOutfit,
     bool isNormalizedPng = false,
   }) {
+    if (state.preciseReferences.length >= ModelSpec.maxPreciseReferences) {
+      return;
+    }
     if (isNormalizedPng) {
       NAIApiUtils.markNormalizedPreciseReferencePng(image);
     }
-    state = state.copyWith(
-      preciseReferences: [
-        ...state.preciseReferences,
-        PreciseReference(
-          image: image,
-          type: type,
-          strength: strength,
-          fidelity: fidelity,
-        ),
-      ],
+    _applyPreciseCompatibleState(
+      state.copyWith(
+        preciseReferences: [
+          ...state.preciseReferences,
+          PreciseReference(
+            image: image,
+            type: type,
+            strength: strength,
+            fidelity: fidelity,
+            preferSameOutfit: preferSameOutfit,
+          ),
+        ],
+      ),
     );
     _scheduleGenerationStateSave(immediate: true);
   }
 
   /// 添加原始图片形式的 Precise Reference，并在后台完成 Director PNG 规范化。
   ///
-  /// 原图会先进入状态，保证用户快速点击生成时请求构建器仍能读取到参考图；
-  /// 规范化完成后再替换为可直接提交的 PNG，避免后续生成重复处理。
+  /// 原图留在草稿，可按切换后的模型重新处理。预热与请求共享规范化缓存。
   Future<void> addPreciseReferenceFromImage(
     Uint8List image, {
     required PreciseRefType type,
     double strength = 1.0,
     double fidelity = 1.0,
+    bool? preferSameOutfit,
     Future<Uint8List> Function(Uint8List)? normalize,
     void Function(PreciseReference before, PreciseReference after)?
     onNormalized,
   }) async {
+    if (state.preciseReferences.length >= ModelSpec.maxPreciseReferences) {
+      return;
+    }
     // A separate byte identity per entry also distinguishes repeated imports of
     // the same source object, without copying its pixels.
     final staged = Uint8List.sublistView(image);
@@ -1201,10 +1229,18 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
       type: type,
       strength: strength,
       fidelity: fidelity,
+      preferSameOutfit: preferSameOutfit,
     );
 
     final Uint8List normalizedImage;
     try {
+      if (normalize == null) {
+        await NAIApiUtils.normalizePreciseReferenceForModel(
+          staged,
+          state.modelSpec,
+        );
+        return;
+      }
       normalizedImage = await NAIApiUtils.normalizePreciseReference(
         staged,
         normalize: normalize,
@@ -1251,6 +1287,8 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
     double? strength,
     double? fidelity,
     bool? enabled,
+    bool? preferSameOutfit,
+    bool resetPreferSameOutfit = false,
   }) {
     if (index < 0 || index >= state.preciseReferences.length) return;
     final newList = [...state.preciseReferences];
@@ -1260,19 +1298,19 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
       strength: strength ?? current.strength,
       fidelity: fidelity ?? current.fidelity,
       enabled: enabled ?? current.enabled,
+      preferSameOutfit:
+          preferSameOutfit ??
+          (resetPreferSameOutfit || (type != null && type != current.type)
+              ? null
+              : current.preferSameOutfit),
     );
-    state = state.copyWith(preciseReferences: newList);
+    _applyPreciseCompatibleState(state.copyWith(preciseReferences: newList));
     _scheduleGenerationStateSave();
   }
 
   /// 更新 Precise Reference 类型
   void updatePreciseReferenceType(int index, PreciseRefType type) {
-    if (index < 0 || index >= state.preciseReferences.length) return;
-    final newList = [...state.preciseReferences];
-    final current = newList[index];
-    newList[index] = current.copyWith(type: type);
-    state = state.copyWith(preciseReferences: newList);
-    _scheduleGenerationStateSave(immediate: true);
+    updatePreciseReference(index, type: type);
   }
 
   /// 清除所有 Precise Reference
@@ -1460,12 +1498,8 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
           continue;
         }
 
-        final typeStr =
-            refData['type'] as String? ??
-            PreciseRefType.character.toApiString();
-        final type = PreciseRefType.values.firstWhere(
-          (item) => item.toApiString() == typeStr,
-          orElse: () => PreciseRefType.character,
+        final parsed = PreciseRefTypeExtension.parseApiCaption(
+          refData['type'] as String?,
         );
 
         final isNormalizedPng = refData['isNormalizedPng'] as bool? ?? false;
@@ -1476,7 +1510,10 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
         preciseRefs.add(
           PreciseReference(
             image: referenceImage,
-            type: type,
+            type: parsed.type,
+            preferSameOutfit: refData.containsKey('preferSameOutfit')
+                ? refData['preferSameOutfit'] as bool?
+                : parsed.preferSameOutfit,
             strength: (refData['strength'] as num?)?.toDouble() ?? 1.0,
             fidelity: (refData['fidelity'] as num?)?.toDouble() ?? 1.0,
             enabled: refData['enabled'] as bool? ?? true,
@@ -1489,16 +1526,18 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
       }
 
       // 合并加载期间的新增项；显式替换、清空与开关修改以用户操作为准。
-      state = state.copyWith(
-        vibeReferencesV4: _restoreSavedVibes
-            ? [...restoredVibes, ...state.vibeReferencesV4].take(16).toList()
-            : state.vibeReferencesV4,
-        preciseReferences: _restoreSavedPreciseRefs
-            ? [...preciseRefs, ...state.preciseReferences]
-            : state.preciseReferences,
-        normalizeVibeStrength: _restoreSavedNormalize
-            ? stateData['normalizeVibeStrength'] as bool? ?? true
-            : state.normalizeVibeStrength,
+      _applyPreciseCompatibleState(
+        state.copyWith(
+          vibeReferencesV4: _restoreSavedVibes
+              ? [...restoredVibes, ...state.vibeReferencesV4].take(16).toList()
+              : state.vibeReferencesV4,
+          preciseReferences: _restoreSavedPreciseRefs
+              ? [...preciseRefs, ...state.preciseReferences]
+              : state.preciseReferences,
+          normalizeVibeStrength: _restoreSavedNormalize
+              ? stateData['normalizeVibeStrength'] as bool? ?? true
+              : state.normalizeVibeStrength,
+        ),
       );
       restoredVibeCount = restoredVibes.length;
       restoredPreciseRefCount = preciseRefs.length;
@@ -1711,7 +1750,10 @@ Map<String, Object?> _buildGenerationStateSaveInput({
     'preciseReferences': preciseReferences
         .map((reference) {
           return <String, Object?>{
-            'type': reference.type.toApiString(),
+            'type': reference.type.toApiString(
+              preferSameOutfit: reference.preferSameOutfit,
+            ),
+            'preferSameOutfit': reference.preferSameOutfit,
             'strength': reference.strength,
             'fidelity': reference.fidelity,
             'enabled': reference.enabled,
@@ -1766,6 +1808,7 @@ String _encodeGenerationStateJson(Map<String, Object?> input) {
         final image = raw['image'] as Uint8List?;
         return <String, Object?>{
           'type': raw['type'],
+          'preferSameOutfit': raw['preferSameOutfit'],
           'strength': raw['strength'],
           'fidelity': raw['fidelity'],
           'enabled': raw['enabled'] as bool? ?? true,
@@ -1853,9 +1896,9 @@ Map<String, Object?> _decodeGenerationStateJson(String jsonString) {
       }
 
       restoredPreciseRefs.add(<String, Object?>{
-        'type':
-            refData['type'] as String? ??
-            PreciseRefType.character.toApiString(),
+        'type': refData['type'] as String?,
+        if (refData.containsKey('preferSameOutfit'))
+          'preferSameOutfit': refData['preferSameOutfit'] as bool?,
         'strength': (refData['strength'] as num?)?.toDouble() ?? 1.0,
         'fidelity': (refData['fidelity'] as num?)?.toDouble() ?? 1.0,
         'enabled': refData['enabled'] as bool? ?? true,

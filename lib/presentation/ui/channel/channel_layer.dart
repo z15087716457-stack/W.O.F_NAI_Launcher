@@ -37,7 +37,7 @@ class ChannelHostBackdropScope extends InheritedWidget {
 /// 画在图块**下面**的通道层：底色、字符艺术主题、过渡层、全局地图、图片光台、时间刻度。
 ///
 /// 接线：放在画布引擎世界层（`CanvasWorldViewport`）的下面、铺满视口，传当前相机即可；
-/// 本层不接收指针。空闲微动由本层以约 30 帧的节拍推进，生成中、系统“减少动态效果”、
+/// 本层不接收指针。空闲微动由本层以约 30 帧的节拍推进，系统“减少动态效果”、
 /// 设置关掉微动或模式为“关闭”时停在静止帧。
 class ChannelBackdrop extends StatefulWidget {
   const ChannelBackdrop({super.key, required this.data, this.pass});
@@ -67,7 +67,6 @@ class _ChannelBackdropState extends State<ChannelBackdrop> {
     if (widget.pass == ChannelPaintPass.annotations) return false;
     final d = widget.data;
     return d.settings.motion &&
-        !d.generating &&
         d.settings.mode != ChannelMode.off &&
         !_reduceMotion;
   }

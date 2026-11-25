@@ -2968,7 +2968,7 @@ class AppLocalizationsKo extends AppLocalizations {
       '인물의 특징과 시각적 스타일을 함께 참고';
 
   @override
-  String get preciseRef_v4Only => '이 기능은 V4 이상 모델이 필요합니다';
+  String get preciseRef_v4Only => '이 기능은 V5 또는 V4.5 모델이 필요합니다';
 
   @override
   String get preciseRef_typeCharacter => '캐릭터';
@@ -9100,7 +9100,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get refs_preciseOnlyV45 => 'V4.5 전용';
+  String get refs_preciseOnlyV45 => 'V5 / V4.5 지원';
 
   @override
   String refs_preciseCostNote(Object cost) {
@@ -9203,7 +9203,8 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get refs_bannerPreciseBody => '참조 이미지 정리는 그대로 됩니다. 생성에 쓰려면 V4.5로 바꾸세요';
+  String get refs_bannerPreciseBody =>
+      '참조 이미지 정리는 그대로 됩니다. 생성에 쓰려면 V5 또는 V4.5로 바꾸세요';
 
   @override
   String refs_switchTo(Object model) {
@@ -9342,7 +9343,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String refs_emptyHelpBody(Object cost) {
-    return 'Vibe: 전체 분위기와 화풍을 빌리며 여러 장을 겹칠 수 있습니다(V4 / V4.5, V5 제외). 정밀 참조: 한 이미지의 인물이나 화풍을 더 정확히 따르며 장당 $cost Anlas(V4.5 전용). 둘은 동시에 쓸 수 없습니다.';
+    return 'Vibe: 전체 분위기와 화풍을 빌리며 여러 장을 겹칠 수 있습니다(V4 / V4.5, V5 제외). 정밀 참조: 이미지의 인물·화풍·의상을 더 정확히 따르며 장당 $cost Anlas(V5 / V4.5 지원, 의상 참조는 V5 전용). 둘은 동시에 쓸 수 없습니다.';
   }
 
   @override
@@ -9617,7 +9618,8 @@ class AppLocalizationsKo extends AppLocalizations {
   String get refs_typeBoth => '캐릭터+화풍';
 
   @override
-  String get refs_typeCharacterDesc => '인물의 얼굴, 머리, 옷을 유지하고 화풍은 프롬프트를 따릅니다';
+  String get refs_typeCharacterDesc =>
+      '인물의 외형을 유지하며(V5에서는 의상 참조 전환 가능), 화풍은 프롬프트를 따릅니다';
 
   @override
   String get refs_typeStyleDesc => '화풍, 배색, 붓질만 빌리고 인물은 따지지 않습니다';
@@ -9639,7 +9641,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get refs_preciseDefaultsNote =>
-      '여기서 바꾸는 값은 기본값이며 보낼 때 그대로 씁니다. 숫자 칸에는 0–1 밖의 값도 넣을 수 있습니다';
+      '여기서 바꾼 값은 전송 시 기본값으로 적용됩니다. V5에서는 강도 최대 5.0이며 충실도는 사용하지 않습니다';
 
   @override
   String get refs_showInFolderShort => '폴더 열기';
@@ -12609,10 +12611,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get gen_precise => '정밀 참조';
 
   @override
-  String get gen_preciseDesc => '캐릭터나 화풍 참조에 고정';
+  String get gen_preciseDesc => '캐릭터·화풍·의상 참조에 고정';
 
   @override
-  String get gen_preciseDrop => '캐릭터나 화풍 참조 이미지를 끌어 놓거나';
+  String get gen_preciseDrop => '캐릭터·화풍·의상 참조 이미지를 끌어 놓거나';
 
   @override
   String get gen_preciseCharacter => '캐릭터';
@@ -14042,9 +14044,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get channel_subtitle => '스크롤할 때 양쪽에 보이는 장식. 이미지 바깥에만 그려집니다';
 
   @override
-  String get channel_paused => '생성 중 · 애니메이션 일시정지';
-
-  @override
   String get channel_modeOff => '끄기';
 
   @override
@@ -14081,7 +14080,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get channel_motion => '대기 중 움직임';
 
   @override
-  String get channel_motionSub => '아주 가벼운 움직임. 생성 중에는 자동으로 멈춥니다';
+  String get channel_motionSub => '아주 가벼운 배경 움직임';
 
   @override
   String get channel_sideTransparency => '사이드 패널 투명도';
@@ -14957,7 +14956,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get set_cvMotion => '대기 중 움직임';
 
   @override
-  String get set_cvMotionSub => '생성 중이거나 동작 줄이기를 켜면 멈춥니다';
+  String get set_cvMotionSub => '동작 줄이기를 켜면 멈춥니다';
 
   @override
   String get set_cvSideTransparency => '사이드 패널 투명도';
@@ -19782,4 +19781,52 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get set_agRulesLoadFailed => 'AGENTS.md를 읽을 수 없습니다. 파일 권한을 확인해 주세요.';
+
+  @override
+  String get preciseRef_typeOutfit => '의상';
+
+  @override
+  String get preciseRef_outfitDescription => '이미지의 의상을 참조합니다 (V5 전용)';
+
+  @override
+  String get preciseRef_preferSameOutfit => '의상도 함께 참조';
+
+  @override
+  String get refs_typeOutfit => '의상';
+
+  @override
+  String get refs_typeOutfitDesc => '의상만 참조하고 인물과 화풍은 프롬프트를 따릅니다 (V5 전용)';
+
+  @override
+  String get refs_preferSameOutfit => '의상도 함께 참조';
+
+  @override
+  String get refs_preferSameOutfitDesc => 'V5에서 켜면 참조 캐릭터의 의상을 더 가깝게 따릅니다';
+
+  @override
+  String get gen_preciseOutfit => '의상';
+
+  @override
+  String get gen_precisePreferSameOutfit => '의상도 함께 참조';
+
+  @override
+  String get gen_preciseInpaintUnsupported =>
+      '이 모델의 인페인트는 정밀 참조를 아직 지원하지 않습니다. 참조 이미지는 건너뛰며 과금되지 않습니다.';
+
+  @override
+  String get gen_preciseOutfitUnsupported =>
+      '이 모델은 의상 참조를 지원하지 않으므로 의상 항목은 건너뛰며 과금되지 않습니다.';
+
+  @override
+  String gen_preciseLimit(int count) {
+    return '정밀 참조는 최대 $count장까지 추가할 수 있습니다';
+  }
+
+  @override
+  String get gen_turboBlockedByPrecise =>
+      '정밀 참조는 일반 모드(V5 Full)에서만 사용할 수 있습니다. Turbo를 켜려면 정밀 참조를 제거하거나 일시 중지하세요';
+
+  @override
+  String get gen_turboSwitchedOffForPrecise =>
+      '정밀 참조는 일반 모드가 필요해 V5 Full로 자동 전환했습니다';
 }

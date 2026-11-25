@@ -235,7 +235,7 @@ Map<String, dynamic> readBridgeBilling(
         batchSize: batchSize,
         smea: p.effectiveSmea,
         smeaDyn: p.effectiveSmeaDyn,
-        model: p.model,
+        model: p.withCompatiblePreciseReferenceModel.model,
         subscriptionTier: subscription?.isOpus == true
             ? AnlasCalculator.opusTier
             : 0,
@@ -244,8 +244,9 @@ Map<String, dynamic> readBridgeBilling(
           ImageGenerationAction.img2img => p.strength,
           ImageGenerationAction.infill => p.inpaintStrength,
         },
-        extraPerSampleCost: AnlasCalculator.resolvePreciseReferenceExtraCost(p),
-        extraPerRequestCost: AnlasCalculator.resolveVibeReferenceExtraCost(p),
+        extraPerSampleCost:
+            AnlasCalculator.resolvePreciseReferenceExtraCost(p) +
+            AnlasCalculator.resolveVibeReferenceExtraCost(p),
         oneTimeCost: encoding,
         opusUsageExhausted: subscription?.isOpusUsageExhausted ?? false,
       );

@@ -42,6 +42,7 @@ class _ConcurrencyTrackingStorage extends PreciseRefLibraryStorageService {
     PreciseRefType type = PreciseRefType.characterAndStyle,
     double strength = 1.0,
     double fidelity = 1.0,
+    bool? preferSameOutfit,
   }) async {
     activeImports++;
     if (activeImports > maxActiveImports) {
@@ -57,6 +58,7 @@ class _ConcurrencyTrackingStorage extends PreciseRefLibraryStorageService {
         typeIndex: type.index,
         strength: strength,
         fidelity: fidelity,
+        preferSameOutfit: preferSameOutfit,
         createdAt: DateTime(2026),
       );
     } finally {
@@ -143,10 +145,12 @@ void main() {
       type: PreciseRefType.character,
       strength: 0.7,
       fidelity: 0.9,
+      preferSameOutfit: true,
     );
 
     expect(state().entries.single.name, 'girl a');
     expect(state().filteredEntries.single.type, PreciseRefType.character);
+    expect(state().filteredEntries.single.preferSameOutfit, isTrue);
   });
 
   test('importMany 有限并发导入并只合并成功条目', () async {

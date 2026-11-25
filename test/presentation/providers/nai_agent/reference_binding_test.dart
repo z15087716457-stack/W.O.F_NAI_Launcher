@@ -295,7 +295,7 @@ void main() {
   );
 
   test(
-    'precise addition is normalized through native PNG workflow; update/removal is real',
+    'precise addition keeps the original image and supports update/removal',
     () async {
       final added = await apply('add_precise', {
         'path': 'input.png',
@@ -307,7 +307,11 @@ void main() {
           .read(generationParamsNotifierProvider)
           .preciseReferences
           .single;
-      expect(NAIApiUtils.isKnownNormalizedPreciseReferencePng(ref.image), true);
+      expect(ref.image, pixels);
+      expect(
+        NAIApiUtils.isKnownNormalizedPreciseReferencePng(ref.image),
+        false,
+      );
       expect(added['precise'].single['type'], 'characterAndStyle');
       expect(added['precise'].single['strength'], 1.5);
       expect(added['precise'].single['fidelity'], 1.5);
@@ -354,6 +358,7 @@ void main() {
         apply('add_vibe', {'path': 'input.png'}),
         code('reference_unsupported'),
       );
+      writer().updateModel('nai-diffusion-4-full');
       await expectLater(
         apply('add_precise', {'path': 'input.png'}),
         code('reference_unsupported'),
@@ -361,6 +366,60 @@ void main() {
       final cleared = await apply('clear_vibes');
       expect(cleared['vibes'], isEmpty);
       expect(backups(), hasLength(1));
+    },
+  );
+
+  test(
+    'V5 exposes precise capabilities, outfit preference and inpaint suspension',
+    () async {
+      await expectLater(
+        apply('add_precise', {'path': 'input.png', 'type': 'outfit'}),
+        code('reference_unsupported'),
+      );
+      writer().updateModel('nai-diffusion-5-full-medium');
+      final summary = await apply('add_precise', {
+        'path': 'input.png',
+        'type': 'characterAndStyle',
+        'prefer_same_outfit': false,
+        'strength': 5,
+      });
+      expect(summary['model'], 'nai-diffusion-5-full');
+      expect(summary['supports_precise'], true);
+      expect(summary['supports_vibe'], false);
+      expect(summary['outfit_references'], true);
+      expect(summary['char_ref_inpainting'], false);
+      expect(summary['fidelity_supported'], false);
+      expect(summary['strength_max'], 5.0);
+      expect(summary['precise'].single['prefer_same_outfit'], false);
+      final updated = await apply('update_precise', {
+        'index': 0,
+        'preferSameOutfit': true,
+      });
+      expect(updated['precise'].single['prefer_same_outfit'], true);
+      await expectLater(
+        apply('update_precise', {'index': 0, 'strength': 5.1}),
+        code('invalid_reference'),
+      );
+      await expectLater(
+        apply('update_precise', {'index': 0, 'fidelity': 1}),
+        code('reference_unsupported'),
+      );
+      final outfit = await apply('add_precise', {
+        'path': 'input.png',
+        'type': 'outfit',
+      });
+      expect(outfit['precise'].last['type'], 'outfit');
+      await apply('set_source', {'path': 'input.png'});
+      await apply('set_mask', {'path': 'mask.png'});
+      final inpaint = await list();
+      for (final reference in inpaint['precise'] as List) {
+        expect(reference['participates'], false);
+        expect(reference['inactive_reason'], 'inpainting_excludes_precise');
+      }
+      await expectLater(
+        apply('add_precise', {'path': 'input.png'}),
+        code('reference_unsupported'),
+      );
     },
   );
 

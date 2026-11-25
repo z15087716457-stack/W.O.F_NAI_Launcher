@@ -267,6 +267,7 @@ void main() {
                 'type': 'character',
                 'strength': 0.72,
                 'fidelity': 0.81,
+                'prefer_same_outfit': true,
               }, vision: false))['saved']
               as Map;
       await apply(entry, kind: 'precise');
@@ -278,12 +279,11 @@ void main() {
         (actual.type, actual.strength, actual.fidelity),
         (PreciseRefType.character, 0.72, 0.81),
       );
-      // Applying a precise reference uses the same target canvas as Studio.
-      // The library and exported file retain the original below.
-      expect(actual.image, await NAIApiUtils.ensurePngFormatAsync(pixels));
+      expect(actual.preferSameOutfit, isTrue);
+      expect(actual.image, pixels);
       expect(
         NAIApiUtils.isKnownNormalizedPreciseReferencePng(actual.image),
-        true,
+        false,
       );
       final exported = await run({
         'kind': 'precise',
@@ -340,6 +340,33 @@ void main() {
             .vibeEncoding,
         'encoding-only',
       );
+    },
+  );
+
+  test(
+    'outfit entries apply on V5 and report why V4.5 cannot use them',
+    () async {
+      final entry =
+          (await run({
+                'kind': 'precise',
+                'action': 'import',
+                'path': 'input.png',
+                'type': 'outfit',
+                'strength': 4.1,
+              }))['saved']
+              as Map;
+      await expectLater(
+        apply(entry, kind: 'precise'),
+        error('reference_unsupported'),
+      );
+      container
+          .read(generationParamsNotifierProvider.notifier)
+          .updateModel('nai-diffusion-5-curated');
+      await apply(entry, kind: 'precise');
+      final current = container.read(generationParamsNotifierProvider);
+      expect(current.preciseReferences.single.type, PreciseRefType.outfit);
+      expect(current.preciseReferences.single.strength, 4.1);
+      expect(current.preciseReferences.single.image, pixels);
     },
   );
   test(

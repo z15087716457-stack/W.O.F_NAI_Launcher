@@ -33,21 +33,13 @@ class AnlasCalculator {
   /// 强度之前。官方 novelai-api SDK 截至 0.34.1 尚无 V5 定价，勿以它为准。
   static const double _v5CostMultiplier = 1.5;
 
-  static bool _usesPreciseReferences(ImageParams params) {
-    return params.isV45Model && params.hasPreciseReferences;
-  }
-
   static bool usesVibeReferences(ImageParams params) {
     return ModelSpecs.of(params.model).encodedVibes &&
         effectiveVibeReferences(params, ModelSpecs.of(params.model)).isNotEmpty;
   }
 
-  static int resolvePreciseReferenceExtraCost(ImageParams params) {
-    if (!_usesPreciseReferences(params)) {
-      return 0;
-    }
-    return params.preciseReferenceCount * _preciseReferenceCost;
-  }
+  static int resolvePreciseReferenceExtraCost(ImageParams params) =>
+      params.effectivePreciseReferenceCount * _preciseReferenceCost;
 
   /// 尚未编码的启用 Vibe 每个只在生成前收取一次编码费。
   static int resolveVibeEncodingCost(ImageParams params) {
@@ -61,14 +53,14 @@ class AnlasCalculator {
     return uncachedCount * _vibeCost;
   }
 
-  /// 单次请求使用超过四个 Vibe 时，每个额外 Vibe 收取 2 Anlas。
+  /// 使用超过四个 Vibe 时，每张生成图为每个额外 Vibe 支付 2 Anlas。
   static int resolveVibeReferenceExtraCost(ImageParams params) {
     if (!usesVibeReferences(params)) {
       return 0;
     }
 
     final extraReferenceCount = math.max(
-      params.enabledVibeReferencesV4.length - 4,
+      params.enabledVibeReferencesV4.length - freeVibeReferences,
       0,
     );
     return extraReferenceCount * _vibeCost;
@@ -95,15 +87,16 @@ class AnlasCalculator {
       batchSize: 1,
       smea: params.effectiveSmea,
       smeaDyn: params.effectiveSmeaDyn,
-      model: params.model,
+      model: params.withCompatiblePreciseReferenceModel.model,
       subscriptionTier: isOpus ? opusTier : 0,
       strength: switch (params.action) {
         ImageGenerationAction.img2img => params.strength,
         ImageGenerationAction.infill => params.inpaintStrength,
         ImageGenerationAction.generate => 1.0,
       },
-      extraPerSampleCost: resolvePreciseReferenceExtraCost(params),
-      extraPerRequestCost: resolveVibeReferenceExtraCost(params),
+      extraPerSampleCost:
+          resolvePreciseReferenceExtraCost(params) +
+          resolveVibeReferenceExtraCost(params),
       oneTimeCost: resolveVibeEncodingCost(params),
     );
   }

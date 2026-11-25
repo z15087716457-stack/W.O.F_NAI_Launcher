@@ -316,6 +316,85 @@ void main() {
     },
   );
 
+  testWidgets(
+    'oversized image (>3MP) on NovelAI cloud upscale does not show free badge and shows 3MP limit',
+    (tester) async {
+      tester.platformDispatcher.accessibilityFeaturesTestValue =
+          const FakeAccessibilityFeatures(disableAnimations: true);
+      addTearDown(
+        tester.platformDispatcher.clearAccessibilityFeaturesTestValue,
+      );
+      final oversized = GeneratedImage(
+        id: 'oversized',
+        bytes: png(64, 64),
+        width: 2048,
+        height: 2048,
+      );
+      (container.read(imageGenerationNotifierProvider.notifier)
+              as DataGeneration)
+          .publish(
+            ImageGenerationState(
+              history: [oversized],
+              displayImages: [oversized],
+            ),
+          );
+      await pump(tester, const GenerationRoute());
+      tester
+          .widget<GenerationPage>(find.byType(GenerationPage))
+          .actions
+          .onUpscaleSettings!();
+      await drain(tester);
+      tester
+          .widget<ToolsUpscaleSheet>(find.byType(ToolsUpscaleSheet))
+          .actions
+          .onBackend('novelai');
+      await drain(tester);
+
+      final sheet = tester.widget<ToolsUpscaleSheet>(
+        find.byType(ToolsUpscaleSheet),
+      );
+      final localBackend = sheet.data.backends.singleWhere(
+        (b) => b.id == 'local',
+      );
+      final cloudBackend = sheet.data.backends.singleWhere(
+        (b) => b.id == 'novelai',
+      );
+      expect(localBackend.cost, 0);
+      expect(cloudBackend.cost, isNull);
+      expect(sheet.data.cost, isNull);
+      expect(sheet.data.blocked, isNotNull);
+      expect(sheet.data.blocked, contains('3MP'));
+      expect(sheet.data.blocked, isNot(contains('6400 万')));
+
+      // Only the local backend card displays the "免费" badge; cloud card & Run button must not.
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('tools-backend-local')),
+          matching: find.text('免费'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('tools-backend-novelai')),
+          matching: find.text('免费'),
+        ),
+        findsNothing,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('tools-upscale-run')),
+          matching: find.text('免费'),
+        ),
+        findsNothing,
+      );
+
+      await tester.pumpWidget(const SizedBox());
+      container.invalidate(tipEpochProvider);
+      await tester.pump();
+    },
+  );
+
   test(
     'director names, prices, source identities, variants and pixel options map to the real contract',
     () {

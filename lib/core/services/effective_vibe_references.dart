@@ -9,7 +9,7 @@ List<VibeReference> effectiveVibeReferences(
 ) {
   if (!spec.vibetransfer ||
       params.action == ImageGenerationAction.infill ||
-      (params.isV45Model && params.hasPreciseReferences)) {
+      params.hasEffectivePreciseReferences) {
     return const [];
   }
   return params.enabledVibeReferencesV4;

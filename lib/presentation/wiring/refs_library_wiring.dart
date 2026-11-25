@@ -351,6 +351,9 @@ class _RefsLibraryWiringState extends ConsumerState<_RefsLibraryWiring> {
         type: patch.type == null ? null : preciseRefType(patch.type!),
         strength: patch.strength,
         fidelity: patch.fidelity,
+        preferSameOutfit: patch.preferSameOutfit,
+        resetPreferSameOutfit:
+            patch.type != null && patch.preferSameOutfit == null,
       );
       if (saved == null) {
         throw StateError(currentL10n.preciseRefLib_imageMissing);

@@ -12,6 +12,7 @@ import '../../data/models/character/character_prompt.dart';
 import '../../data/models/prompt_block/pill_document.dart';
 import '../../core/services/anlas_calculator.dart';
 import '../../core/services/prompt_token_counter_service.dart';
+import '../../data/models/image/image_params.dart' show ImageParamsExtension;
 import '../../data/models/user/user_subscription.dart';
 import '../../data/services/alias_resolver_service.dart';
 import '../../l10n/app_localizations.dart';
@@ -184,6 +185,7 @@ final generationRefsViewProvider = Provider<GenRefsData>((ref) {
     generationParamsNotifierProvider.select(
       (p) => (
         p.model,
+        p.action,
         p.sourceImage,
         p.strength,
         p.noise,
@@ -480,6 +482,8 @@ final generationViewDataProvider = Provider.autoDispose
         displayModel: ImageModels.baseModelForTurboModel(params.model),
         turboVisible: spec.isV5,
         turbo: spec.supportsTurbo ? spec.isTurbo : null,
+        turboBlockedByPrecise:
+            spec.supportsTurbo && params.hasEffectivePreciseReferences,
         models: [
           for (final id in {
             ...ImageModels.allModels.where(

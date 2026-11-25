@@ -130,7 +130,10 @@ void main() {
       identity,
     );
     expect(v5.vibes, isNull);
-    expect(v5.precise, isNull);
+    expect(v5.precise, isNotNull);
+    expect(v5.precise!.supportsOutfit, isTrue);
+    expect(v5.precise!.showFidelity, isFalse);
+    expect(v5.precise!.strengthMax, 5.0);
     expect(params.vibeReferencesV4, [vibe]);
   });
   test('图生图开关只改请求投影，原图与蒙版留在草稿', () async {
@@ -249,5 +252,91 @@ void main() {
       container.read(generationParamsNotifierProvider).vibeReferencesV4,
       hasLength(1),
     );
+  });
+
+  test('V5 精准参考支持服装类型、衣着偏好开关及局部重绘暂停提示，V4.5 标记不支持服装', () async {
+    final notifier = container.read(generationParamsNotifierProvider.notifier);
+    final bytes = Uint8List.fromList([7, 8, 9]);
+    notifier.updateModel(ImageModels.animeDiffusionV5Full);
+    notifier.addPreciseReference(bytes, type: PreciseRefType.character);
+
+    final v5View = generationRefsView(
+      container.read(generationParamsNotifierProvider),
+      const ImageWorkflowState(),
+      container.read(generationReferenceIdentityProvider),
+    );
+    final item = v5View.precise!.list.single;
+    expect(v5View.precise!.supportsOutfit, isTrue);
+    expect(v5View.precise!.showFidelity, isFalse);
+    expect(v5View.precise!.strengthMax, 5.0);
+    expect(v5View.precise!.suspendedForInpaint, isFalse);
+    expect(item.preferSameOutfit, isNull);
+
+    // Toggle preferSameOutfit on character.
+    await actions.precise(
+      GenPrecise(
+        id: item.id,
+        thumb: item.thumb,
+        type: item.type,
+        preferSameOutfit: true,
+        strength: 2.5,
+        fidelity: item.fidelity,
+        enabled: item.enabled,
+      ),
+      previous: item,
+    );
+    var stored = container
+        .read(generationParamsNotifierProvider)
+        .preciseReferences
+        .single;
+    expect(stored.preferSameOutfit, isTrue);
+    expect(stored.strength, 2.5);
+
+    // Switch type to outfit and verify preferSameOutfit resets to null.
+    final updatedItem = generationRefsView(
+      container.read(generationParamsNotifierProvider),
+      const ImageWorkflowState(),
+      container.read(generationReferenceIdentityProvider),
+    ).precise!.list.single;
+    await actions.precise(
+      GenPrecise(
+        id: updatedItem.id,
+        thumb: updatedItem.thumb,
+        type: GenPreciseType.outfit,
+        preferSameOutfit: null,
+        strength: updatedItem.strength,
+        fidelity: updatedItem.fidelity,
+        enabled: updatedItem.enabled,
+      ),
+      previous: updatedItem,
+    );
+    stored = container
+        .read(generationParamsNotifierProvider)
+        .preciseReferences
+        .single;
+    expect(stored.type, PreciseRefType.outfit);
+    expect(stored.preferSameOutfit, isNull);
+
+    // V5 inpaint suspends precise references.
+    notifier.updateAction(ImageGenerationAction.infill);
+    final v5Inpaint = generationRefsView(
+      container.read(generationParamsNotifierProvider),
+      const ImageWorkflowState(mode: ImageWorkflowMode.inpaint),
+      container.read(generationReferenceIdentityProvider),
+    );
+    expect(v5Inpaint.precise!.suspendedForInpaint, isTrue);
+
+    // Switching to V4.5 marks outfit as unsupported and shows fidelity.
+    notifier.updateAction(ImageGenerationAction.generate);
+    notifier.updateModel(ImageModels.animeDiffusionV45Full);
+    final v45View = generationRefsView(
+      container.read(generationParamsNotifierProvider),
+      const ImageWorkflowState(),
+      container.read(generationReferenceIdentityProvider),
+    );
+    expect(v45View.precise!.supportsOutfit, isFalse);
+    expect(v45View.precise!.showFidelity, isTrue);
+    expect(v45View.precise!.strengthMax, 1.0);
+    expect(v45View.precise!.hasUnsupportedOutfit, isTrue);
   });
 }

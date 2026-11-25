@@ -121,13 +121,12 @@ int generationRequestCost(
     batchSize: batchSize,
     smea: params.effectiveSmea,
     smeaDyn: params.effectiveSmeaDyn,
-    model: params.model,
+    model: params.withCompatiblePreciseReferenceModel.model,
     subscriptionTier: subscriptionTier,
     strength: requestInput.strength,
-    extraPerSampleCost: AnlasCalculator.resolvePreciseReferenceExtraCost(
-      params,
-    ),
-    extraPerRequestCost: AnlasCalculator.resolveVibeReferenceExtraCost(params),
+    extraPerSampleCost:
+        AnlasCalculator.resolvePreciseReferenceExtraCost(params) +
+        AnlasCalculator.resolveVibeReferenceExtraCost(params),
     oneTimeCost: AnlasCalculator.resolveVibeEncodingCost(params),
     opusUsageExhausted: subscription?.isOpusUsageExhausted ?? false,
   );

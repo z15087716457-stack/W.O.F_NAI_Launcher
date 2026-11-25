@@ -767,6 +767,70 @@ void main() {
       expect(metadata.preciseReferences[0].fidelity, 0.8);
     });
 
+    test(
+      'preserves V5 precise captions and restores the outfit preferences',
+      () {
+        const captions = [
+          'costume',
+          'character_mainoutfit',
+          'character&style_anyoutfit',
+          'character',
+          'character&style',
+          'style',
+        ];
+        final comment = <String, dynamic>{
+          'prompt': 'silk coat',
+          'model': ImageModels.animeDiffusionV5Full,
+          'director_reference_images': List.filled(captions.length, 'AQIDBA=='),
+          'director_reference_descriptions': [
+            for (final caption in captions)
+              {
+                'caption': {'base_caption': caption},
+              },
+          ],
+          'director_reference_secondary_strength_values': List.filled(
+            captions.length,
+            0.0,
+          ),
+        };
+        final metadata = NaiImageMetadata.fromNaiComment(
+          comment,
+          rawJson: jsonEncode(comment),
+        );
+        expect(metadata.preciseReferenceTypes, captions);
+        expect(metadata.preciseReferences.map((reference) => reference.type), [
+          PreciseRefType.outfit,
+          PreciseRefType.character,
+          PreciseRefType.characterAndStyle,
+          PreciseRefType.character,
+          PreciseRefType.characterAndStyle,
+          PreciseRefType.style,
+        ]);
+        expect(
+          metadata.preciseReferences.map(
+            (reference) => reference.preferSameOutfit,
+          ),
+          [null, true, false, false, true, null],
+        );
+        expect(
+          metadata.preciseReferences.map((reference) => reference.fidelity),
+          List.filled(captions.length, 1.0),
+        );
+        expect(
+          metadata
+              .copyWith(
+                preciseReferenceTypes: List.filled(
+                  captions.length,
+                  'character',
+                ),
+              )
+              .upgradeFromRawJsonIfNeeded()
+              .preciseReferenceTypes,
+          captions,
+        );
+      },
+    );
+
     test('fromNaiComment should preserve uncapped precise parameters', () {
       final referenceImage = base64Encode([1, 2, 3, 4]);
       final metadata = NaiImageMetadata.fromNaiComment({

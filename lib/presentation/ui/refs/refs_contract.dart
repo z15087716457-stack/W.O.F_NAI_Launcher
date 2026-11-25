@@ -22,7 +22,7 @@ enum RefsCardSize { small, medium, large }
 enum RefsVibeSource { png, vibeFile, bundle, rawImage }
 
 /// 精准参考类型（`PreciseRefType`）。
-enum RefsPreciseType { character, style, both }
+enum RefsPreciseType { character, style, both, outfit }
 
 /// Vibe 对**当前模型**的编码状态。
 enum RefsEncoding {
@@ -186,6 +186,7 @@ class RefsEntry {
     this.bundleCount = 0,
     this.bundleThumbs = const [],
     this.type = RefsPreciseType.both,
+    this.preferSameOutfit,
     this.fidelity = 1,
     this.categoryId,
     this.tags = const [],
@@ -229,6 +230,15 @@ class RefsEntry {
 
   final RefsPreciseType type;
 
+  /// V5「同时参考服装」默认开关（null = 按类型默认：角色关、角色+风格开）。
+  final bool? preferSameOutfit;
+
+  bool get supportsPreferSameOutfit =>
+      type == RefsPreciseType.character || type == RefsPreciseType.both;
+
+  bool get effectivePreferSameOutfit =>
+      preferSameOutfit ?? type == RefsPreciseType.both;
+
   /// 精准参考保真度。
   final double fidelity;
 
@@ -258,6 +268,7 @@ class RefsEntry {
     RefsEncoding? encoding,
     String? encodedFor,
     RefsPreciseType? type,
+    bool? preferSameOutfit,
     double? fidelity,
     String? Function()? categoryId,
     List<String>? tags,
@@ -278,6 +289,7 @@ class RefsEntry {
     bundleCount: bundleCount,
     bundleThumbs: bundleThumbs,
     type: type ?? this.type,
+    preferSameOutfit: preferSameOutfit ?? this.preferSameOutfit,
     fidelity: fidelity ?? this.fidelity,
     categoryId: categoryId != null ? categoryId() : this.categoryId,
     tags: tags ?? this.tags,
@@ -611,6 +623,7 @@ class RefsParamsPatch {
     this.infoExtracted,
     this.fidelity,
     this.type,
+    this.preferSameOutfit,
   });
   final double? strength;
 
@@ -618,6 +631,7 @@ class RefsParamsPatch {
   final double? infoExtracted;
   final double? fidelity;
   final RefsPreciseType? type;
+  final bool? preferSameOutfit;
 }
 
 /// 这次发送用的参数（检查器里改过但没“存为默认”的值）。

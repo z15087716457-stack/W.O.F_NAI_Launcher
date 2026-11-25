@@ -547,6 +547,8 @@ class GenSliderRow extends StatefulWidget {
     required this.onChanged,
     this.min = 0,
     this.max = 1,
+    this.midpoint,
+    this.inputMin,
     this.inputMax,
     this.decimals = 2,
     this.defaultValue,
@@ -561,6 +563,10 @@ class GenSliderRow extends StatefulWidget {
   final ValueChanged<double> onChanged;
   final double min;
   final double max;
+
+  /// 非空时采用两段线性映射：[min, midpoint] 占滑槽左半，[midpoint, max] 占滑槽右半。
+  final double? midpoint;
+  final double? inputMin;
   final double? inputMax;
   final int decimals;
   final double? defaultValue;
@@ -578,11 +584,27 @@ class GenSliderRow extends StatefulWidget {
 class _GenSliderRowState extends State<GenSliderRow> {
   double? _drag;
 
-  double _norm(double v) =>
-      ((v - widget.min) / (widget.max - widget.min)).clamp(0.0, 1.0);
+  double _norm(double v) {
+    final mid = widget.midpoint;
+    if (mid != null && mid > widget.min && mid < widget.max) {
+      if (v <= mid) {
+        return (((v - widget.min) / (mid - widget.min)) * 0.5).clamp(0.0, 0.5);
+      }
+      return (0.5 + ((v - mid) / (widget.max - mid)) * 0.5).clamp(0.5, 1.0);
+    }
+    return ((v - widget.min) / (widget.max - widget.min)).clamp(0.0, 1.0);
+  }
 
   double _denorm(double t) {
-    final v = widget.min + t * (widget.max - widget.min);
+    final mid = widget.midpoint;
+    final double v;
+    if (mid != null && mid > widget.min && mid < widget.max) {
+      v = t <= 0.5
+          ? widget.min + (t / 0.5) * (mid - widget.min)
+          : mid + ((t - 0.5) / 0.5) * (widget.max - mid);
+    } else {
+      v = widget.min + t * (widget.max - widget.min);
+    }
     final k = widget.decimals == 0 ? 1 : (widget.decimals == 1 ? 10 : 100);
     return (v * k).roundToDouble() / k;
   }
@@ -619,7 +641,7 @@ class _GenSliderRowState extends State<GenSliderRow> {
         ),
         UiNumBox(
           value: v,
-          min: widget.min,
+          min: widget.inputMin ?? widget.min,
           max: widget.max,
           inputMax: widget.inputMax,
           decimals: widget.decimals,

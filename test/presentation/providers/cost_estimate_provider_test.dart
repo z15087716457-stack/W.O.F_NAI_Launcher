@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:image/image.dart' as img;
 import 'package:nai_launcher/core/constants/storage_keys.dart';
+import 'package:nai_launcher/core/enums/precise_ref_type.dart';
 import 'package:nai_launcher/core/services/anlas_calculator.dart';
 import 'package:nai_launcher/core/utils/max_enhance_utils.dart';
 import 'package:nai_launcher/data/models/image/image_params.dart';
@@ -446,7 +447,7 @@ void main() {
       expect(exploreCost, expectedExploreCost);
     });
 
-    test('should include the per-request fee after four Vibes', () {
+    test('Vibe fees after four apply to every image in each Opus request', () {
       final subscription = container.read(
         subscriptionNotifierProvider.notifier,
       );
@@ -457,6 +458,9 @@ void main() {
       final params = container.read(generationParamsNotifierProvider.notifier);
       params.updateSize(512, 768, persist: false);
       params.updateSteps(28);
+      params.updateNSamples(3);
+      container.read(imagesPerRequestProvider.notifier).set(2);
+      final baseCost = container.read(estimatedCostProvider);
       params.setVibeReferences(
         List.generate(
           5,
@@ -468,8 +472,40 @@ void main() {
         ),
       );
 
-      expect(container.read(estimatedCostProvider), 2);
+      expect(container.read(estimatedCostProvider), baseCost + 12);
     });
+
+    test(
+      'V5 estimates charge PR per image and suspend it during inpainting',
+      () {
+        final params = ImageParams(
+          model: 'nai-diffusion-5-full',
+          nSamples: 3,
+          preciseReferences: [
+            PreciseReference(image: Uint8List(1), type: PreciseRefType.outfit),
+          ],
+        );
+        const workflow = ImageWorkflowState();
+        const opus = UserSubscription(tier: 3, active: true);
+        for (final (model, action, surcharge) in [
+          ('nai-diffusion-5-full', ImageGenerationAction.generate, 30),
+          ('nai-diffusion-5-full', ImageGenerationAction.infill, 0),
+          ('nai-diffusion-4-5-full', ImageGenerationAction.generate, 0),
+        ]) {
+          final input = params.copyWith(model: model, action: action);
+          final base = generationRequestCost(
+            input.copyWith(preciseReferences: []),
+            workflow,
+            opus,
+            2,
+          );
+          expect(
+            generationRequestCost(input, workflow, opus, 2),
+            base + surcharge,
+          );
+        }
+      },
+    );
   });
 }
 

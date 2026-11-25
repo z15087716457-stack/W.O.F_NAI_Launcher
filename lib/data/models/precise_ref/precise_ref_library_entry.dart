@@ -48,6 +48,8 @@ class PreciseRefLibraryEntry with _$PreciseRefLibraryEntry {
 
     /// 创建时间
     @HiveField(9) required DateTime createdAt,
+
+    @HiveField(10) bool? preferSameOutfit,
   }) = _PreciseRefLibraryEntry;
 
   /// 创建新条目（自动生成 id 与创建时间）
@@ -58,6 +60,7 @@ class PreciseRefLibraryEntry with _$PreciseRefLibraryEntry {
     PreciseRefType type = PreciseRefType.characterAndStyle,
     double strength = 1.0,
     double fidelity = 1.0,
+    bool? preferSameOutfit,
     DateTime? createdAt,
   }) {
     final resolvedId = id ?? const Uuid().v4();
@@ -71,6 +74,7 @@ class PreciseRefLibraryEntry with _$PreciseRefLibraryEntry {
       typeIndex: type.index,
       strength: strength,
       fidelity: fidelity,
+      preferSameOutfit: preferSameOutfit,
       createdAt: createdAt ?? DateTime.now(),
     );
   }
@@ -82,6 +86,9 @@ class PreciseRefLibraryEntry with _$PreciseRefLibraryEntry {
     }
     return PreciseRefType.values[typeIndex];
   }
+
+  bool get effectivePreferSameOutfit =>
+      preferSameOutfit ?? type.defaultPreferSameOutfit;
 
   /// 记录一次使用
   PreciseRefLibraryEntry recordUsage() {

@@ -112,6 +112,7 @@ class GenScope extends InheritedModel<GenAspect> {
       data.displayModel,
       data.turboVisible,
       data.turbo,
+      data.turboBlockedByPrecise,
       data.furry,
       data.quota,
       data.layout,

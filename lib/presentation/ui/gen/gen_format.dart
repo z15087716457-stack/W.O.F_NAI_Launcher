@@ -108,6 +108,7 @@ abstract final class GenFormat {
       GenPreciseType.character => l.gen_preciseCharacter,
       GenPreciseType.style => l.gen_preciseStyle,
       GenPreciseType.both => l.gen_preciseBoth,
+      GenPreciseType.outfit => l.gen_preciseOutfit,
     };
   }
 

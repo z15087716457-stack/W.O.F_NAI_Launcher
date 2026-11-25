@@ -92,9 +92,6 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
   AgentThreadMapping? _mapping;
   final _recentImages = <String, AgentImage>{};
   final _promptImports = <String, AgentPromptSetImport>{};
-  final _promptBusy = <String, String>{};
-  final _promptTokens = <NaiAgentCancellation>{};
-  String? _promptOwner;
 
   String _promptKey(AgentChatRuntime r, String id) =>
       '${r.workspace.id}/${r.chat.id}/$id';
@@ -124,7 +121,8 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
       }
       return ok;
     }
-    if (_promptBusy.containsKey(key)) return false;
+    final busyNotifier = ref.read(agentPromptSetBusyProvider.notifier);
+    if (busyNotifier.state.containsKey(key)) return false;
     final set = await NaiAgentPromptSets(r.workspace.agentDirectory).read(id);
     if (set != null && cardId != null) {
       index = (set['items'] as List).indexWhere(
@@ -138,16 +136,28 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
         index >= (set['items'] as List).length) {
       return false;
     }
-    if (_promptBusy.containsKey(key)) return false;
+    if (busyNotifier.state.containsKey(key)) return false;
     switch (action) {
       case AgentPromptSetAction.import:
       case AgentPromptSetAction.importWithParams:
       case AgentPromptSetAction.generate:
         final token = NaiAgentCancellation();
-        _promptTokens.add(token);
-        setState(
-          () => _promptBusy[key] = set['items'][index]['card_id'] as String,
-        );
+        final generation = action == AgentPromptSetAction.generate
+            ? ref.read(
+                agentPromptSetGenerationProvider((
+                  r.workspace.directory.path,
+                  r.workspace.id,
+                  r.chat.id,
+                )),
+              )
+            : null;
+        final blockLibraryFuture = action == AgentPromptSetAction.generate
+            ? ref.read(promptBlockLibraryNotifierProvider.future)
+            : null;
+        busyNotifier.state = {
+          ...busyNotifier.state,
+          key: set['items'][index]['card_id'] as String,
+        };
         try {
           final imported = await service.importItem(
             r.workspace,
@@ -160,16 +170,9 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
           if (imported == null) return false;
           _promptImports[key] = imported;
           if (mounted) setState(() => _revision++);
-          if (action == AgentPromptSetAction.generate) {
+          if (generation != null) {
             token.check();
-            await ref.read(promptBlockLibraryNotifierProvider.future);
-            final generation = ref.read(
-              agentPromptSetGenerationProvider((
-                r.workspace.directory.path,
-                r.workspace.id,
-                r.chat.id,
-              )),
-            );
+            await blockLibraryFuture;
             final response = await generation.requestUserGeneration(token);
             if (agentMap(response['details'])['status'] == 'cancelled' &&
                 mounted) {
@@ -183,15 +186,22 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
               result: agentMap(response['details']),
               check: token.check,
             );
-            await _resources.reloadPromptSet(r.workspace, id);
+            if (mounted) {
+              await _resources.reloadPromptSet(r.workspace, id);
+            }
           }
           return true;
         } on NaiAgentToolError catch (error) {
           if (mounted) AppToast.error(context, error.message);
           return true; // Already presented the native generation error.
         } finally {
-          _promptTokens.remove(token);
-          _promptBusy.remove(key);
+          try {
+            final next = Map<String, String>.of(busyNotifier.state)
+              ..remove(key);
+            busyNotifier.state = next;
+          } catch (_) {
+            // ProviderContainer already disposed during teardown.
+          }
           if (mounted) setState(() => _revision++);
         }
       case AgentPromptSetAction.saveBlock:
@@ -244,9 +254,6 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    for (final token in _promptTokens) {
-      token.cancel();
-    }
     _resources.dispose();
     super.dispose();
   }
@@ -555,13 +562,7 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
   Widget build(BuildContext context) {
     final c = ref.watch(naiAgentControllerProvider), r = c.selected;
     final l = context.l10n;
-    final ownerKey = r == null ? null : '${r.workspace.id}/${r.chat.id}';
-    if (_promptOwner != ownerKey) {
-      for (final token in _promptTokens) {
-        token.cancel();
-      }
-      _promptOwner = ownerKey;
-    }
+    final promptBusy = ref.watch(agentPromptSetBusyProvider);
     int? promptPrice;
     if (r != null && ref.exists(generationParamsNotifierProvider)) {
       final generation = ref.watch(
@@ -688,7 +689,7 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
                     : null,
                 importedIndex: cardIndex(imported?.cardId) ?? imported?.index,
                 canUndoImport: imported != null && imported.version == version,
-                busyIndex: cardIndex(_promptBusy[key]),
+                busyIndex: cardIndex(promptBusy[key]),
               );
             },
           );

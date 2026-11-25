@@ -3,6 +3,7 @@ import '../../../core/utils/inpaint_focus_region.dart';
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../../core/constants/api_constants.dart';
 import '../../../core/constants/model_spec.dart';
 import '../../../core/enums/precise_ref_type.dart';
 import '../../../core/enums/quality_tag_preset.dart';
@@ -27,8 +28,7 @@ extension ImageGenerationActionExtension on ImageGenerationAction {
   }
 }
 
-/// Precise Reference 配置 (仅 V4+ 模型支持)
-/// 支持 Character/Style/CharacterAndStyle 三种类型
+/// 精准参考配置，支持的类型与参数由模型能力决定。
 @freezed
 class PreciseReference with _$PreciseReference {
   const factory PreciseReference({
@@ -37,6 +37,9 @@ class PreciseReference with _$PreciseReference {
 
     /// Precise Reference 类型
     required PreciseRefType type,
+
+    /// 为空时使用参考类型的默认值。
+    bool? preferSameOutfit,
 
     /// 参考强度（数值输入不设前端上下限，滑条范围 0-1）
     @Default(1.0) double strength,
@@ -47,6 +50,21 @@ class PreciseReference with _$PreciseReference {
     /// 是否参与下一次生成请求。
     @Default(true) bool enabled,
   }) = _PreciseReference;
+}
+
+extension PreciseReferenceExtension on PreciseReference {
+  bool get effectivePreferSameOutfit =>
+      preferSameOutfit ?? type.defaultPreferSameOutfit;
+
+  bool isSupportedBy(ModelSpec spec) =>
+      spec.characterReferences &&
+      (spec.outfitReferences || type != PreciseRefType.outfit);
+
+  String toApiCaption(ModelSpec spec) =>
+      type.toApiStringForModel(spec, preferSameOutfit: preferSameOutfit);
+
+  double effectiveFidelity(ModelSpec spec) =>
+      spec.characterReferenceFidelity ? fidelity : 1.0;
 }
 
 /// 多角色提示词配置 (仅 V4 模型支持)
@@ -267,10 +285,19 @@ class ImageParams with _$ImageParams {
 
 /// ImageParams 扩展方法
 extension ImageParamsExtension on ImageParams {
+  /// Turbo and active precise references are mutually exclusive.
+  ImageParams get withCompatiblePreciseReferenceModel {
+    final baseModel = ImageModels.baseModelForTurboModel(model);
+    return baseModel != null && hasEffectivePreciseReferences
+        ? copyWith(model: ImageModels.resolveBaseModel(baseModel))
+        : this;
+  }
+
   /// A request-only projection. Stored Full settings and negative drafts stay intact.
   ImageParams get constrainedForModel {
-    final spec = modelSpec;
-    if (!spec.isTurbo) return this;
+    final compatible = withCompatiblePreciseReferenceModel;
+    final spec = compatible.modelSpec;
+    if (!spec.isTurbo) return compatible;
     return copyWith(
       steps: spec.fixedSteps!,
       sampler: spec.fixedSampler!,
@@ -302,7 +329,7 @@ extension ImageParamsExtension on ImageParams {
   /// 决定请求是否走 `v4_prompt` 结构，V5 同样如此。
   bool get isV4Model => ModelSpecs.of(model).isV4OrLater;
 
-  /// 检查是否支持 Precise Reference（V4.5 起提供，V5 暂未开放）。
+  /// 检查是否为 V4.5 模型。
   bool get isV45Model => model.contains('diffusion-4-5');
 
   /// 检查是否为 V5 模型
@@ -370,6 +397,37 @@ extension ImageParamsExtension on ImageParams {
   /// 启用的 Precise Reference 参考。
   List<PreciseReference> get enabledPreciseReferences =>
       preciseReferences.where((reference) => reference.enabled).toList();
+
+  List<PreciseReference> get effectivePreciseReferencesForRequest {
+    final spec = modelSpec;
+    if (!spec.characterReferences ||
+        (action == ImageGenerationAction.infill && !spec.charRefInpainting)) {
+      return const [];
+    }
+    return enabledPreciseReferences
+        .where((reference) => reference.isSupportedBy(spec))
+        .take(ModelSpec.maxPreciseReferences)
+        .toList(growable: false);
+  }
+
+  bool get hasEffectivePreciseReferences =>
+      effectivePreciseReferencesForRequest.isNotEmpty;
+
+  int get effectivePreciseReferenceCount =>
+      effectivePreciseReferencesForRequest.length;
+
+  bool get preciseReferencesSuspendedForInpaint =>
+      modelSpec.characterReferences &&
+      !modelSpec.charRefInpainting &&
+      action == ImageGenerationAction.infill &&
+      hasPreciseReferences;
+
+  bool get hasUnsupportedOutfitReferences =>
+      modelSpec.characterReferences &&
+      !modelSpec.outfitReferences &&
+      enabledPreciseReferences.any(
+        (reference) => reference.type == PreciseRefType.outfit,
+      );
 
   /// 检查是否为 img2img 模式
   bool get isImg2Img =>

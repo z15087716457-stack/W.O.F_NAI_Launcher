@@ -33,7 +33,7 @@ class ChannelSettingsSection extends StatefulWidget {
   /// 画布最新一批顶边的世界 y：“本次”从这里所在的段开始列。
   final double anchorY;
 
-  /// 生成中：标题旁写“动画已暂停”（微动开着时）。
+  /// 是否处于生成中（保留给外部调用方兼容）。
   final bool generating;
 
   /// “换一组”的新种子；默认随机（测试里注入固定值）。
@@ -96,15 +96,6 @@ class _ChannelSettingsSectionState extends State<ChannelSettingsSection> {
               l.channel_title,
               style: UiText.sans(13, weight: FontWeight.w700, color: c.ink),
             ),
-            if (widget.generating && s.motion && !off)
-              Flexible(
-                child: Text(
-                  l.channel_paused,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: UiText.sans(10.5, color: c.accent),
-                ),
-              ),
           ],
         ),
         const SizedBox(height: 2),

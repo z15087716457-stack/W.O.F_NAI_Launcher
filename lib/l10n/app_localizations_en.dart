@@ -3051,7 +3051,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Reference both the character and visual style';
 
   @override
-  String get preciseRef_v4Only => 'This feature requires V4+ models';
+  String get preciseRef_v4Only => 'This feature requires V5 or V4.5 models';
 
   @override
   String get preciseRef_typeCharacter => 'Character';
@@ -9374,7 +9374,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get refs_preciseOnlyV45 => 'V4.5 only';
+  String get refs_preciseOnlyV45 => 'V5 & V4.5';
 
   @override
   String refs_preciseCostNote(Object cost) {
@@ -9478,7 +9478,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get refs_bannerPreciseBody =>
-      'You can still organize references; switch to V4.5 to generate with them';
+      'You can still organize references; switch to V5 or V4.5 to generate with them';
 
   @override
   String refs_switchTo(Object model) {
@@ -9619,7 +9619,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String refs_emptyHelpBody(Object cost) {
-    return 'Vibe borrows the overall mood and style and can be stacked (V4 / V4.5, not V5). Precise Reference follows one image’s character or style more closely, $cost Anlas each (V4.5 only). The two cannot be used together.';
+    return 'Vibe borrows the overall mood and style and can be stacked (V4 / V4.5, not V5). Precise Reference follows an image’s character, style or outfit more closely, $cost Anlas each (V5 & V4.5; outfit is V5 only). The two cannot be used together.';
   }
 
   @override
@@ -9902,7 +9902,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get refs_typeCharacterDesc =>
-      'Keeps the character’s face, hair and outfit; style follows the prompt';
+      'Keeps the character’s appearance (outfit toggle on V5); style follows the prompt';
 
   @override
   String get refs_typeStyleDesc =>
@@ -9925,7 +9925,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get refs_preciseDefaultsNote =>
-      'These are the defaults used when sending; the number box accepts values beyond 0–1';
+      'These are default values applied on send; on V5 strength goes up to 5.0 and Fidelity is unused';
 
   @override
   String get refs_showInFolderShort => 'Open folder';
@@ -12945,10 +12945,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gen_precise => 'Precise reference';
 
   @override
-  String get gen_preciseDesc => 'Anchor the result to a character or style';
+  String get gen_preciseDesc =>
+      'Bind generation to character, style, or outfit references';
 
   @override
-  String get gen_preciseDrop => 'Drop a character or style reference, or';
+  String get gen_preciseDrop =>
+      'Drop character, style, or outfit reference images here, or';
 
   @override
   String get gen_preciseCharacter => 'Character';
@@ -14430,9 +14432,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Decorations on both sides as you scroll — drawn only outside your images';
 
   @override
-  String get channel_paused => 'Generating · motion paused';
-
-  @override
   String get channel_modeOff => 'Off';
 
   @override
@@ -14469,7 +14468,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get channel_motion => 'Idle motion';
 
   @override
-  String get channel_motionSub => 'Subtle animation, paused while generating';
+  String get channel_motionSub => 'Subtle ambient animation';
 
   @override
   String get channel_sideTransparency => 'Side panel translucency';
@@ -15364,8 +15363,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get set_cvMotion => 'Idle motion';
 
   @override
-  String get set_cvMotionSub =>
-      'Pauses while generating or when reduce motion is on';
+  String get set_cvMotionSub => 'Pauses when reduce motion is on';
 
   @override
   String get set_cvSideTransparency => 'Side panel translucency';
@@ -20428,4 +20426,55 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get set_agRulesLoadFailed =>
       'Unable to read AGENTS.md. Check file permissions.';
+
+  @override
+  String get preciseRef_typeOutfit => 'Outfit';
+
+  @override
+  String get preciseRef_outfitDescription =>
+      'Reference the outfit from this image (V5 only)';
+
+  @override
+  String get preciseRef_preferSameOutfit => 'Prefer same outfit';
+
+  @override
+  String get refs_typeOutfit => 'Outfit';
+
+  @override
+  String get refs_typeOutfitDesc =>
+      'Copies the outfit while character and style follow the prompt (V5 only)';
+
+  @override
+  String get refs_preferSameOutfit => 'Prefer same outfit';
+
+  @override
+  String get refs_preferSameOutfitDesc =>
+      'On V5, follows the reference character’s outfit more closely';
+
+  @override
+  String get gen_preciseOutfit => 'Outfit';
+
+  @override
+  String get gen_precisePreferSameOutfit => 'Prefer same outfit';
+
+  @override
+  String get gen_preciseInpaintUnsupported =>
+      'Inpainting with Precise Reference is not yet supported on this model; references will be skipped and not billed.';
+
+  @override
+  String get gen_preciseOutfitUnsupported =>
+      'Outfit references aren’t supported by this model and will be skipped without billing.';
+
+  @override
+  String gen_preciseLimit(int count) {
+    return 'Up to $count Precise References allowed';
+  }
+
+  @override
+  String get gen_turboBlockedByPrecise =>
+      'Precise Reference requires High effort (V5 Full). Remove or pause Precise References to use Turbo.';
+
+  @override
+  String get gen_turboSwitchedOffForPrecise =>
+      'Precise Reference needs High effort — switched back to V5 Full';
 }

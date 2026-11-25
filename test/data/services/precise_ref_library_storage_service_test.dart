@@ -257,6 +257,34 @@ void main() {
     expect(kept!.name, 'b');
   });
 
+  test('outfit preference survives Hive reopen and can be reset', () async {
+    final entry = await storage.importFromBytes(
+      _pngBytes(),
+      name: 'character',
+      type: PreciseRefType.character,
+      preferSameOutfit: true,
+    );
+    await storage.close();
+    expect((await storage.getAllEntries()).single.preferSameOutfit, isTrue);
+    final changed = await storage.updateEntry(
+      entry.id,
+      type: PreciseRefType.characterAndStyle,
+    );
+    expect(changed!.preferSameOutfit, isNull);
+    expect(changed.effectivePreferSameOutfit, isTrue);
+    await storage.updateEntry(entry.id, preferSameOutfit: false);
+    expect(
+      (await storage.getAllEntries()).single.effectivePreferSameOutfit,
+      isFalse,
+    );
+    final reset = await storage.updateEntry(
+      entry.id,
+      resetPreferSameOutfit: true,
+    );
+    expect(reset!.preferSameOutfit, isNull);
+    expect(reset.effectivePreferSameOutfit, isTrue);
+  });
+
   test('deleteEntry 移除元数据、缩略图缓存与磁盘文件', () async {
     final entry = await storage.importFromBytes(_pngBytes(), name: 'a');
     expect(File(entry.imagePath).existsSync(), isTrue);

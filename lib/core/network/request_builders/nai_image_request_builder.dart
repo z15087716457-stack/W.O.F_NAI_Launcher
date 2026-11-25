@@ -3,9 +3,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import '../../constants/api_constants.dart';
-import '../../constants/model_spec.dart';
 import '../../services/effective_vibe_references.dart';
-import '../../enums/precise_ref_type.dart';
 import '../../utils/app_logger.dart';
 import '../../utils/inpaint_mask_utils.dart';
 import '../../utils/inpaint_focus_region.dart';
@@ -55,18 +53,15 @@ class NAIImageRequestBuilder {
     required ImageParams params,
     required this.encodeVibe,
     List<PreciseReference>? preciseReferences,
-  }) : params = params.constrainedForModel,
-       _preciseReferences =
-           (preciseReferences ??
-                   (params.isV45Model
-                       ? params.preciseReferences
-                       : <PreciseReference>[]))
-               .where((reference) => reference.enabled)
-               .toList(growable: false);
+  }) : params =
+           (preciseReferences == null
+                   ? params
+                   : params.copyWith(preciseReferences: preciseReferences))
+               .constrainedForModel;
 
   final ImageParams params;
   final EncodeVibeFn encodeVibe;
-  final List<PreciseReference> _preciseReferences;
+  late final _preciseReferences = params.effectivePreciseReferencesForRequest;
 
   Map<String, dynamic> buildBaseParameters({
     required String sampler,
@@ -226,14 +221,8 @@ class NAIImageRequestBuilder {
     required bool isStream,
   }) async {
     final vibeEncodingMap = <int, String>{};
-    final spec = ModelSpecs.of(params.model);
-    final effective = effectiveVibeReferences(
-      params.copyWith(preciseReferences: _preciseReferences),
-      spec,
-    );
-    if (!spec.encodedVibes ||
-        effective.isEmpty ||
-        _preciseReferences.isNotEmpty) {
+    final spec = params.modelSpec;
+    if (!spec.encodedVibes || effectiveVibeReferences(params, spec).isEmpty) {
       return vibeEncodingMap;
     }
 
@@ -392,12 +381,13 @@ class NAIImageRequestBuilder {
       return;
     }
 
+    final spec = params.modelSpec;
     final referenceImages = <String>[];
     for (final reference in _preciseReferences) {
-      final imageBytes =
-          NAIApiUtils.isKnownNormalizedPreciseReferencePng(reference.image)
-          ? reference.image
-          : await NAIApiUtils.normalizePreciseReference(reference.image);
+      final imageBytes = await NAIApiUtils.normalizePreciseReferenceForModel(
+        reference.image,
+        spec,
+      );
       referenceImages.add(base64Encode(imageBytes));
     }
 
@@ -407,7 +397,7 @@ class NAIImageRequestBuilder {
         .map(
           (r) => {
             'caption': {
-              'base_caption': r.type.toApiString(),
+              'base_caption': r.toApiCaption(spec),
               'char_captions': [],
             },
             'legacy_uc': false,
@@ -420,7 +410,7 @@ class NAIImageRequestBuilder {
         .map((r) => r.strength)
         .toList();
     requestParameters['director_reference_secondary_strength_values'] =
-        _preciseReferences.map((r) => 1.0 - r.fidelity).toList();
+        _preciseReferences.map((r) => 1.0 - r.effectiveFidelity(spec)).toList();
   }
 
   Future<Uint8List> _normalizeRequestSourceImage(Uint8List sourceImage) async {

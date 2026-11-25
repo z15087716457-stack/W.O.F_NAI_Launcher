@@ -203,6 +203,15 @@ class _GenerationWiringState extends ConsumerState<GenerationWiring> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!TickerMode.valuesOf(context).enabled) {
+      PromptBlockPaletteButton.closeFloating();
+      _translationAdjustment.close();
+    }
+  }
+
+  @override
   void dispose() {
     // 积木悬浮窗不随页面点击关闭；离开生成页时一并收起。
     PromptBlockPaletteButton.closeFloating();

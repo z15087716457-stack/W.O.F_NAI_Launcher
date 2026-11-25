@@ -13,6 +13,142 @@ import 'package:nai_launcher/data/models/vibe/vibe_reference.dart';
 
 void main() {
   test(
+    'V5 precise references use bucketed PNG, new captions and zero secondary strength',
+    () async {
+      final source = _validPngBytes(width: 8, height: 4);
+      final references = [
+        for (final (type, prefer) in [
+          (PreciseRefType.character, true),
+          (PreciseRefType.characterAndStyle, false),
+          (PreciseRefType.outfit, null),
+        ])
+          PreciseReference(
+            image: source,
+            type: type,
+            preferSameOutfit: prefer,
+            strength: 4.2,
+            fidelity: 0.4,
+          ),
+      ];
+      final result = await NAIImageRequestBuilder(
+        params: ImageParams(
+          model: ImageModels.animeDiffusionV5Curated,
+          preciseReferences: references,
+        ),
+        encodeVibe: _fakeEncodeVibe,
+      ).build(sampler: 'k_euler');
+      final parameters = result.requestParameters;
+      expect(_preciseCaptions(parameters), [
+        'character_mainoutfit',
+        'character&style_anyoutfit',
+        'costume',
+      ]);
+      expect(parameters['director_reference_strength_values'], [4.2, 4.2, 4.2]);
+      expect(parameters['director_reference_secondary_strength_values'], [
+        0.0,
+        0.0,
+        0.0,
+      ]);
+      for (final encoded
+          in parameters['director_reference_images'] as List<String>) {
+        final image = img.decodePng(base64Decode(encoded))!;
+        expect((image.width, image.height), (1408, 704));
+      }
+    },
+  );
+
+  test(
+    'PR overrides honor V5 inpainting and V4.5 outfit capabilities',
+    () async {
+      final source = NAIApiUtils.markNormalizedPreciseReferencePng(
+        _validPngBytes(),
+      );
+      final references = [
+        PreciseReference(image: source, type: PreciseRefType.outfit),
+        PreciseReference(
+          image: source,
+          type: PreciseRefType.character,
+          preferSameOutfit: true,
+        ),
+        PreciseReference(
+          image: source,
+          type: PreciseRefType.characterAndStyle,
+          preferSameOutfit: false,
+          fidelity: 0.5,
+        ),
+        PreciseReference(
+          image: source,
+          type: PreciseRefType.style,
+          enabled: false,
+        ),
+      ];
+      final v5Infill = <String, dynamic>{};
+      await NAIImageRequestBuilder(
+        params: const ImageParams(
+          model: ImageModels.animeDiffusionV5FullInpainting,
+          action: ImageGenerationAction.infill,
+        ),
+        preciseReferences: references,
+        encodeVibe: _fakeEncodeVibe,
+      ).buildPreciseReferenceParameters(v5Infill);
+      expect(v5Infill, isEmpty);
+      final v45Infill = <String, dynamic>{};
+      await NAIImageRequestBuilder(
+        params: const ImageParams(
+          model: ImageModels.animeDiffusionV45FullInpainting,
+          action: ImageGenerationAction.infill,
+        ),
+        preciseReferences: references,
+        encodeVibe: _fakeEncodeVibe,
+      ).buildPreciseReferenceParameters(v45Infill);
+      expect(_preciseCaptions(v45Infill), ['character', 'character&style']);
+      expect(v45Infill['director_reference_secondary_strength_values'], [
+        0.0,
+        0.5,
+      ]);
+    },
+  );
+
+  test(
+    'skipped V4.5 outfit references leave Vibe active and PR is capped at 16',
+    () async {
+      final source = NAIApiUtils.markNormalizedPreciseReferencePng(
+        _validPngBytes(),
+      );
+      final outfit = PreciseReference(
+        image: source,
+        type: PreciseRefType.outfit,
+      );
+      final params = ImageParams(
+        model: ImageModels.animeDiffusionV45Full,
+        preciseReferences: [outfit],
+        vibeReferencesV4: const [
+          VibeReference(displayName: 'encoded', vibeEncoding: 'vibe-code'),
+        ],
+      );
+      final result = await NAIImageRequestBuilder(
+        params: params,
+        encodeVibe: _fakeEncodeVibe,
+      ).build(sampler: 'k_euler');
+      expect(result.requestParameters['director_reference_images'], isNull);
+      expect(result.requestParameters['reference_image_multiple'], [
+        'vibe-code',
+      ]);
+
+      final capped = <String, dynamic>{};
+      await NAIImageRequestBuilder(
+        params: params,
+        preciseReferences: [
+          outfit,
+          ...List.filled(17, outfit.copyWith(type: PreciseRefType.character)),
+        ],
+        encodeVibe: _fakeEncodeVibe,
+      ).buildPreciseReferenceParameters(capped);
+      expect(_preciseCaptions(capped), List.filled(16, 'character'));
+    },
+  );
+
+  test(
     'unsupported V5 and infill never encode or send retained Vibes',
     () async {
       for (final model in [
@@ -658,7 +794,7 @@ void main() {
       );
     });
 
-    test('should ignore precise references for non-v4.5 model', () async {
+    test('V4 ignores precise references', () async {
       final params = ImageParams(
         model: 'nai-diffusion-4-full',
         preciseReferences: [
@@ -1239,6 +1375,11 @@ void main() {
     );
   });
 }
+
+Iterable<dynamic> _preciseCaptions(Map<String, dynamic> parameters) =>
+    (parameters['director_reference_descriptions'] as List).map(
+      (description) => description['caption']['base_caption'],
+    );
 
 Future<String> _fakeEncodeVibe(
   Uint8List image, {

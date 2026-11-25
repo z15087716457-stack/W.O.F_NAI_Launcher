@@ -314,6 +314,7 @@ void main() {
                 'kind': 'precise',
                 'action': 'import',
                 'path': 'image.png',
+                'preferSameOutfit': false,
               }))['saved']
               as Map;
       final before = container.read(generationParamsNotifierProvider);
@@ -326,6 +327,7 @@ void main() {
       }, kind: 'precise');
       expect(result['ok'], true);
       final actual = (await precise.getAllEntries()).single;
+      expect(actual.preferSameOutfit, isNull);
       expect(
         (
           actual.name,
@@ -344,6 +346,11 @@ void main() {
         pixels,
       );
       expect(container.read(generationParamsNotifierProvider), same(before));
+      await update(entry['id'] as String, {
+        'type': 'character',
+        'prefer_same_outfit': true,
+      }, kind: 'precise');
+      expect((await precise.getAllEntries()).single.preferSameOutfit, isTrue);
       await expectLater(
         update(entry['id'] as String, {
           'tags': ['unsupported'],

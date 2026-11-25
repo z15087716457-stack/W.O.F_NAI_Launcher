@@ -475,7 +475,10 @@ class RefsParam extends StatelessWidget {
     this.desc,
     this.changed = false,
     this.mixed,
+    this.min = 0,
     this.max = 1,
+    this.sliderMax = 1,
+    this.midpoint,
     this.trailing,
   });
   final String label;
@@ -488,8 +491,33 @@ class RefsParam extends StatelessWidget {
 
   /// 多选“混合”：数字框写这段字、滑杆不画圆钮。
   final String? mixed;
+  final double min;
   final double max;
+  final double sliderMax;
+  final double? midpoint;
   final Widget? trailing;
+
+  double _norm(double v) {
+    final mid = midpoint;
+    if (mid != null && mid > 0 && mid < sliderMax) {
+      if (v <= mid) return (v / mid * 0.5).clamp(0.0, 0.5);
+      return (0.5 + (v - mid) / (sliderMax - mid) * 0.5).clamp(0.5, 1.0);
+    }
+    return (v / sliderMax).clamp(0.0, 1.0);
+  }
+
+  double _denorm(double t) {
+    final mid = midpoint;
+    final double v;
+    if (mid != null && mid > 0 && mid < sliderMax) {
+      v = t <= 0.5
+          ? (t / 0.5) * mid
+          : mid + ((t - 0.5) / 0.5) * (sliderMax - mid);
+    } else {
+      v = t * sliderMax;
+    }
+    return (v * 100).roundToDouble() / 100;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -511,16 +539,19 @@ class RefsParam extends StatelessWidget {
               value: value,
               changed: changed,
               placeholder: mixed,
+              min: min,
               max: max,
               onSubmitted: onSubmitted ?? onChanged,
             ),
           ],
         ),
         UiSlider(
-          value: value,
-          defaultValue: changed ? defaultValue : null,
+          value: _norm(value),
+          defaultValue: changed && defaultValue != null
+              ? _norm(defaultValue!)
+              : null,
           empty: mixed != null,
-          onChanged: onChanged,
+          onChanged: onChanged == null ? null : (t) => onChanged!(_denorm(t)),
         ),
         if (desc != null)
           Text(desc!, style: UiText.sans(11.5, color: c.muted, height: 1.45)),

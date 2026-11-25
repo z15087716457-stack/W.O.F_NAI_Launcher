@@ -44,6 +44,7 @@ enum ResourceGroupIcon {
   typeCharacter,
   typeStyle,
   typeBoth,
+  typeOutfit,
 }
 
 @immutable

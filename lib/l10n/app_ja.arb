@@ -3,13 +3,31 @@
   "set_importInstallationHelp": "この PC のアカウント、環境設定、ショートカット、素材フォルダーを復元します。以前のインストール先または user-data を選択してください。",
   "set_importInstallationInvalid": "別の Studio のインストール先、または hive/settings.hive を含む user-data フォルダーを選択してください。",
   "set_importInstallationPreview": "アカウント {accounts} 件と設定 {prefs} 件が見つかりました。登録済みのアカウントはスキップし、以下の設定を適用します。素材は引き続き表示されたフォルダーから読み込みます。",
-  "@set_importInstallationPreview": {"placeholders":{"accounts":{"type":"int"},"prefs":{"type":"int"}}},
+  "@set_importInstallationPreview": {
+    "placeholders": {
+      "accounts": {
+        "type": "int"
+      },
+      "prefs": {
+        "type": "int"
+      }
+    }
+  },
   "set_importMissingFolder": "フォルダーが見つかりません。移動先を選ぶか、そのままスキップできます。",
   "set_importCategoryBase": "ギャラリー分類フォルダー",
   "set_importEmptyGallery": "以前のギャラリーの参照先は空です。現在の一覧も空になります。",
   "set_importInstallationChanged": "プレビュー中にフォルダー設定が変更されました。以前のフォルダーを選び直してください。",
   "set_importInstallationDone": "移行が完了しました。アカウントを {added} 件追加しました。うち {missing} 件は認証情報を復元できませんでした。必要に応じて再ログインしてください。",
-  "@set_importInstallationDone": {"placeholders":{"added":{"type":"int"},"missing":{"type":"int"}}},
+  "@set_importInstallationDone": {
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "missing": {
+        "type": "int"
+      }
+    }
+  },
   "@@locale": "ja",
   "@blocks_cropRange": {
     "placeholders": {
@@ -1503,7 +1521,7 @@
   "preciseRef_characterDescription": "人物の外見や特徴を参照",
   "preciseRef_styleDescription": "配色、筆致、画面の質感を参照",
   "preciseRef_characterAndStyleDescription": "人物の特徴と画風の両方を参照",
-  "preciseRef_v4Only": "この機能には V4 以降のモデルが必要です",
+  "preciseRef_v4Only": "この機能には V5 または V4.5 モデルが必要です",
   "preciseRef_typeCharacter": "キャラ参照",
   "preciseRef_typeStyle": "絵柄参照",
   "preciseRef_typeCharacterAndStyle": "キャラ＆絵柄参照",
@@ -3107,7 +3125,16 @@
   "wiki_imageHide": "記事の画像を閉じる",
   "wiki_imageLoadFailed": "画像を読み込めません",
   "wiki_imageMore": "さらに読み込む（{loaded}/{total}）",
-  "@wiki_imageMore": {"placeholders":{"loaded":{"type":"int"},"total":{"type":"int"}}},
+  "@wiki_imageMore": {
+    "placeholders": {
+      "loaded": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "wiki_withoutArticle": "説明なし",
   "wiki_sortPopular": "人気順",
   "wiki_sortName": "名前順",
@@ -3883,7 +3910,11 @@
   "update_errorRateLimited": "GitHub のリクエスト上限に達しました。しばらくしてから再試行してください。",
   "update_retryAt": "{time}（現地時刻）以降に再試行してください。",
   "@update_retryAt": {
-    "placeholders": {"time": {"type": "String"}}
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
   },
   "update_errorCheckUnknown": "更新の確認中に不明なエラーが発生しました",
   "update_errorLogPath": "ログ：{path}",
@@ -4137,19 +4168,25 @@
   "imageUse_featureRecorded": "元画像は{feature}を使用しています。",
   "@imageUse_featureRecorded": {
     "placeholders": {
-      "feature": {"type": "String"}
+      "feature": {
+        "type": "String"
+      }
     }
   },
   "imageUse_referenceAvailable": "元画像は{feature}を使用しています。「参照画像」から参照素材を読み込めます。",
   "@imageUse_referenceAvailable": {
     "placeholders": {
-      "feature": {"type": "String"}
+      "feature": {
+        "type": "String"
+      }
     }
   },
   "imageUse_referenceUnavailable": "元画像は{feature}を使用しています。使用記録のみが残っており、読み込める参照素材は含まれていません。",
   "@imageUse_referenceUnavailable": {
     "placeholders": {
-      "feature": {"type": "String"}
+      "feature": {
+        "type": "String"
+      }
     }
   },
   "imageMenu_details": "詳細",
@@ -5131,7 +5168,7 @@
       "type": {}
     }
   },
-  "refs_preciseOnlyV45": "V4.5 のみ",
+  "refs_preciseOnlyV45": "V5 / V4.5 対応",
   "refs_preciseCostNote": "1 枚 {cost} Anlas。Vibe とは同時に使えません",
   "@refs_preciseCostNote": {
     "placeholders": {
@@ -5178,7 +5215,7 @@
       "model": {}
     }
   },
-  "refs_bannerPreciseBody": "参照画像の整理はできます。生成に使うには V4.5 に切り替えてください",
+  "refs_bannerPreciseBody": "参照画像の整理はできます。生成に使うには V5 または V4.5 に切り替えてください",
   "refs_switchTo": "{model} に切り替え",
   "@refs_switchTo": {
     "placeholders": {
@@ -5247,7 +5284,7 @@
   "refs_emptyFromResultPrecise": "生成結果を右クリック → 精密参照ライブラリに保存",
   "refs_emptyFromGallery": "ローカルギャラリーからも可",
   "refs_emptyHelpTitle": "Vibe と精密参照の違い",
-  "refs_emptyHelpBody": "Vibe：全体の雰囲気や画風を借り、何枚も重ねられます（V4 / V4.5、V5 は非対応）。精密参照：1 枚の画像の人物や画風により忠実に描きます。1 枚 {cost} Anlas（V4.5 のみ）。両者は同時に使えません。",
+  "refs_emptyHelpBody": "Vibe：全体の雰囲気や画風を借り、何枚も重ねられます（V4 / V4.5、V5 は非対応）。精密参照：画像の人物・画風・衣装により忠実に描きます。1 枚 {cost} Anlas（V5 / V4.5 対応、衣装参照は V5 専用）。両者は同時に使えません。",
   "@refs_emptyHelpBody": {
     "placeholders": {
       "cost": {}
@@ -5482,14 +5519,14 @@
   "refs_typeCharacter": "キャラ",
   "refs_typeStyle": "画風",
   "refs_typeBoth": "キャラ+画風",
-  "refs_typeCharacterDesc": "人物の顔・髪型・服装を保ち、画風はプロンプトに従います",
+  "refs_typeCharacterDesc": "人物の見た目を保ち（V5 では衣装参照を切替可）、画風はプロンプトに従います",
   "refs_typeStyleDesc": "画風・配色・タッチのみを借ります（人物は問いません）",
   "refs_typeBothDesc": "人物と画風の両方を参照します",
   "refs_preciseStrength": "参照強度",
   "refs_preciseStrengthDesc": "高いほど参照画像に近づきます",
   "refs_fidelity": "忠実度",
   "refs_fidelityDesc": "高いほど細部に忠実、低いほど自由になります",
-  "refs_preciseDefaultsNote": "ここで変えるのは既定値で、送信時にそのまま使われます。数値欄には 0–1 以外も入力できます",
+  "refs_preciseDefaultsNote": "ここで変更した値は送信時の既定値になります。V5 では強度上限 5.0・忠実度は未使用です",
   "refs_showInFolderShort": "フォルダへ",
   "refs_pickHint": "カードにチェックを入れるとここでまとめて設定できます",
   "refs_multiAddTitle": "まとめて生成ページに追加",
@@ -7203,8 +7240,8 @@
   "gen_vibeInfo": "情報抽出",
   "gen_vibeInfoReencode": "情報抽出を変更すると、Vibe の再エンコードが必要です",
   "gen_precise": "精密参照",
-  "gen_preciseDesc": "生成をキャラや画風の参照に固定",
-  "gen_preciseDrop": "キャラや画風の参照画像をドロップ、または",
+  "gen_preciseDesc": "生成をキャラ・絵柄・衣装の参照に固定",
+  "gen_preciseDrop": "キャラ・絵柄・衣装の参照画像をドロップ、または",
   "gen_preciseCharacter": "キャラ",
   "gen_preciseStyle": "画風",
   "gen_preciseBoth": "両方",
@@ -7832,7 +7869,6 @@
   "channel_descStrata": "隠面消去を備えた 3D 潮汐リッジと発光等高線、山頂の標高ラベルがうねりとともに変化します",
   "channel_title": "ビジュアルチャンネル",
   "channel_subtitle": "スクロールすると両側に現れる装飾。画像の外側だけに描かれます",
-  "channel_paused": "生成中 · アニメ一時停止",
   "channel_modeOff": "オフ",
   "channel_modeFixed": "固定",
   "channel_modeRandom": "毎回ランダム",
@@ -7845,20 +7881,68 @@
   "channel_levelStandard": "標準",
   "channel_levelStrong": "濃",
   "channel_motion": "アイドル時の動き",
-  "channel_motionSub": "ごく軽い動き。生成中は自動で止まります",
+  "channel_motionSub": "ごく軽い環境アニメーション",
   "channel_sideTransparency": "サイドバー透過度",
   "channel_batch": "{time} · {count} 枚",
-  "@channel_batch": {"placeholders": {"time": {"type": "String"}, "count": {"type": "int"}}},
+  "@channel_batch": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "channel_batchNewest": "{time} · {count} 枚 · 最新",
-  "@channel_batchNewest": {"placeholders": {"time": {"type": "String"}, "count": {"type": "int"}}},
+  "@channel_batchNewest": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "channel_batchPending": "生成中 · {count} 枚",
-  "@channel_batchPending": {"placeholders": {"count": {"type": "int"}}},
+  "@channel_batchPending": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "channel_dayToday": "今日 · {date}",
-  "@channel_dayToday": {"placeholders": {"date": {"type": "String"}}},
+  "@channel_dayToday": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "channel_dayYesterday": "昨日 · {date}",
-  "@channel_dayYesterday": {"placeholders": {"date": {"type": "String"}}},
+  "@channel_dayYesterday": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "channel_monthDayWeek": "{month}月{day}日（{weekday}）",
-  "@channel_monthDayWeek": {"placeholders": {"month": {"type": "int"}, "day": {"type": "int"}, "weekday": {"type": "String"}}},
+  "@channel_monthDayWeek": {
+    "placeholders": {
+      "month": {
+        "type": "int"
+      },
+      "day": {
+        "type": "int"
+      },
+      "weekday": {
+        "type": "String"
+      }
+    }
+  },
   "channel_weekday1": "月",
   "channel_weekday2": "火",
   "channel_weekday3": "水",
@@ -8341,7 +8425,7 @@
   },
   "set_cvLevel": "濃さ",
   "set_cvMotion": "アイドル時の動き",
-  "set_cvMotionSub": "生成中と「動きを減らす」オンのときは停止",
+  "set_cvMotionSub": "「動きを減らす」オンのときは停止",
   "set_cvSideTransparency": "サイドバー透過度",
   "set_cvSideTransparencySub": "左右パネルから動的背景が透ける量を調整します（0% で不透明）",
   "set_cvOps": "キャンバス操作",
@@ -8541,7 +8625,13 @@
   "set_stSave": "保存",
   "set_stSavePath": "生成画像の保存先",
   "set_stSavePathSub": "自動・手動保存の実際の保存先：\n{path}",
-  "@set_stSavePathSub": {"placeholders": {"path": {"type": "String"}}},
+  "@set_stSavePathSub": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
   "set_stAutoSave": "自動保存",
   "set_stAutoSaveSub": "生成後すぐに保存します。オフではキャンバスと履歴にのみ残ります",
   "set_stAssets": "素材と表示",
@@ -8607,21 +8697,44 @@
   "set_dcLatest": "最新です",
   "set_dcUpdatesAvailable": "更新があります",
   "set_dcLastChecked": "最終確認 {when}",
-  "@set_dcLastChecked": {"placeholders": {"when": {}}},
+  "@set_dcLastChecked": {
+    "placeholders": {
+      "when": {}
+    }
+  },
   "set_dcRefreshWiki": "Wiki を再適用",
   "set_dcRefreshWikiTip": "現在の Wiki データをダウンロードし、既存の記事を更新します。個人の翻訳は保持されます。",
   "set_dcChanged": "{added} 件追加、{updated} 件更新。ローカルに保存しました。",
-  "@set_dcChanged": {"placeholders": {"added": {}, "updated": {}}},
+  "@set_dcChanged": {
+    "placeholders": {
+      "added": {},
+      "updated": {}
+    }
+  },
   "set_dcRagSyncTip": "意味検索を使用している場合は、Studio を再起動してから、該当ソースの索引を手動で同期してください。",
   "set_dcUpdateTags": "タグを更新",
   "set_dcUpdateWiki": "Wiki を更新",
   "set_dcSources": "利用可能なデータ：Tag {tagDate} · Wiki {wikiDate}",
-  "@set_dcSources": {"placeholders": {"tagDate": {}, "wikiDate": {}}},
+  "@set_dcSources": {
+    "placeholders": {
+      "tagDate": {},
+      "wikiDate": {}
+    }
+  },
   "set_dcDownloading": "ダウンロード中 {received} / {total}",
-  "@set_dcDownloading": {"placeholders": {"received": {}, "total": {}}},
+  "@set_dcDownloading": {
+    "placeholders": {
+      "received": {},
+      "total": {}
+    }
+  },
   "set_dcVerifying": "ダウンロードを検証中…",
   "set_dcImporting": "ローカルデータを補充中 · {n} 件読み込み済み",
-  "@set_dcImporting": {"placeholders": {"n": {}}},
+  "@set_dcImporting": {
+    "placeholders": {
+      "n": {}
+    }
+  },
   "set_dcPublishing": "データのバージョンを切り替え中…",
   "set_dcUpdateFailed": "補充できませんでした。既存データは保持されています。再試行できます。",
   "set_dcUpdateCancelled": "キャンセルしました。既存データは引き続き利用できます。",
@@ -8886,7 +8999,17 @@
   "set_rgOpening": "ローカルワーカーに接続し、既存のインデックスを確認しています。",
   "set_rgLoadingSaved": "保存済みの検索インデックスを読み込んでいます。",
   "set_rgRestoring": "検索インデックスを復元中：{done} / {total}。既存のベクトルを再利用します。",
-  "@set_rgRestoring": {"description": "Actual local ANN recovery progress; existing embeddings are reused.", "placeholders": {"done": {"type": "String"}, "total": {"type": "String"}}},
+  "@set_rgRestoring": {
+    "description": "Actual local ANN recovery progress; existing embeddings are reused.",
+    "placeholders": {
+      "done": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
   "set_rgSaving": "復元した検索インデックスを保存しています。",
   "set_rgReadingSources": "各ソースのインデックス状態を読み込んでいます。",
   "set_rgLoadingTimeout": "読み込みが長時間進まないか、制限時間に達しました。再試行してください。既存のデータは保持されています。",
@@ -8917,9 +9040,21 @@
   "set_rgCleanupLegacy": "旧タグ索引を削除",
   "set_rgUpgradeNotice": "タグ検索方式が変わったため、新しい索引が必要です。Wiki、プロンプトブロック、画像庫の索引は引き続き使えます。",
   "set_rgUpgradePlan": "新しいタグ索引を構築・検証してから、旧タグ索引（約 {size}）を削除します。一時的に追加の空き容量が必要です。中断・再開でき、他のソースと翻訳データは保持されます。",
-  "@set_rgUpgradePlan": {"placeholders": {"size": {"type": "String"}}},
+  "@set_rgUpgradePlan": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
   "set_rgCleanupPlan": "旧タグ索引（約 {size}）を削除します。新しいタグ索引、他のソース、翻訳データは保持されます。",
-  "@set_rgCleanupPlan": {"placeholders": {"size": {"type": "String"}}},
+  "@set_rgCleanupPlan": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
   "set_rgUpgradeCleaning": "新しいタグ索引の準備ができました。旧索引を削除中…",
   "set_rgUpgradeCleanupFailed": "新しい検索は利用できます。旧索引の削除を再試行してください。",
   "set_rgUpgradeBadge": "更新が必要",
@@ -8958,7 +9093,13 @@
   "set_rgEnvNeedsUpdate": "更新が必要",
   "set_rgEnvUpdate": "環境を更新",
   "set_rgEnvDependencies": "依存パッケージの追加・更新が必要です：{packages}。既存のインデックスは保持されます。",
-  "@set_rgEnvDependencies": {"placeholders": {"packages": {"type": "String"}}},
+  "@set_rgEnvDependencies": {
+    "placeholders": {
+      "packages": {
+        "type": "String"
+      }
+    }
+  },
   "set_rgEnvPythonVersion": "Python 3.12 が必要です。環境を更新するか、互換性のあるインタープリターを選択してください。既存のインデックスは保持されます。",
   "set_rgEnvCheckFailed": "確認に失敗",
   "set_rgEnvImportFailed": "依存パッケージを読み込めませんでした。再確認するか環境を修復してください。既存のインデックスは保持されます。",
@@ -9313,9 +9454,18 @@
   "set_accBalanceUnread": "残高は未取得",
   "set_agBase": "内蔵システムプロンプト",
   "set_agBaseGlobalState": "全体：{state}",
-  "@set_agBaseGlobalState": {"placeholders": {"state": {}}},
+  "@set_agBaseGlobalState": {
+    "placeholders": {
+      "state": {}
+    }
+  },
   "set_agBaseWsState": "ワークスペース「{name}」：{state}",
-  "@set_agBaseWsState": {"placeholders": {"name": {}, "state": {}}},
+  "@set_agBaseWsState": {
+    "placeholders": {
+      "name": {},
+      "state": {}
+    }
+  },
   "set_agBaseBuiltin": "内蔵",
   "set_agBaseCustom": "カスタム",
   "set_agBaseInherit": "全体を使用",
@@ -9324,7 +9474,11 @@
   "set_agBaseCollapse": "閉じる",
   "set_agScopeGlobal": "全体",
   "set_agScopeWorkspace": "ワークスペース · {name}",
-  "@set_agScopeWorkspace": {"placeholders": {"name": {}}},
+  "@set_agScopeWorkspace": {
+    "placeholders": {
+      "name": {}
+    }
+  },
   "set_agBaseUseGlobalOn": "このワークスペースは全体のプロンプトを使用。オフにすると個別に編集できます",
   "set_agBaseUseGlobalOff": "このワークスペースは個別のプロンプトを使用。オンにすると全体に戻ります",
   "set_agBaseHint": "カスタム内容で内蔵システムプロンプトを置き換え、「内蔵プロンプトの前」の内容に続けます。ツールマップはアプリが追加します。全体とワークスペースは別々に保存され、既存のチャットはそのままです。",
@@ -9473,7 +9627,19 @@
   "ag_greetHint": "Agent はまず下書きを読み、Anlas を使う前には必ず確認します。",
   "ag_draftEyebrow": "現在の下書き",
   "ag_draftCounts": "キャラ {characters} 体 · ブロック {blocks} 個 · 参照画像 {references} 枚",
-  "@ag_draftCounts": {"placeholders": {"characters": {"type": "int"}, "blocks": {"type": "int"}, "references": {"type": "int"}}},
+  "@ag_draftCounts": {
+    "placeholders": {
+      "characters": {
+        "type": "int"
+      },
+      "blocks": {
+        "type": "int"
+      },
+      "references": {
+        "type": "int"
+      }
+    }
+  },
   "ag_taskReview": "下書きを確認",
   "ag_taskReviewHint": "競合・重複・モデルが無視する書き方を探します",
   "ag_taskReviewPrompt": "現在の下書きとパラメータを確認し、競合・重複・現在のモデルが無視する書き方を指摘してください。まだ変更はしないでください。",
@@ -9500,11 +9666,29 @@
   "ag_delete": "削除",
   "ag_deleteWorkspaceTitle": "ワークスペースを削除しますか？",
   "ag_deleteWorkspaceBody": "ワークスペース「{name}」とその中のチャットはすべてごみ箱に移動し、元に戻せます。生成した画像はギャラリーと履歴に残ります。",
-  "@ag_deleteWorkspaceBody": {"placeholders": {"name": {"type": "String"}}},
+  "@ag_deleteWorkspaceBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "ag_chatDeleted": "「{title}」を削除しました",
-  "@ag_chatDeleted": {"placeholders": {"title": {"type": "String"}}},
+  "@ag_chatDeleted": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "ag_workspaceDeleted": "ワークスペース「{name}」を削除しました",
-  "@ag_workspaceDeleted": {"placeholders": {"name": {"type": "String"}}},
+  "@ag_workspaceDeleted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "ag_chatsContent": "メッセージ内",
   "ag_chatsSearching": "メッセージを検索中…",
   "ag_imageVibe": "Vibe に設定",
@@ -9527,7 +9711,16 @@
   "ag_sloganExternal": "外部ツールと合言葉を交換中…\n返事待ち…",
   "ag_foldDone": "処理済み",
   "ag_foldTimes": "{label} {count} 回",
-  "@ag_foldTimes": {"placeholders": {"label": {"type": "String"}, "count": {"type": "int"}}},
+  "@ag_foldTimes": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_kindThink": "思考",
   "ag_kindRead": "読み取り",
   "ag_kindRun": "コマンド",
@@ -9537,7 +9730,13 @@
   "ag_kindExternal": "外部ツール",
   "ag_kindAsk": "確認",
   "ag_limitTitle": "1 回のタスクのステップ上限（{count}）に達しました",
-  "@ag_limitTitle": {"placeholders": {"count": {"type": "int"}}},
+  "@ag_limitTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_limitBody": "進捗は保存済みです。「続ける」で続きから再開できます。上限は設定で変更できます。",
   "ag_limitContinue": "続ける",
   "ag_limitAdjust": "上限を変更",
@@ -9545,49 +9744,184 @@
   "ag_diffExpand": "すべて表示",
   "ag_diffCollapse": "折りたたむ",
   "ag_readImages": "画像確認 · {count} 枚",
-  "@ag_readImages": {"placeholders": {"count": {"type": "int"}}},
+  "@ag_readImages": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_turnTook": "所要 {time}",
-  "@ag_turnTook": {"placeholders": {"time": {"type": "String"}}},
+  "@ag_turnTook": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "ag_turnAnlas": "{anlas} Anlas",
-  "@ag_turnAnlas": {"placeholders": {"anlas": {"type": "String"}}},
+  "@ag_turnAnlas": {
+    "placeholders": {
+      "anlas": {
+        "type": "String"
+      }
+    }
+  },
   "ag_turnChanges": "変更 {count} 件",
-  "@ag_turnChanges": {"placeholders": {"count": {"type": "int"}}},
+  "@ag_turnChanges": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_turnTools": "ツール {count} 回",
-  "@ag_turnTools": {"placeholders": {"count": {"type": "int"}}},
+  "@ag_turnTools": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_turnTokens": "入力 {input} · 出力 {output} トークン",
-  "@ag_turnTokens": {"placeholders": {"input": {"type": "String"}, "output": {"type": "String"}}},
+  "@ag_turnTokens": {
+    "placeholders": {
+      "input": {
+        "type": "String"
+      },
+      "output": {
+        "type": "String"
+      }
+    }
+  },
   "ag_settingsTitle": "アプリ設定",
   "ag_settingsGo": "設定を開く",
   "ag_tagCopied": "{tag} をコピーしました",
-  "@ag_tagCopied": {"placeholders": {"tag": {"type": "String"}}},
+  "@ag_tagCopied": {
+    "placeholders": {
+      "tag": {
+        "type": "String"
+      }
+    }
+  },
   "ag_tagCount": "{count} 件",
-  "@ag_tagCount": {"placeholders": {"count": {"type": "String"}}},
+  "@ag_tagCount": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
   "ag_galleryFavorite": "{count} 枚をお気に入りにしました",
-  "@ag_galleryFavorite": {"placeholders": {"count": {"type": "int"}}},
+  "@ag_galleryFavorite": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_galleryUnfavorite": "{count} 枚のお気に入りを外しました",
-  "@ag_galleryUnfavorite": {"placeholders": {"count": {"type": "int"}}},
+  "@ag_galleryUnfavorite": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_galleryTags": "{count} 枚のタグを変更しました",
-  "@ag_galleryTags": {"placeholders": {"count": {"type": "int"}}},
+  "@ag_galleryTags": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_galleryMove": "{count} 枚を「{target}」へ移動しました",
-  "@ag_galleryMove": {"placeholders": {"count": {"type": "int"}, "target": {"type": "String"}}},
+  "@ag_galleryMove": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
   "ag_galleryCopy": "{count} 枚を「{target}」へコピーしました",
-  "@ag_galleryCopy": {"placeholders": {"count": {"type": "int"}, "target": {"type": "String"}}},
+  "@ag_galleryCopy": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
   "ag_galleryDelete": "{count} 枚をゴミ箱へ移しました",
-  "@ag_galleryDelete": {"placeholders": {"count": {"type": "int"}}},
+  "@ag_galleryDelete": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_galleryRestore": "{count} 枚を復元しました",
-  "@ag_galleryRestore": {"placeholders": {"count": {"type": "int"}}},
+  "@ag_galleryRestore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_galleryCollectionAdd": "{count} 枚をコレクション「{target}」に追加しました",
-  "@ag_galleryCollectionAdd": {"placeholders": {"count": {"type": "int"}, "target": {"type": "String"}}},
+  "@ag_galleryCollectionAdd": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
   "ag_galleryCollectionRemove": "{count} 枚をコレクション「{target}」から外しました",
-  "@ag_galleryCollectionRemove": {"placeholders": {"count": {"type": "int"}, "target": {"type": "String"}}},
+  "@ag_galleryCollectionRemove": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
   "ag_galleryExport": "{count} 枚を書き出しました",
-  "@ag_galleryExport": {"placeholders": {"count": {"type": "int"}}},
+  "@ag_galleryExport": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_galleryMore": "+{count}",
-  "@ag_galleryMore": {"placeholders": {"count": {"type": "int"}}},
+  "@ag_galleryMore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_compacted": "これまでの会話を圧縮しました",
   "ag_compactedAuto": "コンテキストがいっぱいに近いため、これまでの会話を自動で圧縮しました",
   "ag_compactedTokens": "元 {tokens} トークン",
-  "@ag_compactedTokens": {"placeholders": {"tokens": {"type": "String"}}},
+  "@ag_compactedTokens": {
+    "placeholders": {
+      "tokens": {
+        "type": "String"
+      }
+    }
+  },
   "ag_compactedShow": "要約を見る",
   "ag_compactedHide": "要約を閉じる",
   "ag_editResend": "送信",
@@ -9597,7 +9931,16 @@
   "set_agTrashSub": "削除したチャット、ワークスペース、Skill はここに入り、元に戻せます。完全に削除すると戻せません。",
   "set_agTrashManage": "管理",
   "set_agTrashSummary": "{count} 件 · {size}",
-  "@set_agTrashSummary": {"placeholders": {"count": {"type": "int"}, "size": {"type": "String"}}},
+  "@set_agTrashSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
   "set_agTrashEmpty": "ごみ箱は空です",
   "set_agTrashAll": "すべて",
   "set_agTrashChats": "チャット",
@@ -9608,24 +9951,63 @@
   "set_agTrashPurgeAll": "ごみ箱を空にする",
   "set_agTrashPurgeTitle": "完全に削除しますか？",
   "set_agTrashPurgeBody": "「{name}」はディスクから削除され、元に戻せません。",
-  "@set_agTrashPurgeBody": {"placeholders": {"name": {"type": "String"}}},
+  "@set_agTrashPurgeBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "set_agTrashPurgeAllBody": "ごみ箱の {count} 件はディスクから削除され、元に戻せません。",
-  "@set_agTrashPurgeAllBody": {"placeholders": {"count": {"type": "int"}}},
+  "@set_agTrashPurgeAllBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "set_agTrashRestored": "「{name}」を元に戻しました",
-  "@set_agTrashRestored": {"placeholders": {"name": {"type": "String"}}},
+  "@set_agTrashRestored": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "set_agTrashPurged": "「{name}」を完全に削除しました",
-  "@set_agTrashPurged": {"placeholders": {"name": {"type": "String"}}},
+  "@set_agTrashPurged": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "set_agTrashNeedWorkspace": "所属するワークスペースもごみ箱にあります。先にワークスペースを元に戻してください。",
   "set_agTrashRestoreFailed": "元に戻せません：同じ名前のものがすでにあります",
   "set_agTrashGoneWorkspace": "削除済みワークスペース",
   "set_agSkillRemoveBody": "「{name}」はごみ箱に移動します。Agent 設定の「ごみ箱」から元に戻すか完全に削除できます。",
-  "@set_agSkillRemoveBody": {"placeholders": {"name": {"type": "String"}}},
+  "@set_agSkillRemoveBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "set_agSkillName": "名前",
   "set_agSkillNewHelp": "小文字・数字・ハイフンのみ（例：watercolor-style）。作成後にフォルダーが開くので、中の SKILL.md を編集してください。",
   "set_agSkillCreate": "作成",
   "set_agSkillAddConfirm": "追加",
   "set_agPromptStats": "{chars} 文字 · 約 {tokens} トークン",
-  "@set_agPromptStats": {"placeholders": {"chars": {"type": "String"}, "tokens": {"type": "String"}}},
+  "@set_agPromptStats": {
+    "placeholders": {
+      "chars": {
+        "type": "String"
+      },
+      "tokens": {
+        "type": "String"
+      }
+    }
+  },
   "set_agFinalLive": "現在のチャットが実際にモデルへ送る完全なシステムプロンプトです。",
   "set_agBuiltinSub": "Studio 内蔵の基本プロンプト。バージョンとともに更新されます。",
   "set_agMcpEditTitle": "MCP サーバーを編集",
@@ -9649,7 +10031,13 @@
   "ag_stepArguments": "引数",
   "ag_stepResult": "結果",
   "ag_stepsMore": "あと {count} ステップ",
-  "@ag_stepsMore": {"placeholders": {"count": {"type": "int"}}},
+  "@ag_stepsMore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_tool_studio_context": "現在の下書きを読み取り",
   "ag_tool_image_read": "画像を表示",
   "ag_tool_prompt_update": "プロンプトを書き換え",
@@ -9737,40 +10125,112 @@
   "ag_diffLocked": "下書きが再変更されました",
   "ag_diffUndo": "元に戻す",
   "ag_diffCounts": "+{added} −{removed}",
-  "@ag_diffCounts": {"placeholders": {"added": {"type": "int"}, "removed": {"type": "int"}}},
+  "@ag_diffCounts": {
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "removed": {
+        "type": "int"
+      }
+    }
+  },
   "ag_outputs": "今回の出力",
   "ag_anlasSpent": "{anlas} Anlas 使用",
-  "@ag_anlasSpent": {"placeholders": {"anlas": {"type": "String"}}},
+  "@ag_anlasSpent": {
+    "placeholders": {
+      "anlas": {
+        "type": "String"
+      }
+    }
+  },
   "ag_imageReveal": "履歴で表示",
   "ag_imageAttach": "入力欄に添付",
   "ag_imageZoom": "拡大して表示",
   "ag_askHint": "1–{count} で選択",
-  "@ag_askHint": {"placeholders": {"count": {"type": "int"}}},
+  "@ag_askHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_askOther": "その他の案…",
   "ag_askSubmit": "回答",
   "ag_askSkip": "スキップ",
   "ag_approvalTitle": "許可が必要 · {tool}",
-  "@ag_approvalTitle": {"placeholders": {"tool": {"type": "String"}}},
+  "@ag_approvalTitle": {
+    "placeholders": {
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
   "ag_gateTitle": "確認が必要 · {action}",
-  "@ag_gateTitle": {"placeholders": {"action": {"type": "String"}}},
+  "@ag_gateTitle": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
   "ag_gateText2img": "{count} 枚生成",
-  "@ag_gateText2img": {"placeholders": {"count": {"type": "int"}}},
+  "@ag_gateText2img": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_gateImg2img": "画像から {count} 枚",
-  "@ag_gateImg2img": {"placeholders": {"count": {"type": "int"}}},
+  "@ag_gateImg2img": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_gateInpaint": "インペイント {count} 枚",
-  "@ag_gateInpaint": {"placeholders": {"count": {"type": "int"}}},
+  "@ag_gateInpaint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_gateVariations": "バリエーション {count} 枚",
-  "@ag_gateVariations": {"placeholders": {"count": {"type": "int"}}},
+  "@ag_gateVariations": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_gateEnhance": "エンハンス",
   "ag_gateModelSize": "モデル · サイズ",
   "ag_gateRequests": "リクエスト",
   "ag_gateRequestsValue": "{requests} 回 × {batch} 枚",
-  "@ag_gateRequestsValue": {"placeholders": {"requests": {"type": "int"}, "batch": {"type": "int"}}},
+  "@ag_gateRequestsValue": {
+    "placeholders": {
+      "requests": {
+        "type": "int"
+      },
+      "batch": {
+        "type": "int"
+      }
+    }
+  },
   "ag_gateUnit": "1 回あたり",
   "ag_gateEncoding": "参照画像のエンコード",
   "ag_gateAccount": "アカウント",
   "ag_gateTotal": "合計 · 残高 {balance}",
-  "@ag_gateTotal": {"placeholders": {"balance": {"type": "String"}}},
+  "@ag_gateTotal": {
+    "placeholders": {
+      "balance": {
+        "type": "String"
+      }
+    }
+  },
   "ag_gateTotalNoBalance": "合計",
   "ag_gateConfirm": "確認して生成",
   "ag_gateConfirmTool": "確認して実行",
@@ -9780,7 +10240,13 @@
   "ag_placeholder": "Agent への指示 · @ で参照 · / でスキル",
   "ag_dropHint": "ドロップしてこのメッセージに添付",
   "ag_importing": "{count} 枚の画像を追加中…",
-  "@ag_importing": {"placeholders": {"count": {"type": "int"}}},
+  "@ag_importing": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_attach": "画像を追加",
   "ag_attachFile": "ファイルを選択…",
   "ag_attachCanvas": "キャンバスの現在の画像を添付",
@@ -9851,7 +10317,13 @@
   "ag_usageContext": "現在のコンテキスト · 推定",
   "ag_usageUnknown": "モデルが使用量を返すと表示されます",
   "ag_usageRemaining": "残り {tokens}",
-  "@ag_usageRemaining": {"placeholders": {"tokens": {"type": "String"}}},
+  "@ag_usageRemaining": {
+    "placeholders": {
+      "tokens": {
+        "type": "String"
+      }
+    }
+  },
   "ag_usageSession": "このチャットの累計",
   "ag_usageInput": "入力",
   "ag_usageOutput": "出力",
@@ -9862,13 +10334,37 @@
   "ag_usageCost": "料金はプロバイダーの請求によります",
   "ag_usageCompact": "コンテキストを圧縮",
   "ag_shelfAll": "すべて {count}",
-  "@ag_shelfAll": {"placeholders": {"count": {"type": "int"}}},
+  "@ag_shelfAll": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_shelfGenerated": "生成 {count}",
-  "@ag_shelfGenerated": {"placeholders": {"count": {"type": "int"}}},
+  "@ag_shelfGenerated": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_shelfAttachments": "添付 {count}",
-  "@ag_shelfAttachments": {"placeholders": {"count": {"type": "int"}}},
+  "@ag_shelfAttachments": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_shelfFiles": "ファイル {count}",
-  "@ag_shelfFiles": {"placeholders": {"count": {"type": "int"}}},
+  "@ag_shelfFiles": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_shelfFilesTitle": "ファイル",
   "ag_shelfHint": "クリックで拡大 · キャンバスへドラッグ",
   "ag_shelfEmpty": "このチャットにはまだ出力がありません",
@@ -9965,36 +10461,71 @@
   "mp_copyId": "モデル ID をコピー",
   "mp_removeModel": "モデルを削除",
   "mp_removeTitle": "モデル「{id}」を削除しますか？",
-  "@mp_removeTitle": {"placeholders": {"id": {}}},
+  "@mp_removeTitle": {
+    "placeholders": {
+      "id": {}
+    }
+  },
   "mp_removeBody": "このモデルを使う機能は他のモデルに切り替わります。",
   "mp_catalogId": "モデル ID",
   "mp_catalogCtx": "コンテキスト",
   "mp_catalogPrice": "入力 / 出力 · 100万",
   "mp_catalogFooter": "一致 {n} 件 · 全 {total} 件 · {when} 取得",
-  "@mp_catalogFooter": {"placeholders": {"n": {}, "total": {}, "when": {}}},
+  "@mp_catalogFooter": {
+    "placeholders": {
+      "n": {},
+      "total": {},
+      "when": {}
+    }
+  },
   "mp_catalogMore": "他に {n} 件。絞り込みで探してください",
-  "@mp_catalogMore": {"placeholders": {"n": {}}},
+  "@mp_catalogMore": {
+    "placeholders": {
+      "n": {}
+    }
+  },
   "mp_catalogIdle": "カタログ未取得",
   "mp_catalogIdleSub": "保存済みの URL とキーでモデル一覧を取得",
   "mp_catalogLoading": "カタログを取得中…",
   "mp_catalogFailed": "カタログを取得できません：{error}",
-  "@mp_catalogFailed": {"placeholders": {"error": {}}},
+  "@mp_catalogFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
   "mp_fetch": "一覧を取得",
   "mp_noMatch": "一致するモデルがありません",
   "mp_picked": "{n} 件選択",
-  "@mp_picked": {"placeholders": {"n": {}}},
+  "@mp_picked": {
+    "placeholders": {
+      "n": {}
+    }
+  },
   "mp_pickEmpty": "追加するモデルを選択",
   "mp_pickHint": "機能・コンテキスト・思考段階はローカルカタログから入力され、追加後に調整できます。",
   "mp_addPicked": "{n} 件のモデルを追加",
-  "@mp_addPicked": {"placeholders": {"n": {}}},
+  "@mp_addPicked": {
+    "placeholders": {
+      "n": {}
+    }
+  },
   "mp_new": "新規",
   "mp_unsaved": "{name} に未保存の変更が {n} 件",
-  "@mp_unsaved": {"placeholders": {"name": {}, "n": {}}},
+  "@mp_unsaved": {
+    "placeholders": {
+      "name": {},
+      "n": {}
+    }
+  },
   "mp_saving": "保存中…",
   "mp_conflict": "他の場所で変更されました。最新値を統合しました。確認して保存してください",
   "mp_saveFailed": "保存に失敗しました。変更は保持されています",
   "mp_invalid": "{n} 件の修正が必要",
-  "@mp_invalid": {"placeholders": {"n": {}}},
+  "@mp_invalid": {
+    "placeholders": {
+      "n": {}
+    }
+  },
   "mp_leaveBody": "サービス設定は保存されていません。移動すると変更は失われます。",
   "mp_show": "表示",
   "mp_hide": "隠す",
@@ -10028,41 +10559,131 @@
   "mp_errorRateLimit": "レート制限を超過",
   "ag_tool_prompt_set": "プロンプトセット",
   "ag_psCount": "{count} {unit}",
-  "@ag_psCount": {"placeholders": {"count": {"type": "int"}, "unit": {"type": "String"}}},
+  "@ag_psCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
   "ag_psPosition": "第{index}{unit} / 全{count}{unit}",
-  "@ag_psPosition": {"placeholders": {"index": {"type": "int"}, "count": {"type": "int"}, "unit": {"type": "String"}}},
+  "@ag_psPosition": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
   "ag_psOverview": "一覧表示",
   "ag_psSingle": "1件ずつ表示",
   "ag_psPrompt": "プロンプト",
   "ag_psShared": "共通設定",
   "ag_psThisItem": "この{unit}",
-  "@ag_psThisItem": {"placeholders": {"unit": {"type": "String"}}},
+  "@ag_psThisItem": {
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
   "ag_psMain": "メインプロンプト",
   "ag_psCharacter": "キャラクター {index}",
-  "@ag_psCharacter": {"placeholders": {"index": {"type": "int"}}},
+  "@ag_psCharacter": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
   "ag_psNegative": "ネガティブ",
   "ag_psPromptsOnly": "プロンプトのみ適用",
   "ag_psWithSettings": "設定も適用",
   "ag_psImport": "キャンバスに読み込む",
   "ag_psImportTip": "メインプロンプト・キャラクター・ネガティブを書き込みます。パラメータと参照画像は変わりません",
   "ag_psImported": "「{title}」をプロンプトに書き込みました",
-  "@ag_psImported": {"placeholders": {"title": {"type": "String"}}},
+  "@ag_psImported": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "ag_psGenerate": "生成",
   "ag_psGenerating": "生成中",
   "ag_psRevision": "v{revision} · {count}件変更",
-  "@ag_psRevision": {"placeholders": {"revision": {"type": "int"}, "count": {"type": "int"}}},
+  "@ag_psRevision": {
+    "placeholders": {
+      "revision": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_psSaveBlock": "ブロックとして保存",
   "ag_psSavedBlock": "ブロック「{title}」を保存しました · {count}件",
-  "@ag_psSavedBlock": {"placeholders": {"title": {"type": "String"}, "count": {"type": "int"}}},
+  "@ag_psSavedBlock": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_psCopyItem": "この{unit}のプロンプトをコピー",
-  "@ag_psCopyItem": {"placeholders": {"unit": {"type": "String"}}},
+  "@ag_psCopyItem": {
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
   "ag_psCopyAll": "すべてコピー",
   "ag_psEditItem": "この{unit}の修正を Agent に頼む",
-  "@ag_psEditItem": {"placeholders": {"unit": {"type": "String"}}},
+  "@ag_psEditItem": {
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
   "ag_psEditDraft": "「{title}」の第{index}{unit}（{item}）を修正：",
-  "@ag_psEditDraft": {"placeholders": {"title": {"type": "String"}, "index": {"type": "int"}, "unit": {"type": "String"}, "item": {"type": "String"}}},
+  "@ag_psEditDraft": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "index": {
+        "type": "int"
+      },
+      "unit": {
+        "type": "String"
+      },
+      "item": {
+        "type": "String"
+      }
+    }
+  },
   "ag_psTooManyCharacters": "現在のモデルのキャラクターは最大 {count} 人です",
-  "@ag_psTooManyCharacters": {"placeholders": {"count": {"type": "int"}}},
+  "@ag_psTooManyCharacters": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_psNoCharacters": "現在のモデルはキャラクタープロンプトに対応していません",
   "ag_psMissing": "このカードのデータは見つかりません",
   "startup_dataTitle": "アプリのデータを準備できませんでした",
@@ -10531,5 +11152,26 @@
   "set_agRulesView": "表示",
   "set_agRulesMissing": "このワークスペースにはまだ AGENTS.md がありません",
   "set_agRulesEmpty": "AGENTS.md は空です",
-  "set_agRulesLoadFailed": "AGENTS.md を読み取れません。ファイルのアクセス権を確認してください。"
+  "set_agRulesLoadFailed": "AGENTS.md を読み取れません。ファイルのアクセス権を確認してください。",
+  "preciseRef_typeOutfit": "衣装参照",
+  "preciseRef_outfitDescription": "参照画像の衣装を再現（V5 専用）",
+  "preciseRef_preferSameOutfit": "衣装も参照する",
+  "refs_typeOutfit": "衣装",
+  "refs_typeOutfitDesc": "衣装のみを参照し、人物と画風はプロンプトに従います（V5 専用）",
+  "refs_preferSameOutfit": "衣装も参照する",
+  "refs_preferSameOutfitDesc": "V5 でオンにすると参照キャラの衣装に近づきます",
+  "gen_preciseOutfit": "衣装",
+  "gen_precisePreferSameOutfit": "衣装も参照する",
+  "gen_preciseInpaintUnsupported": "このモデルのインペイントは精密参照に未対応です。参照画像は無視され、課金されません。",
+  "gen_preciseOutfitUnsupported": "このモデルは衣装参照に対応していないため、衣装参照はスキップされ課金されません。",
+  "gen_preciseLimit": "精密参照は最大 {count} 枚まで追加できます",
+  "@gen_preciseLimit": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "gen_turboBlockedByPrecise": "精密参照は通常モード（V5 Full）専用です。Turbo を使うには精密参照を外すか一時停止してください",
+  "gen_turboSwitchedOffForPrecise": "精密参照は通常モードが必要なため、V5 Full に切り替えました"
 }

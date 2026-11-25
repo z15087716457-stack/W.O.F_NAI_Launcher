@@ -204,7 +204,7 @@ class ToolsUpscaleBackend {
   /// 一句说明（“用本机显卡 · 只支持 Windows”“官方放大 · 输入上限约 2.8 MP”）。
   final String detail;
 
-  /// null = 免费（卡片角标写“免费”）。
+  /// 0 = 免费（卡片角标写“免费”）；正数 = Anlas 消耗；null = 不可用/不显示价格角标。
   final int? cost;
 
   /// 不能用（非 Windows 没有本机放大）：卡片变灰，[detail] 写原因。
@@ -310,7 +310,7 @@ class ToolsUpscaleData {
   /// 折叠行后面的一句弱色摘要。
   final String? advancedHint;
 
-  /// 云端价格；null = 免费。
+  /// 0 = 免费；正数 = 云端 Anlas 消耗；null = 不可用/不显示价格。
   final int? cost;
   final bool running;
 

@@ -20,6 +20,76 @@ import 'package:nai_launcher/data/models/vibe/vibe_reference.dart';
 import 'package:nai_launcher/presentation/providers/generation/image_workflow_controller.dart';
 
 void main() {
+  for (final streamed in [false, true]) {
+    test(
+      'V5 PR rejects Turbo request constraints in both transports, stream=$streamed',
+      () async {
+        final adapter = _PendingDioAdapter();
+        final dio = Dio()..httpClientAdapter = adapter;
+        final endpoints = NaiApiEndpointService();
+        final service = NAIImageGenerationApiService(
+          dio,
+          NAIImageEnhancementApiService(dio, endpoints),
+          endpoints,
+        );
+        final reference = _solidPng(
+          width: 1024,
+          height: 1024,
+          r: 70,
+          g: 80,
+          b: 90,
+        );
+        final output = _solidPng(width: 4, height: 4, r: 23, g: 45, b: 67);
+        final params = ImageParams(
+          model: 'nai-diffusion-5-full-medium',
+          prompt: 'a silk coat',
+          negativePrompt: 'blur',
+          steps: 25,
+          preciseReferences: [
+            PreciseReference(
+              image: reference,
+              type: PreciseRefType.outfit,
+              strength: 4.5,
+              fidelity: .6,
+            ),
+          ],
+        );
+        final operation = streamed
+            ? service
+                  .generateImageStream(params)
+                  .toList()
+                  .then((chunks) => chunks.last.finalImage)
+            : service.generateImage(params).then((result) => result.$1.single);
+        await _waitForRequestCount(adapter, 1);
+        final request = adapter.requests.single;
+        if (streamed) {
+          request.completeWithMsgpackMessages([
+            {'event_type': 'final', 'samp_ix': 0, 'image': output},
+          ]);
+        } else {
+          request.completeWithZipImage(output);
+        }
+        expect(await operation, output);
+        final body = request.options.data as Map<String, dynamic>;
+        final parameters = body['parameters'] as Map<String, dynamic>;
+        expect(body['model'], 'nai-diffusion-5-full');
+        expect(parameters['steps'], 25);
+        expect(parameters['negative_prompt'], contains('blur'));
+        expect(
+          parameters['director_reference_descriptions'][0]['caption']['base_caption'],
+          'costume',
+        );
+        expect(parameters['director_reference_strength_values'], [4.5]);
+        expect(parameters['director_reference_secondary_strength_values'], [
+          0.0,
+        ]);
+        expect(parameters['director_reference_images'], [
+          base64Encode(reference),
+        ]);
+      },
+    );
+  }
+
   for (final prefix in ['/v1', '/v1/novelai']) {
     for (final streamed in [false, true]) {
       test(

@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:image/image.dart' as img;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/core/constants/api_constants.dart';
+import 'package:nai_launcher/core/enums/precise_ref_type.dart';
 import 'package:nai_launcher/core/enums/quality_tag_preset.dart';
 import 'package:nai_launcher/core/utils/comfyui_prompt_parser.dart';
 import 'package:nai_launcher/core/utils/file_picker_utils.dart';
@@ -14,6 +15,42 @@ import 'package:nai_launcher/data/models/image/image_params.dart';
 import 'package:nai_launcher/data/services/metadata/unified_metadata_parser.dart';
 
 void main() {
+  test(
+    'saved draft metadata records the effective PR settings and Variety+ capability',
+    () {
+      final params = ImageParams(
+        model: ImageModels.animeDiffusionV5Full,
+        varietyPlus: true,
+        preciseReferences: [
+          PreciseReference(image: Uint8List(1), type: PreciseRefType.outfit),
+          PreciseReference(
+            image: Uint8List(1),
+            type: PreciseRefType.character,
+            preferSameOutfit: true,
+            fidelity: 0.5,
+          ),
+        ],
+      );
+      Map<String, dynamic> save(ImageParams input) =>
+          ImageSaveUtils.buildCommentJson(params: input, actualSeed: 1);
+      final v5 = save(params);
+      expect(v5['use_precise_ref'], isTrue);
+      expect(v5['precise_ref_type'], 'costume');
+      expect(v5['director_reference_secondary_strength_values'], [0.0, 0.0]);
+      expect(v5, isNot(contains('variety_plus')));
+      final infill = save(
+        params.copyWith(action: ImageGenerationAction.infill),
+      );
+      expect(infill, isNot(contains('use_precise_ref')));
+      final v45 = save(
+        params.copyWith(model: ImageModels.animeDiffusionV45Full),
+      );
+      expect(v45['precise_ref_type'], 'character');
+      expect(v45['director_reference_secondary_strength_values'], [0.5]);
+      expect(v45['variety_plus'], isTrue);
+    },
+  );
+
   test(
     'new gallery saves share one folder across days without changing bytes',
     () async {

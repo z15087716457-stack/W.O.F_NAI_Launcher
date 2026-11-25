@@ -101,6 +101,7 @@ abstract final class RefsFormat {
       RefsPreciseType.character => l10n.refs_typeCharacter,
       RefsPreciseType.style => l10n.refs_typeStyle,
       RefsPreciseType.both => l10n.refs_typeBoth,
+      RefsPreciseType.outfit => l10n.refs_typeOutfit,
     };
   }
 
@@ -110,6 +111,7 @@ abstract final class RefsFormat {
       RefsPreciseType.character => l10n.refs_typeCharacterDesc,
       RefsPreciseType.style => l10n.refs_typeStyleDesc,
       RefsPreciseType.both => l10n.refs_typeBothDesc,
+      RefsPreciseType.outfit => l10n.refs_typeOutfitDesc,
     };
   }
 
@@ -117,6 +119,7 @@ abstract final class RefsFormat {
     RefsPreciseType.character => UiGlyphs.user,
     RefsPreciseType.style => UiGlyphs.palette,
     RefsPreciseType.both => UiGlyphs.personStar,
+    RefsPreciseType.outfit => UiGlyphs.outfit,
   };
 
   static String sort(BuildContext context, RefsSort s) {
@@ -140,6 +143,7 @@ abstract final class RefsPalette {
     RefsPreciseType.character => const Color(0xFF1E88E5),
     RefsPreciseType.style => const Color(0xFFD81B60),
     RefsPreciseType.both => const Color(0xFF8E24AA),
+    RefsPreciseType.outfit => const Color(0xFF00897B),
   };
 
   /// 类型标签文字：正文色和类型色 2 : 8 混合。
